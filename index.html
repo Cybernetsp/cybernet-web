@@ -3,186 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Centro de Códigos - Cybernet</title>
+  <title>Centro de Códigos - Cybernet Bot Web</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0a0a0a;
       --card-bg: #141414;
-      --accent: #e50914; 
-      --text-main: #ffffff;
-      --text-dim: #a3a3a3;
-      --input-bg: #222222;
-      --whatsapp: #25D366;
+      --color-black: #ffffff; 
+      --color-red: #ff0000;   
+      --color-gray: #a0a0a0;
+      --color-disney: #0063e5;
+      --color-whatsapp: #25D366;
     }
-
+    
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
+    
     body { 
       background: var(--bg); 
-      color: var(--text-main); 
+      color: var(--color-black); 
       display: flex; 
       justify-content: center; 
       align-items: center; 
       min-height: 100vh; 
-      padding: 1.5rem;
+      padding: 1rem; 
     }
-
+    
     .container {
       background: var(--card-bg);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 20px;
-      padding: 3rem 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1); 
+      border-radius: 1.5rem;
+      padding: 2.5rem 2rem;
       width: 100%;
-      max-width: 420px;
+      max-width: 450px;
       text-align: center;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    
+    h2 { color: var(--color-black); font-size: 1.5rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
+    p { color: var(--color-gray); font-size: 0.95rem; margin-bottom: 2rem; }
+    
+    #error-toast {
+      display: none;
+      color: var(--color-red);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      animation: shake 0.4s ease-in-out;
     }
 
-    h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
-    p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.6; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
 
-    .step { display: none; animation: slideUp 0.4s ease-out; }
+    .step { display: none; animation: fadeIn 0.4s ease-in-out; }
     .step.active { display: block; }
-
+    
     input {
-      width: 100%; 
-      padding: 1rem; 
-      margin-bottom: 1.2rem; 
-      border-radius: 12px;
-      border: 1px solid #333; 
-      background: var(--input-bg); 
-      color: white;
-      font-size: 1rem; 
-      outline: none; 
-      text-align: center;
-      transition: all 0.3s;
+      width: 100%; padding: 1rem; margin-bottom: 1.5rem; border-radius: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.2); background: #222; color: #fff;
+      font-size: 1rem; outline: none; text-align: center;
     }
-    input:focus { border-color: var(--accent); background: #2a2a2a; }
-
+    input:focus { border-color: var(--color-red); }
+    
     button {
-      width: 100%; 
-      padding: 1rem; 
-      margin-bottom: 1rem; 
-      border-radius: 12px;
-      border: none; 
-      background: var(--accent); 
-      color: white;
-      font-size: 0.9rem; 
-      font-weight: 600; 
-      cursor: pointer; 
-      text-transform: uppercase;
+      width: 100%; padding: 1rem; margin-bottom: 1rem; border-radius: 50px;
+      border: 2px solid var(--color-black); background: transparent; color: var(--color-black);
+      font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase;
       transition: all 0.3s ease;
     }
-    button:hover { background: #b20710; transform: translateY(-2px); }
-
-    .btn-secondary { background: #333; }
-    .btn-secondary:hover { background: #444; }
-
-    .btn-whatsapp { 
-      background: transparent; 
-      border: 2px solid var(--whatsapp); 
-      color: var(--whatsapp); 
+    button:hover { background: rgba(255, 255, 255, 0.1); transform: scale(1.02); }
+    
+    /* BOTONES PERSONALIZADOS */
+    button.btn-netflix { 
+      border-color: var(--color-red); 
+      color: #fff; 
+      background: var(--color-red); 
     }
-    .btn-whatsapp:hover { background: var(--whatsapp); color: white; }
+    button.btn-netflix:hover { background: #b20000; border-color: #b20000; }
 
+    button.btn-disney { 
+      border-color: #00bfff; 
+      color: #fff; 
+      background: linear-gradient(135deg, #0063e5 0%, #00bfff 100%); 
+    }
+    button.btn-disney:hover { filter: brightness(1.2); }
+
+    button.btn-whatsapp {
+      border-color: var(--color-whatsapp); 
+      color: var(--color-whatsapp);
+    }
+    button.btn-whatsapp:hover {
+      background: rgba(37, 211, 102, 0.1);
+    }
+    
     .loader {
-      border: 3px solid rgba(255, 255, 255, 0.1); 
-      border-top: 3px solid var(--accent);
-      border-radius: 50%; width: 50px; height: 50px; 
-      animation: spin 0.8s linear infinite;
+      border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid var(--color-red);
+      border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;
       margin: 0 auto 1.5rem auto;
     }
-
+    
     .result-box {
-      background: #1f1f1f; 
-      border: 1px solid var(--accent); 
-      padding: 2rem; 
-      border-radius: 15px; 
-      margin-bottom: 1.5rem;
+      background: rgba(255, 0, 0, 0.1); border: 1px dashed var(--color-red); padding: 1.5rem;
+      border-radius: 0.5rem; margin-bottom: 1.5rem;
     }
-    .result-code { font-size: 3.2rem; font-weight: 800; color: var(--text-main); letter-spacing: 8px; }
-    .timer { font-size: 0.8rem; color: var(--accent); margin-top: 0.8rem; font-weight: 600; text-transform: uppercase; }
+    .result-code { font-size: 2.5rem; font-weight: bold; color: #fff; letter-spacing: 5px; }
+    .timer { font-size: 0.85rem; color: var(--color-red); margin-top: 0.5rem; }
 
-    #error-toast {
-      display: none; 
-      background: rgba(229, 9, 20, 0.1); 
-      color: #ff4d4d;
-      padding: 1rem; 
-      border-radius: 10px; 
-      font-size: 0.85rem; 
-      margin-bottom: 1.5rem;
-      border-left: 4px solid var(--accent);
-    }
-
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    .back-btn { display: block; margin-top: 15px; color: var(--text-dim); font-size: 0.8rem; text-decoration: none; cursor: pointer; }
-    .back-btn:hover { color: white; }
+    .back-link { 
+      display: block; margin-top: 10px; color: var(--color-gray); cursor: pointer; font-size: 0.8rem; 
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h2 id="main-title">CENTRO DE CÓDIGOS</h2>
+
     <div id="error-toast"></div>
     
     <div id="step-1" class="step active">
       <p>Ingresa tu <b>NÚMERO DE CELULAR</b> asociado a la compra 📲</p>
-      <input type="tel" id="telefono" placeholder="Ej: 301515XXXX" maxlength="10">
+      <input type="tel" id="telefono" placeholder="Ej: 301515XXXX" maxlength="10" autocomplete="off">
       <button onclick="nextStep(2)">Continuar</button>
-      <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none;">
+      
+      <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none; display:block; margin-top: 0.5rem;">
         <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
       </a>
     </div>
 
     <div id="step-2" class="step">
       <p>¿Qué plataforma deseas gestionar?</p>
-      <button class="btn-secondary" onclick="setPlataforma('NETFLIX')">🔴 Netflix</button>
-      <button class="btn-secondary" onclick="setPlataforma('DISNEY')" style="border-left: 4px solid #00bfff;">🔵 Disney Premium</button>
-      <span class="back-btn" onclick="prevStep(1)">← Volver</span>
+      <button class="btn-netflix" onclick="setPlataforma('NETFLIX')">🔴 Netflix</button>
+      <button class="btn-disney" onclick="setPlataforma('DISNEY')">🔵 Disney Premium</button>
+      
+      <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none; display:block; margin-top: 0.5rem;">
+        <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
+      </a>
+      
+      <span class="back-link" onclick="prevStep(1)">← Volver</span>
     </div>
 
     <div id="step-3" class="step">
       <p>Selecciona el tipo de solicitud de Netflix 👇</p>
-      <button class="btn-secondary" onclick="setOpcion(1)">🔑 Código de Inicio Sesión</button>
-      <button class="btn-secondary" onclick="setOpcion(2)">✈️ Código 'Estoy de Viaje'</button>
-      <button class="btn-secondary" onclick="setOpcion(3)">📧 Enlace de Inicio</button>
-      <span class="back-btn" onclick="prevStep(2)">← Volver</span>
+      <button onclick="setOpcion(1)">🔑 Código de Inicio Sesión</button>
+      <button onclick="setOpcion(2)">✈️ Código 'Estoy de Viaje'</button>
+      <button onclick="setOpcion(3)">📧 Enlace de Inicio</button>
+
+      <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none; display:block; margin-top: 0.5rem;">
+        <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
+      </a>
+
+      <span class="back-link" onclick="prevStep(2)">← Volver</span>
     </div>
 
     <div id="step-4" class="step">
       <p>Ingresa el <b>CORREO</b> de tu cuenta (@cybernetsp.com) 📧</p>
       <input type="email" id="correo" placeholder="ejemplo@cybernetsp.com" autocomplete="off">
-      <button onclick="procesar()">Buscar en el Sistema</button>
-      <span class="back-btn" onclick="prevStep(2)">← Volver al inicio</span>
+      <button class="btn-netflix" onclick="procesar()">Buscar en el Sistema</button>
+
+      <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none; display:block; margin-top: 0.5rem;">
+        <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
+      </a>
+
+      <span class="back-link" onclick="prevStep(2)">← Volver al inicio</span>
     </div>
 
     <div id="step-5" class="step">
       <div class="loader"></div>
-      <p>Verificando credenciales...</p>
+      <p style="color: var(--color-red); font-weight: bold;">Rastreando correo...</p>
     </div>
 
     <div id="step-6" class="step">
-      <h2 id="res-titulo">Acceso</h2>
+      <h2 id="res-titulo">¡Éxito!</h2>
       <p id="res-mensaje"></p>
-      
       <div id="res-caja" class="result-box" style="display:none;">
-        <div id="res-codigo" class="result-code">0000</div>
-        <div id="res-timer" class="timer">Tiempo restante: --:--</div>
+        <div id="res-codigo" class="result-code"></div>
+        <div id="res-timer" class="timer"></div>
       </div>
-
-      <div id="res-link-caja" style="display:none;">
+      <div id="res-link-caja" style="display:none; margin-bottom: 1.5rem;">
         <a id="res-link" href="#" target="_blank" style="text-decoration:none;">
-          <button>Abrir Enlace de Acceso</button>
+          <button class="btn-netflix">✅ AUTORIZAR ACCESO</button>
         </a>
       </div>
-
-      <button class="btn-secondary" onclick="reiniciar()">Nueva Consulta</button>
+      <button onclick="procesar()">🔄 Reintentar Búsqueda</button>
+      
       <a href="https://wa.me/573127706726" target="_blank" style="display:none; text-decoration:none;" id="soporte-btn">
-        <button class="btn-whatsapp">Contactar Soporte</button>
+        <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
       </a>
+      
+      <span class="back-link" onclick="reiniciar()">Nueva Consulta</span>
     </div>
   </div>
 
@@ -201,7 +216,10 @@
     function nextStep(step) {
       if(step === 2) {
         let tel = document.getElementById('telefono').value.replace(/\D/g, '');
-        if(tel.length < 7) { mostrarError("❌ Ingresa un celular válido."); return; }
+        if(tel.length < 7) { 
+          mostrarError("❌ Por favor, ingresa un número de celular válido."); 
+          return; 
+        }
         userData.telefono = tel;
       }
       document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
@@ -211,6 +229,7 @@
     function prevStep(step) {
       document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
       document.getElementById('step-' + step).classList.add('active');
+      document.getElementById('main-title').innerText = "CENTRO DE CÓDIGOS";
     }
 
     function setPlataforma(plat) {
@@ -224,12 +243,15 @@
       userData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
       document.getElementById('telefono').value = '';
       document.getElementById('correo').value = '';
-      nextStep(1);
+      prevStep(1);
     }
 
     async function procesar() {
       let email = document.getElementById('correo').value.toLowerCase().trim();
-      if(!email.includes('@')) { mostrarError("❌ Correo no válido."); return; }
+      if(!email.includes('@')) { 
+        mostrarError("❌ Por favor, ingresa un correo electrónico válido."); 
+        return; 
+      }
       userData.correo = email;
       nextStep(5); 
 
@@ -239,7 +261,11 @@
         const res = await response.json();
         mostrarResultado(res);
       } catch (error) {
-        mostrarResultado({ exito: false, msj: "Error de servidor. Reintenta.", soporte: true });
+        mostrarResultado({ 
+          exito: false, 
+          msj: "Error de conexión con el sistema. Reintenta en unos segundos.", 
+          soporte: true 
+        });
       }
     }
 
@@ -247,18 +273,23 @@
       nextStep(6);
       document.getElementById('res-caja').style.display = 'none';
       document.getElementById('res-link-caja').style.display = 'none';
-      document.getElementById('soporte-btn').style.display = res.soporte ? 'block' : 'none';
+      document.getElementById('soporte-btn').style.display = 'none';
       
-      document.getElementById('res-mensaje').innerText = res.msj;
       if(res.exito) {
+        document.getElementById('main-title').innerText = "¡Éxito!";
+        document.getElementById('res-mensaje').innerText = res.msj || "Aquí tienes tu acceso:";
         if(res.tipo === 'codigo') {
           document.getElementById('res-caja').style.display = 'block';
           document.getElementById('res-codigo').innerText = res.valor;
-          document.getElementById('res-timer').innerText = `Expira en: ${res.tiempo}`;
+          document.getElementById('res-timer').innerText = `Vence en: ${res.tiempo}`;
         } else if (res.tipo === 'link') {
           document.getElementById('res-link-caja').style.display = 'block';
           document.getElementById('res-link').href = res.valor;
         }
+      } else {
+        document.getElementById('main-title').innerText = "Atención";
+        document.getElementById('res-mensaje').innerText = res.msj;
+        if(res.soporte) document.getElementById('soporte-btn').style.display = 'block';
       }
     }
   </script>
