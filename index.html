@@ -22,6 +22,7 @@
       background: var(--bg); 
       color: var(--color-black); 
       display: flex; 
+      flex-direction: column; /* Para permitir que el footer se quede abajo */
       justify-content: center; 
       align-items: center; 
       min-height: 100vh; 
@@ -38,6 +39,7 @@
       text-align: center;
       position: relative;
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      margin-bottom: 2rem; /* Espacio para el footer */
     }
     
     h2 { color: var(--color-black); font-size: 1.5rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
@@ -76,7 +78,6 @@
     }
     button:hover { background: rgba(255, 255, 255, 0.1); transform: scale(1.02); }
     
-    /* BOTONES PERSONALIZADOS */
     button.btn-netflix { 
       border-color: var(--color-red); 
       color: #fff; 
@@ -112,6 +113,15 @@
     .result-code { font-size: 2.5rem; font-weight: bold; color: #fff; letter-spacing: 5px; }
     .timer { font-size: 0.85rem; color: var(--color-red); margin-top: 0.5rem; }
 
+    /* FOOTER ESTILO */
+    footer {
+      text-align: center;
+      color: var(--color-gray);
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      padding: 10px;
+    }
+
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -131,7 +141,6 @@
       <p>Ingresa tu <b>NÚMERO DE CELULAR</b> asociado a la compra 📲</p>
       <input type="tel" id="telefono" placeholder="Ej: 301515XXXX" maxlength="10" autocomplete="off">
       <button onclick="nextStep(2)">Continuar</button>
-      
       <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none; display:block; margin-top: 0.5rem;">
         <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
       </a>
@@ -141,11 +150,9 @@
       <p>¿Qué plataforma deseas gestionar?</p>
       <button class="btn-netflix" onclick="setPlataforma('NETFLIX')">🔴 Netflix</button>
       <button class="btn-disney" onclick="setPlataforma('DISNEY')">🔵 Disney Premium</button>
-      
       <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none; display:block; margin-top: 0.5rem;">
         <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
       </a>
-      
       <span class="back-link" onclick="prevStep(1)">← Volver</span>
     </div>
 
@@ -154,11 +161,9 @@
       <button onclick="setOpcion(1)">🔑 Código de Inicio Sesión</button>
       <button onclick="setOpcion(2)">✈️ Código 'Estoy de Viaje'</button>
       <button onclick="setOpcion(3)">📧 Enlace de Inicio</button>
-
       <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none; display:block; margin-top: 0.5rem;">
         <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
       </a>
-
       <span class="back-link" onclick="prevStep(2)">← Volver</span>
     </div>
 
@@ -166,11 +171,9 @@
       <p>Ingresa el <b>CORREO</b> de tu cuenta (@cybernetsp.com) 📧</p>
       <input type="email" id="correo" placeholder="ejemplo@cybernetsp.com" autocomplete="off">
       <button class="btn-netflix" onclick="procesar()">Buscar en el Sistema</button>
-
       <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none; display:block; margin-top: 0.5rem;">
         <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
       </a>
-
       <span class="back-link" onclick="prevStep(2)">← Volver al inicio</span>
     </div>
 
@@ -192,14 +195,18 @@
         </a>
       </div>
       <button onclick="procesar()">🔄 Reintentar Búsqueda</button>
-      
       <a href="https://wa.me/573127706726" target="_blank" style="display:none; text-decoration:none;" id="soporte-btn">
         <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
       </a>
-      
       <span class="back-link" onclick="reiniciar()">Nueva Consulta</span>
     </div>
   </div>
+
+  <footer>
+    © 2026 Cybernet Streaming Platforms. Todos los derechos reservados.
+    <br>
+    Desarrollado con seguridad para clientes Cybernet.
+  </footer>
 
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
