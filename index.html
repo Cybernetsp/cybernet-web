@@ -22,7 +22,7 @@
       background: var(--bg); 
       color: var(--color-black); 
       display: flex; 
-      flex-direction: column; /* Para permitir que el footer se quede abajo */
+      flex-direction: column;
       justify-content: center; 
       align-items: center; 
       min-height: 100vh; 
@@ -39,11 +39,11 @@
       text-align: center;
       position: relative;
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-      margin-bottom: 2rem; /* Espacio para el footer */
+      margin-bottom: 2rem;
     }
     
     h2 { color: var(--color-black); font-size: 1.5rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
-    p { color: var(--color-gray); font-size: 0.95rem; margin-bottom: 2rem; }
+    p { color: var(--color-gray); font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.5; }
     
     #error-toast {
       display: none;
@@ -113,7 +113,6 @@
     .result-code { font-size: 2.5rem; font-weight: bold; color: #fff; letter-spacing: 5px; }
     .timer { font-size: 0.85rem; color: var(--color-red); margin-top: 0.5rem; }
 
-    /* FOOTER ESTILO */
     footer {
       text-align: center;
       color: var(--color-gray);
@@ -183,7 +182,7 @@
     </div>
 
     <div id="step-6" class="step">
-      <h2 id="res-titulo">¡Éxito!</h2>
+      <h2 id="res-titulo">--</h2>
       <p id="res-mensaje"></p>
       <div id="res-caja" class="result-box" style="display:none;">
         <div id="res-codigo" class="result-code"></div>
@@ -282,9 +281,14 @@
       document.getElementById('res-link-caja').style.display = 'none';
       document.getElementById('soporte-btn').style.display = 'none';
       
+      const tituloEl = document.getElementById('res-titulo');
+      const mensajeEl = document.getElementById('res-mensaje');
+
       if(res.exito) {
-        document.getElementById('main-title').innerText = "¡Éxito!";
-        document.getElementById('res-mensaje').innerText = res.msj || "Aquí tienes tu acceso:";
+        tituloEl.innerText = "¡ÉXITO!";
+        tituloEl.style.color = "#ffffff";
+        mensajeEl.innerText = res.msj || "Aquí tienes tu acceso:";
+        
         if(res.tipo === 'codigo') {
           document.getElementById('res-caja').style.display = 'block';
           document.getElementById('res-codigo').innerText = res.valor;
@@ -294,8 +298,9 @@
           document.getElementById('res-link').href = res.valor;
         }
       } else {
-        document.getElementById('main-title').innerText = "Atención";
-        document.getElementById('res-mensaje').innerText = res.msj;
+        tituloEl.innerText = "BÚSQUEDA FALLIDA";
+        tituloEl.style.color = "#ff0000";
+        mensajeEl.innerText = res.msj;
         if(res.soporte) document.getElementById('soporte-btn').style.display = 'block';
       }
     }
