@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cybernet Bot - Centro de Códigos</title>
+  <title>Centro de Códigos - Cybernet</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0a0a0a;
       --card-bg: #141414;
-      --accent: #e50914; /* Rojo Netflix */
+      --accent: #e50914; 
       --text-main: #ffffff;
       --text-dim: #a3a3a3;
       --input-bg: #222222;
@@ -28,7 +28,6 @@
       padding: 1.5rem;
     }
 
-    /* Contenedor Principal */
     .container {
       background: var(--card-bg);
       border: 1px solid rgba(255, 255, 255, 0.05);
@@ -40,13 +39,12 @@
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     }
 
-    h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.8rem; letter-spacing: -0.5px; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
     p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.6; }
 
     .step { display: none; animation: slideUp 0.4s ease-out; }
     .step.active { display: block; }
 
-    /* Inputs Estilizados */
     input {
       width: 100%; 
       padding: 1rem; 
@@ -62,7 +60,6 @@
     }
     input:focus { border-color: var(--accent); background: #2a2a2a; }
 
-    /* Botones */
     button {
       width: 100%; 
       padding: 1rem; 
@@ -89,7 +86,6 @@
     }
     .btn-whatsapp:hover { background: var(--whatsapp); color: white; }
 
-    /* Animaciones y Loader */
     .loader {
       border: 3px solid rgba(255, 255, 255, 0.1); 
       border-top: 3px solid var(--accent);
@@ -98,7 +94,6 @@
       margin: 0 auto 1.5rem auto;
     }
 
-    /* Caja de Resultados */
     .result-box {
       background: #1f1f1f; 
       border: 1px solid var(--accent); 
@@ -120,33 +115,23 @@
       border-left: 4px solid var(--accent);
     }
 
-    @keyframes slideUp { 
-        from { opacity: 0; transform: translateY(20px); } 
-        to { opacity: 1; transform: translateY(0); } 
-    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    .back-btn { 
-        display: block; 
-        margin-top: 15px; 
-        color: var(--text-dim); 
-        font-size: 0.8rem; 
-        text-decoration: none; 
-        cursor: pointer;
-    }
+    .back-btn { display: block; margin-top: 15px; color: var(--text-dim); font-size: 0.8rem; text-decoration: none; cursor: pointer; }
     .back-btn:hover { color: white; }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h2 id="main-title">CYBERNET</h2>
+    <h2 id="main-title">CENTRO DE CÓDIGOS</h2>
     <div id="error-toast"></div>
     
     <div id="step-1" class="step active">
       <p>Ingresa tu número de celular registrado para continuar.</p>
-      <input type="tel" id="telefono" placeholder="Número de Celular" maxlength="10">
-      <button onclick="nextStep(2)">Siguiente</button>
+      <input type="tel" id="telefono" placeholder="Ej: 301515XXXX" maxlength="10">
+      <button onclick="nextStep(2)">Continuar</button>
       <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none;">
         <button class="btn-whatsapp">Soporte WhatsApp</button>
       </a>
