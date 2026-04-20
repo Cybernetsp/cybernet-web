@@ -129,33 +129,33 @@
     <div id="error-toast"></div>
     
     <div id="step-1" class="step active">
-      <p>Ingresa tu número de celular registrado para continuar.</p>
+      <p>Ingresa tu <b>NÚMERO DE CELULAR</b> asociado a la compra 📲</p>
       <input type="tel" id="telefono" placeholder="Ej: 301515XXXX" maxlength="10">
       <button onclick="nextStep(2)">Continuar</button>
       <a href="https://wa.me/573127706726" target="_blank" style="text-decoration:none;">
-        <button class="btn-whatsapp">Soporte WhatsApp</button>
+        <button class="btn-whatsapp">💬 Soporte WhatsApp</button>
       </a>
     </div>
 
     <div id="step-2" class="step">
-      <p>Selecciona tu plataforma</p>
+      <p>¿Qué plataforma deseas gestionar?</p>
       <button class="btn-secondary" onclick="setPlataforma('NETFLIX')">🔴 Netflix</button>
       <button class="btn-secondary" onclick="setPlataforma('DISNEY')" style="border-left: 4px solid #00bfff;">🔵 Disney Premium</button>
       <span class="back-btn" onclick="prevStep(1)">← Volver</span>
     </div>
 
     <div id="step-3" class="step">
-      <p>¿Qué tipo de acceso necesitas?</p>
-      <button class="btn-secondary" onclick="setOpcion(1)">🔑 Inicio de Sesión</button>
-      <button class="btn-secondary" onclick="setOpcion(2)">✈️ Estoy de Viaje</button>
-      <button class="btn-secondary" onclick="setOpcion(3)">📧 Enlace de Acceso</button>
+      <p>Selecciona el tipo de solicitud de Netflix 👇</p>
+      <button class="btn-secondary" onclick="setOpcion(1)">🔑 Código de Inicio Sesión</button>
+      <button class="btn-secondary" onclick="setOpcion(2)">✈️ Código 'Estoy de Viaje'</button>
+      <button class="btn-secondary" onclick="setOpcion(3)">📧 Enlace de Inicio</button>
       <span class="back-btn" onclick="prevStep(2)">← Volver</span>
     </div>
 
     <div id="step-4" class="step">
-      <p>Ingresa el correo de la cuenta</p>
+      <p>Ingresa el <b>CORREO</b> de tu cuenta (@cybernetsp.com) 📧</p>
       <input type="email" id="correo" placeholder="ejemplo@cybernetsp.com" autocomplete="off">
-      <button onclick="procesar()">Obtener Código</button>
+      <button onclick="procesar()">Buscar en el Sistema</button>
       <span class="back-btn" onclick="prevStep(2)">← Volver al inicio</span>
     </div>
 
