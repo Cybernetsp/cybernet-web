@@ -10,7 +10,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <style>
-    /* PALETA DE COLORES CYBERNET */
+    /* PALETA DE COLORES CYBERNET
+       Rojo principal: #e50914
+       Fondo: Negro absoluto
+    */
     :root {
       --bg-main: #000000;
       --bg-card: #0f0f0f;
@@ -44,7 +47,7 @@
       background-image: radial-gradient(circle at center, #1a0202 0%, #000000 100%);
     }
 
-    /* CONTENEDOR PRINCIPAL */
+    /* CONTENEDOR PRINCIPAL DE LA WEB */
     .container {
       background: var(--bg-card);
       border: 1px solid rgba(229, 9, 20, 0.2); 
@@ -76,7 +79,7 @@
       line-height: 1.6; 
     }
     
-    /* TOAST DE ERROR */
+    /* SISTEMA DE NOTIFICACIÓN DE ERROR (TOAST) */
     #error-toast {
       display: none;
       background: rgba(229, 9, 20, 0.15);
@@ -96,7 +99,7 @@
       75% { transform: translateX(8px); }
     }
 
-    /* NAVEGACIÓN PASOS */
+    /* PASOS DE NAVEGACIÓN */
     .step { display: none; }
     .step.active { display: block; animation: slideUp 0.5s ease; }
     
@@ -105,7 +108,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* INPUTS */
+    /* ESTILOS DE INPUTS */
     input {
       width: 100%; 
       padding: 20px; 
@@ -124,7 +127,7 @@
       box-shadow: 0 0 25px var(--cyber-red-glow); 
     }
     
-    /* BOTONES */
+    /* BOTONES GENERALES */
     button {
       width: 100%; 
       padding: 18px; 
@@ -165,7 +168,7 @@
     .btn-status { border-color: rgba(255, 255, 255, 0.1); color: var(--text-dim); font-size: 0.85rem; margin-top: 15px; }
     .dot { width: 10px; height: 10px; background: var(--online); border-radius: 50%; box-shadow: 0 0 12px var(--online); }
     
-    /* LOADER */
+    /* ANIMACIÓN DE CARGA */
     .loader { 
       border: 6px solid rgba(229, 9, 20, 0.1); 
       border-top: 6px solid var(--cyber-red); 
@@ -178,7 +181,7 @@
     
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* MODAL DE SERVICIOS */
+    /* VENTANA MODAL (SERVICIOS ACTIVOS) */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -207,94 +210,68 @@
       to { opacity: 1; transform: scale(1); }
     }
     
-    /* TARJETA DE SERVICIO MEJORADA */
+    /* TARJETAS DE SERVICIO DENTRO DEL MODAL */
     .service-card {
       background: var(--bg-inner);
       border-radius: 25px;
-      padding: 25px;
+      padding: 30px;
       margin-bottom: 25px;
       border: 1px solid rgba(255, 255, 255, 0.06);
-      border-left: 5px solid var(--cyber-red); 
+      border-left: 6px solid var(--cyber-red); 
       text-align: left;
     }
 
-    /* CABECERA: PLATAFORMA EN MEDIO Y ROJO */
-    .card-platform-header {
-      text-align: center;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .platform-name-red {
-      color: var(--cyber-red);
-      font-size: 1.1rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 2px;
+    .card-header-area {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
+    .client-name { 
+      color: var(--cyber-red); 
+      font-size: 1.4rem; 
+      font-weight: 800; 
+      text-transform: uppercase; 
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .platform-label { 
+      color: var(--text-dim); 
+      font-size: 0.85rem; 
+      font-weight: 700; 
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
     .data-row { 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      margin-bottom: 12px; 
-      font-size: 0.9rem; 
+      margin-bottom: 15px; 
+      font-size: 0.95rem; 
     }
     .data-label { color: var(--text-dim); }
-    
-    /* VALORES Y BOTONES MINI AL BORDE */
-    .data-content-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-grow: 1;
-      justify-content: flex-end;
-      max-width: 70%;
-    }
-    .data-val { 
-      color: var(--text-main); 
-      font-weight: 600; 
-      word-break: break-all; 
-      text-align: right; 
-      font-size: 0.85rem;
-    }
+    .data-val { color: var(--text-main); font-weight: 600; text-align: right; }
 
-    /* BOTONES COPIAR MINI */
-    .btn-copy-mini {
-      background: rgba(229, 9, 20, 0.08);
-      border: 1px solid rgba(229, 9, 20, 0.5);
+    /* BOTONES DE COPIADO */
+    .btn-copy-field {
+      background: rgba(229, 9, 20, 0.12);
+      border: 1px solid var(--cyber-red);
       color: var(--cyber-red);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.6rem;
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 0.7rem;
       cursor: pointer;
       font-weight: 800;
-      text-transform: uppercase;
+      margin-left: 10px;
       transition: 0.2s;
-      flex-shrink: 0;
     }
-    .btn-copy-mini:hover { 
-      background: var(--cyber-red); 
-      color: white; 
-      border-color: var(--cyber-red);
-    }
+    .btn-copy-field:hover { background: var(--cyber-red); color: white; }
     
-    /* NOMBRE DEL CLIENTE (ABAJO Y PEQUEÑO) */
-    .client-footer-name {
-      text-align: center;
-      margin-top: 15px;
-      margin-bottom: 5px;
-    }
-    .client-small-text {
-      color: var(--text-dim);
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      opacity: 0.8;
-      letter-spacing: 0.5px;
-    }
-
-    /* BOTÓN COPIAR TODO */
+    /* NUEVO DISEÑO BOTÓN COPIAR TODO AL FINAL */
     .btn-copy-all-bottom {
       background: var(--cyber-red);
       color: white;
@@ -305,7 +282,7 @@
       font-weight: 800;
       cursor: pointer;
       width: 100%;
-      margin-top: 10px;
+      margin-top: 15px;
       text-transform: uppercase;
       letter-spacing: 1px;
       box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
@@ -314,11 +291,13 @@
     .btn-copy-all-bottom:hover {
       background: #ff0000;
       transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
     }
 
     footer { text-align: center; color: var(--text-dim); font-size: 0.85rem; padding: 40px; opacity: 0.6; }
     .back-link { display: block; margin-top: 25px; color: var(--text-dim); cursor: pointer; font-size: 0.9rem; text-decoration: underline; font-weight: 600; }
     
+    /* SCROLLBAR PERSONALIZADO PARA EL MODAL */
     .modal-content::-webkit-scrollbar { width: 6px; }
     .modal-content::-webkit-scrollbar-thumb { background: var(--cyber-red); border-radius: 10px; }
   </style>
@@ -399,11 +378,11 @@
 
     let globalData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
 
-    // --- FUNCIÓN COPIAR ---
+    // --- FUNCIÓN COPIAR CON FEEDBACK ---
     function handleCopy(text, btn) {
       navigator.clipboard.writeText(text).then(() => {
         const original = btn.innerText;
-        btn.innerText = "¡OK!";
+        btn.innerText = "¡COPIADO!";
         btn.style.color = "var(--online)";
         btn.style.borderColor = "var(--online)";
         setTimeout(() => {
@@ -414,16 +393,19 @@
       });
     }
 
-    // --- GENERADOR DE TARJETAS ---
+    // --- GENERADOR DINÁMICO DE TARJETAS ---
     function buildServiceCard(raw, plat) {
+      // 1. Extraer nombre del cliente
       const nameMatch = raw.match(/Hola\s*\*([^*]+)\*/i) || raw.match(/^\*([^*]+)\*/);
       let userName = nameMatch ? nameMatch[1].trim() : "";
       
-      const namesBlacklist = ["cliente", "cuenta", "general", "usuario", "cybernet"];
+      // Si el nombre detectado es genérico o muy corto, lo tratamos como vacío
+      const namesBlacklist = ["cliente", "cuenta", "general", "usuario"];
       if (namesBlacklist.includes(userName.toLowerCase()) || userName.length < 2) {
         userName = ""; 
       }
 
+      // 2. Extraer datos con Regex potente
       const mMatch = raw.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
       const cMatch = raw.match(/(?:CONTRASEÑA|CLAVE|PASSWORD):?\s*\*?([^*🛒\n]+)\*?/i);
       const pMatch = raw.match(/(?:PERFIL|NOMBRE DEL PERFIL):?\s*\*?([^*|🛒\n\-]+)\*?/i);
@@ -438,62 +420,65 @@
       const pin  = pinMatch ? pinMatch[1] : '';
       const date = clean(dMatch ? dMatch[1] : '');
 
+      // FILTRO: Solo correos válidos
       if (!mail.includes('@')) return '';
 
+      // Escapado de texto para el botón Copiar Todo
       const safeRaw = raw.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
       return `
         <div class="service-card">
-          <div class="card-platform-header">
-            <span class="platform-name-red">📺 ${plat}</span>
+          ${userName ? `
+          <div class="card-header-area">
+            <span class="client-name">${userName}</span>
+            <span class="platform-label">📺 ${plat}</span>
           </div>
+          ` : `
+          <div class="card-header-area" style="border:none; padding:0; margin-bottom:20px;">
+            <span class="platform-label">📺 ${plat}</span>
+          </div>
+          `}
           
-          <div class="data-row">
+          <div class="data-line">
             <span class="data-label">Correo:</span>
-            <div class="data-content-wrapper">
+            <div style="display:flex; align-items:center;">
               <span class="data-val">${mail}</span>
-              <button class="btn-copy-mini" onclick="handleCopy('${mail}', this)">Copiar</button>
+              <button class="btn-copy-field" onclick="handleCopy('${mail}', this)">Copiar</button>
             </div>
           </div>
           
           ${pass ? `
-          <div class="data-row">
+          <div class="data-line">
             <span class="data-label">Clave:</span>
-            <div class="data-content-wrapper">
+            <div style="display:flex; align-items:center;">
               <span class="data-val">${pass}</span>
-              <button class="btn-copy-mini" onclick="handleCopy('${pass}', this)">Copiar</button>
+              <button class="btn-copy-field" onclick="handleCopy('${pass}', this)">Copiar</button>
             </div>
           </div>` : ''}
           
           ${perf ? `<div class="data-row"><span class="data-label">Perfil:</span> <span class="data-val">${perf}</span></div>` : ''}
-          ${pin ? `<div class="data-row"><span class="data-label">PIN Perfil:</span> <span class="data-val" style="color:var(--cyber-red); font-weight:800;">${pin}</span></div>` : ''}
+          ${pin ? `<div class="data-row"><span class="data-label">PIN del Perfil:</span> <span class="data-val" style="color:var(--cyber-red); font-size:1.1rem; font-weight:800;">${pin}</span></div>` : ''}
           
           <div style="margin-top:15px; border-top: 1px solid #222; padding-top:15px;">
             <div class="data-row">
-              <span class="data-label">Vencimiento:</span>
+              <span class="data-label">Fecha de vencimiento:</span>
               <span class="data-val" style="color:var(--cyber-red); font-weight:800;">${date || 'A CONVENIR'}</span>
             </div>
           </div>
-
-          ${userName ? `
-          <div class="client-footer-name">
-            <span class="client-small-text">👤 Titular: ${userName}</span>
-          </div>
-          ` : ''}
 
           <button class="btn-copy-all-bottom" onclick="handleCopy(\`${safeRaw}\`, this)">COPIAR TODO EL TEXTO</button>
         </div>
       `;
     }
 
-    // --- MODAL ---
+    // --- FUNCIONES DE MODAL ---
     async function openServices() {
       let t = document.getElementById('telefono').value.replace(/\D/g, '').trim();
       if (t.length < 7) return fireError("⚠️ Ingresa tu número celular.");
       const modal = document.getElementById('modalServices');
       const box = document.getElementById('cardsWrapper');
       modal.style.display = 'flex';
-      box.innerHTML = '<div class="loader"></div><p style="text-align:center; color:gray;">Sincronizando...</p>';
+      box.innerHTML = '<div class="loader"></div><p style="text-align:center; color:gray;">Sincronizando con Cybernet...</p>';
       try {
         const resp = await fetch(`${GOOGLE_URL}?accion=servicios&telefono=${t}`);
         const json = await resp.json();
@@ -508,16 +493,18 @@
           });
           if (validCount === 0) box.innerHTML = '<p style="color:gray; text-align:center;">No hay correos registrados.</p>';
         } else {
-          box.innerHTML = '<p style="color:gray; text-align:center;">Sin servicios activos vinculados.</p>';
+          box.innerHTML = '<p style="color:gray; text-align:center;">Sin servicios vinculados.</p>';
         }
       } catch (e) { box.innerHTML = '<p style="color:red; text-align:center;">Error de red.</p>'; }
     }
 
     function closeModal() { document.getElementById('modalServices').style.display = 'none'; }
+    
+    // Cierre por clic afuera y tecla Esc
     window.onclick = (e) => { if(e.target == document.getElementById('modalServices')) closeModal(); }
     window.addEventListener('keydown', (e) => { if(e.key === "Escape") closeModal(); });
 
-    // --- FLUJO ---
+    // --- FLUJO DE LA APP ---
     function changeStep(n) {
       if(n === 2) {
         let t = document.getElementById('telefono').value.replace(/\D/g, '').trim();
@@ -533,7 +520,7 @@
     function reloadAll() { document.getElementById('telefono').value = ''; document.getElementById('correo').value = ''; changeStep(1); }
     function fireError(m) { const t = document.getElementById('error-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 5000); }
 
-    // --- BÚSQUEDA ---
+    // --- BÚSQUEDA DE CÓDIGOS ---
     async function executeSearch() {
       let m = document.getElementById('correo').value.toLowerCase().trim();
       if(!m.includes('@')) return fireError("❌ Correo inválido.");
@@ -546,10 +533,12 @@
         changeStep(6);
         document.getElementById('res-box-code').style.display = 'none';
         document.getElementById('res-box-link').style.display = 'none';
+        
         if(res.exito) {
           document.getElementById('res-title').innerText = "¡LOCALIZADO!";
           let finalMsg = (res.msj && res.msj !== "undefined" && res.msj !== "null") ? res.msj : "Información recuperada:";
           document.getElementById('res-desc').innerText = finalMsg;
+          
           if(res.tipo === 'codigo') {
             document.getElementById('res-box-code').style.display = 'block';
             document.getElementById('val-code').innerText = res.valor;
