@@ -10,9 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <style>
-    /* ESTILOS GLOBALES CYBERNET 
-       Identidad: Rojo Neón y Negro Absoluto
-    */
+    /* VARIABLES DE DISEÑO CYBERNET */
     :root {
       --bg-main: #000000;
       --bg-card: #0f0f0f;
@@ -42,12 +40,10 @@
       align-items: center; 
       min-height: 100vh; 
       padding: 20px;
-      overflow-x: hidden;
-      /* Gradiente sutil de fondo para profundidad */
       background-image: radial-gradient(circle at center, #1a0202 0%, #000000 100%);
     }
 
-    /* CONTENEDOR PRINCIPAL ESTILO CARD NEÓN */
+    /* CONTENEDOR PRINCIPAL */
     .container {
       background: var(--bg-card);
       border: 1px solid rgba(229, 9, 20, 0.2); 
@@ -79,7 +75,7 @@
       line-height: 1.6; 
     }
     
-    /* TOAST DE ERROR */
+    /* ALERTA DE ERROR */
     #error-toast {
       display: none;
       background: rgba(229, 9, 20, 0.15);
@@ -108,7 +104,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ENTRADAS DE TEXTO */
+    /* INPUTS */
     input {
       width: 100%; 
       padding: 20px; 
@@ -127,7 +123,7 @@
       box-shadow: 0 0 25px var(--cyber-red-glow); 
     }
     
-    /* BOTONES PRINCIPALES */
+    /* BOTONES */
     button {
       width: 100%; 
       padding: 18px; 
@@ -164,31 +160,11 @@
       box-shadow: 0 10px 30px rgba(229, 9, 20, 0.55); 
     }
 
-    button.btn-whatsapp { 
-      border-color: var(--whatsapp); 
-      color: var(--whatsapp); 
-    }
-    button.btn-whatsapp:hover {
-      background: rgba(37, 211, 102, 0.05);
-    }
+    button.btn-whatsapp { border-color: var(--whatsapp); color: var(--whatsapp); }
+    .btn-status { border-color: rgba(255, 255, 255, 0.1); color: var(--text-dim); font-size: 0.85rem; margin-top: 15px; }
+    .dot { width: 10px; height: 10px; background: var(--online); border-radius: 50%; box-shadow: 0 0 12px var(--online); }
     
-    .btn-status { 
-      border-color: rgba(255, 255, 255, 0.1); 
-      color: var(--text-dim); 
-      font-size: 0.85rem; 
-      margin-top: 15px; 
-      height: 55px;
-    }
-    
-    .dot { 
-      width: 10px; 
-      height: 10px; 
-      background: var(--online); 
-      border-radius: 50%; 
-      box-shadow: 0 0 12px var(--online); 
-    }
-    
-    /* CARGANDO / LOADER */
+    /* LOADER */
     .loader { 
       border: 6px solid rgba(229, 9, 20, 0.1); 
       border-top: 6px solid var(--cyber-red); 
@@ -201,8 +177,7 @@
     
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* SISTEMA DE MODAL (SERVICIOS ACTIVOS) 
-    */
+    /* MODAL DE SERVICIOS ACTIVOS */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -231,7 +206,7 @@
       to { opacity: 1; transform: scale(1); }
     }
     
-    /* DISEÑO DE TARJETAS DE SERVICIO */
+    /* TARJETAS DE SERVICIO */
     .service-card {
       background: var(--bg-inner);
       border-radius: 25px;
@@ -240,50 +215,25 @@
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-left: 6px solid var(--cyber-red); 
       text-align: left;
-      transition: var(--transition);
-    }
-    .service-card:hover {
-      border-color: var(--cyber-red);
-      transform: scale(1.01);
     }
 
     .card-top {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       margin-bottom: 18px;
       padding-bottom: 15px;
       border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
-    .owner-name { 
-      color: var(--cyber-red); 
-      font-size: 1.4rem; 
-      font-weight: 800; 
-      text-transform: uppercase; 
-      letter-spacing: 1px;
-    }
-
-    .platform-badge { 
-      color: var(--text-dim); 
-      font-size: 0.8rem; 
-      font-weight: 700; 
-      background: rgba(255,255,255,0.05);
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
+    .owner-name { color: var(--cyber-red); font-size: 1.3rem; font-weight: 800; text-transform: uppercase; }
+    .platform-label { color: var(--text-dim); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
     
-    .data-line { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 15px; 
-      font-size: 0.95rem; 
-    }
+    .data-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.95rem; }
     .data-label { color: var(--text-dim); }
     .data-val { color: var(--text-main); font-weight: 600; text-align: right; }
 
-    /* BOTONES INTERNOS DE TARJETA */
+    /* BOTONES DE COPIADO */
     .btn-copy-small {
       background: rgba(229, 9, 20, 0.12);
       border: 1px solid var(--cyber-red);
@@ -294,9 +244,7 @@
       cursor: pointer;
       font-weight: 800;
       margin-left: 10px;
-      transition: 0.2s;
     }
-    .btn-copy-small:hover { background: var(--cyber-red); color: white; }
     
     .btn-copy-full {
       background: var(--cyber-red);
@@ -307,17 +255,12 @@
       font-size: 0.75rem;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(229, 9, 20, 0.2);
     }
 
-    footer { text-align: center; color: var(--text-dim); font-size: 0.85rem; padding: 40px; opacity: 0.6; letter-spacing: 1.5px; }
-
+    footer { text-align: center; color: var(--text-dim); font-size: 0.85rem; padding: 40px; opacity: 0.6; }
     .back-link { display: block; margin-top: 25px; color: var(--text-dim); cursor: pointer; font-size: 0.9rem; text-decoration: underline; font-weight: 600; }
-    .back-link:hover { color: var(--cyber-red); }
-
-    /* ESTILO SCROLLBAR PARA EL MODAL */
+    
     .modal-content::-webkit-scrollbar { width: 6px; }
-    .modal-content::-webkit-scrollbar-track { background: transparent; }
     .modal-content::-webkit-scrollbar-thumb { background: var(--cyber-red); border-radius: 10px; }
   </style>
 </head>
@@ -345,7 +288,7 @@
     </div>
 
     <div id="step-3" class="step">
-      <p class="instruction">Selecciona el tipo de solicitud para Netflix 👇</p>
+      <p class="instruction">Selecciona el tipo de solicitud 👇</p>
       <button onclick="setOp(1)">🔑 Código de Inicio Sesión</button>
       <button onclick="setOp(2)">✈️ Código 'Estoy de Viaje'</button>
       <button onclick="setOp(3)">📧 Enlace de Inicio</button>
@@ -361,7 +304,7 @@
 
     <div id="step-5" class="step">
       <div class="loader"></div>
-      <p style="color: var(--cyber-red); font-weight: 800; text-transform: uppercase; letter-spacing: 3px;">Accediendo a la base...</p>
+      <p style="color: var(--cyber-red); font-weight: 800; text-transform: uppercase;">Consultando Cybernet...</p>
     </div>
 
     <div id="step-6" class="step">
@@ -374,9 +317,7 @@
       </div>
       
       <div id="res-box-link" style="display:none; margin-bottom: 30px;">
-        <a id="val-link" href="#" target="_blank" style="text-decoration:none;">
-          <button class="btn-primary">✅ AUTORIZAR ACCESO</button>
-        </a>
+        <a id="val-link" href="#" target="_blank" style="text-decoration:none;"><button class="btn-primary">✅ AUTORIZAR ACCESO</button></a>
       </div>
       
       <button class="btn-primary" onclick="executeSearch()">🔄 Reintentar Búsqueda</button>
@@ -386,11 +327,9 @@
 
   <div id="modalServices" class="modal-overlay">
     <div class="modal-content">
-      <h3 style="margin-bottom: 35px; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; color: #fff; text-align: center;">Tus Cuentas Activas</h3>
-      
+      <h3 style="margin-bottom: 35px; text-transform: uppercase; font-weight: 800; color: #fff; text-align: center;">Mis Cuentas Cybernet</h3>
       <div id="cardsWrapper"></div>
-      
-      <button onclick="closeModal()" style="margin-top: 30px; border-color: #222; color: #444; font-size: 0.8rem; height: 50px;">CERRAR VENTANA</button>
+      <button onclick="closeModal()" style="margin-top: 30px; border-color: #222; color: #444; font-size: 0.8rem;">CERRAR VENTANA</button>
     </div>
   </div>
 
@@ -399,9 +338,9 @@
   <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
 
+    // Almacenamos datos globalmente para evitar "undefined"
     let globalData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
 
-    // --- FUNCIÓN DE COPIADO CON FEEDBACK ---
     function handleCopy(text, btn) {
       navigator.clipboard.writeText(text).then(() => {
         const original = btn.innerText;
@@ -416,17 +355,14 @@
       });
     }
 
-    // --- GENERADOR DE TARJETAS (MODAL) ---
     function buildServiceCard(raw, plat) {
-      // 1. Extraer nombre de usuario
-      const nameMatch = raw.match(/Hola\s*\*([^*]+)\*/i) || rawText.match(/^\*([^*]+)\*/);
-      const user = nameMatch ? nameMatch[1].trim() : "Cliente Cybernet";
+      const nameMatch = raw.match(/Hola\s*\*([^*]+)\*/i) || raw.match(/^\*([^*]+)\*/);
+      const user = nameMatch ? nameMatch[1].trim() : "Cliente";
       
-      // 2. Extraer datos con Regex potente
       const mMatch = raw.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
       const cMatch = raw.match(/(?:CONTRASEÑA|CLAVE|PASSWORD):?\s*\*?([^*🛒\n]+)\*?/i);
       const pMatch = raw.match(/(?:PERFIL|NOMBRE DEL PERFIL):?\s*\*?([^*|🛒\n\-]+)\*?/i);
-      // Regex especial para capturar solo los números del PIN
+      // Extractor numérico para el PIN
       const pinMatch = raw.match(/(?:PIN|CÓDIGO PIN|CLAVE PERFIL)[^\d]*(\d+)/i);
       const dMatch = raw.match(/(?:FECHA DE VENCIMIENTO|VENCE|EXPIRA):?\s*\*?([^*🛒\n]+)\*?/i);
 
@@ -438,68 +374,43 @@
       const pin  = pinMatch ? pinMatch[1] : '';
       const date = clean(dMatch ? dMatch[1] : '');
 
-      // REGLA: Si no hay correo real (@), no mostramos tarjeta
       if (!mail.includes('@')) return '';
 
-      // Preparamos el texto original para el botón de "Copiar Todo"
-      const escapedRaw = raw.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+      const safeRaw = raw.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
       return `
         <div class="service-card">
           <div class="card-top">
             <span class="owner-name">${user}</span>
-            <button class="btn-copy-full" onclick="handleCopy(\`${escapedRaw}\`, this)">COPIAR TODO</button>
+            <button class="btn-copy-full" onclick="handleCopy(\`${safeRaw}\`, this)">COPIAR TODO</button>
           </div>
-          <div class="platform-badge">Plataforma: ${plat}</div>
-          
+          <div class="platform-label">📺 ${plat}</div>
           <div style="margin-top:20px;">
             <div class="data-line">
               <span class="data-label">Correo:</span>
-              <div style="display:flex; align-items:center;">
-                <span class="data-val">${mail}</span>
-                <button class="btn-copy-small" onclick="handleCopy('${mail}', this)">Copiar</button>
-              </div>
+              <div style="display:flex; align-items:center;"><span class="data-val">${mail}</span><button class="btn-copy-small" onclick="handleCopy('${mail}', this)">Copiar</button></div>
             </div>
-            
-            ${pass ? `
-            <div class="data-line">
-              <span class="data-label">Clave:</span>
-              <div style="display:flex; align-items:center;">
-                <span class="data-val">${pass}</span>
-                <button class="btn-copy-small" onclick="handleCopy('${pass}', this)">Copiar</button>
-              </div>
-            </div>` : ''}
-            
+            ${pass ? `<div class="data-line"><span class="data-label">Clave:</span><div style="display:flex; align-items:center;"><span class="data-val">${pass}</span><button class="btn-copy-small" onclick="handleCopy('${pass}', this)">Copiar</button></div></div>` : ''}
             ${perf ? `<div class="data-line"><span class="data-label">Perfil:</span> <span class="data-val">${perf}</span></div>` : ''}
-            
-            ${pin ? `<div class="data-line"><span class="data-label">PIN del Perfil:</span> <span class="data-val" style="color:var(--cyber-red); font-size:1.2rem; font-weight:800;">${pin}</span></div>` : ''}
-            
+            ${pin ? `<div class="data-line"><span class="data-label">PIN:</span> <span class="data-val" style="color:var(--cyber-red); font-size:1.1rem; font-weight:800;">${pin}</span></div>` : ''}
             <div style="margin-top:15px; border-top: 1px solid #222; padding-top:15px;">
-              <div class="data-line">
-                <span class="data-label">Fecha de vencimiento:</span>
-                <span class="data-val" style="color:var(--cyber-red); font-weight:800;">${date || 'A CONVENIR'}</span>
-              </div>
+              <div class="data-line"><span class="data-label">Fecha de vencimiento:</span><span class="data-val" style="color:var(--cyber-red); font-weight:800;">${date || 'A CONVENIR'}</span></div>
             </div>
           </div>
         </div>
       `;
     }
 
-    // --- LÓGICA DE SERVICIOS ACTIVOS ---
     async function openServices() {
-      let t = document.getElementById('telefono').value.replace(/\D/g, '');
-      if (t.length < 7) return fireError("⚠️ Ingresa tu número celular arriba.");
-      
+      let t = document.getElementById('telefono').value.replace(/\D/g, '').trim();
+      if (t.length < 7) return fireError("⚠️ Ingresa tu número celular.");
       const modal = document.getElementById('modalServices');
       const box = document.getElementById('cardsWrapper');
-      
       modal.style.display = 'flex';
-      box.innerHTML = '<div class="loader"></div><p style="text-align:center; color:gray;">Sincronizando con Cybernet...</p>';
-      
+      box.innerHTML = '<div class="loader"></div><p style="text-align:center; color:gray;">Sincronizando...</p>';
       try {
         const resp = await fetch(`${GOOGLE_URL}?accion=servicios&telefono=${t}`);
         const json = await resp.json();
-        
         if (json.exito && json.servicios.length > 0) {
           box.innerHTML = "";
           let validCount = 0;
@@ -509,34 +420,21 @@
               if (card) { box.innerHTML += card; validCount++; }
             }
           });
-          if (validCount === 0) box.innerHTML = '<p style="color:gray; text-align:center;">No se hallaron correos válidos en tus servicios.</p>';
+          if (validCount === 0) box.innerHTML = '<p style="color:gray; text-align:center;">No hay correos válidos.</p>';
         } else {
-          box.innerHTML = '<p style="color:gray; text-align:center;">No tienes servicios activos registrados bajo este número.</p>';
+          box.innerHTML = '<p style="color:gray; text-align:center;">Sin servicios activos vinculados.</p>';
         }
-      } catch (e) { box.innerHTML = '<p style="color:red; text-align:center;">Error al conectar con la base de datos. Intenta de nuevo.</p>'; }
+      } catch (e) { box.innerHTML = '<p style="color:red; text-align:center;">Error de red.</p>'; }
     }
 
-    // --- FUNCIONES DE CIERRE DEL MODAL ---
     function closeModal() { document.getElementById('modalServices').style.display = 'none'; }
+    window.onclick = (e) => { if(e.target == document.getElementById('modalServices')) closeModal(); }
+    window.addEventListener('keydown', (e) => { if(e.key === "Escape") closeModal(); });
 
-    // 1. Cerrar al hacer clic fuera
-    window.onclick = function(event) {
-      const modal = document.getElementById('modalServices');
-      if (event.target == modal) { closeModal(); }
-    }
-
-    // 2. Cerrar con tecla Escape
-    window.addEventListener('keydown', function(event) {
-      if (event.key === "Escape") {
-        closeModal();
-      }
-    });
-
-    // --- NAVEGACIÓN Y FLUJO ---
     function changeStep(n) {
       if(n === 2) {
-        let t = document.getElementById('telefono').value.replace(/\D/g, '');
-        if(t.length < 7) return fireError("❌ El número de celular es muy corto.");
+        let t = document.getElementById('telefono').value.replace(/\D/g, '').trim();
+        if(t.length < 7) return fireError("❌ El número es muy corto.");
         globalData.telefono = t;
       }
       document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
@@ -548,22 +446,19 @@
     function reloadAll() { document.getElementById('telefono').value = ''; document.getElementById('correo').value = ''; changeStep(1); }
     function fireError(m) { const t = document.getElementById('error-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 5000); }
 
-    // --- BÚSQUEDA DE CÓDIGOS ---
     async function executeSearch() {
+      // .trim() para evitar espacios accidentales que causan el error
       let m = document.getElementById('correo').value.toLowerCase().trim();
-      if(!m.includes('@')) return fireError("❌ El formato del correo no es válido.");
+      if(!m.includes('@')) return fireError("❌ Correo inválido.");
       globalData.correo = m;
       changeStep(5);
-      
       try {
         const query = new URLSearchParams(globalData);
         const resp = await fetch(`${GOOGLE_URL}?${query.toString()}`);
         const res = await resp.json();
-        
         changeStep(6);
         document.getElementById('res-box-code').style.display = 'none';
         document.getElementById('res-box-link').style.display = 'none';
-        
         if(res.exito) {
           document.getElementById('res-title').innerText = "¡LOCALIZADO!";
           document.getElementById('res-desc').innerText = res.msj;
@@ -579,7 +474,7 @@
           document.getElementById('res-title').innerText = "SIN RESULTADOS";
           document.getElementById('res-desc').innerText = res.msj;
         }
-      } catch (err) { changeStep(6); document.getElementById('res-desc').innerText = "Hubo un error de conexión. Intenta buscar de nuevo."; }
+      } catch (err) { changeStep(6); document.getElementById('res-desc').innerText = "Error de conexión."; }
     }
   </script>
 </body>
