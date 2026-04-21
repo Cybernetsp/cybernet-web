@@ -10,12 +10,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0a;
-      --card-bg: #141414;
+      --bg: #000000;
+      --card-bg: #0f0f0f;
       --color-white: #ffffff; 
-      --color-red: #ff0000;   
-      --color-gray: #a0a0a0;
-      --color-disney: #0063e5;
+      --color-red: #e50914; /* El Rojo Cybernet de tu logo */
+      --color-red-glow: rgba(229, 9, 20, 0.4);
+      --color-gray: #b3b3b3;
       --color-whatsapp: #25D366;
       --color-online: #2ecc71;
     }
@@ -30,29 +30,39 @@
       justify-content: center; 
       align-items: center; 
       min-height: 100vh; 
-      padding: 1.5rem; 
+      padding: 1.5rem;
+      background-image: radial-gradient(circle at center, #1a0202 0%, #000000 100%);
     }
 
-    /* CONTENEDOR PRINCIPAL */
+    /* CONTENEDOR PRINCIPAL ESTILO CYBER */
     .container {
       background: var(--card-bg);
-      border: 1px solid rgba(255, 255, 255, 0.1); 
+      border: 1px solid rgba(229, 9, 20, 0.2); 
       border-radius: 2rem;
       padding: 4rem 2.5rem;
       width: 100%;
       max-width: 480px;
       text-align: center;
       position: relative;
-      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(229, 9, 20, 0.1);
       margin-bottom: 2rem;
     }
     
-    h2 { color: var(--color-white); font-size: 1.8rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+    h2 { 
+      color: var(--color-white); 
+      font-size: 1.8rem; 
+      margin-bottom: 0.5rem; 
+      text-transform: uppercase; 
+      letter-spacing: 3px; 
+      font-weight: 700;
+      text-shadow: 0 0 15px var(--color-red-glow);
+    }
+    
     p { color: var(--color-gray); font-size: 0.95rem; margin-bottom: 2.5rem; line-height: 1.6; }
     
     #error-toast {
       display: none;
-      background: rgba(255, 0, 0, 0.1);
+      background: rgba(229, 9, 20, 0.1);
       color: var(--color-red);
       padding: 12px;
       border-radius: 12px;
@@ -74,74 +84,83 @@
     
     input {
       width: 100%; padding: 1.3rem; margin-bottom: 1.5rem; border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.1); background: #1a1a1a; color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.1); background: #000; color: #fff;
       font-size: 1rem; outline: none; text-align: center; transition: 0.3s;
     }
-    input:focus { border-color: var(--color-red); box-shadow: 0 0 20px rgba(255, 0, 0, 0.25); }
+    input:focus { border-color: var(--color-red); box-shadow: 0 0 20px var(--color-red-glow); }
     
-    /* BOTONES */
+    /* BOTONES ESTILO LOGO */
     button {
       width: 100%; padding: 1.1rem; margin-bottom: 1.2rem; border-radius: 60px;
-      border: 2px solid rgba(255, 255, 255, 0.6); background: transparent; color: var(--color-white);
+      border: 2px solid rgba(255, 255, 255, 0.2); background: transparent; color: var(--color-white);
       font-size: 0.95rem; font-weight: 700; cursor: pointer; text-transform: uppercase;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex; align-items: center; justify-content: center; gap: 12px;
-      letter-spacing: 0.8px;
+      letter-spacing: 1px;
     }
 
     button:hover { 
-      background: rgba(255, 255, 255, 0.08); 
-      border-color: var(--color-white); 
+      background: rgba(255, 255, 255, 0.05); 
+      border-color: var(--color-red); 
       transform: translateY(-4px); 
       box-shadow: 0 10px 20px rgba(0,0,0,0.4);
     }
     
-    button.btn-netflix { border-color: var(--color-red); color: #fff; background: var(--color-red); }
-    button.btn-netflix:hover { background: #cc0000; border-color: var(--color-white); }
+    button.btn-netflix { 
+      border-color: var(--color-red); 
+      color: #fff; 
+      background: var(--color-red);
+      box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+    }
+    button.btn-netflix:hover { background: #ff0000; border-color: #fff; box-shadow: 0 8px 25px rgba(229, 9, 20, 0.5); }
 
     button.btn-disney { border-color: #00bfff; color: #fff; background: linear-gradient(135deg, #0063e5 0%, #00bfff 100%); }
-    button.btn-disney:hover { filter: brightness(1.2); border-color: var(--color-white); }
 
     button.btn-whatsapp { border-color: var(--color-whatsapp); color: var(--color-whatsapp); }
-    button.btn-whatsapp:hover { background: rgba(37, 211, 102, 0.12); color: var(--color-whatsapp); }
+    button.btn-whatsapp:hover { background: rgba(37, 211, 102, 0.1); }
 
-    .btn-status { border-color: rgba(255, 255, 255, 0.15); color: var(--color-gray); font-size: 0.85rem; margin-top: 15px; }
-    .btn-status:hover { border-color: var(--color-online); color: var(--color-white); background: rgba(46, 204, 113, 0.05); }
+    .btn-status { border-color: rgba(255, 255, 255, 0.1); color: var(--color-gray); font-size: 0.85rem; margin-top: 15px; }
+    .btn-status:hover { border-color: var(--color-online); color: var(--color-white); }
     .dot { width: 10px; height: 10px; background: var(--color-online); border-radius: 50%; box-shadow: 0 0 12px var(--color-online); }
     
-    .loader { border: 5px solid rgba(255, 255, 255, 0.1); border-top: 5px solid var(--color-red); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
+    .loader { border: 5px solid rgba(229, 9, 20, 0.1); border-top: 5px solid var(--color-red); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
     
-    /* MODAL DE SERVICIOS ACTIVOS */
+    /* MODAL DE SERVICIOS ACTIVOS - COLORES LOGO */
     .modal {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.94);
+      background: rgba(0,0,0,0.96);
       justify-content: center; align-items: center;
       z-index: 100; padding: 20px;
+      backdrop-filter: blur(5px);
     }
     .modal-content {
-      background: var(--card-bg);
+      background: #0a0a0a;
       padding: 3rem 1.8rem;
       border-radius: 2rem;
       width: 100%;
       max-width: 500px;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid var(--color-red);
       max-height: 88vh;
       overflow-y: auto;
       position: relative;
+      box-shadow: 0 0 50px rgba(229, 9, 20, 0.2);
     }
     
     .service-card {
-      background: #1a1a1a;
+      background: #141414;
       border-radius: 1.5rem;
       padding: 2rem;
       margin-bottom: 1.8rem;
-      border-left: 6px solid var(--color-online);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-left: 6px solid var(--color-red); /* Color distintivo del logo */
       text-align: left;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transition: 0.3s;
     }
-    .account-owner { display: block; color: var(--color-online); font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .service-card:hover { transform: scale(1.02); border-color: var(--color-red); }
+
+    .account-owner { display: block; color: var(--color-red); font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
     .service-platform { color: var(--color-white); font-size: 0.9rem; font-weight: 600; opacity: 0.5; margin-bottom: 18px; display: block; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; }
     
     .data-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 0.95rem; }
@@ -149,30 +168,30 @@
     .data-wrapper { display: flex; align-items: center; gap: 12px; }
     .data-val { color: var(--color-white); font-weight: 600; word-break: break-all; text-align: right; }
 
-    /* BOTÓN COPIAR */
+    /* BOTÓN COPIAR CYBER */
     .copy-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--color-white);
-      padding: 5px 12px;
-      border-radius: 8px;
+      background: rgba(229, 9, 20, 0.1);
+      border: 1px solid var(--color-red);
+      color: var(--color-red);
+      padding: 6px 14px;
+      border-radius: 10px;
       font-size: 0.7rem;
       cursor: pointer;
       width: auto;
       margin: 0;
-      text-transform: none;
-      font-weight: 600;
+      text-transform: uppercase;
+      font-weight: 700;
       transition: 0.2s;
     }
-    .copy-btn:hover { background: var(--color-online); color: black; border-color: var(--color-online); transform: scale(1.05); }
+    .copy-btn:hover { background: var(--color-red); color: white; transform: scale(1.05); }
 
-    footer { text-align: center; color: var(--color-gray); font-size: 0.85rem; padding: 25px; line-height: 1.7; opacity: 0.7; }
+    footer { text-align: center; color: var(--color-gray); font-size: 0.85rem; padding: 25px; line-height: 1.7; opacity: 0.6; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     .back-link { display: block; margin-top: 18px; color: var(--color-gray); cursor: pointer; font-size: 0.9rem; text-decoration: underline; transition: 0.3s; }
-    .back-link:hover { color: var(--color-white); }
+    .back-link:hover { color: var(--color-red); }
   </style>
 </head>
 <body>
@@ -184,7 +203,7 @@
     <div id="step-1" class="step active">
       <p>Ingresa tu <b>NÚMERO DE CELULAR</b> asociado a la compra 📲</p>
       <input type="tel" id="telefono" placeholder="Ej: 301515XXXX" maxlength="10">
-      <button onclick="nextStep(2)">Continuar</button>
+      <button class="btn-netflix" onclick="nextStep(2)">Continuar</button>
       <button class="btn-whatsapp" onclick="window.open('https://wa.me/573127706726')">💬 Soporte WhatsApp</button>
       <button class="btn-status" onclick="verMisServicios()">
         <div class="dot"></div> MIS SERVICIOS ACTIVOS
@@ -221,7 +240,7 @@
     <div id="step-6" class="step">
       <h2 id="res-titulo">--</h2>
       <p id="res-mensaje"></p>
-      <div id="res-caja" style="background: rgba(255, 0, 0, 0.05); border: 1px dashed var(--color-red); padding: 2rem; border-radius: 1.5rem; margin-bottom: 2rem; display:none;">
+      <div id="res-caja" style="background: rgba(229, 9, 20, 0.05); border: 1px dashed var(--color-red); padding: 2rem; border-radius: 1.5rem; margin-bottom: 2rem; display:none;">
         <div id="res-codigo" style="font-size: 3rem; font-weight: 800; color: #fff; letter-spacing: 8px;"></div>
         <div id="res-timer" style="color: var(--color-red); font-size: 1rem; margin-top: 12px; font-weight: 700;"></div>
       </div>
@@ -230,14 +249,14 @@
           <button class="btn-netflix">✅ AUTORIZAR ACCESO</button>
         </a>
       </div>
-      <button onclick="procesar()">🔄 Reintentar Búsqueda</button>
+      <button class="btn-netflix" onclick="procesar()">🔄 Reintentar Búsqueda</button>
       <span class="back-link" onclick="reiniciar()">Nueva Consulta</span>
     </div>
   </div>
 
   <div id="servicesModal" class="modal">
     <div class="modal-content">
-      <h3 style="margin-bottom: 2.5rem; text-transform: uppercase; letter-spacing: 3px; text-align: center; font-weight: 800; font-size: 1.4rem;">Cuentas Detectadas</h3>
+      <h3 style="margin-bottom: 2.5rem; text-transform: uppercase; letter-spacing: 3px; text-align: center; font-weight: 800; font-size: 1.4rem; color: #fff;">Cuentas Detectadas</h3>
       <div id="servicesList"></div>
       <button onclick="cerrarModal()" style="margin-top: 2rem; border-color: var(--color-gray); color: var(--color-gray); font-size: 0.8rem;">CERRAR VENTANA</button>
     </div>
@@ -246,7 +265,7 @@
   <footer>
     © 2026 Cybernet Streaming Platforms.
     <br>
-    Seguridad y rapidez en cada entrega.
+    Inspirado en la potencia de tu marca.
   </footer>
 
   <script>
@@ -257,13 +276,13 @@
     function copyToClipboard(text, btn) {
       navigator.clipboard.writeText(text).then(() => {
         const originalText = btn.innerText;
-        btn.innerText = "¡Listo!";
-        btn.style.background = "#2ecc71";
+        btn.innerText = "¡OK!";
+        btn.style.background = "#fff";
         btn.style.color = "#000";
         setTimeout(() => {
           btn.innerText = originalText;
-          btn.style.background = "rgba(255, 255, 255, 0.08)";
-          btn.style.color = "#fff";
+          btn.style.background = "rgba(229, 9, 20, 0.1)";
+          btn.style.color = "var(--color-red)";
         }, 1500);
       });
     }
@@ -302,7 +321,7 @@
           <div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin ? pin[1] : 'No tiene'}</span></div>
           <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:12px;">
             <div class="data-item">
-              <span class="data-label">Vencimiento:</span> 
+              <span class="data-label">Estado:</span> 
               <span class="data-val" style="color:var(--color-online)">${vencimiento ? vencimiento[1].trim() : 'Servicio Activo'}</span>
             </div>
           </div>
@@ -333,7 +352,6 @@
 
     function cerrarModal() { document.getElementById('servicesModal').style.display = 'none'; }
 
-    // CIERRE AL CLICAR AFUERA
     window.onclick = function(event) {
       const modal = document.getElementById('servicesModal');
       if (event.target == modal) { cerrarModal(); }
