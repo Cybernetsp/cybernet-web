@@ -34,7 +34,7 @@
       background-image: radial-gradient(circle at center, #1a0202 0%, #000000 100%);
     }
 
-    /* CONTENEDOR PRINCIPAL */
+    /* CONTENEDOR PRINCIPAL ESTILO CYBER */
     .container {
       background: var(--card-bg);
       border: 1px solid rgba(229, 9, 20, 0.2); 
@@ -89,6 +89,7 @@
     }
     input:focus { border-color: var(--color-red); box-shadow: 0 0 20px var(--color-red-glow); }
     
+    /* BOTONES ESTILO CYBERNET */
     button {
       width: 100%; padding: 1.1rem; margin-bottom: 1.2rem; border-radius: 60px;
       border: 2px solid rgba(255, 255, 255, 0.2); background: transparent; color: var(--color-white);
@@ -105,7 +106,12 @@
       box-shadow: 0 10px 20px rgba(0,0,0,0.4);
     }
     
-    button.btn-netflix { border-color: var(--color-red); color: #fff; background: var(--color-red); box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3); }
+    button.btn-netflix { 
+      border-color: var(--color-red); 
+      color: #fff; 
+      background: var(--color-red);
+      box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+    }
     button.btn-netflix:hover { background: #ff0000; border-color: #fff; box-shadow: 0 8px 25px rgba(229, 9, 20, 0.5); }
 
     button.btn-whatsapp { border-color: var(--color-whatsapp); color: var(--color-whatsapp); }
@@ -117,7 +123,7 @@
     
     .loader { border: 5px solid rgba(229, 9, 20, 0.1); border-top: 5px solid var(--color-red); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
     
-    /* MODAL DE SERVICIOS */
+    /* MODAL DE SERVICIOS ACTIVOS */
     .modal {
       display: none;
       position: fixed;
@@ -280,12 +286,10 @@
       
       const correoMatch = rawText.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
       const claveMatch = rawText.match(/(?:CONTRASEÑA|CLAVE|PASSWORD|PASS):?\s*\*?([^*🛒\n]+)\*?/i);
-      
-      // RADAR DE PERFIL: Ahora se detiene si encuentra la palabra PIN o guiones
       const perfilMatch = rawText.match(/(?:PERFIL|NOMBRE DEL PERFIL|NAME):?\s*\*?([^*|🛒\n\-]+)\*?/i);
       
-      // RADAR DE PIN POTENCIADO: Busca cualquier variante de PIN y captura lo que sigue
-      const pinMatch = rawText.match(/(?:PIN|PIN DEL PERFIL|CÓDIGO PIN|CLAVE PERFIL):?\s*\*?([^*|🛒\n]+)\*?/i);
+      // RADAR DE PIN REPARADO: Busca la palabra PIN y atrapa el primer grupo de números que vea después
+      const pinMatch = rawText.match(/(?:PIN|PIN DEL PERFIL|CÓDIGO PIN|CLAVE PERFIL).*?(\d+)/i);
       
       const vencimientoMatch = rawText.match(/(?:FECHA DE VENCIMIENTO|VENCIMIENTO|EXPIRA|VENCE):?\s*\*?([^*🛒\n]+)\*?/i);
 
@@ -294,7 +298,7 @@
       const correo = clean(correoMatch ? correoMatch[1] : '');
       const clave = clean(claveMatch ? claveMatch[1] : '');
       const perfil = clean(perfilMatch ? perfilMatch[1] : '');
-      const pin = clean(pinMatch ? pinMatch[1] : '');
+      const pin = pinMatch ? pinMatch[1].trim() : ''; // Captura directa del número
       const vencimiento = clean(vencimientoMatch ? vencimientoMatch[1] : '');
 
       if (!correo.includes('@')) return '';
