@@ -346,6 +346,33 @@
     /* SCROLLBAR PERSONALIZADO PARA EL MODAL */
     .modal-content::-webkit-scrollbar { width: 6px; }
     .modal-content::-webkit-scrollbar-thumb { background: var(--cyber-red); border-radius: 10px; }
+
+    /* ESTILO DEL BUSCADOR EN EL MODAL */
+.search-wrapper {
+    width: 100%;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+#searchServices {
+    width: 100%;
+    padding: 15px 15px 15px 45px; /* Espacio para el icono de lupa */
+    margin-bottom: 0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    text-align: left;
+    background: #000 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23e50914' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") no-repeat 15px center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    outline: none;
+    transition: 0.3s;
+}
+
+#searchServices:focus {
+    border-color: var(--cyber-red);
+    box-shadow: 0 0 15px var(--cyber-red-glow);
+}
+
   </style>
 </head>
 <body>
@@ -409,6 +436,9 @@
   <div id="modalServices" class="modal-overlay">
     <div class="modal-content">
       <h3 style="margin-bottom: 35px; text-transform: uppercase; font-weight: 800; color: #fff; text-align: center;">Mis Cuentas Cybernet</h3>
+      <div class="search-wrapper">
+    <input type="text" id="searchServices" placeholder="Buscar por plataforma o correo..." onkeyup="filterServices()">
+</div>
       <div id="cardsWrapper"></div>
       <button onclick="closeModal()" style="margin-top: 30px; border-color: #222; color: #444; font-size: 0.8rem;">CERRAR VENTANA</button>
     </div>
@@ -523,6 +553,10 @@
       if (t.length < 7) return fireError("⚠️ Ingresa tu número celular.");
       const modal = document.getElementById('modalServices');
       const box = document.getElementById('cardsWrapper');
+      // Limpiar el texto del buscador cada vez que se abre la ventana
+if(document.getElementById('searchServices')) {
+    document.getElementById('searchServices').value = "";
+}
       modal.style.display = 'flex';
       box.innerHTML = '<div class="loader"></div><p style="text-align:center; color:gray;">Sincronizando con Cybernet...</p>';
       try {
@@ -594,6 +628,24 @@
         }
       } catch (err) { changeStep(6); document.getElementById('res-desc').innerText = "Error de conexión."; }
     }
+
+// FUNCIÓN PARA FILTRAR TARJETAS EN TIEMPO REAL
+function filterServices() {
+    const query = document.getElementById('searchServices').value.toLowerCase();
+    const cards = document.querySelectorAll('.service-card');
+    
+    cards.forEach(card => {
+        // Obtenemos todo el texto de la tarjeta (correo, plataforma, perfil)
+        const content = card.textContent.toLowerCase();
+        
+        if (content.includes(query)) {
+            card.style.display = "block"; // Muestra si coincide
+        } else {
+            card.style.display = "none";  // Oculta si no coincide
+        }
+    });
+}
+
   </script>
   <script>
   if ('serviceWorker' in navigator) {
