@@ -6,6 +6,12 @@
   <title>Centro de Códigos - Cybernet Bot Web</title>
   
   <link rel="icon" type="image/jpeg" href="logo.jpeg">
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#e50914">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cybernet">
+<link rel="apple-touch-icon" href="logo.jpeg">
   
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
   
@@ -589,5 +595,14 @@
       } catch (err) { changeStep(6); document.getElementById('res-desc').innerText = "Error de conexión."; }
     }
   </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('Cybernet App lista para instalar'))
+        .catch(err => console.log('Error al registrar la App', err));
+    });
+  }
+</script>
 </body>
 </html>
