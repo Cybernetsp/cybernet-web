@@ -112,11 +112,12 @@
     button.btn-whatsapp:hover { background: rgba(37, 211, 102, 0.1); }
 
     .btn-status { border-color: rgba(255, 255, 255, 0.1); color: var(--color-gray); font-size: 0.85rem; margin-top: 15px; }
+    .btn-status:hover { border-color: var(--color-online); color: var(--color-white); }
     .dot { width: 10px; height: 10px; background: var(--color-online); border-radius: 50%; box-shadow: 0 0 12px var(--color-online); }
     
     .loader { border: 5px solid rgba(229, 9, 20, 0.1); border-top: 5px solid var(--color-red); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
     
-    /* MODAL Y TARJETAS */
+    /* MODAL DE SERVICIOS */
     .modal {
       display: none;
       position: fixed;
@@ -279,9 +280,11 @@
       
       const correoMatch = rawText.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
       const claveMatch = rawText.match(/(?:CONTRASEÑA|CLAVE|PASSWORD|PASS):?\s*\*?([^*🛒\n]+)\*?/i);
-      const perfilMatch = rawText.match(/(?:PERFIL|NOMBRE DEL PERFIL|NAME):?\s*\*?([^*|🛒\n]+)\*?/i);
       
-      // RADAR MEJORADO PARA PIN (Busca la palabra PIN y captura el valor siguiente)
+      // RADAR DE PERFIL: Ahora se detiene si encuentra la palabra PIN o guiones
+      const perfilMatch = rawText.match(/(?:PERFIL|NOMBRE DEL PERFIL|NAME):?\s*\*?([^*|🛒\n\-]+)\*?/i);
+      
+      // RADAR DE PIN POTENCIADO: Busca cualquier variante de PIN y captura lo que sigue
       const pinMatch = rawText.match(/(?:PIN|PIN DEL PERFIL|CÓDIGO PIN|CLAVE PERFIL):?\s*\*?([^*|🛒\n]+)\*?/i);
       
       const vencimientoMatch = rawText.match(/(?:FECHA DE VENCIMIENTO|VENCIMIENTO|EXPIRA|VENCE):?\s*\*?([^*🛒\n]+)\*?/i);
@@ -307,6 +310,7 @@
           </div>
 
           ${clave ? `<div class="data-item"><span class="data-label">Clave:</span><div class="data-wrapper"><span class="data-val">${clave}</span><button class="copy-btn" onclick="copyToClipboard('${clave}', this)">Copiar</button></div></div>` : ''}
+          
           ${perfil ? `<div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil}</span></div>` : ''}
           
           ${pin ? `<div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin}</span></div>` : ''}
