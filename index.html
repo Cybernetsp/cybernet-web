@@ -30,29 +30,41 @@
       padding: 1.5rem; 
     }
 
+    /* ESTILO DEL LOGO */
+    .logo {
+      width: 140px; /* Tamaño ideal del logo */
+      height: auto;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+      transition: transform 0.3s ease;
+    }
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
     /* CONTENEDOR PRINCIPAL */
     .container {
       background: var(--card-bg);
       border: 1px solid rgba(255, 255, 255, 0.1); 
-      border-radius: 1.5rem;
-      padding: 3.5rem 2rem;
+      border-radius: 2rem;
+      padding: 3.5rem 2.5rem;
       width: 100%;
-      max-width: 460px;
+      max-width: 480px;
       text-align: center;
       position: relative;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8);
       margin-bottom: 2rem;
     }
     
-    h2 { color: var(--color-white); font-size: 1.7rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
+    h2 { color: var(--color-white); font-size: 1.8rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
     p { color: var(--color-gray); font-size: 0.95rem; margin-bottom: 2.5rem; line-height: 1.6; }
     
     #error-toast {
       display: none;
       background: rgba(255, 0, 0, 0.1);
       color: var(--color-red);
-      padding: 10px;
-      border-radius: 10px;
+      padding: 12px;
+      border-radius: 12px;
       font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 1.5rem;
@@ -62,104 +74,121 @@
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
     }
 
     .step { display: none; animation: fadeIn 0.5s ease-in-out; }
     .step.active { display: block; }
     
     input {
-      width: 100%; padding: 1.2rem; margin-bottom: 1.5rem; border-radius: 12px;
+      width: 100%; padding: 1.3rem; margin-bottom: 1.5rem; border-radius: 15px;
       border: 1px solid rgba(255, 255, 255, 0.1); background: #1a1a1a; color: #fff;
       font-size: 1rem; outline: none; text-align: center; transition: 0.3s;
     }
-    input:focus { border-color: var(--color-red); box-shadow: 0 0 15px rgba(255, 0, 0, 0.2); }
+    input:focus { border-color: var(--color-red); box-shadow: 0 0 20px rgba(255, 0, 0, 0.25); }
     
+    /* BOTONES */
     button {
-      width: 100%; padding: 1.1rem; margin-bottom: 1.2rem; border-radius: 50px;
-      border: 2px solid rgba(255, 255, 255, 0.8); background: transparent; color: var(--color-white);
-      font-size: 0.9rem; font-weight: bold; cursor: pointer; text-transform: uppercase;
+      width: 100%; padding: 1.1rem; margin-bottom: 1.2rem; border-radius: 60px;
+      border: 2px solid rgba(255, 255, 255, 0.6); background: transparent; color: var(--color-white);
+      font-size: 0.95rem; font-weight: 700; cursor: pointer; text-transform: uppercase;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex; align-items: center; justify-content: center; gap: 12px;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
     }
 
-    button:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--color-white); transform: translateY(-3px); }
+    button:hover { 
+      background: rgba(255, 255, 255, 0.08); 
+      border-color: var(--color-white); 
+      transform: translateY(-4px); 
+      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    }
     
     button.btn-netflix { border-color: var(--color-red); color: #fff; background: var(--color-red); }
-    button.btn-disney { border-color: #00bfff; color: #fff; background: linear-gradient(135deg, #0063e5 0%, #00bfff 100%); }
-    button.btn-whatsapp { border-color: var(--color-whatsapp); color: var(--color-whatsapp); }
+    button.btn-netflix:hover { background: #cc0000; border-color: var(--color-white); }
 
-    .btn-status { border-color: rgba(255, 255, 255, 0.2); color: var(--color-gray); font-size: 0.8rem; margin-top: 15px; }
+    button.btn-disney { border-color: #00bfff; color: #fff; background: linear-gradient(135deg, #0063e5 0%, #00bfff 100%); }
+    button.btn-disney:hover { filter: brightness(1.2); border-color: var(--color-white); }
+
+    button.btn-whatsapp { border-color: var(--color-whatsapp); color: var(--color-whatsapp); }
+    button.btn-whatsapp:hover { background: rgba(37, 211, 102, 0.12); color: var(--color-whatsapp); }
+
+    .btn-status { border-color: rgba(255, 255, 255, 0.15); color: var(--color-gray); font-size: 0.85rem; margin-top: 15px; }
+    .btn-status:hover { border-color: var(--color-online); color: var(--color-white); background: rgba(46, 204, 113, 0.05); }
     .dot { width: 10px; height: 10px; background: var(--color-online); border-radius: 50%; box-shadow: 0 0 12px var(--color-online); }
     
-    .loader { border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid var(--color-red); border-radius: 50%; width: 55px; height: 55px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
+    .loader { border: 5px solid rgba(255, 255, 255, 0.1); border-top: 5px solid var(--color-red); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
     
     /* MODAL DE SERVICIOS ACTIVOS */
     .modal {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.92);
+      background: rgba(0,0,0,0.94);
       justify-content: center; align-items: center;
       z-index: 100; padding: 20px;
     }
     .modal-content {
       background: var(--card-bg);
-      padding: 2.5rem 1.5rem;
-      border-radius: 1.5rem;
+      padding: 3rem 1.8rem;
+      border-radius: 2rem;
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
       border: 1px solid rgba(255,255,255,0.1);
-      max-height: 85vh;
+      max-height: 88vh;
       overflow-y: auto;
       position: relative;
     }
     
     .service-card {
       background: #1a1a1a;
-      border-radius: 1.2rem;
-      padding: 1.8rem;
-      margin-bottom: 1.5rem;
-      border-left: 5px solid var(--color-online);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      margin-bottom: 1.8rem;
+      border-left: 6px solid var(--color-online);
       text-align: left;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .account-owner { display: block; color: var(--color-online); font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; }
-    .service-platform { color: var(--color-white); font-size: 0.85rem; font-weight: 600; opacity: 0.6; margin-bottom: 15px; display: block; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
+    .account-owner { display: block; color: var(--color-online); font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .service-platform { color: var(--color-white); font-size: 0.9rem; font-weight: 600; opacity: 0.5; margin-bottom: 18px; display: block; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; }
     
-    .data-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.9rem; }
-    .data-label { color: var(--color-gray); }
-    .data-wrapper { display: flex; align-items: center; gap: 10px; }
+    .data-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 0.95rem; }
+    .data-label { color: var(--color-gray); font-weight: 400; }
+    .data-wrapper { display: flex; align-items: center; gap: 12px; }
     .data-val { color: var(--color-white); font-weight: 600; word-break: break-all; text-align: right; }
 
     /* BOTÓN COPIAR */
     .copy-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--color-white);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.6rem;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.7rem;
       cursor: pointer;
       width: auto;
       margin: 0;
       text-transform: none;
-      font-weight: 400;
+      font-weight: 600;
+      transition: 0.2s;
     }
-    .copy-btn:hover { background: var(--color-online); color: black; transform: scale(1.1); }
+    .copy-btn:hover { background: var(--color-online); color: black; border-color: var(--color-online); transform: scale(1.05); }
 
-    footer { text-align: center; color: var(--color-gray); font-size: 0.8rem; padding: 20px; line-height: 1.6; }
+    footer { text-align: center; color: var(--color-gray); font-size: 0.85rem; padding: 25px; line-height: 1.7; opacity: 0.7; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    .back-link { display: block; margin-top: 15px; color: var(--color-gray); cursor: pointer; font-size: 0.85rem; text-decoration: underline; }
+    .back-link { display: block; margin-top: 18px; color: var(--color-gray); cursor: pointer; font-size: 0.9rem; text-decoration: underline; transition: 0.3s; }
+    .back-link:hover { color: var(--color-white); }
   </style>
 </head>
 <body>
 
   <div class="container">
+    <img src="logo.jpeg" alt="Cybernet Streaming" class="logo">
+    
     <h2 id="main-title">CENTRO DE CÓDIGOS</h2>
     <div id="error-toast"></div>
     
@@ -197,17 +226,17 @@
 
     <div id="step-5" class="step">
       <div class="loader"></div>
-      <p style="color: var(--color-red); font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Rastreando correo...</p>
+      <p style="color: var(--color-red); font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Rastreando correo...</p>
     </div>
 
     <div id="step-6" class="step">
       <h2 id="res-titulo">--</h2>
       <p id="res-mensaje"></p>
-      <div id="res-caja" style="background: rgba(255, 0, 0, 0.05); border: 1px dashed var(--color-red); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; display:none;">
+      <div id="res-caja" style="background: rgba(255, 0, 0, 0.05); border: 1px dashed var(--color-red); padding: 2rem; border-radius: 1.5rem; margin-bottom: 2rem; display:none;">
         <div id="res-codigo" style="font-size: 3rem; font-weight: 800; color: #fff; letter-spacing: 8px;"></div>
-        <div id="res-timer" style="color: var(--color-red); font-size: 0.9rem; margin-top: 10px; font-weight: 600;"></div>
+        <div id="res-timer" style="color: var(--color-red); font-size: 1rem; margin-top: 12px; font-weight: 700;"></div>
       </div>
-      <div id="res-link-caja" style="display:none; margin-bottom: 1.5rem;">
+      <div id="res-link-caja" style="display:none; margin-bottom: 2rem;">
         <a id="res-link" href="#" target="_blank" style="text-decoration:none;">
           <button class="btn-netflix">✅ AUTORIZAR ACCESO</button>
         </a>
@@ -219,14 +248,16 @@
 
   <div id="servicesModal" class="modal">
     <div class="modal-content">
-      <h3 style="margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 2px; text-align: center; font-weight: 800;">Mis Cuentas Activas</h3>
+      <h3 style="margin-bottom: 2.5rem; text-transform: uppercase; letter-spacing: 3px; text-align: center; font-weight: 800; font-size: 1.4rem;">Cuentas Detectadas</h3>
       <div id="servicesList"></div>
-      <button onclick="cerrarModal()" style="margin-top: 2rem; border-color: var(--color-gray); color: var(--color-gray);">CERRAR VENTANA</button>
+      <button onclick="cerrarModal()" style="margin-top: 2rem; border-color: var(--color-gray); color: var(--color-gray); font-size: 0.8rem;">CERRAR VENTANA</button>
     </div>
   </div>
 
   <footer>
-    © 2026 Cybernet Streaming Platforms. Todos los derechos reservados.
+    © 2026 Cybernet Streaming Platforms.
+    <br>
+    Seguridad y rapidez en cada entrega.
   </footer>
 
   <script>
@@ -237,11 +268,13 @@
     function copyToClipboard(text, btn) {
       navigator.clipboard.writeText(text).then(() => {
         const originalText = btn.innerText;
-        btn.innerText = "¡Copiado!";
+        btn.innerText = "¡Listo!";
         btn.style.background = "#2ecc71";
+        btn.style.color = "#000";
         setTimeout(() => {
           btn.innerText = originalText;
-          btn.style.background = "rgba(255, 255, 255, 0.1)";
+          btn.style.background = "rgba(255, 255, 255, 0.08)";
+          btn.style.color = "#fff";
         }, 1500);
       });
     }
@@ -261,12 +294,12 @@
       return `
         <div class="service-card">
           <span class="account-owner">👤 ${nombreCuenta.trim()}</span>
-          <span class="service-platform">📺 PLATAFORMA: ${platform}</span>
+          <span class="service-platform">📺 ${platform}</span>
           
           <div class="data-item">
             <span class="data-label">Correo:</span>
             <div class="data-wrapper">
-              <span class="data-val">${correo || 'N/A'}</span>
+              <span class="data-val">${correo || 'No detectado'}</span>
               ${correo ? `<button class="copy-btn" onclick="copyToClipboard('${correo}', this)">Copiar</button>` : ''}
             </div>
           </div>
@@ -274,18 +307,18 @@
           <div class="data-item">
             <span class="data-label">Clave:</span>
             <div class="data-wrapper">
-              <span class="data-val">${clave || 'N/A'}</span>
+              <span class="data-val">${clave || 'No detectada'}</span>
               ${clave ? `<button class="copy-btn" onclick="copyToClipboard('${clave}', this)">Copiar</button>` : ''}
             </div>
           </div>
 
-          <div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil ? perfil[1].trim() : 'Unico'}</span></div>
-          <div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin ? pin[1] : 'Sin PIN'}</span></div>
+          <div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil ? perfil[1].trim() : 'Perfil Único'}</span></div>
+          <div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin ? pin[1] : 'No tiene'}</span></div>
           
-          <div style="margin-top:12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top:10px;">
+          <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:12px;">
             <div class="data-item">
-              <span class="data-label">Estado:</span> 
-              <span class="data-val" style="color:var(--color-online)">${vencimiento ? vencimiento[1].trim() : 'Activo'}</span>
+              <span class="data-label">Vencimiento:</span> 
+              <span class="data-val" style="color:var(--color-online)">${vencimiento ? vencimiento[1].trim() : 'Servicio Activo'}</span>
             </div>
           </div>
         </div>
@@ -294,11 +327,11 @@
 
     async function verMisServicios() {
       let tel = document.getElementById('telefono').value.replace(/\D/g, '');
-      if (tel.length < 7) { mostrarError("⚠️ Debes ingresar tu celular primero."); return; }
+      if (tel.length < 7) { mostrarError("⚠️ Primero ingresa tu número arriba."); return; }
       const modal = document.getElementById('servicesModal');
       const list = document.getElementById('servicesList');
       modal.style.display = 'flex';
-      list.innerHTML = '<p style="text-align:center;font-size:0.9rem;color:gray;margin-top:20px;">Buscando cuentas...</p>';
+      list.innerHTML = '<p style="text-align:center;font-size:1rem;color:gray;margin-top:30px;">Escaneando bases de datos de Cybernet...</p>';
       try {
         const resp = await fetch(`${WEB_APP_URL}?accion=servicios&telefono=${tel}`);
         const data = await resp.json();
@@ -308,14 +341,14 @@
             if(s.info && s.info.length > 10) { list.innerHTML += formatServiceText(s.info, s.plataforma); }
           });
         } else {
-          list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:20px;">No se encontraron cuentas activas.</p>';
+          list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:30px;">No se encontraron cuentas activas vinculadas a este número.</p>';
         }
-      } catch (e) { list.innerHTML = '<p style="color:var(--color-red); text-align:center; margin-top:20px;">Error de red.</p>'; }
+      } catch (e) { list.innerHTML = '<p style="color:var(--color-red); text-align:center; margin-top:30px;">Error de servidor. Reintenta.</p>'; }
     }
 
     function cerrarModal() { document.getElementById('servicesModal').style.display = 'none'; }
 
-    /* CIERRE AL HACER CLIC AFUERA */
+    // CIERRE AL CLICAR AFUERA
     window.onclick = function(event) {
       const modal = document.getElementById('servicesModal');
       if (event.target == modal) { cerrarModal(); }
@@ -324,7 +357,7 @@
     function nextStep(step) {
       if(step === 2) {
         let tel = document.getElementById('telefono').value.replace(/\D/g, '');
-        if(tel.length < 7) { mostrarError("❌ Número corto."); return; }
+        if(tel.length < 7) { mostrarError("❌ Ingresa un celular válido."); return; }
         userData.telefono = tel;
       }
       document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
@@ -358,7 +391,7 @@
 
     async function procesar() {
       let email = document.getElementById('correo').value.toLowerCase().trim();
-      if(!email.includes('@')) { mostrarError("❌ Correo no válido."); return; }
+      if(!email.includes('@')) { mostrarError("❌ Correo con formato incorrecto."); return; }
       userData.correo = email;
       nextStep(5); 
       try {
@@ -369,26 +402,26 @@
         document.getElementById('res-caja').style.display = 'none';
         document.getElementById('res-link-caja').style.display = 'none';
         if(res.exito) {
-          document.getElementById('res-titulo').innerText = "¡LOCALIZADO!";
+          document.getElementById('res-titulo').innerText = "¡ÉXITO TOTAL!";
           document.getElementById('res-titulo').style.color = "#fff";
-          document.getElementById('res-mensaje').innerText = res.msj || "Acceso encontrado:";
+          document.getElementById('res-mensaje').innerText = res.msj || "Información localizada:";
           if(res.tipo === 'codigo') {
             document.getElementById('res-caja').style.display = 'block';
             document.getElementById('res-codigo').innerText = res.valor;
-            document.getElementById('res-timer').innerText = `Válido por: ${res.tiempo}`;
+            document.getElementById('res-timer').innerText = `Expira en: ${res.tiempo}`;
           } else if (res.tipo === 'link') {
             document.getElementById('res-link-caja').style.display = 'block';
             document.getElementById('res-link').href = res.valor;
           }
         } else {
-          document.getElementById('res-titulo').innerText = "ATENCIÓN";
+          document.getElementById('res-titulo').innerText = "BÚSQUEDA FALLIDA";
           document.getElementById('res-titulo').style.color = "#ff0000";
           document.getElementById('res-mensaje').innerText = res.msj;
         }
       } catch (error) {
         nextStep(6);
-        document.getElementById('res-titulo').innerText = "ERROR";
-        document.getElementById('res-mensaje').innerText = "Error al conectar.";
+        document.getElementById('res-titulo').innerText = "ERROR CRÍTICO";
+        document.getElementById('res-mensaje').innerText = "Falla de conexión con la base de datos.";
       }
     }
   </script>
