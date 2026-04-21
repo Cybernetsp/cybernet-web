@@ -8,68 +8,82 @@
   <link rel="icon" type="image/jpeg" href="logo.jpeg">
   
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  
   <style>
+    /* VARIABLES DE MARCA CYBERNET */
     :root {
-      --bg: #000000;
-      --card-bg: #0f0f0f;
-      --color-white: #ffffff; 
-      --color-red: #e50914; /* Rojo Cybernet */
-      --color-red-glow: rgba(229, 9, 20, 0.4);
-      --color-gray: #b3b3b3;
-      --color-whatsapp: #25D366;
-      --color-online: #2ecc71; 
+      --bg-color: #000000;
+      --card-color: #0f0f0f;
+      --text-white: #ffffff; 
+      --cyber-red: #e50914; 
+      --cyber-red-glow: rgba(229, 9, 20, 0.4);
+      --text-gray: #b3b3b3;
+      --whatsapp-green: #25D366;
+      --online-green: #2ecc71; 
     }
     
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    /* RESET GENERAL */
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      font-family: 'Poppins', sans-serif; 
+    }
     
     body { 
-      background: var(--bg); 
-      color: var(--color-white); 
+      background: var(--bg-color); 
+      color: var(--text-white); 
       display: flex; 
       flex-direction: column;
       justify-content: center; 
       align-items: center; 
       min-height: 100vh; 
-      padding: 1.5rem;
+      padding: 20px;
       background-image: radial-gradient(circle at center, #1a0202 0%, #000000 100%);
     }
 
-    /* CONTENEDOR PRINCIPAL */
+    /* CONTENEDOR DE LA APP */
     .container {
-      background: var(--card-bg);
+      background: var(--card-color);
       border: 1px solid rgba(229, 9, 20, 0.2); 
-      border-radius: 2rem;
-      padding: 4rem 2.5rem;
+      border-radius: 30px;
+      padding: 50px 30px;
       width: 100%;
       max-width: 480px;
       text-align: center;
       position: relative;
       box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(229, 9, 20, 0.1);
-      margin-bottom: 2rem;
+      margin-bottom: 30px;
     }
     
     h2 { 
-      color: var(--color-white); 
+      color: var(--text-white); 
       font-size: 1.8rem; 
-      margin-bottom: 0.5rem; 
+      margin-bottom: 10px; 
       text-transform: uppercase; 
       letter-spacing: 3px; 
       font-weight: 700;
-      text-shadow: 0 0 15px var(--color-red-glow);
+      text-shadow: 0 0 15px var(--cyber-red-glow);
     }
     
-    p { color: var(--color-gray); font-size: 0.95rem; margin-bottom: 2.5rem; line-height: 1.6; }
+    .instruction-text { 
+      color: var(--text-gray); 
+      font-size: 0.95rem; 
+      margin-bottom: 35px; 
+      line-height: 1.6; 
+    }
     
+    /* ALERTAS DE ERROR */
     #error-toast {
       display: none;
       background: rgba(229, 9, 20, 0.1);
-      color: var(--color-red);
-      padding: 12px;
+      color: var(--cyber-red);
+      padding: 15px;
       border-radius: 12px;
       font-size: 0.85rem;
       font-weight: 600;
-      margin-bottom: 1.5rem;
-      border: 1px solid var(--color-red);
+      margin-bottom: 20px;
+      border: 1px solid var(--cyber-red);
       animation: shake 0.4s ease-in-out;
     }
 
@@ -79,76 +93,131 @@
       75% { transform: translateX(6px); }
     }
 
+    /* NAVEGACIÓN POR PASOS */
     .step { display: none; animation: fadeIn 0.5s ease-in-out; }
     .step.active { display: block; }
     
+    /* INPUTS */
     input {
-      width: 100%; padding: 1.3rem; margin-bottom: 1.5rem; border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.1); background: #000; color: #fff;
-      font-size: 1rem; outline: none; text-align: center; transition: 0.3s;
+      width: 100%; 
+      padding: 18px; 
+      margin-bottom: 20px; 
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1); 
+      background: #000; 
+      color: #fff;
+      font-size: 1rem; 
+      outline: none; 
+      text-align: center; 
+      transition: 0.3s;
     }
-    input:focus { border-color: var(--color-red); box-shadow: 0 0 20px var(--color-red-glow); }
+    input:focus { 
+      border-color: var(--cyber-red); 
+      box-shadow: 0 0 20px var(--cyber-red-glow); 
+    }
     
+    /* BOTONES */
     button {
-      width: 100%; padding: 1.1rem; margin-bottom: 1.2rem; border-radius: 60px;
-      border: 2px solid rgba(255, 255, 255, 0.2); background: transparent; color: var(--color-white);
-      font-size: 0.95rem; font-weight: 700; cursor: pointer; text-transform: uppercase;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; 
+      padding: 16px; 
+      margin-bottom: 15px; 
+      border-radius: 50px;
+      border: 2px solid rgba(255, 255, 255, 0.2); 
+      background: transparent; 
+      color: var(--text-white);
+      font-size: 0.95rem; 
+      font-weight: 700; 
+      cursor: pointer; 
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 12px;
       letter-spacing: 1px;
     }
 
     button:hover { 
       background: rgba(255, 255, 255, 0.05); 
-      border-color: var(--color-red); 
-      transform: translateY(-4px); 
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+      border-color: var(--cyber-red); 
+      transform: translateY(-3px); 
     }
     
-    button.btn-netflix { border-color: var(--color-red); color: #fff; background: var(--color-red); box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3); }
-    button.btn-netflix:hover { background: #ff0000; border-color: #fff; }
+    button.btn-primary { 
+      border-color: var(--cyber-red); 
+      background: var(--cyber-red);
+      box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+    }
+    button.btn-primary:hover { 
+      background: #ff0000; 
+      box-shadow: 0 8px 25px rgba(229, 9, 20, 0.5); 
+    }
 
-    button.btn-whatsapp { border-color: var(--color-whatsapp); color: var(--color-whatsapp); }
-    button.btn-status { border-color: rgba(255, 255, 255, 0.1); color: var(--color-gray); font-size: 0.85rem; margin-top: 15px; }
-    .dot { width: 10px; height: 10px; background: var(--color-online); border-radius: 50%; box-shadow: 0 0 12px var(--color-online); }
+    button.btn-whatsapp { 
+      border-color: var(--whatsapp-green); 
+      color: var(--whatsapp-green); 
+    }
     
-    .loader { border: 5px solid rgba(229, 9, 20, 0.1); border-top: 5px solid var(--color-red); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
+    .btn-status { 
+      border-color: rgba(255, 255, 255, 0.1); 
+      color: var(--text-gray); 
+      font-size: 0.8rem; 
+      margin-top: 10px; 
+    }
     
-    /* MODAL Y TARJETAS DE SERVICIOS */
-    .modal {
+    .dot-online { 
+      width: 10px; 
+      height: 10px; 
+      background: var(--online-green); 
+      border-radius: 50%; 
+      box-shadow: 0 0 10px var(--online-green); 
+    }
+    
+    /* CARGANDO */
+    .loader { 
+      border: 5px solid rgba(229, 9, 20, 0.1); 
+      border-top: 5px solid var(--cyber-red); 
+      border-radius: 50%; 
+      width: 50px; 
+      height: 50px; 
+      animation: spin 1s linear infinite; 
+      margin: 0 auto 20px auto; 
+    }
+    
+    /* ESTILO DEL MODAL DE SERVICIOS */
+    .modal-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.96);
+      background: rgba(0,0,0,0.97);
       justify-content: center; align-items: center;
-      z-index: 100; padding: 20px;
-      backdrop-filter: blur(5px);
+      z-index: 1000; padding: 20px;
+      backdrop-filter: blur(10px);
     }
-    .modal-content {
+    .modal-box {
       background: #0a0a0a;
-      padding: 3rem 1.8rem;
-      border-radius: 2rem;
+      padding: 40px 25px;
+      border-radius: 25px;
       width: 100%;
       max-width: 500px;
-      border: 1px solid var(--color-red);
-      max-height: 88vh;
+      border: 1px solid var(--cyber-red);
+      max-height: 90vh;
       overflow-y: auto;
-      position: relative;
-      box-shadow: 0 0 50px rgba(229, 9, 20, 0.2);
+      box-shadow: 0 0 50px rgba(229, 9, 20, 0.3);
     }
     
+    /* TARJETAS DENTRO DEL MODAL */
     .service-card {
       background: #141414;
-      border-radius: 1.5rem;
-      padding: 2rem;
-      margin-bottom: 1.8rem;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
       border: 1px solid rgba(255, 255, 255, 0.05);
-      border-left: 6px solid var(--color-red); 
+      border-left: 5px solid var(--cyber-red); 
       text-align: left;
     }
 
-    /* FILA DE PLATAFORMA + COPIAR TODO */
-    .header-row {
+    .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -157,260 +226,267 @@
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
-    .service-platform { color: var(--color-white); font-size: 0.9rem; font-weight: 600; opacity: 0.5; }
+    .card-title { color: var(--cyber-red); font-size: 1.3rem; font-weight: 800; text-transform: uppercase; }
+    .card-platform { color: var(--text-gray); font-size: 0.8rem; font-weight: 600; }
     
-    .account-owner { display: block; color: var(--color-red); font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; }
-    
-    .data-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 0.95rem; }
-    .data-label { color: var(--color-gray); font-weight: 400; }
-    .data-wrapper { display: flex; align-items: center; gap: 12px; }
-    .data-val { color: var(--color-white); font-weight: 600; word-break: break-all; text-align: right; }
-
-    /* BOTONES DE ACCIÓN EN TARJETA */
-    .copy-btn {
-      background: rgba(229, 9, 20, 0.1);
-      border: 1px solid var(--color-red);
-      color: var(--color-red);
-      padding: 6px 14px;
-      border-radius: 10px;
-      font-size: 0.7rem;
-      cursor: pointer;
-      width: auto;
-      margin: 0;
-      text-transform: uppercase;
-      font-weight: 700;
+    .data-row { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 12px; 
+      font-size: 0.9rem; 
     }
+    .label { color: var(--text-gray); }
+    .value { color: var(--text-white); font-weight: 600; text-align: right; }
 
-    .btn-copy-all {
-      background: var(--color-red);
-      color: #fff;
-      border: none;
+    /* BOTONES DE COPIADO DENTRO DE LA TARJETA */
+    .copy-small {
+      background: rgba(229, 9, 20, 0.1);
+      border: 1px solid var(--cyber-red);
+      color: var(--cyber-red);
       padding: 5px 12px;
       border-radius: 8px;
       font-size: 0.65rem;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    
+    .btn-copy-all {
+      background: var(--cyber-red);
+      color: white;
+      border: none;
+      padding: 6px 15px;
+      border-radius: 8px;
+      font-size: 0.7rem;
       font-weight: 800;
       cursor: pointer;
-      width: auto;
-      margin: 0;
     }
 
-    footer { text-align: center; color: var(--color-gray); font-size: 0.85rem; padding: 25px; opacity: 0.6; }
+    footer { text-align: center; color: var(--text-gray); font-size: 0.8rem; padding: 30px; opacity: 0.5; letter-spacing: 1px; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    .back-link { display: block; margin-top: 18px; color: var(--color-gray); cursor: pointer; font-size: 0.9rem; text-decoration: underline; }
+    .back-btn { display: block; margin-top: 20px; color: var(--text-gray); cursor: pointer; font-size: 0.85rem; text-decoration: underline; }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h2 id="main-title">CENTRO DE CÓDIGOS</h2>
+    <h2 id="app-title">CENTRO DE CÓDIGOS</h2>
     <div id="error-toast"></div>
     
     <div id="step-1" class="step active">
-      <p>Ingresa tu <b>NÚMERO DE CELULAR</b> asociado 📲</p>
+      <p class="instruction-text">Ingresa tu <b>NÚMERO DE CELULAR</b> asociado a la compra 📲</p>
       <input type="tel" id="telefono" placeholder="Ej: 301515XXXX" maxlength="10">
-      <button class="btn-netflix" onclick="nextStep(2)">Continuar</button>
+      <button class="btn-primary" onclick="goToStep(2)">Continuar</button>
       <button class="btn-whatsapp" onclick="window.open('https://wa.me/573127706726')">💬 Soporte WhatsApp</button>
-      <button class="btn-status" onclick="verMisServicios()">
-        <div class="dot"></div> MIS SERVICIOS ACTIVOS
+      <button class="btn-status" onclick="fetchActiveServices()">
+        <div class="dot-online"></div> VER MIS SERVICIOS ACTIVOS
       </button>
     </div>
 
     <div id="step-2" class="step">
-      <p>¿Qué plataforma deseas gestionar?</p>
-      <button class="btn-netflix" onclick="setPlataforma('NETFLIX')">🔴 Netflix</button>
-      <button style="border-color:#00bfff; color:#00bfff;" onclick="setPlataforma('DISNEY')">🔵 Disney Premium</button>
-      <span class="back-link" onclick="prevStep(1)">← Volver al inicio</span>
+      <p class="instruction-text">¿Qué plataforma deseas gestionar hoy?</p>
+      <button class="btn-primary" onclick="selectPlatform('NETFLIX')">🔴 Netflix</button>
+      <button style="border-color:#00bfff; color:#00bfff;" onclick="selectPlatform('DISNEY')">🔵 Disney Premium</button>
+      <span class="back-btn" onclick="goToStep(1)">← Volver al inicio</span>
     </div>
 
     <div id="step-3" class="step">
-      <p>Selecciona el tipo de solicitud de Netflix 👇</p>
-      <button onclick="setOpcion(1)">🔑 Código de Inicio Sesión</button>
-      <button onclick="setOpcion(2)">✈️ Código 'Estoy de Viaje'</button>
-      <button onclick="setOpcion(3)">📧 Enlace de Inicio</button>
-      <span class="back-link" onclick="prevStep(2)">← Volver</span>
+      <p class="instruction-text">Selecciona el tipo de solicitud para Netflix 👇</p>
+      <button onclick="selectOption(1)">🔑 Código de Inicio Sesión</button>
+      <button onclick="selectOption(2)">✈️ Código 'Estoy de Viaje'</button>
+      <button onclick="selectOption(3)">📧 Enlace de Inicio</button>
+      <span class="back-btn" onclick="goToStep(2)">← Volver</span>
     </div>
 
     <div id="step-4" class="step">
-      <p>Ingresa el <b>CORREO</b> de tu cuenta (@cybernetsp.com) 📧</p>
+      <p class="instruction-text">Ingresa el <b>CORREO</b> de tu cuenta (@cybernetsp.com) 📧</p>
       <input type="email" id="correo" placeholder="ejemplo@cybernetsp.com" spellcheck="false">
-      <button class="btn-netflix" onclick="procesar()">Buscar en el Sistema</button>
-      <span class="back-link" onclick="prevStep(2)">← Volver</span>
+      <button class="btn-primary" onclick="startSearch()">Rastrear Código</button>
+      <span class="back-btn" onclick="goToStep(2)">← Volver</span>
     </div>
 
     <div id="step-5" class="step">
       <div class="loader"></div>
-      <p style="color: var(--color-red); font-weight: bold; text-transform: uppercase;">Buscando...</p>
+      <p style="color: var(--cyber-red); font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Consultando base de datos...</p>
     </div>
 
     <div id="step-6" class="step">
-      <h2 id="res-titulo">--</h2>
-      <p id="res-mensaje"></p>
-      <div id="res-caja" style="background: rgba(229, 9, 20, 0.05); border: 1px dashed var(--color-red); padding: 2rem; border-radius: 1.5rem; margin-bottom: 2rem; display:none;">
-        <div id="res-codigo" style="font-size: 3rem; font-weight: 800; color: #fff; letter-spacing: 8px;"></div>
-        <div id="res-timer" style="color: var(--color-red); font-size: 1rem; margin-top: 12px; font-weight: 700;"></div>
+      <h2 id="res-header">--</h2>
+      <p id="res-text" class="instruction-text"></p>
+      
+      <div id="box-code" style="background: rgba(229, 9, 20, 0.05); border: 1px dashed var(--cyber-red); padding: 30px; border-radius: 20px; margin-bottom: 25px; display:none;">
+        <div id="display-code" style="font-size: 3rem; font-weight: 800; color: #fff; letter-spacing: 8px;"></div>
+        <div id="display-timer" style="color: var(--cyber-red); font-size: 1rem; margin-top: 15px; font-weight: 700;"></div>
       </div>
-      <div id="res-link-caja" style="display:none; margin-bottom: 2rem;">
-        <a id="res-link" href="#" target="_blank"><button class="btn-netflix">AUTORIZAR ACCESO</button></a>
+      
+      <div id="box-link" style="display:none; margin-bottom: 25px;">
+        <a id="action-link" href="#" target="_blank" style="text-decoration:none;">
+          <button class="btn-primary">✅ AUTORIZAR ACCESO</button>
+        </a>
       </div>
-      <button class="btn-netflix" onclick="procesar()">🔄 Reintentar Búsqueda</button>
-      <span class="back-link" onclick="reiniciar()">Nueva Consulta</span>
+      
+      <button class="btn-primary" onclick="startSearch()">🔄 Reintentar Búsqueda</button>
+      <span class="back-btn" onclick="resetApp()">Nueva Consulta</span>
     </div>
   </div>
 
-  <div id="servicesModal" class="modal">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 2.5rem; text-transform: uppercase; letter-spacing: 3px; text-align: center; font-weight: 800; font-size: 1.4rem; color: #fff;">Cuentas Detectadas</h3>
-      <div id="servicesList"></div>
-      <button onclick="cerrarModal()" style="margin-top: 2rem; border-color: var(--color-gray); color: var(--color-gray); font-size: 0.8rem;">CERRAR VENTANA</button>
+  <div id="modalServices" class="modal-overlay">
+    <div class="modal-box">
+      <h3 style="margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; color: #fff;">Tus Cuentas Cybernet</h3>
+      <div id="servicesContainer"></div>
+      <button onclick="closeModal()" style="margin-top: 25px; border-color: #333; color: #666; font-size: 0.75rem;">CERRAR VENTANA</button>
     </div>
   </div>
 
-  <footer>© 2026 Cybernet Streaming Platforms.</footer>
+  <footer>© 2026 CYBERNET STREAMING PLATFORMS.</footer>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
 
-    let userData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
+    let session = { tel: '', plat: '', op: 1, mail: '' };
 
-    function copyToClipboard(text, btn) {
-      navigator.clipboard.writeText(text).then(() => {
-        const originalText = btn.innerText;
+    function copyText(val, btn) {
+      navigator.clipboard.writeText(val).then(() => {
+        const oldText = btn.innerText;
         btn.innerText = "¡OK!";
-        btn.style.background = "#fff";
-        btn.style.color = "#000";
+        btn.style.borderColor = "var(--online-green)";
+        btn.style.color = "var(--online-green)";
         setTimeout(() => {
-          btn.innerText = originalText;
-          btn.style.background = "";
+          btn.innerText = oldText;
+          btn.style.borderColor = "";
           btn.style.color = "";
-        }, 1500);
+        }, 1200);
       });
     }
 
-    function formatServiceText(rawText, platform) {
-      const nombreMatch = rawText.match(/Hola\s*\*([^*]+)\*/i) || rawText.match(/^\*([^*]+)\*/);
-      const nombreCuenta = nombreMatch ? nombreMatch[1] : "Cuenta General";
+    function createCard(raw, platName) {
+      // Nombre de la cuenta
+      const nameMatch = raw.match(/Hola\s*\*([^*]+)\*/i) || raw.match(/^\*([^*]+)\*/);
+      const accName = nameMatch ? nameMatch[1].trim() : "Cuenta General";
       
-      const correoMatch = rawText.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
-      const claveMatch = rawText.match(/(?:CONTRASEÑA|CLAVE|PASSWORD|PASS):?\s*\*?([^*🛒\n]+)\*?/i);
-      const perfilMatch = rawText.match(/(?:PERFIL|NOMBRE DEL PERFIL|NAME):?\s*\*?([^*|🛒\n\-]+)\*?/i);
-      
-      // EXTRACCIÓN DE PIN NUMÉRICO REFORZADA
-      const pinRegex = /(?:PIN|CÓDIGO PIN|CLAVE PERFIL)[^\d]*(\d+)/i;
-      const pinMatch = rawText.match(pinRegex);
-      
-      const vencimientoMatch = rawText.match(/(?:FECHA DE VENCIMIENTO|VENCIMIENTO|EXPIRA|VENCE):?\s*\*?([^*🛒\n]+)\*?/i);
+      // Buscadores inteligentes (Regex)
+      const mailM = raw.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
+      const passM = raw.match(/(?:CONTRASEÑA|CLAVE|PASSWORD):?\s*\*?([^*🛒\n]+)\*?/i);
+      const perfM = raw.match(/(?:PERFIL|NOMBRE DEL PERFIL):?\s*\*?([^*|🛒\n\-]+)\*?/i);
+      const pinM  = raw.match(/(?:PIN|CÓDIGO PIN|CLAVE PERFIL)[^\d]*(\d+)/i);
+      const dateM = raw.match(/(?:FECHA DE VENCIMIENTO|VENCE|EXPIRA):?\s*\*?([^*🛒\n]+)\*?/i);
 
-      const clean = (str) => str ? str.replace(/\*/g, '').trim() : '';
+      const clean = (s) => s ? s.replace(/\*/g, '').trim() : '';
 
-      const correo = clean(correoMatch ? correoMatch[1] : '');
-      const clave = clean(claveMatch ? claveMatch[1] : '');
-      const perfil = clean(perfilMatch ? perfilMatch[1] : '');
-      const pin = pinMatch ? pinMatch[1] : '';
-      const vencimiento = clean(vencimientoMatch ? vencimientoMatch[1] : '');
+      const mail = clean(mailM ? mailM[1] : '');
+      const pass = clean(passM ? passM[1] : '');
+      const perf = clean(perfM ? perfM[1] : '');
+      const pin  = pinM ? pinM[1] : '';
+      const date = clean(dateM ? dateM[1] : '');
 
-      if (!correo.includes('@')) return '';
+      // REGLA DE ORO: Si no hay correo con @, no mostramos nada
+      if (!mail.includes('@')) return '';
 
-      // ESCAPAR TEXTO PARA EL BOTÓN COPIAR TODO
-      const escapedRaw = rawText.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+      const safeRaw = raw.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
       return `
         <div class="service-card">
-          <span class="account-owner">👤 ${nombreCuenta.trim()}</span>
-          
-          <div class="header-row">
-            <span class="service-platform">📺 ${platform}</span>
-            <button class="btn-copy-all" onclick="copyToClipboard(\`${escapedRaw}\`, this)">COPIAR TODO</button>
+          <div class="card-header">
+            <span class="card-title">${accName}</span>
+            <button class="btn-copy-all" onclick="copyText(\`${safeRaw}\`, this)">COPIAR TODO</button>
           </div>
-          
-          <div class="data-item">
-            <span class="data-label">Correo:</span>
-            <div class="data-wrapper"><span class="data-val">${correo}</span><button class="copy-btn" onclick="copyToClipboard('${correo}', this)">Copiar</button></div>
-          </div>
-
-          ${clave ? `
-          <div class="data-item">
-            <span class="data-label">Clave:</span>
-            <div class="data-wrapper"><span class="data-val">${clave}</span><button class="copy-btn" onclick="copyToClipboard('${clave}', this)">Copiar</button></div>
-          </div>` : ''}
-
-          ${perfil ? `<div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil}</span></div>` : ''}
-          ${pin ? `<div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin}</span></div>` : ''}
-          
-          <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:12px;">
-            <div class="data-item"><span class="data-label">Fecha de vencimiento:</span><span class="data-val" style="color:var(--color-red)">${vencimiento || 'A CONVENIR'}</span></div>
+          <div class="card-platform">Plataforma: ${platName}</div>
+          <div style="margin-top:15px;">
+            <div class="data-row">
+              <span class="label">Correo:</span>
+              <div class="data-wrapper"><span class="value">${mail}</span> <button class="copy-small" onclick="copyText('${mail}', this)">Copiar</button></div>
+            </div>
+            ${pass ? `<div class="data-row"><span class="label">Clave:</span><div class="data-wrapper"><span class="value">${pass}</span> <button class="copy-small" onclick="copyText('${pass}', this)">Copiar</button></div></div>` : ''}
+            ${perf ? `<div class="data-row"><span class="label">Perfil:</span> <span class="value">${perf}</span></div>` : ''}
+            ${pin ? `<div class="data-row"><span class="label">PIN Perfil:</span> <span class="value" style="color:var(--cyber-red); font-size:1.1rem;">${pin}</span></div>` : ''}
+            <div style="margin-top:10px; border-top: 1px solid #222; padding-top:10px;">
+              <div class="data-row">
+                <span class="label">Fecha de vencimiento:</span>
+                <span class="value" style="color:var(--cyber-red)">${date || 'A CONVENIR'}</span>
+              </div>
+            </div>
           </div>
         </div>
       `;
     }
 
-    async function verMisServicios() {
-      let tel = document.getElementById('telefono').value.replace(/\D/g, '');
-      if (tel.length < 7) { mostrarError("⚠️ Ingresa tu número."); return; }
-      const modal = document.getElementById('servicesModal');
-      const list = document.getElementById('servicesList');
+    async function fetchActiveServices() {
+      let t = document.getElementById('telefono').value.replace(/\D/g, '');
+      if (t.length < 7) return alertToast("⚠️ Ingresa tu número celular primero.");
+      
+      const modal = document.getElementById('modalServices');
+      const container = document.getElementById('servicesContainer');
       modal.style.display = 'flex';
-      list.innerHTML = '<p style="text-align:center;color:gray;margin-top:30px;">Buscando en base de datos...</p>';
+      container.innerHTML = '<p style="color:gray; margin-top:20px;">Rastreando tus cuentas...</p>';
+      
       try {
-        const resp = await fetch(`${WEB_APP_URL}?accion=servicios&telefono=${tel}`);
-        const data = await resp.json();
-        if (data.exito && data.servicios.length > 0) {
-          list.innerHTML = "";
-          let cardsFound = 0;
-          data.servicios.forEach(s => { 
+        const r = await fetch(`${API_URL}?accion=servicios&telefono=${t}`);
+        const d = await r.json();
+        if (d.exito && d.servicios.length > 0) {
+          container.innerHTML = "";
+          let found = 0;
+          d.servicios.forEach(s => { 
             if(s.info) { 
-              const cardHtml = formatServiceText(s.info, s.plataforma);
-              if (cardHtml !== '') { list.innerHTML += cardHtml; cardsFound++; }
+              const html = createCard(s.info, s.plataforma);
+              if (html) { container.innerHTML += html; found++; }
             }
           });
-          if (cardsFound === 0) list.innerHTML = '<p style="color:gray; text-align:center; margin-top:30px;">Sin correos válidos encontrados.</p>';
+          if (found === 0) container.innerHTML = '<p style="color:gray;">No se hallaron correos válidos.</p>';
         } else {
-          list.innerHTML = '<p style="color:gray; text-align:center; margin-top:30px;">Sin cuentas vinculadas.</p>';
+          container.innerHTML = '<p style="color:gray;">No tienes servicios activos vinculados.</p>';
         }
-      } catch (e) { list.innerHTML = '<p style="color:red; text-align:center; margin-top:30px;">Error de servidor.</p>'; }
+      } catch (e) { container.innerHTML = '<p style="color:red;">Error de conexión. Reintenta.</p>'; }
     }
 
-    function cerrarModal() { document.getElementById('servicesModal').style.display = 'none'; }
-    function nextStep(s) { 
-      if(s===2 && document.getElementById('telefono').value.length < 7) return mostrarError("❌ Celular inválido.");
-      userData.telefono = document.getElementById('telefono').value;
-      document.querySelectorAll('.step').forEach(e => e.classList.remove('active'));
-      document.getElementById('step-' + s).classList.add('active'); 
-    }
-    function prevStep(s) { document.querySelectorAll('.step').forEach(e => e.classList.remove('active')); document.getElementById('step-' + s).classList.add('active'); }
-    function setPlataforma(p) { userData.plataforma = p; nextStep(p === 'NETFLIX' ? 3 : 4); }
-    function setOpcion(o) { userData.opcion = o; nextStep(4); }
-    function reiniciar() { document.getElementById('telefono').value = ''; document.getElementById('correo').value = ''; nextStep(1); }
-    function mostrarError(m) { const t = document.getElementById('error-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => { t.style.display = 'none'; }, 5000); }
+    function closeModal() { document.getElementById('modalServices').style.display = 'none'; }
+    window.onclick = (e) => { if(e.target == document.getElementById('modalServices')) closeModal(); }
 
-    async function procesar() {
-      let e = document.getElementById('correo').value.toLowerCase().trim();
-      if(!e.includes('@')) return mostrarError("❌ Correo no válido.");
-      userData.correo = e;
-      nextStep(5); 
+    function goToStep(n) {
+      if(n === 2) {
+        let t = document.getElementById('telefono').value.replace(/\D/g, '');
+        if(t.length < 7) return alertToast("❌ Ingresa un celular válido.");
+        session.tel = t;
+      }
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step-' + n).classList.add('active');
+    }
+
+    function selectPlatform(p) { session.plat = p; goToStep(p === 'NETFLIX' ? 3 : 4); }
+    function selectOption(o) { session.op = o; goToStep(4); }
+    function resetApp() { document.getElementById('telefono').value = ''; document.getElementById('correo').value = ''; goToStep(1); }
+    function alertToast(m) { const t = document.getElementById('error-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 5000); }
+
+    async function startSearch() {
+      let m = document.getElementById('correo').value.toLowerCase().trim();
+      if(!m.includes('@')) return alertToast("❌ Formato de correo inválido.");
+      session.mail = m;
+      goToStep(5);
       try {
-        const params = new URLSearchParams(userData);
-        const r = await fetch(`${WEB_APP_URL}?${params.toString()}`);
+        const p = new URLSearchParams(session);
+        const r = await fetch(`${API_URL}?${p.toString()}`);
         const res = await r.json();
-        nextStep(6);
+        goToStep(6);
+        document.getElementById('box-code').style.display = 'none';
+        document.getElementById('box-link').style.display = 'none';
+        
         if(res.exito) {
-          document.getElementById('res-titulo').innerText = "¡LOCALIZADO!";
-          document.getElementById('res-mensaje').innerText = res.msj;
+          document.getElementById('res-header').innerText = "¡LOCALIZADO!";
+          document.getElementById('res-text').innerText = res.msj;
           if(res.tipo === 'codigo') {
-            document.getElementById('res-caja').style.display = 'block';
-            document.getElementById('res-codigo').innerText = res.valor;
-            document.getElementById('res-timer').innerText = `Vence en: ${res.tiempo}`;
+            document.getElementById('box-code').style.display = 'block';
+            document.getElementById('display-code').innerText = res.valor;
+            document.getElementById('display-timer').innerText = `Expira en: ${res.tiempo}`;
           } else if (res.tipo === 'link') {
-            document.getElementById('res-link-caja').style.display = 'block';
-            document.getElementById('res-link').href = res.valor;
+            document.getElementById('box-link').style.display = 'block';
+            document.getElementById('action-link').href = res.valor;
           }
         } else {
-          document.getElementById('res-titulo').innerText = "SIN RESULTADOS";
-          document.getElementById('res-mensaje').innerText = res.msj;
+          document.getElementById('res-header').innerText = "SIN RESULTADOS";
+          document.getElementById('res-text').innerText = res.msj;
         }
-      } catch (err) { nextStep(6); document.getElementById('res-mensaje').innerText = "Error de conexión."; }
+      } catch (err) { goToStep(6); document.getElementById('res-text').innerText = "Fallo de conexión."; }
     }
   </script>
 </body>
