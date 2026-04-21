@@ -49,7 +49,7 @@
     }
     
     h2 { 
-      color: var(--white); 
+      color: var(--color-white); 
       font-size: 1.8rem; 
       margin-bottom: 0.5rem; 
       text-transform: uppercase; 
@@ -112,7 +112,6 @@
     button.btn-whatsapp:hover { background: rgba(37, 211, 102, 0.1); }
 
     .btn-status { border-color: rgba(255, 255, 255, 0.1); color: var(--color-gray); font-size: 0.85rem; margin-top: 15px; }
-    .btn-status:hover { border-color: var(--color-online); color: var(--color-white); }
     .dot { width: 10px; height: 10px; background: var(--color-online); border-radius: 50%; box-shadow: 0 0 12px var(--color-online); }
     
     .loader { border: 5px solid rgba(229, 9, 20, 0.1); border-top: 5px solid var(--color-red); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
@@ -150,16 +149,25 @@
       text-align: left;
       transition: 0.3s;
     }
-    .service-card:hover { transform: scale(1.02); border-color: var(--color-red); }
+    
+    .platform-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 10px;
+    }
 
     .account-owner { display: block; color: var(--color-red); font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-    .service-platform { color: var(--color-white); font-size: 0.9rem; font-weight: 600; opacity: 0.5; margin-bottom: 18px; display: block; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; }
+    .service-platform { color: var(--color-white); font-size: 0.9rem; font-weight: 600; opacity: 0.5; margin-bottom: 0; }
     
     .data-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 0.95rem; }
     .data-label { color: var(--color-gray); font-weight: 400; }
     .data-wrapper { display: flex; align-items: center; gap: 12px; }
     .data-val { color: var(--color-white); font-weight: 600; word-break: break-all; text-align: right; }
 
+    /* BOTONES DE COPIADO */
     .copy-btn {
       background: rgba(229, 9, 20, 0.1);
       border: 1px solid var(--color-red);
@@ -174,7 +182,22 @@
       font-weight: 700;
       transition: 0.2s;
     }
-    .copy-btn:hover { background: var(--color-red); color: white; transform: scale(1.05); }
+    .copy-btn:hover { background: var(--color-red); color: white; }
+
+    /* BOTÓN COPIAR TODO (ARRIBA) */
+    .copy-all-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--color-gray);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.65rem;
+      cursor: pointer;
+      font-weight: 600;
+      width: auto;
+      margin: 0;
+    }
+    .copy-all-btn:hover { border-color: var(--color-red); color: var(--color-red); }
 
     footer { text-align: center; color: var(--color-gray); font-size: 0.85rem; padding: 25px; line-height: 1.7; opacity: 0.6; }
 
@@ -261,15 +284,17 @@
     let userData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
 
     function copyToClipboard(text, btn) {
+      // Eliminar asteriscos del texto para una copia limpia si se desea, 
+      // pero aquí lo dejamos original como está en el Sheet
       navigator.clipboard.writeText(text).then(() => {
         const originalText = btn.innerText;
         btn.innerText = "¡OK!";
-        btn.style.background = "#fff";
-        btn.style.color = "#000";
+        btn.style.borderColor = "var(--color-online)";
+        btn.style.color = "var(--color-online)";
         setTimeout(() => {
           btn.innerText = originalText;
-          btn.style.background = "rgba(229, 9, 20, 0.1)";
-          btn.style.color = "var(--color-red)";
+          btn.style.borderColor = "";
+          btn.style.color = "";
         }, 1500);
       });
     }
@@ -280,14 +305,8 @@
       
       const correoMatch = rawText.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
       const claveMatch = rawText.match(/(?:CONTRASEÑA|CLAVE|PASSWORD|PASS):?\s*\*?([^*🛒\n]+)\*?/i);
-      
-      // PERFIL: Captura hasta encontrar un guion o el final de la línea
       const perfilMatch = rawText.match(/(?:PERFIL|NOMBRE DEL PERFIL|NAME):?\s*\*?([^*|🛒\n\-]+)\*?/i);
-      
-      // PIN: Busca la palabra clave y atrapa los PRIMEROS NÚMEROS que aparezcan después
-      const pinRegex = /(?:PIN|CÓDIGO PIN|CLAVE PERFIL)[^\d]*(\d+)/i;
-      const pinMatch = rawText.match(pinRegex);
-      
+      const pinMatch = rawText.match(/(?:PIN|CÓDIGO PIN|CLAVE PERFIL)[^\d]*(\d+)/i);
       const vencimientoMatch = rawText.match(/(?:FECHA DE VENCIMIENTO|VENCIMIENTO|EXPIRA|VENCE):?\s*\*?([^*🛒\n]+)\*?/i);
 
       const clean = (str) => str ? str.replace(/\*/g, '').trim() : '';
@@ -295,15 +314,22 @@
       const correo = clean(correoMatch ? correoMatch[1] : '');
       const clave = clean(claveMatch ? claveMatch[1] : '');
       const perfil = clean(perfilMatch ? perfilMatch[1] : '');
-      const pin = pinMatch ? pinMatch[1] : ''; // Aquí solo obtenemos los números
+      const pin = pinMatch ? pinMatch[1] : '';
       const vencimiento = clean(vencimientoMatch ? vencimientoMatch[1] : '');
 
       if (!correo.includes('@')) return '';
 
+      // Escapar el texto original para que no rompa el atributo onclick
+      const escapedRawText = rawText.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+
       return `
         <div class="service-card">
           <span class="account-owner">👤 ${nombreCuenta.trim()}</span>
-          <span class="service-platform">📺 ${platform}</span>
+          
+          <div class="platform-header">
+            <span class="service-platform">📺 ${platform}</span>
+            <button class="copy-all-btn" onclick="copyToClipboard(\`${escapedRawText}\`, this)">COPIAR TODO</button>
+          </div>
           
           <div class="data-item">
             <span class="data-label">Correo:</span>
@@ -311,9 +337,7 @@
           </div>
 
           ${clave ? `<div class="data-item"><span class="data-label">Clave:</span><div class="data-wrapper"><span class="data-val">${clave}</span><button class="copy-btn" onclick="copyToClipboard('${clave}', this)">Copiar</button></div></div>` : ''}
-          
           ${perfil ? `<div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil}</span></div>` : ''}
-          
           ${pin ? `<div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin}</span></div>` : ''}
           
           <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:12px;">
