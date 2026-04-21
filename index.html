@@ -13,7 +13,7 @@
       --bg: #000000;
       --card-bg: #0f0f0f;
       --color-white: #ffffff; 
-      --color-red: #e50914; 
+      --color-red: #e50914; /* Rojo Cybernet */
       --color-red-glow: rgba(229, 9, 20, 0.4);
       --color-gray: #b3b3b3;
       --color-whatsapp: #25D366;
@@ -34,6 +34,7 @@
       background-image: radial-gradient(circle at center, #1a0202 0%, #000000 100%);
     }
 
+    /* CONTENEDOR PRINCIPAL */
     .container {
       background: var(--card-bg);
       border: 1px solid rgba(229, 9, 20, 0.2); 
@@ -115,6 +116,7 @@
     
     .loader { border: 5px solid rgba(229, 9, 20, 0.1); border-top: 5px solid var(--color-red); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
     
+    /* MODAL Y TARJETAS */
     .modal {
       display: none;
       position: fixed;
@@ -255,7 +257,6 @@
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
 
-    // VARIABLE PARA GUARDAR DATOS DEL USUARIO
     let userData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
 
     function copyToClipboard(text, btn) {
@@ -279,7 +280,10 @@
       const correoMatch = rawText.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
       const claveMatch = rawText.match(/(?:CONTRASEÑA|CLAVE|PASSWORD|PASS):?\s*\*?([^*🛒\n]+)\*?/i);
       const perfilMatch = rawText.match(/(?:PERFIL|NOMBRE DEL PERFIL|NAME):?\s*\*?([^*|🛒\n]+)\*?/i);
-      const pinMatch = rawText.match(/(?:PIN|PIN DEL PERFIL|CÓDIGO PIN):?\s*\*?(\d+)\*?/i);
+      
+      // RADAR MEJORADO PARA PIN (Busca la palabra PIN y captura el valor siguiente)
+      const pinMatch = rawText.match(/(?:PIN|PIN DEL PERFIL|CÓDIGO PIN|CLAVE PERFIL):?\s*\*?([^*|🛒\n]+)\*?/i);
+      
       const vencimientoMatch = rawText.match(/(?:FECHA DE VENCIMIENTO|VENCIMIENTO|EXPIRA|VENCE):?\s*\*?([^*🛒\n]+)\*?/i);
 
       const clean = (str) => str ? str.replace(/\*/g, '').trim() : '';
@@ -296,13 +300,17 @@
         <div class="service-card">
           <span class="account-owner">👤 ${nombreCuenta.trim()}</span>
           <span class="service-platform">📺 ${platform}</span>
+          
           <div class="data-item">
             <span class="data-label">Correo:</span>
             <div class="data-wrapper"><span class="data-val">${correo}</span><button class="copy-btn" onclick="copyToClipboard('${correo}', this)">Copiar</button></div>
           </div>
+
           ${clave ? `<div class="data-item"><span class="data-label">Clave:</span><div class="data-wrapper"><span class="data-val">${clave}</span><button class="copy-btn" onclick="copyToClipboard('${clave}', this)">Copiar</button></div></div>` : ''}
           ${perfil ? `<div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil}</span></div>` : ''}
+          
           ${pin ? `<div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin}</span></div>` : ''}
+          
           <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:12px;">
             <div class="data-item"><span class="data-label">Fecha de vencimiento:</span><span class="data-val" style="color:var(--color-red)">${vencimiento || 'A CONVENIR'}</span></div>
           </div>
@@ -354,18 +362,8 @@
       document.getElementById('step-' + s).classList.add('active');
     }
 
-    // CORRECCIÓN: Guardar plataforma elegida
-    function setPlataforma(p) { 
-      userData.plataforma = p; 
-      nextStep(p === 'NETFLIX' ? 3 : 4); 
-    }
-
-    // CORRECCIÓN: Guardar opción elegida
-    function setOpcion(o) { 
-      userData.opcion = o; 
-      nextStep(4); 
-    }
-
+    function setPlataforma(p) { userData.plataforma = p; nextStep(p === 'NETFLIX' ? 3 : 4); }
+    function setOpcion(o) { userData.opcion = o; nextStep(4); }
     function reiniciar() { document.getElementById('telefono').value = ''; document.getElementById('correo').value = ''; nextStep(1); }
 
     function mostrarError(m) {
@@ -380,7 +378,6 @@
       userData.correo = e;
       nextStep(5); 
       try {
-        // Enviar todos los parámetros de userData
         const params = new URLSearchParams(userData);
         const r = await fetch(`${WEB_APP_URL}?${params.toString()}`);
         const res = await r.json();
