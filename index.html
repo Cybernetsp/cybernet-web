@@ -106,15 +106,8 @@
       box-shadow: 0 10px 20px rgba(0,0,0,0.4);
     }
     
-    button.btn-netflix { 
-      border-color: var(--color-red); 
-      color: #fff; 
-      background: var(--color-red);
-      box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
-    }
+    button.btn-netflix { border-color: var(--color-red); color: #fff; background: var(--color-red); box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3); }
     button.btn-netflix:hover { background: #ff0000; border-color: #fff; box-shadow: 0 8px 25px rgba(229, 9, 20, 0.5); }
-
-    button.btn-disney { border-color: #00bfff; color: #fff; background: linear-gradient(135deg, #0063e5 0%, #00bfff 100%); }
 
     button.btn-whatsapp { border-color: var(--color-whatsapp); color: var(--color-whatsapp); }
     button.btn-whatsapp:hover { background: rgba(37, 211, 102, 0.1); }
@@ -168,7 +161,6 @@
     .data-wrapper { display: flex; align-items: center; gap: 12px; }
     .data-val { color: var(--color-white); font-weight: 600; word-break: break-all; text-align: right; }
 
-    /* BOTÓN COPIAR CYBER */
     .copy-btn {
       background: rgba(229, 9, 20, 0.1);
       border: 1px solid var(--color-red);
@@ -299,23 +291,21 @@
       const pin = pinMatch ? pinMatch[1].trim() : '';
       const vencimiento = vencimientoMatch ? vencimientoMatch[1].trim() : '';
 
-      // VALIDACIONES DE DATOS REALES
-      const hasCorreo = correo.includes('@');
+      // FILTRO CRÍTICO: Si no hay @ en el correo, no mostramos la tarjeta
+      if (!correo.includes('@')) {
+        return '';
+      }
+
+      // Validaciones secundarias para ocultar filas vacías dentro de la tarjeta
       const hasClave = clave && !clave.toLowerCase().includes('no detectada') && clave.length > 2;
       const hasPerfil = perfil && !perfil.toLowerCase().includes('perfil único') && perfil.length > 1;
       const hasPin = pin && !pin.toLowerCase().includes('no tiene') && !pin.toLowerCase().includes('sin pin');
-
-      // SI NO TIENE CORREO REAL NI CLAVE REAL, NO DIBUJAMOS LA TARJETA
-      if (!hasCorreo && !hasClave) {
-        return '';
-      }
 
       return `
         <div class="service-card">
           <span class="account-owner">👤 ${nombreCuenta.trim()}</span>
           <span class="service-platform">📺 ${platform}</span>
           
-          ${hasCorreo ? `
           <div class="data-item">
             <span class="data-label">Correo:</span>
             <div class="data-wrapper">
@@ -323,7 +313,6 @@
               <button class="copy-btn" onclick="copyToClipboard('${correo}', this)">Copiar</button>
             </div>
           </div>
-          ` : ''}
 
           ${hasClave ? `
           <div class="data-item">
@@ -380,7 +369,7 @@
             }
           });
           if (cardsFound === 0) {
-            list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:30px;">No se encontraron cuentas activas con datos válidos.</p>';
+            list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:30px;">No se encontraron cuentas con formato de correo válido.</p>';
           }
         } else {
           list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:30px;">No se encontraron cuentas activas vinculadas a este número.</p>';
