@@ -34,7 +34,7 @@
       background-image: radial-gradient(circle at center, #1a0202 0%, #000000 100%);
     }
 
-    /* CONTENEDOR PRINCIPAL ESTILO CYBER */
+    /* CONTENEDOR PRINCIPAL */
     .container {
       background: var(--card-bg);
       border: 1px solid rgba(229, 9, 20, 0.2); 
@@ -168,6 +168,7 @@
     .data-wrapper { display: flex; align-items: center; gap: 12px; }
     .data-val { color: var(--color-white); font-weight: 600; word-break: break-all; text-align: right; }
 
+    /* BOTÓN COPIAR CYBER */
     .copy-btn {
       background: rgba(229, 9, 20, 0.1);
       border: 1px solid var(--color-red);
@@ -261,9 +262,7 @@
     </div>
   </div>
 
-  <footer>
-    © 2026 Cybernet Streaming Platforms.
-  </footer>
+  <footer>© 2026 Cybernet Streaming Platforms.</footer>
 
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
@@ -290,22 +289,33 @@
       
       const correoMatch = rawText.match(/\*CORREO:\*\s*([^*🛒\n]+)/i);
       const claveMatch = rawText.match(/\*CONTRASEÑA:\*\s*([^*🛒\n]+)/i);
-      const perfil = rawText.match(/\*NOMBRE DEL PERFIL:\*\s*([^*|🛒\n]+)/i);
-      const pin = rawText.match(/\*PIN DEL PERFIL:\*\s*(\d+)/i);
-      const vencimiento = rawText.match(/\*FECHA DE VENCIMIENTO:\*\s*([^*🛒\n]+)/i);
+      const perfilMatch = rawText.match(/\*NOMBRE DEL PERFIL:\*\s*([^*|🛒\n]+)/i);
+      const pinMatch = rawText.match(/\*PIN DEL PERFIL:\*\s*(\d+)/i);
+      const vencimientoMatch = rawText.match(/\*FECHA DE VENCIMIENTO:\*\s*([^*🛒\n]+)/i);
 
       const correo = correoMatch ? correoMatch[1].trim() : '';
       const clave = claveMatch ? claveMatch[1].trim() : '';
+      const perfil = perfilMatch ? perfilMatch[1].trim() : '';
+      const pin = pinMatch ? pinMatch[1].trim() : '';
+      const vencimiento = vencimientoMatch ? vencimientoMatch[1].trim() : '';
 
-      // VALIDACIÓN: Solo mostrar la fila de correo si contiene un '@'
-      const showCorreo = correo.includes('@');
+      // VALIDACIONES DE DATOS REALES
+      const hasCorreo = correo.includes('@');
+      const hasClave = clave && !clave.toLowerCase().includes('no detectada') && clave.length > 2;
+      const hasPerfil = perfil && !perfil.toLowerCase().includes('perfil único') && perfil.length > 1;
+      const hasPin = pin && !pin.toLowerCase().includes('no tiene') && !pin.toLowerCase().includes('sin pin');
+
+      // SI NO TIENE CORREO REAL NI CLAVE REAL, NO DIBUJAMOS LA TARJETA
+      if (!hasCorreo && !hasClave) {
+        return '';
+      }
 
       return `
         <div class="service-card">
           <span class="account-owner">👤 ${nombreCuenta.trim()}</span>
           <span class="service-platform">📺 ${platform}</span>
           
-          ${showCorreo ? `
+          ${hasCorreo ? `
           <div class="data-item">
             <span class="data-label">Correo:</span>
             <div class="data-wrapper">
@@ -315,21 +325,32 @@
           </div>
           ` : ''}
 
+          ${hasClave ? `
           <div class="data-item">
             <span class="data-label">Clave:</span>
             <div class="data-wrapper">
-              <span class="data-val">${clave || 'No detectada'}</span>
-              ${clave ? `<button class="copy-btn" onclick="copyToClipboard('${clave}', this)">Copiar</button>` : ''}
+              <span class="data-val">${clave}</span>
+              <button class="copy-btn" onclick="copyToClipboard('${clave}', this)">Copiar</button>
             </div>
           </div>
+          ` : ''}
 
-          <div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil ? perfil[1].trim() : 'Perfil Único'}</span></div>
-          <div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin ? pin[1] : 'No tiene'}</span></div>
+          ${hasPerfil ? `
+          <div class="data-item">
+            <span class="data-label">Perfil:</span> <span class="data-val">${perfil}</span>
+          </div>
+          ` : ''}
+
+          ${hasPin ? `
+          <div class="data-item">
+            <span class="data-label">PIN:</span> <span class="data-val">${pin}</span>
+          </div>
+          ` : ''}
           
           <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:12px;">
             <div class="data-item">
               <span class="data-label">Fecha de vencimiento:</span> 
-              <span class="data-val" style="color:var(--color-red)">${vencimiento ? vencimiento[1].trim() : 'Servicio Activo'}</span>
+              <span class="data-val" style="color:var(--color-red)">${vencimiento || 'A CONVENIR'}</span>
             </div>
           </div>
         </div>
@@ -348,9 +369,19 @@
         const data = await resp.json();
         if (data.exito && data.servicios.length > 0) {
           list.innerHTML = "";
+          let cardsFound = 0;
           data.servicios.forEach(s => { 
-            if(s.info && s.info.length > 10) { list.innerHTML += formatServiceText(s.info, s.plataforma); }
+            if(s.info && s.info.length > 10) { 
+              const cardHtml = formatServiceText(s.info, s.plataforma);
+              if (cardHtml !== '') {
+                list.innerHTML += cardHtml;
+                cardsFound++;
+              }
+            }
           });
+          if (cardsFound === 0) {
+            list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:30px;">No se encontraron cuentas activas con datos válidos.</p>';
+          }
         } else {
           list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:30px;">No se encontraron cuentas activas vinculadas a este número.</p>';
         }
