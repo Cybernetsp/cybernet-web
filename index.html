@@ -76,7 +76,6 @@
     }
     input:focus { border-color: var(--color-red); box-shadow: 0 0 15px rgba(255, 0, 0, 0.2); }
     
-    /* CONFIGURACIÓN DE BOTONES (CORREGIDA) */
     button {
       width: 100%; padding: 1.1rem; margin-bottom: 1.2rem; border-radius: 50px;
       border: 2px solid rgba(255, 255, 255, 0.8); background: transparent; color: var(--color-white);
@@ -86,16 +85,14 @@
       letter-spacing: 0.5px;
     }
 
-    /* HOVER GENERAL: EFECTO CRISTAL, NO BLANCO SÓLIDO */
     button:hover { 
       background: rgba(255, 255, 255, 0.08); 
       border-color: var(--color-white);
       transform: translateY(-3px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
     }
     
     button.btn-netflix { border-color: var(--color-red); color: #fff; background: var(--color-red); }
-    button.btn-netflix:hover { background: #b20000; border-color: var(--color-white); box-shadow: 0 0 20px rgba(255, 0, 0, 0.4); }
+    button.btn-netflix:hover { background: #b20000; border-color: var(--color-white); }
 
     button.btn-disney { border-color: #00bfff; color: #fff; background: linear-gradient(135deg, #0063e5 0%, #00bfff 100%); }
     button.btn-disney:hover { filter: brightness(1.2); border-color: var(--color-white); }
@@ -103,7 +100,6 @@
     button.btn-whatsapp { border-color: var(--color-whatsapp); color: var(--color-whatsapp); }
     button.btn-whatsapp:hover { background: rgba(37, 211, 102, 0.15); color: var(--color-whatsapp); }
 
-    /* BOTÓN DE SERVICIOS (SIN EL FONDO BLANCO) */
     .btn-status { 
       border-color: rgba(255, 255, 255, 0.2); 
       color: var(--color-gray); 
@@ -123,13 +119,13 @@
       margin: 0 auto 1.5rem auto;
     }
     
+    /* RESULTADOS Y MODAL */
     .result-box {
       background: rgba(255, 0, 0, 0.05); border: 1px dashed var(--color-red); padding: 1.5rem;
       border-radius: 1rem; margin-bottom: 1.5rem;
     }
     .result-code { font-size: 3rem; font-weight: 800; color: #fff; letter-spacing: 8px; }
 
-    /* MODAL DE SERVICIOS ACTIVOS */
     .modal {
       display: none;
       position: fixed;
@@ -274,33 +270,29 @@
 
     let userData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
 
-    function mostrarError(mensaje) {
-      const toast = document.getElementById('error-toast');
-      toast.innerText = mensaje;
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 5000);
-    }
-
     function formatServiceText(rawText, platform) {
-      const nombreMatch = rawText.match(/Hola \*([^*]+)\*/i);
+      // EXTRACCIÓN DE NOMBRE MEJORADA (Busca el primer texto entre asteriscos o después de Hola)
+      const nombreMatch = rawText.match(/Hola\s*\*([^*]+)\*/i) || rawText.match(/^\*([^*]+)\*/);
       const nombreCuenta = nombreMatch ? nombreMatch[1] : "Cuenta General";
-      const correo = rawText.match(/\*CORREO:\* ([\w.-]+@[\w.-]+)/i);
-      const clave = rawText.match(/\*CONTRASEÑA:\* ([^\s\*]+)/i);
-      const perfil = rawText.match(/\*NOMBRE DEL PERFIL:\* ([^|]+)/i);
-      const pin = rawText.match(/\*PIN DEL PERFIL:\* (\d+)/i);
-      const vencimiento = rawText.match(/\*FECHA DE VENCIMIENTO:\* ([^🛒\n\*]+)/i);
+
+      // EXTRACCIÓN DE DATOS FLEXIBLE
+      const correo = rawText.match(/\*CORREO:\*\s*([^*🛒\n]+)/i);
+      const clave = rawText.match(/\*CONTRASEÑA:\*\s*([^*🛒\n]+)/i);
+      const perfil = rawText.match(/\*NOMBRE DEL PERFIL:\*\s*([^*|🛒\n]+)/i);
+      const pin = rawText.match(/\*PIN DEL PERFIL:\*\s*(\d+)/i);
+      const vencimiento = rawText.match(/\*FECHA DE VENCIMIENTO:\*\s*([^*🛒\n]+)/i);
 
       return `
         <div class="service-card">
-          <span class="account-owner">👤 ${nombreCuenta}</span>
+          <span class="account-owner">👤 ${nombreCuenta.trim()}</span>
           <span class="service-platform">📺 PLATAFORMA: ${platform}</span>
-          <div class="data-item"><span class="data-label">Correo:</span> <span class="data-val">${correo ? correo[1] : 'Verificar soporte'}</span></div>
-          <div class="data-item"><span class="data-label">Clave:</span> <span class="data-val">${clave ? clave[1] : 'Verificar soporte'}</span></div>
+          <div class="data-item"><span class="data-label">Correo:</span> <span class="data-val">${correo ? correo[1].trim() : 'No disponible'}</span></div>
+          <div class="data-item"><span class="data-label">Clave:</span> <span class="data-val">${clave ? clave[1].trim() : 'No disponible'}</span></div>
           <div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil ? perfil[1].trim() : 'Unico'}</span></div>
-          <div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin ? pin[1] : 'No tiene'}</span></div>
+          <div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin ? pin[1] : 'Sin PIN'}</span></div>
           <div style="margin-top:12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top:10px;">
             <div class="data-item">
-              <span class="data-label">Vencimiento:</span> 
+              <span class="data-label">Estado/Vencimiento:</span> 
               <span class="data-val" style="color:var(--color-online)">${vencimiento ? vencimiento[1].trim() : 'Activo'}</span>
             </div>
           </div>
@@ -320,17 +312,21 @@
         const data = await resp.json();
         if (data.exito && data.servicios.length > 0) {
           list.innerHTML = "";
-          data.servicios.forEach(s => { list.innerHTML += formatServiceText(s.info, s.plataforma); });
+          data.servicios.forEach(s => { 
+            // Mostramos solo si el texto contiene información útil
+            if(s.info && s.info.length > 10) {
+              list.innerHTML += formatServiceText(s.info, s.plataforma); 
+            }
+          });
         } else {
-          list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:20px;">No se encontraron cuentas activas vinculadas a este número de celular.</p>';
+          list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:20px;">No se encontraron cuentas activas vinculadas a este número.</p>';
         }
       } catch (e) {
-        list.innerHTML = '<p style="color:var(--color-red); text-align:center; margin-top:20px;">Error de red. Verifica tu conexión e intenta de nuevo.</p>';
+        list.innerHTML = '<p style="color:var(--color-red); text-align:center; margin-top:20px;">Error de red.</p>';
       }
     }
 
     function cerrarModal() { document.getElementById('servicesModal').style.display = 'none'; }
-
     function nextStep(step) {
       if(step === 2) {
         let tel = document.getElementById('telefono').value.replace(/\D/g, '');
@@ -340,28 +336,31 @@
       document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
       document.getElementById('step-' + step).classList.add('active');
     }
-
     function prevStep(step) {
       document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
       document.getElementById('step-' + step).classList.add('active');
     }
-
     function setPlataforma(plat) {
       userData.plataforma = plat;
       plat === 'NETFLIX' ? nextStep(3) : (userData.opcion = 1, nextStep(4));
     }
-
     function setOpcion(op) { userData.opcion = op; nextStep(4); }
-
     function reiniciar() {
       document.getElementById('telefono').value = '';
       document.getElementById('correo').value = '';
       nextStep(1);
     }
 
+    function mostrarError(mensaje) {
+      const toast = document.getElementById('error-toast');
+      toast.innerText = mensaje;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 5000);
+    }
+
     async function procesar() {
       let email = document.getElementById('correo').value.toLowerCase().trim();
-      if(!email.includes('@')) { mostrarError("❌ El formato del correo electrónico no es válido."); return; }
+      if(!email.includes('@')) { mostrarError("❌ Formato de correo no válido."); return; }
       userData.correo = email;
       nextStep(5); 
       try {
@@ -372,26 +371,26 @@
         document.getElementById('res-caja').style.display = 'none';
         document.getElementById('res-link-caja').style.display = 'none';
         if(res.exito) {
-          document.getElementById('res-titulo').innerText = "¡SISTEMA ACTUALIZADO!";
+          document.getElementById('res-titulo').innerText = "¡LOCALIZADO!";
           document.getElementById('res-titulo').style.color = "#fff";
-          document.getElementById('res-mensaje').innerText = res.msj || "Se ha localizado tu acceso con éxito:";
+          document.getElementById('res-mensaje').innerText = res.msj || "Se ha localizado tu acceso:";
           if(res.tipo === 'codigo') {
             document.getElementById('res-caja').style.display = 'block';
             document.getElementById('res-codigo').innerText = res.valor;
-            document.getElementById('res-timer').innerText = `Tiempo de validez: ${res.tiempo}`;
+            document.getElementById('res-timer').innerText = `Válido por: ${res.tiempo}`;
           } else if (res.tipo === 'link') {
             document.getElementById('res-link-caja').style.display = 'block';
             document.getElementById('res-link').href = res.valor;
           }
         } else {
-          document.getElementById('res-titulo').innerText = "BÚSQUEDA FALLIDA";
+          document.getElementById('res-titulo').innerText = "ATENCIÓN";
           document.getElementById('res-titulo').style.color = "#ff0000";
           document.getElementById('res-mensaje').innerText = res.msj;
         }
       } catch (error) {
         nextStep(6);
-        document.getElementById('res-titulo').innerText = "ERROR TÉCNICO";
-        document.getElementById('res-mensaje').innerText = "No se pudo conectar con el servidor central. Intente nuevamente en unos minutos.";
+        document.getElementById('res-titulo').innerText = "ERROR";
+        document.getElementById('res-mensaje').innerText = "Error al conectar con la base de datos.";
       }
     }
   </script>
