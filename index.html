@@ -459,8 +459,15 @@
         
         if(res.exito) {
           document.getElementById('res-title').innerText = "¡LOCALIZADO!";
-          // CORRECCIÓN PARA ELIMINAR EL 'UNDEFINED':
-          document.getElementById('res-desc').innerText = res.msj || "Información recuperada del sistema:";
+          
+          // FILTRO RADICAL ANT-UNDEFINED
+          let finalMsg = "";
+          if (res.msj && res.msj !== "undefined" && res.msj !== "null" && res.msj.trim() !== "") {
+              finalMsg = res.msj;
+          } else {
+              finalMsg = "Información recuperada con éxito:";
+          }
+          document.getElementById('res-desc').innerText = finalMsg;
           
           if(res.tipo === 'codigo') {
             document.getElementById('res-box-code').style.display = 'block';
@@ -472,7 +479,7 @@
           }
         } else {
           document.getElementById('res-title').innerText = "SIN RESULTADOS";
-          document.getElementById('res-desc').innerText = res.msj || "No se encontró información para los datos ingresados.";
+          document.getElementById('res-desc').innerText = res.msj || "No hay datos para este correo.";
         }
       } catch (err) { changeStep(6); document.getElementById('res-desc').innerText = "Error de conexión."; }
     }
