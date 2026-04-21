@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Centro de Códigos - Cybernet Bot Web</title>
+  
+  <link rel="icon" type="image/jpeg" href="logo.jpeg">
+  
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -30,9 +33,9 @@
       padding: 1.5rem; 
     }
 
-    /* ESTILO DEL LOGO */
+    /* ESTILO DEL LOGO EN CUERPO */
     .logo {
-      width: 140px; /* Tamaño ideal del logo */
+      width: 140px; 
       height: auto;
       margin-bottom: 1.5rem;
       filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
@@ -295,7 +298,6 @@
         <div class="service-card">
           <span class="account-owner">👤 ${nombreCuenta.trim()}</span>
           <span class="service-platform">📺 ${platform}</span>
-          
           <div class="data-item">
             <span class="data-label">Correo:</span>
             <div class="data-wrapper">
@@ -303,7 +305,6 @@
               ${correo ? `<button class="copy-btn" onclick="copyToClipboard('${correo}', this)">Copiar</button>` : ''}
             </div>
           </div>
-
           <div class="data-item">
             <span class="data-label">Clave:</span>
             <div class="data-wrapper">
@@ -311,10 +312,8 @@
               ${clave ? `<button class="copy-btn" onclick="copyToClipboard('${clave}', this)">Copiar</button>` : ''}
             </div>
           </div>
-
           <div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil ? perfil[1].trim() : 'Perfil Único'}</span></div>
           <div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin ? pin[1] : 'No tiene'}</span></div>
-          
           <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:12px;">
             <div class="data-item">
               <span class="data-label">Vencimiento:</span> 
@@ -348,7 +347,6 @@
 
     function cerrarModal() { document.getElementById('servicesModal').style.display = 'none'; }
 
-    // CIERRE AL CLICAR AFUERA
     window.onclick = function(event) {
       const modal = document.getElementById('servicesModal');
       if (event.target == modal) { cerrarModal(); }
