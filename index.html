@@ -13,11 +13,11 @@
       --bg: #000000;
       --card-bg: #0f0f0f;
       --color-white: #ffffff; 
-      --color-red: #e50914; /* El Rojo Cybernet de tu logo */
+      --color-red: #e50914; /* Rojo Cybernet del logo */
       --color-red-glow: rgba(229, 9, 20, 0.4);
       --color-gray: #b3b3b3;
       --color-whatsapp: #25D366;
-      --color-online: #2ecc71;
+      --color-online: #2ecc71; /* Verde para el punto online del menú */
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -264,8 +264,6 @@
 
   <footer>
     © 2026 Cybernet Streaming Platforms.
-    <br>
-    Inspirado en la potencia de tu marca.
   </footer>
 
   <script>
@@ -322,7 +320,7 @@
           <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:12px;">
             <div class="data-item">
               <span class="data-label">Estado:</span> 
-              <span class="data-val" style="color:var(--color-online)">${vencimiento ? vencimiento[1].trim() : 'Servicio Activo'}</span>
+              <span class="data-val" style="color:var(--color-red)">${vencimiento ? vencimiento[1].trim() : 'Servicio Activo'}</span>
             </div>
           </div>
         </div>
