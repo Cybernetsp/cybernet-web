@@ -338,7 +338,6 @@
   <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
 
-    // Almacenamos datos globalmente para evitar "undefined"
     let globalData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
 
     function handleCopy(text, btn) {
@@ -362,7 +361,6 @@
       const mMatch = raw.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
       const cMatch = raw.match(/(?:CONTRASEÑA|CLAVE|PASSWORD):?\s*\*?([^*🛒\n]+)\*?/i);
       const pMatch = raw.match(/(?:PERFIL|NOMBRE DEL PERFIL):?\s*\*?([^*|🛒\n\-]+)\*?/i);
-      // Extractor numérico para el PIN
       const pinMatch = raw.match(/(?:PIN|CÓDIGO PIN|CLAVE PERFIL)[^\d]*(\d+)/i);
       const dMatch = raw.match(/(?:FECHA DE VENCIMIENTO|VENCE|EXPIRA):?\s*\*?([^*🛒\n]+)\*?/i);
 
@@ -447,7 +445,6 @@
     function fireError(m) { const t = document.getElementById('error-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 5000); }
 
     async function executeSearch() {
-      // .trim() para evitar espacios accidentales que causan el error
       let m = document.getElementById('correo').value.toLowerCase().trim();
       if(!m.includes('@')) return fireError("❌ Correo inválido.");
       globalData.correo = m;
@@ -459,9 +456,12 @@
         changeStep(6);
         document.getElementById('res-box-code').style.display = 'none';
         document.getElementById('res-box-link').style.display = 'none';
+        
         if(res.exito) {
           document.getElementById('res-title').innerText = "¡LOCALIZADO!";
-          document.getElementById('res-desc').innerText = res.msj;
+          // CORRECCIÓN PARA ELIMINAR EL 'UNDEFINED':
+          document.getElementById('res-desc').innerText = res.msj || "Información recuperada del sistema:";
+          
           if(res.tipo === 'codigo') {
             document.getElementById('res-box-code').style.display = 'block';
             document.getElementById('val-code').innerText = res.valor;
@@ -472,7 +472,7 @@
           }
         } else {
           document.getElementById('res-title').innerText = "SIN RESULTADOS";
-          document.getElementById('res-desc').innerText = res.msj;
+          document.getElementById('res-desc').innerText = res.msj || "No se encontró información para los datos ingresados.";
         }
       } catch (err) { changeStep(6); document.getElementById('res-desc').innerText = "Error de conexión."; }
     }
