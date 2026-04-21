@@ -17,7 +17,7 @@
       --color-red-glow: rgba(229, 9, 20, 0.4);
       --color-gray: #b3b3b3;
       --color-whatsapp: #25D366;
-      --color-online: #2ecc71; /* Verde para el punto online del menú */
+      --color-online: #2ecc71; 
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -89,7 +89,7 @@
     }
     input:focus { border-color: var(--color-red); box-shadow: 0 0 20px var(--color-red-glow); }
     
-    /* BOTONES ESTILO LOGO */
+    /* BOTONES */
     button {
       width: 100%; padding: 1.1rem; margin-bottom: 1.2rem; border-radius: 60px;
       border: 2px solid rgba(255, 255, 255, 0.2); background: transparent; color: var(--color-white);
@@ -125,7 +125,7 @@
     
     .loader { border: 5px solid rgba(229, 9, 20, 0.1); border-top: 5px solid var(--color-red); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
     
-    /* MODAL DE SERVICIOS ACTIVOS - COLORES LOGO */
+    /* MODAL DE SERVICIOS */
     .modal {
       display: none;
       position: fixed;
@@ -154,7 +154,7 @@
       padding: 2rem;
       margin-bottom: 1.8rem;
       border: 1px solid rgba(255, 255, 255, 0.05);
-      border-left: 6px solid var(--color-red); /* Color distintivo del logo */
+      border-left: 6px solid var(--color-red); 
       text-align: left;
       transition: 0.3s;
     }
@@ -168,7 +168,6 @@
     .data-wrapper { display: flex; align-items: center; gap: 12px; }
     .data-val { color: var(--color-white); font-weight: 600; word-break: break-all; text-align: right; }
 
-    /* BOTÓN COPIAR CYBER */
     .copy-btn {
       background: rgba(229, 9, 20, 0.1);
       border: 1px solid var(--color-red);
@@ -267,6 +266,7 @@
   </footer>
 
   <script>
+    // URL DE TU SCRIPT DE GOOGLE
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
 
     let userData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
@@ -319,7 +319,7 @@
           <div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin ? pin[1] : 'No tiene'}</span></div>
           <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:12px;">
             <div class="data-item">
-              <span class="data-label">Estado:</span> 
+              <span class="data-label">Fecha de vencimiento:</span> 
               <span class="data-val" style="color:var(--color-red)">${vencimiento ? vencimiento[1].trim() : 'Servicio Activo'}</span>
             </div>
           </div>
