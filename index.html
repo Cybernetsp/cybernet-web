@@ -7,22 +7,25 @@
   
   <link rel="icon" type="image/jpeg" href="logo.jpeg">
   
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <style>
-    /* VARIABLES DE MARCA CYBERNET */
+    /* ESTILOS GLOBALES CYBERNET 
+       Identidad: Rojo Neón y Negro Absoluto
+    */
     :root {
-      --bg-color: #000000;
-      --card-color: #0f0f0f;
-      --text-white: #ffffff; 
+      --bg-main: #000000;
+      --bg-card: #0f0f0f;
+      --bg-inner: #141414;
+      --text-main: #ffffff; 
       --cyber-red: #e50914; 
-      --cyber-red-glow: rgba(229, 9, 20, 0.4);
-      --text-gray: #b3b3b3;
-      --whatsapp-green: #25D366;
-      --online-green: #2ecc71; 
+      --cyber-red-glow: rgba(229, 9, 20, 0.5);
+      --text-dim: #b3b3b3;
+      --whatsapp: #25D366;
+      --online: #2ecc71; 
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    /* RESET GENERAL */
     * { 
       margin: 0; 
       padding: 0; 
@@ -31,105 +34,113 @@
     }
     
     body { 
-      background: var(--bg-color); 
-      color: var(--text-white); 
+      background: var(--bg-main); 
+      color: var(--text-main); 
       display: flex; 
       flex-direction: column;
       justify-content: center; 
       align-items: center; 
       min-height: 100vh; 
       padding: 20px;
+      overflow-x: hidden;
+      /* Gradiente sutil de fondo para profundidad */
       background-image: radial-gradient(circle at center, #1a0202 0%, #000000 100%);
     }
 
-    /* CONTENEDOR DE LA APP */
+    /* CONTENEDOR PRINCIPAL ESTILO CARD NEÓN */
     .container {
-      background: var(--card-color);
+      background: var(--bg-card);
       border: 1px solid rgba(229, 9, 20, 0.2); 
       border-radius: 30px;
-      padding: 50px 30px;
+      padding: 60px 40px;
       width: 100%;
       max-width: 480px;
       text-align: center;
       position: relative;
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(229, 9, 20, 0.1);
-      margin-bottom: 30px;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(229, 9, 20, 0.15);
+      margin-bottom: 40px;
+      animation: fadeIn 0.8s ease;
     }
     
     h2 { 
-      color: var(--text-white); 
-      font-size: 1.8rem; 
-      margin-bottom: 10px; 
+      color: var(--text-main); 
+      font-size: 1.9rem; 
+      margin-bottom: 12px; 
       text-transform: uppercase; 
-      letter-spacing: 3px; 
-      font-weight: 700;
+      letter-spacing: 4px; 
+      font-weight: 800;
       text-shadow: 0 0 15px var(--cyber-red-glow);
     }
     
-    .instruction-text { 
-      color: var(--text-gray); 
-      font-size: 0.95rem; 
+    .instruction { 
+      color: var(--text-dim); 
+      font-size: 1rem; 
       margin-bottom: 35px; 
       line-height: 1.6; 
     }
     
-    /* ALERTAS DE ERROR */
+    /* TOAST DE ERROR */
     #error-toast {
       display: none;
-      background: rgba(229, 9, 20, 0.1);
+      background: rgba(229, 9, 20, 0.15);
       color: var(--cyber-red);
-      padding: 15px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 20px;
+      padding: 16px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 25px;
       border: 1px solid var(--cyber-red);
       animation: shake 0.4s ease-in-out;
     }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-6px); }
-      75% { transform: translateX(6px); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
     }
 
-    /* NAVEGACIÓN POR PASOS */
-    .step { display: none; animation: fadeIn 0.5s ease-in-out; }
-    .step.active { display: block; }
+    /* SISTEMA DE PASOS */
+    .step { display: none; }
+    .step.active { display: block; animation: slideUp 0.5s ease; }
     
-    /* INPUTS */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ENTRADAS DE TEXTO */
     input {
       width: 100%; 
-      padding: 18px; 
+      padding: 20px; 
       margin-bottom: 20px; 
       border-radius: 15px;
       border: 1px solid rgba(255, 255, 255, 0.1); 
       background: #000; 
       color: #fff;
-      font-size: 1rem; 
+      font-size: 1.1rem; 
       outline: none; 
       text-align: center; 
-      transition: 0.3s;
+      transition: var(--transition);
     }
     input:focus { 
       border-color: var(--cyber-red); 
-      box-shadow: 0 0 20px var(--cyber-red-glow); 
+      box-shadow: 0 0 25px var(--cyber-red-glow); 
     }
     
-    /* BOTONES */
+    /* BOTONES PRINCIPALES */
     button {
       width: 100%; 
-      padding: 16px; 
+      padding: 18px; 
       margin-bottom: 15px; 
-      border-radius: 50px;
+      border-radius: 60px;
       border: 2px solid rgba(255, 255, 255, 0.2); 
       background: transparent; 
-      color: var(--text-white);
-      font-size: 0.95rem; 
+      color: var(--text-main);
+      font-size: 1rem; 
       font-weight: 700; 
       cursor: pointer; 
       text-transform: uppercase;
-      transition: all 0.3s ease;
+      transition: var(--transition);
       display: flex; 
       align-items: center; 
       justify-content: center; 
@@ -140,271 +151,333 @@
     button:hover { 
       background: rgba(255, 255, 255, 0.05); 
       border-color: var(--cyber-red); 
-      transform: translateY(-3px); 
+      transform: translateY(-4px); 
     }
     
     button.btn-primary { 
       border-color: var(--cyber-red); 
       background: var(--cyber-red);
-      box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+      box-shadow: 0 6px 20px rgba(229, 9, 20, 0.35);
     }
     button.btn-primary:hover { 
       background: #ff0000; 
-      box-shadow: 0 8px 25px rgba(229, 9, 20, 0.5); 
+      box-shadow: 0 10px 30px rgba(229, 9, 20, 0.55); 
     }
 
     button.btn-whatsapp { 
-      border-color: var(--whatsapp-green); 
-      color: var(--whatsapp-green); 
+      border-color: var(--whatsapp); 
+      color: var(--whatsapp); 
+    }
+    button.btn-whatsapp:hover {
+      background: rgba(37, 211, 102, 0.05);
     }
     
     .btn-status { 
       border-color: rgba(255, 255, 255, 0.1); 
-      color: var(--text-gray); 
-      font-size: 0.8rem; 
-      margin-top: 10px; 
+      color: var(--text-dim); 
+      font-size: 0.85rem; 
+      margin-top: 15px; 
+      height: 55px;
     }
     
-    .dot-online { 
+    .dot { 
       width: 10px; 
       height: 10px; 
-      background: var(--online-green); 
+      background: var(--online); 
       border-radius: 50%; 
-      box-shadow: 0 0 10px var(--online-green); 
+      box-shadow: 0 0 12px var(--online); 
     }
     
-    /* CARGANDO */
+    /* CARGANDO / LOADER */
     .loader { 
-      border: 5px solid rgba(229, 9, 20, 0.1); 
-      border-top: 5px solid var(--cyber-red); 
+      border: 6px solid rgba(229, 9, 20, 0.1); 
+      border-top: 6px solid var(--cyber-red); 
       border-radius: 50%; 
-      width: 50px; 
-      height: 50px; 
+      width: 60px; 
+      height: 60px; 
       animation: spin 1s linear infinite; 
-      margin: 0 auto 20px auto; 
+      margin: 0 auto 25px auto; 
     }
     
-    /* ESTILO DEL MODAL DE SERVICIOS */
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* SISTEMA DE MODAL (SERVICIOS ACTIVOS) 
+    */
     .modal-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.97);
+      background: rgba(0,0,0,0.98);
       justify-content: center; align-items: center;
-      z-index: 1000; padding: 20px;
-      backdrop-filter: blur(10px);
+      z-index: 10000; padding: 20px;
+      backdrop-filter: blur(15px);
     }
-    .modal-box {
-      background: #0a0a0a;
-      padding: 40px 25px;
-      border-radius: 25px;
+    .modal-content {
+      background: #080808;
+      padding: 45px 30px;
+      border-radius: 30px;
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
       border: 1px solid var(--cyber-red);
-      max-height: 90vh;
+      max-height: 85vh;
       overflow-y: auto;
-      box-shadow: 0 0 50px rgba(229, 9, 20, 0.3);
-    }
-    
-    /* TARJETAS DENTRO DEL MODAL */
-    .service-card {
-      background: #141414;
-      border-radius: 20px;
-      padding: 25px;
-      margin-bottom: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-left: 5px solid var(--cyber-red); 
-      text-align: left;
+      position: relative;
+      box-shadow: 0 0 60px rgba(229, 9, 20, 0.4);
+      animation: modalEntry 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .card-header {
+    @keyframes modalEntry {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    /* DISEÑO DE TARJETAS DE SERVICIO */
+    .service-card {
+      background: var(--bg-inner);
+      border-radius: 25px;
+      padding: 30px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-left: 6px solid var(--cyber-red); 
+      text-align: left;
+      transition: var(--transition);
+    }
+    .service-card:hover {
+      border-color: var(--cyber-red);
+      transform: scale(1.01);
+    }
+
+    .card-top {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      align-items: flex-start;
+      margin-bottom: 18px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
-    .card-title { color: var(--cyber-red); font-size: 1.3rem; font-weight: 800; text-transform: uppercase; }
-    .card-platform { color: var(--text-gray); font-size: 0.8rem; font-weight: 600; }
+    .owner-name { 
+      color: var(--cyber-red); 
+      font-size: 1.4rem; 
+      font-weight: 800; 
+      text-transform: uppercase; 
+      letter-spacing: 1px;
+    }
+
+    .platform-badge { 
+      color: var(--text-dim); 
+      font-size: 0.8rem; 
+      font-weight: 700; 
+      background: rgba(255,255,255,0.05);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
     
-    .data-row { 
+    .data-line { 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      margin-bottom: 12px; 
-      font-size: 0.9rem; 
+      margin-bottom: 15px; 
+      font-size: 0.95rem; 
     }
-    .label { color: var(--text-gray); }
-    .value { color: var(--text-white); font-weight: 600; text-align: right; }
+    .data-label { color: var(--text-dim); }
+    .data-val { color: var(--text-main); font-weight: 600; text-align: right; }
 
-    /* BOTONES DE COPIADO DENTRO DE LA TARJETA */
-    .copy-small {
-      background: rgba(229, 9, 20, 0.1);
+    /* BOTONES INTERNOS DE TARJETA */
+    .btn-copy-small {
+      background: rgba(229, 9, 20, 0.12);
       border: 1px solid var(--cyber-red);
       color: var(--cyber-red);
-      padding: 5px 12px;
-      border-radius: 8px;
-      font-size: 0.65rem;
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 0.7rem;
       cursor: pointer;
-      font-weight: 700;
+      font-weight: 800;
+      margin-left: 10px;
+      transition: 0.2s;
     }
+    .btn-copy-small:hover { background: var(--cyber-red); color: white; }
     
-    .btn-copy-all {
+    .btn-copy-full {
       background: var(--cyber-red);
       color: white;
       border: none;
-      padding: 6px 15px;
-      border-radius: 8px;
-      font-size: 0.7rem;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.75rem;
       font-weight: 800;
       cursor: pointer;
+      box-shadow: 0 4px 10px rgba(229, 9, 20, 0.2);
     }
 
-    footer { text-align: center; color: var(--text-gray); font-size: 0.8rem; padding: 30px; opacity: 0.5; letter-spacing: 1px; }
+    footer { text-align: center; color: var(--text-dim); font-size: 0.85rem; padding: 40px; opacity: 0.6; letter-spacing: 1.5px; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .back-btn { display: block; margin-top: 20px; color: var(--text-gray); cursor: pointer; font-size: 0.85rem; text-decoration: underline; }
+    .back-link { display: block; margin-top: 25px; color: var(--text-dim); cursor: pointer; font-size: 0.9rem; text-decoration: underline; font-weight: 600; }
+    .back-link:hover { color: var(--cyber-red); }
+
+    /* ESTILO SCROLLBAR PARA EL MODAL */
+    .modal-content::-webkit-scrollbar { width: 6px; }
+    .modal-content::-webkit-scrollbar-track { background: transparent; }
+    .modal-content::-webkit-scrollbar-thumb { background: var(--cyber-red); border-radius: 10px; }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h2 id="app-title">CENTRO DE CÓDIGOS</h2>
+    <h2 id="main-title">CENTRO DE CÓDIGOS</h2>
     <div id="error-toast"></div>
     
     <div id="step-1" class="step active">
-      <p class="instruction-text">Ingresa tu <b>NÚMERO DE CELULAR</b> asociado a la compra 📲</p>
+      <p class="instruction">Ingresa tu <b>NÚMERO DE CELULAR</b> asociado a la compra 📲</p>
       <input type="tel" id="telefono" placeholder="Ej: 301515XXXX" maxlength="10">
-      <button class="btn-primary" onclick="goToStep(2)">Continuar</button>
+      <button class="btn-primary" onclick="changeStep(2)">Continuar</button>
       <button class="btn-whatsapp" onclick="window.open('https://wa.me/573127706726')">💬 Soporte WhatsApp</button>
-      <button class="btn-status" onclick="fetchActiveServices()">
-        <div class="dot-online"></div> VER MIS SERVICIOS ACTIVOS
+      <button class="btn-status" onclick="openServices()">
+        <div class="dot"></div> VER MIS SERVICIOS ACTIVOS
       </button>
     </div>
 
     <div id="step-2" class="step">
-      <p class="instruction-text">¿Qué plataforma deseas gestionar hoy?</p>
-      <button class="btn-primary" onclick="selectPlatform('NETFLIX')">🔴 Netflix</button>
-      <button style="border-color:#00bfff; color:#00bfff;" onclick="selectPlatform('DISNEY')">🔵 Disney Premium</button>
-      <span class="back-btn" onclick="goToStep(1)">← Volver al inicio</span>
+      <p class="instruction">¿Qué plataforma deseas gestionar hoy? 👇</p>
+      <button class="btn-primary" onclick="setPlat('NETFLIX')">🔴 Netflix</button>
+      <button style="border-color:#00bfff; color:#00bfff;" onclick="setPlat('DISNEY')">🔵 Disney Premium</button>
+      <span class="back-link" onclick="changeStep(1)">← Volver al inicio</span>
     </div>
 
     <div id="step-3" class="step">
-      <p class="instruction-text">Selecciona el tipo de solicitud para Netflix 👇</p>
-      <button onclick="selectOption(1)">🔑 Código de Inicio Sesión</button>
-      <button onclick="selectOption(2)">✈️ Código 'Estoy de Viaje'</button>
-      <button onclick="selectOption(3)">📧 Enlace de Inicio</button>
-      <span class="back-btn" onclick="goToStep(2)">← Volver</span>
+      <p class="instruction">Selecciona el tipo de solicitud para Netflix 👇</p>
+      <button onclick="setOp(1)">🔑 Código de Inicio Sesión</button>
+      <button onclick="setOp(2)">✈️ Código 'Estoy de Viaje'</button>
+      <button onclick="setOp(3)">📧 Enlace de Inicio</button>
+      <span class="back-link" onclick="changeStep(2)">← Volver</span>
     </div>
 
     <div id="step-4" class="step">
-      <p class="instruction-text">Ingresa el <b>CORREO</b> de tu cuenta (@cybernetsp.com) 📧</p>
+      <p class="instruction">Ingresa el <b>CORREO</b> de tu cuenta (@cybernetsp.com) 📧</p>
       <input type="email" id="correo" placeholder="ejemplo@cybernetsp.com" spellcheck="false">
-      <button class="btn-primary" onclick="startSearch()">Rastrear Código</button>
-      <span class="back-btn" onclick="goToStep(2)">← Volver</span>
+      <button class="btn-primary" onclick="executeSearch()">Rastrear Código</button>
+      <span class="back-link" onclick="changeStep(2)">← Volver</span>
     </div>
 
     <div id="step-5" class="step">
       <div class="loader"></div>
-      <p style="color: var(--cyber-red); font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Consultando base de datos...</p>
+      <p style="color: var(--cyber-red); font-weight: 800; text-transform: uppercase; letter-spacing: 3px;">Accediendo a la base...</p>
     </div>
 
     <div id="step-6" class="step">
-      <h2 id="res-header">--</h2>
-      <p id="res-text" class="instruction-text"></p>
+      <h2 id="res-title">--</h2>
+      <p id="res-desc" class="instruction"></p>
       
-      <div id="box-code" style="background: rgba(229, 9, 20, 0.05); border: 1px dashed var(--cyber-red); padding: 30px; border-radius: 20px; margin-bottom: 25px; display:none;">
-        <div id="display-code" style="font-size: 3rem; font-weight: 800; color: #fff; letter-spacing: 8px;"></div>
-        <div id="display-timer" style="color: var(--cyber-red); font-size: 1rem; margin-top: 15px; font-weight: 700;"></div>
+      <div id="res-box-code" style="background: rgba(229, 9, 20, 0.05); border: 1px dashed var(--cyber-red); padding: 35px; border-radius: 25px; margin-bottom: 30px; display:none;">
+        <div id="val-code" style="font-size: 3.5rem; font-weight: 800; color: #fff; letter-spacing: 10px;"></div>
+        <div id="val-timer" style="color: var(--cyber-red); font-size: 1.1rem; margin-top: 15px; font-weight: 700;"></div>
       </div>
       
-      <div id="box-link" style="display:none; margin-bottom: 25px;">
-        <a id="action-link" href="#" target="_blank" style="text-decoration:none;">
+      <div id="res-box-link" style="display:none; margin-bottom: 30px;">
+        <a id="val-link" href="#" target="_blank" style="text-decoration:none;">
           <button class="btn-primary">✅ AUTORIZAR ACCESO</button>
         </a>
       </div>
       
-      <button class="btn-primary" onclick="startSearch()">🔄 Reintentar Búsqueda</button>
-      <span class="back-btn" onclick="resetApp()">Nueva Consulta</span>
+      <button class="btn-primary" onclick="executeSearch()">🔄 Reintentar Búsqueda</button>
+      <span class="back-link" onclick="reloadAll()">Nueva Consulta</span>
     </div>
   </div>
 
   <div id="modalServices" class="modal-overlay">
-    <div class="modal-box">
-      <h3 style="margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; color: #fff;">Tus Cuentas Cybernet</h3>
-      <div id="servicesContainer"></div>
-      <button onclick="closeModal()" style="margin-top: 25px; border-color: #333; color: #666; font-size: 0.75rem;">CERRAR VENTANA</button>
+    <div class="modal-content">
+      <h3 style="margin-bottom: 35px; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; color: #fff; text-align: center;">Tus Cuentas Activas</h3>
+      
+      <div id="cardsWrapper"></div>
+      
+      <button onclick="closeModal()" style="margin-top: 30px; border-color: #222; color: #444; font-size: 0.8rem; height: 50px;">CERRAR VENTANA</button>
     </div>
   </div>
 
   <footer>© 2026 CYBERNET STREAMING PLATFORMS.</footer>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
 
-    let session = { tel: '', plat: '', op: 1, mail: '' };
+    let globalData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
 
-    function copyText(val, btn) {
-      navigator.clipboard.writeText(val).then(() => {
-        const oldText = btn.innerText;
+    // --- FUNCIÓN DE COPIADO CON FEEDBACK ---
+    function handleCopy(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.innerText;
         btn.innerText = "¡OK!";
-        btn.style.borderColor = "var(--online-green)";
-        btn.style.color = "var(--online-green)";
+        btn.style.color = "var(--online)";
+        btn.style.borderColor = "var(--online)";
         setTimeout(() => {
-          btn.innerText = oldText;
-          btn.style.borderColor = "";
+          btn.innerText = original;
           btn.style.color = "";
+          btn.style.borderColor = "";
         }, 1200);
       });
     }
 
-    function createCard(raw, platName) {
-      // Nombre de la cuenta
-      const nameMatch = raw.match(/Hola\s*\*([^*]+)\*/i) || raw.match(/^\*([^*]+)\*/);
-      const accName = nameMatch ? nameMatch[1].trim() : "Cuenta General";
+    // --- GENERADOR DE TARJETAS (MODAL) ---
+    function buildServiceCard(raw, plat) {
+      // 1. Extraer nombre de usuario
+      const nameMatch = raw.match(/Hola\s*\*([^*]+)\*/i) || rawText.match(/^\*([^*]+)\*/);
+      const user = nameMatch ? nameMatch[1].trim() : "Cliente Cybernet";
       
-      // Buscadores inteligentes (Regex)
-      const mailM = raw.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
-      const passM = raw.match(/(?:CONTRASEÑA|CLAVE|PASSWORD):?\s*\*?([^*🛒\n]+)\*?/i);
-      const perfM = raw.match(/(?:PERFIL|NOMBRE DEL PERFIL):?\s*\*?([^*|🛒\n\-]+)\*?/i);
-      const pinM  = raw.match(/(?:PIN|CÓDIGO PIN|CLAVE PERFIL)[^\d]*(\d+)/i);
-      const dateM = raw.match(/(?:FECHA DE VENCIMIENTO|VENCE|EXPIRA):?\s*\*?([^*🛒\n]+)\*?/i);
+      // 2. Extraer datos con Regex potente
+      const mMatch = raw.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
+      const cMatch = raw.match(/(?:CONTRASEÑA|CLAVE|PASSWORD):?\s*\*?([^*🛒\n]+)\*?/i);
+      const pMatch = raw.match(/(?:PERFIL|NOMBRE DEL PERFIL):?\s*\*?([^*|🛒\n\-]+)\*?/i);
+      // Regex especial para capturar solo los números del PIN
+      const pinMatch = raw.match(/(?:PIN|CÓDIGO PIN|CLAVE PERFIL)[^\d]*(\d+)/i);
+      const dMatch = raw.match(/(?:FECHA DE VENCIMIENTO|VENCE|EXPIRA):?\s*\*?([^*🛒\n]+)\*?/i);
 
       const clean = (s) => s ? s.replace(/\*/g, '').trim() : '';
 
-      const mail = clean(mailM ? mailM[1] : '');
-      const pass = clean(passM ? passM[1] : '');
-      const perf = clean(perfM ? perfM[1] : '');
-      const pin  = pinM ? pinM[1] : '';
-      const date = clean(dateM ? dateM[1] : '');
+      const mail = clean(mMatch ? mMatch[1] : '');
+      const pass = clean(cMatch ? cMatch[1] : '');
+      const perf = clean(pMatch ? pMatch[1] : '');
+      const pin  = pinMatch ? pinMatch[1] : '';
+      const date = clean(dMatch ? dMatch[1] : '');
 
-      // REGLA DE ORO: Si no hay correo con @, no mostramos nada
+      // REGLA: Si no hay correo real (@), no mostramos tarjeta
       if (!mail.includes('@')) return '';
 
-      const safeRaw = raw.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+      // Preparamos el texto original para el botón de "Copiar Todo"
+      const escapedRaw = raw.replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
       return `
         <div class="service-card">
-          <div class="card-header">
-            <span class="card-title">${accName}</span>
-            <button class="btn-copy-all" onclick="copyText(\`${safeRaw}\`, this)">COPIAR TODO</button>
+          <div class="card-top">
+            <span class="owner-name">${user}</span>
+            <button class="btn-copy-full" onclick="handleCopy(\`${escapedRaw}\`, this)">COPIAR TODO</button>
           </div>
-          <div class="card-platform">Plataforma: ${platName}</div>
-          <div style="margin-top:15px;">
-            <div class="data-row">
-              <span class="label">Correo:</span>
-              <div class="data-wrapper"><span class="value">${mail}</span> <button class="copy-small" onclick="copyText('${mail}', this)">Copiar</button></div>
+          <div class="platform-badge">Plataforma: ${plat}</div>
+          
+          <div style="margin-top:20px;">
+            <div class="data-line">
+              <span class="data-label">Correo:</span>
+              <div style="display:flex; align-items:center;">
+                <span class="data-val">${mail}</span>
+                <button class="btn-copy-small" onclick="handleCopy('${mail}', this)">Copiar</button>
+              </div>
             </div>
-            ${pass ? `<div class="data-row"><span class="label">Clave:</span><div class="data-wrapper"><span class="value">${pass}</span> <button class="copy-small" onclick="copyText('${pass}', this)">Copiar</button></div></div>` : ''}
-            ${perf ? `<div class="data-row"><span class="label">Perfil:</span> <span class="value">${perf}</span></div>` : ''}
-            ${pin ? `<div class="data-row"><span class="label">PIN Perfil:</span> <span class="value" style="color:var(--cyber-red); font-size:1.1rem;">${pin}</span></div>` : ''}
-            <div style="margin-top:10px; border-top: 1px solid #222; padding-top:10px;">
-              <div class="data-row">
-                <span class="label">Fecha de vencimiento:</span>
-                <span class="value" style="color:var(--cyber-red)">${date || 'A CONVENIR'}</span>
+            
+            ${pass ? `
+            <div class="data-line">
+              <span class="data-label">Clave:</span>
+              <div style="display:flex; align-items:center;">
+                <span class="data-val">${pass}</span>
+                <button class="btn-copy-small" onclick="handleCopy('${pass}', this)">Copiar</button>
+              </div>
+            </div>` : ''}
+            
+            ${perf ? `<div class="data-line"><span class="data-label">Perfil:</span> <span class="data-val">${perf}</span></div>` : ''}
+            
+            ${pin ? `<div class="data-line"><span class="data-label">PIN del Perfil:</span> <span class="data-val" style="color:var(--cyber-red); font-size:1.2rem; font-weight:800;">${pin}</span></div>` : ''}
+            
+            <div style="margin-top:15px; border-top: 1px solid #222; padding-top:15px;">
+              <div class="data-line">
+                <span class="data-label">Fecha de vencimiento:</span>
+                <span class="data-val" style="color:var(--cyber-red); font-weight:800;">${date || 'A CONVENIR'}</span>
               </div>
             </div>
           </div>
@@ -412,81 +485,101 @@
       `;
     }
 
-    async function fetchActiveServices() {
+    // --- LÓGICA DE SERVICIOS ACTIVOS ---
+    async function openServices() {
       let t = document.getElementById('telefono').value.replace(/\D/g, '');
-      if (t.length < 7) return alertToast("⚠️ Ingresa tu número celular primero.");
+      if (t.length < 7) return fireError("⚠️ Ingresa tu número celular arriba.");
       
       const modal = document.getElementById('modalServices');
-      const container = document.getElementById('servicesContainer');
+      const box = document.getElementById('cardsWrapper');
+      
       modal.style.display = 'flex';
-      container.innerHTML = '<p style="color:gray; margin-top:20px;">Rastreando tus cuentas...</p>';
+      box.innerHTML = '<div class="loader"></div><p style="text-align:center; color:gray;">Sincronizando con Cybernet...</p>';
       
       try {
-        const r = await fetch(`${API_URL}?accion=servicios&telefono=${t}`);
-        const d = await r.json();
-        if (d.exito && d.servicios.length > 0) {
-          container.innerHTML = "";
-          let found = 0;
-          d.servicios.forEach(s => { 
+        const resp = await fetch(`${GOOGLE_URL}?accion=servicios&telefono=${t}`);
+        const json = await resp.json();
+        
+        if (json.exito && json.servicios.length > 0) {
+          box.innerHTML = "";
+          let validCount = 0;
+          json.servicios.forEach(s => { 
             if(s.info) { 
-              const html = createCard(s.info, s.plataforma);
-              if (html) { container.innerHTML += html; found++; }
+              const card = buildServiceCard(s.info, s.plataforma);
+              if (card) { box.innerHTML += card; validCount++; }
             }
           });
-          if (found === 0) container.innerHTML = '<p style="color:gray;">No se hallaron correos válidos.</p>';
+          if (validCount === 0) box.innerHTML = '<p style="color:gray; text-align:center;">No se hallaron correos válidos en tus servicios.</p>';
         } else {
-          container.innerHTML = '<p style="color:gray;">No tienes servicios activos vinculados.</p>';
+          box.innerHTML = '<p style="color:gray; text-align:center;">No tienes servicios activos registrados bajo este número.</p>';
         }
-      } catch (e) { container.innerHTML = '<p style="color:red;">Error de conexión. Reintenta.</p>'; }
+      } catch (e) { box.innerHTML = '<p style="color:red; text-align:center;">Error al conectar con la base de datos. Intenta de nuevo.</p>'; }
     }
 
+    // --- FUNCIONES DE CIERRE DEL MODAL ---
     function closeModal() { document.getElementById('modalServices').style.display = 'none'; }
-    window.onclick = (e) => { if(e.target == document.getElementById('modalServices')) closeModal(); }
 
-    function goToStep(n) {
+    // 1. Cerrar al hacer clic fuera
+    window.onclick = function(event) {
+      const modal = document.getElementById('modalServices');
+      if (event.target == modal) { closeModal(); }
+    }
+
+    // 2. Cerrar con tecla Escape
+    window.addEventListener('keydown', function(event) {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    });
+
+    // --- NAVEGACIÓN Y FLUJO ---
+    function changeStep(n) {
       if(n === 2) {
         let t = document.getElementById('telefono').value.replace(/\D/g, '');
-        if(t.length < 7) return alertToast("❌ Ingresa un celular válido.");
-        session.tel = t;
+        if(t.length < 7) return fireError("❌ El número de celular es muy corto.");
+        globalData.telefono = t;
       }
       document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
       document.getElementById('step-' + n).classList.add('active');
     }
 
-    function selectPlatform(p) { session.plat = p; goToStep(p === 'NETFLIX' ? 3 : 4); }
-    function selectOption(o) { session.op = o; goToStep(4); }
-    function resetApp() { document.getElementById('telefono').value = ''; document.getElementById('correo').value = ''; goToStep(1); }
-    function alertToast(m) { const t = document.getElementById('error-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 5000); }
+    function setPlat(p) { globalData.plataforma = p; changeStep(p === 'NETFLIX' ? 3 : 4); }
+    function setOp(o) { globalData.opcion = o; changeStep(4); }
+    function reloadAll() { document.getElementById('telefono').value = ''; document.getElementById('correo').value = ''; changeStep(1); }
+    function fireError(m) { const t = document.getElementById('error-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 5000); }
 
-    async function startSearch() {
+    // --- BÚSQUEDA DE CÓDIGOS ---
+    async function executeSearch() {
       let m = document.getElementById('correo').value.toLowerCase().trim();
-      if(!m.includes('@')) return alertToast("❌ Formato de correo inválido.");
-      session.mail = m;
-      goToStep(5);
+      if(!m.includes('@')) return fireError("❌ El formato del correo no es válido.");
+      globalData.correo = m;
+      changeStep(5);
+      
       try {
-        const p = new URLSearchParams(session);
-        const r = await fetch(`${API_URL}?${p.toString()}`);
-        const res = await r.json();
-        goToStep(6);
-        document.getElementById('box-code').style.display = 'none';
-        document.getElementById('box-link').style.display = 'none';
+        const query = new URLSearchParams(globalData);
+        const resp = await fetch(`${GOOGLE_URL}?${query.toString()}`);
+        const res = await resp.json();
+        
+        changeStep(6);
+        document.getElementById('res-box-code').style.display = 'none';
+        document.getElementById('res-box-link').style.display = 'none';
         
         if(res.exito) {
-          document.getElementById('res-header').innerText = "¡LOCALIZADO!";
-          document.getElementById('res-text').innerText = res.msj;
+          document.getElementById('res-title').innerText = "¡LOCALIZADO!";
+          document.getElementById('res-desc').innerText = res.msj;
           if(res.tipo === 'codigo') {
-            document.getElementById('box-code').style.display = 'block';
-            document.getElementById('display-code').innerText = res.valor;
-            document.getElementById('display-timer').innerText = `Expira en: ${res.tiempo}`;
+            document.getElementById('res-box-code').style.display = 'block';
+            document.getElementById('val-code').innerText = res.valor;
+            document.getElementById('val-timer').innerText = `Vence en: ${res.tiempo}`;
           } else if (res.tipo === 'link') {
-            document.getElementById('box-link').style.display = 'block';
-            document.getElementById('action-link').href = res.valor;
+            document.getElementById('res-box-link').style.display = 'block';
+            document.getElementById('val-link').href = res.valor;
           }
         } else {
-          document.getElementById('res-header').innerText = "SIN RESULTADOS";
-          document.getElementById('res-text').innerText = res.msj;
+          document.getElementById('res-title').innerText = "SIN RESULTADOS";
+          document.getElementById('res-desc').innerText = res.msj;
         }
-      } catch (err) { goToStep(6); document.getElementById('res-text').innerText = "Fallo de conexión."; }
+      } catch (err) { changeStep(6); document.getElementById('res-desc').innerText = "Hubo un error de conexión. Intenta buscar de nuevo."; }
     }
   </script>
 </body>
