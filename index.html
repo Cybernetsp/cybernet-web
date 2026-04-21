@@ -33,24 +33,12 @@
       padding: 1.5rem; 
     }
 
-    /* ESTILO DEL LOGO EN CUERPO */
-    .logo {
-      width: 140px; 
-      height: auto;
-      margin-bottom: 1.5rem;
-      filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
-      transition: transform 0.3s ease;
-    }
-    .logo:hover {
-      transform: scale(1.05);
-    }
-
     /* CONTENEDOR PRINCIPAL */
     .container {
       background: var(--card-bg);
       border: 1px solid rgba(255, 255, 255, 0.1); 
       border-radius: 2rem;
-      padding: 3.5rem 2.5rem;
+      padding: 4rem 2.5rem;
       width: 100%;
       max-width: 480px;
       text-align: center;
@@ -190,8 +178,6 @@
 <body>
 
   <div class="container">
-    <img src="logo.jpeg" alt="Cybernet Streaming" class="logo">
-    
     <h2 id="main-title">CENTRO DE CÓDIGOS</h2>
     <div id="error-toast"></div>
     
@@ -347,6 +333,7 @@
 
     function cerrarModal() { document.getElementById('servicesModal').style.display = 'none'; }
 
+    // CIERRE AL CLICAR AFUERA
     window.onclick = function(event) {
       const modal = document.getElementById('servicesModal');
       if (event.target == modal) { cerrarModal(); }
