@@ -647,6 +647,15 @@ function filterServices() {
 }
 
   </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('Cybernet App lista para instalar'))
+        .catch(err => console.log('Error al registrar la App', err));
+    });
+  }
+</script>
   
 </body>
 </html>
