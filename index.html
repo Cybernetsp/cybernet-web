@@ -214,64 +214,100 @@
     .service-card {
       background: var(--bg-inner);
       border-radius: 25px;
-      padding: 30px;
+      padding: 25px;
       margin-bottom: 25px;
       border: 1px solid rgba(255, 255, 255, 0.06);
-      border-left: 6px solid var(--cyber-red); 
+      border-left: 5px solid var(--cyber-red); 
       text-align: left;
     }
 
-    .card-header-area {
-      margin-bottom: 15px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+    /* CABECERA DE TARJETA: PLATAFORMA CENTRADA Y ROJA */
+    .card-platform-header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .client-name { 
+    .platform-name-red { 
       color: var(--cyber-red); 
-      font-size: 1.4rem; 
+      font-size: 1.15rem; 
       font-weight: 800; 
       text-transform: uppercase; 
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .platform-label { 
-      color: var(--text-dim); 
-      font-size: 0.85rem; 
-      font-weight: 700; 
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      letter-spacing: 2px;
     }
     
     .data-row { 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      margin-bottom: 15px; 
-      font-size: 0.95rem; 
+      margin-bottom: 12px; 
+      font-size: 0.9rem; 
     }
     .data-label { color: var(--text-dim); }
-    .data-val { color: var(--text-main); font-weight: 600; text-align: right; }
 
-    /* BOTONES DE COPIADO */
-    .btn-copy-field {
-      background: rgba(229, 9, 20, 0.12);
-      border: 1px solid var(--cyber-red);
-      color: var(--cyber-red);
-      padding: 6px 14px;
-      border-radius: 10px;
-      font-size: 0.7rem;
-      cursor: pointer;
-      font-weight: 800;
-      margin-left: 10px;
-      transition: 0.2s;
+    /* CONTENEDOR DE VALOR Y BOTÓN MINI AL BORDE */
+    .data-content-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-grow: 1;
+      justify-content: flex-end;
+      max-width: 78%;
     }
-    .btn-copy-field:hover { background: var(--cyber-red); color: white; }
+
+    .data-val { 
+      color: var(--text-main); 
+      font-weight: 600; 
+      text-align: right; 
+      word-break: break-all;
+      font-size: 0.85rem;
+    }
+
+    /* BOTONES DE COPIADO MINI PEQUEÑOS CON ICONO */
+    .btn-copy-mini {
+      background: rgba(229, 9, 20, 0.2);
+      border: 1px solid var(--cyber-red);
+      color: #ffffff; 
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: 0.2s;
+      padding: 0;
+    }
+    .btn-copy-mini:hover { 
+      background: var(--cyber-red); 
+      transform: scale(1.1);
+    }
+    .btn-copy-mini svg {
+      width: 18px;
+      height: 18px;
+      stroke: #ffffff; /* Icono blanco */
+      fill: none;
+    }
     
-    /* NUEVO DISEÑO BOTÓN COPIAR TODO AL FINAL */
+    /* NOMBRE DEL CLIENTE (PEQUEÑO ABAJO) */
+    .client-footer-info {
+        text-align: center;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+
+    .client-small-text {
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        font-weight: 600;
+        text-transform: uppercase;
+        opacity: 0.7;
+        letter-spacing: 0.5px;
+    }
+
+    /* DISEÑO BOTÓN COPIAR TODO AL FINAL */
     .btn-copy-all-bottom {
       background: var(--cyber-red);
       color: white;
@@ -282,7 +318,7 @@
       font-weight: 800;
       cursor: pointer;
       width: 100%;
-      margin-top: 15px;
+      margin-top: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
       box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
@@ -292,6 +328,10 @@
       background: #ff0000;
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+    }
+    .btn-copy-all-bottom.copied {
+        background: var(--online) !important;
+        transform: scale(0.98);
     }
 
     footer { text-align: center; color: var(--text-dim); font-size: 0.85rem; padding: 40px; opacity: 0.6; }
@@ -348,16 +388,13 @@
     <div id="step-6" class="step">
       <h2 id="res-title">--</h2>
       <p id="res-desc" class="instruction"></p>
-      
       <div id="res-box-code" style="background: rgba(229, 9, 20, 0.05); border: 1px dashed var(--cyber-red); padding: 35px; border-radius: 25px; margin-bottom: 30px; display:none;">
         <div id="val-code" style="font-size: 3.5rem; font-weight: 800; color: #fff; letter-spacing: 10px;"></div>
         <div id="val-timer" style="color: var(--cyber-red); font-size: 1.1rem; margin-top: 15px; font-weight: 700;"></div>
       </div>
-      
       <div id="res-box-link" style="display:none; margin-bottom: 30px;">
         <a id="val-link" href="#" target="_blank" style="text-decoration:none;"><button class="btn-primary">✅ AUTORIZAR ACCESO</button></a>
       </div>
-      
       <button class="btn-primary" onclick="executeSearch()">🔄 Reintentar Búsqueda</button>
       <span class="back-link" onclick="reloadAll()">Nueva Consulta</span>
     </div>
@@ -375,103 +412,106 @@
 
   <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
-
     let globalData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
 
-    // --- FUNCIÓN COPIAR CON FEEDBACK ---
+    // --- FUNCIÓN COPIAR ---
     function handleCopy(text, btn) {
       navigator.clipboard.writeText(text).then(() => {
-        const original = btn.innerText;
-        btn.innerText = "¡COPIADO!";
-        btn.style.color = "var(--online)";
-        btn.style.borderColor = "var(--online)";
-        setTimeout(() => {
-          btn.innerText = original;
-          btn.style.color = "";
-          btn.style.borderColor = "";
-        }, 1200);
+        const isBigBtn = btn.classList.contains('btn-copy-all-bottom');
+        if(isBigBtn) {
+            const originalText = btn.innerText;
+            btn.innerText = "✔ ¡COPIADO!";
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('copied');
+            }, 1500);
+        } else {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+            }, 1200);
+        }
       });
     }
 
-    // --- GENERADOR DINÁMICO DE TARJETAS ---
+    // --- GENERADOR DINÁMICO DE TARJETAS (REPROGRAMADO PARA TEXTOS CON GUIONES Y MULTI-ETIQUETA) ---
     function buildServiceCard(raw, plat) {
-      // 1. Extraer nombre del cliente
       const nameMatch = raw.match(/Hola\s*\*([^*]+)\*/i) || raw.match(/^\*([^*]+)\*/);
       let userName = nameMatch ? nameMatch[1].trim() : "";
-      
-      // Si el nombre detectado es genérico o muy corto, lo tratamos como vacío
-      const namesBlacklist = ["cliente", "cuenta", "general", "usuario"];
-      if (namesBlacklist.includes(userName.toLowerCase()) || userName.length < 2) {
-        userName = ""; 
-      }
+      if (["cliente", "cuenta", "general", "usuario"].includes(userName.toLowerCase())) userName = ""; 
 
-      // 2. Extraer datos con Regex potente
       const mMatch = raw.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
       const cMatch = raw.match(/(?:CONTRASEÑA|CLAVE|PASSWORD):?\s*\*?([^*🛒\n]+)\*?/i);
-      const pMatch = raw.match(/(?:PERFIL|NOMBRE DEL PERFIL):?\s*\*?([^*|🛒\n\-]+)\*?/i);
-      const pinMatch = raw.match(/(?:PIN|CÓDIGO PIN|CLAVE PERFIL)[^\d]*(\d+)/i);
       const dMatch = raw.match(/(?:FECHA DE VENCIMIENTO|VENCE|EXPIRA):?\s*\*?([^*🛒\n]+)\*?/i);
 
+      // --- LÓGICA DE EXTRACCIÓN DEFINITIVA ---
+      // Capturamos el contenido de "Nombre Del Perfil" y "Pin Del Perfil" permitiendo cualquier caracter hasta el final o el siguiente símbolo
+      const pMatches = [...raw.matchAll(/Nombre Del Perfil:\*?\s*([^*|🛒\n]+)/gi)];
+      const pinMatches = [...raw.matchAll(/Pin Del Perfil:\*?\s*([^*|🛒\n]+)/gi)];
+
+      let profilesHtml = '';
       const clean = (s) => s ? s.replace(/\*/g, '').trim() : '';
+
+      // Iteramos sobre lo encontrado para armar las filas
+      const maxLines = Math.max(pMatches.length, pinMatches.length);
+      for (let i = 0; i < maxLines; i++) {
+          const profileVal = pMatches[i] ? clean(pMatches[i][1]) : '';
+          const pinVal = pinMatches[i] ? clean(pinMatches[i][1]) : '';
+
+          if (profileVal) {
+              profilesHtml += `<div class="data-row"><span class="data-label">Perfil:</span> <span class="data-val">${profileVal}</span></div>`;
+          }
+          if (pinVal) {
+              profilesHtml += `<div class="data-row"><span class="data-label">PIN Perfil:</span> <span class="data-val" style="color:var(--cyber-red); font-weight:800;">${pinVal}</span></div>`;
+          }
+      }
 
       const mail = clean(mMatch ? mMatch[1] : '');
       const pass = clean(cMatch ? cMatch[1] : '');
-      const perf = clean(pMatch ? pMatch[1] : '');
-      const pin  = pinMatch ? pinMatch[1] : '';
       const date = clean(dMatch ? dMatch[1] : '');
 
-      // FILTRO: Solo correos válidos
       if (!mail.includes('@')) return '';
 
-      // Escapado de texto para el botón Copiar Todo
       const safeRaw = raw.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+      const iconCopy = `<svg viewBox="0 0 24 24" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 
       return `
         <div class="service-card">
-          ${userName ? `
-          <div class="card-header-area">
-            <span class="client-name">${userName}</span>
-            <span class="platform-label">📺 ${plat}</span>
+          <div class="card-platform-header">
+            <span class="platform-name-red">📺 ${plat}</span>
           </div>
-          ` : `
-          <div class="card-header-area" style="border:none; padding:0; margin-bottom:20px;">
-            <span class="platform-label">📺 ${plat}</span>
-          </div>
-          `}
-          
-          <div class="data-line">
+          <div class="data-row">
             <span class="data-label">Correo:</span>
-            <div style="display:flex; align-items:center;">
+            <div class="data-content-wrapper">
               <span class="data-val">${mail}</span>
-              <button class="btn-copy-field" onclick="handleCopy('${mail}', this)">Copiar</button>
+              <button class="btn-copy-mini" onclick="handleCopy('${mail}', this)">${iconCopy}</button>
             </div>
           </div>
-          
-          ${pass ? `
-          <div class="data-line">
+          ${pass ? `<div class="data-row">
             <span class="data-label">Clave:</span>
-            <div style="display:flex; align-items:center;">
+            <div class="data-content-wrapper">
               <span class="data-val">${pass}</span>
-              <button class="btn-copy-field" onclick="handleCopy('${pass}', this)">Copiar</button>
+              <button class="btn-copy-mini" onclick="handleCopy('${pass}', this)">${iconCopy}</button>
             </div>
           </div>` : ''}
           
-          ${perf ? `<div class="data-row"><span class="data-label">Perfil:</span> <span class="data-val">${perf}</span></div>` : ''}
-          ${pin ? `<div class="data-row"><span class="data-label">PIN del Perfil:</span> <span class="data-val" style="color:var(--cyber-red); font-size:1.1rem; font-weight:800;">${pin}</span></div>` : ''}
+          ${profilesHtml}
           
           <div style="margin-top:15px; border-top: 1px solid #222; padding-top:15px;">
             <div class="data-row">
-              <span class="data-label">Fecha de vencimiento:</span>
+              <span class="data-label">Vencimiento:</span>
               <span class="data-val" style="color:var(--cyber-red); font-weight:800;">${date || 'A CONVENIR'}</span>
             </div>
           </div>
-
+          ${userName ? `<div class="client-footer-info"><span class="client-small-text">👤 Titular: ${userName}</span></div>` : ''}
           <button class="btn-copy-all-bottom" onclick="handleCopy(\`${safeRaw}\`, this)">COPIAR TODO EL TEXTO</button>
         </div>
       `;
     }
 
-    // --- FUNCIONES DE MODAL ---
+    // --- MODAL ---
     async function openServices() {
       let t = document.getElementById('telefono').value.replace(/\D/g, '').trim();
       if (t.length < 7) return fireError("⚠️ Ingresa tu número celular.");
@@ -499,12 +539,10 @@
     }
 
     function closeModal() { document.getElementById('modalServices').style.display = 'none'; }
-    
-    // Cierre por clic afuera y tecla Esc
     window.onclick = (e) => { if(e.target == document.getElementById('modalServices')) closeModal(); }
     window.addEventListener('keydown', (e) => { if(e.key === "Escape") closeModal(); });
 
-    // --- FLUJO DE LA APP ---
+    // --- FLUJO ---
     function changeStep(n) {
       if(n === 2) {
         let t = document.getElementById('telefono').value.replace(/\D/g, '').trim();
@@ -520,7 +558,6 @@
     function reloadAll() { document.getElementById('telefono').value = ''; document.getElementById('correo').value = ''; changeStep(1); }
     function fireError(m) { const t = document.getElementById('error-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 5000); }
 
-    // --- BÚSQUEDA DE CÓDIGOS ---
     async function executeSearch() {
       let m = document.getElementById('correo').value.toLowerCase().trim();
       if(!m.includes('@')) return fireError("❌ Correo inválido.");
@@ -533,12 +570,10 @@
         changeStep(6);
         document.getElementById('res-box-code').style.display = 'none';
         document.getElementById('res-box-link').style.display = 'none';
-        
         if(res.exito) {
           document.getElementById('res-title').innerText = "¡LOCALIZADO!";
           let finalMsg = (res.msj && res.msj !== "undefined" && res.msj !== "null") ? res.msj : "Información recuperada:";
           document.getElementById('res-desc').innerText = finalMsg;
-          
           if(res.tipo === 'codigo') {
             document.getElementById('res-box-code').style.display = 'block';
             document.getElementById('val-code').innerText = res.valor;
