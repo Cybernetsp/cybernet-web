@@ -266,7 +266,6 @@
   </footer>
 
   <script>
-    // URL DE TU SCRIPT DE GOOGLE
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
 
     let userData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
@@ -288,6 +287,7 @@
     function formatServiceText(rawText, platform) {
       const nombreMatch = rawText.match(/Hola\s*\*([^*]+)\*/i) || rawText.match(/^\*([^*]+)\*/);
       const nombreCuenta = nombreMatch ? nombreMatch[1] : "Cuenta General";
+      
       const correoMatch = rawText.match(/\*CORREO:\*\s*([^*🛒\n]+)/i);
       const claveMatch = rawText.match(/\*CONTRASEÑA:\*\s*([^*🛒\n]+)/i);
       const perfil = rawText.match(/\*NOMBRE DEL PERFIL:\*\s*([^*|🛒\n]+)/i);
@@ -297,17 +297,24 @@
       const correo = correoMatch ? correoMatch[1].trim() : '';
       const clave = claveMatch ? claveMatch[1].trim() : '';
 
+      // VALIDACIÓN: Solo mostrar la fila de correo si contiene un '@'
+      const showCorreo = correo.includes('@');
+
       return `
         <div class="service-card">
           <span class="account-owner">👤 ${nombreCuenta.trim()}</span>
           <span class="service-platform">📺 ${platform}</span>
+          
+          ${showCorreo ? `
           <div class="data-item">
             <span class="data-label">Correo:</span>
             <div class="data-wrapper">
-              <span class="data-val">${correo || 'No detectado'}</span>
-              ${correo ? `<button class="copy-btn" onclick="copyToClipboard('${correo}', this)">Copiar</button>` : ''}
+              <span class="data-val">${correo}</span>
+              <button class="copy-btn" onclick="copyToClipboard('${correo}', this)">Copiar</button>
             </div>
           </div>
+          ` : ''}
+
           <div class="data-item">
             <span class="data-label">Clave:</span>
             <div class="data-wrapper">
@@ -315,8 +322,10 @@
               ${clave ? `<button class="copy-btn" onclick="copyToClipboard('${clave}', this)">Copiar</button>` : ''}
             </div>
           </div>
+
           <div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil ? perfil[1].trim() : 'Perfil Único'}</span></div>
           <div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin ? pin[1] : 'No tiene'}</span></div>
+          
           <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top:12px;">
             <div class="data-item">
               <span class="data-label">Fecha de vencimiento:</span> 
