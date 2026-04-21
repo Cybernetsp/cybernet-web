@@ -27,9 +27,10 @@
       justify-content: center; 
       align-items: center; 
       min-height: 100vh; 
-      padding: 1rem; 
+      padding: 1.5rem; 
     }
 
+    /* CONTENEDOR PRINCIPAL */
     .container {
       background: var(--card-bg);
       border: 1px solid rgba(255, 255, 255, 0.1); 
@@ -55,15 +56,23 @@
       animation: shake 0.4s ease-in-out;
     }
 
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
     .step { display: none; animation: fadeIn 0.4s ease-in-out; }
     .step.active { display: block; }
     
     input {
       width: 100%; padding: 1.1rem; margin-bottom: 1.5rem; border-radius: 0.8rem;
       border: 1px solid rgba(255, 255, 255, 0.1); background: #1f1f1f; color: #fff;
-      font-size: 1rem; outline: none; text-align: center;
+      font-size: 1rem; outline: none; text-align: center; transition: 0.3s;
     }
+    input:focus { border-color: var(--color-red); }
     
+    /* BOTONES */
     button {
       width: 100%; padding: 1rem; margin-bottom: 1rem; border-radius: 50px;
       border: 2px solid var(--color-white); background: transparent; color: var(--color-white);
@@ -74,12 +83,34 @@
     button:hover { background: white; color: black; transform: translateY(-2px); }
     
     button.btn-netflix { border-color: var(--color-red); color: #fff; background: var(--color-red); }
-    button.btn-disney { border-color: #00bfff; color: #fff; background: linear-gradient(135deg, #0063e5 0%, #00bfff 100%); }
-    button.btn-whatsapp { border-color: var(--color-whatsapp); color: var(--color-whatsapp); }
+    button.btn-netflix:hover { background: #b20000; border-color: #b20000; }
 
-    .btn-status { border-color: rgba(255, 255, 255, 0.2); color: var(--color-gray); font-size: 0.8rem; margin-top: 10px; }
+    button.btn-disney { border-color: #00bfff; color: #fff; background: linear-gradient(135deg, #0063e5 0%, #00bfff 100%); }
+
+    button.btn-whatsapp { border-color: var(--color-whatsapp); color: var(--color-whatsapp); }
+    button.btn-whatsapp:hover { background: rgba(37, 211, 102, 0.1); }
+
+    .btn-status { 
+      border-color: rgba(255, 255, 255, 0.2); 
+      color: var(--color-gray); 
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+    .btn-status:hover { border-color: var(--color-online); color: var(--color-white); }
     .dot { width: 8px; height: 8px; background: var(--color-online); border-radius: 50%; box-shadow: 0 0 10px var(--color-online); }
     
+    .loader {
+      border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid var(--color-red);
+      border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem auto;
+    }
+    
+    .result-box {
+      background: rgba(255, 0, 0, 0.05); border: 1px dashed var(--color-red); padding: 1.5rem;
+      border-radius: 1rem; margin-bottom: 1.5rem;
+    }
+    .result-code { font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: 6px; }
+
     /* MODAL DE SERVICIOS ACTIVOS */
     .modal {
       display: none;
@@ -135,7 +166,7 @@
     .data-label { color: var(--color-gray); }
     .data-val { color: var(--color-white); font-weight: 600; word-break: break-all; margin-left: 10px; text-align: right;}
 
-    footer { text-align: center; color: var(--color-gray); font-size: 0.75rem; padding: 10px; }
+    footer { text-align: center; color: var(--color-gray); font-size: 0.75rem; padding: 10px; line-height: 1.5; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -152,8 +183,13 @@
     <div id="step-1" class="step active">
       <p>Ingresa tu <b>NÚMERO DE CELULAR</b> asociado a la compra 📲</p>
       <input type="tel" id="telefono" placeholder="Ej: 301515XXXX" maxlength="10">
+      
       <button onclick="nextStep(2)">Continuar</button>
-      <button class="btn-whatsapp" onclick="window.open('https://wa.me/573127706726')">💬 Soporte WhatsApp</button>
+      
+      <button class="btn-whatsapp" onclick="window.open('https://wa.me/573127706726')">
+        💬 Soporte WhatsApp
+      </button>
+
       <button class="btn-status" onclick="verMisServicios()">
         <div class="dot"></div> MIS SERVICIOS ACTIVOS
       </button>
@@ -182,15 +218,15 @@
     </div>
 
     <div id="step-5" class="step">
-      <div class="loader" style="margin: 0 auto 1.5rem auto;"></div>
+      <div class="loader"></div>
       <p style="color: var(--color-red); font-weight: bold;">Rastreando correo...</p>
     </div>
 
     <div id="step-6" class="step">
       <h2 id="res-titulo">--</h2>
       <p id="res-mensaje"></p>
-      <div id="res-caja" style="background: rgba(255, 0, 0, 0.05); border: 1px dashed var(--color-red); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; display:none;">
-        <div id="res-codigo" style="font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: 6px;"></div>
+      <div id="res-caja" class="result-box" style="display:none;">
+        <div id="res-codigo" class="result-code"></div>
         <div id="res-timer" style="color: var(--color-red); font-size: 0.8rem; margin-top: 10px;"></div>
       </div>
       <div id="res-link-caja" style="display:none; margin-bottom: 1.5rem;">
@@ -199,6 +235,7 @@
         </a>
       </div>
       <button onclick="procesar()">🔄 Reintentar Búsqueda</button>
+      <button class="btn-whatsapp" style="display:none;" id="soporte-btn" onclick="window.open('https://wa.me/573127706726')">💬 Soporte WhatsApp</button>
       <span class="back-link" onclick="reiniciar()">Nueva Consulta</span>
     </div>
   </div>
@@ -211,19 +248,30 @@
     </div>
   </div>
 
-  <footer>© 2026 Cybernet Streaming Platforms.</footer>
+  <footer>
+    © 2026 Cybernet Streaming Platforms. Todos los derechos reservados.
+    <br>
+    Desarrollado con seguridad para clientes Cybernet.
+  </footer>
 
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
 
     let userData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
 
+    function mostrarError(mensaje) {
+      const toast = document.getElementById('error-toast');
+      toast.innerText = mensaje;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 4500);
+    }
+
     function formatServiceText(rawText, platform) {
-      // 1. EXTRAER EL NOMBRE DEL REVENDEDOR (Entre asteriscos después de Hola)
+      // 1. Extraer nombre del dueño (entre asteriscos después de Hola)
       const nombreMatch = rawText.match(/Hola \*([^*]+)\*/i);
       const nombreCuenta = nombreMatch ? nombreMatch[1] : "Cuenta General";
 
-      // 2. EXTRAER LOS DATOS DE ACCESO
+      // 2. Extraer datos con Regex
       const correo = rawText.match(/\*CORREO:\* ([\w.-]+@[\w.-]+)/i);
       const clave = rawText.match(/\*CONTRASEÑA:\* ([^\s\*]+)/i);
       const perfil = rawText.match(/\*NOMBRE DEL PERFIL:\* ([^|]+)/i);
@@ -234,16 +282,14 @@
         <div class="service-card">
           <span class="account-owner">👤 ${nombreCuenta}</span>
           <span class="service-platform">📺 PLATAFORMA: ${platform}</span>
-          
-          <div class="data-item"><span class="data-label">Correo:</span> <span class="data-val">${correo ? correo[1] : 'Ver en soporte'}</span></div>
-          <div class="data-item"><span class="data-label">Contraseña:</span> <span class="data-val">${clave ? clave[1] : 'Ver en soporte'}</span></div>
+          <div class="data-item"><span class="data-label">Correo:</span> <span class="data-val">${correo ? correo[1] : 'Consultar'}</span></div>
+          <div class="data-item"><span class="data-label">Clave:</span> <span class="data-val">${clave ? clave[1] : 'Consultar'}</span></div>
           <div class="data-item"><span class="data-label">Perfil:</span> <span class="data-val">${perfil ? perfil[1].trim() : 'No asignado'}</span></div>
           <div class="data-item"><span class="data-label">PIN:</span> <span class="data-val">${pin ? pin[1] : 'Sin PIN'}</span></div>
-          
           <div style="margin-top:10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top:8px;">
             <div class="data-item">
               <span class="data-label">Vencimiento:</span> 
-              <span class="data-val" style="color:var(--color-online)">${vencimiento ? vencimiento[1].trim() : 'A convenir'}</span>
+              <span class="data-val" style="color:var(--color-online)">${vencimiento ? vencimiento[1].trim() : 'Verificado'}</span>
             </div>
           </div>
         </div>
@@ -252,12 +298,12 @@
 
     async function verMisServicios() {
       let tel = document.getElementById('telefono').value.replace(/\D/g, '');
-      if (tel.length < 7) { alert("⚠️ Ingresa tu número de celular primero."); return; }
+      if (tel.length < 7) { mostrarError("⚠️ Ingresa tu celular arriba primero."); return; }
 
       const modal = document.getElementById('servicesModal');
       const list = document.getElementById('servicesList');
       modal.style.display = 'flex';
-      list.innerHTML = '<p style="text-align:center;font-size:0.8rem;color:gray;">Cargando todas tus cuentas...</p>';
+      list.innerHTML = '<div class="loader" style="width:30px; height:30px;"></div><p style="font-size:0.8rem;text-align:center;">Buscando todas tus cuentas...</p>';
 
       try {
         const resp = await fetch(`${WEB_APP_URL}?accion=servicios&telefono=${tel}`);
@@ -272,38 +318,44 @@
           list.innerHTML = '<p style="color:var(--color-gray); text-align:center;">No se encontraron servicios activos.</p>';
         }
       } catch (e) {
-        list.innerHTML = '<p style="color:var(--color-red); text-align:center;">Error de red.</p>';
+        list.innerHTML = '<p style="color:var(--color-red); text-align:center;">Error de conexión.</p>';
       }
     }
 
     function cerrarModal() { document.getElementById('servicesModal').style.display = 'none'; }
+
     function nextStep(step) {
       if(step === 2) {
         let tel = document.getElementById('telefono').value.replace(/\D/g, '');
-        if(tel.length < 7) return;
+        if(tel.length < 7) { mostrarError("❌ Número inválido."); return; }
         userData.telefono = tel;
       }
       document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
       document.getElementById('step-' + step).classList.add('active');
     }
+
     function prevStep(step) {
       document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
       document.getElementById('step-' + step).classList.add('active');
     }
+
     function setPlataforma(plat) {
       userData.plataforma = plat;
       plat === 'NETFLIX' ? nextStep(3) : (userData.opcion = 1, nextStep(4));
     }
+
     function setOpcion(op) { userData.opcion = op; nextStep(4); }
+
     function reiniciar() {
+      userData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
       document.getElementById('telefono').value = '';
       document.getElementById('correo').value = '';
-      nextStep(1);
+      prevStep(1);
     }
 
     async function procesar() {
       let email = document.getElementById('correo').value.toLowerCase().trim();
-      if(!email.includes('@')) return;
+      if(!email.includes('@')) { mostrarError("❌ Correo inválido."); return; }
       userData.correo = email;
       nextStep(5); 
 
@@ -315,9 +367,11 @@
         nextStep(6);
         document.getElementById('res-caja').style.display = 'none';
         document.getElementById('res-link-caja').style.display = 'none';
+        document.getElementById('soporte-btn').style.display = 'none';
 
         if(res.exito) {
           document.getElementById('res-titulo').innerText = "¡ÉXITO!";
+          document.getElementById('res-titulo').style.color = "#fff";
           document.getElementById('res-mensaje').innerText = res.msj || "Acceso encontrado:";
           if(res.tipo === 'codigo') {
             document.getElementById('res-caja').style.display = 'block';
@@ -328,13 +382,15 @@
             document.getElementById('res-link').href = res.valor;
           }
         } else {
-          document.getElementById('res-titulo').innerText = "ATENCIÓN";
+          document.getElementById('res-titulo').innerText = "BÚSQUEDA FALLIDA";
+          document.getElementById('res-titulo').style.color = "#ff0000";
           document.getElementById('res-mensaje').innerText = res.msj;
+          if(res.soporte) document.getElementById('soporte-btn').style.display = 'block';
         }
       } catch (error) {
         nextStep(6);
         document.getElementById('res-titulo').innerText = "ERROR";
-        document.getElementById('res-mensaje').innerText = "Reintenta en un momento.";
+        document.getElementById('res-mensaje').innerText = "Error de red. Intenta de nuevo.";
       }
     }
   </script>
