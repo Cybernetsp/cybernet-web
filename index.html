@@ -34,7 +34,7 @@
       background-image: radial-gradient(circle at center, #1a0202 0%, #000000 100%);
     }
 
-    /* CONTENEDOR PRINCIPAL ESTILO CYBER */
+    /* CONTENEDOR PRINCIPAL */
     .container {
       background: var(--card-bg);
       border: 1px solid rgba(229, 9, 20, 0.2); 
@@ -89,6 +89,7 @@
     }
     input:focus { border-color: var(--color-red); box-shadow: 0 0 20px var(--color-red-glow); }
     
+    /* BOTONES */
     button {
       width: 100%; padding: 1.1rem; margin-bottom: 1.2rem; border-radius: 60px;
       border: 2px solid rgba(255, 255, 255, 0.2); background: transparent; color: var(--color-white);
@@ -122,7 +123,7 @@
     
     .loader { border: 5px solid rgba(229, 9, 20, 0.1); border-top: 5px solid var(--color-red); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
     
-    /* ESTILOS DEL MODAL Y TARJETAS */
+    /* MODAL DE SERVICIOS ACTIVOS */
     .modal {
       display: none;
       position: fixed;
@@ -165,6 +166,7 @@
     .data-wrapper { display: flex; align-items: center; gap: 12px; }
     .data-val { color: var(--color-white); font-weight: 600; word-break: break-all; text-align: right; }
 
+    /* BOTÓN COPIAR CYBER */
     .copy-btn {
       background: rgba(229, 9, 20, 0.1);
       border: 1px solid var(--color-red);
@@ -280,23 +282,27 @@
     }
 
     function formatServiceText(rawText, platform) {
+      // Extraer nombre de la cuenta (usualmente entre asteriscos al inicio)
       const nombreMatch = rawText.match(/Hola\s*\*([^*]+)\*/i) || rawText.match(/^\*([^*]+)\*/);
       const nombreCuenta = nombreMatch ? nombreMatch[1] : "Cuenta General";
       
-      // EXPRESIONES REGULARES FLEXIBLES
-      const correoMatch = rawText.match(/CORREO:?\s*([^*🛒\n]+)/i);
-      const claveMatch = rawText.match(/(?:CONTRASEÑA|CLAVE):?\s*([^*🛒\n]+)/i);
-      const perfilMatch = rawText.match(/PERFIL:?\s*([^*|🛒\n]+)/i);
-      const pinMatch = rawText.match(/PIN:?\s*(\d+)/i);
-      const vencimientoMatch = rawText.match(/(?:FECHA DE VENCIMIENTO|VENCE):?\s*([^*🛒\n]+)/i);
+      // EXPRESIONES REGULARES POTENCIADAS PARA DETECTAR TODO
+      const correoMatch = rawText.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
+      const claveMatch = rawText.match(/(?:CONTRASEÑA|CLAVE|PASSWORD|PASS):?\s*\*?([^*🛒\n]+)\*?/i);
+      const perfilMatch = rawText.match(/(?:PERFIL|NOMBRE DEL PERFIL|NAME):?\s*\*?([^*|🛒\n]+)\*?/i);
+      const pinMatch = rawText.match(/(?:PIN|PIN DEL PERFIL|CÓDIGO PIN):?\s*\*?(\d+)\*?/i);
+      const vencimientoMatch = rawText.match(/(?:FECHA DE VENCIMIENTO|VENCIMIENTO|EXPIRA|VENCE):?\s*\*?([^*🛒\n]+)\*?/i);
 
-      const correo = correoMatch ? correoMatch[1].trim() : '';
-      const clave = claveMatch ? claveMatch[1].trim() : '';
-      const perfil = perfilMatch ? perfilMatch[1].trim() : '';
-      const pin = pinMatch ? pinMatch[1].trim() : '';
-      const vencimiento = vencimientoMatch ? vencimientoMatch[1].trim() : '';
+      // Limpiar asteriscos y espacios sobrantes de los resultados
+      const clean = (str) => str ? str.replace(/\*/g, '').trim() : '';
 
-      // FILTRO CRÍTICO: Si no hay @ en el correo, no mostramos la tarjeta
+      const correo = clean(correoMatch ? correoMatch[1] : '');
+      const clave = clean(claveMatch ? claveMatch[1] : '');
+      const perfil = clean(perfilMatch ? perfilMatch[1] : '');
+      const pin = clean(pinMatch ? pinMatch[1] : '');
+      const vencimiento = clean(vencimientoMatch ? vencimientoMatch[1] : '');
+
+      // FILTRO DE ORO: Si el correo no tiene un '@', NO SE MUESTRA LA TARJETA
       if (!correo.includes('@')) {
         return '';
       }
@@ -349,16 +355,20 @@
     async function verMisServicios() {
       let tel = document.getElementById('telefono').value.replace(/\D/g, '');
       if (tel.length < 7) { mostrarError("⚠️ Primero ingresa tu número arriba."); return; }
+      
       const modal = document.getElementById('servicesModal');
       const list = document.getElementById('servicesList');
       modal.style.display = 'flex';
       list.innerHTML = '<p style="text-align:center;font-size:1rem;color:gray;margin-top:30px;">Buscando en Cybernet...</p>';
+      
       try {
         const resp = await fetch(`${WEB_APP_URL}?accion=servicios&telefono=${tel}`);
         const data = await resp.json();
+        
         if (data.exito && data.servicios.length > 0) {
           list.innerHTML = "";
           let cardsFound = 0;
+          
           data.servicios.forEach(s => { 
             if(s.info) { 
               const cardHtml = formatServiceText(s.info, s.plataforma);
@@ -368,13 +378,16 @@
               }
             }
           });
+          
           if (cardsFound === 0) {
-            list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:30px;">No hay cuentas con correo válido.</p>';
+            list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:30px;">No se encontraron cuentas con correo válido para mostrar.</p>';
           }
         } else {
-          list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:30px;">No hay cuentas vinculadas.</p>';
+          list.innerHTML = '<p style="color:var(--color-gray); text-align:center; margin-top:30px;">No se encontraron cuentas activas vinculadas a este número.</p>';
         }
-      } catch (e) { list.innerHTML = '<p style="color:var(--color-red); text-align:center; margin-top:30px;">Error de servidor.</p>'; }
+      } catch (e) { 
+        list.innerHTML = '<p style="color:var(--color-red); text-align:center; margin-top:30px;">Error de servidor. Reintenta en unos segundos.</p>'; 
+      }
     }
 
     function cerrarModal() { document.getElementById('servicesModal').style.display = 'none'; }
@@ -405,16 +418,17 @@
     }
 
     async function procesar() {
-      let emailInput = document.getElementById('correo').value.toLowerCase().trim();
-      if(!emailInput.includes('@')) { mostrarError("❌ Correo no válido."); return; }
+      let e = document.getElementById('correo').value.toLowerCase().trim();
+      if(!e.includes('@')) { mostrarError("❌ Correo no válido."); return; }
       nextStep(5); 
       try {
-        const telInput = document.getElementById('telefono').value;
-        const response = await fetch(`${WEB_APP_URL}?telefono=${telInput}&correo=${emailInput}`);
+        const telVal = document.getElementById('telefono').value;
+        const response = await fetch(`${WEB_APP_URL}?telefono=${telVal}&correo=${e}`);
         const res = await response.json();
         nextStep(6);
         document.getElementById('res-caja').style.display = 'none';
         document.getElementById('res-link-caja').style.display = 'none';
+        
         if(res.exito) {
           document.getElementById('res-titulo').innerText = "¡LOCALIZADO!";
           document.getElementById('res-mensaje').innerText = res.msj;
@@ -430,7 +444,10 @@
           document.getElementById('res-titulo').innerText = "SIN RESULTADOS";
           document.getElementById('res-mensaje').innerText = res.msj;
         }
-      } catch (err) { nextStep(6); document.getElementById('res-mensaje').innerText = "Error de conexión."; }
+      } catch (err) { 
+        nextStep(6); 
+        document.getElementById('res-mensaje').innerText = "Error de conexión con la base de datos."; 
+      }
     }
   </script>
 </body>
