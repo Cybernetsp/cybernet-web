@@ -34,9 +34,10 @@
       --card-border: 0.5px solid rgba(255, 255, 255, 0.08);
       --input-bg: rgba(255, 255, 255, 0.05);
       --input-focus: rgba(255, 255, 255, 0.12);
-      --orb-1: rgba(10, 132, 255, 0.15);
-      --orb-2: rgba(255, 69, 58, 0.1);
+      --orb-1: rgba(10, 132, 255, 0.28); /* Fondo restaurado */
+      --orb-2: rgba(255, 69, 58, 0.22);   /* Fondo restaurado */
       --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+      --sheet-bg: rgba(25, 25, 27, 0.85);
     }
 
     [data-theme="light"] {
@@ -56,6 +57,7 @@
       --orb-1: rgba(10, 132, 255, 0.08);
       --orb-2: rgba(255, 69, 58, 0.05);
       --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+      --sheet-bg: rgba(25, 25, 27, 0.85);
     }
 
     * { 
@@ -71,7 +73,7 @@
       transition: background-color 0.4s ease, color 0.4s ease;
     }
 
-    /* ORBES RETROILUMINADOS DE PROFUNDIDAD */
+    /* ORBES RETROILUMINADOS RESTAURADOS CORECTAMENTE AL 100% (AZUL Y ROJO VIBRANTE) */
     .bg-orb-1 {
       position: fixed; top: -15%; left: -10%; width: 55vw; height: 55vw;
       background: radial-gradient(circle, var(--orb-1) 0%, transparent 75%); z-index: -1; pointer-events: none;
@@ -93,7 +95,6 @@
       padding: 10px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.3px;
     }
 
-    /* Cápsula de Cristal para el Cronómetro */
     .timer-badge {
       display: inline-flex; align-items: center; gap: 6px;
       background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -112,6 +113,13 @@
       cursor: pointer; transition: var(--transition-spring); color: var(--text-primary); padding: 0;
     }
     .interface-btn:active { transform: scale(0.9); }
+
+    /* Botón Especial Desplegable para Códigos */
+    .btn-codes-toggle {
+      width: auto !important; padding: 0 16px !important; border-radius: 22px !important;
+      font-size: 0.82rem !important; font-weight: 700 !important; color: var(--ios-blue) !important;
+      gap: 5px !important;
+    }
 
     /* PANTALLA LOGIN MODERNA (macOS LOCK SCREEN) */
     .login-overlay {
@@ -199,30 +207,66 @@
 
     .qr-hint { font-size: 0.75rem; color: var(--text-secondary); margin-top: -8px; font-weight: 500; }
 
-    /* BOTONES DE COPIADO ACCIÓN ACCESIBLE DE APPLE */
-    .copy-btn {
-      background: var(--card-bg); border: var(--card-border); color: var(--ios-blue);
-      padding: 12px 16px; font-size: 0.85rem; font-weight: 600; border-radius: 12px;
-      cursor: pointer; transition: var(--transition-spring); width: 100%; letter-spacing: 0.2px;
+    /* =========================================
+       MODAL SHEET PARA CODI-PLATAFORMAS (APPLE SLIDE SHEET)
+       ========================================= */
+    .codes-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+      z-index: 500; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s;
     }
-    .copy-btn:active { transform: scale(0.95); }
-    .copy-btn:hover { background: var(--input-focus); color: var(--text-primary); }
+    .codes-overlay.open { opacity: 1; visibility: visible; }
 
-    /* ESTADOS DE COPIADO EXITOSO E ILUMINACIÓN */
-    .card.active { border-color: var(--ios-red); box-shadow: 0 0 20px rgba(255, 69, 58, 0.25); }
-    .card.active .card-title { color: var(--ios-red); }
+    .codes-sheet {
+      position: absolute; top: 0; right: -460px; width: 100%; max-width: 440px; height: 100%;
+      background: var(--sheet-bg); border-left: var(--glass-border); padding: 35px 25px;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.3); display: flex; flex-direction: column;
+      transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .codes-overlay.open .codes-sheet { right: 0; }
+
+    .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .sheet-header h3 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; }
     
-    .btn-login-action {
-      background: var(--ai-gradient); color: white; border: none; font-weight: 600;
-      box-shadow: 0 4px 15px rgba(10, 132, 255, 0.35); padding: 14px; border-radius: 12px;
-      width: 100%; font-size: 0.95rem; cursor: pointer; transition: var(--transition-spring);
+    /* DISEÑO DE BOTÓN REFRESCAR ESTILO APPLE RECONSTRUIDO */
+    .btn-refresh-action {
+      background: rgba(10, 132, 255, 0.12); border: none; color: var(--ios-blue);
+      padding: 6px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: var(--transition-spring); display: flex; align-items: center; gap: 4px;
     }
-    .btn-login-action:active { transform: scale(0.96); opacity: 0.9; }
+    .btn-refresh-action:active { transform: scale(0.92); opacity: 0.8; }
+    
+    .btn-close-sheet {
+      background: rgba(118, 118, 128, 0.2); border: none; width: 30px; height: 30px; border-radius: 50%;
+      color: var(--text-primary); font-size: 0.9rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: var(--transition-spring);
+    }
+    .btn-close-sheet:active { transform: scale(0.9); }
 
-    .copy-btn-red {
-      background: var(--ios-red) !important; color: white !important; border: none !important;
-      box-shadow: 0 4px 12px rgba(255, 69, 58, 0.3);
+    .codes-scroll-area { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 5px; }
+    
+    /* RECONSTRUCCIÓN DE BOTONES Y TARJETAS HERMOSAS ORIGINALES DE CÓDIGOS */
+    .account-item-box {
+      background: var(--card-bg); border: var(--card-border); border-radius: 16px; padding: 18px;
+      text-align: text-left; display: flex; flex-direction: column; gap: 7px; transition: var(--transition-spring);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     }
+    .account-item-box:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-2px); }
+    .account-header-line { display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 4px; }
+    .platform-tag { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--ios-blue); letter-spacing: 0.3px; }
+    .time-tag { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); font-family: monospace; }
+    .credential-row { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; word-break: break-all; }
+    .credential-row span { color: var(--text-primary); font-weight: 600; }
+
+    /* BOTÓN RECONSTRUIDO Y PULIDO AL MÁXIMO ESTILO LÍQUIDO */
+    .account-item-box .copy-btn-action {
+      background: rgba(10, 132, 255, 0.08); border: 0.5px solid rgba(10, 132, 255, 0.2); color: var(--ios-blue);
+      padding: 11px; font-size: 0.82rem; font-weight: 700; border-radius: 10px;
+      cursor: pointer; transition: var(--transition-spring); width: 100%; letter-spacing: 0.2px;
+      margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .account-item-box .copy-btn-action:hover { background: var(--ios-blue); color: white; border-color: transparent; }
+    .account-item-box .copy-btn-action:active { transform: scale(0.96); }
 
     /* RESPONSIVE SUB-SISTEMAS */
     @media (max-width: 1200px) { .card-container { grid-template-columns: repeat(3, 1fr); } }
@@ -231,6 +275,7 @@
       .top-left-status { position: relative; top: 0; left: 0; margin-bottom: 15px; flex-direction: column; gap: 8px; width: 100%; align-items: center; }
       .control-container { position: relative; top: 0; right: 0; justify-content: center; width: 100%; margin-bottom: 20px; }
       .main-workspace { margin-top: 10px; }
+      .codes-sheet { max-width: 100%; right: -100%; }
     }
     @media (max-width: 600px) { 
       .card-container { grid-template-columns: repeat(1, 1fr); } 
@@ -257,6 +302,9 @@
 </head>
 <body>
 
+  <div class="bg-orb-1"></div>
+  <div class="bg-orb-2"></div>
+
   <div class="top-left-status" id="staffStatusBar" style="display: none;">
       <div class="staff-badge">
         <span id="staffSessionName">USER</span> • PORTAL DE MENSAJES
@@ -268,14 +316,29 @@
   </div>
 
   <div class="control-container" id="controlPanel" style="display: none;">
+      <button class="interface-btn btn-codes-toggle" onclick="toggleCodesPanel()">🔑 CÓDIGOS</button>
       <button class="interface-btn" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema"></button>
       <button class="interface-btn" onclick="cerrarSesionStaff()" aria-label="Cerrar Sesión" style="color: var(--ios-red);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
       </button>
   </div>
 
-  <div class="bg-orb-1"></div>
-  <div class="bg-orb-2"></div>
+  <div class="codes-overlay" id="codesOverlay" onclick="toggleCodesPanel()">
+      <div class="codes-sheet" onclick="event.stopPropagation()">
+          <div class="sheet-header">
+              <h3>Bandeja de Códigos</h3>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                  <button class="btn-refresh-action" onclick="forzarRefrescoDeCodigos()">🔄 Refrescar</button>
+                  <button class="btn-close-sheet" onclick="toggleCodesPanel()">✕</button>
+              </div>
+          </div>
+          <div class="search-container" style="max-width: 100%; margin-bottom: 20px;">
+              <input type="text" id="searchCodesInput" class="search-input" placeholder="🔍 Buscar por asunto o etiqueta..." oninput="filtrarCodigosInternos()">
+          </div>
+          <div class="codes-scroll-area" id="codesScrollArea">
+              </div>
+      </div>
+  </div>
 
   <div class="login-overlay" id="loginOverlay">
     <div class="login-card">
@@ -309,7 +372,6 @@
   <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPh1eFcrTAVA-oBdyWG4E-jzhPZS_PnHuixdtcj_nbTemK0Xe6jtu1IzuXsej7Ib8V/exec";
     
-    // INTEGRADO: CAMILO AÑADIDO CON ACCESO PRIVADO SEGURO
     const staffDatabase = {
       "KATHERINE": "CyberStaff*Kath9",
       "MANUEL": "CyberStaff*Manu2",
@@ -319,6 +381,8 @@
     };
 
     let timerInterval = null;
+    let backgroundSyncInterval = null; 
+    window.currentCodesStock = []; // Memoria global limpia
 
     function haptic() { if (navigator.vibrate) navigator.vibrate(15); }
 
@@ -339,6 +403,128 @@
         } else {
             btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
         }
+    }
+
+    /* =========================================
+       NUEVA LÓGICA: ESCANEO EN SEGUNDO PLANO DESDE EL INICIO (0 ESPERAS)
+       ========================================= */
+    function toggleCodesPanel() {
+        haptic();
+        const overlay = document.getElementById('codesOverlay');
+        overlay.classList.toggle('open');
+        
+        if (overlay.classList.contains('open')) {
+            // Cuando abres el panel, pinta de golpe e instantáneamente lo que ya está en memoria caché
+            renderizarCodigosEnPantalla();
+        }
+    }
+
+    function forzarRefrescoDeCodigos() {
+        haptic();
+        // Solo el botón manual limpia la pantalla con aviso para dar confirmación visual
+        document.getElementById('codesScrollArea').innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando bandeja de Gmail...</div>';
+        cargarCodigosDesdeSheets(false);
+    }
+
+    function cargarCodigosDesdeSheets(silencioso = false) {
+        if (!silencioso && window.cyberCodesTimeout) clearTimeout(window.cyberCodesTimeout);
+        
+        if (!silencioso) {
+            window.cyberCodesTimeout = setTimeout(function() {
+                const container = document.getElementById('codesScrollArea');
+                if (container && container.innerHTML.includes("Sincronizando")) {
+                    container.innerHTML = `<div style="text-align:center; padding:25px; color:var(--ios-red); font-weight:600; line-height:1.4;">⚠️ Tiempo de espera agotado.<br><span style="font-size:0.8rem; color:var(--text-secondary); font-weight:400;">Asegúrate de que en la ventana azul de Google Apps Script pusiste: 'Ejecutar como: Mí' y 'Quién tiene acceso: Cualquiera'.</span></div>`;
+                }
+            }, 15000);
+        }
+
+        const scriptElement = document.createElement('script');
+        scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerCodigos&callback=procesarCodigosSheets&_ts=" + Date.now();
+        document.body.appendChild(scriptElement);
+        
+        setTimeout(function() { scriptElement.remove(); }, 1500);
+    }
+
+    window.procesarCodigosSheets = function(res) {
+        if (window.cyberCodesTimeout) clearTimeout(window.cyberCodesTimeout);
+
+        if (res && res.status === "success") {
+            window.currentCodesStock = res.data; // Guardamos en memoria limpia
+            
+            // Si el Staff tiene la bandeja de códigos abierta, actualiza la pantalla en vivo y sin parpadear
+            if (document.getElementById('codesOverlay').classList.contains('open')) {
+                renderizarCodigosEnPantalla();
+            }
+        } else {
+            const container = document.getElementById('codesScrollArea');
+            if (container && (container.innerHTML.includes("Sincronizando") || container.children.length === 0)) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red); font-weight:600;">❌ ${res.message || 'Error de sincronización'}</div>`;
+            }
+        }
+    };
+
+    // FUNCIÓN CENTRAL RECONSTRUIDA PARA RENDERIZAR LAS TARJETAS Y LOS BOTONES HERMOSOS ORIGINALES
+    function renderizarCodigosEnPantalla() {
+        const container = document.getElementById('codesScrollArea');
+        if (!container) return;
+        
+        if (window.currentCodesStock.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay códigos disponibles en este momento.</div>';
+            return;
+        }
+        
+        let htmlCards = "";
+        window.currentCodesStock.forEach(function(item, index) {
+            htmlCards += `
+              <div class="account-item-box">
+                  <div class="account-header-line">
+                      <span class="platform-tag" style="color:${item.colorText || 'var(--ios-blue)'}">${item.plataforma}</span>
+                      <span class="time-tag">⏰ ${item.hora}</span>
+                  </div>
+                  <div class="credential-row">Cliente: <span>${item.correo}</span></div>
+                  <div class="credential-row">Acción: <span>${item.accion}</span></div>
+                  <div class="credential-row" style="margin-bottom:6px;">Código / Enlace: <span style="color:var(--ios-blue); font-weight:700;">${item.codigoLink}</span></div>
+                  <button class="copy-btn-action" onclick="copiarMensajeRapidoGmail(this, ${index})">📋 COPIAR MENSAJE RÁPIDO</button>
+              </div>
+            `;
+        });
+        
+        container.innerHTML = htmlCards;
+        filtrarCodigosInternos(); // Conserva el filtro de búsqueda mientras se actualiza en fondo
+    }
+
+    function copiarMensajeRapidoGmail(btn, index) {
+        haptic();
+        const item = window.currentCodesStock[index];
+        if (!item) return;
+        
+        navigator.clipboard.writeText(item.copiadoRapido).then(function() {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '¡COPIADO CON ÉXITO! 🚀';
+            btn.style.background = 'var(--ios-green)';
+            btn.style.color = 'white';
+            
+            setTimeout(function() {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 1500);
+        }).catch(function() {
+            const textarea = document.createElement('textarea');
+            textarea.value = item.copiadoRapido;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            textarea.remove();
+        });
+    }
+
+    function filtrarCodigosInternos() {
+        const query = document.getElementById('searchCodesInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.account-item-box');
+        cards.forEach(function(card) {
+            card.style.display = card.innerText.toLowerCase().includes(query) ? "" : "none";
+        });
     }
 
     /* =========================================
@@ -423,6 +609,7 @@
           sessionStorage.removeItem('active_staff');
           localStorage.removeItem('cyber_shift_start_time');
           if (timerInterval) clearInterval(timerInterval);
+          if (backgroundSyncInterval) clearInterval(backgroundSyncInterval);
           location.reload();
       });
     }
@@ -430,6 +617,12 @@
     function inicializarWorkspace() {
         renderGrid();
         startShiftTimer();
+        
+        // LANZAMIENTO GLOBAL EN FONDO: Empieza a descargar correos de Gmail en silencio nada más abrir el portal
+        cargarCodigosDesdeSheets(true);
+        backgroundSyncInterval = setInterval(function() {
+            cargarCodigosDesdeSheets(true);
+        }, 5000); // Consulta asíncrona automática cada 5 segundos de fondo
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -485,11 +678,9 @@ _(Disney+ estandar, Hbo Max, Paramount+, Vix+, Crunchyroll o Plex)._
       },
       {
         titulo: 'NEQUI',
-        texto: `💳 *_Realiza tu pago rápido, fácil y seguro_* ⚡
+        texto: `¡Realiza tu pago rápido, fácil y seguro!
 
-📲 *_Métodos disponibles y confiables:_*
-
-💜 *_Nequi o Daviplata:_* 3015156037
+💜 Nequi o Daviplata: 3015156037
 
 📸 Envía la captura del comprobante y tu servicio quedará activo al instante 🚀`
       },
@@ -503,13 +694,17 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
 0️⃣ Netflix solo → 💰 *_$14.500_* 😔 _(Opción Tradicional)_
 
 1️⃣ Netflix + 1 plataforma → 💰 *_$20.000_* _¡TOP VENTAS!_ 🔥🏆
-2️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL Cet_* 🚀✨
-3️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎
+2️⃣ Netflix + 2 pantallas → 💰 *_$26.000_*
+3️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL Cet_* 🚀✨
+4️⃣ Netflix + 3 pantallas → 💰 *_$36.000_*
+5️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎
+6️⃣ Netflix + 4 pantallas → 💰 *_$46.000_*
+7️⃣ Netflix + 5 pantallas → 💰 *_$55.000_*
 
-4️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_
-5️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_
-6️⃣ Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_
-7️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_
+8️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_
+9️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_
+🔟 Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_
+1️⃣1️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_
 
 *Netflix* cuenta con una página de códigos disponible las 24 horas, los 7 días de la semana.`
       },
@@ -531,7 +726,12 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
       {
         titulo: 'INDIVIDUALES',
         texto: `💻✨ *Plataformas Individuales – Cybernet* 🚀🎬  
-📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 🔒 Bloqueo de perfil
+📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 📡 Vix → *$8.500*
+⚽ Metegol → *$15.000* 🎨 Canva Pro (1 mes) → *$20.000*
+🎶 Spotify (1 mes) → *$14.000* 🎶 YouTube Premium (1 mes) → *$14.000*
+🎶 Deezer (1 mes) → *$12.000* 🎬 *Diferencias Disney+* 💙  
+👉 Estándar →  📺 Con anuncios, sin ESPN
+👉 Premium →  🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil
 
 💜 *En Cybernet no hay trucos,* solo entertainment real y herramientas para tu día a día 🍿✨`
       },
@@ -543,7 +743,7 @@ Solo paso a recordarte que, ante cualquier duda ❓ o inconveniente ⚠️ que p
       },
       {
         titulo: 'DIFERENCIAS DISNEY',
-        texto: `🎬 *_Diferencias de Disney+_* 💙✨
+        texto: `💡 *Diferencias de Disney+* 💙✨
 👉 *_Estándar_*
 - 📺 Incluye anuncios
 - 🚫 No tiene ESPN
@@ -560,7 +760,7 @@ Solo paso a recordarte que, ante cualquier duda ❓ o inconveniente ⚠️ que p
         texto: `🍿 *NETFLIX PREMIUM* 🎬
 
 💎 *Máxima Calidad:* Resolución 4K Ultra HD + HDR.
-🎧 *Audio Espacial:* Sonido envolvente tipo cine.
+🎧 *Audio Espacial:* Sound envolvente tipo cine.
 📥 *Descargas:* Mira tus series favoritas sin internet.
 🚫 *Sin Anuncios:* Disfruta todo el catálogo sin cortes.
 
@@ -589,8 +789,8 @@ Solo paso a recordarte que, ante cualquier duda ❓ o inconveniente ⚠️ que p
 
 🌐 *Opción 2: Reinicio de red* 1️⃣ Apaga tu Smart TV 📴  
 2️⃣ Desconecta módem y router por 30 seg ⏱️  
-3️⃣ Conecta el módem y espera 💡  
-4️⃣ Luego el router y espera 🔁  
+3️⃣ Conecta el modem y espera 💡  
+4️⃣ Luego el router and espera 🔁  
 5️⃣ Enciende el TV y prueba 🌟  
 ✅ Mejora conexión y evita errores de red 📶
 
@@ -610,7 +810,7 @@ _*PASOS PARA TU SOLICITUD:*_
 
 2️⃣ _*Elige tu Plataforma:*_ Selecciona Netflix 🔴 o Disney Premium 🔵.
 
-3️⃣ Si eliges _*NETFLIX*_, tienes 3 opciones:
+3️⃣ Si elige _*NETFLIX*_, tienes 3 opciones:
 
 🔑 Código de Inicio de Sesión: Para entrar por primera vez.
 
@@ -635,7 +835,7 @@ Cualquier duda, el botón de Soporte está integrado en la web. ¡A sacarle el m
 Si quieres acceder rápidamente a tus servicios de Cybernet sin tener que abrir el navegador cada vez, sigue estos sencillos pasos:
 
 🤖 *Para usuarios de Android (Google Chrome)*
-Abre el navegador Chrome y entra a: www.cybernetsp.com
+Abre el navegador Chrome and entra a: www.cybernetsp.com
 
 1️⃣ Toca los tres puntos verticales (⋮) en la esquina superior derecha.
 2️⃣ Selecciona la opción: *"Instalar aplicación"* o *"Agregar a la pantalla principal".*
@@ -876,7 +1076,7 @@ Elige uno de los dos métodos para iniciar sesión:
 📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  
 y confírmame por este medio ✅  
 
-💡 Estoy pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
+💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
       },
       {
         titulo: 'CAMBIO DE CLAVE DISNEY+',
@@ -885,7 +1085,7 @@ y confírmame por este medio ✅
 📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  
 y confírmame por este medio ✅  
 
-💡 Estoy pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
+💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
       },
       {
         titulo: 'CEL PC NETFLIX',
@@ -978,7 +1178,7 @@ Al ingresar al sistema se solicitará un código. Seleccione *Obtener ayuda* y l
         <h2 class="card-title">${qrPrincipal.titulo}</h2>
         <img src="${qrPrincipal.imagenUrl}" alt="QR" class="qr-image">
         <span class="qr-hint">(Mantén presionado o clic derecho para copiar imagen)</span>
-        <button class="copy-btn copy-text-btn" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, '&quot;')}">COPIAR TEXTO</button>
+        <button class="copy-btn copy-text-btn" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
       </div>
     `;
 
@@ -993,7 +1193,7 @@ Al ingresar al sistema se solicitará un código. Seleccione *Obtener ayuda* y l
         card.className = 'card';
         card.innerHTML = `
           <h2 class="card-title">${titulo}</h2>
-          <button class="copy-btn copy-text-btn" data-clipboard-text="${texto.replace(/"/g, '&quot;')}">COPIAR TEXTO</button>
+          <button class="copy-btn copy-text-btn" data-clipboard-text="${texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
         `;
         gridContainer.appendChild(card);
       });
