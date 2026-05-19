@@ -34,8 +34,8 @@
       --card-border: 0.5px solid rgba(255, 255, 255, 0.08);
       --input-bg: rgba(255, 255, 255, 0.05);
       --input-focus: rgba(255, 255, 255, 0.12);
-      --orb-1: rgba(10, 132, 255, 0.25);
-      --orb-2: rgba(255, 69, 58, 0.18);
+      --orb-1: rgba(10, 132, 255, 0.35); 
+      --orb-2: rgba(255, 69, 58, 0.3);   
       --scrollbar-thumb: rgba(255, 255, 255, 0.2);
       --sheet-bg: rgba(25, 25, 27, 0.85);
     }
@@ -57,7 +57,7 @@
       --orb-1: rgba(10, 132, 255, 0.08);
       --orb-2: rgba(255, 69, 58, 0.05);
       --scrollbar-thumb: rgba(0, 0, 0, 0.2);
-      --sheet-bg: rgba(255, 255, 255, 0.85);
+      --sheet-bg: rgba(25, 25, 27, 0.85);
     }
 
     * { 
@@ -73,7 +73,7 @@
       transition: background-color 0.4s ease, color 0.4s ease;
     }
 
-    /* ORBES RETROILUMINADOS DE PROFUNDIDAD */
+    /* ORBES RETROILUMINADOS DE ENTORNO COMERCIAL CYBERNET (AZUL IZQUIERDA Y ROJO DERECHA) */
     .bg-orb-1 {
       position: fixed; top: -15%; left: -10%; width: 55vw; height: 55vw;
       background: radial-gradient(circle, var(--orb-1) 0%, transparent 75%); z-index: -1; pointer-events: none;
@@ -102,13 +102,12 @@
       padding: 10px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; font-variant-numeric: tabular-nums;
     }
 
-    /* REFACTORIZACIÓN COMPLETA DE CONTROLES DE INTERFAZ DERECHOS */
+    /* CONTROLES DE INTERFAZ SUPERIOR DERECHOS */
     .control-container {
       position: absolute; top: 25px; right: 25px; display: flex; gap: 12px; z-index: 100;
       align-items: center;
     }
     
-    /* Base común para todos los items de control */
     .interface-control-item {
       background: var(--glass-bg);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: var(--glass-border);
@@ -117,17 +116,14 @@
     }
     .interface-control-item:active { transform: scale(0.9); }
     
-    /* Clase modificadora para los iconos circulares */
     .circle-control {
       width: 44px; height: 44px; border-radius: 50%; padding: 0;
     }
     
-    /* Clase modificadora para el botón de códigos pill-shaped */
     .pill-codes-control {
       padding: 10px 20px; border-radius: 22px;
       font-size: 0.88rem; font-weight: 700; color: var(--ios-blue);
-      gap: 7px; /* Aumentado gap para mejor legibilidad emoji-texto */
-      /* Fondo translúcido sutil para distinguirlo */
+      gap: 7px;
       background: rgba(10, 132, 255, 0.05);
       border: 0.5px solid rgba(10, 132, 255, 0.2);
     }
@@ -169,6 +165,15 @@
       box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25);
     }
     .ios-input-block::placeholder { color: var(--text-secondary); opacity: 0.7; }
+
+    /* REPARADO INTERFAZ: DISEÑO DE BOTÓN LOGIN MACOS RECONSTRUIDO CON DEGRADÉ LÍQUIDO */
+    .btn-login-action {
+      background: var(--ai-gradient); color: white; border: none; font-weight: 600;
+      box-shadow: 0 4px 15px rgba(10, 132, 255, 0.35); padding: 14px; border-radius: 12px;
+      width: 100%; font-size: 0.95rem; cursor: pointer; transition: var(--transition-spring);
+      margin-top: 8px; display: block; text-align: center;
+    }
+    .btn-login-action:active { transform: scale(0.96); opacity: 0.9; }
 
     /* CONTENEDOR PRINCIPAL POST-LOGIN */
     .main-workspace {
@@ -232,7 +237,7 @@
     .card.active .card-title { color: var(--ios-red); }
     
     /* =========================================
-       MODAL SHEET PARA CODI-PLATAFORMAS (APPLE SLIDE SHEET)
+       PANEL MODAL DESPLEGABLE ESTILO CUPERTINO
        ========================================= */
     .codes-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -268,17 +273,28 @@
 
     .codes-scroll-area { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 5px; }
     
-    /* Cuentas Estilo List Item Cupertino */
+    /* BLOQUES DE CORREO DE BANDDA EN CRISTAL */
     .account-item-box {
-      background: var(--card-bg); border: var(--card-border); border-radius: 16px; padding: 16px;
-      text-align: left; display: flex; flex-direction: column; gap: 6px; transition: var(--transition-spring);
+      background: var(--card-bg); border: var(--card-border); border-radius: 16px; padding: 18px;
+      text-align: left; display: flex; flex-direction: column; gap: 7px; transition: var(--transition-spring);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     }
-    .account-item-box:hover { border-color: var(--ios-blue); }
-    .account-header-line { display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.08); padding-bottom: 6px; margin-bottom: 4px; }
-    .platform-tag { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--ios-blue); }
+    .account-item-box:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-2px); }
+    .account-header-line { display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 4px; }
+    .platform-tag { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--ios-blue); letter-spacing: 0.3px; }
     .time-tag { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); font-family: monospace; }
     .credential-row { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; word-break: break-all; }
     .credential-row span { color: var(--text-primary); font-weight: 600; }
+
+    /* BOTÓN ORIGINAL DE COPIADO CÓDIGOS TOTALMENTE FIJADO */
+    .account-item-box .copy-btn-action {
+      background: var(--card-bg); border: var(--card-border); color: var(--ios-blue);
+      padding: 12px 16px; font-size: 0.85rem; font-weight: 600; border-radius: 12px;
+      cursor: pointer; transition: var(--transition-spring); width: 100%; letter-spacing: 0.2px;
+      margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .account-item-box .copy-btn-action:hover { background: var(--input-focus); color: var(--text-primary); }
+    .account-item-box .copy-btn-action:active { transform: scale(0.95); }
 
     /* RESPONSIVE SUB-SISTEMAS */
     @media (max-width: 1200px) { .card-container { grid-template-columns: repeat(3, 1fr); } }
@@ -299,14 +315,6 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
-
-    #error-login-toast {
-      display: none; background: rgba(255, 69, 58, 0.15); color: var(--ios-red);
-      padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;
-      margin-bottom: 18px; border: 0.5px solid rgba(255, 69, 58, 0.25); text-align: center;
-      animation: shakeIOS 0.4s ease-in-out;
-    }
-    @keyframes shakeIOS { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-4px);} 75% {transform: translateX(4px);} }
 
     .back-link { display: block; margin-top: 22px; color: var(--ios-blue); cursor: pointer; font-size: 0.85rem; text-align: center; text-decoration: none; font-weight: 500;}
     .back-link:hover { text-decoration: underline; }
@@ -329,7 +337,6 @@
 
   <div class="control-container" id="controlPanel" style="display: none;">
       <button class="interface-control-item pill-codes-control" onclick="toggleCodesPanel()">🔑 CÓDIGOS</button>
-      
       <button class="interface-control-item circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema"></button>
       <button class="interface-control-item circle-control" onclick="cerrarSesionStaff()" aria-label="Cerrar Sesión" style="color: var(--ios-red);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -419,6 +426,9 @@
         }
     }
 
+    /* =========================================
+       CONEXIÓN EN CALIENTE AL INBOX DE CÓDIGOS DE GMAIL CORREGIDA
+       ========================================= */
     function toggleCodesPanel() {
         haptic();
         const overlay = document.getElementById('codesOverlay');
@@ -459,29 +469,30 @@
             }, 20000);
         }
 
-        const scriptId = "jsonp_script_" + Date.now();
+        // CORRECCIÓN STRUCTURAL FIJADA: Se remueve el nodo anterior únicamente antes de inyectar el nuevo
+        const oldScript = document.getElementById('cyber_jsonp_node');
+        if (oldScript) oldScript.remove();
+
         const scriptElement = document.createElement('script');
-        scriptElement.id = scriptId;
-        
-        scriptElement.setAttribute('data-cfasync', 'false'); 
-        
+        scriptElement.id = 'cyber_jsonp_node';
+        scriptElement.setAttribute('data-cfasync', 'false'); // Bypass de caché estática de Cloudflare Pages
         scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerCodigos&callback=procesarCodigosSheets&_ts=" + Date.now();
         document.body.appendChild(scriptElement);
         
-        window.activeJsonpScriptId = scriptId;
+        // REMOVIDO EL TIMEOUT DE BORRADO AGRESIVO QUE SE CAÍA EN PRODUCCIÓN
     }
 
     window.procesarCodigosSheets = function(res) {
         isFetchingCodes = false; 
         if (window.cyberCodesTimeout) clearTimeout(window.cyberCodesTimeout);
 
-        if (window.activeJsonpScriptId) {
-            const oldScript = document.getElementById(window.activeJsonpScriptId);
-            if (oldScript) oldScript.remove();
-        }
+        // El script se autoelimina de forma segura solo cuando ya entregó los datos
+        const oldScript = document.getElementById('cyber_jsonp_node');
+        if (oldScript) oldScript.remove();
 
         const container = document.getElementById('codesScrollArea');
         if (res && res.status === "success") {
+            container.innerHTML = "";
             window.currentCodesStock = res.data; 
             
             if (document.getElementById('codesOverlay').classList.contains('open')) {
@@ -559,6 +570,9 @@
         });
     }
 
+    /* =========================================
+       SISTEMA DE CRONÓMETRO ININTERRUMPIBLE (APPLE LOGIC)
+       ========================================= */
     function startShiftTimer() {
         let startTime = localStorage.getItem('cyber_shift_start_time');
         
@@ -638,6 +652,7 @@
           sessionStorage.removeItem('active_staff');
           localStorage.removeItem('cyber_shift_start_time');
           if (timerInterval) clearInterval(timerInterval);
+          if (autoRefreshCodesInterval) clearInterval(autoRefreshCodesInterval);
           location.reload();
       });
     }
@@ -663,6 +678,9 @@
         }
     });
 
+    // =========================================================
+    // BASE DE DATOS INTACTA DE PLANTILLAS COMERCIALES CYBERNET
+    // =========================================================
     const qrPrincipal = {
       titulo: 'PAGOS',
       imagenUrl: 'https://i.postimg.cc/ydfJzvp8/unnamed.png',
@@ -745,7 +763,12 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
       {
         titulo: 'INDIVIDUALES',
         texto: `💻✨ *Plataformas Individuales – Cybernet* 🚀🎬  
-📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 🔒 Bloqueo de perfil
+📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 📡 Vix → *$8.500*
+⚽ Metegol → *$15.000* 🎨 Canva Pro (1 mes) → *$20.000*
+🎶 Spotify (1 mes) → *$14.000* 🎶 YouTube Premium (1 mes) → *$14.000*
+🎶 Deezer (1 mes) → *$12.000* 🎬 *Diferencias Disney+* 💙  
+👉 Estándar →  📺 Con anuncios, sin ESPN
+👉 Premium →  🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil
 
 💜 *En Cybernet no hay trucos,* solo entertainment real y herramientas para tu día a día 🍿✨`
       },
@@ -757,7 +780,7 @@ Solo paso a recordarte que, ante cualquier duda ❓ o inconveniente ⚠️ que p
       },
       {
         titulo: 'DIFERENCIAS DISNEY',
-        texto: `💡 *Diferencias de Disney+* 💙✨
+        texto: `🎬 *_Diferencias de Disney+_* 💙✨
 👉 *_Estándar_*
 - 📺 Incluye anuncios
 - 🚫 No tiene ESPN
@@ -774,7 +797,7 @@ Solo paso a recordarte que, ante cualquier duda ❓ o inconveniente ⚠️ que p
         texto: `🍿 *NETFLIX PREMIUM* 🎬
 
 💎 *Máxima Calidad:* Resolución 4K Ultra HD + HDR.
-🎧 *Audio Espacial:* Sound envolvente tipo cine.
+🎧 *Audio Espacial:* Envolvente tipo cine.
 📥 *Descargas:* Mira tus series favoritas sin internet.
 🚫 *Sin Anuncios:* Disfruta todo el catálogo sin cortes.
 
@@ -961,9 +984,7 @@ No hay nada de qué preocuparse 😉
 📺 IPTV – $7.000  
 🎨 Canva – $10.000  
 📺 YouTube (1 mes) – $10.000  
-🎶 Spotify (1 mes) – $14.000 
-🎶 YouTube Premium (1 mes) – $14.000
-🎶 Spotify (1 mes Distris) – $10.000
+🎶 Spotify (1 mes) – $10.000
 🎶 Deezer (1 mes) – $8.000
 
 📌 *Aclaraciones:* 🏆 Disney+ Premium incluye Star+ y ESPN  
@@ -1142,7 +1163,7 @@ para que sigas disfrutando sin interrupciones 🍿🚀`
         texto: `📢 *Importante sobre tu cuenta de Netflix*
 Hola 👋 Solo para aclararte: con los nuevos métodos de activación, el sistema de Netflix no conserva el historial anterior ni los perfiles personalizados. Esto es completamente normal y parte del proceso técnico que usamos para garantizar acceso estable.
 ✅ ¿Por qué se hace así?
-Este método evita que Netflix active la función de “actualizar hogar”, que puede bloquear el acceso o limitar el uso en diferentes dispositivos. Al usar activaciones temporales o por código, protegemos tu acceso continuo sin interrupciones.
+Este método evita que Netflix active la función de “actualizar hogar”, que puede bloquear el acceso o limitar el uso en differentes dispositivos. Al usar activaciones temporales o por código, protegemos tu acceso continuo sin interrupciones.
 🎬 Aunque el historial se reinicia, puedes seguir disfrutando tus series películas favoritas sin problemas. Si necesitas ayuda para volver a encontrar lo que estaba viendo, con gusto te ayudo`
       },
       {
@@ -1164,19 +1185,24 @@ Para vincular tu dispositivo, sigue estos pasos:
         titulo: 'GARANTIA',
         texto: `✨ *¡Hola!* 😊  
 Te entrego la *garantía de tu cuenta* 🙌  
+
 📺 Por favor ingresa y cuéntame qué tal te fue 💬  
 💪 Estoy pendiente por si necesitas apoyo o alguna revisión adicional ✨  
+
 🍿 ¡Disfruta tu servicio sin preocupaciones!`
       },
       {
         titulo: 'VERIFICACION',
         texto: `¡Recibido! ✅ Procedemos a verificar tu pago en el sistema.
+
 Por favor, confírmame el nombre del titular de la cuenta desde la cual realizaste la transferencia. 📝
+
 En un momento validamos y te hacemos la entrega activa de tu servicio. ¡Gracias por elegirnos! 🚀`
       },
       {
         titulo: 'INICIO DE SESION',
         texto: `🔒✨ *Actualización de Netflix*
+
 Al ingresar al sistema se solicitará un código. Seleccione *Obtener ayuda* y luego *Usar contraseña* para introducir la clave de su cuenta.`
       }
     ];
