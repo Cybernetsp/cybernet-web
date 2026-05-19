@@ -399,7 +399,7 @@
       left: 50%; 
       transform: translateX(-50%);
       width: 40px; 
-      height: 5px; 
+      height: 5px;
       background: var(--text-secondary); 
       border-radius: 10px; 
       opacity: 0.5;
@@ -407,6 +407,7 @@
     }
     @keyframes sheetSlideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
 
+    /* CORRECCIÓN DE RENDIMIENTO EN SCROLL DE CELDAS (SOLUCIÓN DEL REBOTE DE iOS) */
     #cardsWrapper {
       overflow-y: auto; 
       flex-grow: 1; 
@@ -414,6 +415,8 @@
       padding-left: 5px; 
       margin-bottom: 10px; 
       scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch; /* Activa el scroll suave nativo en iOS */
+      overscroll-behavior: contain; /* Encierra el rebote del scroll dentro de la caja, sin mover el fondo */
     }
     
     .service-card {
@@ -667,11 +670,38 @@
             localStorage.setItem('cyber_email', this.value);
         });
 
+        /* REPARACIÓN DEL SENSOR TÁCTIL (PULL-TO-CLOSE) PARA DEJAR DESLIZAR LA PANTALLA LIBREMENTE */
         let startY = 0; let currentY = 0;
         const modalContent = document.getElementById('modalContentInner');
-        modalContent.addEventListener('touchstart', (e) => { if (modalContent.scrollTop === 0) startY = e.touches[0].clientY; else startY = 0; }, {passive: true});
-        modalContent.addEventListener('touchmove', (e) => { if (!startY) return; currentY = e.touches[0].clientY; let diff = currentY - startY; if (diff > 0) { modalContent.style.transform = `translateY(${diff}px)`; modalContent.style.transition = 'none'; } }, {passive: true});
-        modalContent.addEventListener('touchend', (e) => { if (!startY) return; let diff = currentY - startY; modalContent.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'; if (diff > 120) closeModal(); modalContent.style.transform = ''; startY = 0; currentY = 0; });
+        const cardsWrapper = document.getElementById('cardsWrapper');
+        
+        modalContent.addEventListener('touchstart', (e) => { 
+            // ¡Se arregló! Solo arrastra si el scroll de las tarjetas está en el límite superior
+            if (cardsWrapper.scrollTop <= 0) {
+                startY = e.touches[0].clientY; 
+            } else {
+                startY = 0; 
+            }
+        }, {passive: true});
+        
+        modalContent.addEventListener('touchmove', (e) => { 
+            if (!startY) return; 
+            currentY = e.touches[0].clientY; 
+            let diff = currentY - startY; 
+            if (diff > 0) { 
+                modalContent.style.transform = `translateY(${diff}px)`; 
+                modalContent.style.transition = 'none'; 
+            } 
+        }, {passive: true});
+        
+        modalContent.addEventListener('touchend', (e) => { 
+            if (!startY) return; 
+            let diff = currentY - startY; 
+            modalContent.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'; 
+            if (diff > 120) closeModal(); 
+            modalContent.style.transform = ''; 
+            startY = 0; currentY = 0; 
+        });
     });
 
     function haptic() { if (navigator.vibrate) navigator.vibrate(15); }
@@ -759,13 +789,20 @@
       haptic();
       let t = document.getElementById('telefono').value.replace(/\D/g, '').trim();
       if (t.length < 7) return fireError("⚠️ Ingresa tu número celular.");
+      
       const modal = document.getElementById('modalServices');
       const box = document.getElementById('cardsWrapper');
       const btnOpen = document.getElementById('btn-open-services');
+      
       if(document.getElementById('searchServices')) document.getElementById('searchServices').value = "";
       modal.style.display = 'flex';
+      
+      // BLOQUEAMOS EL SCROLL DEL FONDO AL ABRIR
+      document.body.style.overflow = 'hidden';
+
       box.innerHTML = '<div class="loader" style="border-top-color:var(--ios-blue);"></div><p style="text-align:center; color:var(--text-secondary); font-size:0.9rem;">Sincronizando con Cybernet iCloud...</p>';
       btnOpen.disabled = true;
+      
       try {
         const resp = await fetch(`${GOOGLE_URL}?accion=servicios&telefono=${t}`);
         const json = await resp.json();
@@ -777,7 +814,12 @@
       } catch (e) { box.innerHTML = '<p style="color:var(--ios-red); text-align:center; font-size:0.9rem;">Error de conexión.</p>'; } finally { btnOpen.disabled = false; }
     }
 
-    function closeModal() { haptic(); document.getElementById('modalServices').style.display = 'none'; }
+    function closeModal() { 
+        haptic(); 
+        document.getElementById('modalServices').style.display = 'none'; 
+        // LIBERAMOS EL SCROLL DEL FONDO AL CERRAR
+        document.body.style.overflow = ''; 
+    }
     window.onclick = (e) => { if(e.target == document.getElementById('modalServices')) closeModal(); }
     window.addEventListener('keydown', (e) => { if(e.key === "Escape") closeModal(); });
 
