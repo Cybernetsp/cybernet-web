@@ -73,7 +73,7 @@
       transition: background-color 0.4s ease, color 0.4s ease;
     }
 
-    /* ORBES RETROILUMINADOS DE PROFUNDIDAD */
+    /* ORBES RETROILUMINADOS DE ENTORNO COMERCIAL CYBERNET (AZUL IZQUIERDA Y ROJO DERECHA) */
     .bg-orb-1 {
       position: fixed; top: -15%; left: -10%; width: 55vw; height: 55vw;
       background: radial-gradient(circle, var(--orb-1) 0%, transparent 75%); z-index: -1; pointer-events: none;
@@ -409,9 +409,9 @@
       
       <div id="error-login-toast"></div>
 
-      <form id="loginForm" onsubmit="validateStaffAccess(event)">
-          <input type="text" id="staffUser" class="ios-input-block" placeholder="Nombre de Usuario" autocomplete="username" spellcheck="false" required>
-          <input type="password" id="staffPass" class="ios-input-block" placeholder="Contraseña Especial" autocomplete="current-password" required>
+      <form id="loginForm" action="#" onsubmit="validateStaffAccess(event)">
+          <input type="text" id="staffUser" name="username" class="ios-input-block" placeholder="Nombre de Usuario" autocomplete="username" spellcheck="false" required>
+          <input type="password" id="staffPass" name="password" class="ios-input-block" placeholder="Contraseña Especial" autocomplete="current-password" required>
           
           <div class="remember-row">
               <input type="checkbox" id="rememberMe">
@@ -663,6 +663,10 @@
       if (staffDatabase[userInput] && staffDatabase[userInput] === passInput) {
         errorToast.style.display = 'none';
         
+        // TRUCO PARA GOOGLE CHROME: Al forzar el 'blur', el navegador detecta que el usuario terminó y lanza el gestor de contraseñas
+        document.getElementById('staffUser').blur();
+        document.getElementById('staffPass').blur();
+        
         ejecutarNotificacionDeCorreo(userInput, "inicio");
 
         document.getElementById('loginOverlay').classList.add('hidden');
@@ -727,19 +731,10 @@
     const qrPrincipal = {
       titulo: 'PAGOS',
       imagenUrl: 'https://i.postimg.cc/ydfJzvp8/unnamed.png',
-      texto: `Te comparto nuestra llave para el pago de tu servicio desde cualquier entidad bancaria:
-
-📌 *Llave:* 0090878219
-👤 *Verificar nombre:* REF CYBERNET
-
-⚠️ *Nota:* Esta llave es exclusiva para pagos mediante Bre-B desde cualquier banco.
-
-*Pasos para activar tu servicio:* 1️⃣ Realiza la transferencia.
-2️⃣ Envía el comprobante de pago por este medio.
-3️⃣ ¡Recibe tu acceso y empieza a disfrutar! 🚀🎬`
+      texto: `Te comparto nuestra llave para el pago de tu servicio desde cualquier entidad bancaria:\n\n📌 *Llave:* 0090878219\n👤 *Verificar nombre:* REF CYBERNET\n\n⚠️ *Nota:* Esta llave es exclusiva para pagos mediante Bre-B desde cualquier banco.\n\n*Pasos para activar tu servicio:* 1️⃣ Realiza la transferencia.\n2️⃣ Envía el comprobante de pago por este medio.\n3️⃣ ¡Recibe tu acceso y empieza a disfrutar! 🚀🎬`
     };
+
     const elementosGrid = [
-    
       {
         titulo: 'ADS',
         texto: `¡Hola! 👋 ¡Bienvenido a Cybernet! 🎬
@@ -1258,7 +1253,7 @@ Al ingresar al sistema se solicitará un código. Seleccione *Obtener ayuda* y l
     headerContainer.innerHTML = `
       <div class="card qr-card">
         <h2 class="card-title">${qrPrincipal.titulo}</h2>
-        <img src="${qrPrincipal.imagenUrl}" alt="QR" class="qr-image">
+        <img src="${qrPrincipal.imagenUrl}" alt="QR" class="qr-image" onerror="this.style.display='none'; this.nextElementSibling.innerText='⚠️ Error cargando la llave QR. Revisa la conexión.'; this.nextElementSibling.style.color='var(--ios-red)';">
         <span class="qr-hint">(Mantén presionado o clic derecho para copiar imagen)</span>
         <button class="copy-btn copy-text-btn" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
       </div>
