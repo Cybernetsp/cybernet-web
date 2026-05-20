@@ -1,2036 +1,2276 @@
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Cybernet Staff - Panel de Mensajes</title>
-  
-  <link rel="icon" type="image/jpeg" href="logo.jpeg">
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Cybernet Staff">
-  
-  <style>
-    /* =========================================
-       SISTEMA DE VARIABLES MODO CLARO Y OSCURO
-       ========================================= */
-    :root {
-      --ios-blue: #0a84ff;
-      --ios-green: #30d158;
-      --ios-red: #ff453a;
-      --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
-      --transition-spring: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    [data-theme="dark"] {
-      color-scheme: dark;
-      --page-bg: #000000;
-      --text-primary: #ffffff;
-      --text-secondary: rgba(235, 235, 245, 0.6);
-      --glass-bg: rgba(30, 30, 35, 0.45);
-      --glass-border: 0.5px solid rgba(255, 255, 255, 0.15);
-      --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      --card-bg: rgba(44, 44, 46, 0.4);
-      --card-border: 0.5px solid rgba(255, 255, 255, 0.08);
-      --input-bg: rgba(255, 255, 255, 0.05);
-      --input-focus: rgba(255, 255, 255, 0.12);
-      --orb-1: rgba(10, 132, 255, 0.35); 
-      --orb-2: rgba(255, 69, 58, 0.3);   
-      --scrollbar-thumb: rgba(255, 255, 255, 0.2);
-      --sheet-bg: rgba(25, 25, 27, 0.85);
-      --sheet-modal-bg: rgba(30, 30, 30, 0.95);
-    }
-
-    [data-theme="light"] {
-      color-scheme: light;
-      --ios-blue: #007aff;
-      --ios-green: #34c759;
-      --ios-red: #ff3b30;
-      --page-bg: #f2f2f7;
-      --text-primary: #000000;
-      --text-secondary: rgba(60, 60, 67, 0.6);
-      --glass-bg: rgba(255, 255, 255, 0.55);
-      --glass-border: 0.5px solid rgba(0, 0, 0, 0.1);
-      --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-      --card-bg: rgba(255, 255, 255, 0.7);
-      --card-border: 0.5px solid rgba(0, 0, 0, 0.06);
-      --input-bg: rgba(118, 118, 128, 0.12);
-      --input-focus: rgba(118, 118, 128, 0.22);
-      --orb-1: rgba(10, 132, 255, 0.08);
-      --orb-2: rgba(255, 69, 58, 0.05);
-      --scrollbar-thumb: rgba(0, 0, 0, 0.2);
-      --sheet-bg: rgba(255, 255, 255, 0.85);
-      --sheet-modal-bg: rgba(255, 255, 255, 0.95);
-    }
-
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-      -webkit-font-smoothing: antialiased; 
-      -moz-osx-font-smoothing: grayscale;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cybernet Staff - Panel de Mensajes</title>
     
-    body { 
-      background-color: var(--page-bg); 
-      color: var(--text-primary); 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      justify-content: flex-start; 
-      min-height: 100vh; 
-      padding: 0 20px 30px 20px; 
-      position: relative; 
-      overflow-x: hidden;
-      transition: background-color 0.4s ease, color 0.4s ease;
-    }
-
-    .bg-orb-1 {
-      position: fixed; 
-      top: -15%; 
-      left: -10%; 
-      width: 55vw; 
-      height: 55vw;
-      background: radial-gradient(circle, var(--orb-1) 0%, transparent 75%); 
-      z-index: -1; 
-      pointer-events: none;
-    }
-
-    .bg-orb-2 {
-      position: fixed; 
-      bottom: -15%; 
-      right: -10%; 
-      width: 55vw; 
-      height: 55vw;
-      background: radial-gradient(circle, var(--orb-2) 0%, transparent 75%); 
-      z-index: -1; 
-      pointer-events: none;
-    }
-
-    .global-header {
-      position: fixed;
-      top: 0; 
-      left: 0; 
-      width: 100%;
-      background: rgba(20, 20, 22, 0.75);
-      backdrop-filter: blur(35px) saturate(200%);
-      -webkit-backdrop-filter: blur(35px) saturate(200%);
-      border-bottom: 0.5px solid rgba(255, 255, 255, 0.15);
-      padding: 15px 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 400;
-      transition: background 0.4s ease, border-color 0.4s ease;
-    }
-
-    [data-theme="light"] .global-header {
-      background: rgba(255, 255, 255, 0.75);
-      border-bottom-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .top-left-status {
-      display: flex; 
-      align-items: center; 
-      gap: 10px;
-    }
-
-    .staff-badge {
-      display: inline-flex; 
-      align-items: center; 
-      gap: 6px;
-      background: var(--glass-bg); 
-      backdrop-filter: blur(20px); 
-      -webkit-backdrop-filter: blur(20px);
-      border: var(--glass-border); 
-      color: var(--ios-blue); 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      padding: 10px 16px; 
-      border-radius: 20px; 
-      font-size: 0.85rem; 
-      font-weight: 600; 
-      letter-spacing: 0.3px;
-    }
-
-    .timer-badge {
-      display: inline-flex; 
-      align-items: center; 
-      gap: 6px;
-      background: var(--glass-bg); 
-      backdrop-filter: blur(20px); 
-      -webkit-backdrop-filter: blur(20px);
-      border: var(--glass-border); 
-      color: var(--ios-green); 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      padding: 10px 16px; 
-      border-radius: 20px; 
-      font-size: 0.85rem; 
-      font-weight: 700; 
-      font-variant-numeric: tabular-nums;
-      transition: color 0.3s ease, border-color 0.3s ease;
-    }
-
-    .control-container {
-      display: flex; 
-      gap: 12px; 
-      align-items: center;
-    }
+    <link rel="icon" type="image/jpeg" href="logo.jpeg">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cybernet Staff">
     
-    .interface-control-item {
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px); 
-      -webkit-backdrop-filter: blur(20px); 
-      border: var(--glass-border);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
-      cursor: pointer; 
-      transition: var(--transition-spring); 
-      color: var(--text-primary);
-    }
-
-    .interface-control-item:active { 
-      transform: scale(0.9); 
-    }
-    
-    .circle-control { 
-      width: 44px; 
-      height: 44px; 
-      border-radius: 50%; 
-      padding: 0; 
-    }
-    
-    .pill-codes-control {
-      padding: 10px 20px; 
-      border-radius: 22px;
-      font-size: 0.88rem; 
-      font-weight: 700; 
-      color: var(--ios-blue); 
-      gap: 7px; 
-      background: rgba(10, 132, 255, 0.05); 
-      border: 0.5px solid rgba(10, 132, 255, 0.2);
-    }
-    
-    .pill-sale-control {
-      padding: 10px 20px; 
-      border-radius: 22px;
-      font-size: 0.88rem; 
-      font-weight: 700; 
-      color: var(--ios-green); 
-      gap: 7px; 
-      background: rgba(48, 209, 88, 0.1); 
-      border: 0.5px solid rgba(48, 209, 88, 0.3);
-    }
-
-    .pill-shifts-control {
-      padding: 10px 20px; 
-      border-radius: 22px;
-      font-size: 0.88rem; 
-      font-weight: 700; 
-      color: #ffcc00; 
-      gap: 7px; 
-      background: rgba(255, 204, 0, 0.1); 
-      border: 0.5px solid rgba(255, 204, 0, 0.3);
-    }
-
-    .header-search-container {
-      flex-grow: 1; 
-      max-width: 460px; 
-      margin: 0 20px; 
-      position: relative; 
-      display: flex; 
-      align-items: center;
-    }
-
-    .search-input {
-      width: 100%; 
-      padding: 12px 20px 12px 44px; 
-      border-radius: 14px; 
-      border: var(--glass-border);
-      background: var(--input-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") no-repeat 16px center;
-      color: var(--text-primary); 
-      font-size: 0.95rem; 
-      outline: none; 
-      transition: var(--transition-spring);
-    }
-
-    .search-input:focus { 
-      background: var(--input-focus); 
-      border-color: var(--ios-blue); 
-      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2); 
-    }
-
-    .search-input::placeholder { 
-      color: var(--text-secondary); 
-    }
-
-    .login-overlay {
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4); 
-      backdrop-filter: blur(20px); 
-      -webkit-backdrop-filter: blur(20px);
-      z-index: 1000; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: center; 
-      align-items: center; 
-      padding: 20px;
-      transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.5s;
-    }
-
-    .login-overlay.hidden { 
-      opacity: 0; 
-      visibility: hidden; 
-      pointer-events: none; 
-    }
-    
-    .login-card {
-      width: 100%; 
-      max-width: 380px; 
-      padding: 40px 30px;
-      background: var(--glass-bg); 
-      border: var(--glass-border); 
-      border-radius: 28px;
-      box-shadow: var(--glass-shadow); 
-      text-align: center;
-      animation: lockScaleUp 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-
-    @keyframes lockScaleUp { 
-      from { transform: scale(0.95); opacity: 0; } 
-      to { transform: scale(1); opacity: 1; } 
-    }
-
-    .avatar-staff {
-      width: 74px; 
-      height: 74px; 
-      border-radius: 50%; 
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15); 
-      margin: 0 auto 18px auto; 
-      display: flex;
-      align-items: center; 
-      justify-content: center; 
-      color: var(--ios-blue);
-      box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.1);
-    }
-    
-    .login-card h2 { 
-      font-size: 1.5rem; 
-      font-weight: 700; 
-      letter-spacing: -0.5px; 
-      margin-bottom: 6px; 
-      color: var(--text-primary); 
-    }
-
-    .login-card .lock-instruction { 
-      font-size: 0.9rem; 
-      color: var(--text-secondary); 
-      margin-bottom: 25px; 
-      font-weight: 400; 
-    }
-
-    .ios-input-block {
-      width: 100%; 
-      padding: 14px 16px; 
-      margin-bottom: 12px; 
-      border-radius: 12px;
-      border: var(--glass-border); 
-      background: var(--input-bg); 
-      color: var(--text-primary);
-      text-align: left; 
-      font-size: 0.95rem; 
-      outline: none; 
-      transition: var(--transition-spring);
-    }
-
-    .ios-input-block:focus { 
-      background: var(--input-focus); 
-      border-color: var(--ios-blue);
-      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25);
-    }
-
-    .ios-input-block::placeholder { 
-      color: var(--text-secondary); 
-      opacity: 0.7; 
-    }
-
-    .remember-row {
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 8px; 
-      margin-bottom: 18px; 
-      margin-top: 5px;
-    }
-
-    .remember-row input[type="checkbox"] { 
-      width: 16px; 
-      height: 16px; 
-      margin: 0; 
-      cursor: pointer; 
-      accent-color: var(--ios-blue); 
-    }
-
-    .remember-row label { 
-      color: var(--text-secondary); 
-      font-size: 0.85rem; 
-      font-weight: 500; 
-      cursor: pointer; 
-      user-select: none; 
-    }
-
-    .btn-login-action {
-      background: var(--ai-gradient); 
-      color: white; 
-      border: none; 
-      font-weight: 600;
-      box-shadow: 0 4px 15px rgba(10, 132, 255, 0.35); 
-      padding: 14px; 
-      border-radius: 12px;
-      width: 100%; 
-      font-size: 0.95rem; 
-      cursor: pointer; 
-      transition: var(--transition-spring);
-      margin-top: 5px; 
-      display: block; 
-      text-align: center;
-    }
-
-    .btn-login-action:active { 
-      transform: scale(0.96); 
-      opacity: 0.9; 
-    }
-
-    .main-workspace {
-      display: none; 
-      width: 100%; 
-      max-width: 1300px; 
-      flex-direction: column; 
-      align-items: center;
-      animation: workspaceUp 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
-      margin-top: 110px;
-    }
-
-    @keyframes workspaceUp { 
-      from { 
-        opacity: 0; 
-        transform: translateY(20px); 
-      } 
-      to { 
-        opacity: 1; 
-        transform: translateY(0); 
-      } 
-    }
-
-    .header-container { 
-      width: 100%; 
-      display: flex; 
-      justify-content: center; 
-      margin-bottom: 35px; 
-    }
-
-    .card-container { 
-      display: grid; 
-      grid-template-columns: repeat(4, 1fr); 
-      gap: 20px; 
-      width: 100%; 
-      margin-bottom: 50px; 
-    }
-
-    .card {
-      background: var(--glass-bg); 
-      backdrop-filter: blur(40px) saturate(180%); 
-      -webkit-backdrop-filter: blur(40px) saturate(180%);
-      border: var(--glass-border); 
-      border-radius: 22px; 
-      padding: 24px; 
-      text-align: center;
-      box-shadow: var(--glass-shadow); 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center;
-      justify-content: space-between; 
-      gap: 20px; 
-      transition: var(--transition-spring); 
-      height: 100%;
-    }
-
-    .card:hover { 
-      transform: translateY(-4px); 
-      box-shadow: 0 30px 60px rgba(0,0,0,0.15); 
-    }
-
-    .card.qr-card { 
-      max-width: 440px; 
-      width: 100%; 
-      padding: 30px 24px; 
-    }
-
-    .card-title {
-      color: var(--text-primary); 
-      font-size: 0.9rem; 
-      font-weight: 700; 
-      text-transform: uppercase;
-      letter-spacing: 0.5px; 
-      margin: 0; 
-      opacity: 0.9;
-    }
-
-    .qr-image {
-      max-width: 210px; 
-      width: 100%; 
-      border-radius: 16px; 
-      border: var(--glass-border);
-      box-shadow: var(--glass-shadow); 
-      padding: 5px; 
-      background: white;
-    }
-
-    .qr-hint { 
-      font-size: 0.75rem; 
-      color: var(--text-secondary); 
-      margin-top: -8px; 
-      font-weight: 500; 
-    }
-
-    .copy-btn {
-      background: var(--card-bg); 
-      border: var(--card-border); 
-      color: var(--ios-blue);
-      padding: 12px 16px; 
-      font-size: 0.85rem; 
-      font-weight: 600; 
-      border-radius: 12px;
-      cursor: pointer; 
-      transition: var(--transition-spring); 
-      width: 100%; 
-      letter-spacing: 0.2px;
-    }
-
-    .copy-btn:active { 
-      transform: scale(0.95); 
-    }
-
-    .copy-btn:hover { 
-      background: var(--input-focus); 
-      color: var(--text-primary); 
-    }
-
-    .card.active { 
-      border-color: var(--ios-red); 
-      box-shadow: 0 0 20px rgba(255, 69, 58, 0.25); 
-    }
-
-    .card.active .card-title { 
-      color: var(--ios-red); 
-    }
-    
-    .codes-overlay {
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%;
-      background: rgba(0, 0, 0, 0.3); 
-      backdrop-filter: blur(15px); 
-      -webkit-backdrop-filter: blur(15px);
-      z-index: 500; 
-      opacity: 0; 
-      visibility: hidden; 
-      transition: opacity 0.4s ease, visibility 0.4s;
-    }
-
-    .codes-overlay.open { 
-      opacity: 1; 
-      visibility: visible; 
-    }
-
-    .codes-sheet {
-      position: absolute; 
-      top: 0; 
-      right: -460px; 
-      width: 100%; 
-      max-width: 440px; 
-      height: 100%;
-      background: var(--sheet-bg); 
-      border-left: var(--glass-border); 
-      padding: 35px 25px;
-      box-shadow: -10px 0 40px rgba(0,0,0,0.3); 
-      display: flex; 
-      flex-direction: column;
-      transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-
-    .codes-overlay.open .codes-sheet { 
-      right: 0; 
-    }
-
-    .sheet-header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 25px; 
-    }
-
-    .sheet-header h3 { 
-      font-size: 1.4rem; 
-      font-weight: 700; 
-      letter-spacing: -0.5px; 
-    }
-    
-    .btn-refresh-action {
-      background: rgba(10, 132, 255, 0.12); 
-      border: none; 
-      color: var(--ios-blue);
-      padding: 6px 12px; 
-      border-radius: 10px; 
-      font-size: 0.8rem; 
-      font-weight: 600;
-      cursor: pointer; 
-      transition: var(--transition-spring); 
-      display: flex; 
-      align-items: center; 
-      gap: 4px;
-    }
-
-    .btn-refresh-action:active { 
-      transform: scale(0.92); 
-      opacity: 0.8; 
-    }
-    
-    .btn-close-sheet {
-      background: rgba(118, 118, 128, 0.2); 
-      border: none; 
-      width: 30px; 
-      height: 30px; 
-      border-radius: 50%;
-      color: var(--text-primary); 
-      font-size: 0.9rem; 
-      font-weight: 700; 
-      cursor: pointer; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
-      transition: var(--transition-spring);
-    }
-
-    .btn-close-sheet:active { 
-      transform: scale(0.9); 
-    }
-
-    .codes-scroll-area { 
-      flex-grow: 1; 
-      overflow-y: auto; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 15px; 
-      padding-right: 5px; 
-    }
-    
-    .account-item-box {
-      background: rgba(255, 255, 255, 0.03); 
-      backdrop-filter: blur(35px) saturate(200%); 
-      -webkit-backdrop-filter: blur(35px) saturate(200%); 
-      border: 0.5px solid rgba(255, 255, 255, 0.12); 
-      border-radius: 20px; 
-      padding: 20px;
-      text-align: left; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 8px; 
-      transition: var(--transition-spring);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    }
-
-    [data-theme="light"] .account-item-box {
-      background: rgba(255, 255, 255, 0.45);
-      border: 0.5px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    }
-
-    .account-item-box:hover { 
-      border-color: rgba(255, 255, 255, 0.25); 
-      transform: translateY(-2px); 
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-    }
-
-    .account-header-line { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      border-bottom: 0.5px solid rgba(255, 255, 255, 0.1); 
-      padding-bottom: 8px; 
-      margin-bottom: 4px; 
-    }
-
-    [data-theme="light"] .account-header-line { 
-      border-bottom-color: rgba(0, 0, 0, 0.06); 
-    }
-
-    .platform-tag { 
-      font-size: 0.85rem; 
-      font-weight: 700; 
-      text-transform: uppercase; 
-      color: var(--ios-blue); 
-      letter-spacing: 0.3px; 
-    }
-
-    .time-tag { 
-      font-size: 0.75rem; 
-      font-weight: 600; 
-      color: var(--text-secondary); 
-      font-family: monospace; 
-    }
-
-    .credential-row { 
-      font-size: 0.85rem; 
-      color: var(--text-secondary); 
-      font-weight: 500; 
-      word-break: break-all; 
-    }
-
-    .credential-row span { 
-      color: var(--text-primary); 
-      font-weight: 600; 
-    }
-
-    .account-item-box .copy-btn-action {
-      background: rgba(255, 255, 255, 0.05);
-      border: 0.5px solid rgba(255, 255, 255, 0.1); 
-      color: var(--ios-blue);
-      padding: 12px 16px; 
-      font-size: 0.85rem; 
-      font-weight: 600; 
-      border-radius: 12px;
-      cursor: pointer; 
-      transition: var(--transition-spring); 
-      width: 100%; 
-      letter-spacing: 0.2px;
-      margin-top: 8px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 4px;
-    }
-
-    [data-theme="light"] .account-item-box .copy-btn-action { 
-      background: rgba(0, 0, 0, 0.03); 
-      border: 0.5px solid rgba(0, 0, 0, 0.06); 
-    }
-
-    .account-item-box .copy-btn-action:hover { 
-      background: var(--ios-blue); 
-      color: white; 
-      border-color: transparent; 
-      box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3); 
-    }
-
-    .account-item-box .copy-btn-action:active { 
-      transform: scale(0.95); 
-    }
-
-    /* ESTILOS DE LA TABLA DE TURNOS */
-    .shifts-table {
-        width: 100%; 
-        border-collapse: collapse; 
-        margin-top: 10px;
-    }
-
-    .shifts-table th, .shifts-table td {
-        padding: 12px 10px; 
-        text-align: center; 
-        border-bottom: 0.5px solid rgba(255,255,255,0.1);
-    }
-
-    [data-theme="light"] .shifts-table th, [data-theme="light"] .shifts-table td {
-        border-bottom: 0.5px solid rgba(0,0,0,0.1);
-    }
-
-    .shifts-table th {
-        font-size: 0.8rem; 
-        color: var(--text-secondary); 
-        text-transform: uppercase; 
-        letter-spacing: 0.5px;
-    }
-
-    .shifts-table td {
-        font-size: 0.95rem; 
-        color: var(--text-primary);
-    }
-
-    /* MODAL DE CAMBIO DE CONTRASEÑA FORZADO */
-    .password-overlay {
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6); 
-      backdrop-filter: blur(25px); 
-      -webkit-backdrop-filter: blur(25px);
-      z-index: 2000; 
-      opacity: 0; 
-      visibility: hidden; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      padding: 20px;
-      transition: opacity 0.4s ease, visibility 0.4s;
-    }
-
-    .password-overlay.open { 
-      opacity: 1; 
-      visibility: visible; 
-    }
-    
-    .password-card {
-      width: 100%; 
-      max-width: 400px; 
-      background: var(--sheet-modal-bg); 
-      border: var(--glass-border);
-      border-radius: 28px; 
-      padding: 40px 30px; 
-      box-shadow: var(--glass-shadow); 
-      position: relative;
-      animation: lockScaleUp 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-      text-align: center;
-    }
-
-    .password-card h3 { 
-      font-size: 1.4rem; 
-      font-weight: 700; 
-      margin-bottom: 10px; 
-      letter-spacing: -0.5px; 
-      color: var(--ios-red);
-    }
-
-    .password-card p {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      margin-bottom: 25px;
-      line-height: 1.4;
-    }
-
-    @media (max-width: 1200px) { 
-      .card-container { 
-        grid-template-columns: repeat(3, 1fr); 
-      } 
-    }
-
-    @media (max-width: 900px) { 
-      .global-header { 
-        flex-direction: column; 
-        padding: 15px 20px; 
-        gap: 12px; 
-      }
-      .header-search-container {
-        width: 100%;
-        max-width: 100%;
-        order: 3;
-        margin: 0;
-      }
-      .top-left-status {
-        justify-content: center;
-        width: 100%;
-        order: 1;
-      }
-      .control-container {
-        justify-content: center;
-        width: 100%;
-        order: 2;
-      }
-      .main-workspace { 
-        margin-top: 180px; 
-      }
-      .card-container { 
-        grid-template-columns: repeat(2, 1fr); 
-      } 
-      .codes-sheet { 
-        max-width: 100%; 
-        right: -100%; 
-      }
-    }
-
-    @media (max-width: 600px) { 
-      .card-container { 
-        grid-template-columns: repeat(1, 1fr); 
-      } 
-      body { 
-        padding: 0 10px 20px 10px; 
-        justify-content: flex-start; 
-      }
-      .card { 
-        padding: 20px; 
-      }
-      .login-card { 
-        padding: 35px 20px; 
-      }
-    }
-    
-    ::-webkit-scrollbar { 
-      width: 6px; 
-    }
-
-    ::-webkit-scrollbar-track { 
-      background: transparent; 
-    }
-
-    ::-webkit-scrollbar-thumb { 
-      background: var(--scrollbar-thumb); 
-      border-radius: 10px; 
-    }
-
-    #error-login-toast {
-      display: none; 
-      background: rgba(255, 69, 58, 0.15); 
-      color: var(--ios-red);
-      padding: 12px; 
-      border-radius: 12px; 
-      font-size: 0.85rem; 
-      font-weight: 600;
-      margin-bottom: 18px; 
-      border: 0.5px solid rgba(255, 69, 58, 0.25); 
-      text-align: center;
-      animation: shakeIOS 0.4s ease-in-out;
-    }
-
-    @keyframes shakeIOS { 
-      0%, 100% {transform: translateX(0);} 
-      25% {transform: translateX(-4px);} 
-      75% {transform: translateX(4px);} 
-    }
-
-    .back-link { 
-      display: block; 
-      margin-top: 22px; 
-      color: var(--ios-blue); 
-      cursor: pointer; 
-      font-size: 0.85rem; 
-      text-align: center; 
-      text-decoration: none; 
-      font-weight: 500;
-    }
-
-    .back-link:hover { 
-      text-decoration: underline; 
-    }
-  </style>
+    <style>
+        /* =========================================
+           SISTEMA DE VARIABLES MODO CLARO Y OSCURO
+           ========================================= */
+        :root {
+            --ios-blue: #0a84ff;
+            --ios-green: #30d158;
+            --ios-red: #ff453a;
+            --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
+            --transition-spring: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), 
+                                 background 0.3s ease, 
+                                 color 0.3s ease, 
+                                 border-color 0.3s ease, 
+                                 box-shadow 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --page-bg: #000000;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(235, 235, 245, 0.6);
+            --glass-bg: rgba(30, 30, 35, 0.45);
+            --glass-border: 0.5px solid rgba(255, 255, 255, 0.15);
+            --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), 
+                            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(44, 44, 46, 0.4);
+            --card-border: 0.5px solid rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --input-focus: rgba(255, 255, 255, 0.12);
+            --orb-1: rgba(10, 132, 255, 0.35); 
+            --orb-2: rgba(255, 69, 58, 0.3);   
+            --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+            --sheet-bg: rgba(25, 25, 27, 0.85);
+            --sheet-modal-bg: rgba(30, 30, 30, 0.95);
+        }
+
+        [data-theme="light"] {
+            color-scheme: light;
+            --ios-blue: #007aff;
+            --ios-green: #34c759;
+            --ios-red: #ff3b30;
+            --page-bg: #f2f2f7;
+            --text-primary: #000000;
+            --text-secondary: rgba(60, 60, 67, 0.6);
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: 0.5px solid rgba(0, 0, 0, 0.1);
+            --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.06), 
+                            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: 0.5px solid rgba(0, 0, 0, 0.06);
+            --input-bg: rgba(118, 118, 128, 0.12);
+            --input-focus: rgba(118, 118, 128, 0.22);
+            --orb-1: rgba(10, 132, 255, 0.08);
+            --orb-2: rgba(255, 69, 58, 0.05);
+            --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+            --sheet-bg: rgba(255, 255, 255, 0.85);
+            --sheet-modal-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body { 
+            background-color: var(--page-bg); 
+            color: var(--text-primary); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            min-height: 100vh; 
+            padding: 0 20px 30px 20px; 
+            position: relative; 
+            overflow-x: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        .bg-orb-1 {
+            position: fixed; 
+            top: -15%; 
+            left: -10%; 
+            width: 55vw; 
+            height: 55vw;
+            background: radial-gradient(circle, var(--orb-1) 0%, transparent 75%); 
+            z-index: -1; 
+            pointer-events: none;
+        }
+
+        .bg-orb-2 {
+            position: fixed; 
+            bottom: -15%; 
+            right: -10%; 
+            width: 55vw; 
+            height: 55vw;
+            background: radial-gradient(circle, var(--orb-2) 0%, transparent 75%); 
+            z-index: -1; 
+            pointer-events: none;
+        }
+
+        .global-header {
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 100%;
+            background: rgba(20, 20, 22, 0.75);
+            backdrop-filter: blur(35px) saturate(200%);
+            -webkit-backdrop-filter: blur(35px) saturate(200%);
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.15);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 400;
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+
+        [data-theme="light"] .global-header {
+            background: rgba(255, 255, 255, 0.75);
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .top-left-status {
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+        }
+
+        .staff-badge {
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            border: var(--glass-border); 
+            color: var(--ios-blue); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 10px 16px; 
+            border-radius: 20px; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            letter-spacing: 0.3px;
+        }
+
+        .timer-badge {
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            border: var(--glass-border); 
+            color: var(--ios-green); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 10px 16px; 
+            border-radius: 20px; 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            font-variant-numeric: tabular-nums;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .control-container {
+            display: flex; 
+            gap: 12px; 
+            align-items: center;
+        }
+        
+        .interface-control-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px); 
+            border: var(--glass-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            cursor: pointer; 
+            transition: var(--transition-spring); 
+            color: var(--text-primary);
+        }
+
+        .interface-control-item:active { 
+            transform: scale(0.9); 
+        }
+        
+        .circle-control { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            padding: 0; 
+        }
+        
+        .pill-codes-control {
+            padding: 10px 20px; 
+            border-radius: 22px;
+            font-size: 0.88rem; 
+            font-weight: 700; 
+            color: var(--ios-blue); 
+            gap: 7px; 
+            background: rgba(10, 132, 255, 0.05); 
+            border: 0.5px solid rgba(10, 132, 255, 0.2);
+        }
+        
+        .pill-sale-control {
+            padding: 10px 20px; 
+            border-radius: 22px;
+            font-size: 0.88rem; 
+            font-weight: 700; 
+            color: var(--ios-green); 
+            gap: 7px; 
+            background: rgba(48, 209, 88, 0.1); 
+            border: 0.5px solid rgba(48, 209, 88, 0.3);
+        }
+
+        .pill-shifts-control {
+            padding: 10px 20px; 
+            border-radius: 22px;
+            font-size: 0.88rem; 
+            font-weight: 700; 
+            color: #ffcc00; 
+            gap: 7px; 
+            background: rgba(255, 204, 0, 0.1); 
+            border: 0.5px solid rgba(255, 204, 0, 0.3);
+        }
+
+        .header-search-container {
+            flex-grow: 1; 
+            max-width: 460px; 
+            margin: 0 20px; 
+            position: relative; 
+            display: flex; 
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%; 
+            padding: 12px 20px 12px 44px; 
+            border-radius: 14px; 
+            border: var(--glass-border);
+            background: var(--input-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") no-repeat 16px center;
+            color: var(--text-primary); 
+            font-size: 0.95rem; 
+            outline: none; 
+            transition: var(--transition-spring);
+        }
+
+        .search-input:focus { 
+            background: var(--input-focus); 
+            border-color: var(--ios-blue); 
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2); 
+        }
+
+        .search-input::placeholder { 
+            color: var(--text-secondary); 
+        }
+
+        .login-overlay {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px;
+            transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.5s;
+        }
+
+        .login-overlay.hidden { 
+            opacity: 0; 
+            visibility: hidden; 
+            pointer-events: none; 
+        }
+        
+        .login-card {
+            width: 100%; 
+            max-width: 380px; 
+            padding: 40px 30px;
+            background: var(--glass-bg); 
+            border: var(--glass-border); 
+            border-radius: 28px;
+            box-shadow: var(--glass-shadow); 
+            text-align: center;
+            animation: lockScaleUp 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @keyframes lockScaleUp { 
+            from { 
+                transform: scale(0.95); 
+                opacity: 0; 
+            } 
+            to { 
+                transform: scale(1); 
+                opacity: 1; 
+            } 
+        }
+
+        .avatar-staff {
+            width: 74px; 
+            height: 74px; 
+            border-radius: 50%; 
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            margin: 0 auto 18px auto; 
+            display: flex;
+            align-items: center; 
+            justify-content: center; 
+            color: var(--ios-blue);
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.1);
+        }
+        
+        .login-card h2 { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            letter-spacing: -0.5px; 
+            margin-bottom: 6px; 
+            color: var(--text-primary); 
+        }
+
+        .login-card .lock-instruction { 
+            font-size: 0.9rem; 
+            color: var(--text-secondary); 
+            margin-bottom: 25px; 
+            font-weight: 400; 
+        }
+
+        .ios-input-block {
+            width: 100%; 
+            padding: 14px 16px; 
+            margin-bottom: 12px; 
+            border-radius: 12px;
+            border: var(--glass-border); 
+            background: var(--input-bg); 
+            color: var(--text-primary);
+            text-align: left; 
+            font-size: 0.95rem; 
+            outline: none; 
+            transition: var(--transition-spring);
+        }
+
+        .ios-input-block:focus { 
+            background: var(--input-focus); 
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25);
+        }
+
+        .ios-input-block::placeholder { 
+            color: var(--text-secondary); 
+            opacity: 0.7; 
+        }
+
+        .remember-row {
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            margin-bottom: 18px; 
+            margin-top: 5px;
+        }
+
+        .remember-row input[type="checkbox"] { 
+            width: 16px; 
+            height: 16px; 
+            margin: 0; 
+            cursor: pointer; 
+            accent-color: var(--ios-blue); 
+        }
+
+        .remember-row label { 
+            color: var(--text-secondary); 
+            font-size: 0.85rem; 
+            font-weight: 500; 
+            cursor: pointer; 
+            user-select: none; 
+        }
+
+        .btn-login-action {
+            background: var(--ai-gradient); 
+            color: white; 
+            border: none; 
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.35); 
+            padding: 14px; 
+            border-radius: 12px;
+            width: 100%; 
+            font-size: 0.95rem; 
+            cursor: pointer; 
+            transition: var(--transition-spring);
+            margin-top: 5px; 
+            display: block; 
+            text-align: center;
+        }
+
+        .btn-login-action:active { 
+            transform: scale(0.96); 
+            opacity: 0.9; 
+        }
+
+        .main-workspace {
+            display: none; 
+            width: 100%; 
+            max-width: 1300px; 
+            flex-direction: column; 
+            align-items: center;
+            animation: workspaceUp 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
+            margin-top: 110px;
+        }
+
+        @keyframes workspaceUp { 
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+
+        .header-container { 
+            width: 100%; 
+            display: flex; 
+            justify-content: center; 
+            margin-bottom: 35px; 
+        }
+
+        .card-container { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 20px; 
+            width: 100%; 
+            margin-bottom: 50px; 
+        }
+
+        .card {
+            background: var(--glass-bg); 
+            backdrop-filter: blur(40px) saturate(180%); 
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: var(--glass-border); 
+            border-radius: 22px; 
+            padding: 24px; 
+            text-align: center;
+            box-shadow: var(--glass-shadow); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            justify-content: space-between; 
+            gap: 20px; 
+            transition: var(--transition-spring); 
+            height: 100%;
+        }
+
+        .card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15); 
+        }
+
+        .card.qr-card { 
+            max-width: 440px; 
+            width: 100%; 
+            padding: 30px 24px; 
+        }
+
+        .card-title {
+            color: var(--text-primary); 
+            font-size: 0.9rem; 
+            font-weight: 700; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px; 
+            margin: 0; 
+            opacity: 0.9;
+        }
+
+        .qr-image {
+            max-width: 210px; 
+            width: 100%; 
+            border-radius: 16px; 
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow); 
+            padding: 5px; 
+            background: white;
+        }
+
+        .qr-hint { 
+            font-size: 0.75rem; 
+            color: var(--text-secondary); 
+            margin-top: -8px; 
+            font-weight: 500; 
+        }
+
+        .copy-btn {
+            background: var(--card-bg); 
+            border: var(--card-border); 
+            color: var(--ios-blue);
+            padding: 12px 16px; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            border-radius: 12px;
+            cursor: pointer; 
+            transition: var(--transition-spring); 
+            width: 100%; 
+            letter-spacing: 0.2px;
+        }
+
+        .copy-btn:active { 
+            transform: scale(0.95); 
+        }
+
+        .copy-btn:hover { 
+            background: var(--input-focus); 
+            color: var(--text-primary); 
+        }
+
+        .card.active { 
+            border-color: var(--ios-red); 
+            box-shadow: 0 0 20px rgba(255, 69, 58, 0.25); 
+        }
+
+        .card.active .card-title { 
+            color: var(--ios-red); 
+        }
+        
+        .codes-overlay {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 500; 
+            opacity: 0; 
+            visibility: hidden; 
+            transition: opacity 0.4s ease, visibility 0.4s;
+        }
+
+        .codes-overlay.open { 
+            opacity: 1; 
+            visibility: visible; 
+        }
+
+        .codes-sheet {
+            position: absolute; 
+            top: 0; 
+            right: -460px; 
+            width: 100%; 
+            max-width: 440px; 
+            height: 100%;
+            background: var(--sheet-bg); 
+            border-left: var(--glass-border); 
+            padding: 35px 25px;
+            box-shadow: -10px 0 40px rgba(0,0,0,0.3); 
+            display: flex; 
+            flex-direction: column;
+            transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .codes-overlay.open .codes-sheet { 
+            right: 0; 
+        }
+
+        .sheet-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px; 
+        }
+
+        .sheet-header h3 { 
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            letter-spacing: -0.5px; 
+        }
+        
+        .btn-refresh-action {
+            background: rgba(10, 132, 255, 0.12); 
+            border: none; 
+            color: var(--ios-blue);
+            padding: 6px 12px; 
+            border-radius: 10px; 
+            font-size: 0.8rem; 
+            font-weight: 600;
+            cursor: pointer; 
+            transition: var(--transition-spring); 
+            display: flex; 
+            align-items: center; 
+            gap: 4px;
+        }
+
+        .btn-refresh-action:active { 
+            transform: scale(0.92); 
+            opacity: 0.8; 
+        }
+        
+        .btn-close-sheet {
+            background: rgba(118, 118, 128, 0.2); 
+            border: none; 
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%;
+            color: var(--text-primary); 
+            font-size: 0.9rem; 
+            font-weight: 700; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: var(--transition-spring);
+        }
+
+        .btn-close-sheet:active { 
+            transform: scale(0.9); 
+        }
+
+        .codes-scroll-area { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            padding-right: 5px; 
+        }
+        
+        .account-item-box {
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(35px) saturate(200%); 
+            -webkit-backdrop-filter: blur(35px) saturate(200%); 
+            border: 0.5px solid rgba(255, 255, 255, 0.12); 
+            border-radius: 20px; 
+            padding: 20px;
+            text-align: left; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            transition: var(--transition-spring);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        [data-theme="light"] .account-item-box {
+            background: rgba(255, 255, 255, 0.45);
+            border: 0.5px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .account-item-box:hover { 
+            border-color: rgba(255, 255, 255, 0.25); 
+            transform: translateY(-2px); 
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .account-header-line { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1); 
+            padding-bottom: 8px; 
+            margin-bottom: 4px; 
+        }
+
+        [data-theme="light"] .account-header-line { 
+            border-bottom-color: rgba(0, 0, 0, 0.06); 
+        }
+
+        .platform-tag { 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            color: var(--ios-blue); 
+            letter-spacing: 0.3px; 
+        }
+
+        .time-tag { 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            color: var(--text-secondary); 
+            font-family: monospace; 
+        }
+
+        .credential-row { 
+            font-size: 0.85rem; 
+            color: var(--text-secondary); 
+            font-weight: 500; 
+            word-break: break-all; 
+        }
+
+        .credential-row span { 
+            color: var(--text-primary); 
+            font-weight: 600; 
+        }
+
+        .account-item-box .copy-btn-action {
+            background: rgba(255, 255, 255, 0.05);
+            border: 0.5px solid rgba(255, 255, 255, 0.1); 
+            color: var(--ios-blue);
+            padding: 12px 16px; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            border-radius: 12px;
+            cursor: pointer; 
+            transition: var(--transition-spring); 
+            width: 100%; 
+            letter-spacing: 0.2px;
+            margin-top: 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 4px;
+        }
+
+        [data-theme="light"] .account-item-box .copy-btn-action { 
+            background: rgba(0, 0, 0, 0.03); 
+            border: 0.5px solid rgba(0, 0, 0, 0.06); 
+        }
+
+        .account-item-box .copy-btn-action:hover { 
+            background: var(--ios-blue); 
+            color: white; 
+            border-color: transparent; 
+            box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3); 
+        }
+
+        .account-item-box .copy-btn-action:active { 
+            transform: scale(0.95); 
+        }
+
+        .shifts-table {
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px;
+        }
+
+        .shifts-table th, .shifts-table td {
+            padding: 12px 10px; 
+            text-align: center; 
+            border-bottom: 0.5px solid rgba(255,255,255,0.1);
+        }
+
+        [data-theme="light"] .shifts-table th, [data-theme="light"] .shifts-table td {
+            border-bottom: 0.5px solid rgba(0,0,0,0.1);
+        }
+
+        .shifts-table th {
+            font-size: 0.8rem; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+
+        .shifts-table td {
+            font-size: 0.95rem; 
+            color: var(--text-primary);
+        }
+
+        .password-overlay {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6); 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            z-index: 2000; 
+            opacity: 0; 
+            visibility: hidden; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px;
+            transition: opacity 0.4s ease, visibility 0.4s;
+        }
+
+        .password-overlay.open { 
+            opacity: 1; 
+            visibility: visible; 
+        }
+        
+        .password-card {
+            width: 100%; 
+            max-width: 400px; 
+            background: var(--sheet-modal-bg); 
+            border: var(--glass-border);
+            border-radius: 28px; 
+            padding: 40px 30px; 
+            box-shadow: var(--glass-shadow); 
+            position: relative;
+            animation: lockScaleUp 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            text-align: center;
+        }
+
+        .password-card h3 { 
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            margin-bottom: 10px; 
+            letter-spacing: -0.5px; 
+            color: var(--ios-red);
+        }
+
+        .password-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 1200px) { 
+            .card-container { 
+                grid-template-columns: repeat(3, 1fr); 
+            } 
+        }
+
+        @media (max-width: 900px) { 
+            .global-header { 
+                flex-direction: column; 
+                padding: 15px 20px; 
+                gap: 12px; 
+            }
+            .header-search-container {
+                width: 100%;
+                max-width: 100%;
+                order: 3;
+                margin: 0;
+            }
+            .top-left-status {
+                justify-content: center;
+                width: 100%;
+                order: 1;
+            }
+            .control-container {
+                justify-content: center;
+                width: 100%;
+                order: 2;
+            }
+            .main-workspace { 
+                margin-top: 180px; 
+            }
+            .card-container { 
+                grid-template-columns: repeat(2, 1fr); 
+            } 
+            .codes-sheet { 
+                max-width: 100%; 
+                right: -100%; 
+            }
+        }
+
+        @media (max-width: 600px) { 
+            .card-container { 
+                grid-template-columns: repeat(1, 1fr); 
+            } 
+            body { 
+                padding: 0 10px 20px 10px; 
+                justify-content: flex-start; 
+            }
+            .card { 
+                padding: 20px; 
+            }
+            .login-card { 
+                padding: 35px 20px; 
+            }
+        }
+        
+        ::-webkit-scrollbar { 
+            width: 6px; 
+        }
+
+        ::-webkit-scrollbar-track { 
+            background: transparent; 
+        }
+
+        ::-webkit-scrollbar-thumb { 
+            background: var(--scrollbar-thumb); 
+            border-radius: 10px; 
+        }
+
+        #error-login-toast {
+            display: none; 
+            background: rgba(255, 69, 58, 0.15); 
+            color: var(--ios-red);
+            padding: 12px; 
+            border-radius: 12px; 
+            font-size: 0.85rem; 
+            font-weight: 600;
+            margin-bottom: 18px; 
+            border: 0.5px solid rgba(255, 69, 58, 0.25); 
+            text-align: center;
+            animation: shakeIOS 0.4s ease-in-out;
+        }
+
+        @keyframes shakeIOS { 
+            0%, 100% {transform: translateX(0);} 
+            25% {transform: translateX(-4px);} 
+            75% {transform: translateX(4px);} 
+        }
+
+        .back-link { 
+            display: block; 
+            margin-top: 22px; 
+            color: var(--ios-blue); 
+            cursor: pointer; 
+            font-size: 0.85rem; 
+            text-align: center; 
+            text-decoration: none; 
+            font-weight: 500;
+        }
+
+        .back-link:hover { 
+            text-decoration: underline; 
+        }
+    </style>
 </head>
 <body>
 
-  <div class="bg-orb-1"></div>
-  <div class="bg-orb-2"></div>
+    <div class="bg-orb-1"></div>
+    <div class="bg-orb-2"></div>
 
-  <header class="global-header" id="globalHeader" style="display: none;">
-      <div class="top-left-status" id="staffStatusBar">
-          <div class="staff-badge">
-            <span id="staffSessionName">USER</span> • PORTAL DE MENSAJES
-          </div>
-          <div class="timer-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span id="shiftTimer">00:00:00</span>
-          </div>
-      </div>
+    <header class="global-header" id="globalHeader" style="display: none;">
+        <div class="top-left-status" id="staffStatusBar">
+            <div class="staff-badge">
+                <span id="staffSessionName">USER</span> • PORTAL DE MENSAJES
+            </div>
+            <div class="timer-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span id="shiftTimer">00:00:00</span>
+            </div>
+        </div>
 
-      <div class="header-search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="Buscar respuesta rápida...">
-      </div>
+        <div class="header-search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar respuesta rápida...">
+        </div>
 
-      <div class="control-container" id="controlPanel">
-          <button class="interface-control-item pill-shifts-control" onclick="toggleShiftsPanel()">🕒 TURNOS</button>
-          <button class="interface-control-item pill-sale-control" onclick="togglePasswordModal()">🔑 CLAVE</button>
-          <button class="interface-control-item pill-codes-control" onclick="toggleCodesPanel()">🔑 CÓDIGOS</button>
-          <button class="interface-control-item circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema"></button>
-          <button class="interface-control-item circle-control" onclick="cerrarSesionStaff()" aria-label="Cerrar Sesión" style="color: var(--ios-red);">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          </button>
-      </div>
-  </header>
+        <div class="control-container" id="controlPanel">
+            <button class="interface-control-item pill-shifts-control" onclick="toggleShiftsPanel()">🕒 TURNOS</button>
+            <button class="interface-control-item pill-sale-control" onclick="togglePasswordModal()">🔑 CLAVE</button>
+            <button class="interface-control-item pill-codes-control" onclick="toggleCodesPanel()">🔑 CÓDIGOS</button>
+            <button class="interface-control-item circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema"></button>
+            <button class="interface-control-item circle-control" onclick="cerrarSesionStaff()" aria-label="Cerrar Sesión" style="color: var(--ios-red);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </button>
+        </div>
+    </header>
 
-  <div class="codes-overlay" id="shiftsOverlay" onclick="toggleShiftsPanel()">
-      <div class="codes-sheet" onclick="event.stopPropagation()">
-          <div class="sheet-header">
-              <h3>Registro de Turnos</h3>
-              <div style="display: flex; gap: 8px; align-items: center;">
-                  <button class="btn-refresh-action" onclick="forzarRefrescoDeHoras()">🔄 Refrescar</button>
-                  <button class="btn-close-sheet" onclick="toggleShiftsPanel()">✕</button>
-              </div>
-          </div>
-          <div class="search-container" style="max-width: 100%; margin-bottom: 20px;">
-              <input type="text" id="searchShiftsInput" class="search-input" placeholder="🔍 Buscar por vendedor o fecha..." oninput="filtrarHorasInternas()">
-          </div>
-          <div class="codes-scroll-area" id="shiftsScrollArea">
-              </div>
-      </div>
-  </div>
-
-  <div class="codes-overlay" id="codesOverlay" onclick="toggleCodesPanel()">
-      <div class="codes-sheet" onclick="event.stopPropagation()">
-          <div class="sheet-header">
-              <h3>Bandeja de Códigos</h3>
-              <div style="display: flex; gap: 8px; align-items: center;">
-                  <button class="btn-refresh-action" onclick="forzarRefrescoDeCodigos()">🔄 Refrescar</button>
-                  <button class="btn-close-sheet" onclick="toggleCodesPanel()">✕</button>
-              </div>
-          </div>
-          <div class="search-container" style="max-width: 100%; margin-bottom: 20px;">
-              <input type="text" id="searchCodesInput" class="search-input" placeholder="🔍 Buscar por asunto o etiqueta..." oninput="filtrarCodigosInternos()">
-          </div>
-          <div class="codes-scroll-area" id="codesScrollArea">
-          </div>
-      </div>
-  </div>
-
-  <div class="password-overlay" id="passwordOverlay">
-      <div class="password-card" onclick="event.stopPropagation()">
-          <h3 id="passwordModalTitle">⚠️ Actualización Obligatoria</h3>
-          <p id="passwordModalDesc">Por seguridad y políticas del sistema, debes cambiar tu contraseña predeterminada para poder ingresar al panel operativo.</p>
-          <form id="passwordForm" onsubmit="ejecutarCambioClaveForzado(event)">
-              <input type="password" id="oldPasswordForzado" class="ios-input-block" placeholder="Contraseña Actual" style="display:none;" required>
-              <input type="password" id="newPasswordForzado" class="ios-input-block" placeholder="Escribe tu nueva clave" required>
-              <input type="password" id="confirmNewPasswordForzado" class="ios-input-block" placeholder="Confirma tu nueva clave" required>
-              
-              <button type="submit" id="btnSubmitPasswordForzado" class="btn-login-action" style="background:var(--ai-gradient); box-shadow:0 4px 15px rgba(10,132,255,0.35);">Guardar y Entrar al Sistema</button>
-              <button type="button" id="btnCancelPasswordForzado" class="btn-login-action" style="background:rgba(118, 118, 128, 0.2); color:var(--text-primary); box-shadow:none; margin-top: 10px;" onclick="cancelarCambioYSalir()">Cancelar y Salir</button>
-          </form>
-      </div>
-  </div>
-
-  <div class="login-overlay" id="loginOverlay">
-    <div class="login-card">
-      <div class="avatar-staff">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-      </div>
-      <h2>Cybernet Staff</h2>
-      <p class="lock-instruction">Introduce tus credenciales autorizadas.</p>
-      
-      <div id="error-login-toast"></div>
-
-      <form id="loginForm" action="#" onsubmit="validateStaffAccess(event)">
-          <input type="text" id="staffUser" name="username" class="ios-input-block" placeholder="Nombre de Usuario" autocomplete="username" spellcheck="false" required>
-          <input type="password" id="staffPass" name="password" class="ios-input-block" placeholder="Contraseña Especial" autocomplete="current-password" required>
-          
-          <div class="remember-row">
-              <input type="checkbox" id="rememberMe">
-              <label for="rememberMe">Mantener sesión iniciada</label>
-          </div>
-
-          <button type="submit" class="btn-login-action">Verificar Identidad</button>
-      </form>
-      
-      <a href="/" class="back-link">← Volver al Portal de Clientes</a>
+    <div class="codes-overlay" id="shiftsOverlay" onclick="toggleShiftsPanel()">
+        <div class="codes-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-header">
+                <h3>Registro de Turnos</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-refresh-action" onclick="forzarRefrescoDeHoras()">🔄 Refrescar</button>
+                    <button class="btn-close-sheet" onclick="toggleShiftsPanel()">✕</button>
+                </div>
+            </div>
+            <div class="search-container" style="max-width: 100%; margin-bottom: 20px;">
+                <input type="text" id="searchShiftsInput" class="search-input" placeholder="🔍 Buscar por vendedor o fecha..." oninput="filtrarHorasInternas()">
+            </div>
+            <div class="codes-scroll-area" id="shiftsScrollArea">
+                </div>
+        </div>
     </div>
-  </div>
 
-  <div class="main-workspace" id="mainWorkspace">
-      <div id="header-container" class="header-container"></div>
-      <div id="grid-container" class="card-container"></div>
-  </div>
+    <div class="codes-overlay" id="codesOverlay" onclick="toggleCodesPanel()">
+        <div class="codes-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-header">
+                <h3>Bandeja de Códigos</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-refresh-action" onclick="forzarRefrescoDeCodigos()">🔄 Refrescar</button>
+                    <button class="btn-close-sheet" onclick="toggleCodesPanel()">✕</button>
+                </div>
+            </div>
+            <div class="search-container" style="max-width: 100%; margin-bottom: 20px;">
+                <input type="text" id="searchCodesInput" class="search-input" placeholder="🔍 Buscar por asunto o etiqueta..." oninput="filtrarCodigosInternos()">
+            </div>
+            <div class="codes-scroll-area" id="codesScrollArea">
+                </div>
+        </div>
+    </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
-  
-  <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPh1eFcrTAVA-oBdyWG4E-jzhPZS_PnHuixdtcj_nbTemK0Xe6jtu1IzuXsej7Ib8V/exec";
+    <div class="password-overlay" id="passwordOverlay">
+        <div class="password-card" onclick="event.stopPropagation()">
+            <h3 id="passwordModalTitle">⚠️ Actualización Obligatoria</h3>
+            <p id="passwordModalDesc">Por seguridad y políticas del sistema, debes cambiar tu contraseña predeterminada para poder ingresar al panel operativo.</p>
+            <form id="passwordForm" onsubmit="ejecutarCambioClaveForzado(event)">
+                <input type="password" id="oldPasswordForzado" class="ios-input-block" placeholder="Contraseña Actual" style="display:none;" required>
+                <input type="password" id="newPasswordForzado" class="ios-input-block" placeholder="Escribe tu nueva clave" required>
+                <input type="password" id="confirmNewPasswordForzado" class="ios-input-block" placeholder="Confirma tu nueva clave" required>
+                
+                <button type="submit" id="btnSubmitPasswordForzado" class="btn-login-action" style="background:var(--ai-gradient); box-shadow:0 4px 15px rgba(10,132,255,0.35);">Guardar y Entrar al Sistema</button>
+                <button type="button" id="btnCancelPasswordForzado" class="btn-login-action" style="background:rgba(118, 118, 128, 0.2); color:var(--text-primary); box-shadow:none; margin-top: 10px;" onclick="cancelarCambioYSalir()">Cancelar y Salir</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <div class="avatar-staff">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <h2>Cybernet Staff</h2>
+            <p class="lock-instruction">Introduce tus credenciales autorizadas.</p>
+            
+            <div id="error-login-toast"></div>
+
+            <form id="loginForm" action="#" onsubmit="validateStaffAccess(event)">
+                <input type="text" id="staffUser" name="username" class="ios-input-block" placeholder="Nombre de Usuario" autocomplete="username" spellcheck="false" required>
+                <input type="password" id="staffPass" name="password" class="ios-input-block" placeholder="Contraseña Especial" autocomplete="current-password" required>
+                
+                <div class="remember-row">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Mantener sesión iniciada</label>
+                </div>
+
+                <button type="submit" class="btn-login-action">Verificar Identidad</button>
+            </form>
+            
+            <a href="/" class="back-link">← Volver al Portal de Clientes</a>
+        </div>
+    </div>
+
+    <div class="main-workspace" id="mainWorkspace">
+        <div id="header-container" class="header-container"></div>
+        <div id="grid-container" class="card-container"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
     
-    // LISTA MAESTRA DE CONTRASEÑAS PREDETERMINADAS
-    const defaultPasswords = {
-      "KATHERINE": "CyberStaff*Kath9",
-      "MANUEL": "CyberStaff*Manu2",
-      "PABLO": "CyberStaff*Pabl4",
-      "ANGELICA": "CyberStaff*Ange7",
-      "CAMILO": "CyberStaff*Cami3"
-    };
-
-    let timerInterval = null;
-    let autoRefreshCodesInterval = null; 
-    let isFetchingCodes = false; 
-    window.currentCodesStock = []; 
-    
-    let isFetchingHoras = false;
-    window.currentHorasStock = [];
-
-    let temporizadorInactividad = null;
-    let isTimerPaused = false;
-
-    const INACTIVITY_LIMIT = 5 * 60 * 1000; 
-
-    window.pendingUser = "";
-    window.pendingOldPass = "";
-    window.pendingRemember = false;
-    window.isForcedChange = false;
-
-    function haptic() { 
-      if (navigator.vibrate) {
-        navigator.vibrate(15); 
-      }
-    }
-
-    function toggleTheme() {
-        haptic();
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('cyber_theme', newTheme);
-        updateThemeIcon(newTheme);
-    }
-
-    function updateThemeIcon(theme) {
-        const btn = document.getElementById('theme-toggle');
-        if (!btn) return;
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPh1eFcrTAVA-oBdyWG4E-jzhPZS_PnHuixdtcj_nbTemK0Xe6jtu1IzuXsej7Ib8V/exec";
         
-        if (theme === 'light') {
-            btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
-        } else {
-            btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
-        }
-    }
+        const defaultPasswords = {
+            "KATHERINE": "CyberStaff*Kath9",
+            "MANUEL": "CyberStaff*Manu2",
+            "PABLO": "CyberStaff*Pabl4",
+            "ANGELICA": "CyberStaff*Ange7",
+            "CAMILO": "CyberStaff*Cami3"
+        };
 
-    // ================= MÓDULO DE TABLA DE TURNOS SEMANALES ================= //
-    function toggleShiftsPanel() {
-        haptic();
-        const overlay = document.getElementById('shiftsOverlay');
-        overlay.classList.toggle('open');
+        let timerInterval = null;
+        let autoRefreshCodesInterval = null; 
+        let isFetchingCodes = false; 
+        window.currentCodesStock = []; 
         
-        if (overlay.classList.contains('open')) {
-            forzarRefrescoDeHoras();
-        }
-    }
+        let isFetchingHoras = false;
+        window.currentHorasStock = [];
 
-    function forzarRefrescoDeHoras() {
-        haptic();
-        document.getElementById('shiftsScrollArea').innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando Base de Horas...</div>';
-        cargarHorasDesdeSheets();
-    }
+        let temporizadorInactividad = null;
+        let temporizadorCierreTotal = null;
+        let isTimerPaused = false;
 
-    function cargarHorasDesdeSheets() {
-        if (isFetchingHoras) {
-            return;
-        }
-        isFetchingHoras = true;
-        
-        const oldScript = document.getElementById('cyber_shifts_node');
-        if (oldScript) {
-            oldScript.remove();
-        }
+        const INACTIVITY_LIMIT = 5 * 60 * 1000; 
+        const INACTIVITY_LOGOUT_LIMIT = 20 * 60 * 1000; 
 
-        const scriptElement = document.createElement('script');
-        scriptElement.id = 'cyber_shifts_node';
-        scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerHoras&callback=procesarHorasSheets&_ts=" + Date.now();
-        document.body.appendChild(scriptElement);
-    }
+        window.pendingUser = "";
+        window.pendingOldPass = "";
+        window.pendingRemember = false;
+        window.isForcedChange = false;
 
-    window.procesarHorasSheets = function(res) {
-        isFetchingHoras = false;
-        
-        const oldScript = document.getElementById('cyber_shifts_node');
-        if (oldScript) {
-            oldScript.remove();
-        }
-
-        const container = document.getElementById('shiftsScrollArea');
-        
-        if (res && res.status === "success") {
-            window.currentHorasStock = res.data; 
-            
-            if (document.getElementById('shiftsOverlay').classList.contains('open')) {
-                renderizarHorasEnPantalla();
-            }
-        } else {
-            if (container) {
-                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No se pudo cargar los turnos.</div>`;
+        function haptic() { 
+            if (navigator.vibrate) {
+                navigator.vibrate(15); 
             }
         }
-    };
 
-    function parseDate(fechaStr) {
-        let parts = fechaStr.split(' ');
-        if(parts.length < 2) return new Date();
-        
-        let dateParts = parts[0].split('/');
-        if(dateParts.length < 3) return new Date();
-        
-        return new Date(dateParts[2], parseInt(dateParts[1]) - 1, dateParts[0]);
-    }
-
-    function esMismaSemana(fechaStr) {
-        let d = parseDate(fechaStr);
-        let hoy = new Date();
-        
-        let day = hoy.getDay() || 7; 
-        let lunes = new Date(hoy);
-        lunes.setDate(hoy.getDate() - day + 1);
-        lunes.setHours(0,0,0,0);
-        
-        let domingo = new Date(lunes);
-        domingo.setDate(lunes.getDate() + 6);
-        domingo.setHours(23,59,59,999);
-        
-        return d >= lunes && d <= domingo;
-    }
-
-    function renderizarHorasEnPantalla() {
-        const container = document.getElementById('shiftsScrollArea');
-        if (!container) return;
-        
-        const userActivo = sessionStorage.getItem('active_staff') || "";
-        
-        // Filtramos para mostrar únicamente los turnos del usuario en esta semana
-        let misHoras = window.currentHorasStock.filter(item => {
-            return item.vendedor.toUpperCase() === userActivo.toUpperCase() && esMismaSemana(item.fecha);
-        });
-        
-        if (misHoras.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No tienes turnos registrados en la semana actual.</div>';
-            return;
-        }
-        
-        let resumenDiario = {};
-        
-        misHoras.forEach(item => {
-            let d = parseDate(item.fecha);
-            let dateKey = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
-            let dayOfWeek = d.getDay(); 
+        function toggleTheme() {
+            haptic();
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            let newTheme = '';
             
-            if(!resumenDiario[dateKey]) {
-                resumenDiario[dateKey] = {
-                    dateObj: d,
-                    dayOfWeek: dayOfWeek,
-                    totalSeconds: 0
-                };
-            }
-            
-            let timeParts = item.tiempo.split(':');
-            if(timeParts.length === 3) {
-                let sec = parseInt(timeParts[0]) * 3600 + parseInt(timeParts[1]) * 60 + parseInt(timeParts[2]);
-                resumenDiario[dateKey].totalSeconds += sec;
-            }
-        });
-        
-        let diasArray = Object.keys(resumenDiario).map(k => {
-            let r = resumenDiario[k];
-            let decimalHours = r.totalSeconds / 3600;
-            let pay = 0;
-            
-            if (r.dayOfWeek === 0) { 
-                // Domingo = Pago cerrado
-                pay = 150000;
+            if (currentTheme === 'light') {
+                newTheme = 'dark';
             } else {
-                // Lunes a Sabado = 8000 por hora
-                pay = decimalHours * 8000;
+                newTheme = 'light';
+            }
+
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('cyber_theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            if (!btn) {
+                return;
             }
             
-            let h = Math.floor(r.totalSeconds / 3600);
-            let m = Math.floor((r.totalSeconds % 3600) / 60);
-            let s = r.totalSeconds % 60;
-            let fmtTime = String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
+            if (theme === 'light') {
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+            } else {
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+            }
+        }
 
-            return {
-                fechaText: k,
-                dateObj: r.dateObj,
-                diaNombre: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][r.dayOfWeek],
-                hoursFmt: fmtTime,
-                pay: pay
-            };
-        });
-        
-        // Ordenamos los días cronológicamente
-        diasArray.sort((a,b) => a.dateObj - b.dateObj);
-        
-        let totalPay = diasArray.reduce((acc, curr) => acc + curr.pay, 0);
-        let totalSecs = diasArray.reduce((acc, curr) => acc + (curr.dateObj ? resumenDiario[curr.fechaText].totalSeconds : 0), 0);
-        
-        let tH = Math.floor(totalSecs / 3600);
-        let tM = Math.floor((totalSecs % 3600) / 60);
-        let tFmt = String(tH).padStart(2,'0') + "h " + String(tM).padStart(2,'0') + "m";
+        function toggleShiftsPanel() {
+            haptic();
+            const overlay = document.getElementById('shiftsOverlay');
+            overlay.classList.toggle('open');
+            
+            if (overlay.classList.contains('open')) {
+                forzarRefrescoDeHoras();
+            }
+        }
 
-        let html = `
-          <div class="account-item-box" style="padding:15px 10px;">
-              <h4 style="text-align:center; color:var(--ios-blue); font-size:1.1rem; margin-bottom:5px;">📅 Tu Semana Actual</h4>
-              <p style="text-align:center; color:var(--text-secondary); font-size:0.8rem; margin-bottom:15px;">Lun-Sáb: $8.000/hr | Dom: $150.000/día</p>
-              
-              <table class="shifts-table">
-                  <thead>
-                      <tr>
-                          <th>Día</th>
-                          <th>Horas</th>
-                          <th>Pago</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-        `;
-        
-        diasArray.forEach(d => {
-            html += `
-                      <tr>
-                          <td><strong>${d.diaNombre}</strong><br><span style="font-size:0.7rem; color:var(--text-secondary);">${d.fechaText}</span></td>
-                          <td style="color:var(--ios-green); font-family:monospace; font-weight:bold;">${d.hoursFmt}</td>
-                          <td style="font-weight:600;">$${Math.round(d.pay).toLocaleString('es-CO')}</td>
-                      </tr>
+        function forzarRefrescoDeHoras() {
+            haptic();
+            document.getElementById('shiftsScrollArea').innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando Base de Horas...</div>';
+            cargarHorasDesdeSheets();
+        }
+
+        function cargarHorasDesdeSheets() {
+            if (isFetchingHoras) {
+                return;
+            }
+            isFetchingHoras = true;
+            
+            const oldScript = document.getElementById('cyber_shifts_node');
+            if (oldScript) {
+                oldScript.remove();
+            }
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_shifts_node';
+            scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerHoras&callback=procesarHorasSheets&_ts=" + Date.now();
+            document.body.appendChild(scriptElement);
+        }
+
+        window.procesarHorasSheets = function(res) {
+            isFetchingHoras = false;
+            
+            const oldScript = document.getElementById('cyber_shifts_node');
+            if (oldScript) {
+                oldScript.remove();
+            }
+
+            const container = document.getElementById('shiftsScrollArea');
+            
+            if (res && res.status === "success") {
+                window.currentHorasStock = res.data; 
+                
+                if (document.getElementById('shiftsOverlay').classList.contains('open')) {
+                    renderizarHorasEnPantalla();
+                }
+            } else {
+                if (container) {
+                    container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No se pudo cargar los turnos.</div>`;
+                }
+            }
+        };
+
+        function parseDate(fechaStr) {
+            let parts = fechaStr.split(' ');
+            if (parts.length < 2) {
+                return new Date();
+            }
+            
+            let dateParts = parts[0].split('/');
+            if (dateParts.length < 3) {
+                return new Date();
+            }
+            
+            return new Date(dateParts[2], parseInt(dateParts[1]) - 1, dateParts[0]);
+        }
+
+        function esMismaSemana(fechaStr) {
+            let d = parseDate(fechaStr);
+            let hoy = new Date();
+            
+            let day = hoy.getDay();
+            if (day === 0) {
+                day = 7;
+            }
+            
+            let lunes = new Date(hoy);
+            lunes.setDate(hoy.getDate() - day + 1);
+            lunes.setHours(0,0,0,0);
+            
+            let domingo = new Date(lunes);
+            domingo.setDate(lunes.getDate() + 6);
+            domingo.setHours(23,59,59,999);
+            
+            return d >= lunes && d <= domingo;
+        }
+
+        function renderizarHorasEnPantalla() {
+            const container = document.getElementById('shiftsScrollArea');
+            if (!container) {
+                return;
+            }
+            
+            const userActivo = sessionStorage.getItem('active_staff');
+            let userFinal = "";
+            if (userActivo) {
+                userFinal = userActivo.toUpperCase();
+            }
+            
+            let misHoras = [];
+            for (let index = 0; index < window.currentHorasStock.length; index++) {
+                let item = window.currentHorasStock[index];
+                if (item.vendedor.toUpperCase() === userFinal && esMismaSemana(item.fecha)) {
+                    misHoras.push(item);
+                }
+            }
+            
+            if (misHoras.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No tienes turnos registrados en la semana actual.</div>';
+                return;
+            }
+            
+            let resumenDiario = {};
+            
+            for (let i = 0; i < misHoras.length; i++) {
+                let item = misHoras[i];
+                let d = parseDate(item.fecha);
+                
+                let dayNum = String(d.getDate()).padStart(2, '0');
+                let monthNum = String(d.getMonth() + 1).padStart(2, '0');
+                let dateKey = dayNum + '/' + monthNum;
+                let dayOfWeek = d.getDay(); 
+                
+                if (!resumenDiario[dateKey]) {
+                    resumenDiario[dateKey] = {
+                        dateObj: d,
+                        dayOfWeek: dayOfWeek,
+                        totalSeconds: 0
+                    };
+                }
+                
+                let timeParts = item.tiempo.split(':');
+                if (timeParts.length === 3) {
+                    let hSec = parseInt(timeParts[0]) * 3600;
+                    let mSec = parseInt(timeParts[1]) * 60;
+                    let sSec = parseInt(timeParts[2]);
+                    let totalSec = hSec + mSec + sSec;
+                    
+                    resumenDiario[dateKey].totalSeconds += totalSec;
+                }
+            }
+            
+            let keysArray = Object.keys(resumenDiario);
+            let diasArray = [];
+            
+            for (let k = 0; k < keysArray.length; k++) {
+                let kStr = keysArray[k];
+                let r = resumenDiario[kStr];
+                
+                let decimalHours = r.totalSeconds / 3600;
+                let pay = 0;
+                
+                if (r.dayOfWeek === 0) { 
+                    pay = 150000;
+                } else {
+                    pay = decimalHours * 8000;
+                }
+                
+                let h = Math.floor(r.totalSeconds / 3600);
+                let m = Math.floor((r.totalSeconds % 3600) / 60);
+                let s = r.totalSeconds % 60;
+                
+                let hStr = String(h).padStart(2,'0');
+                let mStr = String(m).padStart(2,'0');
+                let sStr = String(s).padStart(2,'0');
+                
+                let fmtTime = hStr + ":" + mStr + ":" + sStr;
+
+                let arrayDiasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                
+                diasArray.push({
+                    fechaText: kStr,
+                    dateObj: r.dateObj,
+                    diaNombre: arrayDiasSemana[r.dayOfWeek],
+                    hoursFmt: fmtTime,
+                    pay: pay
+                });
+            }
+            
+            diasArray.sort(function(a, b) {
+                return a.dateObj - b.dateObj;
+            });
+            
+            let totalPay = 0;
+            let totalSecs = 0;
+            
+            for (let p = 0; p < diasArray.length; p++) {
+                totalPay += diasArray[p].pay;
+                totalSecs += resumenDiario[diasArray[p].fechaText].totalSeconds;
+            }
+            
+            let tH = Math.floor(totalSecs / 3600);
+            let tM = Math.floor((totalSecs % 3600) / 60);
+            
+            let tHStr = String(tH).padStart(2,'0');
+            let tMStr = String(tM).padStart(2,'0');
+            
+            let tFmt = tHStr + "h " + tMStr + "m";
+
+            let html = `
+              <div class="account-item-box" style="padding:15px 10px;">
+                  <h4 style="text-align:center; color:var(--ios-blue); font-size:1.1rem; margin-bottom:5px;">📅 Tu Semana Actual</h4>
+                  <p style="text-align:center; color:var(--text-secondary); font-size:0.8rem; margin-bottom:15px;">Lun-Sáb: $8.000/hr | Dom: $150.000/día</p>
+                  
+                  <table class="shifts-table">
+                      <thead>
+                          <tr>
+                              <th>Día</th>
+                              <th>Horas</th>
+                              <th>Pago</th>
+                          </tr>
+                      </thead>
+                      <tbody>
             `;
-        });
-        
-        html += `
-                  </tbody>
-              </table>
-              <div style="margin-top:15px; padding:15px 10px 0 10px; border-top:1px solid rgba(255,255,255,0.15); display:flex; justify-content:space-between; align-items:center;">
-                  <div>
-                      <span style="display:block; font-size:0.8rem; color:var(--text-secondary);">Total Horas:</span>
-                      <span style="font-weight:bold; color:var(--text-primary); font-size:1.1rem;">${tFmt}</span>
-                  </div>
-                  <div style="text-align:right;">
-                      <span style="display:block; font-size:0.8rem; color:var(--text-secondary);">Total a Pagar:</span>
-                      <span style="font-weight:bold; color:var(--ios-green); font-size:1.3rem;">$${Math.round(totalPay).toLocaleString('es-CO')}</span>
+            
+            for (let f = 0; f < diasArray.length; f++) {
+                let dInfo = diasArray[f];
+                let payFormatted = Math.round(dInfo.pay).toLocaleString('es-CO');
+                
+                html += `
+                          <tr>
+                              <td><strong>${dInfo.diaNombre}</strong><br><span style="font-size:0.7rem; color:var(--text-secondary);">${dInfo.fechaText}</span></td>
+                              <td style="color:var(--ios-green); font-family:monospace; font-weight:bold;">${dInfo.hoursFmt}</td>
+                              <td style="font-weight:600;">$${payFormatted}</td>
+                          </tr>
+                `;
+            }
+            
+            let finalPayFmt = Math.round(totalPay).toLocaleString('es-CO');
+            
+            html += `
+                      </tbody>
+                  </table>
+                  <div style="margin-top:15px; padding:15px 10px 0 10px; border-top:1px solid rgba(255,255,255,0.15); display:flex; justify-content:space-between; align-items:center;">
+                      <div>
+                          <span style="display:block; font-size:0.8rem; color:var(--text-secondary);">Total Horas:</span>
+                          <span style="font-weight:bold; color:var(--text-primary); font-size:1.1rem;">${tFmt}</span>
+                      </div>
+                      <div style="text-align:right;">
+                          <span style="display:block; font-size:0.8rem; color:var(--text-secondary);">Total a Pagar:</span>
+                          <span style="font-weight:bold; color:var(--ios-green); font-size:1.3rem;">$${finalPayFmt}</span>
+                      </div>
                   </div>
               </div>
-          </div>
-        `;
-        
-        container.innerHTML = html;
-    }
-
-    function filtrarHorasInternas() {
-        const query = document.getElementById('searchShiftsInput').value.toLowerCase();
-        const rows = document.querySelectorAll('#shiftsScrollArea tbody tr');
-        
-        rows.forEach(function(row) {
-            if (row.innerText.toLowerCase().includes(query)) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        });
-    }
-
-    // ================================================= //
-
-    function toggleCodesPanel() {
-        haptic();
-        const overlay = document.getElementById('codesOverlay');
-        overlay.classList.toggle('open');
-        
-        if (overlay.classList.contains('open')) {
-            forzarRefrescoDeCodigos();
-            autoRefreshCodesInterval = setInterval(function() {
-                cargarCodigosDesdeSheets(true);
-            }, 12000);
-        } else {
-            if (autoRefreshCodesInterval) {
-                clearInterval(autoRefreshCodesInterval);
-                autoRefreshCodesInterval = null;
-            }
-        }
-    }
-
-    function togglePasswordModal() {
-        haptic();
-        const overlay = document.getElementById('passwordOverlay');
-        
-        if (overlay.classList.contains('open')) {
-            overlay.classList.remove('open');
-        } else {
-            window.isForcedChange = false;
-            document.getElementById('passwordModalTitle').innerText = "🔑 Cambiar Contraseña";
-            document.getElementById('passwordModalDesc').innerText = "Actualiza tu clave personal de acceso al sistema.";
-            document.getElementById('oldPasswordForzado').style.display = "block";
-            document.getElementById('btnSubmitPasswordForzado').innerText = "Guardar en Google Sheets";
-            document.getElementById('btnCancelPasswordForzado').innerText = "Cancelar";
+            `;
             
-            document.getElementById('passwordForm').reset();
-            overlay.classList.add('open');
-            document.getElementById('oldPasswordForzado').focus();
+            container.innerHTML = html;
         }
-    }
 
-    function forzarRefrescoDeCodigos() {
-        haptic();
-        document.getElementById('codesScrollArea').innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando bandeja de Gmail...</div>';
-        cargarCodigosDesdeSheets(false);
-    }
-
-    function cargarCodigosDesdeSheets(silencioso = false) {
-        if (isFetchingCodes) {
-            return; 
+        function filtrarHorasInternas() {
+            const query = document.getElementById('searchShiftsInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#shiftsScrollArea tbody tr');
+            
+            for (let x = 0; x < rows.length; x++) {
+                let row = rows[x];
+                if (row.innerText.toLowerCase().includes(query)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
         }
-        isFetchingCodes = true;
 
-        if (!silencioso && window.cyberCodesTimeout) {
-            clearTimeout(window.cyberCodesTimeout);
+        function toggleCodesPanel() {
+            haptic();
+            const overlay = document.getElementById('codesOverlay');
+            overlay.classList.toggle('open');
+            
+            if (overlay.classList.contains('open')) {
+                forzarRefrescoDeCodigos();
+                autoRefreshCodesInterval = setInterval(function() {
+                    cargarCodigosDesdeSheets(true);
+                }, 12000);
+            } else {
+                if (autoRefreshCodesInterval) {
+                    clearInterval(autoRefreshCodesInterval);
+                    autoRefreshCodesInterval = null;
+                }
+            }
         }
-        
-        if (!silencioso) {
-            window.cyberCodesTimeout = setTimeout(function() {
-                const container = document.getElementById('codesScrollArea');
-                if (container && container.innerHTML.includes("Sincronizando")) {
+
+        function togglePasswordModal() {
+            haptic();
+            const overlay = document.getElementById('passwordOverlay');
+            
+            if (overlay.classList.contains('open')) {
+                overlay.classList.remove('open');
+            } else {
+                window.isForcedChange = false;
+                document.getElementById('passwordModalTitle').innerText = "🔑 Cambiar Contraseña";
+                document.getElementById('passwordModalDesc').innerText = "Actualiza tu clave personal de acceso al sistema.";
+                document.getElementById('oldPasswordForzado').style.display = "block";
+                document.getElementById('btnSubmitPasswordForzado').innerText = "Guardar en Google Sheets";
+                document.getElementById('btnCancelPasswordForzado').innerText = "Cancelar";
+                
+                document.getElementById('passwordForm').reset();
+                overlay.classList.add('open');
+                document.getElementById('oldPasswordForzado').focus();
+            }
+        }
+
+        function forzarRefrescoDeCodigos() {
+            haptic();
+            document.getElementById('codesScrollArea').innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando bandeja de Gmail...</div>';
+            cargarCodigosDesdeSheets(false);
+        }
+
+        function cargarCodigosDesdeSheets(silencioso = false) {
+            if (isFetchingCodes) {
+                return; 
+            }
+            isFetchingCodes = true;
+
+            if (!silencioso && window.cyberCodesTimeout) {
+                clearTimeout(window.cyberCodesTimeout);
+            }
+            
+            if (!silencioso) {
+                window.cyberCodesTimeout = setTimeout(function() {
+                    const container = document.getElementById('codesScrollArea');
+                    if (container && container.innerHTML.includes("Sincronizando")) {
+                        container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay códigos disponibles en este momento.</div>`;
+                    }
+                    isFetchingCodes = false;
+                }, 12000); 
+            }
+
+            const oldScript = document.getElementById('cyber_jsonp_node');
+            if (oldScript) {
+                oldScript.remove();
+            }
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_jsonp_node';
+            scriptElement.setAttribute('data-cfasync', 'false'); 
+            scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerCodigos&callback=procesarCodigosSheets&_ts=" + Date.now();
+            document.body.appendChild(scriptElement);
+        }
+
+        window.procesarCodigosSheets = function(res) {
+            isFetchingCodes = false; 
+            
+            if (window.cyberCodesTimeout) {
+                clearTimeout(window.cyberCodesTimeout);
+            }
+
+            const oldScript = document.getElementById('cyber_jsonp_node');
+            if (oldScript) {
+                oldScript.remove();
+            }
+
+            const container = document.getElementById('codesScrollArea');
+            
+            if (res && res.status === "success") {
+                window.currentCodesStock = res.data; 
+                
+                if (document.getElementById('codesOverlay').classList.contains('open')) {
+                    renderizarCodigosEnPantalla();
+                }
+            } else {
+                if (container && (container.innerHTML.includes("Sincronizando") || container.children.length === 0)) {
                     container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay códigos disponibles en este momento.</div>`;
                 }
-                isFetchingCodes = false;
-            }, 12000); 
-        }
-
-        const oldScript = document.getElementById('cyber_jsonp_node');
-        if (oldScript) {
-            oldScript.remove();
-        }
-
-        const scriptElement = document.createElement('script');
-        scriptElement.id = 'cyber_jsonp_node';
-        scriptElement.setAttribute('data-cfasync', 'false'); 
-        scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerCodigos&callback=procesarCodigosSheets&_ts=" + Date.now();
-        document.body.appendChild(scriptElement);
-    }
-
-    window.procesarCodigosSheets = function(res) {
-        isFetchingCodes = false; 
-        
-        if (window.cyberCodesTimeout) {
-            clearTimeout(window.cyberCodesTimeout);
-        }
-
-        const oldScript = document.getElementById('cyber_jsonp_node');
-        if (oldScript) {
-            oldScript.remove();
-        }
-
-        const container = document.getElementById('codesScrollArea');
-        
-        if (res && res.status === "success") {
-            window.currentCodesStock = res.data; 
-            
-            if (document.getElementById('codesOverlay').classList.contains('open')) {
-                renderizarCodigosEnPantalla();
             }
-        } else {
-            if (container && (container.innerHTML.includes("Sincronizando") || container.children.length === 0)) {
-                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay códigos disponibles en este momento.</div>`;
+        };
+
+        function renderizarCodigosEnPantalla() {
+            const container = document.getElementById('codesScrollArea');
+            if (!container) {
+                return;
             }
-        }
-    };
-
-    function renderizarCodigosEnPantalla() {
-        const container = document.getElementById('codesScrollArea');
-        if (!container) return;
-        
-        if (window.currentCodesStock.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay códigos disponibles en este momento.</div>';
-            return;
-        }
-        
-        let htmlCards = "";
-        
-        window.currentCodesStock.forEach(function(item, index) {
-            htmlCards += `
-              <div class="account-item-box">
-                  <div class="account-header-line">
-                      <span class="platform-tag" style="color:${item.colorText || 'var(--ios-blue)'}">${item.plataforma}</span>
-                      <span class="time-tag">⏰ ${item.hora}</span>
-                  </div>
-                  <div class="credential-row">Cliente: <span>${item.correo}</span></div>
-                  <div class="credential-row">Acción: <span>${item.accion}</span></div>
-                  <div class="credential-row" style="margin-bottom:6px;">Código / Enlace: <span style="color:var(--ios-blue); font-weight:700;">${item.codigoLink}</span></div>
-                  <button class="copy-btn-action" onclick="copiarMensajeRapidoGmail(this, ${index})">📋 COPIAR MENSAJE RÁPIDO</button>
-              </div>
-            `;
-        });
-        
-        container.innerHTML = htmlCards;
-        filtrarCodigosInternos(); 
-    }
-
-    function copiarMensajeRapidoGmail(btn, index) {
-        haptic();
-        
-        const item = window.currentCodesStock[index];
-        
-        if (!item) {
-            return;
-        }
-        
-        navigator.clipboard.writeText(item.copiadoRapido).then(function() {
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '¡COPIADO CON ÉXITO! 🚀';
-            btn.style.background = 'var(--ios-green)';
-            btn.style.color = 'white';
-            btn.style.borderColor = 'transparent';
             
-            setTimeout(function() {
-                btn.innerHTML = originalText;
-                btn.style.background = '';
-                btn.style.color = '';
-                btn.style.borderColor = '';
-            }, 1500);
-        }).catch(function() {
-            const textarea = document.createElement('textarea');
-            textarea.value = item.copiadoRapido;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            textarea.remove();
-        });
-    }
-
-    function filtrarCodigosInternos() {
-        const query = document.getElementById('searchCodesInput').value.toLowerCase();
-        const cards = document.querySelectorAll('#codesScrollArea .account-item-box');
-        
-        cards.forEach(function(card) {
-            if (card.innerText.toLowerCase().includes(query)) {
-                card.style.display = "";
-            } else {
-                card.style.display = "none";
+            if (window.currentCodesStock.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay códigos disponibles en este momento.</div>';
+                return;
             }
-        });
-    }
-
-    // PAUSA INTELIGENTE POR INACTIVIDAD (5 MINUTOS = 300,000 MS)
-    function resetearInactividad() {
-        if (!sessionStorage.getItem('active_staff')) return; 
-
-        if (isTimerPaused) {
-            isTimerPaused = false;
-            // Se actualiza la base de inicio con el tiempo exacto en que regresó
-            localStorage.setItem('cyber_shift_start_time', Date.now());
             
-            document.querySelector('.timer-badge').style.color = 'var(--ios-green)';
-            document.querySelector('.timer-badge').style.borderColor = 'var(--glass-border)';
-            document.getElementById('shiftTimer').innerText = "Reanudando...";
-        }
-
-        if (temporizadorInactividad) {
-            clearTimeout(temporizadorInactividad);
-        }
-        
-        temporizadorInactividad = setTimeout(() => {
-            if (sessionStorage.getItem('active_staff') && !isTimerPaused) {
-                isTimerPaused = true;
-                
-                let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
-                let currentAccumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time')) || 0;
-                let newlyElapsed = Date.now() - startTime;
-                
-                // Restamos exactamente los 5 minutos muertos para que no se los cobren
-                let validTime = newlyElapsed - INACTIVITY_LIMIT;
-                if (validTime < 0) {
-                    validTime = 0;
+            let htmlCards = "";
+            
+            for (let i = 0; i < window.currentCodesStock.length; i++) {
+                let item = window.currentCodesStock[i];
+                let colColor = item.colorText;
+                if (!colColor) {
+                    colColor = 'var(--ios-blue)';
                 }
                 
-                localStorage.setItem('cyber_shift_accumulated_time', currentAccumulated + validTime);
-                
-                document.querySelector('.timer-badge').style.color = '#ffcc00';
-                document.querySelector('.timer-badge').style.borderColor = '#ffcc00';
-                document.getElementById('shiftTimer').innerText = "PAUSADO";
-
-                alert("⏳ Por inactividad (5 minutos), el cronómetro de tu turno se ha pausado.\n\nMueve el mouse o toca la pantalla para reanudar el conteo de horas.");
+                htmlCards += `
+                  <div class="account-item-box">
+                      <div class="account-header-line">
+                          <span class="platform-tag" style="color:${colColor}">${item.plataforma}</span>
+                          <span class="time-tag">⏰ ${item.hora}</span>
+                      </div>
+                      <div class="credential-row">Cliente: <span>${item.correo}</span></div>
+                      <div class="credential-row">Acción: <span>${item.accion}</span></div>
+                      <div class="credential-row" style="margin-bottom:6px;">Código / Enlace: <span style="color:var(--ios-blue); font-weight:700;">${item.codigoLink}</span></div>
+                      <button class="copy-btn-action" onclick="copiarMensajeRapidoGmail(this, ${i})">📋 COPIAR MENSAJE RÁPIDO</button>
+                  </div>
+                `;
             }
-        }, INACTIVITY_LIMIT); 
-    }
-
-    function iniciarControlInactividad() {
-        window.addEventListener('mousemove', resetearInactividad);
-        window.addEventListener('keypress', resetearInactividad);
-        window.addEventListener('click', resetearInactividad);
-        window.addEventListener('scroll', resetearInactividad);
-        window.addEventListener('touchstart', resetearInactividad);
-        resetearInactividad(); 
-    }
-
-    function startShiftTimer() {
-        if (!localStorage.getItem('cyber_shift_start_time')) {
-            localStorage.setItem('cyber_shift_start_time', Date.now());
-        }
-        if (!localStorage.getItem('cyber_shift_accumulated_time')) {
-            localStorage.setItem('cyber_shift_accumulated_time', 0);
-        }
-
-        if (timerInterval) {
-            clearInterval(timerInterval);
-        }
-
-        timerInterval = setInterval(function() {
-            if (isTimerPaused) return; 
             
+            container.innerHTML = htmlCards;
+            filtrarCodigosInternos(); 
+        }
+
+        function copiarMensajeRapidoGmail(btn, index) {
+            haptic();
+            
+            const item = window.currentCodesStock[index];
+            
+            if (!item) {
+                return;
+            }
+            
+            navigator.clipboard.writeText(item.copiadoRapido).then(function() {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '¡COPIADO CON ÉXITO! 🚀';
+                btn.style.background = 'var(--ios-green)';
+                btn.style.color = 'white';
+                btn.style.borderColor = 'transparent';
+                
+                setTimeout(function() {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                }, 1500);
+            }).catch(function() {
+                const textarea = document.createElement('textarea');
+                textarea.value = item.copiadoRapido;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                textarea.remove();
+            });
+        }
+
+        function filtrarCodigosInternos() {
+            const query = document.getElementById('searchCodesInput').value.toLowerCase();
+            const cards = document.querySelectorAll('#codesScrollArea .account-item-box');
+            
+            for (let i = 0; i < cards.length; i++) {
+                let card = cards[i];
+                if (card.innerText.toLowerCase().includes(query)) {
+                    card.style.display = "";
+                } else {
+                    card.style.display = "none";
+                }
+            }
+        }
+
+        // ================= SISTEMA DE INACTIVIDAD DOBLE ================= //
+        function resetearInactividad() {
+            if (!sessionStorage.getItem('active_staff')) {
+                return; 
+            }
+
+            if (isTimerPaused) {
+                isTimerPaused = false;
+                localStorage.setItem('cyber_shift_start_time', Date.now());
+                
+                const tBadge = document.querySelector('.timer-badge');
+                if (tBadge) {
+                    tBadge.style.color = 'var(--ios-green)';
+                    tBadge.style.borderColor = 'var(--glass-border)';
+                }
+                
+                const sTimer = document.getElementById('shiftTimer');
+                if (sTimer) {
+                    sTimer.innerText = "Reanudando...";
+                }
+            }
+
+            if (temporizadorInactividad) {
+                clearTimeout(temporizadorInactividad);
+            }
+
+            if (temporizadorCierreTotal) {
+                clearTimeout(temporizadorCierreTotal);
+            }
+            
+            // PRIMERA ALERTA: A los 5 minutos, se pausa el tiempo de paga
+            temporizadorInactividad = setTimeout(() => {
+                if (sessionStorage.getItem('active_staff') && !isTimerPaused) {
+                    isTimerPaused = true;
+                    
+                    let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
+                    let currentAccumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
+                    if (isNaN(currentAccumulated)) {
+                        currentAccumulated = 0;
+                    }
+                    
+                    let newlyElapsed = Date.now() - startTime;
+                    
+                    let validTime = newlyElapsed - INACTIVITY_LIMIT;
+                    if (validTime < 0) {
+                        validTime = 0;
+                    }
+                    
+                    localStorage.setItem('cyber_shift_accumulated_time', currentAccumulated + validTime);
+                    
+                    const tBadge2 = document.querySelector('.timer-badge');
+                    if (tBadge2) {
+                        tBadge2.style.color = '#ffcc00';
+                        tBadge2.style.borderColor = '#ffcc00';
+                    }
+                    
+                    const sTimer2 = document.getElementById('shiftTimer');
+                    if (sTimer2) {
+                        sTimer2.innerText = "PAUSADO";
+                    }
+
+                    alert("⏳ Por inactividad (5 minutos), el cronómetro de tu turno se ha pausado.\n\nMueve el mouse o toca la pantalla para reanudar el conteo de horas.");
+                }
+            }, INACTIVITY_LIMIT); 
+
+            // SEGUNDA ALERTA: A los 20 minutos de abandono absoluto, se cierra la sesión
+            temporizadorCierreTotal = setTimeout(() => {
+                if (sessionStorage.getItem('active_staff')) {
+                    alert("⏳ Tu sesión se ha cerrado automáticamente tras 20 minutos de inactividad.");
+                    cerrarSesionStaff();
+                }
+            }, INACTIVITY_LOGOUT_LIMIT);
+        }
+
+        function iniciarControlInactividad() {
+            window.addEventListener('mousemove', resetearInactividad);
+            window.addEventListener('keypress', resetearInactividad);
+            window.addEventListener('click', resetearInactividad);
+            window.addEventListener('scroll', resetearInactividad);
+            window.addEventListener('touchstart', resetearInactividad);
+            resetearInactividad(); 
+        }
+
+        function startShiftTimer() {
+            if (!localStorage.getItem('cyber_shift_start_time')) {
+                localStorage.setItem('cyber_shift_start_time', Date.now());
+            }
+            if (!localStorage.getItem('cyber_shift_accumulated_time')) {
+                localStorage.setItem('cyber_shift_accumulated_time', 0);
+            }
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            timerInterval = setInterval(function() {
+                if (isTimerPaused) {
+                    return; 
+                }
+                
+                let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
+                let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
+                if (isNaN(accumulated)) {
+                    accumulated = 0;
+                }
+                
+                let elapsed = Date.now() - startTime;
+                
+                let totalMs = accumulated + elapsed;
+                
+                let totalSeconds = Math.floor(totalMs / 1000);
+                let hours = Math.floor(totalSeconds / 3600);
+                let minutes = Math.floor((totalSeconds % 3600) / 60);
+                let seconds = totalSeconds % 60;
+
+                let hStr = String(hours).padStart(2, '0');
+                let mStr = String(minutes).padStart(2, '0');
+                let sStr = String(seconds).padStart(2, '0');
+
+                let stElement = document.getElementById('shiftTimer');
+                if (stElement) {
+                    stElement.innerText = hStr + ":" + mStr + ":" + sStr;
+                }
+            }, 1000);
+        }
+
+        function obtenerTiempoFinalFormateado() {
             let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
-            let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time')) || 0;
-            let elapsed = Date.now() - startTime;
+            let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
             
-            let totalMs = accumulated + elapsed;
+            if (isNaN(accumulated)) {
+                accumulated = 0;
+            }
             
+            let totalMs = accumulated;
+            
+            if (!isTimerPaused) {
+                let newlyElapsed = Date.now() - startTime;
+                totalMs += newlyElapsed;
+            }
+
             let totalSeconds = Math.floor(totalMs / 1000);
             let hours = Math.floor(totalSeconds / 3600);
             let minutes = Math.floor((totalSeconds % 3600) / 60);
             let seconds = totalSeconds % 60;
-
-            let formattedHours = String(hours).padStart(2, '0');
-            let formattedMinutes = String(minutes).padStart(2, '0');
-            let formattedSeconds = String(seconds).padStart(2, '0');
-
-            document.getElementById('shiftTimer').innerText = formattedHours + ":" + formattedMinutes + ":" + formattedSeconds;
-        }, 1000);
-    }
-
-    function obtenerTiempoFinalFormateado() {
-        let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
-        let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time')) || 0;
-        
-        let totalMs = accumulated;
-        if (!isTimerPaused) {
-            let newlyElapsed = Date.now() - startTime;
-            totalMs += newlyElapsed;
-        }
-
-        let totalSeconds = Math.floor(totalMs / 1000);
-        let hours = Math.floor(totalSeconds / 3600);
-        let minutes = Math.floor((totalSeconds % 3600) / 60);
-        let seconds = totalSeconds % 60;
-        
-        return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
-    }
-
-    function ejecutarNotificacionDeCorreo(vendedor, tipoAccion, tiempoTrabajado, callbackFinal) {
-        if (!GOOGLE_SCRIPT_URL) {
-            if (callbackFinal) {
-                callbackFinal();
-            }
-            return;
-        }
-        
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              action: "notificarCorreo", 
-              user: vendedor, 
-              tipo: tipoAccion,
-              tiempoTrabajado: tiempoTrabajado 
-            })
-        })
-        .then(function() { 
-            if (callbackFinal) callbackFinal(); 
-        })
-        .catch(function() { 
-            if (callbackFinal) callbackFinal(); 
-        });
-    }
-
-    function validateStaffAccess(e) {
-      if (e) {
-          e.preventDefault();
-      }
-      haptic();
-      
-      const userInput = document.getElementById('staffUser').value.toUpperCase().trim();
-      const passInput = document.getElementById('staffPass').value.trim();
-      const rememberMe = document.getElementById('rememberMe').checked;
-      const errorToast = document.getElementById('error-login-toast');
-      const submitBtn = document.querySelector('#loginForm button[type="submit"]');
-
-      if (!userInput || !passInput) return;
-
-      submitBtn.disabled = true;
-      submitBtn.innerText = "⏳ Verificando en Sheets...";
-
-      const oldScript = document.getElementById('cyber_login_node');
-      if (oldScript) {
-          oldScript.remove();
-      }
-
-      window.procesarLoginSheets = function(res) {
-          submitBtn.disabled = false;
-          submitBtn.innerText = "Verificar Identidad";
-          
-          const scriptNode = document.getElementById('cyber_login_node');
-          if (scriptNode) {
-              scriptNode.remove();
-          }
-
-          if (res && res.status === "success") {
-              errorToast.style.display = 'none';
-              document.getElementById('staffUser').blur();
-              document.getElementById('staffPass').blur();
-              
-              if (defaultPasswords[userInput] && defaultPasswords[userInput] === passInput) {
-                  window.isForcedChange = true;
-                  window.pendingUser = userInput;
-                  window.pendingOldPass = passInput;
-                  window.pendingRemember = rememberMe;
-                  
-                  document.getElementById('passwordModalTitle').innerText = "⚠️ Actualización Obligatoria";
-                  document.getElementById('passwordModalDesc').innerText = "Por seguridad y políticas del sistema, debes cambiar tu contraseña predeterminada para poder ingresar al panel operativo.";
-                  document.getElementById('oldPasswordForzado').style.display = "none";
-                  document.getElementById('oldPasswordForzado').value = passInput;
-                  
-                  document.getElementById('btnSubmitPasswordForzado').innerText = "Guardar y Entrar al Sistema";
-                  document.getElementById('btnCancelPasswordForzado').innerText = "Cancelar y Salir";
-                  
-                  document.getElementById('passwordOverlay').classList.add('open');
-              } else {
-                  entrarAlSistema(userInput, rememberMe);
-              }
-
-          } else {
-              errorToast.innerText = "⚠️ " + (res.message || "Credenciales incorrectas en la base de datos.");
-              errorToast.style.display = 'block';
-              document.getElementById('staffPass').value = '';
-          }
-      };
-
-      const scriptElement = document.createElement('script');
-      scriptElement.id = 'cyber_login_node';
-      scriptElement.src = GOOGLE_SCRIPT_URL + "?action=verificarLogin&user=" + encodeURIComponent(userInput) + "&pass=" + encodeURIComponent(passInput) + "&callback=procesarLoginSheets&_ts=" + Date.now();
-      document.body.appendChild(scriptElement);
-    }
-
-    function ejecutarCambioClaveForzado(e) {
-        if (e) {
-            e.preventDefault();
-        }
-        haptic();
-
-        const btnSubmit = document.getElementById('btnSubmitPasswordForzado');
-        
-        let oldPassToUse = "";
-        let userToUse = "";
-        
-        if (window.isForcedChange) {
-            oldPassToUse = window.pendingOldPass;
-            userToUse = window.pendingUser;
-        } else {
-            oldPassToUse = document.getElementById('oldPasswordForzado').value.trim();
-            userToUse = sessionStorage.getItem('active_staff') || "";
-        }
-        
-        const newPass = document.getElementById('newPasswordForzado').value.trim();
-        const confirmPass = document.getElementById('confirmNewPasswordForzado').value.trim();
-
-        if (newPass !== confirmPass) {
-            alert("⚠️ La nueva contraseña y la confirmación no coinciden.");
-            return;
-        }
-        
-        if (window.isForcedChange && newPass === window.pendingOldPass) {
-            alert("⚠️ La nueva contraseña debe ser distinta a la predeterminada.");
-            return;
-        }
-
-        btnSubmit.disabled = true;
-        btnSubmit.innerText = "⏳ Guardando en Sheets...";
-
-        const oldScript = document.getElementById('cyber_forcepass_node');
-        if (oldScript) {
-            oldScript.remove();
-        }
-
-        window.procesarCambioForzadoSheets = function(res) {
-            btnSubmit.disabled = false;
-            btnSubmit.innerText = window.isForcedChange ? "Guardar y Entrar al Sistema" : "Guardar en Google Sheets";
             
-            const scriptNode = document.getElementById('cyber_forcepass_node');
-            if (scriptNode) {
-                scriptNode.remove();
+            let finalH = String(hours).padStart(2, '0');
+            let finalM = String(minutes).padStart(2, '0');
+            let finalS = String(seconds).padStart(2, '0');
+            
+            return finalH + ":" + finalM + ":" + finalS;
+        }
+
+        function ejecutarNotificacionDeCorreo(vendedor, tipoAccion, tiempoTrabajado, callbackFinal) {
+            if (!GOOGLE_SCRIPT_URL) {
+                if (callbackFinal) {
+                    callbackFinal();
+                }
+                return;
+            }
+            
+            let paramObj = {
+                action: "notificarCorreo", 
+                user: vendedor, 
+                tipo: tipoAccion,
+                tiempoTrabajado: tiempoTrabajado 
+            };
+            
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { 
+                    "Content-Type": "application/json" 
+                },
+                body: JSON.stringify(paramObj)
+            })
+            .then(function() { 
+                if (callbackFinal) {
+                    callbackFinal(); 
+                }
+            })
+            .catch(function() { 
+                if (callbackFinal) {
+                    callbackFinal(); 
+                }
+            });
+        }
+
+        function validateStaffAccess(e) {
+            if (e) {
+                e.preventDefault();
+            }
+            haptic();
+            
+            const userElement = document.getElementById('staffUser');
+            const passElement = document.getElementById('staffPass');
+            const remElement = document.getElementById('rememberMe');
+            
+            const userInput = userElement.value.toUpperCase().trim();
+            const passInput = passElement.value.trim();
+            const rememberMe = remElement.checked;
+            
+            const errorToast = document.getElementById('error-login-toast');
+            const submitBtn = document.querySelector('#loginForm button[type="submit"]');
+
+            if (!userInput || !passInput) {
+                return;
             }
 
-            if (res && res.status === "success") {
-                document.getElementById('passwordOverlay').classList.remove('open');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "⏳ Verificando en Sheets...";
+
+            const oldScript = document.getElementById('cyber_login_node');
+            if (oldScript) {
+                oldScript.remove();
+            }
+
+            window.procesarLoginSheets = function(res) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Verificar Identidad";
+                
+                const scriptNode = document.getElementById('cyber_login_node');
+                if (scriptNode) {
+                    scriptNode.remove();
+                }
+
+                if (res && res.status === "success") {
+                    errorToast.style.display = 'none';
+                    userElement.blur();
+                    passElement.blur();
+                    
+                    if (defaultPasswords[userInput] && defaultPasswords[userInput] === passInput) {
+                        window.isForcedChange = true;
+                        window.pendingUser = userInput;
+                        window.pendingOldPass = passInput;
+                        window.pendingRemember = rememberMe;
+                        
+                        document.getElementById('passwordModalTitle').innerText = "⚠️ Actualización Obligatoria";
+                        document.getElementById('passwordModalDesc').innerText = "Por seguridad y políticas del sistema, debes cambiar tu contraseña predeterminada para poder ingresar al panel operativo.";
+                        
+                        document.getElementById('oldPasswordForzado').style.display = "none";
+                        document.getElementById('oldPasswordForzado').value = passInput;
+                        
+                        document.getElementById('btnSubmitPasswordForzado').innerText = "Guardar y Entrar al Sistema";
+                        document.getElementById('btnCancelPasswordForzado').innerText = "Cancelar y Salir";
+                        
+                        document.getElementById('passwordOverlay').classList.add('open');
+                    } else {
+                        entrarAlSistema(userInput, rememberMe);
+                    }
+
+                } else {
+                    let errMsg = "Credenciales incorrectas en la base de datos.";
+                    if (res && res.message) {
+                        errMsg = res.message;
+                    }
+                    
+                    errorToast.innerText = "⚠️ " + errMsg;
+                    errorToast.style.display = 'block';
+                    passElement.value = '';
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_login_node';
+            
+            let queryParams = "?action=verificarLogin&user=" + encodeURIComponent(userInput) + "&pass=" + encodeURIComponent(passInput) + "&callback=procesarLoginSheets&_ts=" + Date.now();
+            
+            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+            document.body.appendChild(scriptElement);
+        }
+
+        function ejecutarCambioClaveForzado(e) {
+            if (e) {
+                e.preventDefault();
+            }
+            haptic();
+
+            const btnSubmit = document.getElementById('btnSubmitPasswordForzado');
+            
+            let oldPassToUse = "";
+            let userToUse = "";
+            
+            if (window.isForcedChange) {
+                oldPassToUse = window.pendingOldPass;
+                userToUse = window.pendingUser;
+            } else {
+                oldPassToUse = document.getElementById('oldPasswordForzado').value.trim();
+                let storedStaff = sessionStorage.getItem('active_staff');
+                if (storedStaff) {
+                    userToUse = storedStaff;
+                }
+            }
+            
+            const newPass = document.getElementById('newPasswordForzado').value.trim();
+            const confirmPass = document.getElementById('confirmNewPasswordForzado').value.trim();
+
+            if (newPass !== confirmPass) {
+                alert("⚠️ La nueva contraseña y la confirmación no coinciden.");
+                return;
+            }
+            
+            if (window.isForcedChange && newPass === window.pendingOldPass) {
+                alert("⚠️ La nueva contraseña debe ser distinta a la predeterminada.");
+                return;
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "⏳ Guardando en Sheets...";
+
+            const oldScript = document.getElementById('cyber_forcepass_node');
+            if (oldScript) {
+                oldScript.remove();
+            }
+
+            window.procesarCambioForzadoSheets = function(res) {
+                btnSubmit.disabled = false;
                 
                 if (window.isForcedChange) {
-                    entrarAlSistema(window.pendingUser, window.pendingRemember);
+                    btnSubmit.innerText = "Guardar y Entrar al Sistema";
                 } else {
-                    alert("🚀 ¡Contraseña actualizada con éxito en tu Google Sheets!");
+                    btnSubmit.innerText = "Guardar en Google Sheets";
                 }
                 
-                document.getElementById('passwordForm').reset();
-            } else {
-                alert("❌ Error: " + (res.message || "No se pudo actualizar la contraseña en Sheets."));
+                const scriptNode = document.getElementById('cyber_forcepass_node');
+                if (scriptNode) {
+                    scriptNode.remove();
+                }
+
+                if (res && res.status === "success") {
+                    document.getElementById('passwordOverlay').classList.remove('open');
+                    
+                    if (window.isForcedChange) {
+                        entrarAlSistema(window.pendingUser, window.pendingRemember);
+                    } else {
+                        alert("🚀 ¡Contraseña actualizada con éxito en tu Google Sheets!");
+                    }
+                    
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    let failMsg = "No se pudo actualizar la contraseña en Sheets.";
+                    if (res && res.message) {
+                        failMsg = res.message;
+                    }
+                    alert("❌ Error: " + failMsg);
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_forcepass_node';
+            
+            let queryParams = "?action=cambiarClave&user=" + encodeURIComponent(userToUse) + "&oldPass=" + encodeURIComponent(oldPassToUse) + "&newPass=" + encodeURIComponent(newPass) + "&callback=procesarCambioForzadoSheets&_ts=" + Date.now();
+            
+            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+            document.body.appendChild(scriptElement);
+        }
+
+        function cancelarCambioYSalir() {
+            document.getElementById('passwordOverlay').classList.remove('open');
+            document.getElementById('passwordForm').reset();
+            
+            if (window.isForcedChange) {
+                window.pendingUser = "";
+                window.pendingOldPass = "";
+                window.pendingRemember = false;
             }
+        }
+
+        function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
+            if (!isAutoLogin) {
+                ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
+            }
+            
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('mainWorkspace').style.display = 'flex';
+            document.getElementById('globalHeader').style.display = 'flex';
+            
+            let sessionNameEl = document.getElementById('staffSessionName');
+            if (sessionNameEl) {
+                sessionNameEl.innerText = userInput;
+            }
+            
+            sessionStorage.setItem('active_staff', userInput);
+            
+            if (rememberMe) {
+                localStorage.setItem('cyber_saved_staff', userInput);
+            }
+            
+            inicializarWorkspace();
+        }
+
+        function cerrarSesionStaff() {
+            haptic();
+            
+            let usuarioActivo = "STAFF";
+            let activeStaffLocal = sessionStorage.getItem('active_staff');
+            
+            if (activeStaffLocal) {
+                usuarioActivo = activeStaffLocal;
+            }
+            
+            const cerrarBoton = document.querySelector('.control-container button:last-child');
+            if (cerrarBoton) {
+                cerrarBoton.style.opacity = "0.5";
+            }
+
+            const tiempoTotalFormateado = obtenerTiempoFinalFormateado();
+
+            ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoTotalFormateado, function() {
+                sessionStorage.removeItem('active_staff');
+                localStorage.removeItem('cyber_saved_staff'); 
+                localStorage.removeItem('cyber_shift_start_time');
+                localStorage.removeItem('cyber_shift_accumulated_time');
+                
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                
+                if (autoRefreshCodesInterval) {
+                    clearInterval(autoRefreshCodesInterval);
+                }
+                
+                if (temporizadorInactividad) {
+                    clearTimeout(temporizadorInactividad);
+                }
+
+                if (temporizadorCierreTotal) {
+                    clearTimeout(temporizadorCierreTotal);
+                }
+                
+                location.reload();
+            });
+        }
+
+        // ================= CERRAR SESIÓN AL CERRAR PESTAÑA ================= //
+        window.addEventListener('pagehide', function() {
+            const userActivo = sessionStorage.getItem('active_staff');
+            if (userActivo) {
+                const tiempoTotalFormateado = obtenerTiempoFinalFormateado();
+                
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    keepalive: true, 
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                      action: "notificarCorreo", 
+                      user: userActivo, 
+                      tipo: "cierre",
+                      tiempoTrabajado: tiempoTotalFormateado 
+                    })
+                });
+
+                sessionStorage.removeItem('active_staff');
+                localStorage.removeItem('cyber_saved_staff');
+                localStorage.removeItem('cyber_shift_start_time');
+                localStorage.removeItem('cyber_shift_accumulated_time');
+            }
+        });
+
+        function inicializarWorkspace() {
+            renderGrid();
+            startShiftTimer();
+            iniciarControlInactividad();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let savedTheme = localStorage.getItem('cyber_theme');
+            if (!savedTheme) {
+                savedTheme = 'dark';
+            }
+            
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            let sessionStaff = sessionStorage.getItem('active_staff');
+            let localStaff = localStorage.getItem('cyber_saved_staff');
+            
+            if (sessionStaff || localStaff) {
+                let user = sessionStaff;
+                if (!user) {
+                    user = localStaff;
+                }
+                
+                sessionStorage.setItem('active_staff', user); 
+                entrarAlSistema(user, false, true);
+            }
+        });
+
+        const qrPrincipal = {
+            titulo: 'PAGOS',
+            imagenUrl: 'https://i.postimg.cc/ydfJzvp8/unnamed.png',
+            texto: `Te comparto nuestra llave para el pago de tu servicio desde cualquier entidad bancaria:\n\n📌 *Llave:* 0090878219\n👤 *Verificar nombre:* REF CYBERNET\n\n⚠️ *Nota:* Esta llave es exclusiva para pagos mediante Bre-B desde cualquier banco.\n\n*Pasos para activar tu servicio:* 1️⃣ Realiza la transferencia.\n2️⃣ Envía el comprobante de pago por este medio.\n3️⃣ ¡Recibe tu acceso y empieza a disfrutar! 🚀🎬`
         };
 
-        const scriptElement = document.createElement('script');
-        scriptElement.id = 'cyber_forcepass_node';
-        scriptElement.src = GOOGLE_SCRIPT_URL + "?action=cambiarClave&user=" + encodeURIComponent(userToUse) + "&oldPass=" + encodeURIComponent(oldPassToUse) + "&newPass=" + encodeURIComponent(newPass) + "&callback=procesarCambioForzadoSheets&_ts=" + Date.now();
-        document.body.appendChild(scriptElement);
-    }
+        const elementosGrid = [
+            {
+                titulo: 'ADS',
+                texto: `¡Hola! 👋 ¡Bienvenido a Cybernet! 🎬\n\nAprovecha nuestra *SUPER PROMO* de hoy:\n\n🔥 *2 PLATAFORMAS POR SOLO $9.900:*\n_(Disney+ estandar, Hbo Max, Paramount+, Vix+, Crunchyroll o Plex)._\n\n🥳 *AMAZON PRIME VIDEO:* por hoy a tan solo $ 9.900\n\n🎁 *OFERTA DE BIENVENIDA:*\n📺 *NETFLIX PREMIUM:* Solo por hoy a $12.500.\n\n¿Cuál te activo ahora mismo?`
+            },
+            {
+                titulo: 'NEQUI',
+                texto: `¡Realiza tu pago rápido, fácil y seguro!\n\n💜 Nequi o Daviplata: 3015156037\n\n📸 Envía la captura del comprobante y tu servicio quedará activo al instante 🚀`
+            },
+            {
+                titulo: 'COMBOS',
+                texto: `💻 ¡Arma tu combo streaming a tu medida con *_NETFLIX PREMIUM!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n\n0️⃣ Netflix solo → 💰 *_$14.500_* 😔 _(Opción Tradicional)_\n\n1️⃣ Netflix + 1 plataforma → 💰 *_$20.000_* _¡TOP VENTAS!_ 🔥🏆\n2️⃣ Netflix + 2 pantallas → 💰 *_$26.000_*\n3️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL Cet_* 🚀✨\n4️⃣ Netflix + 3 pantallas → 💰 *_$36.000_*\n5️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎\n6️⃣ Netflix + 4 pantallas → 💰 *_$46.000_*\n7️⃣ Netflix + 5 pantallas → 💰 *_$55.000_*\n\n8️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_\n9️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_\n🔟 Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_\n1️⃣1️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_\n\n*Netflix* cuenta con una página de códigos disponible las 24 horas, los 7 días de la semana.`
+            },
+            {
+                titulo: 'COMBOS SIN NETFLIX',
+                texto: `💻 ¡Arma tu combo streaming a tu medida con *_Sin Netflix!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n \n1️⃣ 2 Plataformas = 💰 *_$13.000_* 😱 \n2️⃣ 3 Plataformas = 💰 *_$16.000_* 😱 \n3️⃣ 4 Plataformas = 💰 *_$18.000_* 😱 \n\n4️⃣ Disney Premium + 1 plataforma =  💰 *_$20.000_* 😱\n5️⃣ Disney Premium + 2 plataformas =  💰 *_$22.000_* 😱\n6️⃣ Disney Premium + 3 plataformas =  💰 *_$24.000_* 😱`
+            },
+            {
+                titulo: 'INDIVIDUALES',
+                texto: `💻✨ *Plataformas Individuales – Cybernet* 🚀🎬  \n📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 📡 Vix → *$8.500*\n⚽ Metegol → *$15.000* 🎨 Canva Pro (1 mes) → *$20.000*\n🎶 Spotify (1 mes) → *$14.000* 🎶 YouTube Premium (1 mes) → *$14.000*\n🎶 Deezer (1 mes) → *$12.000* 🎬 *Diferencias Disney+* 💙  \n👉 Estándar →  📺 Con anuncios, sin ESPN\n👉 Premium →  🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil\n\n💜 *En Cybernet no hay trucos,* solo entertainment real y herramientas para tu día a día 🍿✨`
+            },
+            {
+                titulo: 'GRACIAS',
+                texto: `¡De nada! Es un verdadero gusto atenderte. 😊🙌\n\nSolo paso a recordarte que, ante cualquier duda ❓ o inconveniente ⚠️ que presentes con tu servicio, ¡no dudes en escribirme de inmediato! 📲⚡ Estoy aquí para darte una solución rápida 🛠️ y que sigas disfrutando de toda tu programación favorita sin interrupciones. 📺🍿🎬`
+            },
+            {
+                titulo: 'DIFERENCIAS DISNEY',
+                texto: `🎬 *_Diferencias de Disney+_* 💙✨\n👉 *_Estándar_*\n- 📺 Incluye anuncios\n- 🚫 No tiene ESPN\n\n👉 *_Premium_*\n- 🚫 Sin anuncios\n- 🏆 ESPN incluido\n- 🔒 Bloqueo de perfil disponible\n\n📲 Tú decides cómo disfrutar tu Disney+ favorito 🍿🌟`
+            },
+            {
+                titulo: 'SIGNIFICADO NETFLIX PREMIUM',
+                texto: `🍿 *NETFLIX PREMIUM* 🎬\n\n💎 *Máxima Calidad:* Resolución 4K Ultra HD + HDR.\n🎧 *Audio Espacial:* Sound omnipresente tipo cine.\n📥 *Descargas:* Mira tus series favoritas sin internet.\n🚫 *Sin Anuncios:* Disfruta todo el catálogo sin cortes.\n\n¡La experiencia completa de Netflix en tus manos! ✨🚀`
+            },
+            {
+                titulo: 'COOKIES',
+                texto: `📲 *Instrucciones para acceder a la cuenta Netflix* 🎬✨\n1️⃣ Ingresa este enlace en el navegador de tu preferencia 👉 https://netflix.com/clearcookies\n2️⃣ Cuando cargue la página, escribe el correo en el campo Email ✉️\n3️⃣ Luego pulsa en *Comenzar* ▶️\n4️⃣ Después ingresa la contraseña de la cuenta 🔑\n5️⃣ Finalmente, dale en *Iniciar sesión* ✅ … ¡y listo! 🍿📺`
+            },
+            {
+                titulo: 'PROBLEMAS',
+                texto: `🔄📺 *¿Tu Smart TV no carga bien o falla?* 😅  \n¡No te preocupes! Aquí tienes dos formas rápidas de solucionarlo 💪✨\n\n⚙️ *Opción 1: Reinicio rápido* 1️⃣ Desconéctala por 1 minuto 🔌  \n2️⃣ Con el TV apagado, presiona Power 5 seg 🔘  \n(Si no tiene botón, déjala desconectada 3 min)  \n3️⃣ Conéctala y enciéndela ✨  \n4️⃣ Intenta acceder a tu cuenta 📲  \n✅ Soluciona problemas de carga o inicio 🛠️\n\n🌐 *Opción 2: Reinicio de red* 1️⃣ Apaga tu Smart TV 📴  \n2️⃣ Desconecta módem y router por 30 seg ⏱️  \n3️⃣ Conecta el modem y espera 💡  \n4️⃣ Luego el router and espera 🔁  \n5️⃣ Enciende el TV y prueba 🌟  \n✅ Mejora conexión y evita errores de red 📶\n\n💜 *Si el problema persiste, escríbeme y te guío paso a paso* 🚀🎬`
+            },
+            {
+                titulo: 'PAG PARA CODIGOS',
+                texto: `🎬 *¡TUTORIAL RÁPIDO: Cómo usar nuestro Centro de Códigos!* 🚀\n\nHola!!!! te enseño a usar nuestra nueva herramienta para que obtengas tus códigos al instante y sin esperas.\n\n🌐 _*LINK OFICIAL:*_ www.cybernetsp.com\n\n_*PASOS PARA TU SOLICITUD:*_\n\n1️⃣ _*Ingresa tu número:*_ Al entrar, la página te pedirá el celular con el que realizaste la compra (por ejemplo, este número desde el que me escribes). Dale a "Continuar".\n\n2️⃣ _*Elige tu Plataforma:*_ Selecciona Netflix 🔴 o Disney Premium 🔵.\n\n3️⃣ Si eliges _*NETFLIX*_, tienes 3 opciones:\n\n🔑 Código de Inicio de Sesión: Para entrar por primera vez.\n\n✈️ Código 'Estoy de Viaje': Para saltar el bloqueo de hogar.\n\n📧 Enlace de Inicio (Aprobación): Para aprobar el acceso vía link.\n\n4️⃣ *_Busca tu cuenta:_*\nIngresa el correo de la cuenta (debe terminar en @cybernetsp.com).\nDale clic en "Buscar en el sistema".\n\n✅ ¡Y LISTO! En segundos el sistema te entrega el código o el link de acceso en pantalla. ⚡\n\n_*PARA DISNEY PREMIUM*_: Es aún más directo. Eliges Disney, pones el correo terminado en @cybernetsp.com y ¡listo! Tienes tu código de inmediato.\n\nCualquier duda, el botón de Soporte está integrado en la web. ¡A sacarle el máximo provecho! 🔥🎬`
+            },
+            {
+                titulo: 'INSTALAR PAG',
+                texto: `🌐 *Cómo instalar Cybernet en tu celular (como una App)*\n\nSi quieres acceder rápidamente a tus servicios de Cybernet sin tener que abrir el navegador cada vez, sigue estos sencillos pasos:\n\n🤖 *Para usuarios de Android (Google Chrome)*\nAbre el navegador Chrome and entra a: www.cybernetsp.com\n\n1️⃣ Toca los tres puntos verticales (⋮) en la esquina superior derecha.\n2️⃣ Selecciona la opción: *"Instalar aplicación"* o *"Agregar a la pantalla principal".*\n*IMPORTANTE:* Cuando te pida el nombre, escribe *"Cybernet Códigos"*.\n3️⃣ Confirma tocando en "Instalar" o "Agregar".\n\n🍎 *Para usuarios de iPhone (Safari)*\nAbre el navegador Safari and entra a: www.cybernetsp.com\n\n1️⃣ Toca el icono de Compartir (el cuadrado con una flecha hacia arriba) en la parte inferior.\n2️⃣ Desliza hacia arriba y selecciona: *"Agregar al inicio".*\n*IMPORTANTE:* Verás un cuadro de texto para el nombre; bórralo y escribe *"Cybernet Códigos"*.\n3️⃣ Presiona *"Agregar"* en la esquina superior derecha.\n\n✨ *¿Por qué instalarla así?*\n*Ahorro de espacio:* No ocupa memoria extra en tu teléfono como una app tradicional.\n*Comodidad:* Entras directamente con un toque desde tu pantalla de inicio.\n\n*Tip:* Coloca el icono en tu pantalla principal para que siempre tengas tus códigos a la mano cuando los necesites.`
+            },
+            {
+                titulo: 'PRECIO NETFLIX',
+                texto: `🎬✨ *NETFLIX PREMIUM* 💙🍿  \n📺 Disfruta tus series y pelis favoritas 🔥  \n\n1️⃣ 👉 1 Pantalla 💻 → 💵 $14.500  \n2️⃣ 👉 2 Pantallas 📱💻 → 💵 $26.000  \n3️⃣ 👉 3 Pantallas 📱💻📺 → 💵 $36.000  \n4️⃣ 👉 4 Pantallas 📱💻📺🖥️ → 💵 $46.000  \n5️⃣ 👉 5 Pantallas 📱💻📺🖥️📲 → 💵 $55.000  \n\n🚀 Sin cortes, sin límites, ¡solo diversión! 🎉`
+            },
+            {
+                titulo: 'PRECIO DISNEY',
+                texto: `🎬 *Disney+ disponible* 💙  \n👉 *Estándar* → $8.500  \n📺 Con anuncios, sin ESPN\n\n👉 *Premium* → $15.000  \n🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil\n\n📲 *Tú eliges cómo disfrutar tu Disney+ favorito* 🍿✨`
+            },
+            {
+                titulo: 'IPTV',
+                texto: `📺✨ Servicio IPTV – Cybernet\n\nEl servicio de IPTV te ofrece más de 5.000 canales de TV en vivo, incluyendo contenido deportivo como ESPN, WIN Sports y mucho más 🏆🎬\n\nPara disfrutarlo sin interrupciones, asegúrate de contar con mínimo 10 Mb de internet estables 🌐⚡\n\n📌 Pasos para configurar tu IPTV, amig@:\n1️⃣ Play List Name: ingresa el Any Name que te proporcionamos.\n2️⃣ Usuario: escribe el usuario que recibiste.\n3️⃣ Clave/Contraseña: introduce la contraseña asignada.\n4️⃣ URL: copia y pega la URL exactamente como te la enviamos.\n5️⃣ Confirmar: presiona Enter para acceder.\n6️⃣ ¡Listo! Disfruta de TV en vivo, películas y series al instante 📡🍿\n\n📱 Instalación según tu dispositivo:\n📲 Android\nDescarga la app IPTV Smarters Pro desde este enlace:\n👉 Descargar aquí\n\n🍎 iOS (iPhone / iPad)\n👉 Descargar aquí\n\n💻 PC (Windows)\n👉 Descargar aquí\n\n📺 Smart TV\nTe recomendamos instalar IPTV Smarters Pro para una mejor experiencia visual y estabilidad 👌\n\n💜 Gracias por elegir Cybernet, amig@.\nTu acceso directo al entretenimiento sin límites 🚀📡✨`
+            },
+            {
+                titulo: 'ANUNCIO',
+                texto: `💬 *¡Tranquil@, amig@!* 😎  \nEse mensaje es solo una notificación temporal 📲  \nNo hay nada de qué preocuparse 😉\n\n✅ Toca *ACEPTAR* o *AHORA NO* y listo  \n🚀 Tu cuenta seguirá funcionando sin interrupciones 🎬\n\n💜 *Relájate y disfruta* En Cybernet todo fluye sin estrés ni complicaciones 🙌🍿`
+            },
+            {
+                titulo: 'DISTRIBUIDORES',
+                texto: `💼✨ *¡Precios nuevos para distribuidores!* 🚀 Aumenta tus ganancias y lleva tu negocio al siguiente nivel 💰\n\n📢 *Info clave:* 1️⃣ Recarga mínima: *$50.000* 💵  \n2️⃣ El saldo se descuenta por cada venta 📲  \n3️⃣ Identifica cada cuenta con el nombre del cliente 📋\n\n🌟 *Planes de 1 pantalla:* 🎬 Netflix – $10.000  \n🎭 Max – $3.000  \n📺 Apple TV – $3.000  \n🏰 Disney+ Premium – $10.000  \n🎥 Disney+ Estándar – $4.000  \n🍿 Prime Video Original – $5.000  \n🌸 Crunchyroll – $3.000  \n🎮 Plex – $3.000  \n🎞️ Paramount+ – $3.000  \n🎞️ MUBI – $3.000  \n⚽ Metegol – $12.000  \n📡 Vix – $3.000  \n📺 IPTV – $7.000  \n🎨 Canva – $10.000  \n📺 YouTube (1 mes) – $10.000  \n🎶 Spotify (1 mes) – $14.000 \n🎶 YouTube Premium (1 mes) – $14.000\n🎶 Spotify (1 mes Distris) – $10.000\n🎶 Deezer (1 mes) – $8.000\n\n📌 *Aclaraciones:* 🏆 Disney+ Premium incluye Star+ y ESPN  \n👀 Disney+ Estándar incluye Star+, sin ESPN\n\n🔥💸 *Aprovecha estos precios preferenciales y multiplica tus ingresos* 📲 Ajusta tus valores de venta y obtén excelentes beneficios 🚀`
+            },
+            {
+                titulo: 'FOTO DEL PROBLEMA',
+                texto: `💬 *Amig@*, para ayudarte rápido solo necesito esto 👇\n\n📸 *Una foto o captura del error* (para ver qué aparece en tu pantalla)  \n📧 *El correo que usas en tu cuenta* (así la identifico fácil)\n\n👉 *¿No puedes enviar imagen?* No pasa nada: descríbeme con tus palabras lo que ves en pantalla 📝\n\n🔧 Con eso ya puedo revisar el problema y darte una solución rápida 🚀🙌  \n🎬 ¡Estoy aquí para que todo funcione sin complicaciones!`
+            },
+            {
+                titulo: 'TV NETFLIX',
+                texto: `📺 *¿Necesitas actualizar Netflix en tu TV?* 😄  \nSigue estos pasos sencillos para que todo funcione perfecto 👇\n\n1️⃣ En tu televisor selecciona *Usar teléfono* 2️⃣ Envíame el *código de 8 dígitos* 📝 (escrito, no en captura)  \n3️⃣ Mantén la pantalla encendida mientras activamos tu acceso 🔓\n\n⚠️ *Importante:* solo un dispositivo a la vez para evitar bloqueos o desconexiones 🚫\n\n✅ ¡Y listo! Tu cuenta quedará activa en segundos 🍿🚀`
+            },
+            {
+                titulo: 'ESTOY DE VIAJE NETFLIX',
+                texto: `🔓 *Acceso a Netflix en tu TV* 🎬📺\n\nEl mensaje que ves es parte de la nueva verificación de Netflix. No es un error de tu cuenta, solo sigue estos pasos para activarla:\n\n1️⃣ Selecciona: *ESTA ES MI CUENTA*\n2️⃣ Pulsa en: *ESTOY DE VIAJE*\n3️⃣ Gestión: Después de eso envíame el correo o la cuenta\n4️⃣ Finaliza: Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n💡 *Tip: ¡Hazlo tú mismo 24/7!* Si prefieres no esperar, usa nuestro bot disponible a cualquier hora:\n\n👉 www.cybernetsp.com _(Selecciona la opción: Estoy de viaje. Solo disponible para correos @cybernetsp.com)_`
+            },
+            {
+                titulo: 'ACTUALIZAR HOGAR NETFLIX',
+                texto: `🏠 *Actualizar Hogar Netflix* 🎬📺\n\nSi te aparece el mensaje de *"Este televisor no forma parte de tu hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *ACTUALIZAR HOGAR.*\n3️⃣ Despues de eso *ME ENVIAS CORREO.* 4️⃣ Dale a *ENVIAR* y avísame de inmediato para actualizarlo.\n\n🍿 ¡Listo! Once actualizado, podrás seguir disfrutando en tu TV sin bloqueos.`
+            },
+            {
+                titulo: 'FUERA DE CASA DISNEY',
+                texto: `🔓 *Acceso a Disney+ en tu TV* 🎬✨\n\nSi te aparece el mensaje de verificación en tu televisor, no te preocupes. Sigue estos pasos rápidos para entrar:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *ESTOY FUERA DE CASA.*\n3️⃣ Despues de eso ME ENVÍAS LA CUENTA.\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n⏳ *Nota:* Ten el televisor encendido en la pantalla del código, ya que estos accesos expiran rápido.\n\n💙 ¡Listo! Once ingresado, podrás seguir disfrutando de todo el contenido.`
+            },
+            {
+                titulo: 'CAMBIO DE HOGAR DISNEY',
+                texto: `🏠 *Cambiar de Hogar Disney+* 🎬✨\n\nSi te aparece el mensaje de *"Este televisor no forma parte del hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *CAMBIAR DE HOGAR.*\n3️⃣ Despues de eso *ME ENVÍAS LA CUENTA.*\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n⏳ *Nota:* Mantente en esa pantalla para que el código no expire y puedas ingresarlo apenas te lo envíe.\n\n💙 ¡Listo! Una vez cambiado el hogar, podrás seguir disfrutando sin bloqueos.`
+            },
+            {
+                titulo: 'SINCRONIZAR DISNEY',
+                texto: `✨ Activa Disney+ en tu TV fácilmente 📺\n\nElige uno de los dos métodos para iniciar sesión:\n\n▶️ *MÉTODO 1:* Por código _(El más recomendado)_ 💻📱\n1️⃣ En tu televisor abre la aplicación de Disney+ y dale clic a "Iniciar sesión".\n👀 Te aparecerá un código de 8 dígitos en la pantalla.\n2️⃣ Desde tu celular o computador entra al navegador (Chrome o Safari) e ingresa a:\n🌐 www.disneyplus.com/es-419/begin\n3️⃣ Escribe el código del TV en la página, dale a "Continuar" e inicia sesión con el correo y contraseña que te entregamos 📧.\n\n▶️ *MÉTODO 2:* Por Red Wi-Fi _(Sincronización automática)_ 📶\n1️⃣ Asegúrate de que tu celular y tu televisor estén conectados exactamente a la misma red Wi-Fi de la casa.\n2️⃣ Abre la aplicación de Disney+ en tu celular e inicia sesión con los datos que te entregamos.\n3️⃣ Abre la aplicación de Disney+ en tu televisor y dale a "Iniciar sesión".\n4️⃣ Te saldrá un aviso automático en la pantalla de tu celular preguntando si deseas permitir el acceso. Dale a "Permitir" o "Iniciar sesión" ¡y listo!\n\n✅ En segundos tu televisor se actualizará solo y podrás disfrutar de todas tus películas y series favoritas 🍿🎬`
+            },
+            {
+                titulo: 'SINCRONIZAR AMAZON',
+                texto: `✨ *Sincroniza Amazon Prime Video en tu TV* 📺\n\n1️⃣ Desde tu celular o computador entra a:  \n🌐 www.primevideo.com/region/eu/ontv/code/ref=atv_set_rd_reg\n\n2️⃣ Ingresa los datos de la cuenta que te proporcionamos 📧  \n3️⃣ En tu TV, abre la app de Prime Video y selecciona *Identificarse* 4️⃣ Verás un código en pantalla → escríbelo en la página y pulsa *Continuar*\n\n✅ ¡Listo! Tu TV quedará sincronizado y podrás disfrutar tus series y pelis favoritas 🍿🎬`
+            },
+            {
+                titulo: 'CAMBIO DE CLAVE NETFLIX',
+                texto: `🔒✨ *Notificación de seguridad – Netflix* Hola 👋 amig@, tu contraseña de Netflix fue actualizada por motivos de seguridad 🔐.  \n\n📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  \ny confírmame por este medio ✅  \n\n💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
+            },
+            {
+                titulo: 'CAMBIO DE CLAVE DISNEY+',
+                texto: `🔒✨ *Notificación de seguridad – Disney Premium* Hola 👋 amig@, tu contraseña de Disney Premium fue actualizada por motivos de seguridad 🔐.  \n\n📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  \ny confírmame por este medio ✅  \n\n💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
+            },
+            {
+                titulo: 'CEL PC NETFLIX',
+                texto: `🎬✨ *Accede a tu cuenta de Netflix en segundos 📺*\n\n1️⃣ Abre: La app o página de Netflix.\n2️⃣ Selecciona: La opción *Usar código de inicio* 💻\n3️⃣ Ingresa: El correo de tu cuenta 📧\n4️⃣ Confirma: Haz clic en *Enviar código* 🔐\n5️⃣ Gestión: Reenvíame el correo que solicita el código.\n6️⃣ Finaliza: Avísame apenas tu dispositivo te pida el código para entregártelo.\n\n💡 *Tip: ¡Hazlo tú mismo 24/7!*\nSi prefieres no esperar, usa nuestro bot disponible a cualquier hora:\n👉 www.cybernetsp.com _(Selecciona la opción: Código de inicio sesión. Solo disponible para correos @cybernetsp.com)_`
+            },
+            {
+                titulo: 'CAMBIAR PLAN',
+                texto: `📺 *Mensaje en pantalla:* _"Hay demasiadas personas usando la cuenta en este momento"_\n\n😎 ¡No te preocupes! La solución es muy sencilla 👇\n\n1️⃣ Haz clic en *Cambiar* 2️⃣ Luego selecciona *Cambiar o Confirmar* 3️⃣ 🎉 ¡Listo! Todo vuelve a la normalidad y puedes seguir disfrutando sin problema 🍿\n\n👉 Si este aviso vuelve a aparecer, repite los mismos pasos sin necesidad de escribirme 🚀`
+            },
+            {
+                titulo: 'SOPORTE',
+                texto: `🧰 *Tu cuenta está en revisión técnica* 🧩⚙️  \n\n⏳ Por favor espera entre *10 a 15 minutos* y luego vuelve a ingresar para confirmar que todo quedó funcionando 📺✨  \n\n🙌 ¡Tranquil@! En pocos minutos todo estará listo  \npara que sigas disfrutando sin interrupciones 🍿🚀`
+            },
+            {
+                titulo: 'REEMPLAZOS',
+                texto: `📢 *Importante sobre tu cuenta de Netflix*\nHola 👋 Solo para aclararte: con los nuevos métodos de activación, el sistema de Netflix no conserva el historial anterior ni los perfiles personalizados. Esto es completamente normal y parte del proceso técnico que usamos para garantizar acceso estable.\n✅ ¿Por qué se hace así?\nEste método evita que Netflix active la función de “actualizar hogar”, que puede bloquear el acceso o limitar el uso en differentes dispositivos. Al usar activaciones temporales o por código, protegemos tu acceso continuo sin interrupciones.\n🎬 Aunque el historial se reinicia, puedes seguir disfrutando tus series películas favoritas sin problemas. Si necesitas ayuda para volver a encontrar lo que estaba viendo, con gusto te ayudo`
+            },
+            {
+                titulo: 'ENLACE INICIO DE SESION',
+                texto: `✨ *¡Activa tu pantalla en segundos!* 🎬\n\nPara vincular tu dispositivo, sigue estos pasos:\n\n1️⃣ En tu TV: Selecciona la opción *“Enviar enlace de inicio de sesión”*\n2️⃣ Confirma: Pulsa en el botón *“Enviar”* que aparece en pantalla\n3️⃣ Gestión: Reenvíame el correo que recibas con la solicitud del código\n4️⃣ Finaliza: Avísame en cuanto tu dispositivo te pida la aprobación\n\n🚀 *¡Ahorra tiempo!* Hazlo tú mismo 24/7 Si no quieres esperar, puedes obtener tu código al instante en nuestra web:\n\n👉 www.cybernetsp.com _(Selecciona la opción: Solicitud de inicio. Solo disponible para correos @cybernetsp.com)_`
+            },
+            {
+                titulo: 'GARANTIA',
+                texto: `✨ *¡Hola!* 😊  \nTe entrego la *garantía de tu cuenta* 🙌  \n\n📺 Por favor ingresa y cuéntame qué tal te fue 💬  \n💪 Estoy pendiente por si necesitas apoyo o alguna revisión adicional ✨  \n\n🍿 ¡Disfruta tu servicio sin preocupaciones!`
+            },
+            {
+                titulo: 'VERIFICACION',
+                texto: `¡Recibido! ✅ Procedemos a verificar tu pago en el sistema.\n\nPor favor, confírmame el nombre del titular de la cuenta desde la cual realizaste la transferencia. 📝\n\nEn un momento validamos y te hacemos la entrega activa de tu servicio. ¡Gracias por elegirnos! 🚀`
+            },
+            {
+                titulo: 'INICIO DE SESION',
+                texto: `🔒✨ *Actualización de Netflix*\n\nAl ingresar al sistema se solicitará un código. Seleccione *Obtener ayuda* y luego *Usar contraseña* para introducir la clave de su cuenta.`
+            }
+        ];
 
-    function cancelarCambioYSalir() {
-        document.getElementById('passwordOverlay').classList.remove('open');
-        document.getElementById('passwordForm').reset();
-        
-        if (window.isForcedChange) {
-            window.pendingUser = "";
-            window.pendingOldPass = "";
-            window.pendingRemember = false;
-        }
-    }
+        const gridContainer = document.getElementById('grid-container');
+        const headerContainer = document.getElementById('header-container');
 
-    function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
-        if (!isAutoLogin) {
-            ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
-        }
-        
-        document.getElementById('loginOverlay').classList.add('hidden');
-        document.getElementById('mainWorkspace').style.display = 'flex';
-        document.getElementById('globalHeader').style.display = 'flex';
-        document.getElementById('staffSessionName').innerText = userInput;
-        
-        sessionStorage.setItem('active_staff', userInput);
-        
-        if (rememberMe) {
-            localStorage.setItem('cyber_saved_staff', userInput);
-        }
-        
-        inicializarWorkspace();
-    }
-
-    function cerrarSesionStaff() {
-      haptic();
-      
-      const usuarioActivo = sessionStorage.getItem('active_staff') || "STAFF";
-      const cerrarBoton = document.querySelector('.control-container button:last-child');
-      
-      if (cerrarBoton) {
-          cerrarBoton.style.opacity = "0.5";
-      }
-
-      const tiempoTotalFormateado = obtenerTiempoFinalFormateado();
-
-      ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoTotalFormateado, function() {
-          sessionStorage.removeItem('active_staff');
-          localStorage.removeItem('cyber_saved_staff'); 
-          localStorage.removeItem('cyber_shift_start_time');
-          localStorage.removeItem('cyber_shift_accumulated_time');
-          
-          if (timerInterval) clearInterval(timerInterval);
-          if (autoRefreshCodesInterval) clearInterval(autoRefreshCodesInterval);
-          if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
-          
-          location.reload();
-      });
-    }
-
-    function inicializarWorkspace() {
-        renderGrid();
-        startShiftTimer();
-        iniciarControlInactividad();
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('cyber_theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeIcon(savedTheme);
-
-        if(sessionStorage.getItem('active_staff') || localStorage.getItem('cyber_saved_staff')) {
-            const user = sessionStorage.getItem('active_staff') || localStorage.getItem('cyber_saved_staff');
-            sessionStorage.setItem('active_staff', user); 
-            entrarAlSistema(user, false, true);
-        }
-    });
-
-    const qrPrincipal = {
-      titulo: 'PAGOS',
-      imagenUrl: 'https://i.postimg.cc/ydfJzvp8/unnamed.png',
-      texto: `Te comparto nuestra llave para el pago de tu servicio desde cualquier entidad bancaria:\n\n📌 *Llave:* 0090878219\n👤 *Verificar nombre:* REF CYBERNET\n\n⚠️ *Nota:* Esta llave es exclusiva para pagos mediante Bre-B desde cualquier banco.\n\n*Pasos para activar tu servicio:* 1️⃣ Realiza la transferencia.\n2️⃣ Envía el comprobante de pago por este medio.\n3️⃣ ¡Recibe tu acceso y empieza a disfrutar! 🚀🎬`
-    };
-
-    const elementosGrid = [
-      {
-        titulo: 'ADS',
-        texto: `¡Hola! 👋 ¡Bienvenido a Cybernet! 🎬\n\nAprovecha nuestra *SUPER PROMO* de hoy:\n\n🔥 *2 PLATAFORMAS POR SOLO $9.900:*\n_(Disney+ estandar, Hbo Max, Paramount+, Vix+, Crunchyroll o Plex)._\n\n🥳 *AMAZON PRIME VIDEO:* por hoy a tan solo $ 9.900\n\n🎁 *OFERTA DE BIENVENIDA:*\n📺 *NETFLIX PREMIUM:* Solo por hoy a $12.500.\n\n¿Cuál te activo ahora mismo?`
-      },
-      {
-        titulo: 'NEQUI',
-        texto: `¡Realiza tu pago rápido, fácil y seguro!\n\n💜 Nequi o Daviplata: 3015156037\n\n📸 Envía la captura del comprobante y tu servicio quedará activo al instante 🚀`
-      },
-      {
-        titulo: 'COMBOS',
-        texto: `💻 ¡Arma tu combo streaming a tu medida con *_NETFLIX PREMIUM!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n\n0️⃣ Netflix solo → 💰 *_$14.500_* 😔 _(Opción Tradicional)_\n\n1️⃣ Netflix + 1 plataforma → 💰 *_$20.000_* _¡TOP VENTAS!_ 🔥🏆\n2️⃣ Netflix + 2 pantallas → 💰 *_$26.000_*\n3️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL Cet_* 🚀✨\n4️⃣ Netflix + 3 pantallas → 💰 *_$36.000_*\n5️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎\n6️⃣ Netflix + 4 pantallas → 💰 *_$46.000_*\n7️⃣ Netflix + 5 pantallas → 💰 *_$55.000_*\n\n8️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_\n9️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_\n🔟 Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_\n1️⃣1️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_\n\n*Netflix* cuenta con una página de códigos disponible las 24 horas, los 7 días de la semana.`
-      },
-      {
-        titulo: 'COMBOS SIN NETFLIX',
-        texto: `💻 ¡Arma tu combo streaming a tu medida con *_Sin Netflix!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n \n1️⃣ 2 Plataformas = 💰 *_$13.000_* 😱 \n2️⃣ 3 Plataformas = 💰 *_$16.000_* 😱 \n3️⃣ 4 Plataformas = 💰 *_$18.000_* 😱 \n\n4️⃣ Disney Premium + 1 plataforma =  💰 *_$20.000_* 😱\n5️⃣ Disney Premium + 2 plataformas =  💰 *_$22.000_* 😱\n6️⃣ Disney Premium + 3 plataformas =  💰 *_$24.000_* 😱`
-      },
-      {
-        titulo: 'INDIVIDUALES',
-        texto: `💻✨ *Plataformas Individuales – Cybernet* 🚀🎬  \n📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 📡 Vix → *$8.500*\n⚽ Metegol → *$15.000* 🎨 Canva Pro (1 mes) → *$20.000*\n🎶 Spotify (1 mes) → *$14.000* 🎶 YouTube Premium (1 mes) → *$14.000*\n🎶 Deezer (1 mes) → *$12.000* 🎬 *Diferencias Disney+* 💙  \n👉 Estándar →  📺 Con anuncios, sin ESPN\n👉 Premium →  🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil\n\n💜 *En Cybernet no hay trucos,* solo entertainment real y herramientas para tu día a día 🍿✨`
-      },
-      {
-        titulo: 'GRACIAS',
-        texto: `¡De nada! Es un verdadero gusto atenderte. 😊🙌\n\nSolo paso a recordarte que, ante cualquier duda ❓ o inconveniente ⚠️ que presentes con tu servicio, ¡no dudes en escribirme de inmediato! 📲⚡ Estoy aquí para darte una solución rápida 🛠️ y que sigas disfrutando de toda tu programación favorita sin interrupciones. 📺🍿🎬`
-      },
-      {
-        titulo: 'DIFERENCIAS DISNEY',
-        texto: `🎬 *_Diferencias de Disney+_* 💙✨\n👉 *_Estándar_*\n- 📺 Incluye anuncios\n- 🚫 No tiene ESPN\n\n👉 *_Premium_*\n- 🚫 Sin anuncios\n- 🏆 ESPN incluido\n- 🔒 Bloqueo de perfil disponible\n\n📲 Tú decides cómo disfrutar tu Disney+ favorito 🍿🌟`
-      },
-      {
-        titulo: 'SIGNIFICADO NETFLIX PREMIUM',
-        texto: `🍿 *NETFLIX PREMIUM* 🎬\n\n💎 *Máxima Calidad:* Resolución 4K Ultra HD + HDR.\n🎧 *Audio Espacial:* Sound omnipresente tipo cine.\n📥 *Descargas:* Mira tus series favoritas sin internet.\n🚫 *Sin Anuncios:* Disfruta todo el catálogo sin cortes.\n\n¡La experiencia completa de Netflix en tus manos! ✨🚀`
-      },
-      {
-        titulo: 'COOKIES',
-        texto: `📲 *Instrucciones para acceder a la cuenta Netflix* 🎬✨\n1️⃣ Ingresa este enlace en el navegador de tu preferencia 👉 https://netflix.com/clearcookies\n2️⃣ Cuando cargue la página, escribe el correo en el campo Email ✉️\n3️⃣ Luego pulsa en *Comenzar* ▶️\n4️⃣ Después ingresa la contraseña de la cuenta 🔑\n5️⃣ Finalmente, dale en *Iniciar sesión* ✅ … ¡y listo! 🍿📺`
-      },
-      {
-        titulo: 'PROBLEMAS',
-        texto: `🔄📺 *¿Tu Smart TV no carga bien o falla?* 😅  \n¡No te preocupes! Aquí tienes dos formas rápidas de solucionarlo 💪✨\n\n⚙️ *Opción 1: Reinicio rápido* 1️⃣ Desconéctala por 1 minuto 🔌  \n2️⃣ Con el TV apagado, presiona Power 5 seg 🔘  \n(Si no tiene botón, déjala desconectada 3 min)  \n3️⃣ Conéctala y enciéndela ✨  \n4️⃣ Intenta acceder a tu cuenta 📲  \n✅ Soluciona problemas de carga o inicio 🛠️\n\n🌐 *Opción 2: Reinicio de red* 1️⃣ Apaga tu Smart TV 📴  \n2️⃣ Desconecta módem y router por 30 seg ⏱️  \n3️⃣ Conecta el modem y espera 💡  \n4️⃣ Luego el router and espera 🔁  \n5️⃣ Enciende el TV y prueba 🌟  \n✅ Mejora conexión y evita errores de red 📶\n\n💜 *Si el problema persiste, escríbeme y te guío paso a paso* 🚀🎬`
-      },
-      {
-        titulo: 'PAG PARA CODIGOS',
-        texto: `🎬 *¡TUTORIAL RÁPIDO: Cómo usar nuestro Centro de Códigos!* 🚀\n\nHola!!!! te enseño a usar nuestra nueva herramienta para que obtengas tus códigos al instante y sin esperas.\n\n🌐 _*LINK OFICIAL:*_ www.cybernetsp.com\n\n_*PASOS PARA TU SOLICITUD:*_\n\n1️⃣ _*Ingresa tu número:*_ Al entrar, la página te pedirá el celular con el que realizaste la compra (por ejemplo, este número desde el que me escribes). Dale a "Continuar".\n\n2️⃣ _*Elige tu Plataforma:*_ Selecciona Netflix 🔴 o Disney Premium 🔵.\n\n3️⃣ Si eliges _*NETFLIX*_, tienes 3 opciones:\n\n🔑 Código de Inicio de Sesión: Para entrar por primera vez.\n\n✈️ Código 'Estoy de Viaje': Para saltar el bloqueo de hogar.\n\n📧 Enlace de Inicio (Aprobación): Para aprobar el acceso vía link.\n\n4️⃣ *_Busca tu cuenta:_*\nIngresa el correo de la cuenta (debe terminar en @cybernetsp.com).\nDale clic en "Buscar en el sistema".\n\n✅ ¡Y LISTO! En segundos el sistema te entrega el código o el link de acceso en pantalla. ⚡\n\n_*PARA DISNEY PREMIUM*_: Es aún más directo. Eliges Disney, pones el correo terminado en @cybernetsp.com y ¡listo! Tienes tu código de inmediato.\n\nCualquier duda, el botón de Soporte está integrado en la web. ¡A sacarle el máximo provecho! 🔥🎬`
-      },
-      {
-        titulo: 'INSTALAR PAG',
-        texto: `🌐 *Cómo instalar Cybernet en tu celular (como una App)*\n\nSi quieres acceder rápidamente a tus servicios de Cybernet sin tener que abrir el navegador cada vez, sigue estos sencillos pasos:\n\n🤖 *Para usuarios de Android (Google Chrome)*\nAbre el navegador Chrome and entra a: www.cybernetsp.com\n\n1️⃣ Toca los tres puntos verticales (⋮) en la esquina superior derecha.\n2️⃣ Selecciona la opción: *"Instalar aplicación"* o *"Agregar a la pantalla principal".*\n*IMPORTANTE:* Cuando te pida el nombre, escribe *"Cybernet Códigos"*.\n3️⃣ Confirma tocando en "Instalar" o "Agregar".\n\n🍎 *Para usuarios de iPhone (Safari)*\nAbre el navegador Safari and entra a: www.cybernetsp.com\n\n1️⃣ Toca el icono de Compartir (el cuadrado con una flecha hacia arriba) en la parte inferior.\n2️⃣ Desliza hacia arriba y selecciona: *"Agregar al inicio".*\n*IMPORTANTE:* Verás un cuadro de texto para el nombre; bórralo y escribe *"Cybernet Códigos"*.\n3️⃣ Presiona *"Agregar"* en la esquina superior derecha.\n\n✨ *¿Por qué instalarla así?*\n*Ahorro de espacio:* No ocupa memoria extra en tu teléfono como una app tradicional.\n*Comodidad:* Entras directamente con un toque desde tu pantalla de inicio.\n\n*Tip:* Coloca el icono en tu pantalla principal para que siempre tengas tus códigos a la mano cuando los necesites.`
-      },
-      {
-        titulo: 'PRECIO NETFLIX',
-        texto: `🎬✨ *NETFLIX PREMIUM* 💙🍿  \n📺 Disfruta tus series y pelis favoritas 🔥  \n\n1️⃣ 👉 1 Pantalla 💻 → 💵 $14.500  \n2️⃣ 👉 2 Pantallas 📱💻 → 💵 $26.000  \n3️⃣ 👉 3 Pantallas 📱💻📺 → 💵 $36.000  \n4️⃣ 👉 4 Pantallas 📱💻📺🖥️ → 💵 $46.000  \n5️⃣ 👉 5 Pantallas 📱💻📺🖥️📲 → 💵 $55.000  \n\n🚀 Sin cortes, sin límites, ¡solo diversión! 🎉`
-      },
-      {
-        titulo: 'PRECIO DISNEY',
-        texto: `🎬 *Disney+ disponible* 💙  \n👉 *Estándar* → $8.500  \n📺 Con anuncios, sin ESPN\n\n👉 *Premium* → $15.000  \n🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil\n\n📲 *Tú eliges cómo disfrutar tu Disney+ favorito* 🍿✨`
-      },
-      {
-        titulo: 'IPTV',
-        texto: `📺✨ Servicio IPTV – Cybernet\n\nEl servicio de IPTV te ofrece más de 5.000 canales de TV en vivo, incluyendo contenido deportivo como ESPN, WIN Sports y mucho más 🏆🎬\n\nPara disfrutarlo sin interrupciones, asegúrate de contar con mínimo 10 Mb de internet estables 🌐⚡\n\n📌 Pasos para configurar tu IPTV, amig@:\n1️⃣ Play List Name: ingresa el Any Name que te proporcionamos.\n2️⃣ Usuario: escribe el usuario que recibiste.\n3️⃣ Clave/Contraseña: introduce la contraseña asignada.\n4️⃣ URL: copia y pega la URL exactamente como te la enviamos.\n5️⃣ Confirmar: presiona Enter para acceder.\n6️⃣ ¡Listo! Disfruta de TV en vivo, películas y series al instante 📡🍿\n\n📱 Instalación según tu dispositivo:\n📲 Android\nDescarga la app IPTV Smarters Pro desde este enlace:\n👉 Descargar aquí\n\n🍎 iOS (iPhone / iPad)\n👉 Descargar aquí\n\n💻 PC (Windows)\n👉 Descargar aquí\n\n📺 Smart TV\nTe recomendamos instalar IPTV Smarters Pro para una mejor experiencia visual y estabilidad 👌\n\n💜 Gracias por elegir Cybernet, amig@.\nTu acceso directo al entretenimiento sin límites 🚀📡✨`
-      },
-      {
-        titulo: 'ANUNCIO',
-        texto: `💬 *¡Tranquil@, amig@!* 😎  \nEse mensaje es solo una notificación temporal 📲  \nNo hay nada de qué preocuparse 😉\n\n✅ Toca *ACEPTAR* o *AHORA NO* y listo  \n🚀 Tu cuenta seguirá funcionando sin interrupciones 🎬\n\n💜 *Relájate y disfruta* En Cybernet todo fluye sin estrés ni complicaciones 🙌🍿`
-      },
-      {
-        titulo: 'DISTRIBUIDORES',
-        texto: `💼✨ *¡Precios nuevos para distribuidores!* 🚀 Aumenta tus ganancias y lleva tu negocio al siguiente nivel 💰\n\n📢 *Info clave:* 1️⃣ Recarga mínima: *$50.000* 💵  \n2️⃣ El saldo se descuenta por cada venta 📲  \n3️⃣ Identifica cada cuenta con el nombre del cliente 📋\n\n🌟 *Planes de 1 pantalla:* 🎬 Netflix – $10.000  \n🎭 Max – $3.000  \n📺 Apple TV – $3.000  \n🏰 Disney+ Premium – $10.000  \n🎥 Disney+ Estándar – $4.000  \n🍿 Prime Video Original – $5.000  \n🌸 Crunchyroll – $3.000  \n🎮 Plex – $3.000  \n🎞️ Paramount+ – $3.000  \n🎞️ MUBI – $3.000  \n⚽ Metegol – $12.000  \n📡 Vix – $3.000  \n📺 IPTV – $7.000  \n🎨 Canva – $10.000  \n📺 YouTube (1 mes) – $10.000  \n🎶 Spotify (1 mes) – $14.000 \n🎶 YouTube Premium (1 mes) – $14.000\n🎶 Spotify (1 mes Distris) – $10.000\n🎶 Deezer (1 mes) – $8.000\n\n📌 *Aclaraciones:* 🏆 Disney+ Premium incluye Star+ y ESPN  \n👀 Disney+ Estándar incluye Star+, sin ESPN\n\n🔥💸 *Aprovecha estos precios preferenciales y multiplica tus ingresos* 📲 Ajusta tus valores de venta y obtén excelentes beneficios 🚀`
-      },
-      {
-        titulo: 'FOTO DEL PROBLEMA',
-        texto: `💬 *Amig@*, para ayudarte rápido solo necesito esto 👇\n\n📸 *Una foto o captura del error* (para ver qué aparece en tu pantalla)  \n📧 *El correo que usas en tu cuenta* (así la identifico fácil)\n\n👉 *¿No puedes enviar imagen?* No pasa nada: descríbeme con tus palabras lo que ves en pantalla 📝\n\n🔧 Con eso ya puedo revisar el problema y darte una solución rápida 🚀🙌  \n🎬 ¡Estoy aquí para que todo funcione sin complicaciones!`
-      },
-      {
-        titulo: 'TV NETFLIX',
-        texto: `📺 *¿Necesitas actualizar Netflix en tu TV?* 😄  \nSigue estos pasos sencillos para que todo funcione perfecto 👇\n\n1️⃣ En tu televisor selecciona *Usar teléfono* 2️⃣ Envíame el *código de 8 dígitos* 📝 (escrito, no en captura)  \n3️⃣ Mantén la pantalla encendida mientras activamos tu acceso 🔓\n\n⚠️ *Importante:* solo un dispositivo a la vez para evitar bloqueos o desconexiones 🚫\n\n✅ ¡Y listo! Tu cuenta quedará activa en segundos 🍿🚀`
-      },
-      {
-        titulo: 'ESTOY DE VIAJE NETFLIX',
-        texto: `🔓 *Acceso a Netflix en tu TV* 🎬📺\n\nEl mensaje que ves es parte de la nueva verificación de Netflix. No es un error de tu cuenta, solo sigue estos pasos para activarla:\n\n1️⃣ Selecciona: *ESTA ES MI CUENTA*\n2️⃣ Pulsa en: *ESTOY DE VIAJE*\n3️⃣ Gestión: Después de eso envíame el correo o la cuenta\n4️⃣ Finaliza: Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n💡 *Tip: ¡Hazlo tú mismo 24/7!* Si prefieres no esperar, usa nuestro bot disponible a cualquier hora:\n\n👉 www.cybernetsp.com _(Selecciona la opción: Estoy de viaje. Solo disponible para correos @cybernetsp.com)_`
-      },
-      {
-        titulo: 'ACTUALIZAR HOGAR NETFLIX',
-        texto: `🏠 *Actualizar Hogar Netflix* 🎬📺\n\nSi te aparece el mensaje de *"Este televisor no forma parte de tu hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *ACTUALIZAR HOGAR.*\n3️⃣ Despues de eso *ME ENVIAS CORREO.* 4️⃣ Dale a *ENVIAR* y avísame de inmediato para actualizarlo.\n\n🍿 ¡Listo! Once actualizado, podrás seguir disfrutando en tu TV sin bloqueos.`
-      },
-      {
-        titulo: 'FUERA DE CASA DISNEY',
-        texto: `🔓 *Acceso a Disney+ en tu TV* 🎬✨\n\nSi te aparece el mensaje de verificación en tu televisor, no te preocupes. Sigue estos pasos rápidos para entrar:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *ESTOY FUERA DE CASA.*\n3️⃣ Despues de eso ME ENVÍAS LA CUENTA.\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n⏳ *Nota:* Ten el televisor encendido en la pantalla del código, ya que estos accesos expiran rápido.\n\n💙 ¡Listo! Once ingresado, podrás seguir disfrutando de todo el contenido.`
-      },
-      {
-        titulo: 'CAMBIO DE HOGAR DISNEY',
-        texto: `🏠 *Cambiar de Hogar Disney+* 🎬✨\n\nSi te aparece el mensaje de *"Este televisor no forma parte del hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *CAMBIAR DE HOGAR.*\n3️⃣ Despues de eso *ME ENVÍAS LA CUENTA.*\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n⏳ *Nota:* Mantente en esa pantalla para que el código no expire y puedas ingresarlo apenas te lo envíe.\n\n💙 ¡Listo! Una vez cambiado el hogar, podrás seguir disfrutando sin bloqueos.`
-      },
-      {
-        titulo: 'SINCRONIZAR DISNEY',
-        texto: `✨ Activa Disney+ en tu TV fácilmente 📺\n\nElige uno de los dos métodos para iniciar sesión:\n\n▶️ *MÉTODO 1:* Por código _(El más recomendado)_ 💻📱\n1️⃣ En tu televisor abre la aplicación de Disney+ y dale clic a "Iniciar sesión".\n👀 Te aparecerá un código de 8 dígitos en la pantalla.\n2️⃣ Desde tu celular o computador entra al navegador (Chrome o Safari) e ingresa a:\n🌐 www.disneyplus.com/es-419/begin\n3️⃣ Escribe el código del TV en la página, dale a "Continuar" e inicia sesión con el correo y contraseña que te entregamos 📧.\n\n▶️ *MÉTODO 2:* Por Red Wi-Fi _(Sincronización automática)_ 📶\n1️⃣ Asegúrate de que tu celular y tu televisor estén conectados exactamente a la misma red Wi-Fi de la casa.\n2️⃣ Abre la aplicación de Disney+ en tu celular e inicia sesión con los datos que te entregamos.\n3️⃣ Abre la aplicación de Disney+ en tu televisor y dale a "Iniciar sesión".\n4️⃣ Te saldrá un aviso automático en la pantalla de tu celular preguntando si deseas permitir el acceso. Dale a "Permitir" o "Iniciar sesión" ¡y listo!\n\n✅ En segundos tu televisor se actualizará solo y podrás disfrutar de todas tus películas y series favoritas 🍿🎬`
-      },
-      {
-        titulo: 'SINCRONIZAR AMAZON',
-        texto: `✨ *Sincroniza Amazon Prime Video en tu TV* 📺\n\n1️⃣ Desde tu celular o computador entra a:  \n🌐 www.primevideo.com/region/eu/ontv/code/ref=atv_set_rd_reg\n\n2️⃣ Ingresa los datos de la cuenta que te proporcionamos 📧  \n3️⃣ En tu TV, abre la app de Prime Video y selecciona *Identificarse* 4️⃣ Verás un código en pantalla → escríbelo en la página y pulsa *Continuar*\n\n✅ ¡Listo! Tu TV quedará sincronizado y podrás disfrutar tus series y pelis favoritas 🍿🎬`
-      },
-      {
-        titulo: 'CAMBIO DE CLAVE NETFLIX',
-        texto: `🔒✨ *Notificación de seguridad – Netflix* Hola 👋 amig@, tu contraseña de Netflix fue actualizada por motivos de seguridad 🔐.  \n\n📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  \ny confírmame por este medio ✅  \n\n💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
-      },
-      {
-        titulo: 'CAMBIO DE CLAVE DISNEY+',
-        texto: `🔒✨ *Notificación de seguridad – Disney Premium* Hola 👋 amig@, tu contraseña de Disney Premium fue actualizada por motivos de seguridad 🔐.  \n\n📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  \ny confírmame por este medio ✅  \n\n💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
-      },
-      {
-        titulo: 'CEL PC NETFLIX',
-        texto: `🎬✨ *Accede a tu cuenta de Netflix en segundos 📺*\n\n1️⃣ Abre: La app o página de Netflix.\n2️⃣ Selecciona: La opción *Usar código de inicio* 💻\n3️⃣ Ingresa: El correo de tu cuenta 📧\n4️⃣ Confirma: Haz clic en *Enviar código* 🔐\n5️⃣ Gestión: Reenvíame el correo que solicita el código.\n6️⃣ Finaliza: Avísame apenas tu dispositivo te pida el código para entregártelo.\n\n💡 *Tip: ¡Hazlo tú mismo 24/7!*\nSi prefieres no esperar, usa nuestro bot disponible a cualquier hora:\n👉 www.cybernetsp.com _(Selecciona la opción: Código de inicio sesión. Solo disponible para correos @cybernetsp.com)_`
-      },
-      {
-        titulo: 'CAMBIAR PLAN',
-        texto: `📺 *Mensaje en pantalla:* _"Hay demasiadas personas usando la cuenta en este momento"_\n\n😎 ¡No te preocupes! La solución es muy sencilla 👇\n\n1️⃣ Haz clic en *Cambiar* 2️⃣ Luego selecciona *Cambiar o Confirmar* 3️⃣ 🎉 ¡Listo! Todo vuelve a la normalidad y puedes seguir disfrutando sin problema 🍿\n\n👉 Si este aviso vuelve a aparecer, repite los mismos pasos sin necesidad de escribirme 🚀`
-      },
-      {
-        titulo: 'SOPORTE',
-        texto: `🧰 *Tu cuenta está en revisión técnica* 🧩⚙️  \n\n⏳ Por favor espera entre *10 a 15 minutos* y luego vuelve a ingresar para confirmar que todo quedó funcionando 📺✨  \n\n🙌 ¡Tranquil@! En pocos minutos todo estará listo  \npara que sigas disfrutando sin interrupciones 🍿🚀`
-      },
-      {
-        titulo: 'REEMPLAZOS',
-        texto: `📢 *Importante sobre tu cuenta de Netflix*\nHola 👋 Solo para aclararte: con los nuevos métodos de activación, el sistema de Netflix no conserva el historial anterior ni los perfiles personalizados. Esto es completamente normal y parte del proceso técnico que usamos para garantizar acceso estable.\n✅ ¿Por qué se hace así?\nEste método evita que Netflix active la función de “actualizar hogar”, que puede bloquear el acceso o limitar el uso en differentes dispositivos. Al usar activaciones temporales o por código, protegemos tu acceso continuo sin interrupciones.\n🎬 Aunque el historial se reinicia, puedes seguir disfrutando tus series películas favoritas sin problemas. Si necesitas ayuda para volver a encontrar lo que estaba viendo, con gusto te ayudo`
-      },
-      {
-        titulo: 'ENLACE INICIO DE SESION',
-        texto: `✨ *¡Activa tu pantalla en segundos!* 🎬\n\nPara vincular tu dispositivo, sigue estos pasos:\n\n1️⃣ En tu TV: Selecciona la opción *“Enviar enlace de inicio de sesión”*\n2️⃣ Confirma: Pulsa en el botón *“Enviar”* que aparece en pantalla\n3️⃣ Gestión: Reenvíame el correo que recibas con la solicitud del código\n4️⃣ Finaliza: Avísame en cuanto tu dispositivo te pida la aprobación\n\n🚀 *¡Ahorra tiempo!* Hazlo tú mismo 24/7 Si no quieres esperar, puedes obtener tu código al instante en nuestra web:\n\n👉 www.cybernetsp.com _(Selecciona la opción: Solicitud de inicio. Solo disponible para correos @cybernetsp.com)_`
-      },
-      {
-        titulo: 'GARANTIA',
-        texto: `✨ *¡Hola!* 😊  \nTe entrego la *garantía de tu cuenta* 🙌  \n\n📺 Por favor ingresa y cuéntame qué tal te fue 💬  \n💪 Estoy pendiente por si necesitas apoyo o alguna revisión adicional ✨  \n\n🍿 ¡Disfruta tu servicio sin preocupaciones!`
-      },
-      {
-        titulo: 'VERIFICACION',
-        texto: `¡Recibido! ✅ Procedemos a verificar tu pago en el sistema.\n\nPor favor, confírmame el nombre del titular de la cuenta desde la cual realizaste la transferencia. 📝\n\nEn un momento validamos y te hacemos la entrega activa de tu servicio. ¡Gracias por elegirnos! 🚀`
-      },
-      {
-        titulo: 'INICIO DE SESION',
-        texto: `🔒✨ *Actualización de Netflix*\n\nAl ingresar al sistema se solicitará un código. Seleccione *Obtener ayuda* y luego *Usar contraseña* para introducir la clave de su cuenta.`
-      }
-    ];
-
-    const gridContainer = document.getElementById('grid-container');
-    const headerContainer = document.getElementById('header-container');
-
-    headerContainer.innerHTML = `
-      <div class="card qr-card">
-        <h2 class="card-title">${qrPrincipal.titulo}</h2>
-        <img src="${qrPrincipal.imagenUrl}" alt="QR" class="qr-image" onerror="this.style.display='none'; this.nextElementSibling.innerText='⚠️ Error cargando la llave QR. Revisa la conexión.'; this.nextElementSibling.style.color='var(--ios-red)';">
-        <span class="qr-hint">(Mantén presionado o clic derecho para copiar imagen)</span>
-        <button class="copy-btn copy-text-btn" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
-      </div>
-    `;
-
-    function renderGrid(filtro = "") {
-      gridContainer.innerHTML = "";
-      const filtrados = elementosGrid.filter(item => 
-        item.titulo.toLowerCase().includes(filtro.toLowerCase())
-      );
-
-      filtrados.forEach(({ titulo, texto }) => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <h2 class="card-title">${titulo}</h2>
-          <button class="copy-btn copy-text-btn" data-clipboard-text="${texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
+        headerContainer.innerHTML = `
+          <div class="card qr-card">
+            <h2 class="card-title">${qrPrincipal.titulo}</h2>
+            <img src="${qrPrincipal.imagenUrl}" alt="QR" class="qr-image" onerror="this.style.display='none'; this.nextElementSibling.innerText='⚠️ Error cargando la llave QR. Revisa la conexión.'; this.nextElementSibling.style.color='var(--ios-red)';">
+            <span class="qr-hint">(Mantén presionado o clic derecho para copiar imagen)</span>
+            <button class="copy-btn copy-text-btn" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
+          </div>
         `;
-        gridContainer.appendChild(card);
-      });
-    }
 
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      renderGrid(e.target.value);
-    });
+        function renderGrid(filtro = "") {
+            gridContainer.innerHTML = "";
+            let filtrados = [];
+            
+            for (let index = 0; index < elementosGrid.length; index++) {
+                let item = elementosGrid[index];
+                if (item.titulo.toLowerCase().includes(filtro.toLowerCase())) {
+                    filtrados.push(item);
+                }
+            }
 
-    const clipboard = new ClipboardJS('.copy-text-btn');
-    clipboard.on('success', function (e) {
-      haptic();
-      const btn = e.trigger;
-      const card = btn.closest('.card');
-      const originalText = btn.textContent;
-      
-      btn.textContent = '¡COPIADO!';
-      btn.classList.add('copy-btn-red');
-      card.classList.add('active'); 
-      
-      setTimeout(() => {
-        btn.textContent = originalText;
-        btn.classList.remove('copy-btn-red');
-        card.classList.remove('active');
-      }, 1500);
-    });
-  </script>
+            for (let f = 0; f < filtrados.length; f++) {
+                let currentItem = filtrados[f];
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                  <h2 class="card-title">${currentItem.titulo}</h2>
+                  <button class="copy-btn copy-text-btn" data-clipboard-text="${currentItem.texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
+                `;
+                gridContainer.appendChild(card);
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            renderGrid(e.target.value);
+        });
+
+        const clipboard = new ClipboardJS('.copy-text-btn');
+        
+        clipboard.on('success', function (e) {
+            haptic();
+            const btn = e.trigger;
+            const card = btn.closest('.card');
+            const originalText = btn.textContent;
+            
+            btn.textContent = '¡COPIADO!';
+            btn.classList.add('copy-btn-red');
+            card.classList.add('active'); 
+            
+            setTimeout(function() {
+                btn.textContent = originalText;
+                btn.classList.remove('copy-btn-red');
+                card.classList.remove('active');
+            }, 1500);
+        });
+    </script>
 </body>
 </html>
