@@ -1131,6 +1131,7 @@
             overlay.classList.toggle('open');
             
             if (overlay.classList.contains('open')) {
+                document.getElementById('searchShiftsInput').value = "";
                 forzarRefrescoDeHoras();
             }
         }
@@ -1172,7 +1173,7 @@
                 window.currentHorasStock = res.data; 
                 
                 if (document.getElementById('shiftsOverlay').classList.contains('open')) {
-                    renderizarHorasEnPantalla();
+                    renderizarHorasEnPantalla(document.getElementById('searchShiftsInput').value.toLowerCase());
                 }
             } else {
                 if (container) {
@@ -1218,7 +1219,7 @@
             }
         }
 
-        function renderizarHorasEnPantalla() {
+        function renderizarHorasEnPantalla(filtroBusqueda = "") {
             const container = document.getElementById('shiftsScrollArea');
             if (!container) {
                 return;
@@ -1234,13 +1235,26 @@
             for (let index = 0; index < window.currentHorasStock.length; index++) {
                 let item = window.currentHorasStock[index];
                 
-                if (item.vendedor.toUpperCase() === userFinal && esMismaQuincena(item.fecha)) {
-                    misHoras.push(item);
+                let coincideFiltro = false;
+                if (filtroBusqueda === "") {
+                    coincideFiltro = true;
+                } else if (item.vendedor.toLowerCase().includes(filtroBusqueda) || item.fecha.toLowerCase().includes(filtroBusqueda)) {
+                    coincideFiltro = true;
+                }
+
+                if (userFinal === "CAMILO") {
+                    if (esMismaQuincena(item.fecha) && coincideFiltro) {
+                        misHoras.push(item);
+                    }
+                } else {
+                    if (item.vendedor.toUpperCase() === userFinal && esMismaQuincena(item.fecha) && coincideFiltro) {
+                        misHoras.push(item);
+                    }
                 }
             }
             
             if (misHoras.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No tienes turnos registrados en la quincena actual.</div>';
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay turnos que coincidan con la búsqueda actual.</div>';
                 return;
             }
             
@@ -1255,11 +1269,15 @@
                 let dateKey = dayNum + '/' + monthNum;
                 let dayOfWeek = d.getDay(); 
                 
-                if (!resumenDiario[dateKey]) {
-                    resumenDiario[dateKey] = {
+                let groupKey = dateKey + '_' + item.vendedor.toUpperCase();
+                
+                if (!resumenDiario[groupKey]) {
+                    resumenDiario[groupKey] = {
                         dateObj: d,
                         dayOfWeek: dayOfWeek,
-                        totalSeconds: 0
+                        totalSeconds: 0,
+                        vendedor: item.vendedor,
+                        fechaText: dateKey
                     };
                 }
                 
@@ -1270,7 +1288,7 @@
                     let sSec = parseInt(timeParts[2]);
                     let totalSec = hSec + mSec + sSec;
                     
-                    resumenDiario[dateKey].totalSeconds += totalSec;
+                    resumenDiario[groupKey].totalSeconds += totalSec;
                 }
             }
             
@@ -1303,7 +1321,9 @@
                 let arrayDiasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
                 
                 diasArray.push({
-                    fechaText: kStr,
+                    groupKey: kStr,
+                    fechaText: r.fechaText,
+                    vendedor: r.vendedor,
                     dateObj: r.dateObj,
                     diaNombre: arrayDiasSemana[r.dayOfWeek],
                     hoursFmt: fmtTime,
@@ -1312,7 +1332,11 @@
             }
             
             diasArray.sort(function(a, b) {
-                return a.dateObj - b.dateObj;
+                if (a.dateObj.getTime() !== b.dateObj.getTime()) {
+                    return a.dateObj - b.dateObj;
+                } else {
+                    return a.vendedor.localeCompare(b.vendedor);
+                }
             });
             
             let totalPay = 0;
@@ -1320,7 +1344,7 @@
             
             for (let p = 0; p < diasArray.length; p++) {
                 totalPay += diasArray[p].pay;
-                totalSecs += resumenDiario[diasArray[p].fechaText].totalSeconds;
+                totalSecs += resumenDiario[diasArray[p].groupKey].totalSeconds;
             }
             
             let tH = Math.floor(totalSecs / 3600);
@@ -1331,9 +1355,14 @@
             
             let tFmt = tHStr + "h " + tMStr + "m";
 
+            let tituloPanel = userFinal === "CAMILO" ? "📅 Quincena Global (Staff)" : "📅 Tu Quincena Actual";
+            if (filtroBusqueda !== "") {
+                tituloPanel = "📅 Resultados de Búsqueda";
+            }
+
             let html = `
               <div class="account-item-box" style="padding:15px 10px;">
-                  <h4 style="text-align:center; color:var(--ios-blue); font-size:1.1rem; margin-bottom:5px;">📅 Tu Quincena Actual (Días 1-15 o 16-Fin)</h4>
+                  <h4 style="text-align:center; color:var(--ios-blue); font-size:1.1rem; margin-bottom:5px;">${tituloPanel}</h4>
                   <p style="text-align:center; color:var(--text-secondary); font-size:0.8rem; margin-bottom:15px;">Lun-Sáb: $8.000/hr | Dom: $150.000/día</p>
                   
                   <table class="shifts-table">
@@ -1351,9 +1380,14 @@
                 let dInfo = diasArray[f];
                 let payFormatted = Math.round(dInfo.pay).toLocaleString('es-CO');
                 
+                let vendedorLabel = "";
+                if (userFinal === "CAMILO") {
+                    vendedorLabel = `<br><span style="color:var(--ios-blue); font-size:0.75rem; font-weight:bold;">👤 ${dInfo.vendedor}</span>`;
+                }
+                
                 html += `
                           <tr>
-                              <td><strong>${dInfo.diaNombre}</strong><br><span style="font-size:0.7rem; color:var(--text-secondary);">${dInfo.fechaText}</span></td>
+                              <td><strong>${dInfo.diaNombre}</strong>${vendedorLabel}<br><span style="font-size:0.7rem; color:var(--text-secondary);">${dInfo.fechaText}</span></td>
                               <td style="color:var(--ios-green); font-family:monospace; font-weight:bold;">${dInfo.hoursFmt}</td>
                               <td style="font-weight:600;">$${payFormatted}</td>
                           </tr>
@@ -1371,7 +1405,7 @@
                           <span style="font-weight:bold; color:var(--text-primary); font-size:1.1rem;">${tFmt}</span>
                       </div>
                       <div style="text-align:right;">
-                          <span style="display:block; font-size:0.8rem; color:var(--text-secondary);">Total a Pagar:</span>
+                          <span style="display:block; font-size:0.8rem; color:var(--text-secondary);">Total Quincena:</span>
                           <span style="font-weight:bold; color:var(--ios-green); font-size:1.3rem;">$${finalPayFmt}</span>
                       </div>
                   </div>
@@ -1383,16 +1417,7 @@
 
         function filtrarHorasInternas() {
             const query = document.getElementById('searchShiftsInput').value.toLowerCase();
-            const rows = document.querySelectorAll('#shiftsScrollArea tbody tr');
-            
-            for (let x = 0; x < rows.length; x++) {
-                let row = rows[x];
-                if (row.innerText.toLowerCase().includes(query)) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            }
+            renderizarHorasEnPantalla(query);
         }
 
         function toggleCodesPanel() {
@@ -1611,7 +1636,6 @@
                 clearTimeout(temporizadorCierreTotal);
             }
             
-            // PRIMERA ALERTA: A los 15 minutos, se pausa el tiempo de paga
             temporizadorInactividad = setTimeout(() => {
                 if (sessionStorage.getItem('active_staff') && !isTimerPaused) {
                     isTimerPaused = true;
@@ -1646,7 +1670,6 @@
                 }
             }, INACTIVITY_LIMIT); 
 
-            // SEGUNDA ALERTA: A los 30 minutos de abandono absoluto, se cierra la sesión
             temporizadorCierreTotal = setTimeout(() => {
                 if (sessionStorage.getItem('active_staff')) {
                     alert("⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.");
@@ -2014,35 +2037,6 @@
                 location.reload();
             });
         }
-
-        window.addEventListener('pagehide', function() {
-            const userActivo = sessionStorage.getItem('active_staff');
-            if (userActivo) {
-                const tiempoTotalFormateado = obtenerTiempoFinalFormateado();
-                
-                let paramObj = {
-                    action: "notificarCorreo", 
-                    user: userActivo, 
-                    tipo: "cierre",
-                    tiempoTrabajado: tiempoTotalFormateado 
-                };
-                
-                fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    keepalive: true, 
-                    headers: { 
-                        "Content-Type": "application/json" 
-                    },
-                    body: JSON.stringify(paramObj)
-                });
-
-                sessionStorage.removeItem('active_staff');
-                localStorage.removeItem('cyber_saved_staff');
-                localStorage.removeItem('cyber_shift_start_time');
-                localStorage.removeItem('cyber_shift_accumulated_time');
-            }
-        });
 
         function inicializarWorkspace() {
             renderGrid();
