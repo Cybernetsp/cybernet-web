@@ -44,6 +44,8 @@
             --orb-1: rgba(191, 90, 242, 0.25); 
             --orb-2: rgba(94, 92, 230, 0.25);   
             --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+            --sheet-bg: rgba(25, 25, 27, 0.85);
+            --sheet-modal-bg: rgba(30, 30, 30, 0.95);
         }
 
         [data-theme="light"] {
@@ -59,7 +61,7 @@
             --glass-border: 0.5px solid rgba(0, 0, 0, 0.1);
             --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.06), 
                             inset 0 1px 0 rgba(255, 255, 255, 0.4);
-            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-bg: rgba(44, 44, 46, 0.4);
             --card-border: 0.5px solid rgba(0, 0, 0, 0.06);
             --input-bg: rgba(118, 118, 128, 0.12);
             --input-focus: rgba(118, 118, 128, 0.22);
@@ -182,6 +184,13 @@
             align-items: center;
         }
         
+        .circle-control { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            padding: 0; 
+        }
+
         .interface-control-item {
             background: var(--glass-bg);
             backdrop-filter: blur(20px); 
@@ -199,14 +208,7 @@
         .interface-control-item:active { 
             transform: scale(0.9); 
         }
-        
-        .circle-control { 
-            width: 44px; 
-            height: 44px; 
-            border-radius: 50%; 
-            padding: 0; 
-        }
-        
+
         .pill-back-control {
             padding: 10px 20px; 
             border-radius: 22px;
@@ -220,23 +222,31 @@
 
         .main-workspace {
             display: flex; 
+            flex-direction: column;
             width: 100%; 
-            max-width: 1300px; 
-            flex-direction: column; 
+            max-width: 1200px; 
             align-items: center;
             animation: workspaceUp 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
-            margin-top: 110px;
+            margin-top: 100px;
+            gap: 30px;
         }
 
         @keyframes workspaceUp { 
-            from { 
-                opacity: 0; 
-                transform: translateY(20px); 
-            } 
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            } 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            width: 100%;
+        }
+
+        .column-flex {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
         }
 
         .card {
@@ -245,31 +255,214 @@
             -webkit-backdrop-filter: blur(40px) saturate(180%);
             border: var(--glass-border); 
             border-radius: 22px; 
-            padding: 40px 30px; 
-            text-align: center;
+            padding: 30px; 
+            text-align: left;
             box-shadow: var(--glass-shadow); 
             display: flex; 
             flex-direction: column; 
-            align-items: center;
-            justify-content: center; 
-            gap: 20px; 
             transition: var(--transition-spring); 
             width: 100%;
-            max-width: 600px;
-            margin-top: 50px;
         }
 
         .card h2 {
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--ios-purple);
             letter-spacing: -0.5px;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
-        .card p {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
+        /* Formulario Input */
+        .ios-input-block {
+            width: 100%; 
+            padding: 14px 16px; 
+            margin-bottom: 15px; 
+            border-radius: 12px;
+            border: var(--glass-border); 
+            background: var(--input-bg); 
+            color: var(--text-primary);
+            text-align: left; 
+            font-size: 0.95rem; 
+            outline: none; 
+            transition: var(--transition-spring);
+        }
+
+        .ios-input-block:focus { 
+            background: var(--input-focus); 
+            border-color: var(--ios-purple);
+            box-shadow: 0 0 0 3px rgba(191, 90, 242, 0.25);
+        }
+
+        .ios-input-block::placeholder { 
+            color: var(--text-secondary); 
+            opacity: 0.7; 
+        }
+
+        select.ios-input-block {
+            appearance: none;
+            cursor: pointer;
+            background-color: var(--page-bg) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--ios-purple);
+        }
+
+        select.ios-input-block option {
+            background-color: var(--page-bg) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .checkbox-container {
+            height: 220px; 
+            overflow-y: auto; 
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .checkbox-container label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .checkbox-container label:hover {
+            background: rgba(191, 90, 242, 0.1);
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--ios-purple);
+            cursor: pointer;
+        }
+
+        .btn-action {
+            background: var(--ai-gradient); 
+            color: white; 
+            border: none; 
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(191, 90, 242, 0.35); 
+            padding: 14px; 
+            border-radius: 12px;
+            width: 100%; 
+            font-size: 0.95rem; 
+            cursor: pointer; 
+            transition: var(--transition-spring);
+            margin-top: 5px; 
+            display: block; 
+            text-align: center;
+        }
+
+        .btn-action:active { 
+            transform: scale(0.96); 
+            opacity: 0.9; 
+        }
+
+        .btn-action:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Tabla de Revendedores */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            max-height: 550px;
+            overflow-y: auto;
+        }
+
+        .distris-table {
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px;
+        }
+
+        .distris-table th, .distris-table td {
+            padding: 12px 10px; 
+            text-align: left; 
+            border-bottom: 0.5px solid rgba(255,255,255,0.1);
+        }
+
+        [data-theme="light"] .distris-table th, [data-theme="light"] .distris-table td {
+            border-bottom: 0.5px solid rgba(0,0,0,0.1);
+        }
+
+        .distris-table th {
+            font-size: 0.8rem; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+        }
+
+        .distris-table td {
+            font-size: 0.95rem; 
+            color: var(--text-primary);
+        }
+
+        .saldo-verde {
+            color: var(--ios-green);
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+        
+        .saldo-rojo {
+            color: var(--ios-red);
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        .btn-refresh-action {
+            background: rgba(191, 90, 242, 0.12); 
+            border: none; 
+            color: var(--ios-purple);
+            padding: 8px 16px; 
+            border-radius: 12px; 
+            font-size: 0.85rem; 
+            font-weight: 700;
+            cursor: pointer; 
+            transition: var(--transition-spring); 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .btn-refresh-action:active { 
+            transform: scale(0.96); 
+            opacity: 0.8; 
+        }
+
+        .trash-icon-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: transform 0.2s ease;
+            padding: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trash-icon-btn:hover {
+            transform: scale(1.2);
         }
 
         @media (max-width: 900px) { 
@@ -290,6 +483,9 @@
             }
             .main-workspace { 
                 margin-top: 160px; 
+            }
+            .grid-layout {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -320,41 +516,117 @@
     </header>
 
     <div class="main-workspace" id="mainWorkspace">
-        <div class="card">
-            <h2>Módulo de Revendedores</h2>
-            <p>Este espacio está reservado para las futuras herramientas de gestión, control de saldos y administración de tu red de distribuidores mayoristas.</p>
-            <p style="font-size: 0.85rem; color: var(--ios-purple); font-weight: bold; margin-top: 10px;">En desarrollo... 🚀</p>
+        
+        <div class="grid-layout">
+            
+            <div class="column-flex">
+                
+                <div class="card" style="margin-top:0;">
+                    <h2>💸 Debitar Pantallas</h2>
+                    <form id="formDescuento" onsubmit="ejecutarDescuento(event)">
+                        
+                        <input type="text" id="inputRevendedor" list="listaRevendedores" class="ios-input-block" placeholder="📱 Escribe Celular o Nombre..." required autocomplete="off">
+                        <datalist id="listaRevendedores">
+                            </datalist>
+                        
+                        <div class="ios-input-block checkbox-container" id="grupoPlataformas">
+                            <label><input type="checkbox" name="plataforma" value="NETFLIX"> Netflix 1 Pantalla - $10.000</label>
+                            <label><input type="checkbox" name="plataforma" value="MAX"> Max 1 Pantalla - $3.000</label>
+                            <label><input type="checkbox" name="plataforma" value="APPLE-TV"> Apple TV - $3.000</label>
+                            <label><input type="checkbox" name="plataforma" value="DISNEY-PREMIUM"> Disney+ Premium - $10.000</label>
+                            <label><input type="checkbox" name="plataforma" value="DISNEY-ESTANDAR"> Disney+ Estándar - $4.000</label>
+                            <label><input type="checkbox" name="plataforma" value="AMAZON-PRIME-VIDEO"> Prime Video Original - $5.000</label>
+                            <label><input type="checkbox" name="plataforma" value="CRUNCHYROLL"> Crunchyroll - $3.000</label>
+                            <label><input type="checkbox" name="plataforma" value="PLEX"> Plex - $3.000</label>
+                            <label><input type="checkbox" name="plataforma" value="PARAMOUNT"> Paramount+ - $3.000</label>
+                            <label><input type="checkbox" name="plataforma" value="MUBI"> MUBI - $3.000</label>
+                            <label><input type="checkbox" name="plataforma" value="METEGOL"> Metegol - $12.000</label>
+                            <label><input type="checkbox" name="plataforma" value="VIX"> Vix - $3.000</label>
+                            <label><input type="checkbox" name="plataforma" value="IPTV"> IPTV - $7.000</label>
+                            <label><input type="checkbox" name="plataforma" value="CANVA"> Canva Pro (1 Mes) - $10.000</label>
+                            <label><input type="checkbox" name="plataforma" value="YOUTUBE"> YouTube (1 Mes) - $10.000</label>
+                            <label><input type="checkbox" name="plataforma" value="SPOTIFY"> Spotify (1 Mes) - $14.000</label>
+                            <label><input type="checkbox" name="plataforma" value="YOUTUBE-PREMIUM"> YouTube Premium (1 Mes) - $14.000</label>
+                            <label><input type="checkbox" name="plataforma" value="SPOTIFY-DISTRI"> Spotify (1 Mes Distris) - $10.000</label>
+                            <label><input type="checkbox" name="plataforma" value="DEEZER"> Deezer (1 Mes) - $8.000</label>
+                        </div>
+
+                        <button type="submit" id="btnDescontar" class="btn-action">Efectuar Descuento Global</button>
+                    </form>
+                </div>
+
+                <div class="card" style="margin-top:0;">
+                    <h2>💵 Agregar Saldo</h2>
+                    <form id="formRecarga" onsubmit="ejecutarRecarga(event)">
+                        
+                        <input type="text" id="inputRecargaRevendedor" list="listaRevendedores" class="ios-input-block" placeholder="📱 Selecciona o Escribe Nuevo Revendedor..." required autocomplete="off">
+                        
+                        <input type="number" id="inputMontoRecarga" class="ios-input-block" placeholder="💰 Monto Base Recargado (Sin puntos)" required min="1000">
+
+                        <select id="selectBono" class="ios-input-block" required>
+                            <option value="0" selected>🎁 Bono de Regalo: 0% (Sin Bono)</option>
+                            <option value="5">🎁 Bono de Regalo: 5% Adicional</option>
+                            <option value="10">🎁 Bono de Regalo: 10% Adicional</option>
+                            <option value="15">🎁 Bono de Regalo: 15% Adicional</option>
+                            <option value="20">🎁 Bono de Regalo: 20% Adicional</option>
+                            <option value="25">🎁 Bono de Regalo: 25% Adicional</option>
+                            <option value="30">🎁 Bono de Regalo: 30% Adicional</option>
+                        </select>
+
+                        <button type="submit" id="btnRecargar" class="btn-action" style="background:var(--ios-green); box-shadow: 0 4px 15px rgba(48, 209, 88, 0.35);">Agregar Saldo al Libro</button>
+                    </form>
+                </div>
+
+            </div>
+
+            <div class="card" style="margin-top:0; justify-content: flex-start;">
+                <h2>📊 Saldos Actuales</h2>
+                
+                <input type="text" id="searchTablaDistris" class="ios-input-block" placeholder="🔍 Filtrar revendedor en la tabla..." oninput="filtrarTablaRevendedores()" style="margin-bottom:10px; padding: 10px 16px;">
+                
+                <button class="btn-refresh-action" onclick="cargarDistribuidores()">🔄 Refrescar Saldos</button>
+                
+                <div class="table-container">
+                    <table class="distris-table">
+                        <thead>
+                            <tr>
+                                <th>Celular / Revendedor</th>
+                                <th>Saldo Disponible</th>
+                                <th style="text-align: center; width: 40px;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaDistribuidores">
+                            <tr>
+                                <td colspan="3" style="text-align: center; color: var(--text-secondary);">⏳ Sincronizando saldos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
+
     </div>
     
     <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPh1eFcrTAVA-oBdyWG4E-jzhPZS_PnHuixdtcj_nbTemK0Xe6jtu1IzuXsej7Ib8V/exec";
+
         let timerInterval = null;
         let temporizadorInactividad = null;
         let temporizadorCierreTotal = null;
         let isTimerPaused = false;
 
-        // ================== TIEMPOS DE INACTIVIDAD (SINCRONIZADOS CON ADMIN) ==================
-        const INACTIVITY_LIMIT = 15 * 60 * 1000;         // 15 minutos en milisegundos
-        const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;  // 30 minutos en milisegundos
-        // =======================================================================================
+        const INACTIVITY_LIMIT = 15 * 60 * 1000;         
+        const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;  
 
         function haptic() { 
-            if (navigator.vibrate) {
-                navigator.vibrate(15); 
-            }
+            if (navigator.vibrate) navigator.vibrate(15); 
         }
 
         function toggleTheme() {
             haptic();
             const currentTheme = document.documentElement.getAttribute('data-theme');
-            let newTheme = '';
-            
-            if (currentTheme === 'light') {
-                newTheme = 'dark';
-            } else {
-                newTheme = 'light';
-            }
-
+            let newTheme = currentTheme === 'light' ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('cyber_theme', newTheme);
             updateThemeIcon(newTheme);
@@ -362,10 +634,7 @@
 
         function updateThemeIcon(theme) {
             const btn = document.getElementById('theme-toggle');
-            if (!btn) {
-                return;
-            }
-            
+            if (!btn) return;
             if (theme === 'light') {
                 btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
             } else {
@@ -373,74 +642,270 @@
             }
         }
 
-        function resetearInactividad() {
-            if (!sessionStorage.getItem('active_staff')) {
-                return; 
+        function formatearMoneda(valorStr) {
+            let valorNum = parseFloat(String(valorStr).replace(/[^\d.-]/g, ''));
+            if (isNaN(valorNum)) return "$0";
+            
+            if (valorNum > 0 && valorNum < 1000) {
+                valorNum = valorNum * 1000;
             }
+            
+            return "$" + valorNum.toLocaleString('es-CO');
+        }
+
+        function cargarDistribuidores() {
+            haptic();
+            const tbody = document.getElementById('tablaDistribuidores');
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary);">⏳ Sincronizando saldos en tiempo real...</td></tr>';
+            
+            const oldScript = document.getElementById('script_get_distris');
+            if (oldScript) oldScript.remove();
+
+            window.procesarDistribuidores = function(res) {
+                if (res && res.status === "success") {
+                    let data = res.data;
+                    if (data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary);">No hay distribuidores registrados.</td></tr>';
+                        return;
+                    }
+                    
+                    data.sort(function(a, b) {
+                        let saldoA = parseFloat(String(a.saldo).replace(/[^\d.-]/g, '')) || 0;
+                        let saldoB = parseFloat(String(b.saldo).replace(/[^\d.-]/g, '')) || 0;
+                        if (saldoA > 0 && saldoA < 1000) saldoA = saldoA * 1000;
+                        if (saldoB > 0 && saldoB < 1000) saldoB = saldoB * 1000;
+                        return saldoB - saldoA;
+                    });
+                    
+                    let html = "";
+                    let datalistHtml = "";
+
+                    for(let i = 0; i < data.length; i++) {
+                        let d = data[i];
+                        let saldoLimpio = parseFloat(String(d.saldo).replace(/[^\d.-]/g, '')) || 0;
+                        if (saldoLimpio > 0 && saldoLimpio < 1000) saldoLimpio = saldoLimpio * 1000;
+                        let claseSaldo = saldoLimpio > 5000 ? 'saldo-verde' : 'saldo-rojo';
+
+                        // Inyección del botón de eliminar pasando la llave identificadora
+                        html += `
+                        <tr class="distri-row">
+                            <td><strong>${d.nombre}</strong><br><span style="color:var(--text-secondary); font-size:0.8rem;">📱 ${d.telefono}</span></td>
+                            <td class="${claseSaldo}">${formatearMoneda(d.saldo)}</td>
+                            <td style="text-align:center;">
+                                <button class="trash-icon-btn" onclick="solicitarEliminacion('${d.nombre}')" title="Eliminar Revendedor">🗑️</button>
+                            </td>
+                        </tr>`;
+
+                        datalistHtml += `<option value="${d.nombre}">Tel: ${d.telefono}</option>`;
+                        datalistHtml += `<option value="${d.telefono}">Nombre: ${d.nombre}</option>`;
+                    }
+                    tbody.innerHTML = html;
+                    document.getElementById('listaRevendedores').innerHTML = datalistHtml;
+
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--ios-red);">❌ Error al cargar datos: ${res.message || 'Desconocido'}</td></tr>`;
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'script_get_distris';
+            scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerDistribuidores&callback=procesarDistribuidores&_ts=" + Date.now();
+            document.body.appendChild(scriptElement);
+        }
+
+        function solicitarEliminacion(nombreRevendedor) {
+            haptic();
+            if (!nombreRevendedor) return;
+
+            // Escudo de Doble Confirmación de Seguridad
+            if (!confirm(`⚠️ ADVERTENCIA DE SEGURIDAD ⚠️\n\n¿Estás absolutamente seguro de eliminar por completo al revendedor "${nombreRevendedor}" de la base de datos?\n\nEsta acción borrará permanentemente su saldo y registro del Google Sheets.`)) {
+                return;
+            }
+
+            const tbody = document.getElementById('tablaDistribuidores');
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary);">⏳ Eliminando registro del Sheets...</td></tr>';
+
+            const oldScript = document.getElementById('script_delete_distri');
+            if (oldScript) oldScript.remove();
+
+            window.procesarEliminacion = function(res) {
+                if (res && res.status === "success") {
+                    alert(`🗑️ Éxito: El revendedor "${res.eliminado}" ha sido borrado del sistema.`);
+                    cargarDistribuidores(); // Recarga automática de la tabla limpia
+                } else {
+                    alert(`❌ Error al eliminar: ${res.message || 'Fallo interno.'}`);
+                    cargarDistribuidores();
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'script_delete_distri';
+            scriptElement.src = GOOGLE_SCRIPT_URL + `?action=eliminarRevendedor&revendedor=${encodeURIComponent(nombreRevendedor)}&callback=procesarEliminacion&_ts=${Date.now()}`;
+            document.body.appendChild(scriptElement);
+        }
+
+        function filtrarTablaRevendedores() {
+            const query = document.getElementById('searchTablaDistris').value.toLowerCase();
+            const rows = document.querySelectorAll('.distri-row');
+            
+            for(let i = 0; i < rows.length; i++) {
+                let text = rows[i].innerText.toLowerCase();
+                if(text.includes(query)) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+
+        function ejecutarDescuento(e) {
+            e.preventDefault();
+            haptic();
+
+            const revendedor = document.getElementById('inputRevendedor').value.trim();
+            const checkboxes = document.querySelectorAll('input[name="plataforma"]:checked');
+            
+            if (checkboxes.length === 0) {
+                alert("⚠️ Por favor, selecciona al menos un plan para debitar.");
+                return;
+            }
+
+            let plataformasSeleccionadas = [];
+            let resumenNombres = [];
+            for(let i=0; i<checkboxes.length; i++){
+                plataformasSeleccionadas.push(checkboxes[i].value);
+                resumenNombres.push(checkboxes[i].parentNode.innerText.trim());
+            }
+
+            const stringPlataformas = plataformasSeleccionadas.join(",");
+
+            if (!revendedor) return;
+
+            let msjConfirma = `¿Estás seguro de debitar los siguientes planes?\n\n`;
+            for(let j=0; j<resumenNombres.length; j++){
+                msjConfirma += `▪ ${resumenNombres[j]}\n`;
+            }
+            msjConfirma += `\nAl revendedor: ${revendedor}`;
+
+            if(!confirm(msjConfirma)) {
+                return;
+            }
+
+            const btn = document.getElementById('btnDescontar');
+            btn.disabled = true;
+            btn.innerText = "⏳ Procesando Débito...";
+
+            const oldScript = document.getElementById('script_debit_distri');
+            if (oldScript) oldScript.remove();
+
+            window.procesarDescuento = function(res) {
+                btn.disabled = false;
+                btn.innerText = "Efectuar Descuento Global";
+
+                if (res && res.status === "success") {
+                    alert(`✅ ¡Débito Exitoso!\n\nRevendedor: ${res.revendedor}\nDescuento Total: ${formatearMoneda(res.debitado)}\nNuevo Saldo: ${formatearMoneda(res.saldoQuedante)}`);
+                    document.getElementById('formDescuento').reset();
+                    cargarDistribuidores(); 
+                } else {
+                    alert(`❌ Error al procesar:\n\n${res.message || 'Verifica los datos y vuelve a intentar.'}`);
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'script_debit_distri';
+            let params = `?action=descontarSaldoRevendedor&revendedor=${encodeURIComponent(revendedor)}&plataformas=${encodeURIComponent(stringPlataformas)}&callback=procesarDescuento&_ts=${Date.now()}`;
+            scriptElement.src = GOOGLE_SCRIPT_URL + params;
+            document.body.appendChild(scriptElement);
+        }
+
+        function ejecutarRecarga(e) {
+            e.preventDefault();
+            haptic();
+
+            const revendedor = document.getElementById('inputRecargaRevendedor').value.trim();
+            const montoBase = parseFloat(document.getElementById('inputMontoRecarga').value.trim());
+            const bonoPorcentaje = parseFloat(document.getElementById('selectBono').value);
+
+            if (!revendedor || isNaN(montoBase) || montoBase <= 0) {
+                alert("⚠️ Ingresa un nombre válido y un monto mayor a 0.");
+                return;
+            }
+
+            const montoBono = montoBase * (bonoPorcentaje / 100);
+            const totalRecarga = montoBase + montoBono;
+
+            if(!confirm(`¿Deseas aplicar esta recarga?\n\n👤 Revendedor: ${revendedor}\n💵 Monto Base: ${formatearMoneda(montoBase)}\n🎁 Bono (${bonoPorcentaje}%): ${formatearMoneda(montoBono)}\n💰 TOTAL A SUMAR: ${formatearMoneda(totalRecarga)}`)) {
+                return;
+            }
+
+            const btn = document.getElementById('btnRecargar');
+            btn.disabled = true;
+            btn.innerText = "⏳ Procesando Recarga...";
+
+            const oldScript = document.getElementById('script_recharge_distri');
+            if (oldScript) oldScript.remove();
+
+            window.procesarRecarga = function(res) {
+                btn.disabled = false;
+                btn.innerText = "Agregar Saldo al Libro";
+
+                if (res && res.status === "success") {
+                    alert(`✅ ¡Recarga Exitosa!\n\nRevendedor: ${res.revendedor}\nAgregado a cuenta: ${formatearMoneda(res.recargado)}\nNuevo Saldo Total: ${formatearMoneda(res.nuevoSaldo)}`);
+                    document.getElementById('formRecarga').reset();
+                    cargarDistribuidores(); 
+                } else {
+                    alert(`❌ Error al procesar:\n\n${res.message || 'Verifica los datos y vuelve a intentar.'}`);
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'script_recharge_distri';
+            let params = `?action=recargarSaldo&revendedor=${encodeURIComponent(revendedor)}&totalRecarga=${encodeURIComponent(totalRecarga)}&callback=procesarRecarga&_ts=${Date.now()}`;
+            scriptElement.src = GOOGLE_SCRIPT_URL + params;
+            document.body.appendChild(scriptElement);
+        }
+
+        // ================== CONTROL DE SESIÓN ==================
+        function resetearInactividad() {
+            if (!sessionStorage.getItem('active_staff')) return; 
 
             if (isTimerPaused) {
                 isTimerPaused = false;
                 localStorage.setItem('cyber_shift_start_time', Date.now());
-                
                 const tBadge = document.querySelector('.timer-badge');
-                if (tBadge) {
-                    tBadge.style.color = 'var(--ios-green)';
-                    tBadge.style.borderColor = 'var(--glass-border)';
-                }
-                
+                if (tBadge) { tBadge.style.color = 'var(--ios-green)'; tBadge.style.borderColor = 'var(--glass-border)'; }
                 const sTimer = document.getElementById('shiftTimer');
-                if (sTimer) {
-                    sTimer.innerText = "Reanudando...";
-                }
+                if (sTimer) sTimer.innerText = "Reanudando...";
             }
 
-            if (temporizadorInactividad) {
-                clearTimeout(temporizadorInactividad);
-            }
-
-            if (temporizadorCierreTotal) {
-                clearTimeout(temporizadorCierreTotal);
-            }
+            if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
+            if (temporizadorCierreTotal) clearTimeout(temporizadorCierreTotal);
             
             temporizadorInactividad = setTimeout(() => {
                 if (sessionStorage.getItem('active_staff') && !isTimerPaused) {
                     isTimerPaused = true;
-                    
                     let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
                     let currentAccumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
-                    if (isNaN(currentAccumulated)) {
-                        currentAccumulated = 0;
-                    }
+                    if (isNaN(currentAccumulated)) currentAccumulated = 0;
                     
                     let newlyElapsed = Date.now() - startTime;
-                    
                     let validTime = newlyElapsed - INACTIVITY_LIMIT;
-                    if (validTime < 0) {
-                        validTime = 0;
-                    }
+                    if (validTime < 0) validTime = 0;
                     
                     localStorage.setItem('cyber_shift_accumulated_time', currentAccumulated + validTime);
                     
                     const tBadge2 = document.querySelector('.timer-badge');
-                    if (tBadge2) {
-                        tBadge2.style.color = '#ffcc00';
-                        tBadge2.style.borderColor = '#ffcc00';
-                    }
-                    
+                    if (tBadge2) { tBadge2.style.color = '#ffcc00'; tBadge2.style.borderColor = '#ffcc00'; }
                     const sTimer2 = document.getElementById('shiftTimer');
-                    if (sTimer2) {
-                        sTimer2.innerText = "PAUSADO";
-                    }
+                    if (sTimer2) sTimer2.innerText = "PAUSADO";
 
-                    alert("⏳ Por inactividad (15 minutos), el cronómetro de tu turno se ha pausado.\n\nMueve el mouse o toca la pantalla para reanudar el conteo de horas.");
+                    alert("⏳ Por inactividad (15 minutos), el cronómetro de tu turno se ha pausado.\nMueve el mouse o toca la pantalla para reanudar el conteo de horas.");
                 }
             }, INACTIVITY_LIMIT); 
 
             temporizadorCierreTotal = setTimeout(() => {
                 if (sessionStorage.getItem('active_staff')) {
                     alert("⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.");
-                    
-                    // Si expira por abandono total, limpiamos y mandamos al login (admin.html)
                     sessionStorage.removeItem('active_staff');
                     localStorage.removeItem('cyber_saved_staff');
                     localStorage.removeItem('cyber_shift_start_time');
@@ -460,30 +925,18 @@
         }
 
         function startShiftTimer() {
-            if (!localStorage.getItem('cyber_shift_start_time')) {
-                localStorage.setItem('cyber_shift_start_time', Date.now());
-            }
-            if (!localStorage.getItem('cyber_shift_accumulated_time')) {
-                localStorage.setItem('cyber_shift_accumulated_time', 0);
-            }
-
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
+            if (!localStorage.getItem('cyber_shift_start_time')) localStorage.setItem('cyber_shift_start_time', Date.now());
+            if (!localStorage.getItem('cyber_shift_accumulated_time')) localStorage.setItem('cyber_shift_accumulated_time', 0);
+            if (timerInterval) clearInterval(timerInterval);
 
             timerInterval = setInterval(function() {
-                if (isTimerPaused) {
-                    return; 
-                }
+                if (isTimerPaused) return; 
                 
                 let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
                 let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
-                if (isNaN(accumulated)) {
-                    accumulated = 0;
-                }
+                if (isNaN(accumulated)) accumulated = 0;
                 
                 let elapsed = Date.now() - startTime;
-                
                 let totalMs = accumulated + elapsed;
                 
                 let totalSeconds = Math.floor(totalMs / 1000);
@@ -496,39 +949,29 @@
                 let sStr = String(seconds).padStart(2, '0');
 
                 let stElement = document.getElementById('shiftTimer');
-                if (stElement) {
-                    stElement.innerText = hStr + ":" + mStr + ":" + sStr;
-                }
+                if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
             }, 1000);
         }
 
-        // ================== CONTROL DE SESIÓN Y CARGA INICIAL ==================
         window.addEventListener('DOMContentLoaded', () => {
-            // Aplicar tema
             let savedTheme = localStorage.getItem('cyber_theme');
-            if (!savedTheme) {
-                savedTheme = 'dark';
-            }
+            if (!savedTheme) savedTheme = 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
 
-            // Verificar si hay una sesión activa permitida
             let activeUser = sessionStorage.getItem('active_staff');
-            
             if (!activeUser) {
-                // Si alguien intenta entrar a revendedor.html directamente escribiendo la URL sin haberse logueado, lo devolvemos
                 window.location.href = 'admin.html';
                 return;
             }
 
-            // Si está logueado, inicializamos la interfaz
             let sessionNameEl = document.getElementById('staffSessionName');
-            if (sessionNameEl) {
-                sessionNameEl.innerText = activeUser;
-            }
+            if (sessionNameEl) sessionNameEl.innerText = activeUser;
 
             startShiftTimer();
             iniciarControlInactividad();
+            
+            cargarDistribuidores();
         });
     </script>
 </body>
