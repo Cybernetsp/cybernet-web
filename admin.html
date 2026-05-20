@@ -13,7 +13,7 @@
   
   <style>
     /* =========================================
-       SISTEMA DE VARIABLES MODO CLARO Y OSCURO NATIVO APPLE
+       SISTEMA DE VARIABLES MODO CLARO Y OSCURO
        ========================================= */
     :root {
       --ios-blue: #0a84ff;
@@ -111,7 +111,9 @@
 
     .global-header {
       position: fixed;
-      top: 0; left: 0; width: 100%;
+      top: 0; 
+      left: 0; 
+      width: 100%;
       background: rgba(20, 20, 22, 0.75);
       backdrop-filter: blur(35px) saturate(200%);
       -webkit-backdrop-filter: blur(35px) saturate(200%);
@@ -167,6 +169,7 @@
       font-size: 0.85rem; 
       font-weight: 700; 
       font-variant-numeric: tabular-nums;
+      transition: color 0.3s ease, border-color 0.3s ease;
     }
 
     .control-container {
@@ -206,9 +209,31 @@
       font-size: 0.88rem; 
       font-weight: 700; 
       color: var(--ios-blue); 
-      gap: 7px;
+      gap: 7px; 
       background: rgba(10, 132, 255, 0.05); 
       border: 0.5px solid rgba(10, 132, 255, 0.2);
+    }
+    
+    .pill-sale-control {
+      padding: 10px 20px; 
+      border-radius: 22px;
+      font-size: 0.88rem; 
+      font-weight: 700; 
+      color: var(--ios-green); 
+      gap: 7px; 
+      background: rgba(48, 209, 88, 0.1); 
+      border: 0.5px solid rgba(48, 209, 88, 0.3);
+    }
+
+    .pill-shifts-control {
+      padding: 10px 20px; 
+      border-radius: 22px;
+      font-size: 0.88rem; 
+      font-weight: 700; 
+      color: #ffcc00; 
+      gap: 7px; 
+      background: rgba(255, 204, 0, 0.1); 
+      border: 0.5px solid rgba(255, 204, 0, 0.3);
     }
 
     .header-search-container {
@@ -395,8 +420,14 @@
     }
 
     @keyframes workspaceUp { 
-      from { opacity: 0; transform: translateY(20px); } 
-      to { opacity: 1; transform: translateY(0); } 
+      from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+      } 
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      } 
     }
 
     .header-container { 
@@ -706,6 +737,88 @@
       transform: scale(0.95); 
     }
 
+    /* ESTILOS DE LA TABLA DE TURNOS */
+    .shifts-table {
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 10px;
+    }
+
+    .shifts-table th, .shifts-table td {
+        padding: 12px 10px; 
+        text-align: center; 
+        border-bottom: 0.5px solid rgba(255,255,255,0.1);
+    }
+
+    [data-theme="light"] .shifts-table th, [data-theme="light"] .shifts-table td {
+        border-bottom: 0.5px solid rgba(0,0,0,0.1);
+    }
+
+    .shifts-table th {
+        font-size: 0.8rem; 
+        color: var(--text-secondary); 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px;
+    }
+
+    .shifts-table td {
+        font-size: 0.95rem; 
+        color: var(--text-primary);
+    }
+
+    /* MODAL DE CAMBIO DE CONTRASEÑA FORZADO */
+    .password-overlay {
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6); 
+      backdrop-filter: blur(25px); 
+      -webkit-backdrop-filter: blur(25px);
+      z-index: 2000; 
+      opacity: 0; 
+      visibility: hidden; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 20px;
+      transition: opacity 0.4s ease, visibility 0.4s;
+    }
+
+    .password-overlay.open { 
+      opacity: 1; 
+      visibility: visible; 
+    }
+    
+    .password-card {
+      width: 100%; 
+      max-width: 400px; 
+      background: var(--sheet-modal-bg); 
+      border: var(--glass-border);
+      border-radius: 28px; 
+      padding: 40px 30px; 
+      box-shadow: var(--glass-shadow); 
+      position: relative;
+      animation: lockScaleUp 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      text-align: center;
+    }
+
+    .password-card h3 { 
+      font-size: 1.4rem; 
+      font-weight: 700; 
+      margin-bottom: 10px; 
+      letter-spacing: -0.5px; 
+      color: var(--ios-red);
+    }
+
+    .password-card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 25px;
+      line-height: 1.4;
+    }
+
     @media (max-width: 1200px) { 
       .card-container { 
         grid-template-columns: repeat(3, 1fr); 
@@ -735,7 +848,7 @@
         order: 2;
       }
       .main-workspace { 
-        margin-top: 220px; 
+        margin-top: 180px; 
       }
       .card-container { 
         grid-template-columns: repeat(2, 1fr); 
@@ -832,6 +945,8 @@
       </div>
 
       <div class="control-container" id="controlPanel">
+          <button class="interface-control-item pill-shifts-control" onclick="toggleShiftsPanel()">🕒 TURNOS</button>
+          <button class="interface-control-item pill-sale-control" onclick="togglePasswordModal()">🔑 CLAVE</button>
           <button class="interface-control-item pill-codes-control" onclick="toggleCodesPanel()">🔑 CÓDIGOS</button>
           <button class="interface-control-item circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema"></button>
           <button class="interface-control-item circle-control" onclick="cerrarSesionStaff()" aria-label="Cerrar Sesión" style="color: var(--ios-red);">
@@ -839,6 +954,23 @@
           </button>
       </div>
   </header>
+
+  <div class="codes-overlay" id="shiftsOverlay" onclick="toggleShiftsPanel()">
+      <div class="codes-sheet" onclick="event.stopPropagation()">
+          <div class="sheet-header">
+              <h3>Registro de Turnos</h3>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                  <button class="btn-refresh-action" onclick="forzarRefrescoDeHoras()">🔄 Refrescar</button>
+                  <button class="btn-close-sheet" onclick="toggleShiftsPanel()">✕</button>
+              </div>
+          </div>
+          <div class="search-container" style="max-width: 100%; margin-bottom: 20px;">
+              <input type="text" id="searchShiftsInput" class="search-input" placeholder="🔍 Buscar por vendedor o fecha..." oninput="filtrarHorasInternas()">
+          </div>
+          <div class="codes-scroll-area" id="shiftsScrollArea">
+              </div>
+      </div>
+  </div>
 
   <div class="codes-overlay" id="codesOverlay" onclick="toggleCodesPanel()">
       <div class="codes-sheet" onclick="event.stopPropagation()">
@@ -854,6 +986,21 @@
           </div>
           <div class="codes-scroll-area" id="codesScrollArea">
           </div>
+      </div>
+  </div>
+
+  <div class="password-overlay" id="passwordOverlay">
+      <div class="password-card" onclick="event.stopPropagation()">
+          <h3 id="passwordModalTitle">⚠️ Actualización Obligatoria</h3>
+          <p id="passwordModalDesc">Por seguridad y políticas del sistema, debes cambiar tu contraseña predeterminada para poder ingresar al panel operativo.</p>
+          <form id="passwordForm" onsubmit="ejecutarCambioClaveForzado(event)">
+              <input type="password" id="oldPasswordForzado" class="ios-input-block" placeholder="Contraseña Actual" style="display:none;" required>
+              <input type="password" id="newPasswordForzado" class="ios-input-block" placeholder="Escribe tu nueva clave" required>
+              <input type="password" id="confirmNewPasswordForzado" class="ios-input-block" placeholder="Confirma tu nueva clave" required>
+              
+              <button type="submit" id="btnSubmitPasswordForzado" class="btn-login-action" style="background:var(--ai-gradient); box-shadow:0 4px 15px rgba(10,132,255,0.35);">Guardar y Entrar al Sistema</button>
+              <button type="button" id="btnCancelPasswordForzado" class="btn-login-action" style="background:rgba(118, 118, 128, 0.2); color:var(--text-primary); box-shadow:none; margin-top: 10px;" onclick="cancelarCambioYSalir()">Cancelar y Salir</button>
+          </form>
       </div>
   </div>
 
@@ -893,7 +1040,8 @@
   <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPh1eFcrTAVA-oBdyWG4E-jzhPZS_PnHuixdtcj_nbTemK0Xe6jtu1IzuXsej7Ib8V/exec";
     
-    const staffDatabase = {
+    // LISTA MAESTRA DE CONTRASEÑAS PREDETERMINADAS
+    const defaultPasswords = {
       "KATHERINE": "CyberStaff*Kath9",
       "MANUEL": "CyberStaff*Manu2",
       "PABLO": "CyberStaff*Pabl4",
@@ -905,6 +1053,19 @@
     let autoRefreshCodesInterval = null; 
     let isFetchingCodes = false; 
     window.currentCodesStock = []; 
+    
+    let isFetchingHoras = false;
+    window.currentHorasStock = [];
+
+    let temporizadorInactividad = null;
+    let isTimerPaused = false;
+
+    const INACTIVITY_LIMIT = 5 * 60 * 1000; 
+
+    window.pendingUser = "";
+    window.pendingOldPass = "";
+    window.pendingRemember = false;
+    window.isForcedChange = false;
 
     function haptic() { 
       if (navigator.vibrate) {
@@ -932,6 +1093,224 @@
         }
     }
 
+    // ================= MÓDULO DE TABLA DE TURNOS SEMANALES ================= //
+    function toggleShiftsPanel() {
+        haptic();
+        const overlay = document.getElementById('shiftsOverlay');
+        overlay.classList.toggle('open');
+        
+        if (overlay.classList.contains('open')) {
+            forzarRefrescoDeHoras();
+        }
+    }
+
+    function forzarRefrescoDeHoras() {
+        haptic();
+        document.getElementById('shiftsScrollArea').innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando Base de Horas...</div>';
+        cargarHorasDesdeSheets();
+    }
+
+    function cargarHorasDesdeSheets() {
+        if (isFetchingHoras) {
+            return;
+        }
+        isFetchingHoras = true;
+        
+        const oldScript = document.getElementById('cyber_shifts_node');
+        if (oldScript) {
+            oldScript.remove();
+        }
+
+        const scriptElement = document.createElement('script');
+        scriptElement.id = 'cyber_shifts_node';
+        scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerHoras&callback=procesarHorasSheets&_ts=" + Date.now();
+        document.body.appendChild(scriptElement);
+    }
+
+    window.procesarHorasSheets = function(res) {
+        isFetchingHoras = false;
+        
+        const oldScript = document.getElementById('cyber_shifts_node');
+        if (oldScript) {
+            oldScript.remove();
+        }
+
+        const container = document.getElementById('shiftsScrollArea');
+        
+        if (res && res.status === "success") {
+            window.currentHorasStock = res.data; 
+            
+            if (document.getElementById('shiftsOverlay').classList.contains('open')) {
+                renderizarHorasEnPantalla();
+            }
+        } else {
+            if (container) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No se pudo cargar los turnos.</div>`;
+            }
+        }
+    };
+
+    function parseDate(fechaStr) {
+        let parts = fechaStr.split(' ');
+        if(parts.length < 2) return new Date();
+        
+        let dateParts = parts[0].split('/');
+        if(dateParts.length < 3) return new Date();
+        
+        return new Date(dateParts[2], parseInt(dateParts[1]) - 1, dateParts[0]);
+    }
+
+    function esMismaSemana(fechaStr) {
+        let d = parseDate(fechaStr);
+        let hoy = new Date();
+        
+        let day = hoy.getDay() || 7; 
+        let lunes = new Date(hoy);
+        lunes.setDate(hoy.getDate() - day + 1);
+        lunes.setHours(0,0,0,0);
+        
+        let domingo = new Date(lunes);
+        domingo.setDate(lunes.getDate() + 6);
+        domingo.setHours(23,59,59,999);
+        
+        return d >= lunes && d <= domingo;
+    }
+
+    function renderizarHorasEnPantalla() {
+        const container = document.getElementById('shiftsScrollArea');
+        if (!container) return;
+        
+        const userActivo = sessionStorage.getItem('active_staff') || "";
+        
+        // Filtramos para mostrar únicamente los turnos del usuario en esta semana
+        let misHoras = window.currentHorasStock.filter(item => {
+            return item.vendedor.toUpperCase() === userActivo.toUpperCase() && esMismaSemana(item.fecha);
+        });
+        
+        if (misHoras.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No tienes turnos registrados en la semana actual.</div>';
+            return;
+        }
+        
+        let resumenDiario = {};
+        
+        misHoras.forEach(item => {
+            let d = parseDate(item.fecha);
+            let dateKey = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+            let dayOfWeek = d.getDay(); 
+            
+            if(!resumenDiario[dateKey]) {
+                resumenDiario[dateKey] = {
+                    dateObj: d,
+                    dayOfWeek: dayOfWeek,
+                    totalSeconds: 0
+                };
+            }
+            
+            let timeParts = item.tiempo.split(':');
+            if(timeParts.length === 3) {
+                let sec = parseInt(timeParts[0]) * 3600 + parseInt(timeParts[1]) * 60 + parseInt(timeParts[2]);
+                resumenDiario[dateKey].totalSeconds += sec;
+            }
+        });
+        
+        let diasArray = Object.keys(resumenDiario).map(k => {
+            let r = resumenDiario[k];
+            let decimalHours = r.totalSeconds / 3600;
+            let pay = 0;
+            
+            if (r.dayOfWeek === 0) { 
+                // Domingo = Pago cerrado
+                pay = 150000;
+            } else {
+                // Lunes a Sabado = 8000 por hora
+                pay = decimalHours * 8000;
+            }
+            
+            let h = Math.floor(r.totalSeconds / 3600);
+            let m = Math.floor((r.totalSeconds % 3600) / 60);
+            let s = r.totalSeconds % 60;
+            let fmtTime = String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
+
+            return {
+                fechaText: k,
+                dateObj: r.dateObj,
+                diaNombre: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][r.dayOfWeek],
+                hoursFmt: fmtTime,
+                pay: pay
+            };
+        });
+        
+        // Ordenamos los días cronológicamente
+        diasArray.sort((a,b) => a.dateObj - b.dateObj);
+        
+        let totalPay = diasArray.reduce((acc, curr) => acc + curr.pay, 0);
+        let totalSecs = diasArray.reduce((acc, curr) => acc + (curr.dateObj ? resumenDiario[curr.fechaText].totalSeconds : 0), 0);
+        
+        let tH = Math.floor(totalSecs / 3600);
+        let tM = Math.floor((totalSecs % 3600) / 60);
+        let tFmt = String(tH).padStart(2,'0') + "h " + String(tM).padStart(2,'0') + "m";
+
+        let html = `
+          <div class="account-item-box" style="padding:15px 10px;">
+              <h4 style="text-align:center; color:var(--ios-blue); font-size:1.1rem; margin-bottom:5px;">📅 Tu Semana Actual</h4>
+              <p style="text-align:center; color:var(--text-secondary); font-size:0.8rem; margin-bottom:15px;">Lun-Sáb: $8.000/hr | Dom: $150.000/día</p>
+              
+              <table class="shifts-table">
+                  <thead>
+                      <tr>
+                          <th>Día</th>
+                          <th>Horas</th>
+                          <th>Pago</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+        `;
+        
+        diasArray.forEach(d => {
+            html += `
+                      <tr>
+                          <td><strong>${d.diaNombre}</strong><br><span style="font-size:0.7rem; color:var(--text-secondary);">${d.fechaText}</span></td>
+                          <td style="color:var(--ios-green); font-family:monospace; font-weight:bold;">${d.hoursFmt}</td>
+                          <td style="font-weight:600;">$${Math.round(d.pay).toLocaleString('es-CO')}</td>
+                      </tr>
+            `;
+        });
+        
+        html += `
+                  </tbody>
+              </table>
+              <div style="margin-top:15px; padding:15px 10px 0 10px; border-top:1px solid rgba(255,255,255,0.15); display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                      <span style="display:block; font-size:0.8rem; color:var(--text-secondary);">Total Horas:</span>
+                      <span style="font-weight:bold; color:var(--text-primary); font-size:1.1rem;">${tFmt}</span>
+                  </div>
+                  <div style="text-align:right;">
+                      <span style="display:block; font-size:0.8rem; color:var(--text-secondary);">Total a Pagar:</span>
+                      <span style="font-weight:bold; color:var(--ios-green); font-size:1.3rem;">$${Math.round(totalPay).toLocaleString('es-CO')}</span>
+                  </div>
+              </div>
+          </div>
+        `;
+        
+        container.innerHTML = html;
+    }
+
+    function filtrarHorasInternas() {
+        const query = document.getElementById('searchShiftsInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#shiftsScrollArea tbody tr');
+        
+        rows.forEach(function(row) {
+            if (row.innerText.toLowerCase().includes(query)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    // ================================================= //
+
     function toggleCodesPanel() {
         haptic();
         const overlay = document.getElementById('codesOverlay');
@@ -950,6 +1329,26 @@
         }
     }
 
+    function togglePasswordModal() {
+        haptic();
+        const overlay = document.getElementById('passwordOverlay');
+        
+        if (overlay.classList.contains('open')) {
+            overlay.classList.remove('open');
+        } else {
+            window.isForcedChange = false;
+            document.getElementById('passwordModalTitle').innerText = "🔑 Cambiar Contraseña";
+            document.getElementById('passwordModalDesc').innerText = "Actualiza tu clave personal de acceso al sistema.";
+            document.getElementById('oldPasswordForzado').style.display = "block";
+            document.getElementById('btnSubmitPasswordForzado').innerText = "Guardar en Google Sheets";
+            document.getElementById('btnCancelPasswordForzado').innerText = "Cancelar";
+            
+            document.getElementById('passwordForm').reset();
+            overlay.classList.add('open');
+            document.getElementById('oldPasswordForzado').focus();
+        }
+    }
+
     function forzarRefrescoDeCodigos() {
         haptic();
         document.getElementById('codesScrollArea').innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando bandeja de Gmail...</div>';
@@ -958,12 +1357,12 @@
 
     function cargarCodigosDesdeSheets(silencioso = false) {
         if (isFetchingCodes) {
-          return; 
+            return; 
         }
         isFetchingCodes = true;
 
         if (!silencioso && window.cyberCodesTimeout) {
-          clearTimeout(window.cyberCodesTimeout);
+            clearTimeout(window.cyberCodesTimeout);
         }
         
         if (!silencioso) {
@@ -978,7 +1377,7 @@
 
         const oldScript = document.getElementById('cyber_jsonp_node');
         if (oldScript) {
-          oldScript.remove();
+            oldScript.remove();
         }
 
         const scriptElement = document.createElement('script');
@@ -990,16 +1389,18 @@
 
     window.procesarCodigosSheets = function(res) {
         isFetchingCodes = false; 
+        
         if (window.cyberCodesTimeout) {
-          clearTimeout(window.cyberCodesTimeout);
+            clearTimeout(window.cyberCodesTimeout);
         }
 
         const oldScript = document.getElementById('cyber_jsonp_node');
         if (oldScript) {
-          oldScript.remove();
+            oldScript.remove();
         }
 
         const container = document.getElementById('codesScrollArea');
+        
         if (res && res.status === "success") {
             window.currentCodesStock = res.data; 
             
@@ -1023,6 +1424,7 @@
         }
         
         let htmlCards = "";
+        
         window.currentCodesStock.forEach(function(item, index) {
             htmlCards += `
               <div class="account-item-box">
@@ -1044,9 +1446,11 @@
 
     function copiarMensajeRapidoGmail(btn, index) {
         haptic();
+        
         const item = window.currentCodesStock[index];
+        
         if (!item) {
-          return;
+            return;
         }
         
         navigator.clipboard.writeText(item.copiadoRapido).then(function() {
@@ -1074,28 +1478,91 @@
 
     function filtrarCodigosInternos() {
         const query = document.getElementById('searchCodesInput').value.toLowerCase();
-        const cards = document.querySelectorAll('.account-item-box');
+        const cards = document.querySelectorAll('#codesScrollArea .account-item-box');
+        
         cards.forEach(function(card) {
-            card.style.display = card.innerText.toLowerCase().includes(query) ? "" : "none";
+            if (card.innerText.toLowerCase().includes(query)) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
         });
     }
 
-    function startShiftTimer() {
-        let startTime = localStorage.getItem('cyber_shift_start_time');
+    // PAUSA INTELIGENTE POR INACTIVIDAD (5 MINUTOS = 300,000 MS)
+    function resetearInactividad() {
+        if (!sessionStorage.getItem('active_staff')) return; 
+
+        if (isTimerPaused) {
+            isTimerPaused = false;
+            // Se actualiza la base de inicio con el tiempo exacto en que regresó
+            localStorage.setItem('cyber_shift_start_time', Date.now());
+            
+            document.querySelector('.timer-badge').style.color = 'var(--ios-green)';
+            document.querySelector('.timer-badge').style.borderColor = 'var(--glass-border)';
+            document.getElementById('shiftTimer').innerText = "Reanudando...";
+        }
+
+        if (temporizadorInactividad) {
+            clearTimeout(temporizadorInactividad);
+        }
         
-        if (!startTime) {
-            startTime = Date.now();
-            localStorage.setItem('cyber_shift_start_time', startTime);
+        temporizadorInactividad = setTimeout(() => {
+            if (sessionStorage.getItem('active_staff') && !isTimerPaused) {
+                isTimerPaused = true;
+                
+                let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
+                let currentAccumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time')) || 0;
+                let newlyElapsed = Date.now() - startTime;
+                
+                // Restamos exactamente los 5 minutos muertos para que no se los cobren
+                let validTime = newlyElapsed - INACTIVITY_LIMIT;
+                if (validTime < 0) {
+                    validTime = 0;
+                }
+                
+                localStorage.setItem('cyber_shift_accumulated_time', currentAccumulated + validTime);
+                
+                document.querySelector('.timer-badge').style.color = '#ffcc00';
+                document.querySelector('.timer-badge').style.borderColor = '#ffcc00';
+                document.getElementById('shiftTimer').innerText = "PAUSADO";
+
+                alert("⏳ Por inactividad (5 minutos), el cronómetro de tu turno se ha pausado.\n\nMueve el mouse o toca la pantalla para reanudar el conteo de horas.");
+            }
+        }, INACTIVITY_LIMIT); 
+    }
+
+    function iniciarControlInactividad() {
+        window.addEventListener('mousemove', resetearInactividad);
+        window.addEventListener('keypress', resetearInactividad);
+        window.addEventListener('click', resetearInactividad);
+        window.addEventListener('scroll', resetearInactividad);
+        window.addEventListener('touchstart', resetearInactividad);
+        resetearInactividad(); 
+    }
+
+    function startShiftTimer() {
+        if (!localStorage.getItem('cyber_shift_start_time')) {
+            localStorage.setItem('cyber_shift_start_time', Date.now());
+        }
+        if (!localStorage.getItem('cyber_shift_accumulated_time')) {
+            localStorage.setItem('cyber_shift_accumulated_time', 0);
         }
 
         if (timerInterval) {
-          clearInterval(timerInterval);
+            clearInterval(timerInterval);
         }
 
         timerInterval = setInterval(function() {
-            let elapsed = Date.now() - parseInt(startTime);
+            if (isTimerPaused) return; 
             
-            let totalSeconds = Math.floor(elapsed / 1000);
+            let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
+            let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time')) || 0;
+            let elapsed = Date.now() - startTime;
+            
+            let totalMs = accumulated + elapsed;
+            
+            let totalSeconds = Math.floor(totalMs / 1000);
             let hours = Math.floor(totalSeconds / 3600);
             let minutes = Math.floor((totalSeconds % 3600) / 60);
             let seconds = totalSeconds % 60;
@@ -1108,10 +1575,28 @@
         }, 1000);
     }
 
-    function ejecutarNotificacionDeCorreo(vendedor, tipoAccion, callbackFinal) {
+    function obtenerTiempoFinalFormateado() {
+        let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
+        let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time')) || 0;
+        
+        let totalMs = accumulated;
+        if (!isTimerPaused) {
+            let newlyElapsed = Date.now() - startTime;
+            totalMs += newlyElapsed;
+        }
+
+        let totalSeconds = Math.floor(totalMs / 1000);
+        let hours = Math.floor(totalSeconds / 3600);
+        let minutes = Math.floor((totalSeconds % 3600) / 60);
+        let seconds = totalSeconds % 60;
+        
+        return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+    }
+
+    function ejecutarNotificacionDeCorreo(vendedor, tipoAccion, tiempoTrabajado, callbackFinal) {
         if (!GOOGLE_SCRIPT_URL) {
             if (callbackFinal) {
-              callbackFinal();
+                callbackFinal();
             }
             return;
         }
@@ -1120,19 +1605,24 @@
             method: "POST",
             mode: "no-cors",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "notificarCorreo", user: vendedor, tipo: tipoAccion })
+            body: JSON.stringify({ 
+              action: "notificarCorreo", 
+              user: vendedor, 
+              tipo: tipoAccion,
+              tiempoTrabajado: tiempoTrabajado 
+            })
         })
         .then(function() { 
-          if (callbackFinal) callbackFinal(); 
+            if (callbackFinal) callbackFinal(); 
         })
         .catch(function() { 
-          if (callbackFinal) callbackFinal(); 
+            if (callbackFinal) callbackFinal(); 
         });
     }
 
     function validateStaffAccess(e) {
       if (e) {
-        e.preventDefault(); 
+          e.preventDefault();
       }
       haptic();
       
@@ -1140,50 +1630,185 @@
       const passInput = document.getElementById('staffPass').value.trim();
       const rememberMe = document.getElementById('rememberMe').checked;
       const errorToast = document.getElementById('error-login-toast');
+      const submitBtn = document.querySelector('#loginForm button[type="submit"]');
 
-      if (staffDatabase[userInput] && staffDatabase[userInput] === passInput) {
-        errorToast.style.display = 'none';
-        
-        document.getElementById('staffUser').blur();
-        document.getElementById('staffPass').blur();
-        
-        ejecutarNotificacionDeCorreo(userInput, "inicio");
+      if (!userInput || !passInput) return;
 
+      submitBtn.disabled = true;
+      submitBtn.innerText = "⏳ Verificando en Sheets...";
+
+      const oldScript = document.getElementById('cyber_login_node');
+      if (oldScript) {
+          oldScript.remove();
+      }
+
+      window.procesarLoginSheets = function(res) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Verificar Identidad";
+          
+          const scriptNode = document.getElementById('cyber_login_node');
+          if (scriptNode) {
+              scriptNode.remove();
+          }
+
+          if (res && res.status === "success") {
+              errorToast.style.display = 'none';
+              document.getElementById('staffUser').blur();
+              document.getElementById('staffPass').blur();
+              
+              if (defaultPasswords[userInput] && defaultPasswords[userInput] === passInput) {
+                  window.isForcedChange = true;
+                  window.pendingUser = userInput;
+                  window.pendingOldPass = passInput;
+                  window.pendingRemember = rememberMe;
+                  
+                  document.getElementById('passwordModalTitle').innerText = "⚠️ Actualización Obligatoria";
+                  document.getElementById('passwordModalDesc').innerText = "Por seguridad y políticas del sistema, debes cambiar tu contraseña predeterminada para poder ingresar al panel operativo.";
+                  document.getElementById('oldPasswordForzado').style.display = "none";
+                  document.getElementById('oldPasswordForzado').value = passInput;
+                  
+                  document.getElementById('btnSubmitPasswordForzado').innerText = "Guardar y Entrar al Sistema";
+                  document.getElementById('btnCancelPasswordForzado').innerText = "Cancelar y Salir";
+                  
+                  document.getElementById('passwordOverlay').classList.add('open');
+              } else {
+                  entrarAlSistema(userInput, rememberMe);
+              }
+
+          } else {
+              errorToast.innerText = "⚠️ " + (res.message || "Credenciales incorrectas en la base de datos.");
+              errorToast.style.display = 'block';
+              document.getElementById('staffPass').value = '';
+          }
+      };
+
+      const scriptElement = document.createElement('script');
+      scriptElement.id = 'cyber_login_node';
+      scriptElement.src = GOOGLE_SCRIPT_URL + "?action=verificarLogin&user=" + encodeURIComponent(userInput) + "&pass=" + encodeURIComponent(passInput) + "&callback=procesarLoginSheets&_ts=" + Date.now();
+      document.body.appendChild(scriptElement);
+    }
+
+    function ejecutarCambioClaveForzado(e) {
+        if (e) {
+            e.preventDefault();
+        }
+        haptic();
+
+        const btnSubmit = document.getElementById('btnSubmitPasswordForzado');
+        
+        let oldPassToUse = "";
+        let userToUse = "";
+        
+        if (window.isForcedChange) {
+            oldPassToUse = window.pendingOldPass;
+            userToUse = window.pendingUser;
+        } else {
+            oldPassToUse = document.getElementById('oldPasswordForzado').value.trim();
+            userToUse = sessionStorage.getItem('active_staff') || "";
+        }
+        
+        const newPass = document.getElementById('newPasswordForzado').value.trim();
+        const confirmPass = document.getElementById('confirmNewPasswordForzado').value.trim();
+
+        if (newPass !== confirmPass) {
+            alert("⚠️ La nueva contraseña y la confirmación no coinciden.");
+            return;
+        }
+        
+        if (window.isForcedChange && newPass === window.pendingOldPass) {
+            alert("⚠️ La nueva contraseña debe ser distinta a la predeterminada.");
+            return;
+        }
+
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = "⏳ Guardando en Sheets...";
+
+        const oldScript = document.getElementById('cyber_forcepass_node');
+        if (oldScript) {
+            oldScript.remove();
+        }
+
+        window.procesarCambioForzadoSheets = function(res) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = window.isForcedChange ? "Guardar y Entrar al Sistema" : "Guardar en Google Sheets";
+            
+            const scriptNode = document.getElementById('cyber_forcepass_node');
+            if (scriptNode) {
+                scriptNode.remove();
+            }
+
+            if (res && res.status === "success") {
+                document.getElementById('passwordOverlay').classList.remove('open');
+                
+                if (window.isForcedChange) {
+                    entrarAlSistema(window.pendingUser, window.pendingRemember);
+                } else {
+                    alert("🚀 ¡Contraseña actualizada con éxito en tu Google Sheets!");
+                }
+                
+                document.getElementById('passwordForm').reset();
+            } else {
+                alert("❌ Error: " + (res.message || "No se pudo actualizar la contraseña en Sheets."));
+            }
+        };
+
+        const scriptElement = document.createElement('script');
+        scriptElement.id = 'cyber_forcepass_node';
+        scriptElement.src = GOOGLE_SCRIPT_URL + "?action=cambiarClave&user=" + encodeURIComponent(userToUse) + "&oldPass=" + encodeURIComponent(oldPassToUse) + "&newPass=" + encodeURIComponent(newPass) + "&callback=procesarCambioForzadoSheets&_ts=" + Date.now();
+        document.body.appendChild(scriptElement);
+    }
+
+    function cancelarCambioYSalir() {
+        document.getElementById('passwordOverlay').classList.remove('open');
+        document.getElementById('passwordForm').reset();
+        
+        if (window.isForcedChange) {
+            window.pendingUser = "";
+            window.pendingOldPass = "";
+            window.pendingRemember = false;
+        }
+    }
+
+    function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
+        if (!isAutoLogin) {
+            ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
+        }
+        
         document.getElementById('loginOverlay').classList.add('hidden');
         document.getElementById('mainWorkspace').style.display = 'flex';
-        
         document.getElementById('globalHeader').style.display = 'flex';
         document.getElementById('staffSessionName').innerText = userInput;
         
         sessionStorage.setItem('active_staff', userInput);
+        
         if (rememberMe) {
             localStorage.setItem('cyber_saved_staff', userInput);
         }
         
         inicializarWorkspace();
-      } else {
-        errorToast.innerText = "⚠️ Clave o Usuario de Staff incorrecto.";
-        errorToast.style.display = 'block';
-        document.getElementById('staffPass').value = '';
-      }
     }
 
     function cerrarSesionStaff() {
       haptic();
-      const usuarioActivo = sessionStorage.getItem('active_staff') || "STAFF";
       
+      const usuarioActivo = sessionStorage.getItem('active_staff') || "STAFF";
       const cerrarBoton = document.querySelector('.control-container button:last-child');
+      
       if (cerrarBoton) {
-        cerrarBoton.style.opacity = "0.5";
+          cerrarBoton.style.opacity = "0.5";
       }
 
-      ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", function() {
+      const tiempoTotalFormateado = obtenerTiempoFinalFormateado();
+
+      ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoTotalFormateado, function() {
           sessionStorage.removeItem('active_staff');
           localStorage.removeItem('cyber_saved_staff'); 
           localStorage.removeItem('cyber_shift_start_time');
+          localStorage.removeItem('cyber_shift_accumulated_time');
           
           if (timerInterval) clearInterval(timerInterval);
           if (autoRefreshCodesInterval) clearInterval(autoRefreshCodesInterval);
+          if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
           
           location.reload();
       });
@@ -1192,6 +1817,7 @@
     function inicializarWorkspace() {
         renderGrid();
         startShiftTimer();
+        iniciarControlInactividad();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -1202,14 +1828,7 @@
         if(sessionStorage.getItem('active_staff') || localStorage.getItem('cyber_saved_staff')) {
             const user = sessionStorage.getItem('active_staff') || localStorage.getItem('cyber_saved_staff');
             sessionStorage.setItem('active_staff', user); 
-            
-            document.getElementById('loginOverlay').classList.add('hidden');
-            document.getElementById('mainWorkspace').style.display = 'flex';
-            
-            document.getElementById('globalHeader').style.display = 'flex';
-            document.getElementById('staffSessionName').innerText = user;
-            
-            inicializarWorkspace();
+            entrarAlSistema(user, false, true);
         }
     });
 
