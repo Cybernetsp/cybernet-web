@@ -1193,25 +1193,30 @@
             return new Date(dateParts[2], parseInt(dateParts[1]) - 1, dateParts[0]);
         }
 
-        function esMismaSemana(fechaStr) {
+        // ==================== LÓGICA DE QUINCENA ====================
+        function esMismaQuincena(fechaStr) {
             let d = parseDate(fechaStr);
             let hoy = new Date();
             
-            let day = hoy.getDay();
-            if (day === 0) {
-                day = 7;
+            let diaHoy = hoy.getDate();
+            let mesHoy = hoy.getMonth();
+            let anioHoy = hoy.getFullYear();
+            
+            let dDia = d.getDate();
+            let dMes = d.getMonth();
+            let dAnio = d.getFullYear();
+            
+            if (dMes !== mesHoy || dAnio !== anioHoy) {
+                return false;
             }
             
-            let lunes = new Date(hoy);
-            lunes.setDate(hoy.getDate() - day + 1);
-            lunes.setHours(0,0,0,0);
-            
-            let domingo = new Date(lunes);
-            domingo.setDate(lunes.getDate() + 6);
-            domingo.setHours(23,59,59,999);
-            
-            return d >= lunes && d <= domingo;
+            if (diaHoy <= 15) {
+                return (dDia >= 1 && dDia <= 15);
+            } else {
+                return (dDia >= 16);
+            }
         }
+        // ============================================================
 
         function renderizarHorasEnPantalla() {
             const container = document.getElementById('shiftsScrollArea');
@@ -1228,13 +1233,15 @@
             let misHoras = [];
             for (let index = 0; index < window.currentHorasStock.length; index++) {
                 let item = window.currentHorasStock[index];
-                if (item.vendedor.toUpperCase() === userFinal && esMismaSemana(item.fecha)) {
+                
+                // Usamos la nueva lógica de Quincena
+                if (item.vendedor.toUpperCase() === userFinal && esMismaQuincena(item.fecha)) {
                     misHoras.push(item);
                 }
             }
             
             if (misHoras.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No tienes turnos registrados en la semana actual.</div>';
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No tienes turnos registrados en la quincena actual.</div>';
                 return;
             }
             
@@ -1327,7 +1334,7 @@
 
             let html = `
               <div class="account-item-box" style="padding:15px 10px;">
-                  <h4 style="text-align:center; color:var(--ios-blue); font-size:1.1rem; margin-bottom:5px;">📅 Tu Semana Actual</h4>
+                  <h4 style="text-align:center; color:var(--ios-blue); font-size:1.1rem; margin-bottom:5px;">📅 Tu Quincena Actual (Días 1-15 o 16-Fin)</h4>
                   <p style="text-align:center; color:var(--text-secondary); font-size:0.8rem; margin-bottom:15px;">Lun-Sáb: $8.000/hr | Dom: $150.000/día</p>
                   
                   <table class="shifts-table">
@@ -1576,7 +1583,6 @@
             }
         }
 
-        // ================= SISTEMA DE INACTIVIDAD DOBLE ================= //
         function resetearInactividad() {
             if (!sessionStorage.getItem('active_staff')) {
                 return; 
@@ -1606,7 +1612,6 @@
                 clearTimeout(temporizadorCierreTotal);
             }
             
-            // PRIMERA ALERTA: A los 5 minutos, se pausa el tiempo de paga
             temporizadorInactividad = setTimeout(() => {
                 if (sessionStorage.getItem('active_staff') && !isTimerPaused) {
                     isTimerPaused = true;
@@ -1641,7 +1646,6 @@
                 }
             }, INACTIVITY_LIMIT); 
 
-            // SEGUNDA ALERTA: A los 20 minutos de abandono absoluto, se cierra la sesión
             temporizadorCierreTotal = setTimeout(() => {
                 if (sessionStorage.getItem('active_staff')) {
                     alert("⏳ Tu sesión se ha cerrado automáticamente tras 20 minutos de inactividad.");
@@ -2010,23 +2014,26 @@
             });
         }
 
-        // ================= CERRAR SESIÓN AL CERRAR PESTAÑA ================= //
         window.addEventListener('pagehide', function() {
             const userActivo = sessionStorage.getItem('active_staff');
             if (userActivo) {
                 const tiempoTotalFormateado = obtenerTiempoFinalFormateado();
                 
+                let paramObj = {
+                    action: "notificarCorreo", 
+                    user: userActivo, 
+                    tipo: "cierre",
+                    tiempoTrabajado: tiempoTotalFormateado 
+                };
+                
                 fetch(GOOGLE_SCRIPT_URL, {
                     method: "POST",
                     mode: "no-cors",
                     keepalive: true, 
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                      action: "notificarCorreo", 
-                      user: userActivo, 
-                      tipo: "cierre",
-                      tiempoTrabajado: tiempoTotalFormateado 
-                    })
+                    headers: { 
+                        "Content-Type": "application/json" 
+                    },
+                    body: JSON.stringify(paramObj)
                 });
 
                 sessionStorage.removeItem('active_staff');
