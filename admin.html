@@ -24,6 +24,7 @@
     }
 
     [data-theme="dark"] {
+      color-scheme: dark;
       --page-bg: #000000;
       --text-primary: #ffffff;
       --text-secondary: rgba(235, 235, 245, 0.6);
@@ -38,9 +39,11 @@
       --orb-2: rgba(255, 69, 58, 0.3);   
       --scrollbar-thumb: rgba(255, 255, 255, 0.2);
       --sheet-bg: rgba(25, 25, 27, 0.85);
+      --sheet-modal-bg: rgba(30, 30, 30, 0.95);
     }
 
     [data-theme="light"] {
+      color-scheme: light;
       --ios-blue: #007aff;
       --ios-green: #34c759;
       --ios-red: #ff3b30;
@@ -58,233 +61,549 @@
       --orb-2: rgba(255, 69, 58, 0.05);
       --scrollbar-thumb: rgba(0, 0, 0, 0.2);
       --sheet-bg: rgba(255, 255, 255, 0.85);
+      --sheet-modal-bg: rgba(255, 255, 255, 0.95);
     }
 
     * { 
-      margin: 0; padding: 0; box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      -webkit-font-smoothing: antialiased; 
+      -moz-osx-font-smoothing: grayscale;
     }
     
     body { 
-      background-color: var(--page-bg); color: var(--text-primary); 
-      display: flex; flex-direction: column; align-items: center; justify-content: center; 
-      min-height: 100vh; padding: 30px 20px; position: relative; overflow-x: hidden;
+      background-color: var(--page-bg); 
+      color: var(--text-primary); 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: flex-start; 
+      min-height: 100vh; 
+      padding: 0 20px 30px 20px; 
+      position: relative; 
+      overflow-x: hidden;
       transition: background-color 0.4s ease, color 0.4s ease;
     }
 
-    /* ORBES RETROILUMINADOS DE ENTORNO COMERCIAL CYBERNET (AZUL IZQUIERDA Y ROJO DERECHA) */
     .bg-orb-1 {
-      position: fixed; top: -15%; left: -10%; width: 55vw; height: 55vw;
-      background: radial-gradient(circle, var(--orb-1) 0%, transparent 75%); z-index: -1; pointer-events: none;
-    }
-    .bg-orb-2 {
-      position: fixed; bottom: -15%; right: -10%; width: 55vw; height: 55vw;
-      background: radial-gradient(circle, var(--orb-2) 0%, transparent 75%); z-index: -1; pointer-events: none;
+      position: fixed; 
+      top: -15%; 
+      left: -10%; 
+      width: 55vw; 
+      height: 55vw;
+      background: radial-gradient(circle, var(--orb-1) 0%, transparent 75%); 
+      z-index: -1; 
+      pointer-events: none;
     }
 
-    /* CONTENEDOR DE ESTADO SUPERIOR IZQUIERDO */
+    .bg-orb-2 {
+      position: fixed; 
+      bottom: -15%; 
+      right: -10%; 
+      width: 55vw; 
+      height: 55vw;
+      background: radial-gradient(circle, var(--orb-2) 0%, transparent 75%); 
+      z-index: -1; 
+      pointer-events: none;
+    }
+
+    .global-header {
+      position: fixed;
+      top: 0; left: 0; width: 100%;
+      background: rgba(20, 20, 22, 0.75);
+      backdrop-filter: blur(35px) saturate(200%);
+      -webkit-backdrop-filter: blur(35px) saturate(200%);
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.15);
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 400;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    [data-theme="light"] .global-header {
+      background: rgba(255, 255, 255, 0.75);
+      border-bottom-color: rgba(0, 0, 0, 0.1);
+    }
+
     .top-left-status {
-      position: absolute; top: 25px; left: 25px; display: flex; align-items: center; gap: 10px; z-index: 100;
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
     }
 
     .staff-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border: var(--glass-border); color: var(--ios-blue); box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      padding: 10px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.3px;
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px;
+      background: var(--glass-bg); 
+      backdrop-filter: blur(20px); 
+      -webkit-backdrop-filter: blur(20px);
+      border: var(--glass-border); 
+      color: var(--ios-blue); 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 10px 16px; 
+      border-radius: 20px; 
+      font-size: 0.85rem; 
+      font-weight: 600; 
+      letter-spacing: 0.3px;
     }
 
     .timer-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border: var(--glass-border); color: var(--ios-green); box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      padding: 10px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; font-variant-numeric: tabular-nums;
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px;
+      background: var(--glass-bg); 
+      backdrop-filter: blur(20px); 
+      -webkit-backdrop-filter: blur(20px);
+      border: var(--glass-border); 
+      color: var(--ios-green); 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 10px 16px; 
+      border-radius: 20px; 
+      font-size: 0.85rem; 
+      font-weight: 700; 
+      font-variant-numeric: tabular-nums;
     }
 
-    /* CONTROLES DE INTERFAZ SUPERIOR DERECHOS */
     .control-container {
-      position: absolute; top: 25px; right: 25px; display: flex; gap: 12px; z-index: 100;
+      display: flex; 
+      gap: 12px; 
       align-items: center;
     }
     
     .interface-control-item {
       background: var(--glass-bg);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: var(--glass-border);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: var(--transition-spring); color: var(--text-primary);
+      backdrop-filter: blur(20px); 
+      -webkit-backdrop-filter: blur(20px); 
+      border: var(--glass-border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      cursor: pointer; 
+      transition: var(--transition-spring); 
+      color: var(--text-primary);
     }
-    .interface-control-item:active { transform: scale(0.9); }
+
+    .interface-control-item:active { 
+      transform: scale(0.9); 
+    }
     
-    .circle-control {
-      width: 44px; height: 44px; border-radius: 50%; padding: 0;
+    .circle-control { 
+      width: 44px; 
+      height: 44px; 
+      border-radius: 50%; 
+      padding: 0; 
     }
     
     .pill-codes-control {
-      padding: 10px 20px; border-radius: 22px;
-      font-size: 0.88rem; font-weight: 700; color: var(--ios-blue);
+      padding: 10px 20px; 
+      border-radius: 22px;
+      font-size: 0.88rem; 
+      font-weight: 700; 
+      color: var(--ios-blue); 
       gap: 7px;
-      background: rgba(10, 132, 255, 0.05);
+      background: rgba(10, 132, 255, 0.05); 
       border: 0.5px solid rgba(10, 132, 255, 0.2);
     }
 
-    /* PANTALLA LOGIN MODERNA (macOS LOCK SCREEN) */
+    .header-search-container {
+      flex-grow: 1; 
+      max-width: 460px; 
+      margin: 0 20px; 
+      position: relative; 
+      display: flex; 
+      align-items: center;
+    }
+
+    .search-input {
+      width: 100%; 
+      padding: 12px 20px 12px 44px; 
+      border-radius: 14px; 
+      border: var(--glass-border);
+      background: var(--input-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") no-repeat 16px center;
+      color: var(--text-primary); 
+      font-size: 0.95rem; 
+      outline: none; 
+      transition: var(--transition-spring);
+    }
+
+    .search-input:focus { 
+      background: var(--input-focus); 
+      border-color: var(--ios-blue); 
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2); 
+    }
+
+    .search-input::placeholder { 
+      color: var(--text-secondary); 
+    }
+
     .login-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4); 
+      backdrop-filter: blur(20px); 
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 1000; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 20px;
       transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.5s;
     }
-    .login-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .login-overlay.hidden { 
+      opacity: 0; 
+      visibility: hidden; 
+      pointer-events: none; 
+    }
     
     .login-card {
-      width: 100%; max-width: 380px; padding: 40px 30px;
-      background: var(--glass-bg); border: var(--glass-border); border-radius: 28px;
-      box-shadow: var(--glass-shadow); text-align: center;
+      width: 100%; 
+      max-width: 380px; 
+      padding: 40px 30px;
+      background: var(--glass-bg); 
+      border: var(--glass-border); 
+      border-radius: 28px;
+      box-shadow: var(--glass-shadow); 
+      text-align: center;
       animation: lockScaleUp 0.6s cubic-bezier(0.25, 1, 0.5, 1);
     }
-    @keyframes lockScaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    @keyframes lockScaleUp { 
+      from { transform: scale(0.95); opacity: 0; } 
+      to { transform: scale(1); opacity: 1; } 
+    }
 
     .avatar-staff {
-      width: 74px; height: 74px; border-radius: 50%; background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15); margin: 0 auto 18px auto; display: flex;
-      align-items: center; justify-content: center; color: var(--ios-blue);
+      width: 74px; 
+      height: 74px; 
+      border-radius: 50%; 
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15); 
+      margin: 0 auto 18px auto; 
+      display: flex;
+      align-items: center; 
+      justify-content: center; 
+      color: var(--ios-blue);
       box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.1);
     }
     
-    .login-card h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; color: var(--text-primary); }
-    .login-card .lock-instruction { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 25px; font-weight: 400; }
+    .login-card h2 { 
+      font-size: 1.5rem; 
+      font-weight: 700; 
+      letter-spacing: -0.5px; 
+      margin-bottom: 6px; 
+      color: var(--text-primary); 
+    }
+
+    .login-card .lock-instruction { 
+      font-size: 0.9rem; 
+      color: var(--text-secondary); 
+      margin-bottom: 25px; 
+      font-weight: 400; 
+    }
 
     .ios-input-block {
-      width: 100%; padding: 14px 16px; margin-bottom: 12px; border-radius: 12px;
-      border: var(--glass-border); background: var(--input-bg); color: var(--text-primary);
-      text-align: left; font-size: 0.95rem; outline: none; transition: var(--transition-spring);
+      width: 100%; 
+      padding: 14px 16px; 
+      margin-bottom: 12px; 
+      border-radius: 12px;
+      border: var(--glass-border); 
+      background: var(--input-bg); 
+      color: var(--text-primary);
+      text-align: left; 
+      font-size: 0.95rem; 
+      outline: none; 
+      transition: var(--transition-spring);
     }
+
     .ios-input-block:focus { 
-      background: var(--input-focus); border-color: var(--ios-blue);
+      background: var(--input-focus); 
+      border-color: var(--ios-blue);
       box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25);
     }
-    .ios-input-block::placeholder { color: var(--text-secondary); opacity: 0.7; }
 
-    /* CHECKBOX DE RECORDAR SESIÓN */
+    .ios-input-block::placeholder { 
+      color: var(--text-secondary); 
+      opacity: 0.7; 
+    }
+
     .remember-row {
-      display: flex; align-items: center; justify-content: center; gap: 8px; 
-      margin-bottom: 18px; margin-top: 5px;
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
+      margin-bottom: 18px; 
+      margin-top: 5px;
     }
-    .remember-row input[type="checkbox"] {
-      width: 16px; height: 16px; margin: 0; cursor: pointer; accent-color: var(--ios-blue);
+
+    .remember-row input[type="checkbox"] { 
+      width: 16px; 
+      height: 16px; 
+      margin: 0; 
+      cursor: pointer; 
+      accent-color: var(--ios-blue); 
     }
-    .remember-row label {
-      color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; cursor: pointer; user-select: none;
+
+    .remember-row label { 
+      color: var(--text-secondary); 
+      font-size: 0.85rem; 
+      font-weight: 500; 
+      cursor: pointer; 
+      user-select: none; 
     }
 
     .btn-login-action {
-      background: var(--ai-gradient); color: white; border: none; font-weight: 600;
-      box-shadow: 0 4px 15px rgba(10, 132, 255, 0.35); padding: 14px; border-radius: 12px;
-      width: 100%; font-size: 0.95rem; cursor: pointer; transition: var(--transition-spring);
-      margin-top: 5px; display: block; text-align: center;
+      background: var(--ai-gradient); 
+      color: white; 
+      border: none; 
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(10, 132, 255, 0.35); 
+      padding: 14px; 
+      border-radius: 12px;
+      width: 100%; 
+      font-size: 0.95rem; 
+      cursor: pointer; 
+      transition: var(--transition-spring);
+      margin-top: 5px; 
+      display: block; 
+      text-align: center;
     }
-    .btn-login-action:active { transform: scale(0.96); opacity: 0.9; }
 
-    /* CONTENEDOR PRINCIPAL POST-LOGIN */
+    .btn-login-action:active { 
+      transform: scale(0.96); 
+      opacity: 0.9; 
+    }
+
     .main-workspace {
-      display: none; width: 100%; max-width: 1300px; flex-direction: column; align-items: center;
-      animation: workspaceUp 0.6s cubic-bezier(0.25, 1, 0.5, 1); margin-top: 60px;
-    }
-    @keyframes workspaceUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* BUSCADOR ESTILO SPOTLIGHT SEARCH */
-    .search-container { width: 100%; max-width: 440px; margin-bottom: 35px; position: relative; }
-    .search-input {
-      width: 100%; padding: 14px 20px 14px 44px; border-radius: 14px; border: var(--glass-border);
-      background: var(--input-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") no-repeat 16px center;
-      color: var(--text-primary); font-size: 1rem; outline: none; transition: var(--transition-spring);
-    }
-    .search-input:focus { background: var(--input-focus); border-color: var(--ios-blue); box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2); }
-    .search-input::placeholder { color: var(--text-secondary); }
-
-    /* DISEÑO DE CONTENEDORES SUPERIOR (QR CARD) */
-    .header-container { width: 100%; display: flex; justify-content: center; margin-bottom: 35px; }
-
-    /* GRID ESTILO WIDGETS DE iPHONE */
-    .card-container {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; margin-bottom: 50px;
+      display: none; 
+      width: 100%; 
+      max-width: 1300px; 
+      flex-direction: column; 
+      align-items: center;
+      animation: workspaceUp 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
+      margin-top: 110px;
     }
 
-    /* DISEÑO DE TARJETAS (LIQUID GLASS APP CARDS) */
+    @keyframes workspaceUp { 
+      from { opacity: 0; transform: translateY(20px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+
+    .header-container { 
+      width: 100%; 
+      display: flex; 
+      justify-content: center; 
+      margin-bottom: 35px; 
+    }
+
+    .card-container { 
+      display: grid; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 20px; 
+      width: 100%; 
+      margin-bottom: 50px; 
+    }
+
     .card {
-      background: var(--glass-bg); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%);
-      border: var(--glass-border); border-radius: 22px; padding: 24px; text-align: center;
-      box-shadow: var(--glass-shadow); display: flex; flex-direction: column; align-items: center;
-      justify-content: space-between; gap: 20px; transition: var(--transition-spring); height: 100%;
+      background: var(--glass-bg); 
+      backdrop-filter: blur(40px) saturate(180%); 
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: var(--glass-border); 
+      border-radius: 22px; 
+      padding: 24px; 
+      text-align: center;
+      box-shadow: var(--glass-shadow); 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center;
+      justify-content: space-between; 
+      gap: 20px; 
+      transition: var(--transition-spring); 
+      height: 100%;
     }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 30px 60px rgba(0,0,0,0.15); }
 
-    .card.qr-card { max-width: 440px; width: 100%; padding: 30px 24px; }
+    .card:hover { 
+      transform: translateY(-4px); 
+      box-shadow: 0 30px 60px rgba(0,0,0,0.15); 
+    }
+
+    .card.qr-card { 
+      max-width: 440px; 
+      width: 100%; 
+      padding: 30px 24px; 
+    }
 
     .card-title {
-      color: var(--text-primary); font-size: 0.9rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.5px; margin: 0; opacity: 0.9;
+      color: var(--text-primary); 
+      font-size: 0.9rem; 
+      font-weight: 700; 
+      text-transform: uppercase;
+      letter-spacing: 0.5px; 
+      margin: 0; 
+      opacity: 0.9;
     }
 
     .qr-image {
-      max-width: 210px; width: 100%; border-radius: 16px; border: var(--glass-border);
-      box-shadow: var(--glass-shadow); padding: 5px; background: white;
+      max-width: 210px; 
+      width: 100%; 
+      border-radius: 16px; 
+      border: var(--glass-border);
+      box-shadow: var(--glass-shadow); 
+      padding: 5px; 
+      background: white;
     }
 
-    .qr-hint { font-size: 0.75rem; color: var(--text-secondary); margin-top: -8px; font-weight: 500; }
+    .qr-hint { 
+      font-size: 0.75rem; 
+      color: var(--text-secondary); 
+      margin-top: -8px; 
+      font-weight: 500; 
+    }
 
-    /* BOTONES DE COPIADO ACCIÓN ACCESIBLE DE APPLE */
     .copy-btn {
-      background: var(--card-bg); border: var(--card-border); color: var(--ios-blue);
-      padding: 12px 16px; font-size: 0.85rem; font-weight: 600; border-radius: 12px;
-      cursor: pointer; transition: var(--transition-spring); width: 100%; letter-spacing: 0.2px;
+      background: var(--card-bg); 
+      border: var(--card-border); 
+      color: var(--ios-blue);
+      padding: 12px 16px; 
+      font-size: 0.85rem; 
+      font-weight: 600; 
+      border-radius: 12px;
+      cursor: pointer; 
+      transition: var(--transition-spring); 
+      width: 100%; 
+      letter-spacing: 0.2px;
     }
-    .copy-btn:active { transform: scale(0.95); }
-    .copy-btn:hover { background: var(--input-focus); color: var(--text-primary); }
 
-    /* ESTADOS DE COPIADO EXITOSO E ILUMINACIÓN */
-    .card.active { border-color: var(--ios-red); box-shadow: 0 0 20px rgba(255, 69, 58, 0.25); }
-    .card.active .card-title { color: var(--ios-red); }
-    
-    /* =========================================
-       PANEL MODAL DESPLEGABLE ESTILO CUPERTINO
-       ========================================= */
-    .codes-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-      z-index: 500; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s;
+    .copy-btn:active { 
+      transform: scale(0.95); 
     }
-    .codes-overlay.open { opacity: 1; visibility: visible; }
+
+    .copy-btn:hover { 
+      background: var(--input-focus); 
+      color: var(--text-primary); 
+    }
+
+    .card.active { 
+      border-color: var(--ios-red); 
+      box-shadow: 0 0 20px rgba(255, 69, 58, 0.25); 
+    }
+
+    .card.active .card-title { 
+      color: var(--ios-red); 
+    }
+    
+    .codes-overlay {
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3); 
+      backdrop-filter: blur(15px); 
+      -webkit-backdrop-filter: blur(15px);
+      z-index: 500; 
+      opacity: 0; 
+      visibility: hidden; 
+      transition: opacity 0.4s ease, visibility 0.4s;
+    }
+
+    .codes-overlay.open { 
+      opacity: 1; 
+      visibility: visible; 
+    }
 
     .codes-sheet {
-      position: absolute; top: 0; right: -460px; width: 100%; max-width: 440px; height: 100%;
-      background: var(--sheet-bg); border-left: var(--glass-border); padding: 35px 25px;
-      box-shadow: -10px 0 40px rgba(0,0,0,0.3); display: flex; flex-direction: column;
+      position: absolute; 
+      top: 0; 
+      right: -460px; 
+      width: 100%; 
+      max-width: 440px; 
+      height: 100%;
+      background: var(--sheet-bg); 
+      border-left: var(--glass-border); 
+      padding: 35px 25px;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.3); 
+      display: flex; 
+      flex-direction: column;
       transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     }
-    .codes-overlay.open .codes-sheet { right: 0; }
 
-    .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-    .sheet-header h3 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; }
+    .codes-overlay.open .codes-sheet { 
+      right: 0; 
+    }
+
+    .sheet-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 25px; 
+    }
+
+    .sheet-header h3 { 
+      font-size: 1.4rem; 
+      font-weight: 700; 
+      letter-spacing: -0.5px; 
+    }
     
     .btn-refresh-action {
-      background: rgba(10, 132, 255, 0.12); border: none; color: var(--ios-blue);
-      padding: 6px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 600;
-      cursor: pointer; transition: var(--transition-spring); display: flex; align-items: center; gap: 4px;
+      background: rgba(10, 132, 255, 0.12); 
+      border: none; 
+      color: var(--ios-blue);
+      padding: 6px 12px; 
+      border-radius: 10px; 
+      font-size: 0.8rem; 
+      font-weight: 600;
+      cursor: pointer; 
+      transition: var(--transition-spring); 
+      display: flex; 
+      align-items: center; 
+      gap: 4px;
     }
-    .btn-refresh-action:active { transform: scale(0.92); opacity: 0.8; }
+
+    .btn-refresh-action:active { 
+      transform: scale(0.92); 
+      opacity: 0.8; 
+    }
     
     .btn-close-sheet {
-      background: rgba(118, 118, 128, 0.2); border: none; width: 30px; height: 30px; border-radius: 50%;
-      color: var(--text-primary); font-size: 0.9rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      background: rgba(118, 118, 128, 0.2); 
+      border: none; 
+      width: 30px; 
+      height: 30px; 
+      border-radius: 50%;
+      color: var(--text-primary); 
+      font-size: 0.9rem; 
+      font-weight: 700; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
       transition: var(--transition-spring);
     }
-    .btn-close-sheet:active { transform: scale(0.9); }
 
-    .codes-scroll-area { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 5px; }
+    .btn-close-sheet:active { 
+      transform: scale(0.9); 
+    }
+
+    .codes-scroll-area { 
+      flex-grow: 1; 
+      overflow-y: auto; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 15px; 
+      padding-right: 5px; 
+    }
     
-    /* BLOQUES DE CORREO DE BANDEJA EN CRISTAL */
     .account-item-box {
       background: rgba(255, 255, 255, 0.03); 
       backdrop-filter: blur(35px) saturate(200%); 
@@ -292,71 +611,204 @@
       border: 0.5px solid rgba(255, 255, 255, 0.12); 
       border-radius: 20px; 
       padding: 20px;
-      text-align: left; display: flex; flex-direction: column; gap: 8px; 
+      text-align: left; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
       transition: var(--transition-spring);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
+
     [data-theme="light"] .account-item-box {
       background: rgba(255, 255, 255, 0.45);
       border: 0.5px solid rgba(0, 0, 0, 0.08);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
+
     .account-item-box:hover { 
       border-color: rgba(255, 255, 255, 0.25); 
       transform: translateY(-2px); 
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
 
-    .account-header-line { display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px; margin-bottom: 4px; }
-    [data-theme="light"] .account-header-line { border-bottom-color: rgba(0, 0, 0, 0.06); }
-    .platform-tag { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--ios-blue); letter-spacing: 0.3px; }
-    .time-tag { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); font-family: monospace; }
-    .credential-row { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; word-break: break-all; }
-    .credential-row span { color: var(--text-primary); font-weight: 600; }
+    .account-header-line { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.1); 
+      padding-bottom: 8px; 
+      margin-bottom: 4px; 
+    }
 
-    /* BOTÓN ORIGINAL DE COPIADO CÓDIGOS */
+    [data-theme="light"] .account-header-line { 
+      border-bottom-color: rgba(0, 0, 0, 0.06); 
+    }
+
+    .platform-tag { 
+      font-size: 0.85rem; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      color: var(--ios-blue); 
+      letter-spacing: 0.3px; 
+    }
+
+    .time-tag { 
+      font-size: 0.75rem; 
+      font-weight: 600; 
+      color: var(--text-secondary); 
+      font-family: monospace; 
+    }
+
+    .credential-row { 
+      font-size: 0.85rem; 
+      color: var(--text-secondary); 
+      font-weight: 500; 
+      word-break: break-all; 
+    }
+
+    .credential-row span { 
+      color: var(--text-primary); 
+      font-weight: 600; 
+    }
+
     .account-item-box .copy-btn-action {
       background: rgba(255, 255, 255, 0.05);
       border: 0.5px solid rgba(255, 255, 255, 0.1); 
       color: var(--ios-blue);
-      padding: 12px 16px; font-size: 0.85rem; font-weight: 600; border-radius: 12px;
-      cursor: pointer; transition: var(--transition-spring); width: 100%; letter-spacing: 0.2px;
-      margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;
+      padding: 12px 16px; 
+      font-size: 0.85rem; 
+      font-weight: 600; 
+      border-radius: 12px;
+      cursor: pointer; 
+      transition: var(--transition-spring); 
+      width: 100%; 
+      letter-spacing: 0.2px;
+      margin-top: 8px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 4px;
     }
-    [data-theme="light"] .account-item-box .copy-btn-action { background: rgba(0, 0, 0, 0.03); border: 0.5px solid rgba(0, 0, 0, 0.06); }
-    .account-item-box .copy-btn-action:hover { background: var(--ios-blue); color: white; border-color: transparent; box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3); }
-    .account-item-box .copy-btn-action:active { transform: scale(0.95); }
 
-    /* RESPONSIVE SUB-SISTEMAS */
-    @media (max-width: 1200px) { .card-container { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 900px) { 
-      .card-container { grid-template-columns: repeat(2, 1fr); } 
-      .top-left-status { position: relative; top: 0; left: 0; margin-bottom: 15px; flex-direction: column; gap: 8px; width: 100%; align-items: center; }
-      .control-container { position: relative; top: 0; right: 0; justify-content: center; width: 100%; margin-bottom: 20px; }
-      .main-workspace { margin-top: 10px; }
-      .codes-sheet { max-width: 100%; right: -100%; }
+    [data-theme="light"] .account-item-box .copy-btn-action { 
+      background: rgba(0, 0, 0, 0.03); 
+      border: 0.5px solid rgba(0, 0, 0, 0.06); 
     }
+
+    .account-item-box .copy-btn-action:hover { 
+      background: var(--ios-blue); 
+      color: white; 
+      border-color: transparent; 
+      box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3); 
+    }
+
+    .account-item-box .copy-btn-action:active { 
+      transform: scale(0.95); 
+    }
+
+    @media (max-width: 1200px) { 
+      .card-container { 
+        grid-template-columns: repeat(3, 1fr); 
+      } 
+    }
+
+    @media (max-width: 900px) { 
+      .global-header { 
+        flex-direction: column; 
+        padding: 15px 20px; 
+        gap: 12px; 
+      }
+      .header-search-container {
+        width: 100%;
+        max-width: 100%;
+        order: 3;
+        margin: 0;
+      }
+      .top-left-status {
+        justify-content: center;
+        width: 100%;
+        order: 1;
+      }
+      .control-container {
+        justify-content: center;
+        width: 100%;
+        order: 2;
+      }
+      .main-workspace { 
+        margin-top: 220px; 
+      }
+      .card-container { 
+        grid-template-columns: repeat(2, 1fr); 
+      } 
+      .codes-sheet { 
+        max-width: 100%; 
+        right: -100%; 
+      }
+    }
+
     @media (max-width: 600px) { 
-      .card-container { grid-template-columns: repeat(1, 1fr); } 
-      body { padding: 20px 10px; justify-content: flex-start; }
-      .card { padding: 20px; }
-      .login-card { padding: 35px 20px; }
+      .card-container { 
+        grid-template-columns: repeat(1, 1fr); 
+      } 
+      body { 
+        padding: 0 10px 20px 10px; 
+        justify-content: flex-start; 
+      }
+      .card { 
+        padding: 20px; 
+      }
+      .login-card { 
+        padding: 35px 20px; 
+      }
     }
     
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
+    ::-webkit-scrollbar { 
+      width: 6px; 
+    }
+
+    ::-webkit-scrollbar-track { 
+      background: transparent; 
+    }
+
+    ::-webkit-scrollbar-thumb { 
+      background: var(--scrollbar-thumb); 
+      border-radius: 10px; 
+    }
 
     #error-login-toast {
-      display: none; background: rgba(255, 69, 58, 0.15); color: var(--ios-red);
-      padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;
-      margin-bottom: 18px; border: 0.5px solid rgba(255, 69, 58, 0.25); text-align: center;
+      display: none; 
+      background: rgba(255, 69, 58, 0.15); 
+      color: var(--ios-red);
+      padding: 12px; 
+      border-radius: 12px; 
+      font-size: 0.85rem; 
+      font-weight: 600;
+      margin-bottom: 18px; 
+      border: 0.5px solid rgba(255, 69, 58, 0.25); 
+      text-align: center;
       animation: shakeIOS 0.4s ease-in-out;
     }
-    @keyframes shakeIOS { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-4px);} 75% {transform: translateX(4px);} }
 
-    .back-link { display: block; margin-top: 22px; color: var(--ios-blue); cursor: pointer; font-size: 0.85rem; text-align: center; text-decoration: none; font-weight: 500;}
-    .back-link:hover { text-decoration: underline; }
+    @keyframes shakeIOS { 
+      0%, 100% {transform: translateX(0);} 
+      25% {transform: translateX(-4px);} 
+      75% {transform: translateX(4px);} 
+    }
+
+    .back-link { 
+      display: block; 
+      margin-top: 22px; 
+      color: var(--ios-blue); 
+      cursor: pointer; 
+      font-size: 0.85rem; 
+      text-align: center; 
+      text-decoration: none; 
+      font-weight: 500;
+    }
+
+    .back-link:hover { 
+      text-decoration: underline; 
+    }
   </style>
 </head>
 <body>
@@ -364,23 +816,29 @@
   <div class="bg-orb-1"></div>
   <div class="bg-orb-2"></div>
 
-  <div class="top-left-status" id="staffStatusBar" style="display: none;">
-      <div class="staff-badge">
-        <span id="staffSessionName">USER</span> • PORTAL DE MENSAJES
+  <header class="global-header" id="globalHeader" style="display: none;">
+      <div class="top-left-status" id="staffStatusBar">
+          <div class="staff-badge">
+            <span id="staffSessionName">USER</span> • PORTAL DE MENSAJES
+          </div>
+          <div class="timer-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span id="shiftTimer">00:00:00</span>
+          </div>
       </div>
-      <div class="timer-badge">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        <span id="shiftTimer">00:00:00</span>
-      </div>
-  </div>
 
-  <div class="control-container" id="controlPanel" style="display: none;">
-      <button class="interface-control-item pill-codes-control" onclick="toggleCodesPanel()">🔑 CÓDIGOS</button>
-      <button class="interface-control-item circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema"></button>
-      <button class="interface-control-item circle-control" onclick="cerrarSesionStaff()" aria-label="Cerrar Sesión" style="color: var(--ios-red);">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-      </button>
-  </div>
+      <div class="header-search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar respuesta rápida...">
+      </div>
+
+      <div class="control-container" id="controlPanel">
+          <button class="interface-control-item pill-codes-control" onclick="toggleCodesPanel()">🔑 CÓDIGOS</button>
+          <button class="interface-control-item circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema"></button>
+          <button class="interface-control-item circle-control" onclick="cerrarSesionStaff()" aria-label="Cerrar Sesión" style="color: var(--ios-red);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          </button>
+      </div>
+  </header>
 
   <div class="codes-overlay" id="codesOverlay" onclick="toggleCodesPanel()">
       <div class="codes-sheet" onclick="event.stopPropagation()">
@@ -395,7 +853,7 @@
               <input type="text" id="searchCodesInput" class="search-input" placeholder="🔍 Buscar por asunto o etiqueta..." oninput="filtrarCodigosInternos()">
           </div>
           <div class="codes-scroll-area" id="codesScrollArea">
-              </div>
+          </div>
       </div>
   </div>
 
@@ -426,10 +884,6 @@
   </div>
 
   <div class="main-workspace" id="mainWorkspace">
-      <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="Buscar respuesta rápida...">
-      </div>
-
       <div id="header-container" class="header-container"></div>
       <div id="grid-container" class="card-container"></div>
   </div>
@@ -452,7 +906,11 @@
     let isFetchingCodes = false; 
     window.currentCodesStock = []; 
 
-    function haptic() { if (navigator.vibrate) navigator.vibrate(15); }
+    function haptic() { 
+      if (navigator.vibrate) {
+        navigator.vibrate(15); 
+      }
+    }
 
     function toggleTheme() {
         haptic();
@@ -466,6 +924,7 @@
     function updateThemeIcon(theme) {
         const btn = document.getElementById('theme-toggle');
         if (!btn) return;
+        
         if (theme === 'light') {
             btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
         } else {
@@ -498,10 +957,14 @@
     }
 
     function cargarCodigosDesdeSheets(silencioso = false) {
-        if (isFetchingCodes) return; 
+        if (isFetchingCodes) {
+          return; 
+        }
         isFetchingCodes = true;
 
-        if (!silencioso && window.cyberCodesTimeout) clearTimeout(window.cyberCodesTimeout);
+        if (!silencioso && window.cyberCodesTimeout) {
+          clearTimeout(window.cyberCodesTimeout);
+        }
         
         if (!silencioso) {
             window.cyberCodesTimeout = setTimeout(function() {
@@ -514,7 +977,9 @@
         }
 
         const oldScript = document.getElementById('cyber_jsonp_node');
-        if (oldScript) oldScript.remove();
+        if (oldScript) {
+          oldScript.remove();
+        }
 
         const scriptElement = document.createElement('script');
         scriptElement.id = 'cyber_jsonp_node';
@@ -525,10 +990,14 @@
 
     window.procesarCodigosSheets = function(res) {
         isFetchingCodes = false; 
-        if (window.cyberCodesTimeout) clearTimeout(window.cyberCodesTimeout);
+        if (window.cyberCodesTimeout) {
+          clearTimeout(window.cyberCodesTimeout);
+        }
 
         const oldScript = document.getElementById('cyber_jsonp_node');
-        if (oldScript) oldScript.remove();
+        if (oldScript) {
+          oldScript.remove();
+        }
 
         const container = document.getElementById('codesScrollArea');
         if (res && res.status === "success") {
@@ -576,7 +1045,9 @@
     function copiarMensajeRapidoGmail(btn, index) {
         haptic();
         const item = window.currentCodesStock[index];
-        if (!item) return;
+        if (!item) {
+          return;
+        }
         
         navigator.clipboard.writeText(item.copiadoRapido).then(function() {
             const originalText = btn.innerHTML;
@@ -617,7 +1088,9 @@
             localStorage.setItem('cyber_shift_start_time', startTime);
         }
 
-        if (timerInterval) clearInterval(timerInterval);
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
 
         timerInterval = setInterval(function() {
             let elapsed = Date.now() - parseInt(startTime);
@@ -637,7 +1110,9 @@
 
     function ejecutarNotificacionDeCorreo(vendedor, tipoAccion, callbackFinal) {
         if (!GOOGLE_SCRIPT_URL) {
-            if (callbackFinal) callbackFinal();
+            if (callbackFinal) {
+              callbackFinal();
+            }
             return;
         }
         
@@ -647,12 +1122,18 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "notificarCorreo", user: vendedor, tipo: tipoAccion })
         })
-        .then(function() { if (callbackFinal) callbackFinal(); })
-        .catch(function() { if (callbackFinal) callbackFinal(); });
+        .then(function() { 
+          if (callbackFinal) callbackFinal(); 
+        })
+        .catch(function() { 
+          if (callbackFinal) callbackFinal(); 
+        });
     }
 
     function validateStaffAccess(e) {
-      if (e) e.preventDefault(); 
+      if (e) {
+        e.preventDefault(); 
+      }
       haptic();
       
       const userInput = document.getElementById('staffUser').value.toUpperCase().trim();
@@ -663,7 +1144,6 @@
       if (staffDatabase[userInput] && staffDatabase[userInput] === passInput) {
         errorToast.style.display = 'none';
         
-        // TRUCO PARA GOOGLE CHROME: Al forzar el 'blur', el navegador detecta que el usuario terminó y lanza el gestor de contraseñas
         document.getElementById('staffUser').blur();
         document.getElementById('staffPass').blur();
         
@@ -671,8 +1151,8 @@
 
         document.getElementById('loginOverlay').classList.add('hidden');
         document.getElementById('mainWorkspace').style.display = 'flex';
-        document.getElementById('controlPanel').style.display = 'flex';
-        document.getElementById('staffStatusBar').style.display = 'flex';
+        
+        document.getElementById('globalHeader').style.display = 'flex';
         document.getElementById('staffSessionName').innerText = userInput;
         
         sessionStorage.setItem('active_staff', userInput);
@@ -693,14 +1173,18 @@
       const usuarioActivo = sessionStorage.getItem('active_staff') || "STAFF";
       
       const cerrarBoton = document.querySelector('.control-container button:last-child');
-      if (cerrarBoton) cerrarBoton.style.opacity = "0.5";
+      if (cerrarBoton) {
+        cerrarBoton.style.opacity = "0.5";
+      }
 
       ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", function() {
           sessionStorage.removeItem('active_staff');
           localStorage.removeItem('cyber_saved_staff'); 
           localStorage.removeItem('cyber_shift_start_time');
+          
           if (timerInterval) clearInterval(timerInterval);
           if (autoRefreshCodesInterval) clearInterval(autoRefreshCodesInterval);
+          
           location.reload();
       });
     }
@@ -721,9 +1205,10 @@
             
             document.getElementById('loginOverlay').classList.add('hidden');
             document.getElementById('mainWorkspace').style.display = 'flex';
-            document.getElementById('controlPanel').style.display = 'flex';
-            document.getElementById('staffStatusBar').style.display = 'flex';
+            
+            document.getElementById('globalHeader').style.display = 'flex';
             document.getElementById('staffSessionName').innerText = user;
+            
             inicializarWorkspace();
         }
     });
@@ -737,513 +1222,143 @@
     const elementosGrid = [
       {
         titulo: 'ADS',
-        texto: `¡Hola! 👋 ¡Bienvenido a Cybernet! 🎬
-
-Aprovecha nuestra *SUPER PROMO* de hoy:
-
-🔥 *2 PLATAFORMAS POR SOLO $9.900:*
-_(Disney+ estandar, Hbo Max, Paramount+, Vix+, Crunchyroll o Plex)._
-
-🥳 *AMAZON PRIME VIDEO:* por hoy a tan solo $ 9.900
-
-🎁 *OFERTA DE BIENVENIDA:*
-📺 *NETFLIX PREMIUM:* Solo por hoy a $12.500.
-
-¿Cuál te activo ahora mismo?`
+        texto: `¡Hola! 👋 ¡Bienvenido a Cybernet! 🎬\n\nAprovecha nuestra *SUPER PROMO* de hoy:\n\n🔥 *2 PLATAFORMAS POR SOLO $9.900:*\n_(Disney+ estandar, Hbo Max, Paramount+, Vix+, Crunchyroll o Plex)._\n\n🥳 *AMAZON PRIME VIDEO:* por hoy a tan solo $ 9.900\n\n🎁 *OFERTA DE BIENVENIDA:*\n📺 *NETFLIX PREMIUM:* Solo por hoy a $12.500.\n\n¿Cuál te activo ahora mismo?`
       },
       {
         titulo: 'NEQUI',
-        texto: `¡Realiza tu pago rápido, fácil y seguro!
-
-💜 Nequi o Daviplata: 3015156037
-
-📸 Envía la captura del comprobante y tu servicio quedará activo al instante 🚀`
+        texto: `¡Realiza tu pago rápido, fácil y seguro!\n\n💜 Nequi o Daviplata: 3015156037\n\n📸 Envía la captura del comprobante y tu servicio quedará activo al instante 🚀`
       },
       {
         titulo: 'COMBOS',
-        texto: `💻 ¡Arma tu combo streaming a tu medida con *_NETFLIX PREMIUM!_* 🎉📺
-
-🔥 *_Plataformas disponibles para escoger:_*
-Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV
-
-0️⃣ Netflix solo → 💰 *_$14.500_* 😔 _(Opción Tradicional)_
-
-1️⃣ Netflix + 1 plataforma → 💰 *_$20.000_* _¡TOP VENTAS!_ 🔥🏆
-2️⃣ Netflix + 2 pantallas → 💰 *_$26.000_*
-3️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL Cet_* 🚀✨
-4️⃣ Netflix + 3 pantallas → 💰 *_$36.000_*
-5️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎
-6️⃣ Netflix + 4 pantallas → 💰 *_$46.000_*
-7️⃣ Netflix + 5 pantallas → 💰 *_$55.000_*
-
-8️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_
-9️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_
-🔟 Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_
-1️⃣1️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_
-
-*Netflix* cuenta con una página de códigos disponible las 24 horas, los 7 días de la semana.`
+        texto: `💻 ¡Arma tu combo streaming a tu medida con *_NETFLIX PREMIUM!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n\n0️⃣ Netflix solo → 💰 *_$14.500_* 😔 _(Opción Tradicional)_\n\n1️⃣ Netflix + 1 plataforma → 💰 *_$20.000_* _¡TOP VENTAS!_ 🔥🏆\n2️⃣ Netflix + 2 pantallas → 💰 *_$26.000_*\n3️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL Cet_* 🚀✨\n4️⃣ Netflix + 3 pantallas → 💰 *_$36.000_*\n5️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎\n6️⃣ Netflix + 4 pantallas → 💰 *_$46.000_*\n7️⃣ Netflix + 5 pantallas → 💰 *_$55.000_*\n\n8️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_\n9️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_\n🔟 Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_\n1️⃣1️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_\n\n*Netflix* cuenta con una página de códigos disponible las 24 horas, los 7 días de la semana.`
       },
       {
         titulo: 'COMBOS SIN NETFLIX',
-        texto: `💻 ¡Arma tu combo streaming a tu medida con *_Sin Netflix!_* 🎉📺
-
-🔥 *_Plataformas disponibles para escoger:_*
-Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV
- 
-1️⃣ 2 Plataformas = 💰 *_$13.000_* 😱 
-2️⃣ 3 Plataformas = 💰 *_$16.000_* 😱 
-3️⃣ 4 Plataformas = 💰 *_$18.000_* 😱 
-
-4️⃣ Disney Premium + 1 plataforma =  💰 *_$20.000_* 😱
-5️⃣ Disney Premium + 2 plataformas =  💰 *_$22.000_* 😱
-6️⃣ Disney Premium + 3 plataformas =  💰 *_$24.000_* 😱`
+        texto: `💻 ¡Arma tu combo streaming a tu medida con *_Sin Netflix!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n \n1️⃣ 2 Plataformas = 💰 *_$13.000_* 😱 \n2️⃣ 3 Plataformas = 💰 *_$16.000_* 😱 \n3️⃣ 4 Plataformas = 💰 *_$18.000_* 😱 \n\n4️⃣ Disney Premium + 1 plataforma =  💰 *_$20.000_* 😱\n5️⃣ Disney Premium + 2 plataformas =  💰 *_$22.000_* 😱\n6️⃣ Disney Premium + 3 plataformas =  💰 *_$24.000_* 😱`
       },
       {
         titulo: 'INDIVIDUALES',
-        texto: `💻✨ *Plataformas Individuales – Cybernet* 🚀🎬  
-📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 📡 Vix → *$8.500*
-⚽ Metegol → *$15.000* 🎨 Canva Pro (1 mes) → *$20.000*
-🎶 Spotify (1 mes) → *$14.000* 🎶 YouTube Premium (1 mes) → *$14.000*
-🎶 Deezer (1 mes) → *$12.000* 🎬 *Diferencias Disney+* 💙  
-👉 Estándar →  📺 Con anuncios, sin ESPN
-👉 Premium →  🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil
-
-💜 *En Cybernet no hay trucos,* solo entertainment real y herramientas para tu día a día 🍿✨`
+        texto: `💻✨ *Plataformas Individuales – Cybernet* 🚀🎬  \n📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 📡 Vix → *$8.500*\n⚽ Metegol → *$15.000* 🎨 Canva Pro (1 mes) → *$20.000*\n🎶 Spotify (1 mes) → *$14.000* 🎶 YouTube Premium (1 mes) → *$14.000*\n🎶 Deezer (1 mes) → *$12.000* 🎬 *Diferencias Disney+* 💙  \n👉 Estándar →  📺 Con anuncios, sin ESPN\n👉 Premium →  🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil\n\n💜 *En Cybernet no hay trucos,* solo entertainment real y herramientas para tu día a día 🍿✨`
       },
       {
         titulo: 'GRACIAS',
-        texto: `¡De nada! Es un verdadero gusto atenderte. 😊🙌
-
-Solo paso a recordarte que, ante cualquier duda ❓ o inconveniente ⚠️ que presentes con tu servicio, ¡no dudes en escribirme de inmediato! 📲⚡ Estoy aquí para darte una solución rápida 🛠️ y que sigas disfrutando de toda tu programación favorita sin interrupciones. 📺🍿🎬`
+        texto: `¡De nada! Es un verdadero gusto atenderte. 😊🙌\n\nSolo paso a recordarte que, ante cualquier duda ❓ o inconveniente ⚠️ que presentes con tu servicio, ¡no dudes en escribirme de inmediato! 📲⚡ Estoy aquí para darte una solución rápida 🛠️ y que sigas disfrutando de toda tu programación favorita sin interrupciones. 📺🍿🎬`
       },
       {
         titulo: 'DIFERENCIAS DISNEY',
-        texto: `🎬 *_Diferencias de Disney+_* 💙✨
-👉 *_Estándar_*
-- 📺 Incluye anuncios
-- 🚫 No tiene ESPN
-
-👉 *_Premium_*
-- 🚫 Sin anuncios
-- 🏆 ESPN incluido
-- 🔒 Bloqueo de perfil disponible
-
-📲 Tú decides cómo disfrutar tu Disney+ favorito 🍿🌟`
+        texto: `🎬 *_Diferencias de Disney+_* 💙✨\n👉 *_Estándar_*\n- 📺 Incluye anuncios\n- 🚫 No tiene ESPN\n\n👉 *_Premium_*\n- 🚫 Sin anuncios\n- 🏆 ESPN incluido\n- 🔒 Bloqueo de perfil disponible\n\n📲 Tú decides cómo disfrutar tu Disney+ favorito 🍿🌟`
       },
       {
         titulo: 'SIGNIFICADO NETFLIX PREMIUM',
-        texto: `🍿 *NETFLIX PREMIUM* 🎬
-
-💎 *Máxima Calidad:* Resolución 4K Ultra HD + HDR.
-🎧 *Audio Espacial:* Sound omnipresente tipo cine.
-📥 *Descargas:* Mira tus series favoritas sin internet.
-🚫 *Sin Anuncios:* Disfruta todo el catálogo sin cortes.
-
-¡La experiencia completa de Netflix en tus manos! ✨🚀`
+        texto: `🍿 *NETFLIX PREMIUM* 🎬\n\n💎 *Máxima Calidad:* Resolución 4K Ultra HD + HDR.\n🎧 *Audio Espacial:* Sound omnipresente tipo cine.\n📥 *Descargas:* Mira tus series favoritas sin internet.\n🚫 *Sin Anuncios:* Disfruta todo el catálogo sin cortes.\n\n¡La experiencia completa de Netflix en tus manos! ✨🚀`
       },
       {
         titulo: 'COOKIES',
-        texto: `📲 *Instrucciones para acceder a la cuenta Netflix* 🎬✨
-1️⃣ Ingresa este enlace en el navegador de tu preferencia 👉 https://netflix.com/clearcookies
-2️⃣ Cuando cargue la página, escribe el correo en el campo Email ✉️
-3️⃣ Luego pulsa en *Comenzar* ▶️
-4️⃣ Después ingresa la contraseña de la cuenta 🔑
-5️⃣ Finalmente, dale en *Iniciar sesión* ✅ … ¡y listo! 🍿📺`
+        texto: `📲 *Instrucciones para acceder a la cuenta Netflix* 🎬✨\n1️⃣ Ingresa este enlace en el navegador de tu preferencia 👉 https://netflix.com/clearcookies\n2️⃣ Cuando cargue la página, escribe el correo en el campo Email ✉️\n3️⃣ Luego pulsa en *Comenzar* ▶️\n4️⃣ Después ingresa la contraseña de la cuenta 🔑\n5️⃣ Finalmente, dale en *Iniciar sesión* ✅ … ¡y listo! 🍿📺`
       },
       {
         titulo: 'PROBLEMAS',
-        texto: `🔄📺 *¿Tu Smart TV no carga bien o falla?* 😅  
-¡No te preocupes! Aquí tienes dos formas rápidas de solucionarlo 💪✨
-
-⚙️ *Opción 1: Reinicio rápido* 1️⃣ Desconéctala por 1 minuto 🔌  
-2️⃣ Con el TV apagado, presiona Power 5 seg 🔘  
-(Si no tiene botón, déjala desconectada 3 min)  
-3️⃣ Conéctala y enciéndela ✨  
-4️⃣ Intenta acceder a tu cuenta 📲  
-✅ Soluciona problemas de carga o inicio 🛠️
-
-🌐 *Opción 2: Reinicio de red* 1️⃣ Apaga tu Smart TV 📴  
-2️⃣ Desconecta módem y router por 30 seg ⏱️  
-3️⃣ Conecta el modem y espera 💡  
-4️⃣ Luego el router and espera 🔁  
-5️⃣ Enciende el TV y prueba 🌟  
-✅ Mejora conexión y evita errores de red 📶
-
-💜 *Si el problema persiste, escríbeme y te guío paso a paso* 🚀🎬`
+        texto: `🔄📺 *¿Tu Smart TV no carga bien o falla?* 😅  \n¡No te preocupes! Aquí tienes dos formas rápidas de solucionarlo 💪✨\n\n⚙️ *Opción 1: Reinicio rápido* 1️⃣ Desconéctala por 1 minuto 🔌  \n2️⃣ Con el TV apagado, presiona Power 5 seg 🔘  \n(Si no tiene botón, déjala desconectada 3 min)  \n3️⃣ Conéctala y enciéndela ✨  \n4️⃣ Intenta acceder a tu cuenta 📲  \n✅ Soluciona problemas de carga o inicio 🛠️\n\n🌐 *Opción 2: Reinicio de red* 1️⃣ Apaga tu Smart TV 📴  \n2️⃣ Desconecta módem y router por 30 seg ⏱️  \n3️⃣ Conecta el modem y espera 💡  \n4️⃣ Luego el router and espera 🔁  \n5️⃣ Enciende el TV y prueba 🌟  \n✅ Mejora conexión y evita errores de red 📶\n\n💜 *Si el problema persiste, escríbeme y te guío paso a paso* 🚀🎬`
       },
       {
         titulo: 'PAG PARA CODIGOS',
-        texto: `🎬 *¡TUTORIAL RÁPIDO: Cómo usar nuestro Centro de Códigos!* 🚀
-
-Hola!!!! te enseño a usar nuestra nueva herramienta para que obtengas tus códigos al instante y sin esperas.
-
-🌐 _*LINK OFICIAL:*_ www.cybernetsp.com
-
-_*PASOS PARA TU SOLICITUD:*_
-
-1️⃣ _*Ingresa tu número:*_ Al entrar, la página te pedirá el celular con el que realizaste la compra (por ejemplo, este número desde el que me escribes). Dale a "Continuar".
-
-2️⃣ _*Elige tu Plataforma:*_ Selecciona Netflix 🔴 o Disney Premium 🔵.
-
-3️⃣ Si eliges _*NETFLIX*_, tienes 3 opciones:
-
-🔑 Código de Inicio de Sesión: Para entrar por primera vez.
-
-✈️ Código 'Estoy de Viaje': Para saltar el bloqueo de hogar.
-
-📧 Enlace de Inicio (Aprobación): Para aprobar el acceso vía link.
-
-4️⃣ *_Busca tu cuenta:_*
-Ingresa el correo de la cuenta (debe terminar en @cybernetsp.com).
-Dale clic en "Buscar en el sistema".
-
-✅ ¡Y LISTO! En segundos el sistema te entrega el código o el link de acceso en pantalla. ⚡
-
-_*PARA DISNEY PREMIUM*_: Es aún más directo. Eliges Disney, pones el correo terminado en @cybernetsp.com y ¡listo! Tienes tu código de inmediato.
-
-Cualquier duda, el botón de Soporte está integrado en la web. ¡A sacarle el máximo provecho! 🔥🎬`
+        texto: `🎬 *¡TUTORIAL RÁPIDO: Cómo usar nuestro Centro de Códigos!* 🚀\n\nHola!!!! te enseño a usar nuestra nueva herramienta para que obtengas tus códigos al instante y sin esperas.\n\n🌐 _*LINK OFICIAL:*_ www.cybernetsp.com\n\n_*PASOS PARA TU SOLICITUD:*_\n\n1️⃣ _*Ingresa tu número:*_ Al entrar, la página te pedirá el celular con el que realizaste la compra (por ejemplo, este número desde el que me escribes). Dale a "Continuar".\n\n2️⃣ _*Elige tu Plataforma:*_ Selecciona Netflix 🔴 o Disney Premium 🔵.\n\n3️⃣ Si eliges _*NETFLIX*_, tienes 3 opciones:\n\n🔑 Código de Inicio de Sesión: Para entrar por primera vez.\n\n✈️ Código 'Estoy de Viaje': Para saltar el bloqueo de hogar.\n\n📧 Enlace de Inicio (Aprobación): Para aprobar el acceso vía link.\n\n4️⃣ *_Busca tu cuenta:_*\nIngresa el correo de la cuenta (debe terminar en @cybernetsp.com).\nDale clic en "Buscar en el sistema".\n\n✅ ¡Y LISTO! En segundos el sistema te entrega el código o el link de acceso en pantalla. ⚡\n\n_*PARA DISNEY PREMIUM*_: Es aún más directo. Eliges Disney, pones el correo terminado en @cybernetsp.com y ¡listo! Tienes tu código de inmediato.\n\nCualquier duda, el botón de Soporte está integrado en la web. ¡A sacarle el máximo provecho! 🔥🎬`
       },
       {
         titulo: 'INSTALAR PAG',
-        texto: `🌐 *Cómo instalar Cybernet en tu celular (como una App)*
-
-Si quieres acceder rápidamente a tus servicios de Cybernet sin tener que abrir el navegador cada vez, sigue estos sencillos pasos:
-
-🤖 *Para usuarios de Android (Google Chrome)*
-Abre el navegador Chrome and entra a: www.cybernetsp.com
-
-1️⃣ Toca los tres puntos verticales (⋮) en la esquina superior derecha.
-2️⃣ Selecciona la opción: *"Instalar aplicación"* o *"Agregar a la pantalla principal".*
-*IMPORTANTE:* Cuando te pida el nombre, escribe *"Cybernet Códigos"*.
-3️⃣ Confirma tocando en "Instalar" o "Agregar".
-
-🍎 *Para usuarios de iPhone (Safari)*
-Abre el navegador Safari and entra a: www.cybernetsp.com
-
-1️⃣ Toca el icono de Compartir (el cuadrado con una flecha hacia arriba) en la parte inferior.
-2️⃣ Desliza hacia arriba y selecciona: *"Agregar al inicio".*
-*IMPORTANTE:* Verás un cuadro de texto para el nombre; bórralo y escribe *"Cybernet Códigos"*.
-3️⃣ Presiona *"Agregar"* en la esquina superior derecha.
-
-✨ *¿Por qué instalarla así?*
-*Ahorro de espacio:* No ocupa memoria extra en tu teléfono como una app tradicional.
-*Comodidad:* Entras directamente con un toque desde tu pantalla de inicio.
-
-*Tip:* Coloca el icono en tu pantalla principal para que siempre tengas tus códigos a la mano cuando los necesites.`
+        texto: `🌐 *Cómo instalar Cybernet en tu celular (como una App)*\n\nSi quieres acceder rápidamente a tus servicios de Cybernet sin tener que abrir el navegador cada vez, sigue estos sencillos pasos:\n\n🤖 *Para usuarios de Android (Google Chrome)*\nAbre el navegador Chrome and entra a: www.cybernetsp.com\n\n1️⃣ Toca los tres puntos verticales (⋮) en la esquina superior derecha.\n2️⃣ Selecciona la opción: *"Instalar aplicación"* o *"Agregar a la pantalla principal".*\n*IMPORTANTE:* Cuando te pida el nombre, escribe *"Cybernet Códigos"*.\n3️⃣ Confirma tocando en "Instalar" o "Agregar".\n\n🍎 *Para usuarios de iPhone (Safari)*\nAbre el navegador Safari and entra a: www.cybernetsp.com\n\n1️⃣ Toca el icono de Compartir (el cuadrado con una flecha hacia arriba) en la parte inferior.\n2️⃣ Desliza hacia arriba y selecciona: *"Agregar al inicio".*\n*IMPORTANTE:* Verás un cuadro de texto para el nombre; bórralo y escribe *"Cybernet Códigos"*.\n3️⃣ Presiona *"Agregar"* en la esquina superior derecha.\n\n✨ *¿Por qué instalarla así?*\n*Ahorro de espacio:* No ocupa memoria extra en tu teléfono como una app tradicional.\n*Comodidad:* Entras directamente con un toque desde tu pantalla de inicio.\n\n*Tip:* Coloca el icono en tu pantalla principal para que siempre tengas tus códigos a la mano cuando los necesites.`
       },
       {
         titulo: 'PRECIO NETFLIX',
-        texto: `🎬✨ *NETFLIX PREMIUM* 💙🍿  
-📺 Disfruta tus series y pelis favoritas 🔥  
-
-1️⃣ 👉 1 Pantalla 💻 → 💵 $14.500  
-2️⃣ 👉 2 Pantallas 📱💻 → 💵 $26.000  
-3️⃣ 👉 3 Pantallas 📱💻📺 → 💵 $36.000  
-4️⃣ 👉 4 Pantallas 📱💻📺🖥️ → 💵 $46.000  
-5️⃣ 👉 5 Pantallas 📱💻📺🖥️📲 → 💵 $55.000  
-
-🚀 Sin cortes, sin límites, ¡solo diversión! 🎉`
+        texto: `🎬✨ *NETFLIX PREMIUM* 💙🍿  \n📺 Disfruta tus series y pelis favoritas 🔥  \n\n1️⃣ 👉 1 Pantalla 💻 → 💵 $14.500  \n2️⃣ 👉 2 Pantallas 📱💻 → 💵 $26.000  \n3️⃣ 👉 3 Pantallas 📱💻📺 → 💵 $36.000  \n4️⃣ 👉 4 Pantallas 📱💻📺🖥️ → 💵 $46.000  \n5️⃣ 👉 5 Pantallas 📱💻📺🖥️📲 → 💵 $55.000  \n\n🚀 Sin cortes, sin límites, ¡solo diversión! 🎉`
       },
       {
         titulo: 'PRECIO DISNEY',
-        texto: `🎬 *Disney+ disponible* 💙  
-👉 *Estándar* → $8.500  
-📺 Con anuncios, sin ESPN
-
-👉 *Premium* → $15.000  
-🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil
-
-📲 *Tú eliges cómo disfrutar tu Disney+ favorito* 🍿✨`
+        texto: `🎬 *Disney+ disponible* 💙  \n👉 *Estándar* → $8.500  \n📺 Con anuncios, sin ESPN\n\n👉 *Premium* → $15.000  \n🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil\n\n📲 *Tú eliges cómo disfrutar tu Disney+ favorito* 🍿✨`
       },
       {
         titulo: 'IPTV',
-        texto: `📺✨ Servicio IPTV – Cybernet
-
-El servicio de IPTV te ofrece más de 5.000 canales de TV en vivo, incluyendo contenido deportivo como ESPN, WIN Sports y mucho más 🏆🎬
-
-Para disfrutarlo sin interrupciones, asegúrate de contar con mínimo 10 Mb de internet estables 🌐⚡
-
-📌 Pasos para configurar tu IPTV, amig@:
-1️⃣ Play List Name: ingresa el Any Name que te proporcionamos.
-2️⃣ Usuario: escribe el usuario que recibiste.
-3️⃣ Clave/Contraseña: introduce la contraseña asignada.
-4️⃣ URL: copia y pega la URL exactamente como te la enviamos.
-5️⃣ Confirmar: presiona Enter para acceder.
-6️⃣ ¡Listo! Disfruta de TV en vivo, películas y series al instante 📡🍿
-
-📱 Instalación según tu dispositivo:
-📲 Android
-Descarga la app IPTV Smarters desde este enlace:
-👉 Descargar aquí
-
-🍎 iOS (iPhone / iPad)
-👉 Descargar aquí
-
-💻 PC (Windows)
-👉 Descargar aquí
-
-📺 Smart TV
-Te recomendamos instalar IPTV Smarters Pro para una mejor experiencia visual y estabilidad 👌
-
-💜 Gracias por elegir Cybernet, amig@.
-Tu acceso directo al entretenimiento sin límites 🚀📡✨`
+        texto: `📺✨ Servicio IPTV – Cybernet\n\nEl servicio de IPTV te ofrece más de 5.000 canales de TV en vivo, incluyendo contenido deportivo como ESPN, WIN Sports y mucho más 🏆🎬\n\nPara disfrutarlo sin interrupciones, asegúrate de contar con mínimo 10 Mb de internet estables 🌐⚡\n\n📌 Pasos para configurar tu IPTV, amig@:\n1️⃣ Play List Name: ingresa el Any Name que te proporcionamos.\n2️⃣ Usuario: escribe el usuario que recibiste.\n3️⃣ Clave/Contraseña: introduce la contraseña asignada.\n4️⃣ URL: copia y pega la URL exactamente como te la enviamos.\n5️⃣ Confirmar: presiona Enter para acceder.\n6️⃣ ¡Listo! Disfruta de TV en vivo, películas y series al instante 📡🍿\n\n📱 Instalación según tu dispositivo:\n📲 Android\nDescarga la app IPTV Smarters Pro desde este enlace:\n👉 Descargar aquí\n\n🍎 iOS (iPhone / iPad)\n👉 Descargar aquí\n\n💻 PC (Windows)\n👉 Descargar aquí\n\n📺 Smart TV\nTe recomendamos instalar IPTV Smarters Pro para una mejor experiencia visual y estabilidad 👌\n\n💜 Gracias por elegir Cybernet, amig@.\nTu acceso directo al entretenimiento sin límites 🚀📡✨`
       },
       {
         titulo: 'ANUNCIO',
-        texto: `💬 *¡Tranquil@, amig@!* 😎  
-Ese mensaje es solo una notificación temporal 📲  
-No hay nada de qué preocuparse 😉
-
-✅ Toca *ACEPTAR* o *AHORA NO* y listo  
-🚀 Tu cuenta seguirá funcionando sin interrupciones 🎬
-
-💜 *Relájate y disfruta* En Cybernet todo fluye sin estrés ni complicaciones 🙌🍿`
+        texto: `💬 *¡Tranquil@, amig@!* 😎  \nEse mensaje es solo una notificación temporal 📲  \nNo hay nada de qué preocuparse 😉\n\n✅ Toca *ACEPTAR* o *AHORA NO* y listo  \n🚀 Tu cuenta seguirá funcionando sin interrupciones 🎬\n\n💜 *Relájate y disfruta* En Cybernet todo fluye sin estrés ni complicaciones 🙌🍿`
       },
       {
         titulo: 'DISTRIBUIDORES',
-        texto: `💼✨ *¡Precios nuevos para distribuidores!* 🚀 Aumenta tus ganancias y lleva tu negocio al siguiente nivel 💰
-
-📢 *Info clave:* 1️⃣ Recarga mínima: *$50.000* 💵  
-2️⃣ El saldo se descuenta por cada venta 📲  
-3️⃣ Identifica cada cuenta con el nombre del cliente 📋
-
-🌟 *Planes de 1 pantalla:* 🎬 Netflix – $10.000  
-🎭 Max – $3.000  
-📺 Apple TV – $3.000  
-🏰 Disney+ Premium – $10.000  
-🎥 Disney+ Estándar – $4.000  
-🍿 Prime Video Original – $5.000  
-🌸 Crunchyroll – $3.000  
-🎮 Plex – $3.000  
-🎞️ Paramount+ – $3.000  
-🎞️ MUBI – $3.000  
-⚽ Metegol – $12.000  
-📡 Vix – $3.000  
-📺 IPTV – $7.000  
-🎨 Canva – $10.000  
-📺 YouTube (1 mes) – $10.000  
-🎶 Spotify (1 mes) – $14.000 
-🎶 YouTube Premium (1 mes) – $14.000
-🎶 Spotify (1 mes Distris) – $10.000
-🎶 Deezer (1 mes) – $8.000
-
-📌 *Aclaraciones:* 🏆 Disney+ Premium incluye Star+ y ESPN  
-👀 Disney+ Estándar incluye Star+, sin ESPN
-
-🔥💸 *Aprovecha estos precios preferenciales y multiplica tus ingresos* 📲 Ajusta tus valores de venta y obtén excelentes beneficios 🚀`
+        texto: `💼✨ *¡Precios nuevos para distribuidores!* 🚀 Aumenta tus ganancias y lleva tu negocio al siguiente nivel 💰\n\n📢 *Info clave:* 1️⃣ Recarga mínima: *$50.000* 💵  \n2️⃣ El saldo se descuenta por cada venta 📲  \n3️⃣ Identifica cada cuenta con el nombre del cliente 📋\n\n🌟 *Planes de 1 pantalla:* 🎬 Netflix – $10.000  \n🎭 Max – $3.000  \n📺 Apple TV – $3.000  \n🏰 Disney+ Premium – $10.000  \n🎥 Disney+ Estándar – $4.000  \n🍿 Prime Video Original – $5.000  \n🌸 Crunchyroll – $3.000  \n🎮 Plex – $3.000  \n🎞️ Paramount+ – $3.000  \n🎞️ MUBI – $3.000  \n⚽ Metegol – $12.000  \n📡 Vix – $3.000  \n📺 IPTV – $7.000  \n🎨 Canva – $10.000  \n📺 YouTube (1 mes) – $10.000  \n🎶 Spotify (1 mes) – $14.000 \n🎶 YouTube Premium (1 mes) – $14.000\n🎶 Spotify (1 mes Distris) – $10.000\n🎶 Deezer (1 mes) – $8.000\n\n📌 *Aclaraciones:* 🏆 Disney+ Premium incluye Star+ y ESPN  \n👀 Disney+ Estándar incluye Star+, sin ESPN\n\n🔥💸 *Aprovecha estos precios preferenciales y multiplica tus ingresos* 📲 Ajusta tus valores de venta y obtén excelentes beneficios 🚀`
       },
       {
         titulo: 'FOTO DEL PROBLEMA',
-        texto: `💬 *Amig@*, para ayudarte rápido solo necesito esto 👇
-
-📸 *Una foto o captura del error* (para ver qué aparece en tu pantalla)  
-📧 *El correo que usas en tu cuenta* (así la identifico fácil)
-
-👉 *¿No puedes enviar imagen?* No pasa nada: descríbeme con tus palabras lo que ves en pantalla 📝
-
-🔧 Con eso ya puedo revisar el problema y darte una solución rápida 🚀🙌  
-🎬 ¡Estoy aquí para que todo funcione sin complicaciones!`
+        texto: `💬 *Amig@*, para ayudarte rápido solo necesito esto 👇\n\n📸 *Una foto o captura del error* (para ver qué aparece en tu pantalla)  \n📧 *El correo que usas en tu cuenta* (así la identifico fácil)\n\n👉 *¿No puedes enviar imagen?* No pasa nada: descríbeme con tus palabras lo que ves en pantalla 📝\n\n🔧 Con eso ya puedo revisar el problema y darte una solución rápida 🚀🙌  \n🎬 ¡Estoy aquí para que todo funcione sin complicaciones!`
       },
       {
         titulo: 'TV NETFLIX',
-        texto: `📺 *¿Necesitas actualizar Netflix en tu TV?* 😄  
-Sigue estos pasos sencillos para que todo funcione perfecto 👇
-
-1️⃣ En tu televisor selecciona *Usar teléfono* 2️⃣ Envíame el *código de 8 dígitos* 📝 (escrito, no en captura)  
-3️⃣ Mantén la pantalla encendida mientras activamos tu acceso 🔓
-
-⚠️ *Importante:* solo un dispositivo a la vez para evitar bloqueos o desconexiones 🚫
-
-✅ ¡Y listo! Tu cuenta quedará activa en segundos 🍿🚀`
+        texto: `📺 *¿Necesitas actualizar Netflix en tu TV?* 😄  \nSigue estos pasos sencillos para que todo funcione perfecto 👇\n\n1️⃣ En tu televisor selecciona *Usar teléfono* 2️⃣ Envíame el *código de 8 dígitos* 📝 (escrito, no en captura)  \n3️⃣ Mantén la pantalla encendida mientras activamos tu acceso 🔓\n\n⚠️ *Importante:* solo un dispositivo a la vez para evitar bloqueos o desconexiones 🚫\n\n✅ ¡Y listo! Tu cuenta quedará activa en segundos 🍿🚀`
       },
       {
         titulo: 'ESTOY DE VIAJE NETFLIX',
-        texto: `🔓 *Acceso a Netflix en tu TV* 🎬📺
-
-El mensaje que ves es parte de la nueva verificación de Netflix. No es un error de tu cuenta, solo sigue estos pasos para activarla:
-
-1️⃣ Selecciona: *ESTA ES MI CUENTA*
-2️⃣ Pulsa en: *ESTOY DE VIAJE*
-3️⃣ Gestión: Después de eso envíame el correo o la cuenta
-4️⃣ Finaliza: Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.
-
-💡 *Tip: ¡Hazlo tú mismo 24/7!* Si prefieres no esperar, usa nuestro bot disponible a cualquier hora:
-
-👉 www.cybernetsp.com _(Selecciona la opción: Estoy de viaje. Solo disponible para correos @cybernetsp.com)_`
+        texto: `🔓 *Acceso a Netflix en tu TV* 🎬📺\n\nEl mensaje que ves es parte de la nueva verificación de Netflix. No es un error de tu cuenta, solo sigue estos pasos para activarla:\n\n1️⃣ Selecciona: *ESTA ES MI CUENTA*\n2️⃣ Pulsa en: *ESTOY DE VIAJE*\n3️⃣ Gestión: Después de eso envíame el correo o la cuenta\n4️⃣ Finaliza: Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n💡 *Tip: ¡Hazlo tú mismo 24/7!* Si prefieres no esperar, usa nuestro bot disponible a cualquier hora:\n\n👉 www.cybernetsp.com _(Selecciona la opción: Estoy de viaje. Solo disponible para correos @cybernetsp.com)_`
       },
       {
         titulo: 'ACTUALIZAR HOGAR NETFLIX',
-        texto: `🏠 *Actualizar Hogar Netflix* 🎬📺
-
-Si te aparece el mensaje de *"Este televisor no forma parte de tu hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:
-
-1️⃣ Selecciona *ESTA ES MI CUENTA.*
-2️⃣ Pulsa en *ACTUALIZAR HOGAR.*
-3️⃣ Despues de eso *ME ENVIAS CORREO.* 4️⃣ Dale a *ENVIAR* y avísame de inmediato para actualizarlo.
-
-🍿 ¡Listo! Once actualizado, podrás seguir disfrutando en tu TV sin bloqueos.`
+        texto: `🏠 *Actualizar Hogar Netflix* 🎬📺\n\nSi te aparece el mensaje de *"Este televisor no forma parte de tu hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *ACTUALIZAR HOGAR.*\n3️⃣ Despues de eso *ME ENVIAS CORREO.* 4️⃣ Dale a *ENVIAR* y avísame de inmediato para actualizarlo.\n\n🍿 ¡Listo! Once actualizado, podrás seguir disfrutando en tu TV sin bloqueos.`
       },
       {
         titulo: 'FUERA DE CASA DISNEY',
-        texto: `🔓 *Acceso a Disney+ en tu TV* 🎬✨
-
-Si te aparece el mensaje de verificación en tu televisor, no te preocupes. Sigue estos pasos rápidos para entrar:
-
-1️⃣ Selecciona *ESTA ES MI CUENTA.*
-2️⃣ Pulsa en *ESTOY FUERA DE CASA.*
-3️⃣ Despues de eso ME ENVÍAS LA CUENTA.
-4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.
-
-⏳ *Nota:* Ten el televisor encendido en la pantalla del código, ya que estos accesos expiran rápido.
-
-💙 ¡Listo! Once ingresado, podrás seguir disfrutando de todo el contenido.`
+        texto: `🔓 *Acceso a Disney+ en tu TV* 🎬✨\n\nSi te aparece el mensaje de verificación en tu televisor, no te preocupes. Sigue estos pasos rápidos para entrar:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *ESTOY FUERA DE CASA.*\n3️⃣ Despues de eso ME ENVÍAS LA CUENTA.\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n⏳ *Nota:* Ten el televisor encendido en la pantalla del código, ya que estos accesos expiran rápido.\n\n💙 ¡Listo! Once ingresado, podrás seguir disfrutando de todo el contenido.`
       },
       {
         titulo: 'CAMBIO DE HOGAR DISNEY',
-        texto: `🏠 *Cambiar de Hogar Disney+* 🎬✨
-
-Si te aparece el mensaje de *"Este televisor no forma parte del hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:
-
-1️⃣ Selecciona *ESTA ES MI CUENTA.*
-2️⃣ Pulsa en *CAMBIAR DE HOGAR.*
-3️⃣ Despues de eso *ME ENVÍAS LA CUENTA.*
-4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.
-
-⏳ *Nota:* Mantente en esa pantalla para que el código no expire y puedas ingresarlo apenas te lo envíe.
-
-💙 ¡Listo! Una vez cambiado el hogar, podrás seguir disfrutando sin bloqueos.`
+        texto: `🏠 *Cambiar de Hogar Disney+* 🎬✨\n\nSi te aparece el mensaje de *"Este televisor no forma parte del hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *CAMBIAR DE HOGAR.*\n3️⃣ Despues de eso *ME ENVÍAS LA CUENTA.*\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n⏳ *Nota:* Mantente en esa pantalla para que el código no expire y puedas ingresarlo apenas te lo envíe.\n\n💙 ¡Listo! Una vez cambiado el hogar, podrás seguir disfrutando sin bloqueos.`
       },
       {
         titulo: 'SINCRONIZAR DISNEY',
-        texto: `✨ Activa Disney+ en tu TV fácilmente 📺
-
-Elige uno de los dos métodos para iniciar sesión:
-
-▶️ *MÉTODO 1:* Por código _(El más recomendado)_ 💻📱
-1️⃣ En tu televisor abre la aplicación de Disney+ y dale clic a "Iniciar sesión".
-👀 Te aparecerá un código de 8 dígitos en la pantalla.
-2️⃣ Desde tu celular o computador entra al navegador (Chrome o Safari) e ingresa a:
-🌐 www.disneyplus.com/es-419/begin
-3️⃣ Escribe el código del TV en la página, dale a "Continuar" e inicia sesión con el correo y contraseña que te entregamos 📧.
-
-▶️ *MÉTODO 2:* Por Red Wi-Fi _(Sincronización automática)_ 📶
-1️⃣ Asegúrate de que tu celular y tu televisor estén conectados exactamente a la misma red Wi-Fi de la casa.
-2️⃣ Abre la aplicación de Disney+ en tu celular e inicia sesión con los datos que te entregamos.
-3️⃣ Abre la aplicación de Disney+ en tu televisor y dale a "Iniciar sesión".
-4️⃣ Te saldrá un aviso automático en la pantalla de tu celular preguntando si deseas permitir el acceso. Dale a "Permitir" o "Iniciar sesión" ¡y listo!
-
-✅ En segundos tu televisor se actualizará solo y podrás disfrutar de todas tus películas y series favoritas 🍿🎬`
+        texto: `✨ Activa Disney+ en tu TV fácilmente 📺\n\nElige uno de los dos métodos para iniciar sesión:\n\n▶️ *MÉTODO 1:* Por código _(El más recomendado)_ 💻📱\n1️⃣ En tu televisor abre la aplicación de Disney+ y dale clic a "Iniciar sesión".\n👀 Te aparecerá un código de 8 dígitos en la pantalla.\n2️⃣ Desde tu celular o computador entra al navegador (Chrome o Safari) e ingresa a:\n🌐 www.disneyplus.com/es-419/begin\n3️⃣ Escribe el código del TV en la página, dale a "Continuar" e inicia sesión con el correo y contraseña que te entregamos 📧.\n\n▶️ *MÉTODO 2:* Por Red Wi-Fi _(Sincronización automática)_ 📶\n1️⃣ Asegúrate de que tu celular y tu televisor estén conectados exactamente a la misma red Wi-Fi de la casa.\n2️⃣ Abre la aplicación de Disney+ en tu celular e inicia sesión con los datos que te entregamos.\n3️⃣ Abre la aplicación de Disney+ en tu televisor y dale a "Iniciar sesión".\n4️⃣ Te saldrá un aviso automático en la pantalla de tu celular preguntando si deseas permitir el acceso. Dale a "Permitir" o "Iniciar sesión" ¡y listo!\n\n✅ En segundos tu televisor se actualizará solo y podrás disfrutar de todas tus películas y series favoritas 🍿🎬`
       },
       {
         titulo: 'SINCRONIZAR AMAZON',
-        texto: `✨ *Sincroniza Amazon Prime Video en tu TV* 📺
-
-1️⃣ Desde tu celular o computador entra a:  
-🌐 www.primevideo.com/region/eu/ontv/code/ref=atv_set_rd_reg
-
-2️⃣ Ingresa los datos de la cuenta que te proporcionamos 📧  
-3️⃣ En tu TV, abre la app de Prime Video y selecciona *Identificarse* 4️⃣ Verás un código en pantalla → escríbelo en la página y pulsa *Continuar*
-
-✅ ¡Listo! Tu TV quedará sincronizado y podrás disfrutar tus series y pelis favoritas 🍿🎬`
+        texto: `✨ *Sincroniza Amazon Prime Video en tu TV* 📺\n\n1️⃣ Desde tu celular o computador entra a:  \n🌐 www.primevideo.com/region/eu/ontv/code/ref=atv_set_rd_reg\n\n2️⃣ Ingresa los datos de la cuenta que te proporcionamos 📧  \n3️⃣ En tu TV, abre la app de Prime Video y selecciona *Identificarse* 4️⃣ Verás un código en pantalla → escríbelo en la página y pulsa *Continuar*\n\n✅ ¡Listo! Tu TV quedará sincronizado y podrás disfrutar tus series y pelis favoritas 🍿🎬`
       },
       {
         titulo: 'CAMBIO DE CLAVE NETFLIX',
-        texto: `🔒✨ *Notificación de seguridad – Netflix* Hola 👋 amig@, tu contraseña de Netflix fue actualizada por motivos de seguridad 🔐.  
-
-📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  
-y confírmame por este medio ✅  
-
-💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
+        texto: `🔒✨ *Notificación de seguridad – Netflix* Hola 👋 amig@, tu contraseña de Netflix fue actualizada por motivos de seguridad 🔐.  \n\n📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  \ny confírmame por este medio ✅  \n\n💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
       },
       {
         titulo: 'CAMBIO DE CLAVE DISNEY+',
-        texto: `🔒✨ *Notificación de seguridad – Disney Premium* Hola 👋 amig@, tu contraseña de Disney Premium fue actualizada por motivos de seguridad 🔐.  
-
-📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  
-y confírmame por este medio ✅  
-
-💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
+        texto: `🔒✨ *Notificación de seguridad – Disney Premium* Hola 👋 amig@, tu contraseña de Disney Premium fue actualizada por motivos de seguridad 🔐.  \n\n📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  \ny confírmame por este medio ✅  \n\n💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`
       },
       {
         titulo: 'CEL PC NETFLIX',
-        texto: `🎬✨ *Accede a tu cuenta de Netflix en segundos 📺*
-
-1️⃣ Abre: La app o página de Netflix.
-2️⃣ Selecciona: La opción *Usar código de inicio* 💻
-3️⃣ Ingresa: El correo de tu cuenta 📧
-4️⃣ Confirma: Haz clic en *Enviar código* 🔐
-5️⃣ Gestión: Reenvíame el correo que solicita el código.
-6️⃣ Finaliza: Avísame apenas tu dispositivo te pida el código para entregártelo.
-
-💡 *Tip: ¡Hazlo tú mismo 24/7!*
-Si prefieres no esperar, usa nuestro bot disponible a cualquier hora:
-👉 www.cybernetsp.com _(Selecciona la opción: Código de inicio sesión. Solo disponible para correos @cybernetsp.com)_`
+        texto: `🎬✨ *Accede a tu cuenta de Netflix en segundos 📺*\n\n1️⃣ Abre: La app o página de Netflix.\n2️⃣ Selecciona: La opción *Usar código de inicio* 💻\n3️⃣ Ingresa: El correo de tu cuenta 📧\n4️⃣ Confirma: Haz clic en *Enviar código* 🔐\n5️⃣ Gestión: Reenvíame el correo que solicita el código.\n6️⃣ Finaliza: Avísame apenas tu dispositivo te pida el código para entregártelo.\n\n💡 *Tip: ¡Hazlo tú mismo 24/7!*\nSi prefieres no esperar, usa nuestro bot disponible a cualquier hora:\n👉 www.cybernetsp.com _(Selecciona la opción: Código de inicio sesión. Solo disponible para correos @cybernetsp.com)_`
       },
       {
         titulo: 'CAMBIAR PLAN',
-        texto: `📺 *Mensaje en pantalla:* _"Hay demasiadas personas usando la cuenta en este momento"_
-
-😎 ¡No te preocupes! La solución es muy sencilla 👇
-
-1️⃣ Haz clic en *Cambiar* 2️⃣ Luego selecciona *Cambiar o Confirmar* 3️⃣ 🎉 ¡Listo! Todo vuelve a la normalidad y puedes seguir disfrutando sin problema 🍿
-
-👉 Si este aviso vuelve a aparecer, repite los mismos pasos sin necesidad de escribirme 🚀`
+        texto: `📺 *Mensaje en pantalla:* _"Hay demasiadas personas usando la cuenta en este momento"_\n\n😎 ¡No te preocupes! La solución es muy sencilla 👇\n\n1️⃣ Haz clic en *Cambiar* 2️⃣ Luego selecciona *Cambiar o Confirmar* 3️⃣ 🎉 ¡Listo! Todo vuelve a la normalidad y puedes seguir disfrutando sin problema 🍿\n\n👉 Si este aviso vuelve a aparecer, repite los mismos pasos sin necesidad de escribirme 🚀`
       },
       {
         titulo: 'SOPORTE',
-        texto: `🧰 *Tu cuenta está en revisión técnica* 🧩⚙️  
-
-⏳ Por favor espera entre *10 a 15 minutos* y luego vuelve a ingresar para confirmar que todo quedó funcionando 📺✨  
-
-🙌 ¡Tranquil@! En pocos minutos todo estará listo  
-para que sigas disfrutando sin interrupciones 🍿🚀`
+        texto: `🧰 *Tu cuenta está en revisión técnica* 🧩⚙️  \n\n⏳ Por favor espera entre *10 a 15 minutos* y luego vuelve a ingresar para confirmar que todo quedó funcionando 📺✨  \n\n🙌 ¡Tranquil@! En pocos minutos todo estará listo  \npara que sigas disfrutando sin interrupciones 🍿🚀`
       },
       {
         titulo: 'REEMPLAZOS',
-        texto: `📢 *Importante sobre tu cuenta de Netflix*
-Hola 👋 Solo para aclararte: con los nuevos métodos de activación, el sistema de Netflix no conserva el historial anterior ni los perfiles personalizados. Esto es completamente normal y parte del proceso técnico que usamos para garantizar acceso estable.
-✅ ¿Por qué se hace así?
-Este método evita que Netflix active la función de “actualizar hogar”, que puede bloquear el acceso o limitar el uso en differentes dispositivos. Al usar activaciones temporales o por código, protegemos tu acceso continuo sin interrupciones.
-🎬 Aunque el historial se reinicia, puedes seguir disfrutando tus series películas favoritas sin problemas. Si necesitas ayuda para volver a encontrar lo que estaba viendo, con gusto te ayudo`
+        texto: `📢 *Importante sobre tu cuenta de Netflix*\nHola 👋 Solo para aclararte: con los nuevos métodos de activación, el sistema de Netflix no conserva el historial anterior ni los perfiles personalizados. Esto es completamente normal y parte del proceso técnico que usamos para garantizar acceso estable.\n✅ ¿Por qué se hace así?\nEste método evita que Netflix active la función de “actualizar hogar”, que puede bloquear el acceso o limitar el uso en differentes dispositivos. Al usar activaciones temporales o por código, protegemos tu acceso continuo sin interrupciones.\n🎬 Aunque el historial se reinicia, puedes seguir disfrutando tus series películas favoritas sin problemas. Si necesitas ayuda para volver a encontrar lo que estaba viendo, con gusto te ayudo`
       },
       {
         titulo: 'ENLACE INICIO DE SESION',
-        texto: `✨ *¡Activa tu pantalla en segundos!* 🎬
-
-Para vincular tu dispositivo, sigue estos pasos:
-
-1️⃣ En tu TV: Selecciona la opción *“Enviar enlace de inicio de sesión”*
-2️⃣ Confirma: Pulsa en el botón *“Enviar”* que aparece en pantalla
-3️⃣ Gestión: Reenvíame el correo que recibas con la solicitud del código
-4️⃣ Finaliza: Avísame en cuanto tu dispositivo te pida la aprobación
-
-🚀 *¡Ahorra tiempo!* Hazlo tú mismo 24/7 Si no quieres esperar, puedes obtener tu código al instante en nuestra web:
-
-👉 www.cybernetsp.com _(Selecciona la opción: Solicitud de inicio. Solo disponible para correos @cybernetsp.com)_`
+        texto: `✨ *¡Activa tu pantalla en segundos!* 🎬\n\nPara vincular tu dispositivo, sigue estos pasos:\n\n1️⃣ En tu TV: Selecciona la opción *“Enviar enlace de inicio de sesión”*\n2️⃣ Confirma: Pulsa en el botón *“Enviar”* que aparece en pantalla\n3️⃣ Gestión: Reenvíame el correo que recibas con la solicitud del código\n4️⃣ Finaliza: Avísame en cuanto tu dispositivo te pida la aprobación\n\n🚀 *¡Ahorra tiempo!* Hazlo tú mismo 24/7 Si no quieres esperar, puedes obtener tu código al instante en nuestra web:\n\n👉 www.cybernetsp.com _(Selecciona la opción: Solicitud de inicio. Solo disponible para correos @cybernetsp.com)_`
       },
       {
         titulo: 'GARANTIA',
-        texto: `✨ *¡Hola!* 😊  
-Te entrego la *garantía de tu cuenta* 🙌  
-
-📺 Por favor ingresa y cuéntame qué tal te fue 💬  
-💪 Estoy pendiente por si necesitas apoyo o alguna revisión adicional ✨  
-
-🍿 ¡Disfruta tu servicio sin preocupaciones!`
+        texto: `✨ *¡Hola!* 😊  \nTe entrego la *garantía de tu cuenta* 🙌  \n\n📺 Por favor ingresa y cuéntame qué tal te fue 💬  \n💪 Estoy pendiente por si necesitas apoyo o alguna revisión adicional ✨  \n\n🍿 ¡Disfruta tu servicio sin preocupaciones!`
       },
       {
         titulo: 'VERIFICACION',
-        texto: `¡Recibido! ✅ Procedemos a verificar tu pago en el sistema.
-
-Por favor, confírmame el nombre del titular de la cuenta desde la cual realizaste la transferencia. 📝
-
-En un momento validamos y te hacemos la entrega activa de tu servicio. ¡Gracias por elegirnos! 🚀`
+        texto: `¡Recibido! ✅ Procedemos a verificar tu pago en el sistema.\n\nPor favor, confírmame el nombre del titular de la cuenta desde la cual realizaste la transferencia. 📝\n\nEn un momento validamos y te hacemos la entrega activa de tu servicio. ¡Gracias por elegirnos! 🚀`
       },
       {
         titulo: 'INICIO DE SESION',
-        texto: `🔒✨ *Actualización de Netflix*
-
-Al ingresar al sistema se solicitará un código. Seleccione *Obtener ayuda* y luego *Usar contraseña* para introducir la clave de su cuenta.`
+        texto: `🔒✨ *Actualización de Netflix*\n\nAl ingresar al sistema se solicitará un código. Seleccione *Obtener ayuda* y luego *Usar contraseña* para introducir la clave de su cuenta.`
       }
     ];
 
