@@ -242,6 +242,17 @@
             border: 0.5px solid rgba(255, 204, 0, 0.3);
         }
 
+        .pill-rev-control {
+            padding: 10px 20px; 
+            border-radius: 22px;
+            font-size: 0.88rem; 
+            font-weight: 700; 
+            color: #bf5af2; 
+            gap: 7px; 
+            background: rgba(191, 90, 242, 0.1); 
+            border: 0.5px solid rgba(191, 90, 242, 0.3);
+        }
+
         .header-search-container {
             flex-grow: 1; 
             max-width: 460px; 
@@ -959,7 +970,8 @@
 
         <div class="control-container" id="controlPanel">
             <button class="interface-control-item pill-shifts-control" onclick="toggleShiftsPanel()">🕒 TURNOS</button>
-            <button class="interface-control-item pill-sale-control" onclick="togglePasswordModal()">🔑 CLAVE</button>
+            <button class="interface-control-item pill-sale-control" onclick="toggleSearchAccountPanel()">🔍 BUSCAR CUENTA</button>
+            <button class="interface-control-item pill-rev-control" onclick="window.location.href='revendedor.html'">👥 REVENDEDORES</button>
             <button class="interface-control-item pill-codes-control" onclick="toggleCodesPanel()">🔑 CÓDIGOS</button>
             <button class="interface-control-item circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema"></button>
             <button class="interface-control-item circle-control" onclick="cerrarSesionStaff()" aria-label="Cerrar Sesión" style="color: var(--ios-red);">
@@ -971,6 +983,24 @@
             </button>
         </div>
     </header>
+
+    <div class="codes-overlay" id="searchAccountOverlay" onclick="toggleSearchAccountPanel()">
+        <div class="codes-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-header">
+                <h3>Buscar Cuenta Cliente</h3>
+                <button class="btn-close-sheet" onclick="toggleSearchAccountPanel()">✕</button>
+            </div>
+            <div class="search-container" style="max-width: 100%; margin-bottom: 20px; display:flex; gap:10px;">
+                <input type="text" id="inputSearchAccount" class="search-input" placeholder="📱 Celular o Nombre..." onkeypress="if(event.key === 'Enter') ejecutarBusquedaCuentas()">
+                <button class="btn-refresh-action" style="padding: 0 15px;" onclick="ejecutarBusquedaCuentas()">Buscar</button>
+            </div>
+            <div class="codes-scroll-area" id="searchAccountScrollArea">
+                <div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">
+                    Escribe el número de celular o nombre del cliente y presiona Buscar. El sistema escaneará el inventario completo.
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="codes-overlay" id="shiftsOverlay" onclick="toggleShiftsPanel()">
         <div class="codes-sheet" onclick="event.stopPropagation()">
@@ -1076,14 +1106,17 @@
         let isFetchingHoras = false;
         window.currentHorasStock = [];
 
+        let isFetchingAccounts = false;
+        window.currentSearchStock = []; 
+
         let temporizadorInactividad = null;
         let temporizadorCierreTotal = null;
         let isTimerPaused = false;
 
-        // ================== NUEVOS TIEMPOS ==================
+        // ================== TIEMPOS DE INACTIVIDAD ==================
         const INACTIVITY_LIMIT = 15 * 60 * 1000;         // 15 minutos en milisegundos
         const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;  // 30 minutos en milisegundos
-        // ====================================================
+        // ============================================================
 
         window.pendingUser = "";
         window.pendingOldPass = "";
@@ -1125,6 +1158,158 @@
             }
         }
 
+        // ================= MÓDULO DE BÚSQUEDA DE CUENTAS (CRM) ================= //
+        function toggleSearchAccountPanel() {
+            haptic();
+            const overlay = document.getElementById('searchAccountOverlay');
+            overlay.classList.toggle('open');
+            if (overlay.classList.contains('open')) {
+                document.getElementById('inputSearchAccount').focus();
+            }
+        }
+
+        function ejecutarBusquedaCuentas() {
+            haptic();
+            const query = document.getElementById('inputSearchAccount').value.trim();
+            const container = document.getElementById('searchAccountScrollArea');
+            
+            if (query === "") {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⚠️ Por favor ingresa un número celular o nombre para buscar.</div>';
+                return;
+            }
+
+            container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Escaneando base de datos de 18 plataformas en vivo...</div>';
+            
+            const oldScript = document.getElementById('cyber_search_node');
+            if (oldScript) {
+                oldScript.remove();
+            }
+
+            window.procesarBusquedaCuentasSheets = function(res) {
+                const scriptNode = document.getElementById('cyber_search_node');
+                if (scriptNode) {
+                    scriptNode.remove();
+                }
+
+                if (res && res.status === "success") {
+                    window.currentSearchStock = res.data; 
+                    const data = res.data;
+                    
+                    if (data.length === 0) {
+                        container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No se encontraron cuentas activas asociadas a "' + query + '".</div>';
+                        return;
+                    }
+
+                    let htmlCards = "";
+                    for (let i = 0; i < data.length; i++) {
+                        let item = data[i];
+                        htmlCards += `
+                          <div class="account-item-box">
+                              <div class="account-header-line">
+                                  <span class="platform-tag" style="color:var(--ios-blue)">${item.plataforma}</span>
+                                  <span class="time-tag">Vence: ${item.vencimiento}</span>
+                              </div>
+                              <div class="credential-row">Cliente: <span>${item.cliente}</span></div>
+                              <div class="credential-row">Teléfono: <span>${item.telefono}</span></div>
+                              
+                              <div class="credential-row" style="margin-top:6px;">Correo: <span style="color:var(--ios-green); font-weight:700; user-select:all; cursor:pointer;" title="Clic para copiar solo el correo" onclick="copiarDatoAislado(this, '${item.correo}')">${item.correo}</span></div>
+                              
+                              <div class="credential-row">Clave: <span style="color:var(--ios-red); font-weight:700; user-select:all; cursor:pointer;" title="Clic para copiar solo la clave" onclick="copiarDatoAislado(this, '${item.clave}')">${item.clave}</span></div>
+                              
+                              <div class="credential-row">Perfil: <span style="font-weight:700;">${item.perfil}</span> | PIN: <span style="font-weight:700;">${item.pin}</span></div>
+                              
+                              <button class="copy-btn-action" style="margin-top:12px;" onclick="copiarCuentaCompleta(this, ${i})">📋 COPIAR DATOS DE LA CUENTA</button>
+                          </div>
+                        `;
+                    }
+                    container.innerHTML = htmlCards;
+
+                } else {
+                    let errMsg = "Error al buscar cuentas en el sistema.";
+                    if (res && res.message) {
+                        errMsg = res.message;
+                    }
+                    container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red); font-weight:600; line-height:1.4;">❌ ${errMsg}</div>`;
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_search_node';
+            let queryParams = "?action=buscarCuentaGlobal&query=" + encodeURIComponent(query) + "&callback=procesarBusquedaCuentasSheets&_ts=" + Date.now();
+            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+            document.body.appendChild(scriptElement);
+        }
+
+        function copiarDatoAislado(elemento, texto) {
+            haptic();
+            navigator.clipboard.writeText(texto).then(function() {
+                let originalText = elemento.innerText;
+                elemento.innerText = "¡COPIADO!";
+                elemento.style.opacity = "0.7";
+                setTimeout(function() {
+                    elemento.innerText = originalText;
+                    elemento.style.opacity = "1";
+                }, 1000);
+            }).catch(function() {
+                const textarea = document.createElement('textarea');
+                textarea.value = texto;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                textarea.remove();
+                
+                let originalText = elemento.innerText;
+                elemento.innerText = "¡COPIADO!";
+                elemento.style.opacity = "0.7";
+                setTimeout(function() {
+                    elemento.innerText = originalText;
+                    elemento.style.opacity = "1";
+                }, 1000);
+            });
+        }
+
+        function copiarCuentaCompleta(btn, index) {
+            haptic();
+            let item = window.currentSearchStock[index];
+            if (!item) return;
+            
+            let textoCompleto = `📺 Plataforma: ${item.plataforma}\n👤 Cliente: ${item.cliente}\n📱 Teléfono: ${item.telefono}\n\n📧 Correo: ${item.correo}\n🔑 Clave: ${item.clave}\n👤 Perfil: ${item.perfil} | 📌 PIN: ${item.pin}\n⌛ Vence: ${item.vencimiento}`;
+            
+            navigator.clipboard.writeText(textoCompleto).then(function() {
+                let originalText = btn.innerHTML;
+                btn.innerHTML = '¡COPIADO CON ÉXITO! 🚀';
+                btn.style.background = 'var(--ios-green)';
+                btn.style.color = 'white';
+                btn.style.borderColor = 'transparent';
+                setTimeout(function() {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                }, 1500);
+            }).catch(function() {
+                const textarea = document.createElement('textarea');
+                textarea.value = textoCompleto;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                textarea.remove();
+                
+                let originalText = btn.innerHTML;
+                btn.innerHTML = '¡COPIADO CON ÉXITO! 🚀';
+                btn.style.background = 'var(--ios-green)';
+                btn.style.color = 'white';
+                btn.style.borderColor = 'transparent';
+                setTimeout(function() {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                }, 1500);
+            });
+        }
+
+        // ================= MÓDULO DE TABLA DE TURNOS SEMANALES ================= //
         function toggleShiftsPanel() {
             haptic();
             const overlay = document.getElementById('shiftsOverlay');
