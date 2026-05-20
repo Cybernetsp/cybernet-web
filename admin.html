@@ -1080,8 +1080,10 @@
         let temporizadorCierreTotal = null;
         let isTimerPaused = false;
 
-        const INACTIVITY_LIMIT = 5 * 60 * 1000; 
-        const INACTIVITY_LOGOUT_LIMIT = 20 * 60 * 1000; 
+        // ================== NUEVOS TIEMPOS ==================
+        const INACTIVITY_LIMIT = 15 * 60 * 1000;         // 15 minutos en milisegundos
+        const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;  // 30 minutos en milisegundos
+        // ====================================================
 
         window.pendingUser = "";
         window.pendingOldPass = "";
@@ -1193,7 +1195,6 @@
             return new Date(dateParts[2], parseInt(dateParts[1]) - 1, dateParts[0]);
         }
 
-        // ==================== LÓGICA DE QUINCENA ====================
         function esMismaQuincena(fechaStr) {
             let d = parseDate(fechaStr);
             let hoy = new Date();
@@ -1216,7 +1217,6 @@
                 return (dDia >= 16);
             }
         }
-        // ============================================================
 
         function renderizarHorasEnPantalla() {
             const container = document.getElementById('shiftsScrollArea');
@@ -1234,7 +1234,6 @@
             for (let index = 0; index < window.currentHorasStock.length; index++) {
                 let item = window.currentHorasStock[index];
                 
-                // Usamos la nueva lógica de Quincena
                 if (item.vendedor.toUpperCase() === userFinal && esMismaQuincena(item.fecha)) {
                     misHoras.push(item);
                 }
@@ -1612,6 +1611,7 @@
                 clearTimeout(temporizadorCierreTotal);
             }
             
+            // PRIMERA ALERTA: A los 15 minutos, se pausa el tiempo de paga
             temporizadorInactividad = setTimeout(() => {
                 if (sessionStorage.getItem('active_staff') && !isTimerPaused) {
                     isTimerPaused = true;
@@ -1642,13 +1642,14 @@
                         sTimer2.innerText = "PAUSADO";
                     }
 
-                    alert("⏳ Por inactividad (5 minutos), el cronómetro de tu turno se ha pausado.\n\nMueve el mouse o toca la pantalla para reanudar el conteo de horas.");
+                    alert("⏳ Por inactividad (15 minutos), el cronómetro de tu turno se ha pausado.\n\nMueve el mouse o toca la pantalla para reanudar el conteo de horas.");
                 }
             }, INACTIVITY_LIMIT); 
 
+            // SEGUNDA ALERTA: A los 30 minutos de abandono absoluto, se cierra la sesión
             temporizadorCierreTotal = setTimeout(() => {
                 if (sessionStorage.getItem('active_staff')) {
-                    alert("⏳ Tu sesión se ha cerrado automáticamente tras 20 minutos de inactividad.");
+                    alert("⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.");
                     cerrarSesionStaff();
                 }
             }, INACTIVITY_LOGOUT_LIMIT);
