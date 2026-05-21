@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cybernet Staff - Cargar Inventario</title>
+    
+    <link rel="icon" type="image/jpeg" href="logo.jpeg">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cybernet Cargar">
+    
+    <link rel="stylesheet" href="admin.css">
+
+    <style>
+        /* --- ESTILOS ESPECÍFICOS PARA EL MÓDULO DE CARGA MASIVA --- */
+        #globalHeader {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            padding: 15px 25px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            min-height: 65px !important;
+            box-sizing: border-box !important;
+            z-index: 9998 !important;
+            background-color: rgba(15, 15, 20, 0.85) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        [data-theme="light"] #globalHeader {
+            background-color: rgba(245, 245, 247, 0.85) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .circle-control {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: var(--glass-border);
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .circle-control:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .circle-control:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        /* ESTRUCTURA DEL ESPACIO DE TRABAJO */
+        .carga-container {
+            width: 100%;
+            max-width: 750px;
+            margin: 0 auto;
+            padding-top: 100px;
+            padding-bottom: 50px;
+        }
+
+        .section-panel {
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: var(--glass-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .panel-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 5px;
+        }
+
+        [data-theme="light"] .panel-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header h2 {
+            font-size: 1.4rem;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* CONFIGURACIÓN DE INPUTS */
+        select.ios-input-block {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            cursor: pointer;
+        }
+
+        select.ios-input-block option {
+            background-color: var(--sheet-modal-bg);
+            color: var(--text-primary);
+        }
+
+        textarea.ios-input-block {
+            resize: vertical;
+            min-height: 180px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            letter-spacing: 0.3px;
+        }
+
+        .input-group-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .dynamic-input-box {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.35s ease, margin-bottom 0.35s ease;
+            margin-bottom: 0;
+        }
+
+        .dynamic-input-box.visible {
+            max-height: 80px;
+            opacity: 1;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .carga-container {
+                padding-top: 130px;
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            .input-group-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            #globalHeader {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding: 15px 20px !important;
+                gap: 15px !important;
+            }
+            .header-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-orb-1"></div>
+    <div class="bg-orb-2"></div>
+
+    <header class="global-header" id="globalHeader">
+        <div class="top-left-status" id="staffStatusBar">
+            <div class="staff-badge">
+                <span id="staffSessionName">STAFF</span> • CARGAR INVENTARIO
+            </div>
+            <div class="timer-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span id="shiftTimer">00:00:00</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema">
+            </button>
+            <button class="btn-login-action" style="margin: 0; padding: 10px 20px; width: auto; font-size: 0.85rem;" onclick="window.location.href='admin.html'">
+                ← Volver al Panel
+            </button>
+        </div>
+    </header>
+
+    <div class="carga-container">
+        
+        <div class="section-panel">
+            <div class="panel-header">
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                    Ingreso Masivo de Cuentas
+                </h2>
+            </div>
+            
+            <form id="formCargarCuentas" onsubmit="ejecutarCargaLote(event)">
+                
+                <div class="input-group-row">
+                    <select id="loadPlataforma" class="ios-input-block" required>
+                        <option value="" disabled selected>Selecciona la Plataforma...</option>
+                        <option value="AMAZON-PRIME-VIDEO">AMAZON PRIME VIDEO</option>
+                        <option value="DISNEY-PREMIUM">DISNEY PREMIUM</option>
+                        <option value="HBO-MAX">HBO MAX</option>
+                        <option value="DISNEY-ESTANDAR">DISNEY ESTANDAR</option>
+                        <option value="PLEX">PLEX</option>
+                        <option value="CRUNCHYROLL">CRUNCHYROLL</option>
+                        <option value="VIX">VIX</option>
+                        <option value="PARAMOUNT">PARAMOUNT</option>
+                        <option value="METEGOL">METEGOL</option>
+                        <option value="CANVA">CANVA</option>
+                        <option value="CAPCUT">CAPCUT</option>
+                        <option value="SPOTIFY">SPOTIFY</option>
+                        <option value="YOUTUBE">YOUTUBE</option>
+                        <option value="DEEZER">DEEZER</option>
+                    </select>
+
+                    <select id="loadProveedor" class="ios-input-block" onchange="comprobarProveedorDinamico()" required>
+                        <option value="" disabled selected>Selecciona el Proveedor...</option>
+                        <option value="ANA">ANA</option>
+                        <option value="CHAYO">CHAYO</option>
+                        <option value="FABIAN">FABIAN</option>
+                        <option value="OTRO">Otro (Escribir manualmente)</option>
+                    </select>
+                </div>
+
+                <div id="wrapperProveedorManual" class="dynamic-input-box">
+                    <input type="text" id="loadProveedorManual" class="ios-input-block" placeholder="Escribe el nombre del nuevo proveedor">
+                </div>
+
+                <textarea id="loadCuentasBloque" class="ios-input-block" placeholder="Copia y pega las cuentas aquí. Formatos aceptados:&#10;correo@gmail.com clave123&#10;correo2@gmail.com | clave456" required></textarea>
+                
+                <button type="submit" id="btnSubmitCarga" class="btn-login-action" style="background:var(--ios-green); box-shadow:0 4px 15px rgba(48, 209, 88, 0.35); margin-top: 10px;">
+                    Cargar Cuentas en Lote
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPh1eFcrTAVA-oBdyWG4E-jzhPZS_PnHuixdtcj_nbTemK0Xe6jtu1IzuXsej7Ib8V/exec";
+        let timerInterval = null;
+        let isTimerPaused = false;
+
+        function haptic() { 
+            if (navigator.vibrate) navigator.vibrate(15); 
+        }
+
+        // ==========================================
+        // TEMAS CLARO/OSCURO
+        // ==========================================
+        function toggleTheme() {
+            haptic();
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            let newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('cyber_theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            if (!btn) return;
+            if (theme === 'light') {
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+            } else {
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+            }
+        }
+
+        // ==========================================
+        // VALIDACIÓN INTERNA DEL SELECTOR DE PROVEEDOR
+        // ==========================================
+        function comprobarProveedorDinamico() {
+            const selectProv = document.getElementById('loadProveedor').value;
+            const wrapperManual = document.getElementById('wrapperProveedorManual');
+            const inputManual = document.getElementById('loadProveedorManual');
+
+            if (selectProv === "OTRO") {
+                wrapperManual.classList.add('visible');
+                inputManual.required = true;
+                inputManual.focus();
+            } else {
+                wrapperManual.classList.remove('visible');
+                inputManual.required = false;
+                inputManual.value = "";
+            }
+        }
+
+        // ==========================================
+        // CONEXIÓN DIRECTA CON EL ENDPOINT DEL SCRIPT (ACCION: cargarCuentasMasivo)
+        // ==========================================
+        function ejecutarCargaLote(e) {
+            e.preventDefault();
+            haptic();
+
+            const btnSubmit = document.getElementById('btnSubmitCarga');
+            const plataforma = document.getElementById('loadPlataforma').value;
+            const selectProv = document.getElementById('loadProveedor').value;
+            const proveedorManual = document.getElementById('loadProveedorManual').value.trim();
+            const bloqueCuentas = document.getElementById('loadCuentasBloque').value;
+
+            const proveedorFinal = (selectProv === "OTRO") ? proveedorManual : selectProv;
+
+            if (selectProv === "OTRO" && proveedorFinal === "") {
+                alert("⚠️ Por favor escribe el nombre del nuevo proveedor.");
+                return;
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "⏳ Procesando e Inyectando Lote...";
+
+            const oldScript = document.getElementById('cyber_cargamasiva_node');
+            if (oldScript) oldScript.remove();
+
+            window.procesarCargaLoteSheets = function(res) {
+                const scriptNode = document.getElementById('cyber_cargamasiva_node');
+                if (scriptNode) scriptNode.remove();
+
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Cargar Cuentas en Lote";
+
+                if (res && res.status === "success") {
+                    alert("🚀 " + res.message);
+                    document.getElementById('formCargarCuentas').reset();
+                    document.getElementById('wrapperProveedorManual').classList.remove('visible');
+                } else {
+                    alert("❌ Error de Inserción: " + (res ? res.message : "Fallo de conexión externa."));
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_cargamasiva_node';
+            let queryParams = `?action=cargarCuentasMasivo&plataforma=${encodeURIComponent(plataforma)}&proveedor=${encodeURIComponent(proveedorFinal)}&bloqueCuentas=${encodeURIComponent(bloqueCuentas)}&callback=procesarCargaLoteSheets&_ts=${Date.now()}`;
+            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+            document.body.appendChild(scriptElement);
+        }
+
+        // ==========================================
+        // CONTROL COMPARTIDO DEL TEMPORIZADOR DE TURNO
+        // ==========================================
+        function startShiftTimer() {
+            if (!sessionStorage.getItem('cyber_shift_start_time')) {
+                sessionStorage.setItem('cyber_shift_start_time', Date.now());
+            }
+            if (!sessionStorage.getItem('cyber_shift_accumulated_time')) {
+                sessionStorage.setItem('cyber_shift_accumulated_time', 0);
+            }
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            timerInterval = setInterval(function() {
+                if (isTimerPaused) return; 
+                
+                let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
+                let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
+                if (isNaN(accumulated)) accumulated = 0;
+                
+                let elapsed = Date.now() - startTime;
+                let totalMs = accumulated + elapsed;
+                
+                let totalSeconds = Math.floor(totalMs / 1000);
+                let hours = Math.floor(totalSeconds / 3600);
+                let minutes = Math.floor((totalSeconds % 3600) / 60);
+                let seconds = totalSeconds % 60;
+
+                let hStr = String(hours).padStart(2, '0');
+                let mStr = String(minutes).padStart(2, '0');
+                let sStr = String(seconds).padStart(2, '0');
+
+                let stElement = document.getElementById('shiftTimer');
+                if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
+            }, 1000);
+        }
+
+        // ==========================================
+        // CARGA INICIAL DE LA INTERFAZ
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            const activeUser = sessionStorage.getItem('active_staff');
+            if(activeUser) {
+                document.getElementById('staffSessionName').innerText = activeUser.toUpperCase();
+                startShiftTimer(); 
+            }
+
+            let savedTheme = localStorage.getItem('cyber_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        });
+    </script>
+</body>
+</html>
