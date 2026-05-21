@@ -32,13 +32,11 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
         }
 
-        /* Estilo para el Header en Modo Claro */
         [data-theme="light"] #globalHeader {
             background-color: rgba(245, 245, 247, 0.85) !important;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
         }
 
-        /* Centrar absolutamente la barra de búsqueda en el header */
         .header-search-container {
             position: absolute !important;
             left: 50% !important;
@@ -76,7 +74,6 @@
             overflow-y: auto !important; 
         }
 
-        /* Estilo para la Barra Lateral en Modo Claro */
         [data-theme="light"] #controlPanel {
             background-color: rgba(245, 245, 247, 0.85) !important;
             border-left: 1px solid rgba(0, 0, 0, 0.1) !important;
@@ -106,16 +103,11 @@
             flex-shrink: 0 !important;
         }
 
-        #controlPanel .interface-control-item.hidden-btn {
-            display: none !important; 
-        }
-
         #controlPanel .interface-control-item:hover {
             background: rgba(255, 255, 255, 0.08) !important;
             color: var(--text-primary) !important;
         }
 
-        /* Hover de botones en Modo Claro */
         [data-theme="light"] #controlPanel .interface-control-item:hover {
             background: rgba(0, 0, 0, 0.08) !important;
         }
@@ -137,12 +129,16 @@
         }
 
         #mainWorkspace {
-            padding-top: 85px !important; /* Espacio para que no lo tape la barra de arriba */
+            padding-top: 85px !important; 
             padding-right: 90px !important;
         }
 
+        /* --- SOLUCIÓN: FORZAR QUE LAS VENTANAS EMERGENTES TAPEN TODO --- */
+        .codes-overlay, .password-overlay, .login-overlay {
+            z-index: 10000 !important;
+        }
+
         @media (max-width: 768px) {
-            /* En móviles, apilamos el header para que la búsqueda no pise el nombre */
             #globalHeader {
                 flex-direction: column !important;
                 align-items: flex-start !important;
@@ -169,7 +165,7 @@
                 gap: 6px !important;
             }
             #mainWorkspace {
-                padding-top: 130px !important; /* Más espacio en celular por apilarse */
+                padding-top: 130px !important; 
                 padding-right: 75px !important;
             }
             #controlPanel .interface-control-item {
@@ -274,16 +270,6 @@
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                 </svg>
                 <span>PROMO</span>
-            </button>
-
-            <button class="interface-control-item hidden-btn" id="btnCaja" onclick="alert('Módulo Caja en desarrollo')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M12 9v1"></path>
-                    <path d="M12 14v1"></path>
-                </svg>
-                <span>CAJA</span>
             </button>
 
             <button class="interface-control-item" onclick="toggleTheme()" id="theme-toggle">
@@ -442,9 +428,7 @@
         let temporizadorCierreTotal = null;
         let isTimerPaused = false;
 
-        // ================== TIEMPOS DE INACTIVIDAD ==================
-        const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;  // 30 minutos en milisegundos
-        // ============================================================
+        const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;
 
         window.pendingUser = "";
         window.pendingOldPass = "";
@@ -486,7 +470,6 @@
             }
         }
 
-        // ================= MÓDULO DE BÚSQUEDA DE CUENTAS (CRM) ================= //
         function toggleSearchAccountPanel() {
             haptic();
             const overlay = document.getElementById('searchAccountOverlay');
@@ -637,7 +620,6 @@
             });
         }
 
-        // ================= MÓDULO DE TABLA DE TURNOS SEMANALES ================= //
         function toggleShiftsPanel() {
             haptic();
             const overlay = document.getElementById('shiftsOverlay');
@@ -903,14 +885,12 @@
                     vendedorLabel = `<br><span style="color:var(--ios-blue); font-size:0.75rem; font-weight:bold;">👤 ${dInfo.vendedor}</span>`;
                 }
 
-                // ================= NUEVO: BOTÓN INDIVIDUAL PARA CAMILO =================
                 let btnLiquidarIndividual = "";
                 if (userFinal === "CAMILO" && dInfo.filasAsociadas && dInfo.filasAsociadas.length > 0) {
                     let filasStrInd = dInfo.filasAsociadas.join(",");
                     let targetInd = dInfo.vendedor + " el " + dInfo.fechaText;
                     btnLiquidarIndividual = ` <span style="cursor:pointer; font-size:1.1rem; margin-left:8px; vertical-align:middle;" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Liquidar este día">💵</span>`;
                 }
-                // =======================================================================
                 
                 html += `
                           <tr>
@@ -923,7 +903,6 @@
             
             let finalPayFmt = Math.round(totalPay).toLocaleString('es-CO');
             
-            // ================== BOTÓN GLOBAL (SE MANTIENE IGUAL) ==================
             let btnLiquidarHTML = "";
             if (userFinal === "CAMILO") {
                 let targetName = filtroBusqueda !== "" ? filtroBusqueda.toUpperCase() : "TODOS (GLOBAL)";
@@ -945,7 +924,6 @@
                     `;
                 }
             }
-            // ===============================================================================
 
             html += `
                       </tbody>
@@ -967,7 +945,6 @@
             container.innerHTML = html;
         }
 
-        // ================= NUEVA FUNCIÓN GLOBAL: EJECUTAR LIQUIDACIÓN ================= //
         window.ejecutarLiquidacion = function(nombreObjetivo, filasStr) {
             if (!filasStr) return;
             let count = filasStr.split(",").length;
@@ -1006,7 +983,6 @@
             scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
             document.body.appendChild(scriptElement);
         };
-        // ===============================================================================
 
         function filtrarHorasInternas() {
             const query = document.getElementById('searchShiftsInput').value.toLowerCase();
@@ -1513,17 +1489,6 @@
             if (!isAutoLogin) {
                 ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
             }
-
-            // --- RESTRICCIÓN DE PERMISOS: Solo CAMILO puede ver la CAJA ---
-            let btnCaja = document.getElementById('btnCaja');
-            if(btnCaja) {
-                if(userInput.toUpperCase() === "CAMILO") {
-                    btnCaja.classList.remove('hidden-btn');
-                } else {
-                    btnCaja.classList.add('hidden-btn');
-                }
-            }
-            // ---------------------------------------------------------------
             
             document.getElementById('loginOverlay').classList.add('hidden');
             document.getElementById('mainWorkspace').style.display = 'flex';
