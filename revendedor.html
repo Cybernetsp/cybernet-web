@@ -686,7 +686,6 @@
                         if (saldoLimpio > 0 && saldoLimpio < 1000) saldoLimpio = saldoLimpio * 1000;
                         let claseSaldo = saldoLimpio > 5000 ? 'saldo-verde' : 'saldo-rojo';
 
-                        // Inyección del botón de eliminar pasando la llave identificadora
                         html += `
                         <tr class="distri-row">
                             <td><strong>${d.nombre}</strong><br><span style="color:var(--text-secondary); font-size:0.8rem;">📱 ${d.telefono}</span></td>
@@ -717,7 +716,6 @@
             haptic();
             if (!nombreRevendedor) return;
 
-            // Escudo de Doble Confirmación de Seguridad
             if (!confirm(`⚠️ ADVERTENCIA DE SEGURIDAD ⚠️\n\n¿Estás absolutamente seguro de eliminar por completo al revendedor "${nombreRevendedor}" de la base de datos?\n\nEsta acción borrará permanentemente su saldo y registro del Google Sheets.`)) {
                 return;
             }
@@ -731,7 +729,7 @@
             window.procesarEliminacion = function(res) {
                 if (res && res.status === "success") {
                     alert(`🗑️ Éxito: El revendedor "${res.eliminado}" ha sido borrado del sistema.`);
-                    cargarDistribuidores(); // Recarga automática de la tabla limpia
+                    cargarDistribuidores(); 
                 } else {
                     alert(`❌ Error al eliminar: ${res.message || 'Fallo interno.'}`);
                     cargarDistribuidores();
@@ -843,7 +841,9 @@
             btn.innerText = "⏳ Procesando Recarga...";
 
             const oldScript = document.getElementById('script_recharge_distri');
-            if (oldScript) oldScript.remove();
+            if (oldScript) {
+                oldScript.remove();
+            }
 
             window.procesarRecarga = function(res) {
                 btn.disabled = false;
@@ -865,13 +865,13 @@
             document.body.appendChild(scriptElement);
         }
 
-        // ================== CONTROL DE SESIÓN ==================
+        // ================== CONTROL DE SESIÓN CON SINCRO AUTOMÁTICA EN SESSIONSTORAGE ==================
         function resetearInactividad() {
             if (!sessionStorage.getItem('active_staff')) return; 
 
             if (isTimerPaused) {
                 isTimerPaused = false;
-                localStorage.setItem('cyber_shift_start_time', Date.now());
+                sessionStorage.setItem('cyber_shift_start_time', Date.now());
                 const tBadge = document.querySelector('.timer-badge');
                 if (tBadge) { tBadge.style.color = 'var(--ios-green)'; tBadge.style.borderColor = 'var(--glass-border)'; }
                 const sTimer = document.getElementById('shiftTimer');
@@ -884,15 +884,15 @@
             temporizadorInactividad = setTimeout(() => {
                 if (sessionStorage.getItem('active_staff') && !isTimerPaused) {
                     isTimerPaused = true;
-                    let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
-                    let currentAccumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
+                    let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
+                    let currentAccumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
                     if (isNaN(currentAccumulated)) currentAccumulated = 0;
                     
                     let newlyElapsed = Date.now() - startTime;
                     let validTime = newlyElapsed - INACTIVITY_LIMIT;
                     if (validTime < 0) validTime = 0;
                     
-                    localStorage.setItem('cyber_shift_accumulated_time', currentAccumulated + validTime);
+                    sessionStorage.setItem('cyber_shift_accumulated_time', currentAccumulated + validTime);
                     
                     const tBadge2 = document.querySelector('.timer-badge');
                     if (tBadge2) { tBadge2.style.color = '#ffcc00'; tBadge2.style.borderColor = '#ffcc00'; }
@@ -908,8 +908,8 @@
                     alert("⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.");
                     sessionStorage.removeItem('active_staff');
                     localStorage.removeItem('cyber_saved_staff');
-                    localStorage.removeItem('cyber_shift_start_time');
-                    localStorage.removeItem('cyber_shift_accumulated_time');
+                    sessionStorage.removeItem('cyber_shift_start_time');
+                    sessionStorage.removeItem('cyber_shift_accumulated_time');
                     window.location.href = 'admin.html';
                 }
             }, INACTIVITY_LOGOUT_LIMIT);
@@ -925,15 +925,15 @@
         }
 
         function startShiftTimer() {
-            if (!localStorage.getItem('cyber_shift_start_time')) localStorage.setItem('cyber_shift_start_time', Date.now());
-            if (!localStorage.getItem('cyber_shift_accumulated_time')) localStorage.setItem('cyber_shift_accumulated_time', 0);
+            if (!sessionStorage.getItem('cyber_shift_start_time')) sessionStorage.setItem('cyber_shift_start_time', Date.now());
+            if (!sessionStorage.getItem('cyber_shift_accumulated_time')) sessionStorage.setItem('cyber_shift_accumulated_time', 0);
             if (timerInterval) clearInterval(timerInterval);
 
             timerInterval = setInterval(function() {
                 if (isTimerPaused) return; 
                 
-                let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
-                let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
+                let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
+                let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
                 if (isNaN(accumulated)) accumulated = 0;
                 
                 let elapsed = Date.now() - startTime;
