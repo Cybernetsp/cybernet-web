@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cybernet Staff - Recordatorios de Pago</title>
+    
+    <link rel="icon" type="image/jpeg" href="logo.jpeg">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cybernet Recordatorios">
+    
+    <link rel="stylesheet" href="admin.css">
+
+    <style>
+        /* --- ESTILOS ESPECÍFICOS PARA EL MÓDULO DE RECORDATORIOS DOBLE --- */
+        #globalHeader {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            padding: 15px 25px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            min-height: 65px !important;
+            box-sizing: border-box !important;
+            z-index: 9998 !important;
+            background-color: rgba(15, 15, 20, 0.85) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        [data-theme="light"] #globalHeader {
+            background-color: rgba(245, 245, 247, 0.85) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .circle-control {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: var(--glass-border);
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .circle-control:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .circle-control:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        /* DISEÑO DE DOS ESPACIOS DE TRABAJO (W1 y W2) */
+        .recordatorios-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; 
+            gap: 25px;
+            width: 100%;
+            max-width: 1800px; 
+            margin: 0 auto;
+            padding-top: 100px;
+            padding-bottom: 50px;
+            padding-left: 20px;
+            padding-right: 20px;
+            box-sizing: border-box;
+        }
+
+        .workspace-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-panel {
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: var(--glass-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        [data-theme="light"] .panel-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header h2 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        select.ios-input-block {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        select.ios-input-block option {
+            background-color: var(--sheet-modal-bg);
+            color: var(--text-primary);
+        }
+
+        .btn-sync {
+            background: var(--ai-gradient);
+            box-shadow: 0 4px 15px rgba(191, 90, 242, 0.3);
+            border: none;
+            color: white;
+            font-weight: 700;
+            border-radius: 12px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            width: 100%;
+            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-sync:active { transform: scale(0.97); }
+
+        .blocks-area-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .btn-copy-block {
+            background: rgba(48, 209, 88, 0.12);
+            color: var(--ios-green);
+            border: 1px solid rgba(48, 209, 88, 0.3);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn-copy-block:hover {
+            background: var(--ios-green);
+            color: white;
+        }
+
+        /* --- LISTA DE INDIVIDUALES --- */
+        .reminders-scroll-area {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 5px;
+            align-content: start;
+        }
+
+        .reminder-row-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.3s ease;
+        }
+
+        [data-theme="light"] .reminder-row-box {
+            background: rgba(255, 255, 255, 0.45);
+            border: 0.5px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .reminder-row-box:hover {
+            border-color: var(--ios-purple);
+            transform: translateY(-2px);
+        }
+
+        /* ESTADO TACHADO (COMPLETADO) */
+        .reminder-row-box.tachado {
+            opacity: 0.4;
+            border-color: var(--ios-green);
+            background: rgba(48, 209, 88, 0.05);
+            transform: translateY(0);
+        }
+
+        .reminder-row-box.tachado .reminder-link-text {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .reminder-row-box.tachado .reminder-number {
+            background: var(--ios-green);
+            color: white;
+        }
+
+        .reminder-left-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .reminder-number {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            background: rgba(118, 118, 128, 0.15);
+            min-width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .reminder-link-text {
+            font-size: 0.95rem;
+            font-family: monospace;
+            font-weight: bold;
+            color: var(--ios-blue);
+            user-select: all;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.3s ease;
+        }
+
+        /* ICONO DE COPIAR COMPACTO Y CUADRADO */
+        .btn-icon-copy {
+            background: rgba(191, 90, 242, 0.12);
+            color: var(--ios-purple);
+            border: 1px solid rgba(191, 90, 242, 0.3);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-icon-copy:hover {
+            background: var(--ios-purple);
+            color: white;
+        }
+
+        .btn-icon-copy:active {
+            transform: scale(0.9);
+        }
+
+        .btn-icon-copy.success {
+            background: var(--ios-green);
+            color: white;
+            border-color: var(--ios-green);
+        }
+
+        .status-badge {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--ios-blue);
+            background: rgba(10, 132, 255, 0.15);
+            padding: 5px 12px;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 1100px) {
+            .reminders-scroll-area { grid-template-columns: 1fr; }
+            .blocks-area-container { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .recordatorios-container {
+                grid-template-columns: 1fr; 
+                padding-top: 130px;
+            }
+            #globalHeader {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding: 15px 20px !important;
+                gap: 15px !important;
+            }
+            .header-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-orb-1"></div>
+    <div class="bg-orb-2"></div>
+
+    <header class="global-header" id="globalHeader">
+        <div class="top-left-status" id="staffStatusBar">
+            <div class="staff-badge">
+                <span id="staffSessionName">STAFF</span> • GESTOR MULTI-WHATSAPP
+            </div>
+            <div class="timer-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span id="shiftTimer">00:00:00</span>
+            </div>
+        </div>
+
+        <div class="header-search-container"></div>
+
+        <div class="header-actions">
+            <button class="circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema"></button>
+            <button class="btn-login-action" style="margin: 0; padding: 10px 20px; width: auto; font-size: 0.85rem;" onclick="window.location.href='admin.html'">
+                ← Volver al Panel
+            </button>
+        </div>
+    </header>
+
+    <div class="recordatorios-container">
+        
+        <div class="workspace-column">
+            
+            <div class="section-panel">
+                <div class="panel-header">
+                    <h2>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-purple)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        WhatsApp 1 (Generador)
+                    </h2>
+                    <span id="contadorW1" class="status-badge">0 clientes</span>
+                </div>
+
+                <select id="periodoW1" class="ios-input-block">
+                    <option value="hoy" selected>🗓️ Vencen: Hoy</option>
+                    <option value="ayer">🗓️ Vencieron: Ayer</option>
+                    <option value="antes_ayer">🗓️ Vencieron: Antes de Ayer</option>
+                    <option value="tres_dias">🗓️ Por Vencer: En 3 Días</option>
+                </select>
+                
+                <button class="btn-sync" onclick="sincronizarW1()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+                    Sincronizar Panel 1
+                </button>
+
+                <div class="blocks-area-container" id="bloquesW1">
+                    <div style="text-align:center; padding:15px; color:var(--text-secondary); font-size:0.85rem; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; grid-column: span 2;">
+                        Sincroniza para ver los bloques de enlaces.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-panel" style="flex-grow: 1;">
+                <div class="panel-header">
+                    <h2>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        Lista de Mensajes (W1)
+                    </h2>
+                </div>
+                
+                <div class="reminders-scroll-area" id="listaIndividualW1">
+                    <div style="text-align:center; padding:40px 10px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">
+                        ⏳ En espera de sincronización...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="workspace-column">
+            
+            <div class="section-panel">
+                <div class="panel-header">
+                    <h2>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        WhatsApp 2 (Generador)
+                    </h2>
+                    <span id="contadorW2" class="status-badge" style="color:var(--ios-green); background:rgba(48,209,88,0.15)">0 clientes</span>
+                </div>
+
+                <select id="periodoW2" class="ios-input-block">
+                    <option value="tres_dias" selected>🗓️ Por Vencer: En 3 Días</option>
+                    <option value="hoy">🗓️ Vencen: Hoy</option>
+                    <option value="ayer">🗓️ Vencieron: Ayer</option>
+                    <option value="antes_ayer">🗓️ Vencieron: Antes de Ayer</option>
+                </select>
+                
+                <button class="btn-sync" onclick="sincronizarW2()" style="background: rgba(48, 209, 88, 0.15); color: var(--ios-green); box-shadow: none; border: 1px solid rgba(48,209,88,0.3);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+                    Sincronizar Panel 2
+                </button>
+
+                <div class="blocks-area-container" id="bloquesW2">
+                    <div style="text-align:center; padding:15px; color:var(--text-secondary); font-size:0.85rem; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; grid-column: span 2;">
+                        Sincroniza para ver los bloques de enlaces.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-panel" style="flex-grow: 1;">
+                <div class="panel-header">
+                    <h2>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        Lista de Mensajes (W2)
+                    </h2>
+                </div>
+                
+                <div class="reminders-scroll-area" id="listaIndividualW2">
+                    <div style="text-align:center; padding:40px 10px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">
+                        ⏳ En espera de sincronización...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // URL CONECTADA A TU SCRIPT INDEPENDIENTE DE RECORDATORIOS
+        const RECORDATORIOS_API_URL = "https://script.google.com/macros/s/AKfycbxOykzXfcfFPuJa8_pjQn04MdwqfpDCLi9NcpdoKf7EAmALURT3qwbOtd72zroaQII/exec";
+        
+        let timerInterval = null;
+        let isTimerPaused = false;
+        
+        // ESTADO GLOBAL: Se guardará e inicializará desde localStorage
+        window.estadoW1 = { data: [], tachados: new Set(), periodo: 'hoy' };
+        window.estadoW2 = { data: [], tachados: new Set(), periodo: 'tres_dias' };
+
+        function haptic() { 
+            if (navigator.vibrate) navigator.vibrate(15); 
+        }
+
+        // ==========================================
+        // PERSISTENCIA DE DATOS (LOCALSTORAGE)
+        // ==========================================
+        function guardarEstadoEnLocal(refName) {
+            let estado = refName === 'W1' ? window.estadoW1 : window.estadoW2;
+            let objetoParaGuardar = {
+                data: estado.data,
+                tachados: Array.from(estado.tachados), // Convertir Set a Array para poder guardarlo
+                periodo: document.getElementById('periodo' + refName).value
+            };
+            localStorage.setItem('cyber_reminders_' + refName, JSON.stringify(objetoParaGuardar));
+        }
+
+        function cargarEstadoDeLocal() {
+            ['W1', 'W2'].forEach(refName => {
+                let guardado = localStorage.getItem('cyber_reminders_' + refName);
+                if (guardado) {
+                    let parsed = JSON.parse(guardado);
+                    let estado = refName === 'W1' ? window.estadoW1 : window.estadoW2;
+                    
+                    estado.data = parsed.data || [];
+                    estado.tachados = new Set(parsed.tachados || []);
+                    estado.periodo = parsed.periodo || (refName === 'W1' ? 'hoy' : 'tres_dias');
+                    
+                    // Restaurar visualmente el combo de opciones
+                    document.getElementById('periodo' + refName).value = estado.periodo;
+
+                    // Restaurar visualmente las listas si hay datos
+                    if (estado.data.length > 0) {
+                        document.getElementById('contador' + refName).innerText = `${estado.data.length} clientes`;
+                        renderizarBloques(estado.data, 'bloques' + refName);
+                        renderizarLista(estado, 'listaIndividual' + refName, refName);
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // TEMAS CLARO/OSCURO
+        // ==========================================
+        function toggleTheme() {
+            haptic();
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            let newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('cyber_theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            if (!btn) return;
+            if (theme === 'light') {
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+            } else {
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+            }
+        }
+
+        // ==========================================
+        // EXTRACCIÓN Y RENDERIZADO W1 (PANEL IZQUIERDO)
+        // ==========================================
+        function sincronizarW1() {
+            haptic();
+            const containerLista = document.getElementById('listaIndividualW1');
+            const containerBloques = document.getElementById('bloquesW1');
+            const periodo = document.getElementById('periodoW1').value;
+            
+            containerLista.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">⏳ Escaneando NETFLIX para W1...</div>';
+            containerBloques.innerHTML = '<div style="text-align:center; padding:15px; color:var(--text-secondary); font-size:0.85rem; grid-column: span 2;">Procesando...</div>';
+            
+            const oldScript = document.getElementById('cyber_reminders_w1');
+            if (oldScript) oldScript.remove();
+
+            window.procesarRespuestaW1 = function(res) {
+                const scriptNode = document.getElementById('cyber_reminders_w1');
+                if (scriptNode) scriptNode.remove();
+
+                if (res && res.status === "success") {
+                    window.estadoW1.data = res.data;
+                    window.estadoW1.tachados = new Set(); // Reset tachados al sincronizar nuevo
+                    window.estadoW1.periodo = periodo;
+                    
+                    guardarEstadoEnLocal('W1'); // Guardar inmediatamente
+                    
+                    document.getElementById('contadorW1').innerText = `${res.data.length} clientes`;
+                    
+                    if (res.data.length === 0) {
+                        containerLista.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">✨ Todo limpio en este periodo para W1.</div>';
+                        containerBloques.innerHTML = '';
+                        return;
+                    }
+                    
+                    renderizarBloques(window.estadoW1.data, 'bloquesW1');
+                    renderizarLista(window.estadoW1, 'listaIndividualW1', 'W1');
+                } else {
+                    containerLista.innerHTML = `<div style="text-align:center; padding:40px; color:var(--ios-red); font-weight:600; grid-column: span 2;">❌ Error: ${res ? res.message : "Desconocido"}</div>`;
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_reminders_w1';
+            let queryParams = `?action=obtenerRecordatorios&periodo=${encodeURIComponent(periodo)}&callback=procesarRespuestaW1&_ts=${Date.now()}`;
+            scriptElement.src = RECORDATORIOS_API_URL + queryParams;
+            document.body.appendChild(scriptElement);
+        }
+
+        // ==========================================
+        // EXTRACCIÓN Y RENDERIZADO W2 (PANEL DERECHO)
+        // ==========================================
+        function sincronizarW2() {
+            haptic();
+            const containerLista = document.getElementById('listaIndividualW2');
+            const containerBloques = document.getElementById('bloquesW2');
+            const periodo = document.getElementById('periodoW2').value;
+            
+            containerLista.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">⏳ Escaneando NETFLIX para W2...</div>';
+            containerBloques.innerHTML = '<div style="text-align:center; padding:15px; color:var(--text-secondary); font-size:0.85rem; grid-column: span 2;">Procesando...</div>';
+            
+            const oldScript = document.getElementById('cyber_reminders_w2');
+            if (oldScript) oldScript.remove();
+
+            window.procesarRespuestaW2 = function(res) {
+                const scriptNode = document.getElementById('cyber_reminders_w2');
+                if (scriptNode) scriptNode.remove();
+
+                if (res && res.status === "success") {
+                    window.estadoW2.data = res.data;
+                    window.estadoW2.tachados = new Set(); // Reset tachados al sincronizar nuevo
+                    window.estadoW2.periodo = periodo;
+
+                    guardarEstadoEnLocal('W2'); // Guardar inmediatamente
+                    
+                    document.getElementById('contadorW2').innerText = `${res.data.length} clientes`;
+                    
+                    if (res.data.length === 0) {
+                        containerLista.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">✨ Todo limpio en este periodo para W2.</div>';
+                        containerBloques.innerHTML = '';
+                        return;
+                    }
+                    
+                    renderizarBloques(window.estadoW2.data, 'bloquesW2');
+                    renderizarLista(window.estadoW2, 'listaIndividualW2', 'W2');
+                } else {
+                    containerLista.innerHTML = `<div style="text-align:center; padding:40px; color:var(--ios-red); font-weight:600; grid-column: span 2;">❌ Error: ${res ? res.message : "Desconocido"}</div>`;
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_reminders_w2';
+            let queryParams = `?action=obtenerRecordatorios&periodo=${encodeURIComponent(periodo)}&callback=procesarRespuestaW2&_ts=${Date.now()}`;
+            scriptElement.src = RECORDATORIOS_API_URL + queryParams;
+            document.body.appendChild(scriptElement);
+        }
+
+        // ==========================================
+        // FUNCIONES COMPARTIDAS DE RENDERIZADO
+        // ==========================================
+        function renderizarBloques(dataArray, contenedorId) {
+            const container = document.getElementById(contenedorId);
+            container.innerHTML = "";
+
+            let total = dataArray.length;
+            let tamanoBloque = 20;
+            let totalBloques = Math.ceil(total / tamanoBloque);
+
+            for (let b = 0; b < totalBloques; b++) {
+                let inicio = b * tamanoBloque + 1;
+                let fin = Math.min((b + 1) * tamanoBloque, total);
+
+                let btn = document.createElement('button');
+                btn.className = "btn-copy-block";
+                btn.innerText = `📲 Bloque (${inicio}-${fin})`;
+
+                btn.onclick = function() {
+                    haptic();
+                    let bloqueTexto = "";
+                    for (let i = b * tamanoBloque; i < fin; i++) {
+                        // SALTO DE LÍNEA SIMPLE
+                        bloqueTexto += `${i + 1}. wa.me/${dataArray[i].tel}\n`;
+                    }
+
+                    navigator.clipboard.writeText(bloqueTexto.trim()).then(() => {
+                        let originalText = btn.innerText;
+                        btn.innerText = "¡Copiado! ✔️";
+                        btn.style.background = "var(--ios-green)";
+                        btn.style.color = "white";
+                        setTimeout(() => {
+                            btn.innerText = originalText;
+                            btn.style.background = "";
+                            btn.style.color = "";
+                        }, 1200);
+                    });
+                };
+                container.appendChild(btn);
+            }
+        }
+
+        function renderizarLista(estadoObj, contenedorId, refName) {
+            const container = document.getElementById(contenedorId);
+            let html = "";
+            
+            estadoObj.data.forEach((item, index) => {
+                let msgEscaped = encodeURIComponent(item.mensaje);
+                let rowId = `row-${refName}-${index}`;
+                let claseTachado = estadoObj.tachados.has(index) ? 'tachado' : '';
+                
+                html += `
+                <div class="reminder-row-box ${claseTachado}" id="${rowId}">
+                    <div class="reminder-left-info">
+                        <div class="reminder-number">${index + 1}</div>
+                        <div class="reminder-link-text">${item.tel}</div>
+                    </div>
+                    <button class="btn-icon-copy" title="Copiar Mensaje" onclick="copiarMsg(this, '${msgEscaped}', '${rowId}', '${refName}', ${index})">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function copiarMsg(btn, msgEncoded, rowId, refName, indexObj) {
+            haptic();
+            const mensajeFinal = decodeURIComponent(msgEncoded);
+            
+            navigator.clipboard.writeText(mensajeFinal).then(() => {
+                marcarTachadoUniversal(btn, rowId, refName, indexObj);
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = mensajeFinal;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                textarea.remove();
+                marcarTachadoUniversal(btn, rowId, refName, indexObj);
+            });
+        }
+
+        function marcarTachadoUniversal(btn, rowId, refName, indexObj) {
+            // Guardar en la memoria correspondiente al Panel
+            if(refName === 'W1') {
+                window.estadoW1.tachados.add(indexObj);
+                guardarEstadoEnLocal('W1');
+            }
+            if(refName === 'W2') {
+                window.estadoW2.tachados.add(indexObj);
+                guardarEstadoEnLocal('W2');
+            }
+
+            // 1. Tacha y marca la fila
+            const row = document.getElementById(rowId);
+            if(row) row.classList.add('tachado');
+
+            // 2. Cambia a Check verde el botón
+            const originalHTML = btn.innerHTML;
+            btn.classList.add('success');
+            btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            
+            setTimeout(() => {
+                btn.classList.remove('success');
+                btn.innerHTML = originalHTML;
+            }, 1500);
+        }
+
+        // ==========================================
+        // CONTROL SINCRO DEL TIMER (SESSIONSTORAGE)
+        // ==========================================
+        function startShiftTimer() {
+            if (!sessionStorage.getItem('cyber_shift_start_time')) {
+                sessionStorage.setItem('cyber_shift_start_time', Date.now());
+            }
+            if (!sessionStorage.getItem('cyber_shift_accumulated_time')) {
+                sessionStorage.setItem('cyber_shift_accumulated_time', 0);
+            }
+
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(function() {
+                if (isTimerPaused) return; 
+                
+                let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
+                let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
+                if (isNaN(accumulated)) accumulated = 0;
+                
+                let elapsed = Date.now() - startTime;
+                let totalMs = accumulated + elapsed;
+                
+                let totalSeconds = Math.floor(totalMs / 1000);
+                let hours = Math.floor(totalSeconds / 3600);
+                let minutes = Math.floor((totalSeconds % 3600) / 60);
+                let seconds = totalSeconds % 60;
+
+                let hStr = String(hours).padStart(2, '0');
+                let mStr = String(minutes).padStart(2, '0');
+                let sStr = String(seconds).padStart(2, '0');
+
+                let stElement = document.getElementById('shiftTimer');
+                if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
+            }, 1000);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const activeUser = sessionStorage.getItem('active_staff');
+            if(activeUser) {
+                document.getElementById('staffSessionName').innerText = activeUser.toUpperCase();
+                startShiftTimer();
+            }
+
+            let savedTheme = localStorage.getItem('cyber_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            // Cargar el estado guardado para que no se pierdan los tachados al cambiar de página
+            cargarEstadoDeLocal();
+        });
+    </script>
+</body>
+</html>
