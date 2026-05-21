@@ -216,12 +216,21 @@
                 <span>CÓDIGOS</span>
             </button>
 
-            <button class="interface-control-item" onclick="window.location.href='ventas.html'">
+            <button class="interface-control-item" onclick="window.location.href='ventas.html'" style="display: none !important;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="1" x2="12" y2="23"></line>
                     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                 </svg>
                 <span>VENTAS</span>
+            </button>
+            
+            <button class="interface-control-item" onclick="window.location.href='cargar.html'" style="color: var(--ios-green) !important;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>+CARGAR</span>
             </button>
 
             <button class="interface-control-item" onclick="toggleShiftsPanel()">
@@ -1488,6 +1497,15 @@
         function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
             if (!isAutoLogin) {
                 ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
+            }
+
+            let btnCaja = document.getElementById('btnCaja');
+            if(btnCaja) {
+                if(userInput.toUpperCase() === "CAMILO") {
+                    btnCaja.classList.remove('hidden-btn');
+                } else {
+                    btnCaja.classList.add('hidden-btn');
+                }
             }
             
             document.getElementById('loginOverlay').classList.add('hidden');
