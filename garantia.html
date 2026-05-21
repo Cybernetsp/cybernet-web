@@ -570,15 +570,13 @@
             document.body.appendChild(scriptElement);
         }
 
-        // ==========================================
-        // 4. LÓGICA DEL CRONÓMETRO DE TURNO
-        // ==========================================
+        // --- SINCRO AUTOMÁTICA DEL CRONÓMETRO CON SESSIONSTORAGE ---
         function startShiftTimer() {
-            if (!localStorage.getItem('cyber_shift_start_time')) {
-                localStorage.setItem('cyber_shift_start_time', Date.now());
+            if (!sessionStorage.getItem('cyber_shift_start_time')) {
+                sessionStorage.setItem('cyber_shift_start_time', Date.now());
             }
-            if (!localStorage.getItem('cyber_shift_accumulated_time')) {
-                localStorage.setItem('cyber_shift_accumulated_time', 0);
+            if (!sessionStorage.getItem('cyber_shift_accumulated_time')) {
+                sessionStorage.setItem('cyber_shift_accumulated_time', 0);
             }
 
             if (timerInterval) {
@@ -590,14 +588,13 @@
                     return; 
                 }
                 
-                let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
-                let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
+                let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
+                let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
                 if (isNaN(accumulated)) {
                     accumulated = 0;
                 }
                 
                 let elapsed = Date.now() - startTime;
-                
                 let totalMs = accumulated + elapsed;
                 
                 let totalSeconds = Math.floor(totalMs / 1000);
@@ -623,7 +620,7 @@
             const activeUser = sessionStorage.getItem('active_staff');
             if(activeUser) {
                 document.getElementById('staffSessionName').innerText = activeUser.toUpperCase();
-                // Iniciar el cronómetro apenas se verifique la sesión
+                // Arrancar cronómetro dinámico enlazado
                 startShiftTimer();
             }
 
@@ -631,7 +628,7 @@
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
 
-            cargarGarantias(); // Cargar la lista al entrar
+            cargarGarantias(); 
         });
     </script>
 </body>
