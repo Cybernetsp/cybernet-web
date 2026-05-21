@@ -260,7 +260,7 @@
             </button>
 
             <button class="interface-control-item" onclick="window.location.href='garantia.html'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
                 <span>GARANTÍA</span>
@@ -588,7 +588,7 @@
             });
         }
 
-        function copiarCuentaCompleta(btn, index) {
+        function copiedAccountComplete(btn, index) {
             haptic();
             let item = window.currentSearchStock[index];
             if (!item) return;
@@ -1209,12 +1209,13 @@
             resetearInactividad(); 
         }
 
+        // --- SOLUCIÓN DEL CRONÓMETRO INTERNO SIN DESFASES ---
         function startShiftTimer() {
-            if (!localStorage.getItem('cyber_shift_start_time')) {
-                localStorage.setItem('cyber_shift_start_time', Date.now());
+            if (!sessionStorage.getItem('cyber_shift_start_time')) {
+                sessionStorage.setItem('cyber_shift_start_time', Date.now());
             }
-            if (!localStorage.getItem('cyber_shift_accumulated_time')) {
-                localStorage.setItem('cyber_shift_accumulated_time', 0);
+            if (!sessionStorage.getItem('cyber_shift_accumulated_time')) {
+                sessionStorage.setItem('cyber_shift_accumulated_time', 0);
             }
 
             if (timerInterval) {
@@ -1226,14 +1227,13 @@
                     return; 
                 }
                 
-                let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
-                let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
+                let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
+                let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
                 if (isNaN(accumulated)) {
                     accumulated = 0;
                 }
                 
                 let elapsed = Date.now() - startTime;
-                
                 let totalMs = accumulated + elapsed;
                 
                 let totalSeconds = Math.floor(totalMs / 1000);
@@ -1253,8 +1253,8 @@
         }
 
         function obtenerTiempoFinalFormateado() {
-            let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
-            let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
+            let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
+            let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
             
             if (isNaN(accumulated)) {
                 accumulated = 0;
@@ -1498,15 +1498,6 @@
             if (!isAutoLogin) {
                 ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
             }
-
-            let btnCaja = document.getElementById('btnCaja');
-            if(btnCaja) {
-                if(userInput.toUpperCase() === "CAMILO") {
-                    btnCaja.classList.remove('hidden-btn');
-                } else {
-                    btnCaja.classList.add('hidden-btn');
-                }
-            }
             
             document.getElementById('loginOverlay').classList.add('hidden');
             document.getElementById('mainWorkspace').style.display = 'flex';
@@ -1546,8 +1537,9 @@
             ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoTotalFormateado, function() {
                 sessionStorage.removeItem('active_staff');
                 localStorage.removeItem('cyber_saved_staff'); 
-                localStorage.removeItem('cyber_shift_start_time');
-                localStorage.removeItem('cyber_shift_accumulated_time');
+                
+                sessionStorage.removeItem('cyber_shift_start_time');
+                sessionStorage.removeItem('cyber_shift_accumulated_time');
                 
                 if (timerInterval) {
                     clearInterval(timerInterval);
@@ -1820,6 +1812,10 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
                 card.classList.remove('active');
             }, 1500);
         });
+
+       
     </script>
+
+    
 </body>
 </html>
