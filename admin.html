@@ -414,13 +414,7 @@
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPh1eFcrTAVA-oBdyWG4E-jzhPZS_PnHuixdtcj_nbTemK0Xe6jtu1IzuXsej7Ib8V/exec";
         
-        const defaultPasswords = {
-            "KATHERINE": "CyberStaff*Kath9",
-            "MANUEL": "CyberStaff*Manu2",
-            "PABLO": "CyberStaff*Pabl4",
-            "ANGELICA": "CyberStaff*Ange7",
-            "CAMILO": "CyberStaff*Cami3"
-        };
+        
 
         let timerInterval = null;
         let autoRefreshCodesInterval = null; 
@@ -1357,25 +1351,8 @@
                     userElement.blur();
                     passElement.blur();
                     
-                    if (defaultPasswords[userInput] && defaultPasswords[userInput] === passInput) {
-                        window.isForcedChange = true;
-                        window.pendingUser = userInput;
-                        window.pendingOldPass = passInput;
-                        window.pendingRemember = rememberMe;
-                        
-                        document.getElementById('passwordModalTitle').innerText = "⚠️ Actualización Obligatoria";
-                        document.getElementById('passwordModalDesc').innerText = "Por seguridad y políticas del sistema, debes cambiar tu contraseña predeterminada para poder ingresar al panel operativo.";
-                        
-                        document.getElementById('oldPasswordForzado').style.display = "none";
-                        document.getElementById('oldPasswordForzado').value = passInput;
-                        
-                        document.getElementById('btnSubmitPasswordForzado').innerText = "Guardar y Entrar al Sistema";
-                        document.getElementById('btnCancelPasswordForzado').innerText = "Cancelar y Salir";
-                        
-                        document.getElementById('passwordOverlay').classList.add('open');
-                    } else {
-                        entrarAlSistema(userInput, rememberMe);
-                    }
+                    // ENTRA DIRECTO: El Sheets ya validó que todo está perfecto
+                    entrarAlSistema(userInput, rememberMe);
 
                 } else {
                     let errMsg = "Credenciales incorrectas en la base de datos.";
@@ -1397,7 +1374,6 @@
             scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
             document.body.appendChild(scriptElement);
         }
-
         function ejecutarCambioClaveForzado(e) {
             if (e) {
                 e.preventDefault();
