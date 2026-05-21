@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cybernet Staff - Garantías</title>
+    
+    <link rel="icon" type="image/jpeg" href="logo.jpeg">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cybernet Garantías">
+    
+    <link rel="stylesheet" href="admin.css">
+
+    <style>
+        /* --- ESTILOS ESPECÍFICOS PARA EL MÓDULO DE GARANTÍAS --- */
+        #globalHeader {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            padding: 15px 25px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            min-height: 65px !important;
+            box-sizing: border-box !important;
+            z-index: 9998 !important;
+            background-color: rgba(15, 15, 20, 0.85) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        [data-theme="light"] #globalHeader {
+            background-color: rgba(245, 245, 247, 0.85) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .circle-control {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: var(--glass-border);
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .circle-control:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .circle-control:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        /* ESTRUCTURA A 2 COLUMNAS */
+        .garantia-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding-top: 100px;
+            padding-bottom: 50px;
+        }
+
+        .section-panel {
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: var(--glass-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: fit-content;
+        }
+
+        .panel-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+        }
+
+        [data-theme="light"] .panel-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header h2 {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* FORMULARIO Y SELECTS */
+        select.ios-input-block {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            cursor: pointer;
+        }
+
+        select.ios-input-block option {
+            background-color: var(--sheet-modal-bg);
+            color: var(--text-primary);
+        }
+
+        textarea.ios-input-block {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        /* LISTA DE TICKETS DE GARANTÍA */
+        .tickets-scroll-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .ticket-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        [data-theme="light"] .ticket-card {
+            background: rgba(255, 255, 255, 0.45);
+            border: 0.5px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--ios-blue);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .ticket-field {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .ticket-field span {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .ticket-desc {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 5px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        [data-theme="light"] .ticket-desc {
+            background: rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .btn-resolver {
+            background: rgba(48, 209, 88, 0.15);
+            color: var(--ios-green);
+            border: 1px solid rgba(48, 209, 88, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-resolver:hover {
+            background: var(--ios-green);
+            color: white;
+        }
+
+        .btn-resolver:active {
+            transform: scale(0.96);
+        }
+
+        /* --- FORZAR VENTANAS EMERGENTES AL FRENTE --- */
+        .password-overlay {
+            z-index: 10000 !important;
+        }
+
+        @media (max-width: 900px) {
+            .garantia-container {
+                grid-template-columns: 1fr;
+                padding-top: 130px;
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            #globalHeader {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding: 15px 20px !important;
+                gap: 15px !important;
+            }
+            .header-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-orb-1"></div>
+    <div class="bg-orb-2"></div>
+
+    <header class="global-header" id="globalHeader">
+        <div class="top-left-status" id="staffStatusBar">
+            <div class="staff-badge">
+                <span id="staffSessionName">STAFF</span> • PANEL DE GARANTÍAS
+            </div>
+            <div class="timer-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span id="shiftTimer">00:00:00</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema">
+                </button>
+            <button class="btn-login-action" style="margin: 0; padding: 10px 20px; width: auto; font-size: 0.85rem;" onclick="window.location.href='admin.html'">
+                ← Volver al Panel
+            </button>
+        </div>
+    </header>
+
+    <div class="password-overlay" id="resolverOverlay">
+        <div class="password-card" onclick="event.stopPropagation()">
+            <h3 style="color: var(--ios-green); margin-bottom: 5px;">✅ Resolver Cuenta</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">Ingresa los nuevos datos de acceso para solucionar este reporte.</p>
+            
+            <form id="formResolverGarantia" onsubmit="ejecutarResolverGarantia(event)">
+                <input type="hidden" id="resolverFila">
+                <input type="hidden" id="resolverCorreoViejo">
+                <input type="hidden" id="resolverPlataforma">
+
+                <input type="email" id="resNuevoCorreo" class="ios-input-block" placeholder="Nuevo Correo Asignado" required>
+                <input type="text" id="resNuevaClave" class="ios-input-block" placeholder="Nueva Contraseña" required>
+                
+                <button type="submit" id="btnSubmitResolver" class="btn-login-action" style="background:var(--ios-green); box-shadow:0 4px 15px rgba(48, 209, 88, 0.35);">Guardar y Resolver</button>
+                <button type="button" class="btn-login-action" style="background:rgba(118, 118, 128, 0.2); color:var(--text-primary); box-shadow:none; margin-top: 10px;" onclick="cerrarModalResolver()">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="garantia-container">
+        
+        <div class="section-panel">
+            <div class="panel-header">
+                <h2>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    Reportar Problema
+                </h2>
+            </div>
+            
+            <form id="formReportar" onsubmit="ejecutarReporte(event)">
+                <select id="repPlataforma" class="ios-input-block" required>
+                    <option value="" disabled selected>Selecciona la Plataforma...</option>
+                    <option value="NETFLIX">NETFLIX</option>
+                    <option value="AMAZON-PRIME-VIDEO">AMAZON PRIME VIDEO</option>
+                    <option value="DISNEY-PREMIUM">DISNEY PREMIUM</option>
+                    <option value="HBO-MAX">HBO MAX</option>
+                    <option value="DISNEY-ESTANDAR">DISNEY ESTANDAR</option>
+                    <option value="PLEX">PLEX</option>
+                    <option value="CRUNCHYROLL">CRUNCHYROLL</option>
+                    <option value="VIX">VIX</option>
+                    <option value="PARAMOUNT">PARAMOUNT</option>
+                    <option value="METEGOL">METEGOL</option>
+                    <option value="CANVA">CANVA</option>
+                    <option value="CAPCUT">CAPCUT</option>
+                    <option value="SPOTIFY">SPOTIFY</option>
+                    <option value="YOUTUBE">YOUTUBE</option>
+                    <option value="DEEZER">DEEZER</option>
+                </select>
+
+                <input type="email" id="repCorreo" class="ios-input-block" placeholder="Correo de la cuenta" required autocomplete="off">
+                <input type="text" id="repClave" class="ios-input-block" placeholder="Contraseña actual" required autocomplete="off">
+                <textarea id="repDesc" class="ios-input-block" placeholder="Describe el problema (Ej: Clave incorrecta, pantalla llena, cuenta pausada...)" required></textarea>
+                
+                <button type="submit" id="btnSubmitReporte" class="btn-login-action" style="background:var(--ios-red); box-shadow:0 4px 15px rgba(255, 69, 58, 0.35);">
+                    Enviar a Garantía
+                </button>
+            </form>
+        </div>
+
+        <div class="section-panel">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Cuentas Reportadas
+                </h2>
+                <button class="btn-login-action" style="margin:0; width:auto; padding: 6px 12px; font-size: 0.75rem;" onclick="cargarGarantias()">🔄 Actualizar</button>
+            </div>
+
+            <div class="tickets-scroll-area" id="listaGarantias">
+                <div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">
+                    ⏳ Cargando garantías pendientes...
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURACIÓN INICIAL
+        // ==========================================
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPh1eFcrTAVA-oBdyWG4E-jzhPZS_PnHuixdtcj_nbTemK0Xe6jtu1IzuXsej7Ib8V/exec";
+        let isFetchingGarantias = false;
+        
+        // VARIABLES DEL CRONÓMETRO
+        let timerInterval = null;
+        let isTimerPaused = false;
+
+        function haptic() { 
+            if (navigator.vibrate) navigator.vibrate(15); 
+        }
+
+        // ==========================================
+        // TEMAS CLARO/OSCURO
+        // ==========================================
+        function toggleTheme() {
+            haptic();
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            let newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('cyber_theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            if (!btn) return;
+            if (theme === 'light') {
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+            } else {
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+            }
+        }
+
+        // ==========================================
+        // 1. FUNCIÓN PARA REPORTAR UNA CUENTA
+        // ==========================================
+        function ejecutarReporte(e) {
+            e.preventDefault();
+            haptic();
+            
+            const btnSubmit = document.getElementById('btnSubmitReporte');
+            const plataforma = document.getElementById('repPlataforma').value;
+            const correo = document.getElementById('repCorreo').value;
+            const clave = document.getElementById('repClave').value;
+            const descripcion = document.getElementById('repDesc').value;
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "⏳ Enviando Reporte...";
+
+            const oldScript = document.getElementById('cyber_reporte_node');
+            if (oldScript) oldScript.remove();
+
+            window.procesarReporteSheets = function(res) {
+                const scriptNode = document.getElementById('cyber_reporte_node');
+                if (scriptNode) scriptNode.remove();
+
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Enviar a Garantía";
+
+                if (res && res.status === "success") {
+                    alert("✅ " + res.message);
+                    document.getElementById('formReportar').reset();
+                    cargarGarantias(); // Refrescar la lista de al lado automáticamente
+                } else {
+                    alert("❌ Error: " + (res ? res.message : "Desconocido"));
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_reporte_node';
+            let queryParams = `?action=reportarGarantia&plataforma=${encodeURIComponent(plataforma)}&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}&descripcion=${encodeURIComponent(descripcion)}&callback=procesarReporteSheets&_ts=${Date.now()}`;
+            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+            document.body.appendChild(scriptElement);
+        }
+
+        // ==========================================
+        // 2. OBTENER LISTA DE REPORTADAS
+        // ==========================================
+        function cargarGarantias() {
+            if (isFetchingGarantias) return;
+            isFetchingGarantias = true;
+            haptic();
+
+            const container = document.getElementById('listaGarantias');
+            container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando tickets...</div>';
+
+            const oldScript = document.getElementById('cyber_getgarantias_node');
+            if (oldScript) oldScript.remove();
+
+            window.procesarListaGarantiasSheets = function(res) {
+                isFetchingGarantias = false;
+                const scriptNode = document.getElementById('cyber_getgarantias_node');
+                if (scriptNode) scriptNode.remove();
+
+                if (res && res.status === "success") {
+                    renderizarListaGarantias(res.data);
+                } else {
+                    container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--ios-red); font-weight:600;">❌ Error al cargar garantías.</div>';
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_getgarantias_node';
+            let queryParams = `?action=obtenerGarantias&callback=procesarListaGarantiasSheets&_ts=${Date.now()}`;
+            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+            document.body.appendChild(scriptElement);
+        }
+
+        function renderizarListaGarantias(data) {
+            const container = document.getElementById('listaGarantias');
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600;">✨ No hay cuentas en garantía en este momento.</div>';
+                return;
+            }
+
+            let html = "";
+            data.forEach(item => {
+                html += `
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <span class="platform-tag" style="color:var(--ios-blue); font-weight:800; font-size:0.9rem;">${item.plataforma}</span>
+                        <span class="ticket-date">${item.fecha}</span>
+                    </div>
+                    <div class="ticket-field">Correo: <span style="color:var(--ios-red); user-select:all;">${item.correo}</span></div>
+                    <div class="ticket-field">Clave: <span style="user-select:all;">${item.clave}</span></div>
+                    <div class="ticket-field">Proveedor: <span>${item.proveedor}</span></div>
+                    <div class="ticket-desc">💬 ${item.desc}</div>
+                    
+                    <button class="btn-resolver" onclick="abrirModalResolver('${item.filaIndex}', '${item.correo}', '${item.plataforma}')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        Resolver Cuenta
+                    </button>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // 3. FUNCIONES DEL MODAL PARA RESOLVER
+        // ==========================================
+        function abrirModalResolver(fila, correo, plataforma) {
+            haptic();
+            document.getElementById('resolverFila').value = fila;
+            document.getElementById('resolverCorreoViejo').value = correo;
+            document.getElementById('resolverPlataforma').value = plataforma;
+            
+            document.getElementById('resNuevoCorreo').value = correo;
+            
+            document.getElementById('resolverOverlay').classList.add('open');
+        }
+
+        function cerrarModalResolver() {
+            document.getElementById('resolverOverlay').classList.remove('open');
+            document.getElementById('formResolverGarantia').reset();
+        }
+
+        function ejecutarResolverGarantia(e) {
+            e.preventDefault();
+            haptic();
+
+            const btnSubmit = document.getElementById('btnSubmitResolver');
+            const fila = document.getElementById('resolverFila').value;
+            const plat = document.getElementById('resolverPlataforma').value;
+            const correoViejo = document.getElementById('resolverCorreoViejo').value;
+            const nuevoCorreo = document.getElementById('resNuevoCorreo').value;
+            const nuevaClave = document.getElementById('resNuevaClave').value;
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "⏳ Guardando Solución...";
+
+            const oldScript = document.getElementById('cyber_resolver_node');
+            if (oldScript) oldScript.remove();
+
+            window.procesarResolucionSheets = function(res) {
+                const scriptNode = document.getElementById('cyber_resolver_node');
+                if (scriptNode) scriptNode.remove();
+
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Guardar y Resolver";
+
+                if (res && res.status === "success") {
+                    alert("✅ " + res.message);
+                    cerrarModalResolver();
+                    cargarGarantias(); // Actualiza la lista para quitar la resuelta
+                } else {
+                    alert("❌ Error: " + (res ? res.message : "Desconocido"));
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_resolver_node';
+            let queryParams = `?action=resolverGarantia&filaIndex=${encodeURIComponent(fila)}&plataforma=${encodeURIComponent(plat)}&correoViejo=${encodeURIComponent(correoViejo)}&nuevoCorreo=${encodeURIComponent(nuevoCorreo)}&nuevaClave=${encodeURIComponent(nuevaClave)}&callback=procesarResolucionSheets&_ts=${Date.now()}`;
+            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+            document.body.appendChild(scriptElement);
+        }
+
+        // ==========================================
+        // 4. LÓGICA DEL CRONÓMETRO DE TURNO
+        // ==========================================
+        function startShiftTimer() {
+            if (!localStorage.getItem('cyber_shift_start_time')) {
+                localStorage.setItem('cyber_shift_start_time', Date.now());
+            }
+            if (!localStorage.getItem('cyber_shift_accumulated_time')) {
+                localStorage.setItem('cyber_shift_accumulated_time', 0);
+            }
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            timerInterval = setInterval(function() {
+                if (isTimerPaused) {
+                    return; 
+                }
+                
+                let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
+                let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
+                if (isNaN(accumulated)) {
+                    accumulated = 0;
+                }
+                
+                let elapsed = Date.now() - startTime;
+                
+                let totalMs = accumulated + elapsed;
+                
+                let totalSeconds = Math.floor(totalMs / 1000);
+                let hours = Math.floor(totalSeconds / 3600);
+                let minutes = Math.floor((totalSeconds % 3600) / 60);
+                let seconds = totalSeconds % 60;
+
+                let hStr = String(hours).padStart(2, '0');
+                let mStr = String(minutes).padStart(2, '0');
+                let sStr = String(seconds).padStart(2, '0');
+
+                let stElement = document.getElementById('shiftTimer');
+                if (stElement) {
+                    stElement.innerText = hStr + ":" + mStr + ":" + sStr;
+                }
+            }, 1000);
+        }
+
+        // ==========================================
+        // CARGA INICIAL
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            const activeUser = sessionStorage.getItem('active_staff');
+            if(activeUser) {
+                document.getElementById('staffSessionName').innerText = activeUser.toUpperCase();
+                // Iniciar el cronómetro apenas se verifique la sesión
+                startShiftTimer();
+            }
+
+            let savedTheme = localStorage.getItem('cyber_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            cargarGarantias(); // Cargar la lista al entrar
+        });
+    </script>
+</body>
+</html>
