@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cybernet Staff - Módulo Ventas</title>
+    
+    <link rel="icon" type="image/jpeg" href="logo.jpeg">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="stylesheet" href="admin.css">
+    
+    <style>
+        /* ESTILOS ESPECÍFICOS PARA EL MÓDULO DE VENTAS */
+        .main-workspace {
+            display: flex; 
+            flex-direction: column;
+            width: 100%; 
+            max-width: 800px; 
+            align-items: center;
+            animation: workspaceUp 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
+            margin-top: 100px;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--glass-bg); 
+            backdrop-filter: blur(40px) saturate(180%); 
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: var(--glass-border); 
+            border-radius: 22px; 
+            padding: 30px; 
+            box-shadow: var(--glass-shadow); 
+            width: 100%;
+        }
+
+        .card h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--ios-green);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        /* SELECTOR MÚLTIPLE PERSONALIZADO CON BUSCADOR */
+        .custom-multiselect {
+            position: relative;
+            width: 100%;
+        }
+
+        .multiselect-box {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: var(--glass-border);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition-spring);
+        }
+
+        .multiselect-box:hover {
+            background: var(--input-focus);
+        }
+
+        .multiselect-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: var(--sheet-modal-bg);
+            border: var(--glass-border);
+            border-radius: 12px;
+            margin-top: 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .multiselect-dropdown.show {
+            display: flex;
+        }
+
+        .multiselect-search {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .multiselect-search input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .multiselect-options {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .multiselect-options label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .multiselect-options label:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .multiselect-options input[type="checkbox"] {
+            margin-right: 10px;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--ios-green);
+        }
+
+        /* UPLOAD DE IMAGEN Y OCR */
+        .file-upload-wrapper {
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--ios-green);
+            background: rgba(48, 209, 88, 0.05);
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        #ocr-result-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(10, 132, 255, 0.1);
+            border: 1px solid rgba(10, 132, 255, 0.3);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            display: none;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .grid-2-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        select.ios-input-block {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        select.ios-input-block option {
+            background: #1e1e1e;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-orb-1"></div>
+    <div class="bg-orb-2"></div>
+
+    <header class="global-header" id="globalHeader">
+        <div class="top-left-status" id="staffStatusBar">
+            <div class="staff-badge">
+                <span id="staffSessionName">USER</span> • MÓDULO VENTAS
+            </div>
+            <div class="timer-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span id="shiftTimer">00:00:00</span>
+            </div>
+        </div>
+
+        <div class="control-container" id="controlPanel">
+            <button class="interface-control-item pill-back-control" style="background: rgba(118, 118, 128, 0.2); border: 0.5px solid rgba(118, 118, 128, 0.3); padding: 10px 20px; border-radius: 22px; color: white; font-weight: bold; cursor: pointer;" onclick="window.location.href='admin.html'">⬅ VOLVER AL PANEL</button>
+            <button class="interface-control-item circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema"></button>
+        </div>
+    </header>
+
+    <div class="main-workspace">
+        <div class="card">
+            <h2>🛒 Registro de Nueva Venta</h2>
+            <form id="formVenta" onsubmit="ejecutarRegistroVenta(event)">
+                
+                <div class="grid-2-cols">
+                    <div class="input-group">
+                        <label class="input-label">📱 Celular del Cliente (Obligatorio)</label>
+                        <input type="tel" id="inputCelular" class="ios-input-block" placeholder="Ej: 3001234567" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">👤 Nombre del Cliente (Opcional)</label>
+                        <input type="text" id="inputNombre" class="ios-input-block" placeholder="Ej: Juan Pérez">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">📺 Plataformas a Activar</label>
+                    <div class="custom-multiselect" id="multiSelectContainer">
+                        <div class="multiselect-box" onclick="toggleDropdown()">
+                            <span id="multiselectText">Seleccionar plataformas...</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="multiselect-dropdown" id="dropdownList">
+                            <div class="multiselect-search">
+                                <input type="text" id="searchPlat" placeholder="🔍 Buscar plataforma..." onkeyup="filtrarPlataformas()" onclick="event.stopPropagation();">
+                            </div>
+                            <div class="multiselect-options" id="opcionesPlataformas">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2-cols">
+                    <div class="input-group">
+                        <label class="input-label">📅 Cantidad de Meses</label>
+                        <input type="number" id="inputMeses" class="ios-input-block" min="1" max="5" value="1" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">💰 Valor Cobrado (COP)</label>
+                        <input type="number" id="inputValor" class="ios-input-block" placeholder="Ej: 14500" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">🏦 Método de Pago</label>
+                    <select id="inputMetodoPago" class="ios-input-block" required>
+                        <option value="" disabled selected>Seleccione el banco/método...</option>
+                        <option value="Bre-B">Bre-B</option>
+                        <option value="Nequi">Nequi</option>
+                        <option value="Bancolombia">Bancolombia</option>
+                        <option value="Daviplata">Daviplata</option>
+                        <option value="Saldo">Saldo (Revendedor)</option>
+                        <option value="Efectivo">Efectivo</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">📸 Subir Comprobante (Se analizará el pago)</label>
+                    <div class="file-upload-wrapper">
+                        <div id="fileText">Haz clic o arrastra la imagen del pago aquí</div>
+                        <input type="file" id="inputFile" accept="image/*" required onchange="procesarImagen(this)">
+                    </div>
+                    
+                    <div id="ocr-result-box">
+                        <strong style="color:var(--ios-blue);">🤖 Análisis de Inteligencia Artificial:</strong><br>
+                        <span id="ocrTextContent">Procesando imagen...</span>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnRegistrarVenta" class="btn-action" style="background:var(--ios-green); box-shadow: 0 4px 15px rgba(48, 209, 88, 0.35); padding: 16px; font-size: 1rem;">🚀 Guardar Venta y Subir a Drive</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+    <script>
+        // ==========================================
+        // VARIABLES GLOBALES Y CONFIGURACIÓN
+        // ==========================================
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPh1eFcrTAVA-oBdyWG4E-jzhPZS_PnHuixdtcj_nbTemK0Xe6jtu1IzuXsej7Ib8V/exec";
+        
+        const PLATAFORMAS_DISPONIBLES = [
+            "1 NETFLIX", "RENO: 1 NETFLIX", "2 NETFLIX", "3 NETFLIX", "4 NETFLIX", "5 NETFLIX",
+            "AMAZON", "2 AMAZON", "3 AMAZON", "DISNEY PREMIUM", "2 DISNEY PREMIUM",
+            "DISNEY ESTANDAR", "2 DISNEY ESTANDAR", "HBO MAX", "2 HBO MAX", 
+            "VIX", "PLEX", "PARAMOUNT", "APPLE TV", "YOUTUBE", "SPOTIFY", "IPTV",
+            "CANVA", "CAPCUT", "METEGOL", "DEEZER", "MUBI", "CRUNCHYROLL"
+        ];
+
+        let base64Image = "";
+        let imageMimeType = "";
+        
+        let timerInterval = null;
+        let temporizadorInactividad = null;
+        let temporizadorCierreTotal = null;
+        let isTimerPaused = false;
+        const INACTIVITY_LIMIT = 15 * 60 * 1000;         
+        const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;
+
+        function haptic() { if (navigator.vibrate) navigator.vibrate(15); }
+
+        function toggleTheme() {
+            haptic();
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            let newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('cyber_theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            if (!btn) return;
+            btn.innerHTML = theme === 'light' 
+                ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
+                : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        }
+
+        // ==========================================
+        // LÓGICA DEL SELECTOR MÚLTIPLE DE PLATAFORMAS
+        // ==========================================
+        function cargarPlataformas() {
+            const container = document.getElementById('opcionesPlataformas');
+            let html = "";
+            PLATAFORMAS_DISPONIBLES.forEach(plat => {
+                html += `<label class="plat-label"><input type="checkbox" value="${plat}" onchange="actualizarTextoMultiselect()"> ${plat}</label>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function toggleDropdown() {
+            document.getElementById('dropdownList').classList.toggle('show');
+        }
+
+        function filtrarPlataformas() {
+            let query = document.getElementById('searchPlat').value.toLowerCase();
+            let labels = document.querySelectorAll('.plat-label');
+            labels.forEach(label => {
+                if(label.innerText.toLowerCase().includes(query)) {
+                    label.style.display = "flex";
+                } else {
+                    label.style.display = "none";
+                }
+            });
+        }
+
+        function actualizarTextoMultiselect() {
+            let seleccionados = [];
+            let checkboxes = document.querySelectorAll('.multiselect-options input:checked');
+            checkboxes.forEach(cb => seleccionados.push(cb.value));
+
+            let texto = seleccionados.length > 0 ? seleccionados.join(', ') : "Seleccionar plataformas...";
+            document.getElementById('multiselectText').innerText = texto;
+        }
+
+        // Cerrar dropdown si se hace clic afuera
+        document.addEventListener('click', function(e) {
+            let container = document.getElementById('multiSelectContainer');
+            if (container && !container.contains(e.target)) {
+                document.getElementById('dropdownList').classList.remove('show');
+            }
+        });
+
+        // ==========================================
+        // LÓGICA DE OCR (LECTURA DE IMAGEN) Y BASE64
+        // ==========================================
+        async function procesarImagen(input) {
+            if (input.files && input.files[0]) {
+                let file = input.files[0];
+                document.getElementById('fileText').innerText = "Archivo cargado: " + file.name;
+                
+                // Mostrar caja de OCR
+                const ocrBox = document.getElementById('ocr-result-box');
+                const ocrText = document.getElementById('ocrTextContent');
+                ocrBox.style.display = 'block';
+                ocrText.innerHTML = "<i>Analizando comprobante con Inteligencia Artificial... ⏳</i>";
+
+                // 1. Convertir a Base64 para guardarlo en Drive
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Extraer solo la data base64 (quitar "data:image/jpeg;base64,")
+                    let resultUrl = e.target.result;
+                    imageMimeType = resultUrl.split(';')[0].split(':')[1];
+                    base64Image = resultUrl.split(',')[1];
+                }
+                reader.readAsDataURL(file);
+
+                // 2. Ejecutar Tesseract OCR para leer el texto
+                try {
+                    const worker = await Tesseract.createWorker('spa'); // Español
+                    const ret = await worker.recognize(file);
+                    await worker.terminate();
+                    
+                    let textoExtraido = ret.data.text;
+                    
+                    // Filtrado inteligente para rectificar pagos (Buscar montos, aprobados, referencias)
+                    let extractoUtil = textoExtraido.match(/(Aprobado|Exitoso|Transferencia|[\$0-9]{3,})/gi);
+                    let resumenVisual = extractoUtil ? extractoUtil.join(" | ") : textoExtraido;
+
+                    ocrText.innerHTML = `<strong>Valores detectados:</strong><br>${resumenVisual}<br><br><span style="font-size:0.75rem; color:var(--text-secondary);">Revisa que el valor coincida con lo que vas a registrar.</span>`;
+                } catch (error) {
+                    ocrText.innerHTML = "<i>No se pudo leer el texto automáticamente, pero la imagen se guardará correctamente.</i>";
+                }
+            }
+        }
+
+        // ==========================================
+        // ENVIAR EL FORMULARIO (APPS SCRIPT)
+        // ==========================================
+        function ejecutarRegistroVenta(e) {
+            e.preventDefault();
+            haptic();
+
+            let celular = document.getElementById('inputCelular').value.trim();
+            let nombre = document.getElementById('inputNombre').value.trim();
+            let meses = document.getElementById('inputMeses').value;
+            let valor = document.getElementById('inputValor').value;
+            let metodo = document.getElementById('inputMetodoPago').value;
+            let trabajador = sessionStorage.getItem('active_staff') || "STAFF";
+
+            // Obtener plataformas seleccionadas
+            let seleccionados = [];
+            document.querySelectorAll('.multiselect-options input:checked').forEach(cb => seleccionados.push(cb.value));
+            
+            if (seleccionados.length === 0) {
+                alert("⚠️ Selecciona al menos una plataforma.");
+                return;
+            }
+
+            if (!base64Image) {
+                alert("⚠️ Debes subir el comprobante de pago.");
+                return;
+            }
+
+            let plataformasStr = seleccionados.join(' | ');
+
+            const btn = document.getElementById('btnRegistrarVenta');
+            btn.disabled = true;
+            btn.innerText = "⏳ Subiendo a Drive y registrando...";
+
+            // Creamos un Payload para enviar mediante POST a tu Apps Script
+            const payload = {
+                action: "guardarVentaDrive",
+                celular: celular,
+                nombre: nombre,
+                plataformas: plataformasStr,
+                meses: meses,
+                valor: valor,
+                metodo: metodo,
+                vendedor: trabajador,
+                imageBase64: base64Image,
+                mimeType: imageMimeType
+            };
+
+            // Enviar a Google Apps Script usando POST
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors", // Evita problemas de CORS, pero no podemos leer el JSON de respuesta directo
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                alert(`✅ ¡Venta Registrada Exitosamente!\n\nEl comprobante ha sido enviado a Google Drive con el número: ${celular}`);
+                document.getElementById('formVenta').reset();
+                document.getElementById('multiselectText').innerText = "Seleccionar plataformas...";
+                document.getElementById('fileText').innerText = "Haz clic o arrastra la imagen del pago aquí";
+                document.getElementById('ocr-result-box').style.display = "none";
+                base64Image = "";
+                
+                btn.disabled = false;
+                btn.innerText = "🚀 Guardar Venta y Subir a Drive";
+            })
+            .catch((err) => {
+                alert("❌ Ocurrió un error al enviar los datos. Revisa tu conexión.");
+                btn.disabled = false;
+                btn.innerText = "🚀 Guardar Venta y Subir a Drive";
+            });
+        }
+
+        // ==========================================
+        // CONTROL DE SESIÓN E INACTIVIDAD (IGUAL A ADMIN)
+        // ==========================================
+        function resetearInactividad() {
+            if (!sessionStorage.getItem('active_staff')) return; 
+
+            if (isTimerPaused) {
+                isTimerPaused = false;
+                localStorage.setItem('cyber_shift_start_time', Date.now());
+                const tBadge = document.querySelector('.timer-badge');
+                if (tBadge) { tBadge.style.color = 'var(--ios-green)'; tBadge.style.borderColor = 'var(--glass-border)'; }
+                const sTimer = document.getElementById('shiftTimer');
+                if (sTimer) sTimer.innerText = "Reanudando...";
+            }
+
+            if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
+            if (temporizadorCierreTotal) clearTimeout(temporizadorCierreTotal);
+            
+            temporizadorInactividad = setTimeout(() => {
+                if (sessionStorage.getItem('active_staff') && !isTimerPaused) {
+                    isTimerPaused = true;
+                    let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
+                    let currentAccumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
+                    if (isNaN(currentAccumulated)) currentAccumulated = 0;
+                    
+                    let newlyElapsed = Date.now() - startTime;
+                    let validTime = newlyElapsed - INACTIVITY_LIMIT;
+                    if (validTime < 0) validTime = 0;
+                    
+                    localStorage.setItem('cyber_shift_accumulated_time', currentAccumulated + validTime);
+                    
+                    const tBadge2 = document.querySelector('.timer-badge');
+                    if (tBadge2) { tBadge2.style.color = '#ffcc00'; tBadge2.style.borderColor = '#ffcc00'; }
+                    const sTimer2 = document.getElementById('shiftTimer');
+                    if (sTimer2) sTimer2.innerText = "PAUSADO";
+
+                    alert("⏳ Por inactividad (15 minutos), el cronómetro de tu turno se ha pausado.\nMueve el mouse o toca la pantalla para reanudar el conteo de horas.");
+                }
+            }, INACTIVITY_LIMIT); 
+
+            temporizadorCierreTotal = setTimeout(() => {
+                if (sessionStorage.getItem('active_staff')) {
+                    alert("⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.");
+                    sessionStorage.removeItem('active_staff');
+                    window.location.href = 'admin.html';
+                }
+            }, INACTIVITY_LOGOUT_LIMIT);
+        }
+
+        function iniciarControlInactividad() {
+            window.addEventListener('mousemove', resetearInactividad);
+            window.addEventListener('keypress', resetearInactividad);
+            window.addEventListener('click', resetearInactividad);
+            window.addEventListener('scroll', resetearInactividad);
+            window.addEventListener('touchstart', resetearInactividad);
+            resetearInactividad(); 
+        }
+
+        function startShiftTimer() {
+            if (!localStorage.getItem('cyber_shift_start_time')) localStorage.setItem('cyber_shift_start_time', Date.now());
+            if (!localStorage.getItem('cyber_shift_accumulated_time')) localStorage.setItem('cyber_shift_accumulated_time', 0);
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(function() {
+                if (isTimerPaused) return; 
+                let startTime = parseInt(localStorage.getItem('cyber_shift_start_time'));
+                let accumulated = parseInt(localStorage.getItem('cyber_shift_accumulated_time'));
+                if (isNaN(accumulated)) accumulated = 0;
+                let elapsed = Date.now() - startTime;
+                let totalMs = accumulated + elapsed;
+                
+                let hours = Math.floor(totalMs / 3600000);
+                let minutes = Math.floor((totalMs % 3600000) / 60000);
+                let seconds = Math.floor((totalMs % 60000) / 1000);
+
+                let stElement = document.getElementById('shiftTimer');
+                if (stElement) stElement.innerText = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+            }, 1000);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let savedTheme = localStorage.getItem('cyber_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            let activeUser = sessionStorage.getItem('active_staff');
+            if (!activeUser) {
+                window.location.href = 'admin.html'; // Redirigir si no hay sesión
+                return;
+            }
+            let sessionNameEl = document.getElementById('staffSessionName');
+            if (sessionNameEl) sessionNameEl.innerText = activeUser;
+
+            cargarPlataformas();
+            startShiftTimer();
+            iniciarControlInactividad();
+        });
+    </script>
+</body>
+</html>
