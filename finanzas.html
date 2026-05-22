@@ -12,6 +12,21 @@
     
     <link rel="stylesheet" href="admin.css">
 
+    <script>
+        (function() {
+            // Escanear si hay una sesión activa en la memoria del navegador
+            let sessionUser = sessionStorage.getItem('active_staff') || localStorage.getItem('cyber_saved_staff');
+            
+            if (!sessionUser || sessionUser.toUpperCase().trim() !== "CAMILO") {
+                // Si la sesión está vacía o el usuario NO es Camilo, bloquear y redirigir de inmediato
+                window.location.replace("admin.html");
+            } else {
+                // Si eres tú, asegurar que la sesión permanezca activa en este módulo
+                sessionStorage.setItem('active_staff', "CAMILO");
+            }
+        })();
+    </script>
+
     <style>
         /* =========================================================================
            REDISEÑO DE INTERFAZ FINANZAS V15: NAVBAR FLUIDO (NO ESTÁTICO)
