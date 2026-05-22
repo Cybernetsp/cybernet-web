@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cybernet Staff - Promo</title>
+    
+    <link rel="icon" type="image/jpeg" href="logo.jpeg">
+    <meta name="theme-color" content="#0b0e14">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <style>
+        /* ========================================================================= */
+        /* VARIABLES GLOBALES Y ESTÉTICA PREMIUM (TIPO PANEL DARK) */
+        /* ========================================================================= */
+        :root {
+            --bg-color: #0b0e14;
+            --panel-bg: #151822;
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #8b92a5;
+            --ios-blue: #3b82f6;
+            --ios-blue-hover: #2563eb;
+            --block-bg: rgba(16, 185, 129, 0.1);
+            --block-border: rgba(16, 185, 129, 0.3);
+            --block-text: #10b981;
+            --card-bg: #1c202d;
+            --card-hover: #232838;
+            --icon-bg: rgba(255, 255, 255, 0.05);
+            --icon-hover: rgba(255, 255, 255, 0.1);
+            --ios-green: #30d158;
+            --ios-red: #ff453a;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f3f4f6;
+            --panel-bg: #ffffff;
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --ios-blue: #2563eb;
+            --ios-blue-hover: #1d4ed8;
+            --block-bg: rgba(16, 185, 129, 0.1);
+            --block-border: rgba(16, 185, 129, 0.4);
+            --block-text: #059669;
+            --card-bg: #f9fafb;
+            --card-hover: #f3f4f6;
+            --icon-bg: rgba(0, 0, 0, 0.05);
+            --icon-hover: rgba(0, 0, 0, 0.1);
+            --ios-green: #34c759;
+            --ios-red: #ff3b30;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* ========================================================================= */
+        /* ANIMACIONES Y FONDOS EN MOVIMIENTO (ORBES) */
+        /* ========================================================================= */
+        .bg-orb-1, .bg-orb-2 {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out alternate;
+            pointer-events: none;
+        }
+
+        .bg-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(10, 132, 255, 0.15);
+            top: -100px;
+            left: -100px;
+        }
+
+        .bg-orb-2 {
+            width: 500px;
+            height: 500px;
+            background: rgba(94, 92, 230, 0.15);
+            bottom: -150px;
+            right: -100px;
+            animation-delay: -10s;
+        }
+
+        [data-theme="light"] .bg-orb-1 { background: rgba(0, 122, 255, 0.15); filter: blur(60px); }
+        [data-theme="light"] .bg-orb-2 { background: rgba(88, 86, 214, 0.1); filter: blur(60px); }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(50px, 30px) scale(1.1); }
+            100% { transform: translate(-30px, 50px) scale(0.9); }
+        }
+
+        @keyframes pulseIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* ========================================================================= */
+        /* CABECERA (HEADER) GLOBAL CON USUARIO Y TIEMPO */
+        /* ========================================================================= */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(11, 14, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            height: 70px;
+        }
+
+        [data-theme="light"] header {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .top-left-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .staff-badge {
+            background: rgba(10, 132, 255, 0.15);
+            color: var(--ios-blue);
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(10, 132, 255, 0.3);
+            text-transform: uppercase;
+        }
+
+        .timer-badge {
+            background: rgba(48, 209, 88, 0.15);
+            color: var(--ios-green);
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(48, 209, 88, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-back {
+            background: var(--icon-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            background: var(--ios-blue);
+            color: white;
+            border-color: var(--ios-blue);
+        }
+
+        /* ========================================================================= */
+        /* CONTENEDOR PRINCIPAL Y ÁREA DE TRABAJO */
+        /* ========================================================================= */
+        .workspace {
+            padding: 100px 20px 40px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* ========================================================================= */
+        /* PANEL 1: CONTROL DE SINCRONIZACIÓN Y BLOQUES */
+        /* ========================================================================= */
+        .main-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 15px;
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .clients-badge {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--ios-blue);
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        /* Botón de Sincronizar / Generar */
+        .btn-sync {
+            width: 100%;
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .btn-sync:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-sync:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Contenedor de Botones de Bloques */
+        .blocks-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-block {
+            flex: 1;
+            min-width: 140px;
+            background: var(--block-bg);
+            border: 1px solid var(--block-border);
+            color: var(--block-text);
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-block:hover {
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-block.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* ========================================================================= */
+        /* PANEL 2: LISTA DE MENSAJES (GRID DE CONTACTOS) */
+        /* ========================================================================= */
+        .list-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .list-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        /* Grid de contactos 2 columnas */
+        .contacts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+        }
+
+        .contact-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .contact-card:hover {
+            background: var(--card-hover);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .contact-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .index-badge {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .index-badge {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .phone-text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--ios-blue);
+            font-family: monospace;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        /* ESTILO PARA NÚMERO TACHADO DESPUÉS DE COPIAR */
+        .crossed-out {
+            text-decoration: line-through;
+            opacity: 0.4;
+            color: var(--text-secondary);
+        }
+
+        .contact-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-icon {
+            background: var(--icon-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-icon:hover {
+            background: var(--icon-hover);
+            color: var(--text-primary);
+        }
+
+        .btn-icon.success {
+            background: rgba(48, 209, 88, 0.2);
+            color: #30d158;
+            border-color: rgba(48, 209, 88, 0.4);
+        }
+
+        /* ========================================================================= */
+        /* TOAST Y SPINNER */
+        /* ========================================================================= */
+        .status-empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            grid-column: 1 / -1; /* 🟢 LA MAGIA: Obliga al bloque a ocupar todo el ancho */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(30, 30, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .loader-spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ========================================================================= */
+        /* RESPONSIVE DESIGN PARA MÓVILES */
+        /* ========================================================================= */
+        @media (max-width: 600px) {
+            header { 
+                padding: 15px; 
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                height: auto;
+            }
+            .btn-back {
+                position: absolute;
+                right: 15px;
+                top: 15px;
+            }
+            .workspace { padding: 120px 15px 30px 15px; }
+            .contacts-grid { grid-template-columns: 1fr; }
+            .btn-block { min-width: 100%; }
+            .contact-card { padding: 12px; }
+            .phone-text { font-size: 0.95rem; }
+            .btn-icon { width: 36px; height: 36px; }
+            .btn-icon svg { width: 16px; height: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-orb-1"></div>
+    <div class="bg-orb-2"></div>
+
+    <header>
+        <div class="top-left-status" id="staffStatusBar">
+            <div class="staff-badge">
+                <span id="staffSessionName">USER</span> • PROMO
+            </div>
+            <div class="timer-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span id="shiftTimer">00:00:00</span>
+            </div>
+        </div>
+        <a href="admin.html" class="btn-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Volver
+        </a>
+    </header>
+
+    <main class="workspace">
+        
+        <div class="main-panel">
+            <div class="panel-header">
+                <div class="panel-title">Generador de Promociones</div>
+                <div class="clients-badge" id="badgeTotalClients">0 clientes</div>
+            </div>
+            
+            <button id="btnFetchContacts" class="btn-sync" onclick="iniciarSincronizacion()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                </svg>
+                Generar Promo
+            </button>
+
+            <div id="blockButtonsContainer" class="blocks-container"></div>
+        </div>
+
+        <div class="list-panel">
+            <div class="list-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Lista de Mensajes
+            </div>
+
+            <div id="promoGridContainer" class="contacts-grid">
+                <div class="status-empty">
+                    Presiona "Generar Promo" para extraer los clientes de la base de datos.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="globalToast" class="toast-notification">
+        <span id="toastIcon">✅</span>
+        <span id="toastText">Acción completada</span>
+    </div>
+
+    <script>
+        // -------------------------------------------------------------------------
+        // CONEXIÓN DIRECTA CON LA API CENTRAL
+        // -------------------------------------------------------------------------
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxK9Ggqp1xIhYS_MtO3jlRC-iiS9e1bN5B0Kr6wT8Yx9_BicSY6IIprZUtC5Jg_vrAQ/exec";
+        
+        let isFetching = false;
+        let globalContacts = []; 
+        let currentBlockIndex = 0;
+        const CHUNK_SIZE = 10; // Bloques de 10 en 10 exactos
+
+        let timerInterval = null;
+        let temporizadorInactividad = null;
+        const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;
+        let isTimerPaused = false;
+
+        // -------------------------------------------------------------------------
+        // UTILIDADES: HAPTIC Y TOASTS
+        // -------------------------------------------------------------------------
+        function hapticFeedback() { 
+            if (navigator.vibrate) navigator.vibrate(15); 
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('globalToast');
+            const toastText = document.getElementById('toastText');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastText.innerText = message;
+            toastIcon.innerText = isError ? "❌" : "✅";
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // -------------------------------------------------------------------------
+        // 1. EXTRAER CONTACTOS, LIMPIAR DUPLICADOS Y LIMITAR A 20 MÁXIMO
+        // -------------------------------------------------------------------------
+        function iniciarSincronizacion() {
+            if (isFetching) return;
+            
+            hapticFeedback();
+            isFetching = true;
+            globalContacts = [];
+            currentBlockIndex = 0;
+            
+            const btn = document.getElementById('btnFetchContacts');
+            const badge = document.getElementById('badgeTotalClients');
+            const blockContainer = document.getElementById('blockButtonsContainer');
+            const gridContainer = document.getElementById('promoGridContainer');
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader-spinner"></div> Generando Promo...';
+            blockContainer.innerHTML = "";
+            gridContainer.innerHTML = '<div class="status-empty">⏳ Extrayendo clientes del historial y aplicando motor 60/40...</div>';
+            badge.innerText = "0 clientes";
+
+            const oldScript = document.getElementById('cyber_promo_node');
+            if (oldScript) oldScript.remove();
+
+            window.procesarSincronizacion = function(res) {
+                isFetching = false;
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                    </svg>
+                    Generar Promo
+                `;
+
+                const scriptNode = document.getElementById('cyber_promo_node');
+                if (scriptNode) scriptNode.remove();
+
+                if (res && res.status === "success") {
+                    let data = res.data;
+                    
+                    if (!data || data.length === 0) {
+                        gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">⚠️ No quedan clientes disponibles en el Histórico.</div>`;
+                        return;
+                    }
+
+                    // Limpiar duplicados por número
+                    let uniqueMap = new Map();
+                    for (let i = 0; i < data.length; i++) {
+                        let item = data[i];
+                        let tel = item.tel;
+                        if (tel && tel.trim() !== "" && !uniqueMap.has(tel.trim())) {
+                            uniqueMap.set(tel.trim(), item);
+                        }
+                    }
+
+                    // LIMITAMOS A EXACTAMENTE 20 CLIENTES PARA CREAR 2 BLOQUES DE 10
+                    globalContacts = Array.from(uniqueMap.values()).slice(0, 20);
+                    
+                    if (globalContacts.length === 0) {
+                        gridContainer.innerHTML = `<div class="status-empty">⚠️ Registros inválidos.</div>`;
+                        return;
+                    }
+
+                    // Actualizar Badge
+                    badge.innerText = `${globalContacts.length} clientes`;
+                    showToast(`Éxito. Se prepararon ${globalContacts.length} contactos listos.`);
+
+                    // Generar Botones de Bloques
+                    crearBotonesBloques();
+
+                } else {
+                    let errMsg = "Error de conexión.";
+                    if (res && res.message) errMsg = res.message;
+                    gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">❌ ${errMsg}</div>`;
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_promo_node';
+            // Llama a generarPromosWeb, la cual extrae sin preguntar fechas.
+            let queryParams = "?action=generarPromosWeb&callback=procesarSincronizacion&_ts=" + Date.now();
+            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+            document.body.appendChild(scriptElement);
+        }
+
+        // -------------------------------------------------------------------------
+        // 2. CREAR BOTONES VERDES DE PAGINACIÓN (BLOQUE 1-10, BLOQUE 11-20)
+        // -------------------------------------------------------------------------
+        function crearBotonesBloques() {
+            const blockContainer = document.getElementById('blockButtonsContainer');
+            blockContainer.innerHTML = "";
+
+            const totalBlocks = Math.ceil(globalContacts.length / CHUNK_SIZE);
+
+            for (let i = 0; i < totalBlocks; i++) {
+                let start = (i * CHUNK_SIZE) + 1;
+                let end = Math.min((i + 1) * CHUNK_SIZE, globalContacts.length);
+                
+                const btn = document.createElement('button');
+                btn.className = `btn-block ${i === 0 ? 'active' : ''}`;
+                btn.id = `btnBlock_${i}`;
+                btn.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Bloque (${start}-${end})
+                `;
+                
+                btn.onclick = () => mostrarBloque(i);
+                blockContainer.appendChild(btn);
+            }
+
+            // Mostrar el primer bloque por defecto
+            mostrarBloque(0);
+        }
+
+        // -------------------------------------------------------------------------
+        // 3. MOSTRAR LOS 10 CONTACTOS DEL BLOQUE SELECCIONADO EN EL GRID
+        // -------------------------------------------------------------------------
+        function mostrarBloque(blockIndex) {
+            hapticFeedback();
+            currentBlockIndex = blockIndex;
+
+            // Actualizar botones activos
+            const allBtns = document.querySelectorAll('.btn-block');
+            allBtns.forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`btnBlock_${blockIndex}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Extraer el pedazo de array correspondiente a este bloque
+            const startIndex = blockIndex * CHUNK_SIZE;
+            const endIndex = startIndex + CHUNK_SIZE;
+            const loteActual = globalContacts.slice(startIndex, endIndex);
+
+            const gridContainer = document.getElementById('promoGridContainer');
+            gridContainer.innerHTML = "";
+
+            // Renderizar las tarjetas (Solo 1 botón: Copiar Mensaje)
+            loteActual.forEach((item, localIndex) => {
+                const absoluteIndex = startIndex + localIndex;
+                const visualIndex = absoluteIndex + 1; 
+
+                // Ocultamos comillas que rompan el JS en el onclick
+                const safeMessage = item.mensaje.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+                const card = document.createElement('div');
+                card.className = 'contact-card';
+                card.innerHTML = `
+                    <div class="contact-left">
+                        <div class="index-badge">${visualIndex}</div>
+                        <div class="phone-text" id="phone_text_${absoluteIndex}">${item.tel}</div>
+                    </div>
+                    <div class="contact-right">
+                        <button class="btn-icon" title="Copiar Mensaje de Promo" onclick="copiarAlPortapapeles('${safeMessage}', this, ${absoluteIndex})">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                gridContainer.appendChild(card);
+            });
+        }
+
+        // -------------------------------------------------------------------------
+        // FUNCIONES DE COPIADO AL PORTAPAPELES Y TACHADO DE NÚMERO
+        // -------------------------------------------------------------------------
+        function copiarAlPortapapeles(texto, btnElement, indexToCross) {
+            hapticFeedback();
+            navigator.clipboard.writeText(texto).then(() => {
+                efectoBotonExito(btnElement);
+                marcarNumeroComoEnviado(indexToCross);
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = texto;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                window.getSelection().removeAllRanges();
+                efectoBotonExito(btnElement);
+                marcarNumeroComoEnviado(indexToCross);
+            });
+        }
+
+        function marcarNumeroComoEnviado(index) {
+            // Busca el div del texto del número y le aplica la clase de tachado
+            const phoneEl = document.getElementById('phone_text_' + index);
+            if (phoneEl) {
+                phoneEl.classList.add('crossed-out');
+            }
+        }
+
+        function efectoBotonExito(btn) {
+            const originalHTML = btn.innerHTML;
+            btn.classList.add('success');
+            btn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            `;
+
+            setTimeout(() => {
+                btn.classList.remove('success');
+                btn.innerHTML = originalHTML;
+            }, 1500);
+        }
+
+        // -------------------------------------------------------------------------
+        // FUNCIONES DEL CRONÓMETRO DE TURNO Y USUARIO
+        // -------------------------------------------------------------------------
+        function startShiftTimer() {
+            if (!sessionStorage.getItem('cyber_shift_start_time')) {
+                sessionStorage.setItem('cyber_shift_start_time', Date.now());
+            }
+            if (!sessionStorage.getItem('cyber_shift_accumulated_time')) {
+                sessionStorage.setItem('cyber_shift_accumulated_time', 0);
+            }
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(function() {
+                if (isTimerPaused) return; 
+                
+                let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
+                let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
+                if (isNaN(accumulated)) accumulated = 0;
+                
+                let elapsed = Date.now() - startTime;
+                let totalMs = accumulated + elapsed;
+                
+                let totalSeconds = Math.floor(totalMs / 1000);
+                let hours = Math.floor(totalSeconds / 3600);
+                let minutes = Math.floor((totalSeconds % 3600) / 60);
+                let seconds = totalSeconds % 60;
+
+                let hStr = String(hours).padStart(2, '0');
+                let mStr = String(minutes).padStart(2, '0');
+                let sStr = String(seconds).padStart(2, '0');
+
+                let stElement = document.getElementById('shiftTimer');
+                if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
+            }, 1000);
+        }
+
+        function resetearInactividad() {
+            if (!sessionStorage.getItem('active_staff')) return;
+            if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
+            temporizadorInactividad = setTimeout(() => {
+                if (sessionStorage.getItem('active_staff')) {
+                    alert("⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.");
+                    window.location.href = 'admin.html'; 
+                }
+            }, INACTIVITY_LOGOUT_LIMIT);
+        }
+
+        function iniciarControlInactividad() {
+            window.addEventListener('mousemove', resetearInactividad);
+            window.addEventListener('keypress', resetearInactividad);
+            window.addEventListener('click', resetearInactividad);
+            window.addEventListener('scroll', resetearInactividad);
+            window.addEventListener('touchstart', resetearInactividad);
+            resetearInactividad(); 
+        }
+
+        // -------------------------------------------------------------------------
+        // INICIALIZACIÓN GENERAL (TEMA, USUARIO, TIEMPO)
+        // -------------------------------------------------------------------------
+        window.addEventListener('DOMContentLoaded', () => {
+            // Tema
+            let savedTheme = localStorage.getItem('cyber_theme');
+            if (!savedTheme) savedTheme = 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
+            // Usuario
+            let activeUser = sessionStorage.getItem('active_staff') || "STAFF";
+            document.getElementById('staffSessionName').innerText = activeUser.toUpperCase();
+
+            // Tiempo e Inactividad
+            startShiftTimer();
+            iniciarControlInactividad();
+        });
+
+    </script>
+</body>
+</html>
