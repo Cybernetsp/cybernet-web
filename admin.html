@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="admin.css">
 
     <style>
-        /* --- MODIFICACIÓN: BARRA BÚSQUEDA CENTRADA, BARRAS ESTÁTICAS Y MODO CLARO --- */
+        /* --- ESTILOS PRINCIPALES --- */
         #globalHeader {
             position: fixed !important;
             top: 0 !important;
@@ -133,10 +133,149 @@
             padding-right: 90px !important;
         }
 
-        /* --- SOLUCIÓN: FORZAR QUE LAS VENTANAS EMERGENTES TAPEN TODO --- */
         .codes-overlay, .password-overlay, .login-overlay {
             z-index: 10000 !important;
         }
+
+        /* ========================================================================= */
+        /* ✨ NUEVOS ESTILOS PREMIUM PARA BOTONES DE TURNOS (AGREGAR, REFRESCAR, EDITAR) */
+        /* ========================================================================= */
+        
+        .shift-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .action-buttons-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .add-shift-btn {
+            background: linear-gradient(135deg, #34c759 0%, #248a3d 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 8px 18px !important;
+            border-radius: 20px !important;
+            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3) !important;
+        }
+
+        .add-shift-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(52, 199, 89, 0.4) !important;
+            filter: brightness(1.1);
+        }
+
+        .btn-refresh-premium {
+            background: linear-gradient(135deg, rgba(10, 132, 255, 0.15) 0%, rgba(10, 132, 255, 0.05) 100%) !important;
+            border: 1px solid rgba(10, 132, 255, 0.4) !important;
+            color: var(--ios-blue) !important;
+            padding: 8px 18px !important;
+            border-radius: 20px !important;
+            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            cursor: pointer !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            backdrop-filter: blur(5px) !important;
+        }
+
+        .btn-refresh-premium:hover {
+            background: rgba(10, 132, 255, 0.25) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.2) !important;
+        }
+
+        .btn-edit-shift {
+            background: transparent;
+            border: none;
+            color: var(--ios-blue);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .btn-edit-shift:hover {
+            background: rgba(10, 132, 255, 0.15);
+            transform: scale(1.1);
+        }
+
+        .shift-form-container {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        [data-theme="light"] .shift-form-container {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .shift-form-container.active {
+            display: flex;
+            animation: fadeInShift 0.3s ease forwards;
+        }
+
+        @keyframes fadeInShift {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .shift-form-container input, .shift-form-container select {
+            background: var(--glass-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        [data-theme="light"] .shift-form-container input, 
+        [data-theme="light"] .shift-form-container select {
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .btn-submit-shift {
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit-shift:hover { opacity: 0.8; }
+        .btn-submit-shift:disabled { opacity: 0.4; cursor: not-allowed; }
 
         @media (max-width: 768px) {
             #globalHeader {
@@ -179,8 +318,17 @@
                 width: 18px !important;
                 height: 18px !important;
             }
+            .shift-header-actions {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 12px;
+            }
+            .action-buttons-group {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
         }
-        /* -------------------------------------------------------- */
     </style>
 </head>
 <body>
@@ -297,7 +445,7 @@
 
             <button class="interface-control-item" onclick="cerrarSesionStaff()" style="color: var(--ios-red) !important;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <path d="M9 21H5a2 2 0 0 1-2 2V5a2 2 0 0 1 2-2h4"></path>
                     <polyline points="16 17 21 12 16 7"></polyline>
                     <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
@@ -327,18 +475,62 @@
 
     <div class="codes-overlay" id="shiftsOverlay" onclick="toggleShiftsPanel()">
         <div class="codes-sheet" onclick="event.stopPropagation()">
-            <div class="sheet-header">
+            
+            <div class="sheet-header shift-header-actions">
                 <h3>Registro de Turnos</h3>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <button class="btn-refresh-action" onclick="forzarRefrescoDeHoras()">🔄 Refrescar</button>
-                    <button class="btn-close-sheet" onclick="toggleShiftsPanel()">✕</button>
+                <div class="action-buttons-group">
+                    <button class="add-shift-btn" id="btnToggleFormShift" onclick="toggleFormularioHoras()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Agregar
+                    </button>
+                    <button class="btn-refresh-premium" onclick="forzarRefrescoDeHoras()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        Refrescar
+                    </button>
+                    <button class="btn-close-sheet" onclick="toggleShiftsPanel()" style="margin-left: 5px;">✕</button>
                 </div>
             </div>
+
+            <div class="shift-form-container" id="formularioIngresoHoras">
+                <h4 style="margin:0; color:var(--text-primary); font-size:0.95rem;">Manual: Agregar Horas Extras</h4>
+                <div style="display:flex; gap:10px; flex-wrap: wrap;">
+                    <input type="text" id="inputVendedorShift" placeholder="Vendedor (Ej: CAMILO)" style="flex:1; min-width: 120px;" disabled>
+                    <input type="text" id="inputHorasShift" placeholder="Horas (Ej: 04:30:00)" style="flex:1; min-width: 120px;">
+                    <input type="date" id="inputFechaShift" style="flex:1; min-width: 120px;">
+                </div>
+                <button class="btn-submit-shift" id="btnGuardarShiftManual" onclick="ejecutarGuardadoHorasManual()">Guardar Horas en Sheets</button>
+            </div>
+
             <div class="search-container" style="max-width: 100%; margin-bottom: 20px;">
                 <input type="text" id="searchShiftsInput" class="search-input" placeholder="🔍 Buscar por vendedor o fecha..." oninput="filtrarHorasInternas()">
             </div>
-            <div class="codes-scroll-area" id="shiftsScrollArea">
+            
+            <div class="codes-scroll-area" id="shiftsScrollArea"></div>
+        </div>
+    </div>
+
+    <div class="password-overlay" id="editShiftModalOverlay">
+        <div class="password-card" onclick="event.stopPropagation()">
+            <h3 id="editShiftModalTitle" style="color:var(--text-primary); font-size:1.3rem;">✏️ Editar Horas</h3>
+            <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:15px;">Modifica el tiempo trabajado para este turno. El sistema borrará los registros antiguos de este día y guardará este nuevo tiempo.</p>
+            <form id="editShiftForm" onsubmit="ejecutarEdicionHoras(event)">
+                <input type="hidden" id="editShiftFilas">
+                <input type="hidden" id="editShiftVendedor">
+                <input type="hidden" id="editShiftFechaReal">
+                
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:0.8rem; color:var(--text-secondary); font-weight:bold; margin-bottom:5px; display:block;">Vendedor y Día</label>
+                    <input type="text" id="editShiftDisplayInfo" class="ios-input-block" disabled style="opacity:0.7; background:var(--glass-bg);">
                 </div>
+                
+                <div style="margin-bottom:20px;">
+                    <label style="font-size:0.8rem; color:var(--text-secondary); font-weight:bold; margin-bottom:5px; display:block;">Nuevo Tiempo (HH:MM:SS)</label>
+                    <input type="text" id="editShiftInputHoras" class="ios-input-block" placeholder="Ejemplo: 05:30:00" required>
+                </div>
+                
+                <button type="submit" id="btnSubmitEditShift" class="btn-login-action" style="background:var(--ios-blue); box-shadow:0 4px 15px rgba(10,132,255,0.35);">Guardar Nueva Hora</button>
+                <button type="button" class="btn-login-action" style="background:rgba(118, 118, 128, 0.2); color:var(--text-primary); box-shadow:none; margin-top: 10px;" onclick="cerrarEdicionHoras()">Cancelar</button>
+            </form>
         </div>
     </div>
 
@@ -413,8 +605,6 @@
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxK9Ggqp1xIhYS_MtO3jlRC-iiS9e1bN5B0Kr6wT8Yx9_BicSY6IIprZUtC5Jg_vrAQ/exec";
         
-        
-
         let timerInterval = null;
         let autoRefreshCodesInterval = null; 
         let isFetchingCodes = false; 
@@ -581,7 +771,7 @@
             });
         }
 
-        function copiedAccountComplete(btn, index) {
+        function copiarCuentaCompleta(btn, index) {
             haptic();
             let item = window.currentSearchStock[index];
             if (!item) return;
@@ -622,6 +812,9 @@
             });
         }
 
+        // =========================================================================
+        // MÓDULO DE TURNOS: APERTURA Y GESTIÓN DE EDICIONES
+        // =========================================================================
         function toggleShiftsPanel() {
             haptic();
             const overlay = document.getElementById('shiftsOverlay');
@@ -629,8 +822,154 @@
             
             if (overlay.classList.contains('open')) {
                 document.getElementById('searchShiftsInput').value = "";
+                document.getElementById('formularioIngresoHoras').classList.remove('active');
+                
+                const userActivo = sessionStorage.getItem('active_staff') || "";
+                const inpVendedor = document.getElementById('inputVendedorShift');
+                
+                if (userActivo.toUpperCase() === "CAMILO") {
+                    inpVendedor.disabled = false;
+                    inpVendedor.value = "";
+                } else {
+                    inpVendedor.disabled = true;
+                    inpVendedor.value = userActivo.toUpperCase();
+                }
+
+                document.getElementById('inputFechaShift').valueAsDate = new Date();
                 forzarRefrescoDeHoras();
             }
+        }
+
+        function toggleFormularioHoras() {
+            haptic();
+            const form = document.getElementById('formularioIngresoHoras');
+            form.classList.toggle('active');
+            if (form.classList.contains('active')) {
+                document.getElementById('inputHorasShift').focus();
+            }
+        }
+
+        function ejecutarGuardadoHorasManual() {
+            haptic();
+            const vendedor = document.getElementById('inputVendedorShift').value.toUpperCase().trim();
+            let horasStr = document.getElementById('inputHorasShift').value.trim();
+            const fechaInput = document.getElementById('inputFechaShift').value;
+
+            if (!vendedor || !horasStr || !fechaInput) {
+                alert("⚠️ Por favor completa todos los campos (Vendedor, Horas y Fecha).");
+                return;
+            }
+
+            if (!horasStr.includes(":")) {
+                horasStr = horasStr + ":00:00"; 
+            } else if (horasStr.split(":").length === 2) {
+                horasStr = horasStr + ":00"; 
+            }
+
+            const btn = document.getElementById('btnGuardarShiftManual');
+            btn.disabled = true;
+            btn.innerText = "⏳ Enviando correo y guardando...";
+
+            const partsF = fechaInput.split("-"); 
+            const fechaObj = new Date(partsF[0], partsF[1] - 1, partsF[2], 12, 0, 0); 
+            const fechaSheets = String(fechaObj.getDate()).padStart(2, '0') + "/" + String(fechaObj.getMonth() + 1).padStart(2, '0') + "/" + fechaObj.getFullYear() + " 12:00 PM";
+
+            let paramObj = {
+                action: "notificarCorreo", 
+                user: vendedor + " (Ingreso Manual)", 
+                tipo: "cierre", 
+                tiempoTrabajado: horasStr 
+            };
+            
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(paramObj)
+            })
+            .then(function() { 
+                alert("✅ Las horas se han ingresado y calculado correctamente en Sheets.");
+                btn.disabled = false;
+                btn.innerText = "Guardar Horas en Sheets";
+                document.getElementById('inputHorasShift').value = "";
+                document.getElementById('formularioIngresoHoras').classList.remove('active');
+                forzarRefrescoDeHoras(); 
+            })
+            .catch(function(e) { 
+                alert("❌ Ocurrió un error enviando la petición. Verifica tu conexión.");
+                btn.disabled = false;
+                btn.innerText = "Guardar Horas en Sheets";
+            });
+        }
+
+        // --- FUNCIONES DEL LÁPIZ DE EDICIÓN ---
+        function abrirEdicionHoras(vendedor, fechaDisplay, fechaReal, horasActuales, filasStr) {
+            haptic();
+            document.getElementById('editShiftFilas').value = filasStr;
+            document.getElementById('editShiftVendedor').value = vendedor;
+            document.getElementById('editShiftFechaReal').value = fechaReal;
+            
+            document.getElementById('editShiftDisplayInfo').value = vendedor + " | " + fechaDisplay;
+            document.getElementById('editShiftInputHoras').value = horasActuales;
+            
+            document.getElementById('editShiftModalOverlay').classList.add('open');
+            document.getElementById('editShiftInputHoras').focus();
+        }
+
+        function cerrarEdicionHoras() {
+            haptic();
+            document.getElementById('editShiftModalOverlay').classList.remove('open');
+            document.getElementById('editShiftForm').reset();
+        }
+
+        function ejecutarEdicionHoras(e) {
+            e.preventDefault();
+            haptic();
+            
+            const btnSubmit = document.getElementById('btnSubmitEditShift');
+            let filasStr = document.getElementById('editShiftFilas').value;
+            let vendedor = document.getElementById('editShiftVendedor').value;
+            let fechaReal = document.getElementById('editShiftFechaReal').value;
+            let nuevasHoras = document.getElementById('editShiftInputHoras').value.trim();
+
+            if (!nuevasHoras.includes(":")) {
+                nuevasHoras = nuevasHoras + ":00:00"; 
+            } else if (nuevasHoras.split(":").length === 2) {
+                nuevasHoras = nuevasHoras + ":00"; 
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "⏳ Guardando...";
+
+            const oldScript = document.getElementById('cyber_edit_shift_node');
+            if (oldScript) oldScript.remove();
+
+            window.procesarEdicionSheets = function(res) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Guardar Nueva Hora";
+                
+                const scriptNode = document.getElementById('cyber_edit_shift_node');
+                if (scriptNode) scriptNode.remove();
+
+                if (res && res.status === "success") {
+                    cerrarEdicionHoras();
+                    forzarRefrescoDeHoras();
+                } else {
+                    let errMsg = "No se pudo editar el turno.";
+                    if (res && res.message) errMsg = res.message;
+                    alert("❌ Error: " + errMsg);
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_edit_shift_node';
+            let queryParams = "?action=editarTurnoGlobal&filas=" + encodeURIComponent(filasStr) + 
+                              "&vendedor=" + encodeURIComponent(vendedor) + 
+                              "&fecha=" + encodeURIComponent(fechaReal) + 
+                              "&nuevasHoras=" + encodeURIComponent(nuevasHoras) + 
+                              "&callback=procesarEdicionSheets&_ts=" + Date.now();
+            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+            document.body.appendChild(scriptElement);
         }
 
         function forzarRefrescoDeHoras() {
@@ -698,14 +1037,11 @@
             let hoy = new Date();
             
             let diaHoy = hoy.getDate();
-            let mesHoy = hoy.getMonth();
-            let anioHoy = hoy.getFullYear();
-            
             let dDia = d.getDate();
             let dMes = d.getMonth();
             let dAnio = d.getFullYear();
             
-            if (dMes !== mesHoy || dAnio !== anioHoy) {
+            if (dMes !== hoy.getMonth() || dAnio !== hoy.getFullYear()) {
                 return false;
             }
             
@@ -744,7 +1080,7 @@
                         misHoras.push(item);
                     }
                 } else {
-                    if (item.vendedor.toUpperCase() === userFinal && esMismaQuincena(item.fecha) && coincideFiltro) {
+                    if (item.vendedor.toUpperCase().includes(userFinal) && esMismaQuincena(item.fecha) && coincideFiltro) {
                         misHoras.push(item);
                     }
                 }
@@ -766,15 +1102,17 @@
                 let dateKey = dayNum + '/' + monthNum;
                 let dayOfWeek = d.getDay(); 
                 
-                let groupKey = dateKey + '_' + item.vendedor.toUpperCase();
+                let vendedorReal = item.vendedor.toUpperCase().replace(" (INGRESO MANUAL)", "");
+                let groupKey = dateKey + '_' + vendedorReal;
                 
                 if (!resumenDiario[groupKey]) {
                     resumenDiario[groupKey] = {
                         dateObj: d,
                         dayOfWeek: dayOfWeek,
                         totalSeconds: 0,
-                        vendedor: item.vendedor,
+                        vendedor: vendedorReal,
                         fechaText: dateKey,
+                        fechaExactaOrigen: item.fecha, 
                         filasAsociadas: []
                     };
                 }
@@ -824,6 +1162,7 @@
                 diasArray.push({
                     groupKey: kStr,
                     fechaText: r.fechaText,
+                    fechaExactaOrigen: r.fechaExactaOrigen,
                     vendedor: r.vendedor,
                     dateObj: r.dateObj,
                     diaNombre: arrayDiasSemana[r.dayOfWeek],
@@ -887,18 +1226,41 @@
                     vendedorLabel = `<br><span style="color:var(--ios-blue); font-size:0.75rem; font-weight:bold;">👤 ${dInfo.vendedor}</span>`;
                 }
 
+                // ==========================================
+                // LÓGICA DE PERMISOS: LÁPIZ Y BORRADO
+                // ==========================================
+                let puedeEditar = (userFinal === "CAMILO") || (dInfo.vendedor === userFinal);
+                let btnEditarIndividual = "";
                 let btnLiquidarIndividual = "";
-                if (userFinal === "CAMILO" && dInfo.filasAsociadas && dInfo.filasAsociadas.length > 0) {
+
+                if (dInfo.filasAsociadas && dInfo.filasAsociadas.length > 0) {
                     let filasStrInd = dInfo.filasAsociadas.join(",");
-                    let targetInd = dInfo.vendedor + " el " + dInfo.fechaText;
-                    btnLiquidarIndividual = ` <span style="cursor:pointer; font-size:1.1rem; margin-left:8px; vertical-align:middle;" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Liquidar este día">💵</span>`;
+                    
+                    // El lápiz de editar (Camilo edita todo, Vendedor edita el suyo)
+                    if (puedeEditar) {
+                        btnEditarIndividual = `
+                        <button class="btn-edit-shift" onclick="abrirEdicionHoras('${dInfo.vendedor}', '${dInfo.fechaText}', '${dInfo.fechaExactaOrigen}', '${dInfo.hoursFmt}', '${filasStrInd}')" title="Editar tiempo">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>`;
+                    }
+
+                    // El billete de borrar / liquidar (Solo Camilo)
+                    if (userFinal === "CAMILO") {
+                        let targetInd = dInfo.vendedor + " el " + dInfo.fechaText;
+                        btnLiquidarIndividual = `
+                        <span style="cursor:pointer; font-size:1.1rem; margin-left:4px; vertical-align:middle; display:inline-block;" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Liquidar y Borrar este día">💵</span>`;
+                    }
                 }
                 
                 html += `
                           <tr>
                               <td><strong>${dInfo.diaNombre}</strong>${vendedorLabel}<br><span style="font-size:0.7rem; color:var(--text-secondary);">${dInfo.fechaText}</span></td>
-                              <td style="color:var(--ios-green); font-family:monospace; font-weight:bold;">${dInfo.hoursFmt}</td>
-                              <td style="font-weight:600;">$${payFormatted}${btnLiquidarIndividual}</td>
+                              <td style="color:var(--ios-green); font-family:monospace; font-weight:bold; vertical-align: middle;">${dInfo.hoursFmt}</td>
+                              <td style="font-weight:600; vertical-align: middle; white-space: nowrap;">
+                                  $${payFormatted} 
+                                  ${btnEditarIndividual} 
+                                  ${btnLiquidarIndividual}
+                              </td>
                           </tr>
                 `;
             }
@@ -1202,7 +1564,6 @@
             resetearInactividad(); 
         }
 
-        // --- SOLUCIÓN DEL CRONÓMETRO INTERNO SIN DESFASES ---
         function startShiftTimer() {
             if (!sessionStorage.getItem('cyber_shift_start_time')) {
                 sessionStorage.setItem('cyber_shift_start_time', Date.now());
@@ -1350,7 +1711,6 @@
                     userElement.blur();
                     passElement.blur();
                     
-                    // ENTRA DIRECTO: El Sheets ya validó que todo está perfecto
                     entrarAlSistema(userInput, rememberMe);
 
                 } else {
@@ -1373,6 +1733,7 @@
             scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
             document.body.appendChild(scriptElement);
         }
+        
         function ejecutarCambioClaveForzado(e) {
             if (e) {
                 e.preventDefault();
@@ -1582,23 +1943,7 @@
             },
             {
                 titulo: 'COMBOS',
-                texto: `💻 ¡Arma tu combo streaming a tu medida con *_NETFLIX PREMIUM!_* 🎉📺
-
-🔥 *_Plataformas disponibles para escoger:_*
-Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV
-
-0️⃣ Netflix solo → 💰 *_$14.500_* 😔 _(Opción Tradicional)_
-
-1️⃣ Netflix + 1 plataforma → 💰 *_$20.000_* _¡TOP VENTAS!_ 🔥🏆
-2️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL_ 🚀✨
-3️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎
-
-4️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_
-5️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_
-6️⃣ Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_
-7️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_
-
-*Netflix* cuenta con una página de códigos disponible las 24 horas, los 7 días de la semana.`
+                texto: `💻 ¡Arma tu combo streaming a tu medida con *_NETFLIX PREMIUM!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n\n0️⃣ Netflix solo → 💰 *_$14.500_* 😔 _(Opción Tradicional)_\n\n1️⃣ Netflix + 1 plataforma → 💰 *_$20.000_* _¡TOP VENTAS!_ 🔥🏆\n2️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL_ 🚀✨\n3️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎\n\n4️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_\n5️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_\n6️⃣ Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_\n7️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_\n\n*Netflix* cuenta con una página de códigos disponible las 24 horas, los 7 días de la semana.`
             },
             {
                 titulo: 'COMBOS SIN NETFLIX',
@@ -1630,7 +1975,7 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
             },
             {
                 titulo: 'PAG PARA CODIGOS',
-                texto: `🎬 *¡TUTORIAL RÁPIDO: Cómo usar nuestro Centro de Códigos!* 🚀\n\nHola!!!! te enseño a usar nuestra nueva herramienta para que obtengas tus códigos al instante y sin esperas.\n\n🌐 _*LINK OFICIAL:*_ www.cybernetsp.com\n\n_*PASOS PARA TU SOLICITUD:*_\n\n1️⃣ _*Ingresa tu número:*_ Al entrar, la página te pedirá el celular con el que realizaste la compra (por ejemplo, este número desde el que me escribes). Dale a "Continuar".\n\n2️⃣ _*Elige tu Plataforma:*_ Selecciona Netflix 🔴 o Disney Premium 🔵.\n\n3️⃣ Si eliges _*NETFLIX*_, tienes 3 opciones:\n\n🔑 Código de Inicio de Sesión: Para entrar por primera vez.\n\n✈️ Código 'Estoy de Viaje': Para saltar el bloqueo de hogar.\n\n📧 Enlace de Inicio (Aprobación): Para aprobar el acceso vía link.\n\n4️⃣ *_Busca tu cuenta:_*\nIngresa el correo de la cuenta (debe terminar en @cybernetsp.com).\nDale clic en "Buscar en el sistema".\n\n✅ ¡Y LISTO! En segundos el sistema te entrega el código o el link de acceso en pantalla. ⚡\n\n_*PARA DISNEY PREMIUM*_: Es aún más directo. Eliges Disney, pones el correo terminado en @cybernetsp.com y ¡listo! Tienes tu código de inmediato.\n\nCualquier duda, el botón de Soporte está integrado en la web. ¡A sacarle el máximo provecho! 🔥🎬`
+                texto: `🎬 *¡TUTORIAL RÁPIDO: Cómo usar nuestro Centro de Códigos!* 🚀\n\nHola!!!! te enseño a usar nuestra nueva herramienta para que obtengas tus códigos al instante y sin esperas.\n\n🌐 _*LINK OFICIAL:*_ www.cybernetsp.com\n\n_*PASOS PARA TU SOLICITUD:_*\n\n1️⃣ _*Ingresa tu número:*_ Al entrar, la página te pedirá el celular con el que realizaste la compra (por ejemplo, este número desde el que me escribes). Dale a "Continuar".\n\n2️⃣ _*Elige tu Plataforma:*_ Selecciona Netflix 🔴 o Disney Premium 🔵.\n\n3️⃣ Si eliges _*NETFLIX*_, tienes 3 opciones:\n\n🔑 Código de Inicio de Sesión: Para entrar por primera vez.\n\n✈️ Código 'Estoy de Viaje': Para saltar el bloqueo de hogar.\n\n📧 Enlace de Inicio (Aprobación): Para aprobar el acceso vía link.\n\n4️⃣ *_Busca tu cuenta:_*\nIngresa el correo de la cuenta (debe terminar en @cybernetsp.com).\nDale clic en "Buscar en el sistema".\n\n✅ ¡Y LISTO! En segundos el sistema te entrega el código o el link de acceso en pantalla. ⚡\n\n_*PARA DISNEY PREMIUM*_: Es aún más directo. Eliges Disney, pones el correo terminado en @cybernetsp.com y ¡listo! Tienes tu código de inmediato.\n\nCualquier duda, el botón de Soporte está integrado en la web. ¡A sacarle el máximo provecho! 🔥🎬`
             },
             {
                 titulo: 'INSTALAR PAG',
@@ -1674,11 +2019,11 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
             },
             {
                 titulo: 'FUERA DE CASA DISNEY',
-                texto: `🔓 *Acceso a Disney+ en tu TV* 🎬✨\n\nSi te aparece el mensaje de verificación en tu televisor, no te preocupes. Sigue estos pasos rápidos para entrar:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *ESTOY FUERA DE CASA.*\n3️⃣ Despues de eso ME ENVÍAS LA CUENTA.\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n⏳ *Nota:* Ten el televisor encendido en la pantalla del código, ya que estos accesos expiran rápido.\n\n💙 ¡Listo! Once ingresado, podrás seguir disfrutando de todo el contenido.`
+                texto: `🔓 *Acceso a Disney+ en tu TV* 🎬✨\n\nSi te aparece el mensaje de verificación en tu televisor, no te preocupes. Sigue estos pasos rápidos para entrar:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *ESTOY FUERA DE CASA.*\n3️⃣ Despues de eso ME ENVÍAS LA CUENTA.\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n💡 *Nota:* Ten el televisor encendido en la pantalla del código, ya que estos accesos expiran rápido.\n\n💙 ¡Listo! Once ingresado, podrás seguir disfrutando de todo el contenido.`
             },
             {
                 titulo: 'CAMBIO DE HOGAR DISNEY',
-                texto: `🏠 *Cambiar de Hogar Disney+* 🎬✨\n\nSi te aparece el mensaje de *"Este televisor no forma parte del hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *CAMBIAR DE HOGAR.*\n3️⃣ Despues de eso *ME ENVÍAS LA CUENTA.*\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n⏳ *Nota:* Mantente en esa pantalla para que el código no expire y puedas ingresarlo apenas te lo envíe.\n\n💙 ¡Listo! Una vez cambiado el hogar, podrás seguir disfrutando sin bloqueos.`
+                texto: `🏠 *Cambiar de Hogar Disney+* 🎬✨\n\nSi te aparece el mensaje de *"Este televisor no forma parte del hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *CAMBIAR DE HOGAR.*\n3️⃣ Despues de eso *ME ENVÍAS LA CUENTA.*\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n💡 *Nota:* Mantente en esa pantalla para que el código no expire y puedas ingresarlo apenas te lo envíe.\n\n💙 ¡Listo! Una vez cambiado el hogar, podrás seguir disfrutando sin bloqueos.`
             },
             {
                 titulo: 'SINCRONIZAR DISNEY',
@@ -1787,10 +2132,6 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
                 card.classList.remove('active');
             }, 1500);
         });
-
-       
     </script>
-
-    
 </body>
 </html>
