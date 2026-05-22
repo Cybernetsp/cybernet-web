@@ -355,6 +355,15 @@
         </div>
 
         <div class="control-container" id="controlPanel">
+
+            <button class="interface-control-item" id="btnCajaFinanzas" onclick="window.location.href='finanzas.html'" style="color: var(--ios-green) !important; display: none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+        <line x1="12" y1="1" x2="12" y2="23"></line>
+        <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path>
+    </svg>
+    <span>CAJA</span>
+</button>
             
             <button class="interface-control-item" onclick="toggleCodesPanel()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -429,6 +438,8 @@
                 </svg>
                 <span>PROMO</span>
             </button>
+
+            
 
             <button class="interface-control-item" onclick="toggleTheme()" id="theme-toggle">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -1833,27 +1844,52 @@
         }
 
         function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
-            if (!isAutoLogin) {
-                ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
-            }
-            
-            document.getElementById('loginOverlay').classList.add('hidden');
-            document.getElementById('mainWorkspace').style.display = 'flex';
-            document.getElementById('globalHeader').style.display = 'flex';
-            
-            let sessionNameEl = document.getElementById('staffSessionName');
-            if (sessionNameEl) {
-                sessionNameEl.innerText = userInput;
-            }
-            
-            sessionStorage.setItem('active_staff', userInput);
-            
-            if (rememberMe) {
-                localStorage.setItem('cyber_saved_staff', userInput);
-            }
-            
-            inicializarWorkspace();
+    if (!isAutoLogin) {
+        ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
+    }
+    
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('mainWorkspace').style.display = 'flex';
+    document.getElementById('globalHeader').style.display = 'flex';
+    
+    let sessionNameEl = document.getElementById('staffSessionName');
+    if (sessionNameEl) {
+        sessionNameEl.innerText = userInput;
+    }
+    
+    sessionStorage.setItem('active_staff', userInput);
+    
+    if (rememberMe) {
+        localStorage.setItem('cyber_saved_staff', userInput);
+    }
+    
+    // =========================================================================
+    // 🔐 CONTROL DE ACCESOS DETALLADO: CAMILO VS OTROS USUARIOS
+    // =========================================================================
+    const currentOperator = userInput.toUpperCase().trim();
+    const shiftTimer = document.getElementById('shiftTimer');
+    const cajaBtn = document.getElementById('btnCajaFinanzas');
+    
+    if (currentOperator === "CAMILO") {
+        // Camilo ve TODO el panel de botones normal + el botón de CAJA, pero se le oculta el tiempo
+        if (shiftTimer && shiftTimer.parentElement) {
+            shiftTimer.parentElement.style.setProperty('display', 'none', 'important');
         }
+        if (cajaBtn) {
+            cajaBtn.style.setProperty('display', 'flex', 'important');
+        }
+    } else {
+        // Los demás usuarios ven todo su panel normal con su TIEMPO, pero la CAJA se mantiene oculta
+        if (shiftTimer && shiftTimer.parentElement) {
+            shiftTimer.parentElement.style.setProperty('display', 'inline-flex', 'important');
+        }
+        if (cajaBtn) {
+            cajaBtn.style.setProperty('display', 'none', 'important');
+        }
+    }
+    
+    inicializarWorkspace();
+}
 
         function cerrarSesionStaff() {
             haptic();
