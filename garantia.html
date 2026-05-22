@@ -11,9 +11,96 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Cybernet Garantías">
     
-    <link rel="stylesheet" href="admin.css">
-
     <style>
+        /* ========================================================================= */
+        /* VARIABLES GLOBALES Y RESETEO BÁSICO */
+        /* ========================================================================= */
+        :root {
+            --bg-color: #0b0e14;
+            --panel-bg: #151822;
+            --glass-bg: rgba(20, 20, 25, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #8b92a5;
+            --ios-blue: #3b82f6;
+            --ios-green: #30d158;
+            --ios-red: #ff453a;
+            --ios-orange: #ff9f0a;
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f3f4f6;
+            --panel-bg: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --ios-blue: #2563eb;
+            --ios-green: #34c759;
+            --ios-red: #ff3b30;
+            --ios-orange: #ff9500;
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* --- ANIMACIONES Y FONDOS EN MOVIMIENTO (ORBES) --- */
+        .bg-orb-1, .bg-orb-2 {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out alternate;
+            pointer-events: none;
+        }
+
+        .bg-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 69, 58, 0.15); /* Rojo Garantías */
+            top: -100px;
+            left: -100px;
+        }
+
+        .bg-orb-2 {
+            width: 500px;
+            height: 500px;
+            background: rgba(10, 132, 255, 0.15); /* Azul Info */
+            bottom: -150px;
+            right: -100px;
+            animation-delay: -10s;
+        }
+
+        [data-theme="light"] .bg-orb-1 { background: rgba(255, 59, 48, 0.1); filter: blur(60px); }
+        [data-theme="light"] .bg-orb-2 { background: rgba(0, 122, 255, 0.1); filter: blur(60px); }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(50px, 30px) scale(1.1); }
+            100% { transform: translate(-30px, 50px) scale(0.9); }
+        }
+
+        @keyframes pulseIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
         /* --- ESTILOS ESPECÍFICOS PARA EL MÓDULO DE GARANTÍAS --- */
         #globalHeader {
             position: fixed !important;
@@ -38,6 +125,35 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
         }
 
+        .top-left-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .staff-badge {
+            background: rgba(10, 132, 255, 0.15);
+            color: var(--ios-blue);
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(10, 132, 255, 0.3);
+            text-transform: uppercase;
+        }
+
+        .timer-badge {
+            background: rgba(48, 209, 88, 0.15);
+            color: var(--ios-green);
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(48, 209, 88, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
         .header-actions {
             display: flex;
             align-items: center;
@@ -47,7 +163,7 @@
         .circle-control {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
-            border: var(--glass-border);
+            border: 1px solid var(--glass-border);
             color: var(--text-primary);
             width: 44px;
             height: 44px;
@@ -67,24 +183,50 @@
             background: rgba(0, 0, 0, 0.08);
         }
 
+        .btn-back-header {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        [data-theme="light"] .btn-back-header { background: rgba(0,0,0,0.03); }
+
+        .btn-back-header:hover {
+            background: var(--ios-blue);
+            color: white;
+            border-color: var(--ios-blue);
+        }
+
         /* ESTRUCTURA A 2 COLUMNAS */
         .garantia-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1.5fr; /* Ligeramente más ancho el panel de reportadas */
             gap: 30px;
             width: 100%;
             max-width: 1300px;
             margin: 0 auto;
             padding-top: 100px;
             padding-bottom: 50px;
+            padding-left: 20px;
+            padding-right: 20px;
         }
 
         .section-panel {
-            background: var(--glass-bg);
-            border: var(--glass-border);
+            background: var(--panel-bg);
+            border: 1px solid var(--glass-border);
             border-radius: 24px;
             padding: 25px;
-            box-shadow: var(--glass-shadow);
+            box-shadow: var(--card-shadow);
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -95,6 +237,9 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 15px;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         [data-theme="light"] .panel-header {
@@ -110,7 +255,51 @@
             gap: 8px;
         }
 
+        .btn-action-panel {
+            background: rgba(10, 132, 255, 0.15);
+            color: var(--ios-blue);
+            border: 1px solid rgba(10, 132, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-action-panel:hover {
+            background: var(--ios-blue);
+            color: white;
+        }
+
         /* FORMULARIO Y SELECTS */
+        .ios-input-block {
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        [data-theme="light"] .ios-input-block {
+            background: rgba(255,255,255,0.5);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .ios-input-block:focus {
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+        }
+
         select.ios-input-block {
             appearance: none;
             -webkit-appearance: none;
@@ -122,14 +311,45 @@
         }
 
         select.ios-input-block option {
-            background-color: var(--sheet-modal-bg);
-            color: var(--text-primary);
+            background-color: #1c1c1e;
+            color: #ffffff;
+        }
+
+        [data-theme="light"] select.ios-input-block option {
+            background-color: #ffffff;
+            color: #000000;
         }
 
         textarea.ios-input-block {
             resize: vertical;
-            min-height: 100px;
+            min-height: 120px;
             font-family: inherit;
+        }
+
+        .btn-submit-main {
+            background: linear-gradient(135deg, #ff453a 0%, #ff3b30 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 69, 58, 0.3);
+            margin-top: 5px;
+        }
+
+        .btn-submit-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 69, 58, 0.5);
+        }
+
+        .btn-submit-main:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         /* LISTA DE TICKETS DE GARANTÍA */
@@ -137,25 +357,36 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            max-height: 600px;
+            max-height: 650px;
             overflow-y: auto;
             padding-right: 5px;
+        }
+        
+        .tickets-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .tickets-scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .tickets-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
         }
 
         .ticket-card {
             background: rgba(255, 255, 255, 0.03);
-            border: 0.5px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--glass-border);
             border-radius: 16px;
-            padding: 18px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            gap: 10px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
         }
 
         [data-theme="light"] .ticket-card {
-            background: rgba(255, 255, 255, 0.45);
-            border: 0.5px solid rgba(0, 0, 0, 0.08);
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0,0,0,0.08);
         }
 
         .ticket-card:hover {
@@ -166,50 +397,73 @@
         .ticket-header {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        [data-theme="light"] .ticket-header { border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+        .platform-tag {
+            color: var(--ios-blue);
+            font-weight: 800;
+            font-size: 1.05rem;
+            display: flex;
             align-items: center;
+            gap: 6px;
         }
 
         .ticket-date {
             font-size: 0.75rem;
             color: var(--text-secondary);
+            text-align: right;
         }
 
         .ticket-field {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--text-secondary);
         }
 
         .ticket-field span {
             color: var(--text-primary);
             font-weight: 600;
+            user-select: all;
         }
 
         .ticket-desc {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--text-primary);
             background: rgba(0,0,0,0.2);
-            padding: 10px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 10px;
             margin-top: 5px;
             border: 1px solid rgba(255,255,255,0.05);
+            line-height: 1.4;
         }
 
         [data-theme="light"] .ticket-desc {
-            background: rgba(0,0,0,0.03);
+            background: rgba(255,255,255,0.5);
             border: 1px solid rgba(0,0,0,0.05);
         }
 
+        .ticket-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
         .btn-resolver {
+            flex: 1;
             background: rgba(48, 209, 88, 0.15);
             color: var(--ios-green);
             border: 1px solid rgba(48, 209, 88, 0.3);
-            padding: 10px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 12px;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 10px;
+            transition: all 0.2s ease;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -219,23 +473,139 @@
         .btn-resolver:hover {
             background: var(--ios-green);
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3);
         }
 
-        .btn-resolver:active {
-            transform: scale(0.96);
+        .btn-copy-report {
+            flex: 1;
+            background: rgba(255, 159, 10, 0.15);
+            color: var(--ios-orange);
+            border: 1px solid rgba(255, 159, 10, 0.3);
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
         }
 
-        /* --- FORZAR VENTANAS EMERGENTES AL FRENTE --- */
+        .btn-copy-report:hover {
+            background: var(--ios-orange);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 159, 10, 0.3);
+        }
+
+        /* --- MODAL RESOLVER OVERLAY --- */
         .password-overlay {
-            z-index: 10000 !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .password-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .password-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transform: scale(0.95) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .password-overlay.open .password-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .btn-modal-cancel {
+            background: rgba(118, 118, 128, 0.2);
+            color: var(--text-primary);
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-modal-cancel:hover { background: rgba(118, 118, 128, 0.3); }
+
+        .btn-modal-submit {
+            background: linear-gradient(135deg, #30d158 0%, #248a3d 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3);
+            margin-top: 10px;
+        }
+        .btn-modal-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(48, 209, 88, 0.4);
+        }
+
+        /* --- TOAST --- */
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(30, 30, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 10001;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
 
         @media (max-width: 900px) {
             .garantia-container {
                 grid-template-columns: 1fr;
                 padding-top: 130px;
-                padding-left: 20px;
-                padding-right: 20px;
             }
             #globalHeader {
                 flex-direction: column !important;
@@ -246,6 +616,9 @@
             .header-actions {
                 width: 100%;
                 justify-content: flex-end;
+            }
+            .ticket-actions {
+                flex-direction: column;
             }
         }
     </style>
@@ -272,15 +645,19 @@
         <div class="header-actions">
             <button class="circle-control" onclick="toggleTheme()" id="theme-toggle" aria-label="Cambiar Tema">
                 </button>
-            <button class="btn-login-action" style="margin: 0; padding: 10px 20px; width: auto; font-size: 0.85rem;" onclick="window.location.href='admin.html'">
-                ← Volver al Panel
+            <button class="btn-back-header" onclick="window.location.href='admin.html'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Volver al Panel
             </button>
         </div>
     </header>
 
     <div class="password-overlay" id="resolverOverlay">
         <div class="password-card" onclick="event.stopPropagation()">
-            <h3 style="color: var(--ios-green); margin-bottom: 5px;">✅ Resolver Cuenta</h3>
+            <h3 style="color: var(--ios-green); margin-bottom: 5px; font-size: 1.3rem;">✅ Resolver Cuenta</h3>
             <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">Ingresa los nuevos datos de acceso para solucionar este reporte.</p>
             
             <form id="formResolverGarantia" onsubmit="ejecutarResolverGarantia(event)">
@@ -291,8 +668,8 @@
                 <input type="email" id="resNuevoCorreo" class="ios-input-block" placeholder="Nuevo Correo Asignado" required>
                 <input type="text" id="resNuevaClave" class="ios-input-block" placeholder="Nueva Contraseña" required>
                 
-                <button type="submit" id="btnSubmitResolver" class="btn-login-action" style="background:var(--ios-green); box-shadow:0 4px 15px rgba(48, 209, 88, 0.35);">Guardar y Resolver</button>
-                <button type="button" class="btn-login-action" style="background:rgba(118, 118, 128, 0.2); color:var(--text-primary); box-shadow:none; margin-top: 10px;" onclick="cerrarModalResolver()">Cancelar</button>
+                <button type="submit" id="btnSubmitResolver" class="btn-modal-submit">Guardar y Resolver</button>
+                <button type="button" class="btn-modal-cancel" onclick="cerrarModalResolver()">Cancelar</button>
             </form>
         </div>
     </div>
@@ -333,16 +710,25 @@
 
                 <input type="email" id="repCorreo" class="ios-input-block" placeholder="Correo de la cuenta" required autocomplete="off">
                 <input type="text" id="repClave" class="ios-input-block" placeholder="Contraseña actual" required autocomplete="off">
-                <textarea id="repDesc" class="ios-input-block" placeholder="Describe el problema (Ej: Clave incorrecta, pantalla llena, cuenta pausada...)" required></textarea>
                 
-                <button type="submit" id="btnSubmitReporte" class="btn-login-action" style="background:var(--ios-red); box-shadow:0 4px 15px rgba(255, 69, 58, 0.35);">
+                <select id="repTipoProblema" class="ios-input-block" required onchange="verificarTipoProblema()">
+                    <option value="" disabled selected>Selecciona el tipo de problema...</option>
+                    <option value="CUENTA CAIDA">CUENTA CAÍDA</option>
+                    <option value="CONTRASEÑA INCORRECTA">CONTRASEÑA INCORRECTA</option>
+                    <option value="CUENTA BLOQUEADA">CUENTA BLOQUEADA</option>
+                    <option value="OTRA">OTRA (Explicar detalladamente)</option>
+                </select>
+
+                <textarea id="repDesc" class="ios-input-block" placeholder="Por favor, explica el problema detalladamente..." style="display: none;"></textarea>
+                
+                <button type="submit" id="btnSubmitReporte" class="btn-submit-main">
                     Enviar a Garantía
                 </button>
             </form>
         </div>
 
         <div class="section-panel">
-            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="panel-header">
                 <h2>
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -353,7 +739,10 @@
                     </svg>
                     Cuentas Reportadas
                 </h2>
-                <button class="btn-login-action" style="margin:0; width:auto; padding: 6px 12px; font-size: 0.75rem;" onclick="cargarGarantias()">🔄 Actualizar</button>
+                <button class="btn-action-panel" onclick="cargarGarantias()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                    Actualizar
+                </button>
             </div>
 
             <div class="tickets-scroll-area" id="listaGarantias">
@@ -365,6 +754,11 @@
 
     </div>
 
+    <div id="globalToast" class="toast-notification">
+        <span id="toastIcon">✅</span>
+        <span id="toastText">Acción completada</span>
+    </div>
+
     <script>
         // ==========================================
         // CONFIGURACIÓN INICIAL
@@ -372,12 +766,25 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxK9Ggqp1xIhYS_MtO3jlRC-iiS9e1bN5B0Kr6wT8Yx9_BicSY6IIprZUtC5Jg_vrAQ/exec";
         let isFetchingGarantias = false;
         
-        // VARIABLES DEL CRONÓMETRO
+        // VARIABLES DEL CRONÓMETRO Y SESIÓN
         let timerInterval = null;
+        let temporizadorInactividad = null;
+        const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;
         let isTimerPaused = false;
 
         function haptic() { 
             if (navigator.vibrate) navigator.vibrate(15); 
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('globalToast');
+            const toastText = document.getElementById('toastText');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastText.innerText = message;
+            toastIcon.innerText = isError ? "❌" : "✅";
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
         // ==========================================
@@ -403,7 +810,25 @@
         }
 
         // ==========================================
-        // 1. FUNCIÓN PARA REPORTAR UNA CUENTA
+        // 1. MOSTRAR/OCULTAR TEXTAREA DE PROBLEMA
+        // ==========================================
+        function verificarTipoProblema() {
+            const select = document.getElementById('repTipoProblema');
+            const textarea = document.getElementById('repDesc');
+            
+            if (select.value === 'OTRA') {
+                textarea.style.display = 'block';
+                textarea.setAttribute('required', 'true');
+                textarea.focus();
+            } else {
+                textarea.style.display = 'none';
+                textarea.removeAttribute('required');
+                textarea.value = ''; // Limpiar si el usuario se arrepiente y cambia de opción
+            }
+        }
+
+        // ==========================================
+        // 2. FUNCIÓN PARA REPORTAR UNA CUENTA
         // ==========================================
         function ejecutarReporte(e) {
             e.preventDefault();
@@ -413,7 +838,14 @@
             const plataforma = document.getElementById('repPlataforma').value;
             const correo = document.getElementById('repCorreo').value;
             const clave = document.getElementById('repClave').value;
-            const descripcion = document.getElementById('repDesc').value;
+            
+            // Lógica para capturar la descripción correcta
+            const tipoProblema = document.getElementById('repTipoProblema').value;
+            let descripcion = tipoProblema; // Por defecto es "CUENTA CAIDA", etc.
+            
+            if (tipoProblema === 'OTRA') {
+                descripcion = document.getElementById('repDesc').value.trim();
+            }
 
             btnSubmit.disabled = true;
             btnSubmit.innerText = "⏳ Enviando Reporte...";
@@ -429,11 +861,12 @@
                 btnSubmit.innerText = "Enviar a Garantía";
 
                 if (res && res.status === "success") {
-                    alert("✅ " + res.message);
+                    showToast(res.message);
                     document.getElementById('formReportar').reset();
+                    verificarTipoProblema(); // Ocultar el textarea de nuevo
                     cargarGarantias(); // Refrescar la lista de al lado automáticamente
                 } else {
-                    alert("❌ Error: " + (res ? res.message : "Desconocido"));
+                    showToast("Error: " + (res ? res.message : "Desconocido"), true);
                 }
             };
 
@@ -445,7 +878,7 @@
         }
 
         // ==========================================
-        // 2. OBTENER LISTA DE REPORTADAS
+        // 3. OBTENER LISTA DE REPORTADAS
         // ==========================================
         function cargarGarantias() {
             if (isFetchingGarantias) return;
@@ -486,25 +919,45 @@
             }
 
             let html = "";
-            data.forEach(item => {
+            data.forEach((item, index) => {
+                
+                // Formateamos el texto del reporte para que pueda ser copiado fácilmente
+                const textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${item.plataforma}\n📧 *Correo:* ${item.correo}\n🔑 *Clave:* ${item.clave}\n👤 *Proveedor:* ${item.proveedor}\n📅 *Fecha de Compra:* ${item.fechaCompra || "No Registrada"}\n💬 *Motivo:* ${item.desc}`;
+                const safeReporte = encodeURIComponent(textoReporte);
+
                 html += `
                 <div class="ticket-card">
                     <div class="ticket-header">
-                        <span class="platform-tag" style="color:var(--ios-blue); font-weight:800; font-size:0.9rem;">${item.plataforma}</span>
-                        <span class="ticket-date">${item.fecha}</span>
+                        <span class="platform-tag">
+                            ${item.plataforma}
+                        </span>
+                        <div class="ticket-date">
+                            Reporte: <strong>${item.fecha}</strong><br>
+                            Compra: <strong>${item.fechaCompra || "N/A"}</strong>
+                        </div>
                     </div>
                     <div class="ticket-field">Correo: <span style="color:var(--ios-red); user-select:all;">${item.correo}</span></div>
                     <div class="ticket-field">Clave: <span style="user-select:all;">${item.clave}</span></div>
-                    <div class="ticket-field">Proveedor: <span>${item.proveedor}</span></div>
+                    <div class="ticket-field">Proveedor: <span style="color:var(--ios-orange);">${item.proveedor}</span></div>
                     <div class="ticket-desc">💬 ${item.desc}</div>
                     
-                    <button class="btn-resolver" onclick="abrirModalResolver('${item.filaIndex}', '${item.correo}', '${item.plataforma}')">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                        Resolver Cuenta
-                    </button>
+                    <div class="ticket-actions">
+                        <button class="btn-copy-report" onclick="copiarReporteAlPortapapeles('${safeReporte}', this)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            Copiar Reporte
+                        </button>
+                        
+                        <button class="btn-resolver" onclick="abrirModalResolver('${item.filaIndex}', '${item.correo}', '${item.plataforma}')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            Resolver Cuenta
+                        </button>
+                    </div>
                 </div>`;
             });
 
@@ -512,7 +965,48 @@
         }
 
         // ==========================================
-        // 3. FUNCIONES DEL MODAL PARA RESOLVER
+        // 4. FUNCIONES DE COPIADO DE REPORTE
+        // ==========================================
+        function copiarReporteAlPortapapeles(textoEncodeado, btnElement) {
+            haptic();
+            const texto = decodeURIComponent(textoEncodeado);
+
+            navigator.clipboard.writeText(texto).then(() => {
+                efectoBotonCopiadoReporte(btnElement);
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = texto;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                textarea.remove();
+                efectoBotonCopiadoReporte(btnElement);
+            });
+        }
+
+        function efectoBotonCopiadoReporte(btn) {
+            const originalHTML = btn.innerHTML;
+            const originalBg = btn.style.background;
+            const originalColor = btn.style.color;
+
+            btn.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                ¡Copiado!
+            `;
+            btn.style.background = 'var(--ios-orange)';
+            btn.style.color = '#ffffff';
+
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.style.background = originalBg;
+                btn.style.color = originalColor;
+            }, 1500);
+        }
+
+        // ==========================================
+        // 5. FUNCIONES DEL MODAL PARA RESOLVER
         // ==========================================
         function abrirModalResolver(fila, correo, plataforma) {
             haptic();
@@ -555,11 +1049,11 @@
                 btnSubmit.innerText = "Guardar y Resolver";
 
                 if (res && res.status === "success") {
-                    alert("✅ " + res.message);
+                    showToast(res.message);
                     cerrarModalResolver();
                     cargarGarantias(); // Actualiza la lista para quitar la resuelta
                 } else {
-                    alert("❌ Error: " + (res ? res.message : "Desconocido"));
+                    showToast("Error: " + (res ? res.message : "Desconocido"), true);
                 }
             };
 
@@ -570,7 +1064,9 @@
             document.body.appendChild(scriptElement);
         }
 
-        // --- SINCRO AUTOMÁTICA DEL CRONÓMETRO CON SESSIONSTORAGE ---
+        // ==========================================
+        // 6. CRONÓMETRO DE TURNO E INACTIVIDAD
+        // ==========================================
         function startShiftTimer() {
             if (!sessionStorage.getItem('cyber_shift_start_time')) {
                 sessionStorage.setItem('cyber_shift_start_time', Date.now());
@@ -613,6 +1109,26 @@
             }, 1000);
         }
 
+        function resetearInactividad() {
+            if (!sessionStorage.getItem('active_staff')) return;
+            if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
+            temporizadorInactividad = setTimeout(() => {
+                if (sessionStorage.getItem('active_staff')) {
+                    alert("⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.");
+                    window.location.href = 'admin.html';
+                }
+            }, INACTIVITY_LOGOUT_LIMIT);
+        }
+
+        function iniciarControlInactividad() {
+            window.addEventListener('mousemove', resetearInactividad);
+            window.addEventListener('keypress', resetearInactividad);
+            window.addEventListener('click', resetearInactividad);
+            window.addEventListener('scroll', resetearInactividad);
+            window.addEventListener('touchstart', resetearInactividad);
+            resetearInactividad(); 
+        }
+
         // ==========================================
         // CARGA INICIAL
         // ==========================================
@@ -620,8 +1136,8 @@
             const activeUser = sessionStorage.getItem('active_staff');
             if(activeUser) {
                 document.getElementById('staffSessionName').innerText = activeUser.toUpperCase();
-                // Arrancar cronómetro dinámico enlazado
                 startShiftTimer();
+                iniciarControlInactividad();
             }
 
             let savedTheme = localStorage.getItem('cyber_theme') || 'dark';
