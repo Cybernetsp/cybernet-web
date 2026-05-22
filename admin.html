@@ -1844,7 +1844,8 @@
         }
 
         function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
-    if (!isAutoLogin) {
+    // 🔐 FILTRO EXCLUSIVO PARA CAMILO: Se salta el correo de inicio de turno por completo
+    if (!isAutoLogin && userInput.toUpperCase().trim() !== "CAMILO") {
         ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
     }
     
@@ -1892,48 +1893,56 @@
 }
 
         function cerrarSesionStaff() {
-            haptic();
-            
-            let usuarioActivo = "STAFF";
-            let activeStaffLocal = sessionStorage.getItem('active_staff');
-            
-            if (activeStaffLocal) {
-                usuarioActivo = activeStaffLocal;
-            }
-            
-            const cerrarBoton = document.querySelector('.control-container button:last-child');
-            if (cerrarBoton) {
-                cerrarBoton.style.opacity = "0.5";
-            }
+    haptic();
+    
+    let usuarioActivo = "STAFF";
+    let activeStaffLocal = sessionStorage.getItem('active_staff');
+    
+    if (activeStaffLocal) {
+        usuarioActivo = activeStaffLocal;
+    }
+    
+    const cerrarBoton = document.querySelector('.control-container button:last-child');
+    if (cerrarBoton) {
+        cerrarBoton.style.opacity = "0.5";
+    }
 
-            const tiempoTotalFormateado = obtenerTiempoFinalFormateado();
-
-            ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoTotalFormateado, function() {
-                sessionStorage.removeItem('active_staff');
-                localStorage.removeItem('cyber_saved_staff'); 
-                
-                sessionStorage.removeItem('cyber_shift_start_time');
-                sessionStorage.removeItem('cyber_shift_accumulated_time');
-                
-                if (timerInterval) {
-                    clearInterval(timerInterval);
-                }
-                
-                if (autoRefreshCodesInterval) {
-                    clearInterval(autoRefreshCodesInterval);
-                }
-                
-                if (temporizadorInactividad) {
-                    clearTimeout(temporizadorInactividad);
-                }
-
-                if (temporizadorCierreTotal) {
-                    clearTimeout(temporizadorCierreTotal);
-                }
-                
-                location.reload();
-            });
+    // Función interna aislada para limpiar la memoria y recargar la página
+    function finalizarCierre() {
+        sessionStorage.removeItem('active_staff');
+        localStorage.removeItem('cyber_saved_staff'); 
+        
+        sessionStorage.removeItem('cyber_shift_start_time');
+        sessionStorage.removeItem('cyber_shift_accumulated_time');
+        
+        if (timerInterval) {
+            clearInterval(timerInterval);
         }
+        
+        if (autoRefreshCodesInterval) {
+            clearInterval(autoRefreshCodesInterval);
+        }
+        
+        if (temporizadorInactividad) {
+            clearTimeout(temporizadorInactividad);
+        }
+
+        if (temporizadorCierreTotal) {
+            clearTimeout(temporizadorCierreTotal);
+        }
+        
+        location.reload();
+    }
+
+    // 🔐 FILTRO EXCLUSIVO PARA CAMILO: Cierra sesión directo sin tocar el Sheets ni enviar correos
+    if (usuarioActivo.toUpperCase().trim() === "CAMILO") {
+        finalizarCierre();
+    } else {
+        // Flujo normal de cálculo y registro para los demás operadores
+        const tiempoTotalFormateado = obtenerTiempoFinalFormateado();
+        ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoTotalFormateado, finalizarCierre);
+    }
+}
 
         function inicializarWorkspace() {
             renderGrid();
