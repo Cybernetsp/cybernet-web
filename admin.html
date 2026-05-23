@@ -1389,6 +1389,19 @@
                     document.getElementById('ventasOverlay').classList.remove('open');
                     document.getElementById('outputTextoVentaFicha').value = mensajeFinalFicha;
                     document.getElementById('ventaGeneradaModalOverlay').classList.add('open');
+
+                    // ⚠️ RECEPTOR DE ALERTA DE STOCK CRÍTICO
+                    if (res.alertasStock && res.alertasStock.length > 0) {
+                        let avisoTexto = "⚠️ ¡ALERTA DE INVENTARIO CRÍTICO! ⚠️\n───────────────────────────\n";
+                        res.alertasStock.forEach(a => {
+                            avisoTexto += `🚨 Plataforma: ${a.plat} ➔ ¡Solo quedan ${a.cant} perfiles libres!\n`;
+                        });
+                        avisoTexto += "───────────────────────────\n👉 ¡Toca CORTAR perfiles caídos o COMPRAR más cuentas inmediatamente!";
+                        
+                        setTimeout(() => {
+                            alert(avisoTexto);
+                        }, 600);
+                    }
                 } else {
                     alert("❌ Error: " + (res ? res.message : "Fallo de comunicación."));
                 }
