@@ -256,6 +256,33 @@
                 </button>
             </form>
         </div>
+        <div class="section-panel" style="margin-top: 25px;">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ios-orange)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <polyline points="9 12 11 14 15 10"></polyline>
+                    </svg>
+                    Estatus de Garantías por Proveedor
+                </h2>
+                <button type="button" class="btn-login-action" style="margin: 0; padding: 6px 12px; width: auto; font-size: 0.75rem; background: rgba(255, 159, 10, 0.15); color: var(--ios-orange); border: 1px solid rgba(255, 159, 10, 0.3);" onclick="cargarResumenProveedores()">🔄 Actualizar</button>
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <th style="padding: 10px; text-align: left; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Proveedor</th>
+                        <th style="padding: 10px; text-align: center; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Caídas Activas</th>
+                        <th style="padding: 10px; text-align: right; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Estado de Salud</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaResumenProveedores">
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 20px; color: var(--text-secondary); font-size: 0.9rem;">⏳ Sincronizando métricas de calidad...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
     </div>
 
@@ -357,6 +384,66 @@
             scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
             document.body.appendChild(scriptElement);
         }
+        // 📊 MOTOR DE ANÁLISIS DE CALIDAD DE PROVEEDORES
+        function cargarResumenProveedores() {
+            const tbody = document.getElementById('tablaResumenProveedores');
+            if (!tbody) return;
+            
+            const oldScript = document.getElementById('cyber_prov_summary_node');
+            if (oldScript) oldScript.remove();
+
+            window.procesarResumenProveedores = function(res) {
+                const scriptNode = document.getElementById('cyber_prov_summary_node');
+                if (scriptNode) scriptNode.remove();
+
+                if (res && res.status === "success") {
+                    const data = res.data;
+                    
+                    // Inicializar los contadores por defecto
+                    const conteo = { "ANA": 0, "CHAYO": 0, "FABIAN": 0, "OTROS / MANUAL": 0 };
+                    
+                    data.forEach(item => {
+                        let prov = String(item.proveedor || "").toUpperCase().trim();
+                        if (prov === "ANA" || prov === "CHAYO" || prov === "FABIAN") {
+                            conteo[prov]++;
+                        } else if (prov !== "") {
+                            conteo["OTROS / MANUAL"]++;
+                        }
+                    });
+
+                    let html = "";
+                    for (let prov in conteo) {
+                        let cant = conteo[prov];
+                        let alarmaTexto = "🟢 Estable";
+                        let alarmaColor = "var(--ios-green)";
+                        
+                        if (cant > 4) {
+                            alarmaTexto = "🔴 Crítico";
+                            alarmaColor = "var(--ios-red)";
+                        } else if (cant > 0) {
+                            alarmaTexto = "🟠 Riesgo";
+                            alarmaColor = "var(--ios-orange)";
+                        }
+
+                        html += `
+                        <tr style="border-bottom: 0.5px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 12px 10px;"><strong>${prov}</strong></td>
+                            <td style="padding: 12px 10px; text-align: center; font-family: monospace; font-weight: bold; font-size: 1.1rem; color: ${cant > 0 ? 'var(--ios-red)' : 'var(--text-secondary)'};">${cant}</td>
+                            <td style="padding: 12px 10px; text-align: right; font-weight: 600; color: ${alarmaColor};">${alarmaTexto}</td>
+                        </tr>`;
+                    }
+                    tbody.innerHTML = html;
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--ios-red);">❌ Error al sincronizar métricas.</td></tr>';
+                }
+                delete window.procesarResumenProveedores;
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_prov_summary_node';
+            scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerGarantias&callback=procesarResumenProveedores&_ts=" + Date.now();
+            document.body.appendChild(scriptElement);
+        }
 
         // ==========================================
         // CONTROL COMPARTIDO DEL TEMPORIZADOR DE TURNO
@@ -402,6 +489,7 @@
         // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             const activeUser = sessionStorage.getItem('active_staff');
+            cargarResumenProveedores(); // 📊 Carga las métricas al abrir la página
             if(activeUser) {
                 document.getElementById('staffSessionName').innerText = activeUser.toUpperCase();
                 startShiftTimer(); 
