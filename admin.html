@@ -191,6 +191,24 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             backdrop-filter: blur(5px) !important;
         }
+        /* 🔴 PÍLDORA DE NOTIFICACIÓN DE GARANTÍAS (ESTILO IOS) */
+        .badge-garantias {
+            position: absolute !important;
+            top: 2px !important;
+            right: 12px !important;
+            background: var(--ios-red, #ff453a) !important;
+            color: white !important;
+            font-size: 0.65rem !important;
+            font-weight: 700 !important;
+            border-radius: 50% !important;
+            width: 16px !important;
+            height: 16px !important;
+            display: none; /* Nace oculto si no hay errores */
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 2px 8px rgba(255, 69, 58, 0.5) !important;
+            z-index: 50 !important;
+        }
 
         .btn-refresh-premium:hover {
             background: rgba(10, 132, 255, 0.25) !important;
@@ -482,7 +500,8 @@
                 <span>REVENDEDORES</span>
             </button>
 
-            <button class="interface-control-item" onclick="window.location.href='garantia.html'">
+            <button class="interface-control-item" onclick="window.location.href='garantia.html'" style="position: relative !important;">
+                <div id="badgeGarantiasCount" class="badge-garantias">0</div>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                     <polyline points="9 12 11 14 15 10"></polyline>
@@ -710,6 +729,33 @@
             if (navigator.vibrate) {
                 navigator.vibrate(15); 
             }
+        }
+        // 🔄 DETECTOR EN VIVO DE REPORTES PENDIENTES
+        function actualizarBadgeGarantias() {
+            const oldScript = document.getElementById('cyber_badge_garantias_node');
+            if (oldScript) oldScript.remove();
+
+            window.procesarBadgeGarantias = function(res) {
+                const scriptNode = document.getElementById('cyber_badge_garantias_node');
+                if (scriptNode) scriptNode.remove();
+
+                const badge = document.getElementById('badgeGarantiasCount');
+                if (res && res.status === "success" && badge) {
+                    const count = res.data.length;
+                    if (count > 0) {
+                        badge.innerText = count;
+                        badge.style.display = "flex";
+                    } else {
+                        badge.style.display = "none";
+                    }
+                }
+                delete window.procesarBadgeGarantias;
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'cyber_badge_garantias_node';
+            scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerGarantias&callback=procesarBadgeGarantias&_ts=" + Date.now();
+            document.body.appendChild(scriptElement);
         }
 
         function toggleTheme() {
@@ -2021,6 +2067,8 @@
             if (!savedTheme) {
                 savedTheme = 'dark';
             }
+            actualizarBadgeGarantias(); // 🔥 Carga inicial al abrir el panel
+            setInterval(actualizarBadgeGarantias, 60000); // 🔄 Escanea fallas automáticamente cada 1 minuto
             
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
