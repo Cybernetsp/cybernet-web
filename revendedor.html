@@ -443,20 +443,80 @@
             opacity: 0.8; 
         }
 
-        .trash-icon-btn {
+        .trash-icon-btn, .copy-icon-btn {
             background: transparent;
             border: none;
             cursor: pointer;
-            font-size: 1.1rem;
             transition: transform 0.2s ease;
-            padding: 5px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
         }
 
-        .trash-icon-btn:hover {
+        .trash-icon-btn {
+            font-size: 1.1rem;
+            padding: 5px;
+        }
+
+        .copy-icon-btn {
+            font-size: 0.95rem;
+            padding: 4px 6px;
+            margin-left: 8px;
+            background: rgba(118, 118, 128, 0.15);
+            border-radius: 8px;
+            border: 0.5px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+        }
+
+        [data-theme="light"] .copy-icon-btn {
+            background: rgba(118, 118, 128, 0.12);
+            border-color: rgba(0,0,0,0.05);
+        }
+
+        .trash-icon-btn:hover, .copy-icon-btn:hover {
             transform: scale(1.2);
+        }
+        
+        .copy-icon-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* 📱 DISEÑO DE LA NOTIFICACIÓN TOAST ESTILO IOS (PRECIOSO) */
+        .ios-toast {
+            position: fixed;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 32, 0.85);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            color: #ffffff;
+            padding: 14px 24px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 0.5px solid rgba(255, 255, 255, 0.15);
+            z-index: 5000;
+            transition: bottom 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+            letter-spacing: 0.2px;
+        }
+
+        [data-theme="light"] .ios-toast {
+            background: rgba(255, 255, 255, 0.85);
+            color: #000000;
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        .ios-toast.show {
+            bottom: 40px;
+            opacity: 1;
         }
 
         @media (max-width: 900px) { 
@@ -488,6 +548,8 @@
 
     <div class="bg-orb-1"></div>
     <div class="bg-orb-2"></div>
+
+    <div id="iosToast" class="ios-toast"></div>
 
     <header class="global-header" id="globalHeader">
         <div class="top-left-status" id="staffStatusBar">
@@ -731,6 +793,28 @@
             return "$" + valorNum.toLocaleString('es-CO');
         }
 
+        // 🚀 NUEVA FUNCIÓN ANIMADA: Copia sin alertas ruidosas y activa la píldora flotante
+        function copiarSaldo(nombre, saldoFormateado) {
+            haptic();
+            
+            const textoWhatsApp = `*CYBERNET STREAMING* 🚀\n\nEstimado(a) *${nombre}*,\n\nTe informamos que tu saldo disponible actual en el sistema es de: *${saldoFormateado}* 💵\n\n¡Gracias por tu confianza y preferencia! ✨`;
+            
+            navigator.clipboard.writeText(textoWhatsApp).then(() => {
+                // 🌪️ ACTIVACIÓN DE LA ANIMACIÓN TOAST (iOS style)
+                const toast = document.getElementById('iosToast');
+                toast.innerHTML = `<span>📋 Reporte de ${nombre} copiado con éxito</span>`;
+                toast.classList.add('show');
+                
+                // Se oculta automáticamente a los 2.2 segundos
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2200);
+                
+            }).catch(err => {
+                console.error("Fallo al copiar: ", err);
+            });
+        }
+
         function cargarDistribuidores() {
             const tbody = document.getElementById('tablaDistribuidores');
             
@@ -761,13 +845,19 @@
                         let saldoLimpio = parseFloat(String(d.saldo).replace(/[^\d.-]/g, '')) || 0;
                         if (saldoLimpio > 0 && saldoLimpio < 1000) saldoLimpio = saldoLimpio * 1000;
                         let claseSaldo = saldoLimpio > 5000 ? 'saldo-verde' : 'saldo-rojo';
+                        
+                        let saldoTexto = formatearMoneda(d.saldo);
+                        let nombreLimpioParaClick = d.nombre.replace(/'/g, "\\'");
 
                         html += `
                         <tr class="distri-row">
                             <td><strong>${d.nombre}</strong><br><span style="color:var(--text-secondary); font-size:0.8rem;">📱 ${d.telefono}</span></td>
-                            <td class="${claseSaldo}">${formatearMoneda(d.saldo)}</td>
+                            <td class="${claseSaldo}" style="white-space: nowrap;">
+                                <span>${saldoTexto}</span>
+                                <button class="copy-icon-btn" onclick="copiarSaldo('${nombreLimpioParaClick}', '${saldoTexto}')" title="Copiar reporte de saldo">📋</button>
+                            </td>
                             <td style="text-align:center;">
-                                <button class="trash-icon-btn" onclick="solicitarEliminacion('${d.nombre}')" title="Eliminar Revendedor">🗑️</button>
+                                <button class="trash-icon-btn" onclick="solicitarEliminacion('${nombreLimpioParaClick}')" title="Eliminar Revendedor">🗑️</button>
                             </td>
                         </tr>`;
 
@@ -837,7 +927,6 @@
             haptic();
 
             const revendedor = document.getElementById('inputRevendedor').value.trim();
-            // ⏳ Capturamos el multiplicador de meses seleccionado
             const meses = parseInt(document.getElementById('selectMesesDebito').value) || 1;
             
             const inputsCantidad = document.querySelectorAll('input[name="cant_plataforma"]');
@@ -852,14 +941,11 @@
                     let codigoPlat = input.getAttribute('data-value');
                     let nombreEstetico = input.getAttribute('data-name');
                     
-                    // 💥 LA MAGIA MATEMÁTICA: Multiplicamos pantallas por meses
                     let totalItemsMultiplicados = cantidadPantallas * meses;
                     totalDébitosFinales += totalItemsMultiplicados;
                     
-                    // Armamos un resumen súper claro para la confirmación
                     resumenNombres.push(`▪ ${nombreEstetico}: ${cantidadPantallas} ${cantidadPantallas === 1 ? 'pantalla' : 'pantallas'} × ${meses} ${meses === 1 ? 'mes' : 'meses'} (Total: ${totalItemsMultiplicados} débitos)`);
                     
-                    // Metemos el código repetido tantas veces como débitos totales correspondan
                     for (let k = 0; k < totalItemsMultiplicados; k++) {
                         plataformasSeleccionadas.push(codigoPlat);
                     }
@@ -875,7 +961,6 @@
 
             if (!revendedor) return;
 
-            // 💬 Mensaje aclaratorio de confirmación
             let msjConfirma = `¿Confirmas efectuar el débito global con las siguientes vigencias multiplicadas por mes?\n\n`;
             for(let j=0; j<resumenNombres.length; j++){
                 msjConfirma += `${resumenNombres[j]}\n`;
@@ -908,7 +993,6 @@
 
             const scriptElement = document.createElement('script');
             scriptElement.id = 'script_debit_distri';
-            // 🚀 Enviamos la cadena con los textos ya multiplicados. Dejamos el parámetro meses en 1 en la URL para que Sheets no duplique la cuenta.
             let params = `?action=descontarSaldoRevendedor&revendedor=${encodeURIComponent(revendedor)}&plataformas=${encodeURIComponent(stringPlataformas)}&meses=1&callback=procesarDescuento&_ts=${Date.now()}`;
             scriptElement.src = GOOGLE_SCRIPT_URL + params;
             document.body.appendChild(scriptElement);
@@ -1069,12 +1153,10 @@
             startShiftTimer();
             iniciarControlInactividad();
             
-            // 🚀 ARRANQUE SEGURO AUTO-LOAD AUTOMÁTICO
             setTimeout(() => {
                 cargarDistribuidores();
             }, 300);
 
-            // 🔄 AUTO-REFRESCO AUTOMÁTICO CADA 1 MINUTO
             setInterval(() => {
                 cargarDistribuidores();
             }, 60000);
