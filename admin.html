@@ -335,8 +335,10 @@
 
     <div class="bg-orb-1"></div>
     <div class="bg-orb-2"></div>
+    
 
     <header class="global-header" id="globalHeader" style="display: none;">
+        
         <div class="top-left-status" id="staffStatusBar">
             <div class="staff-badge">
                 <span id="staffSessionName">USER</span> • PORTAL DE MENSAJES
@@ -348,19 +350,83 @@
                 </svg>
                 <span id="shiftTimer">00:00:00</span>
             </div>
+            
         </div>
+        
 
-        <div class="header-search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="Buscar respuesta rápida...">
+        <div class="header-search-container" style="display: flex; align-items: center; gap: 20px; width: 100%; justify-content: space-between;">
+
+    <input type="text" id="searchInput" class="search-input" placeholder="Buscar respuesta rápida..." style="flex: 1; max-width: 350px;">
+    
+    <style>
+        .ticker-container {
+            flex: 2; /* Toma el resto del espacio disponible */
+            min-width: 0; /* Evita que el contenedor empuje el buscador */
+            display: flex; 
+            align-items: center; 
+            background: transparent; /* Quitamos el fondo feo */
+            padding-left: 20px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1); /* Línea divisoria elegante */
+        }
+
+        .ticker-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            overflow: hidden;
+            /* Difuminado a ambos lados para que las letras nazcan y mueran suavemente */
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+        }
+        
+        .ticker-track {
+            display: flex;
+            gap: 15px;
+            white-space: nowrap;
+            animation: tickerScroll 25s linear infinite;
+        }
+        
+        .ticker-track:hover {
+            animation-play-state: paused; /* Pausa al pasar el mouse */
+        }
+
+        @keyframes tickerScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); } 
+        }
+        
+        .btn-dot-recarga {
+            width: 10px; height: 10px; border-radius: 50%; 
+            background: var(--ios-red, #ff3b30); box-shadow: 0 0 10px var(--ios-red, #ff3b30); 
+            margin-right: 15px; cursor: pointer; flex-shrink: 0;
+            transition: background 0.3s;
+        }
+    </style>
+
+    <div class="ticker-container">
+        <div id="dotLibres" class="btn-dot-recarga" onclick="actualizarPerfilesLibres(true)" title="Toca para forzar recarga manual"></div>
+        
+        <div class="ticker-wrap">
+            <div id="contenedorPlataformasLibres" class="ticker-track">
+                <span style="font-size: 0.85rem; color: var(--text-secondary, #a1a1a6);">Sincronizando inventario...</span>
+            </div>
         </div>
+    </div>
+
+</div>
+        
+        
 
         <div class="control-container" id="controlPanel">
+            
 
             <button class="interface-control-item" id="btnCajaFinanzas" onclick="window.location.href='finanzas.html'" style="color: var(--ios-green) !important; display: none;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
         <line x1="12" y1="1" x2="12" y2="23"></line>
         <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path>
+        
     </svg>
     <span>CAJA</span>
 </button>
@@ -1973,6 +2039,9 @@
             }
         });
 
+        
+        
+
         const qrPrincipal = {
             titulo: 'PAGOS',
             imagenUrl: 'https://i.postimg.cc/ydfJzvp8/unnamed.png',
@@ -2260,5 +2329,75 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
             }, 1500);
         });
     </script>
+    <script>
+    function actualizarPerfilesLibres(manual = false) {
+        if(manual) haptic();
+        
+        const dot = document.getElementById('dotLibres');
+        const container = document.getElementById('contenedorPlataformasLibres');
+        
+        if(dot) {
+            dot.style.background = "var(--ios-red)"; 
+            dot.style.boxShadow = "0 0 8px var(--ios-red)";
+        }
+
+        const callbackName = "cb_libres_" + Date.now();
+        window[callbackName] = function(res) {
+            if(res && res.status === "success" && container) {
+                let htmlPildoras = "";
+                
+                if (res.data.length === 0) {
+                    htmlPildoras = '<span style="font-size: 0.8rem; color: var(--ios-red); font-weight: 600;">Sin inventario</span>';
+                    container.innerHTML = htmlPildoras;
+                } else {
+                    // Crea las píldoras con un diseño más brillante y moderno
+                    res.data.forEach(item => {
+                        let colorBg = item.libres > 0 ? "rgba(10, 132, 255, 0.15)" : "rgba(255, 69, 58, 0.15)";
+                        let colorTxt = item.libres > 0 ? "#64d2ff" : "#ff453a"; 
+                        let borderCol = item.libres > 0 ? "rgba(10, 132, 255, 0.3)" : "rgba(255, 69, 58, 0.3)";
+                        
+                        htmlPildoras += `
+                            <div style="background: ${colorBg}; color: ${colorTxt}; padding: 4px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: 1px solid ${borderCol}; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                <span>${item.plat}</span>
+                                <span style="font-size: 0.95rem; color: #ffffff;">${item.libres}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    // TRUCO DE MAGIA: Duplicamos el HTML para que el bucle de animación sea infinito y sin cortes
+                    container.innerHTML = htmlPildoras + htmlPildoras;
+                }
+                
+                if(dot) {
+                    dot.style.background = "var(--ios-green)";
+                    dot.style.boxShadow = "0 0 8px var(--ios-green)";
+                }
+            }
+            
+            delete window[callbackName];
+            const scriptNode = document.getElementById('node_' + callbackName);
+            if(scriptNode) scriptNode.remove();
+        };
+
+        const script = document.createElement('script');
+        script.id = 'node_' + callbackName;
+        script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPerfilesLibres&callback=${callbackName}`;
+        document.body.appendChild(script);
+    }
+    // =========================================================================
+    // ⏱️ RELOJ INTERNO: ARRANQUE Y ACTUALIZACIÓN AUTOMÁTICA DEL TICKER
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Hace la primera sincronización casi de inmediato (al segundo de abrir la página)
+        setTimeout(() => {
+            actualizarPerfilesLibres(false);
+        }, 1000);
+        
+        // 2. Configura la alarma cíclica para actualizar el inventario cada 10 minutos (600,000 ms)
+        setInterval(() => {
+            actualizarPerfilesLibres(false);
+        }, 300000);
+    });
+</script>
 </body>
 </html>
