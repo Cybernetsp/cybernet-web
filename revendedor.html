@@ -697,6 +697,34 @@
             
             return "$" + valorNum.toLocaleString('es-CO');
         }
+        // 💸 MOTOR DE INYECCIÓN DE PRECIOS DINÁMICOS DESDE GOOGLE SHEETS
+        function cargarPreciosDeSheets() {
+            const container = document.getElementById('grupoPlataformas');
+            const oldScript = document.getElementById('script_get_precios');
+            if (oldScript) oldScript.remove();
+
+            window.procesarPreciosWeb = function(res) {
+                if (res && res.status === "success") {
+                    let lista = res.data;
+                    let html = "";
+                    lista.forEach(item => {
+                        html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                            <label style="font-size: 0.9rem;">📱 ${item.nombre} - ${formatearMoneda(item.precio)}</label>
+                            <input type="number" name="cant_plataforma" data-value="${item.codigo}" data-name="${item.nombre}" min="0" max="10" value="0">
+                        </div>`;
+                    });
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = `<div style="text-align:center; padding:50px 0; color:var(--ios-red);">❌ Error cargando catálogo: ${res.message}</div>`;
+                }
+            };
+
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'script_get_precios';
+            scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerPrecios&callback=procesarPreciosWeb&_ts=" + Date.now();
+            document.body.appendChild(scriptElement);
+        }
 
         // 🚀 NUEVA FUNCIÓN ANIMADA: Copia sin alertas ruidosas y activa la píldora flotante
         function copiarSaldo(nombre, saldoFormateado) {
@@ -891,6 +919,7 @@
                     alert(`✅ ¡Débito Exitoso!\n\nRevendedor: ${res.revendedor}\nDescuento Total: ${formatearMoneda(res.debitado)}\nNuevo Saldo: ${formatearMoneda(res.saldoQuedante)}`);
                     document.getElementById('formDescuento').reset();
                     cargarDistribuidores(); 
+                    cargarPreciosDeSheets(); // Limpia el catálogo a ceros
                 } else {
                     alert(`❌ Error al procesar:\n\n${res.message || 'Verifica los datos y vuelve a intentar.'}`);
                 }
@@ -1058,8 +1087,10 @@
             startShiftTimer();
             iniciarControlInactividad();
             
+            // 🚀 ARRANQUE SEGURO EN SEGUNDO PLANO AUTOMÁTICO
             setTimeout(() => {
                 cargarDistribuidores();
+                cargarPreciosDeSheets(); // 💸 Llama la lista viva de precios
             }, 300);
 
             setInterval(() => {
