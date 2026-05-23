@@ -122,7 +122,7 @@
         }
 
         /* 1. BARRA DE FILTROS SUPERIOR */
-        .filter-top-bar { padding: 14px 24px !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; }
+        .filter-top-bar { padding: 14px 24px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; }
         .picker-box { display: flex !important; align-items: center !important; gap: 10px !important; }
         .picker-box label { font-size: 0.85rem !important; font-weight: 600 !important; color: var(--text-secondary) !important; }
         
@@ -192,7 +192,6 @@
 
         .empty-log-msg { text-align: center !important; padding: 35px !important; color: var(--text-secondary) !important; font-size: 0.88rem !important; width: 100% !important; }
 
-        /* 🛠️ REDISEÑO EXCLUSIVO DEL LETRERO DE NOTIFICACIÓN (CORREGIDO EL TRANSPORTE TOP) */
         .apple-notification-toast {
             position: fixed !important; 
             top: 85px !important; /* CAMBIADO: De 30px a 85px para que baje limpiamente de la barra fija */
@@ -227,7 +226,7 @@
             .finanzas-workspace { margin-top: 24px !important; }
             .top-left-status { justify-content: center !important; width: 100% !important; }
             #controlPanel { width: 100% !important; justify-content: center !important; }
-            .apple-notification-toast { top: 125px !important; } /* Un poco más abajo en móviles por el despliegue del header */
+            .apple-notification-toast { top: 125px !important; } /* Un poco más abajo en móbiles por el despliegue del header */
         }
         @media (max-width: 650px) {
             .bento-horizontal-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
@@ -302,6 +301,15 @@
                 <label style="margin-left: 15px;">Día:</label>
                 <select id="appleDaySelect" class="apple-select-filter" onchange="actualizarFiltrosUI()"></select>
             </div>
+            
+            <button class="apple-select-filter" onclick="exportarExcelEmpresarial()" style="display:flex; align-items:center; gap:8px; background-color: rgba(48, 209, 88, 0.12) !important; border: 0.5px solid rgba(48, 209, 88, 0.4) !important; color: var(--ios-green) !important; height: 38px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 !important;">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span style="font-size: 0.8rem; font-weight:700;">EXPORTAR EXCEL</span>
+            </button>
         </section>
 
         <section class="glass-panel executive-panoramic-hub">
@@ -689,6 +697,141 @@
             
             script.src = `${GOOGLE_SCRIPT_URL}?action=registrarTransaccionFinanciera&categoria=${catVal}&monto=${montoVal}&detalle=${detalleVal}&callback=saveCallback`;
             document.body.appendChild(script);
+        }
+
+        // 🚀 NUEVA FUNCIÓN: Generador de Excel con Plantilla de Diseño Corporativo Nivel Premium
+        function exportarExcelEmpresarial() {
+            if (!globalFinanzasData || !globalFinanzasData.listaDetallada) {
+                triggerToast("⚠️ Espera que se sincronicen los datos contables.");
+                return;
+            }
+
+            const mesSeleccionado = document.getElementById('appleMonthSelect').value;
+            const diaSeleccionado = document.getElementById('appleDaySelect').value;
+            const periodoTexto = (diaSeleccionado === "TODOS") ? `MES DE ${mesSeleccionado}` : `DÍA ${diaSeleccionado} DE ${mesSeleccionado}`;
+            const summary = globalFinanzasData[activePeriod];
+            const movimientos = globalFinanzasData.listaDetallada;
+
+            // Determinar color de salud financiera en el balance neto
+            const colorNetoExcel = (summary.neto >= 0) ? '#30d158' : '#ff453a';
+
+            // 🏛️ CONSTRUCCIÓN DEL TEMPLATE HTML CON ESTILOS AVANZADOS COMPATIBLES CON EXCEL
+            let excelTemplate = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1c1c1e; }
+                    table { border-collapse: collapse; margin-bottom: 20px; }
+                    .main-title { font-size: 18pt; font-weight: bold; color: #0a84ff; text-align: left; }
+                    .meta-info { font-size: 10pt; color: #8e8e93; font-style: italic; }
+                    
+                    /* Tarjetas de Indicadores KPI */
+                    .kpi-table th { background-color: #f2f2f7; font-size: 9pt; color: #636366; text-transform: uppercase; text-align: center; font-weight: bold; padding: 6px; border: 1px solid #d1d1d6; }
+                    .kpi-table td { font-size: 13pt; font-weight: bold; text-align: center; padding: 12px; border: 1px solid #d1d1d6; background-color: #ffffff; }
+                    
+                    /* Tabla de Movimientos */
+                    .header-row th { background-color: #0a84ff; color: #ffffff; font-weight: bold; font-size: 11pt; padding: 10px; border: 1px solid #007aff; text-align: left; }
+                    .data-row td { font-size: 10pt; padding: 8px 10px; border: 1px solid #e5e5ea; color: #2c2c2e; }
+                    .zebra-row td { background-color: #f9f9fb; }
+                    
+                    /* Tipos de Moneda e Importes */
+                    .money-cell { text-align: right; font-family: 'Consolas', monospace; font-size: 10.5pt; }
+                    .money-ingreso { color: #248a3d; font-weight: 600; }
+                    .money-egreso { color: #b3261e; }
+                    
+                    /* Totales */
+                    .total-row td { font-weight: bold; background-color: #e5e5ea; border-top: 2.5px solid #1c1c1e; font-size: 11pt; padding: 10px; }
+                </style>
+            </head>
+            <body>
+                <table>
+                    <tr><td class="main-title" colspan="4">CYBERNET STREAMING S.A.S.</td></tr>
+                    <tr><td class="meta-info" colspan="4">INFORME DE CONSOLIDACIÓN FINANCIERA EJECUTIVA</td></tr>
+                    <tr><td class="meta-info" colspan="4">Periodo Evaluado: ${periodoTexto} | Fecha de Generación: ${new Date().toLocaleDateString('es-CO')}</td></tr>
+                </table>
+                <br>
+
+                <table class="kpi-table" cellpadding="0" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th width="150">Ventas Brutas</th>
+                            <th width="150">Gastos Operativos</th>
+                            <th width="150">Inversiones</th>
+                            <th width="150">Staff Nómina</th>
+                            <th width="180" style="background-color: #1c1c1e; color: #fff;">Caja Real (Neto)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="color: #0a84ff;">$${parseFloat(summary.ingresos).toLocaleString('es-CO')}</td>
+                            <td style="color: #ff453a;">$${parseFloat(summary.gastos).toLocaleString('es-CO')}</td>
+                            <td style="color: #ff9f0a;">$${parseFloat(summary.inversiones).toLocaleString('es-CO')}</td>
+                            <td style="color: #bf5af2;">$${parseFloat(summary.nomina).toLocaleString('es-CO')}</td>
+                            <td style="background-color: #f2f2f7; color: ${colorNetoExcel}; font-size: 15pt;">$${parseFloat(summary.neto).toLocaleString('es-CO')}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
+
+                <table>
+                    <tr><td style="font-size: 12pt; font-weight: bold; color: #1c1c1e;">DETALLE CRONOLÓGICO DEL LIBRO CONTABLE</td></tr>
+                </table>
+
+                <table cellpadding="0" cellspacing="0">
+                    <thead>
+                        <tr class="header-row">
+                            <th width="110">Fecha</th>
+                            <th width="140" style="text-align: right;">Monto</th>
+                            <th width="320">Descripción / Concepto</th>
+                            <th width="180">Categoría Operativa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            // Rellenar dinámicamente las filas del libro mayor
+            movimientos.forEach((item, index) => {
+                const filaZebra = (index % 2 === 0) ? '' : 'class="zebra-row"';
+                const claseMonto = (item.tipo === "INGRESO") ? 'money-ingreso' : 'money-egreso';
+                const signo = (item.tipo === "INGRESO") ? '' : '-';
+
+                excelTemplate += `
+                    <tr class="data-row ${filaZebra}">
+                        <td>${item.fecha}</td>
+                        <td class="money-cell ${claseMonto}">${signo}$${parseFloat(item.monto).toLocaleString('es-CO')}</td>
+                        <td>${item.detalle}</td>
+                        <td>${item.categoria}</td>
+                    </tr>
+                `;
+            });
+
+            // Fila de Cierre con el Balance Final
+            excelTemplate += `
+                        <tr class="total-row">
+                            <td>TOTAL NETO</td>
+                            <td style="text-align: right; color: ${colorNetoExcel}; font-family: 'Consolas', monospace;">$${parseFloat(summary.neto).toLocaleString('es-CO')}</td>
+                            <td colspan="2" style="color: #636366; font-size: 9pt; font-weight: normal; font-style: italic; text-align: right;">Cierre de libro contable Cybernet verificado por sistema •</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </body>
+            </html>
+            `;
+
+            // 💾 PROCESAMIENTO DE DESCARGA EN SEGUNDO PLANO (SIN ALERTAS EXTRALIMITADAS)
+            const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            // Nombre corporativo estético: Cybernet_Finanzas_MAYO_2026.xls
+            link.href = url;
+            link.setAttribute("download", `Cybernet_Finanzas_${mesSeleccionado}_2026.xls`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            triggerToast(`📈 Excel de ${mesSeleccionado} exportado exitosamente.`);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
