@@ -2351,10 +2351,28 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
                     container.innerHTML = htmlPildoras;
                 } else {
                     // Crea las píldoras con un diseño más brillante y moderno
+                    // Crea las píldoras con el sistema de semáforo inteligente
                     res.data.forEach(item => {
-                        let colorBg = item.libres > 0 ? "rgba(10, 132, 255, 0.15)" : "rgba(255, 69, 58, 0.15)";
-                        let colorTxt = item.libres > 0 ? "#64d2ff" : "#ff453a"; 
-                        let borderCol = item.libres > 0 ? "rgba(10, 132, 255, 0.3)" : "rgba(255, 69, 58, 0.3)";
+                        let colorBg, colorTxt, borderCol;
+
+                        // 🟢 NORMAL (3 o más perfiles): Azul
+                        if (item.libres > 2) {
+                            colorBg = "rgba(10, 132, 255, 0.15)";
+                            colorTxt = "#64d2ff";
+                            borderCol = "rgba(10, 132, 255, 0.3)";
+                        } 
+                        // 🟠 ALERTA (Exactamente 2 perfiles): Naranja
+                        else if (item.libres === 2) {
+                            colorBg = "rgba(255, 149, 0, 0.15)";
+                            colorTxt = "#ff9f0a";
+                            borderCol = "rgba(255, 149, 0, 0.4)";
+                        } 
+                        // 🔴 CRÍTICO (1 o 0 perfiles): Rojo
+                        else {
+                            colorBg = "rgba(255, 69, 58, 0.15)";
+                            colorTxt = "#ff453a";
+                            borderCol = "rgba(255, 69, 58, 0.4)";
+                        }
                         
                         htmlPildoras += `
                             <div style="background: ${colorBg}; color: ${colorTxt}; padding: 4px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: 1px solid ${borderCol}; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
