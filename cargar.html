@@ -249,7 +249,7 @@
                     <input type="text" id="loadProveedorManual" class="ios-input-block" placeholder="Escribe el nombre del nuevo proveedor">
                 </div>
 
-                <textarea id="loadCuentasBloque" class="ios-input-block" placeholder="Copia y pega las cuentas aquí. Formatos aceptados:&#10;correo@gmail.com clave123&#10;correo2@gmail.com | clave456" required></textarea>
+                <textarea id="loadCuentasBloque" class="ios-input-block" placeholder="Copia y pega las cuentas aquí. Formatos aceptados:&#10;correo@gmail.com clave123&#10;correo@gmail.com:clave123&#10;correo2@gmail.com | clave456" required></textarea>
                 
                 <button type="submit" id="btnSubmitCarga" class="btn-login-action" style="background:var(--ios-green); box-shadow:0 4px 15px rgba(48, 209, 88, 0.35); margin-top: 10px;">
                     Cargar Cuentas en Lote
@@ -337,7 +337,7 @@
         }
 
         // ==========================================
-        // CONEXIÓN DIRECTA CON EL ENDPOINT DEL SCRIPT (ACCION: cargarCuentasMasivo)
+        // CONEXIÓN CON EL ENDPOINT DEL SCRIPT
         // ==========================================
         function ejecutarCargaLote(e) {
             e.preventDefault();
@@ -348,6 +348,18 @@
             const selectProv = document.getElementById('loadProveedor').value;
             const proveedorManual = document.getElementById('loadProveedorManual').value.trim();
             const bloqueCuentas = document.getElementById('loadCuentasBloque').value;
+
+            // ⚡ TRADUCTOR DE FORMATO MASIVO: Detecta y cambia en milisegundos "usuario:clave" por "usuario clave"
+            let lineas = bloqueCuentas.split('\n');
+            let lineasNormalizadas = lineas.map(linea => {
+                let l = linea.trim();
+                // Si la línea contiene dos puntos y no tiene espacios ni barras divisorias comunes
+                if (l.includes(':') && !l.includes('|') && !l.includes(' ')) {
+                    return l.replace(':', ' '); // Convierte los primeros dos puntos en el espacio que espera Apps Script
+                }
+                return l;
+            });
+            const bloqueCuentasFinal = lineasNormalizadas.join('\n');
 
             const proveedorFinal = (selectProv === "OTRO") ? proveedorManual : selectProv;
 
@@ -380,10 +392,12 @@
 
             const scriptElement = document.createElement('script');
             scriptElement.id = 'cyber_cargamasiva_node';
-            let queryParams = `?action=cargarCuentasMasivo&plataforma=${encodeURIComponent(plataforma)}&proveedor=${encodeURIComponent(proveedorFinal)}&bloqueCuentas=${encodeURIComponent(bloqueCuentas)}&callback=procesarCargaLoteSheets&_ts=${Date.now()}`;
+            // Se envía el lote normalizado con espacios limpios hacia las Sheets
+            let queryParams = `?action=cargarCuentasMasivo&plataforma=${encodeURIComponent(plataforma)}&proveedor=${encodeURIComponent(proveedorFinal)}&bloqueCuentas=${encodeURIComponent(bloqueCuentasFinal)}&callback=procesarCargaLoteSheets&_ts=${Date.now()}`;
             scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
             document.body.appendChild(scriptElement);
         }
+        
         // 📊 MOTOR DE ANÁLISIS DE CALIDAD DE PROVEEDORES
         function cargarResumenProveedores() {
             const tbody = document.getElementById('tablaResumenProveedores');
@@ -489,7 +503,7 @@
         // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             const activeUser = sessionStorage.getItem('active_staff');
-            cargarResumenProveedores(); // 📊 Carga las métricas al abrir la página
+            cargarResumenProveedores(); 
             if(activeUser) {
                 document.getElementById('staffSessionName').innerText = activeUser.toUpperCase();
                 startShiftTimer(); 
