@@ -313,36 +313,30 @@
         }
 
         .checkbox-container {
-            height: 220px; 
+            height: 280px; 
             overflow-y: auto; 
             padding: 10px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 5px;
         }
 
-        .checkbox-container label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-            color: var(--text-primary);
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 8px;
-            transition: background 0.2s;
+        .checkbox-container input[type="number"] {
+            width: 60px; 
+            padding: 4px; 
+            border-radius: 8px; 
+            border: var(--glass-border); 
+            background: rgba(255,255,255,0.05); 
+            color: #fff; 
+            text-align: center; 
+            font-weight: bold;
+            outline: none;
         }
-
-        .checkbox-container label:hover {
-            background: rgba(191, 90, 242, 0.1);
-        }
-
-        .checkbox-container input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--ios-purple);
-            cursor: pointer;
+        
+        [data-theme="light"] .checkbox-container input[type="number"] {
+            background: rgba(0,0,0,0.05);
+            color: #000;
         }
 
         .btn-action {
@@ -526,29 +520,113 @@
                     <form id="formDescuento" onsubmit="ejecutarDescuento(event)">
                         
                         <input type="text" id="inputRevendedor" list="listaRevendedores" class="ios-input-block" placeholder="📱 Escribe Celular o Nombre..." required autocomplete="off">
-                        <datalist id="listaRevendedores">
-                            </datalist>
+                        <datalist id="listaRevendedores"></datalist>
+                        
+                        <select id="selectMesesDebito" class="ios-input-block" required>
+                            <option value="1" selected>⏳ Vigencia del servicio: 1 Mes</option>
+                            <option value="2">⏳ Vigencia del servicio: 2 Meses</option>
+                            <option value="3">⏳ Vigencia del servicio: 3 Meses</option>
+                            <option value="4">⏳ Vigencia del servicio: 4 Meses</option>
+                            <option value="5">⏳ Vigencia del servicio: 5 Meses</option>
+                        </select>
                         
                         <div class="ios-input-block checkbox-container" id="grupoPlataformas">
-                            <label><input type="checkbox" name="plataforma" value="NETFLIX"> Netflix 1 Pantalla - $10.000</label>
-                            <label><input type="checkbox" name="plataforma" value="MAX"> Max 1 Pantalla - $3.000</label>
-                            <label><input type="checkbox" name="plataforma" value="APPLE-TV"> Apple TV - $3.000</label>
-                            <label><input type="checkbox" name="plataforma" value="DISNEY-PREMIUM"> Disney+ Premium - $10.000</label>
-                            <label><input type="checkbox" name="plataforma" value="DISNEY-ESTANDAR"> Disney+ Estándar - $4.000</label>
-                            <label><input type="checkbox" name="plataforma" value="AMAZON-PRIME-VIDEO"> Prime Video Original - $5.000</label>
-                            <label><input type="checkbox" name="plataforma" value="CRUNCHYROLL"> Crunchyroll - $3.000</label>
-                            <label><input type="checkbox" name="plataforma" value="PLEX"> Plex - $3.000</label>
-                            <label><input type="checkbox" name="plataforma" value="PARAMOUNT"> Paramount+ - $3.000</label>
-                            <label><input type="checkbox" name="plataforma" value="MUBI"> MUBI - $3.000</label>
-                            <label><input type="checkbox" name="plataforma" value="METEGOL"> Metegol - $12.000</label>
-                            <label><input type="checkbox" name="plataforma" value="VIX"> Vix - $3.000</label>
-                            <label><input type="checkbox" name="plataforma" value="IPTV"> IPTV - $7.000</label>
-                            <label><input type="checkbox" name="plataforma" value="CANVA"> Canva Pro (1 Mes) - $10.000</label>
-                            <label><input type="checkbox" name="plataforma" value="YOUTUBE"> YouTube (1 Mes) - $10.000</label>
-                            <label><input type="checkbox" name="plataforma" value="SPOTIFY"> Spotify (1 Mes) - $14.000</label>
-                            <label><input type="checkbox" name="plataforma" value="YOUTUBE-PREMIUM"> YouTube Premium (1 Mes) - $14.000</label>
-                            <label><input type="checkbox" name="plataforma" value="SPOTIFY-DISTRI"> Spotify (1 Mes Distris) - $10.000</label>
-                            <label><input type="checkbox" name="plataforma" value="DEEZER"> Deezer (1 Mes) - $8.000</label>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🎬 Netflix 1 Pantalla - $10.000</label>
+                                <input type="number" name="cant_plataforma" data-value="NETFLIX" data-name="Netflix 1 Pantalla" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🍿 Max 1 Pantalla - $3.000</label>
+                                <input type="number" name="cant_plataforma" data-value="MAX" data-name="Max 1 Pantalla" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🍎 Apple TV - $3.000</label>
+                                <input type="number" name="cant_plataforma" data-value="APPLE-TV" data-name="Apple TV" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">👑 Disney+ Premium - $10.000</label>
+                                <input type="number" name="cant_plataforma" data-value="DISNEY-PREMIUM" data-name="Disney+ Premium" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">✨ Disney+ Estándar - $4.000</label>
+                                <input type="number" name="cant_plataforma" data-value="DISNEY-ESTANDAR" data-name="Disney+ Estándar" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">📦 Prime Video Original - $5.000</label>
+                                <input type="number" name="cant_plataforma" data-value="AMAZON-PRIME-VIDEO" data-name="Prime Video Original" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">💥 Crunchyroll - $3.000</label>
+                                <input type="number" name="cant_plataforma" data-value="CRUNCHYROLL" data-name="Crunchyroll" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🔮 Plex - $3.000</label>
+                                <input type="number" name="cant_plataforma" data-value="PLEX" data-name="Plex" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">⛰️ Paramount+ - $3.000</label>
+                                <input type="number" name="cant_plataforma" data-value="PARAMOUNT" data-name="Paramount+" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🎨 MUBI - $3.000</label>
+                                <input type="number" name="cant_plataforma" data-value="MUBI" data-name="MUBI" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">⚽ Metegol - $12.000</label>
+                                <input type="number" name="cant_plataforma" data-value="METEGOL" data-name="Metegol" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🔥 Vix - $3.000</label>
+                                <input type="number" name="cant_plataforma" data-value="VIX" data-name="Vix" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">📺 IPTV - $7.000</label>
+                                <input type="number" name="cant_plataforma" data-value="IPTV" data-name="IPTV" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🖌️ Canva Pro (1 Mes) - $10.000</label>
+                                <input type="number" name="cant_plataforma" data-value="CANVA" data-name="Canva Pro" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">❤️ YouTube (1 Mes) - $10.000</label>
+                                <input type="number" name="cant_plataforma" data-value="YOUTUBE" data-name="YouTube" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🎵 Spotify (1 Mes) - $14.000</label>
+                                <input type="number" name="cant_plataforma" data-value="SPOTIFY" data-name="Spotify" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🔴 YouTube Premium (1 Mes) - $14.000</label>
+                                <input type="number" name="cant_plataforma" data-value="YOUTUBE-PREMIUM" data-name="YouTube Premium" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🎧 Spotify (1 Mes Distris) - $10.000</label>
+                                <input type="number" name="cant_plataforma" data-value="SPOTIFY-DISTRI" data-name="Spotify Distris" min="0" max="10" value="0">
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                                <label style="font-size: 0.9rem;">🟢 Deezer (1 Mes) - $8.000</label>
+                                <input type="number" name="cant_plataforma" data-value="DEEZER" data-name="Deezer" min="0" max="10" value="0">
+                            </div>
+
                         </div>
 
                         <button type="submit" id="btnDescontar" class="btn-action">Efectuar Descuento Global</button>
@@ -584,7 +662,7 @@
                 
                 <input type="text" id="searchTablaDistris" class="ios-input-block" placeholder="🔍 Filtrar revendedor en la tabla..." oninput="filtrarTablaRevendedores()" style="margin-bottom:10px; padding: 10px 16px;">
                 
-                <button class="btn-refresh-action" onclick="cargarDistribuidores()">🔄 Refrescar Saldos</button>
+                <button class="btn-refresh-action" onclick="cargarDistribuidores()">🔄 Refrescar Saldos Manual</button>
                 
                 <div class="table-container">
                     <table class="distris-table">
@@ -654,9 +732,7 @@
         }
 
         function cargarDistribuidores() {
-            haptic();
             const tbody = document.getElementById('tablaDistribuidores');
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary);">⏳ Sincronizando saldos en tiempo real...</td></tr>';
             
             const oldScript = document.getElementById('script_get_distris');
             if (oldScript) oldScript.remove();
@@ -761,29 +837,50 @@
             haptic();
 
             const revendedor = document.getElementById('inputRevendedor').value.trim();
-            const checkboxes = document.querySelectorAll('input[name="plataforma"]:checked');
+            // ⏳ Capturamos el multiplicador de meses seleccionado
+            const meses = parseInt(document.getElementById('selectMesesDebito').value) || 1;
             
-            if (checkboxes.length === 0) {
-                alert("⚠️ Por favor, selecciona al menos un plan para debitar.");
-                return;
-            }
-
+            const inputsCantidad = document.querySelectorAll('input[name="cant_plataforma"]');
+            
             let plataformasSeleccionadas = [];
             let resumenNombres = [];
-            for(let i=0; i<checkboxes.length; i++){
-                plataformasSeleccionadas.push(checkboxes[i].value);
-                resumenNombres.push(checkboxes[i].parentNode.innerText.trim());
+            let totalDébitosFinales = 0;
+
+            inputsCantidad.forEach(input => {
+                let cantidadPantallas = parseInt(input.value) || 0;
+                if (cantidadPantallas > 0) {
+                    let codigoPlat = input.getAttribute('data-value');
+                    let nombreEstetico = input.getAttribute('data-name');
+                    
+                    // 💥 LA MAGIA MATEMÁTICA: Multiplicamos pantallas por meses
+                    let totalItemsMultiplicados = cantidadPantallas * meses;
+                    totalDébitosFinales += totalItemsMultiplicados;
+                    
+                    // Armamos un resumen súper claro para la confirmación
+                    resumenNombres.push(`▪ ${nombreEstetico}: ${cantidadPantallas} ${cantidadPantallas === 1 ? 'pantalla' : 'pantallas'} × ${meses} ${meses === 1 ? 'mes' : 'meses'} (Total: ${totalItemsMultiplicados} débitos)`);
+                    
+                    // Metemos el código repetido tantas veces como débitos totales correspondan
+                    for (let k = 0; k < totalItemsMultiplicados; k++) {
+                        plataformasSeleccionadas.push(codigoPlat);
+                    }
+                }
+            });
+            
+            if (totalDébitosFinales === 0) {
+                alert("⚠️ Por favor, ingresa una cantidad mayor a 0 en al menos una plataforma.");
+                return;
             }
 
             const stringPlataformas = plataformasSeleccionadas.join(",");
 
             if (!revendedor) return;
 
-            let msjConfirma = `¿Estás seguro de debitar los siguientes planes?\n\n`;
+            // 💬 Mensaje aclaratorio de confirmación
+            let msjConfirma = `¿Confirmas efectuar el débito global con las siguientes vigencias multiplicadas por mes?\n\n`;
             for(let j=0; j<resumenNombres.length; j++){
-                msjConfirma += `▪ ${resumenNombres[j]}\n`;
+                msjConfirma += `${resumenNombres[j]}\n`;
             }
-            msjConfirma += `\nAl revendedor: ${revendedor}`;
+            msjConfirma += `\n👤 Revendedor: ${revendedor}`;
 
             if(!confirm(msjConfirma)) {
                 return;
@@ -811,7 +908,8 @@
 
             const scriptElement = document.createElement('script');
             scriptElement.id = 'script_debit_distri';
-            let params = `?action=descontarSaldoRevendedor&revendedor=${encodeURIComponent(revendedor)}&plataformas=${encodeURIComponent(stringPlataformas)}&callback=procesarDescuento&_ts=${Date.now()}`;
+            // 🚀 Enviamos la cadena con los textos ya multiplicados. Dejamos el parámetro meses en 1 en la URL para que Sheets no duplique la cuenta.
+            let params = `?action=descontarSaldoRevendedor&revendedor=${encodeURIComponent(revendedor)}&plataformas=${encodeURIComponent(stringPlataformas)}&meses=1&callback=procesarDescuento&_ts=${Date.now()}`;
             scriptElement.src = GOOGLE_SCRIPT_URL + params;
             document.body.appendChild(scriptElement);
         }
@@ -971,7 +1069,15 @@
             startShiftTimer();
             iniciarControlInactividad();
             
-            cargarDistribuidores();
+            // 🚀 ARRANQUE SEGURO AUTO-LOAD AUTOMÁTICO
+            setTimeout(() => {
+                cargarDistribuidores();
+            }, 300);
+
+            // 🔄 AUTO-REFRESCO AUTOMÁTICO CADA 1 MINUTO
+            setInterval(() => {
+                cargarDistribuidores();
+            }, 60000);
         });
     </script>
 </body>
