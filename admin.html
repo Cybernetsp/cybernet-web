@@ -964,17 +964,18 @@
         ];
 
         // 🔄 Función modificada para limpiar el buscador y disparar el catálogo dinámico
+        // 🔄 FUNCIÓN DE APERTURA: Abre el panel manteniendo los checks guardados
         function toggleVentasPanel() {
-         haptic();
-         const overlay = document.getElementById('ventasOverlay');
-         overlay.classList.toggle('open');
-         if (overlay.classList.contains('open')) {
-             // 🔥 Quitamos el .reset() de aquí para proteger tus datos si cierras y reabres
-             document.getElementById('buscarPlataformaVenta').value = "";
-             renderizarPlataformasVenta(); 
-             document.getElementById('ventaNombre').focus();
-         }
-     }
+            haptic();
+            const overlay = document.getElementById('ventasOverlay');
+            overlay.classList.toggle('open');
+            if (overlay.classList.contains('open')) {
+                // 🔥 Quitamos renderizarPlataformasVenta() de aquí para que no destruya tus checks marcados
+                document.getElementById('buscarPlataformaVenta').value = "";
+                filtrarPlataformasVenta(); // Muestra en caliente solo las que ya dejaste palomeadas
+                document.getElementById('ventaNombre').focus();
+            }
+        }
 
         
         
@@ -3157,6 +3158,9 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
         setInterval(() => {
             actualizarPerfilesLibres(false);
         }, 300000);
+
+        // 🔥 OBLIGATORIO: Construye el catálogo de plataformas una sola vez al cargar la web
+        renderizarPlataformasVenta();
     });
 </script>
 </body>
