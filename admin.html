@@ -1248,7 +1248,9 @@
 
             const nombre = document.getElementById('ventaNombre').value.trim();
             const telefono = document.getElementById('ventaTelefono').value.replace(/\s+/g, '').trim();
-            const cantidad = document.getElementById('ventaCantidad').value;
+            // 🧼 Extrae el texto formateado, le quita los símbolos y lo vuelve un número puro para el Sheets
+            const cantidadRaw = document.getElementById('ventaCantidad').value.replace(/\D/g, "");
+            const cantidad = parseFloat(cantidadRaw) || 0;
             const banco = document.getElementById('ventaBanco').value;
 
             // 🔥 CANDADO INTELIGENTE: Si seleccionaron la tarjeta "SALDO", es una recarga directa
