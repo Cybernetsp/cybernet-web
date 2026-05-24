@@ -2016,17 +2016,25 @@
                 }
                 
                 let timeParts = item.tiempo.split(':');
-                if (timeParts.length === 3) {
-                    let hSec = parseInt(timeParts[0]) * 3600;
-                    let mSec = parseInt(timeParts[1]) * 60;
-                    let sSec = parseInt(timeParts[2]);
-                    let totalSec = hSec + mSec + sSec;
-                    
-                    resumenDiario[groupKey].totalSeconds += totalSec;
-                    if(item.filaIndex) {
-                        resumenDiario[groupKey].filasAsociadas.push(item.filaIndex);
-                    }
+            let totalSec = 0;
+            let esTiempoValido = false;
+
+            if (timeParts.length === 3) {
+                // Formato completo: hh:mm:ss
+                totalSec = (parseInt(timeParts[0], 10) || 0) * 3600 + (parseInt(timeParts[1], 10) || 0) * 60 + (parseInt(timeParts[2], 10) || 0);
+                esTiempoValido = true;
+            } else if (timeParts.length === 2) {
+                // Formato optimizado por Sheets: hh:mm
+                totalSec = (parseInt(timeParts[0], 10) || 0) * 3600 + (parseInt(timeParts[1], 10) || 0) * 60;
+                esTiempoValido = true;
+            }
+
+            if (esTiempoValido) {
+                resumenDiario[groupKey].totalSeconds += totalSec;
+                if(item.filaIndex) {
+                    resumenDiario[groupKey].filasAsociadas.push(item.filaIndex);
                 }
+            }
             }
             
             let keysArray = Object.keys(resumenDiario);
