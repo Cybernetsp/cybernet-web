@@ -812,7 +812,7 @@
 
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: bold; margin-bottom: 5px; display: block;">Cantidad que pagó ($ CO)</label>
-                        <input type="number" id="ventaCantidad" class="ios-input-block" placeholder="Ej: 20000" required>
+                        <input type="text" id="ventaCantidad" class="ios-input-block" placeholder="Ej: $20.000" oninput="formatearMontoEnVivoCOP(this)" required>
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px; margin-bottom: 20px; width: 100%; clear: both;">
@@ -821,7 +821,6 @@
                     <option value="" disabled selected style="color: #999999; background-color: #ffffff;">Seleccione cuenta de recepción</option>
                     <option value="Nequi" style="color: #000000; background-color: #ffffff;">Nequi</option>
                     <option value="Bre-B" style="color: #000000; background-color: #ffffff;">Bre-B</option>
-                    <option value="Daviplata" style="color: #000000; background-color: #ffffff;">Daviplata</option>
                     <option value="Ahorros Bancolombia" style="color: #000000; background-color: #ffffff;">Ahorros Bancolombia</option>
                     <option value="Saldo Distribuidor" style="color: #000000; background-color: #ffffff;">Saldo Distribuidor</option>
                 </select>
@@ -1213,6 +1212,22 @@
                 select.disabled = true;
                 select.value = "Cuenta Nueva";
             }
+        }
+        // 💵 FORMATEADOR EN VIVO: Transforma números sueltos a formato $20.000 en tiempo real
+        function formatearMontoEnVivoCOP(input) {
+            // Elimina cualquier carácter que no sea un número digitado
+            let valor = input.value.replace(/\D/g, "");
+            
+            if (valor === "") {
+                input.value = "";
+                return;
+              }
+            
+            // Agrega los puntos de miles usando expresiones regulares quirúrgicas
+            valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            
+            // Le antepone el signo de pesos colombianos
+            input.value = "$" + valor;
         }
 
         
