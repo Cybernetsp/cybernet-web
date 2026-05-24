@@ -2547,6 +2547,9 @@
             if (timerInterval) {
                 clearInterval(timerInterval);
             }
+            if (!sessionStorage.getItem('cyber_last_sync_time')) {
+        sessionStorage.setItem('cyber_last_sync_time', Date.now());
+    }
 
             timerInterval = setInterval(function() {
                 if (isTimerPaused) {
@@ -2575,6 +2578,11 @@
                 if (stElement) {
                     stElement.innerText = hStr + ":" + mStr + ":" + sStr;
                 }
+                // 🔄 REVISOR DE PULSOS: Si pasaron 10 minutos (600.000 ms) detona el guardado de fondo
+        let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10);
+        if (Date.now() - lastSync >= 600000) {
+            ejecutarAutoPulsoTiempo();
+        }
             }, 1000);
         }
 
@@ -3247,6 +3255,76 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
         // 🔥 OBLIGATORIO: Construye el catálogo de plataformas una sola vez al cargar la web
         renderizarPlataformasVenta();
     });
+
+    // 🤖 MOTOR BACKGROUND: Envía el fragmento neto trabajado en los últimos 10 minutos
+        function ejecutarAutoPulsoTiempo() {
+            let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10) || Date.now();
+            let ahora = Date.now();
+            let deltaMs = ahora - lastSync;
+            
+            let totalSeconds = Math.floor(deltaMs / 1000);
+            let hours = Math.floor(totalSeconds / 3600);
+            let minutes = Math.floor((totalSeconds % 3600) / 60);
+            let seconds = totalSeconds % 60;
+            
+            let tiempoTexto = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+            const activeUser = sessionStorage.getItem('active_staff') || "Vendedor";
+            
+            // Actualizamos la marca para el siguiente bloque de 10 minutos
+            sessionStorage.setItem('cyber_last_sync_time', ahora);
+            
+            // Petición silenciosa en segundo plano
+            fetch("https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec", {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "notificarCorreo",
+                    tipo: "pulso", // Avisa a Google que es un fragmento intermedio
+                    user: activeUser,
+                    tiempoTrabajado: tiempoTexto
+                })
+            })
+            .then(() => console.log("✅ Auto-Guardado: Bloque de " + tiempoTexto + " salvado en la nube."))
+            .catch(() => sessionStorage.setItem('cyber_last_sync_time', lastSync)); // Si cae internet, reintenta en el próximo ciclo sumando el tiempo
+        }
+
+        // 🚪 BOTÓN DE CIERRE: Envía únicamente el residuo final acumulado desde el último pulso
+        function ejecutarCierreSesionDefinitivo() {
+            if(confirm("¿Estás seguro de que deseas cerrar tu sesión e informar tu turno?")) {
+                let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10) || Date.now();
+                let ahora = Date.now();
+                let deltaMs = ahora - lastSync;
+                
+                let totalSeconds = Math.floor(deltaMs / 1000);
+                let hours = Math.floor(totalSeconds / 3600);
+                let minutes = Math.floor((totalSeconds % 3600) / 60);
+                let seconds = totalSeconds % 60;
+                
+                let tiempoTexto = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+                const activeUser = sessionStorage.getItem('active_staff') || "Vendedor";
+                
+                // Cambia el botón para evitar doble clic
+                const btn = document.querySelector('.btn-logout-action') || document.body;
+                btn.innerText = "⏳ Liquidando turno...";
+                
+                fetch("https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec", {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        action: "notificarCorreo",
+                        tipo: "cierre", // Detona el cierre oficial y tu correo de resumen
+                        user: activeUser,
+                        tiempoTrabajado: tiempoTexto
+                    })
+                })
+                .then(() => {
+                    sessionStorage.clear();
+                    window.location.href = "login.html";
+                });
+            }
+        }
 </script>
 </body>
 </html>
