@@ -782,7 +782,7 @@
         </div>
     </div>
 
-    <div class="codes-overlay" id="ventasOverlay" onclick="toggleVentasPanel()">
+    <div class="codes-overlay" id="ventasOverlay">
         <div class="codes-sheet" onclick="event.stopPropagation()">
             <div class="sheet-header">
                 <h3>Generar Nueva Venta</h3>
@@ -965,16 +965,16 @@
 
         // 🔄 Función modificada para limpiar el buscador y disparar el catálogo dinámico
         function toggleVentasPanel() {
-            haptic();
-            const overlay = document.getElementById('ventasOverlay');
-            overlay.classList.toggle('open');
-            if (overlay.classList.contains('open')) {
-                document.getElementById('formGenerarVenta').reset();
-                document.getElementById('buscarPlataformaVenta').value = "";
-                renderizarPlataformasVenta(); // Construye la lista limpia al abrir
-                document.getElementById('ventaNombre').focus();
-            }
-        }
+         haptic();
+         const overlay = document.getElementById('ventasOverlay');
+         overlay.classList.toggle('open');
+         if (overlay.classList.contains('open')) {
+             // 🔥 Quitamos el .reset() de aquí para proteger tus datos si cierras y reabres
+             document.getElementById('buscarPlataformaVenta').value = "";
+             renderizarPlataformasVenta(); 
+             document.getElementById('ventaNombre').focus();
+         }
+     }
 
         
         
@@ -1265,11 +1265,22 @@
                         fichaRecarga += `✨ _¡Tu saldo acumulado ya se encuentra disponible para compras!_`;
 
                         window.textoSaldoRevendedorGlobal = "";
-                        document.getElementById('btnCopiarSaldoRevendedor').style.display = "none"; // Ocultamos este botón ya que va integrado
+                        document.getElementById('btnCopiarSaldoRevendedor').style.display = "none"; 
                         
                         document.getElementById('ventasOverlay').classList.remove('open');
                         document.getElementById('outputTextoVentaFicha').value = fichaRecarga;
                         document.getElementById('ventaGeneradaModalOverlay').classList.add('open');
+
+                        // ✨ LIMPIEZA POST-RECARGA EXITOSA
+                        document.getElementById('formGenerarVenta').reset();
+                        const checksABorrar = document.getElementsByName('platformCheckVenta');
+                        for (let c = 0; c < checksABorrar.length; c++) {
+                            checksABorrar[c].checked = false;
+                            comprobarDesbloqueoVentaPill(checksABorrar[c], checksABorrar[c].value);
+                        }
+                        if(document.getElementById('buscarPlataformaVenta')) {
+                            document.getElementById('buscarPlataformaVenta').value = "";
+                        }
                     } else {
                         alert("❌ Error: " + (res ? res.message : "Fallo al inyectar saldo."));
                     }
@@ -1277,10 +1288,7 @@
 
                 const script = document.createElement('script');
                 script.id = 'node_' + callbackName;
-                
-                // 🔥 Se agrega "&banco=" para enlazar el método con la hoja NETFLIX
                 script.src = `${GOOGLE_SCRIPT_URL}?action=recargarSaldo&revendedor=${encodeURIComponent(telefono !== "" ? telefono : nombre)}&totalRecarga=${encodeURIComponent(cantidad)}&bono=${encodeURIComponent(bonoElegido)}&banco=${encodeURIComponent(banco)}&callback=${callbackName}`;
-                
                 document.body.appendChild(script);
                 return;
             }
@@ -1389,6 +1397,17 @@
                     document.getElementById('ventasOverlay').classList.remove('open');
                     document.getElementById('outputTextoVentaFicha').value = mensajeFinalFicha;
                     document.getElementById('ventaGeneradaModalOverlay').classList.add('open');
+
+                    // ✨ LIMPIEZA EXCLUSIVA POST-VENTA TRADICIONAL EXITOSA
+                    document.getElementById('formGenerarVenta').reset();
+                    const checksABorrar = document.getElementsByName('platformCheckVenta');
+                    for (let c = 0; c < checksABorrar.length; c++) {
+                        checksABorrar[c].checked = false;
+                        comprobarDesbloqueoVentaPill(checksABorrar[c], checksABorrar[c].value);
+                    }
+                    if(document.getElementById('buscarPlataformaVenta')) {
+                        document.getElementById('buscarPlataformaVenta').value = "";
+                    }
 
                     // ⚠️ RECEPTOR DE ALERTA DE STOCK CRÍTICO
                     if (res.alertasStock && res.alertasStock.length > 0) {
