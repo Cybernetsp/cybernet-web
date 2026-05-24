@@ -2415,105 +2415,98 @@
         }
 
         // 🔄 DETECTOR EN VIVO: Registra el momento exacto del último movimiento útil
+        // 🔄 DETECTOR DE ACTIVIDAD V25: Registra el momento exacto de interacción física útil
         function resetearInactividad() {
-            if (!sessionStorage.getItem('active_staff')) {
-                return;
-            }
+            if (!sessionStorage.getItem('active_staff')) return;
             window.cyberUltimaActividad = Date.now();
         }
 
-        // 🕵️‍♂️ GUARDIÁN CENTRAL V23: Controla el Auto-Guardado cada 10 min y el Cierre total a los 30 min
+        // 🕵️‍♂️ GUARDIÁN CENTRAL ULTRA-PRECISO V25: Controla el Auto-Guardado y Descartes
         function iniciarControlInactividad() {
-            window.cyberUltimaActividad = Date.now(); 
-            window.cyberUltimoAutoGuardado = Date.now(); // Marca el inicio del temporizador de 10 min
+            window.cyberUltimaActividad = Date.now();
+            
+            if (!sessionStorage.getItem('cyber_shift_start_time')) {
+                sessionStorage.setItem('cyber_shift_start_time', Date.now());
+            }
 
             window.addEventListener('mousemove', resetearInactividad);
             window.addEventListener('keypress', resetearInactividad);
             window.addEventListener('click', resetearInactividad);
             window.addEventListener('scroll', resetearInactividad);
             window.addEventListener('touchstart', resetearInactividad);
-            resetearInactividad(); 
+            resetearInactividad();
 
-            // 🕒 Bucle de Monitoreo Constante (Revisa el estado cada 5 segundos)
+            // 🕒 Bucle Verificador: Escanea el comportamiento en vivo cada 5 segundos
             setInterval(function() {
                 if (!sessionStorage.getItem('active_staff')) return;
                 if (sessionStorage.getItem('active_staff').toUpperCase() === "CAMILO") return;
 
                 let ahora = Date.now();
                 let tiempoInactivo = ahora - window.cyberUltimaActividad;
-                let tiempoDesdeUltimoGuardado = ahora - window.cyberUltimoAutoGuardado;
+                
+                let uncommittedStart = parseInt(sessionStorage.getItem('cyber_shift_start_time')) || ahora;
+                let tiempoDesdeUltimoGuardado = ahora - uncommittedStart;
 
-                // 🛑 CONDICIÓN 1: Si pasaron 30 minutos de inactividad total, DEJA DE REGISTRAR y expulsa
+                // 🚨 REGLA 1: ABANDONO TOTAL (30 Minutos sin tocar el PC) -> Borra el tiempo muerto de la última media hora
                 if (tiempoInactivo > 30 * 60 * 1000) {
-                    console.log("🚨 Guardián: 30 min de inactividad. Cerrando sesión definitivamente.");
+                    console.log("🚨 Guardián: Abandono total (30 min). Ejecutando descarte estricto de tiempo muerto.");
                     cerrarSesionStaffPorInactividadGrave();
                     return;
                 }
 
-                // 💾 CONDICIÓN 2: Si el trabajador está activo y ya pasaron 10 minutos, AUTO-GUARDAR progreso
+                // 💾 REGLA 2: AUTO-GUARDADO POR HITO DE 10 MINUTOS
+                // Si el trabajador está interactuando o regresó hace poco (tiempo inactivo menor a 2 min), envía el paquete a Sheets
                 if (tiempoDesdeUltimoGuardado >= 10 * 60 * 1000) {
-                    ejecutarAutoGuardadoParcial();
+                    if (tiempoInactivo < 2 * 60 * 1000) {
+                        ejecutarAutoGuardadoParcialSmart(tiempoDesdeUltimoGuardado);
+                    } else {
+                        // Si está ausente pero no ha cumplido la media hora, retenemos el tiempo en memoria por si regresa
+                        console.log("⏳ Tiempo retenido en memoria. Esperando retorno activo o descarte por abandono.");
+                    }
                 }
             }, 5000);
         }
 
-        // 📝 GRABADOR AUTOMÁTICO: Registra el avance de 10 minutos en Sheets sin alterar el reloj de la web
-        function ejecutarAutoGuardadoParcial() {
-            let ahora = Date.now();
-            let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
-            if (isNaN(startTime)) return;
-
-            let elapsedMs = ahora - startTime;
-            if (elapsedMs <= 0) return;
-
-            let totalSeconds = Math.floor(elapsedMs / 1000);
+        // 📝 GRABADOR SEGURO V25: Envía los milisegundos exactos trabajados y reinicia el ancla
+        function ejecutarAutoGuardadoParcialSmart(msA_Registrar, callbackFinal) {
+            let usuarioActivo = sessionStorage.getItem('active_staff');
+            
+            let totalSeconds = Math.floor(msA_Registrar / 1000);
             let hours = Math.floor(totalSeconds / 3600);
             let minutes = Math.floor((totalSeconds % 3600) / 60);
             let seconds = totalSeconds % 60;
-            let deltaFormateado = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+            let tiempoFormateado = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
 
-            let usuarioActivo = sessionStorage.getItem('active_staff');
-            
-            // Mueve la aguja del tiempo de autoguardado de inmediato para evitar envíos dobles
-            window.cyberUltimoAutoGuardado = ahora;
+            // Movemos el ancla de inicio al momento exacto actual
+            sessionStorage.setItem('cyber_shift_start_time', Date.now());
 
-            ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", deltaFormateado, function() {
-                console.log("💾 Cybernet: Respaldo de actividad de 10 minutos guardado con éxito.");
-                
-                // Actualiza los anclajes de memoria para que el reloj en pantalla siga sumando corrido
-                let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time')) || 0;
-                sessionStorage.setItem('cyber_shift_accumulated_time', accumulated + elapsedMs);
-                sessionStorage.setItem('cyber_shift_start_time', Date.now());
+            ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoFormateado, function() {
+                console.log("💾 Respaldo Cybernet exitoso: " + tiempoFormateado);
+                if (callbackFinal) callbackFinal();
             });
         }
 
-        // 🔒 CORTACIRCUITOS DE EMERGENCIA: Liquidación final calculada al último minuto útil
+        // 🔒 CORTACIRCUITOS AUTOMÁTICO: Descarta la media hora de inactividad y guarda lo trabajado antes del abandono
         function cerrarSesionStaffPorInactividadGrave() {
             let usuarioActivo = sessionStorage.getItem('active_staff') || "STAFF";
+            let uncommittedStart = parseInt(sessionStorage.getItem('cyber_shift_start_time')) || Date.now();
             
-            let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time')) || Date.now();
-            // Calcula solo el tiempo neto que trabajó desde el último autoguardado hasta que abandonó el PC
-            let deltaMs = window.cyberUltimaActividad - startTime; 
-            if (deltaMs < 0 || isNaN(deltaMs)) deltaMs = 0;
-
-            let totalSeconds = Math.floor(deltaMs / 1000);
-            let hours = Math.floor(totalSeconds / 3600);
-            let minutes = Math.floor((totalSeconds % 3600) / 60);
-            let seconds = totalSeconds % 60;
-            let tiempoRealTrabajado = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+            // Tiempo real trabajado = Momento del último movimiento útil - Inicio del bloque
+            let msUtiles = window.cyberUltimaActividad - uncommittedStart;
+            if (msUtiles < 0 || isNaN(msUtiles)) msUtiles = 0;
 
             function finalizarCierreLimpio() {
                 sessionStorage.removeItem('active_staff');
-                localStorage.removeItem('cyber_saved_staff'); 
+                localStorage.removeItem('cyber_saved_staff');
                 sessionStorage.removeItem('cyber_shift_start_time');
-                sessionStorage.removeItem('cyber_shift_accumulated_time');
-                
-                if (timerInterval) clearInterval(timerInterval);
-                if (autoRefreshCodesInterval) clearInterval(autoRefreshCodesInterval);
                 window.location.reload();
             }
-            
-            ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoRealTrabajado, finalizarCierreLimpio);
+
+            if (msUtiles > 0) {
+                ejecutarAutoGuardadoParcialSmart(msUtiles, finalizarCierreLimpio);
+            } else {
+                finalizarCierreLimpio();
+            }
         }
 
         function startShiftTimer() {
@@ -2824,51 +2817,26 @@
             inicializarWorkspace();
         }
 
-        // 🚪 FUNCIÓN DE SALIDA MANUAL: Envía el último pedazo de tiempo trabajado y cierra sesión
+        // 🚪 FUNCIÓN DE SALIDA MANUAL: Registra el remanente de tiempo trabajado y destruye la sesión
         function cerrarSesionStaff() {
             haptic();
-            let usuarioActivo = "STAFF";
-            let activeStaffLocal = sessionStorage.getItem('active_staff');
+            let usuarioActivo = sessionStorage.getItem('active_staff') || "STAFF";
             
-            if (activeStaffLocal) {
-                usuarioActivo = activeStaffLocal;
-            }
-            
-            const cerrarBoton = document.querySelector('.control-container button:last-child');
-            if (cerrarBoton) {
-                cerrarBoton.style.opacity = "0.5";
-            }
-
             function finalizarCierre() {
                 sessionStorage.removeItem('active_staff');
-                localStorage.removeItem('cyber_saved_staff'); 
+                localStorage.removeItem('cyber_saved_staff');
                 sessionStorage.removeItem('cyber_shift_start_time');
-                sessionStorage.removeItem('cyber_shift_accumulated_time');
-                
-                if (timerInterval) clearInterval(timerInterval);
-                if (autoRefreshCodesInterval) clearInterval(autoRefreshCodesInterval);
-                if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
-                if (temporizadorCierreTotal) clearTimeout(temporizadorCierreTotal);
-                
                 location.reload();
             }
 
             if (usuarioActivo.toUpperCase().trim() === "CAMILO") {
                 finalizarCierre();
             } else {
-                // 🧮 Calcula únicamente el tiempo transcurrido desde el último auto-guardado
-                let ahora = Date.now();
-                let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time')) || ahora;
-                let deltaMs = ahora - startTime;
-                if (deltaMs < 0) deltaMs = 0;
+                let uncommittedStart = parseInt(sessionStorage.getItem('cyber_shift_start_time')) || Date.now();
+                let msTrabajados = Date.now() - uncommittedStart;
+                if (msTrabajados < 0) msTrabajados = 0;
 
-                let totalSeconds = Math.floor(deltaMs / 1000);
-                let hours = Math.floor(totalSeconds / 3600);
-                let minutes = Math.floor((totalSeconds % 3600) / 60);
-                let seconds = totalSeconds % 60;
-                let tiempoDeltaFormateado = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
-
-                ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoDeltaFormateado, finalizarCierre);
+                ejecutarAutoGuardadoParcialSmart(msTrabajados, finalizarCierre);
             }
         }
 
