@@ -2036,11 +2036,12 @@
                 let kStr = keysArray[k];
                 let r = resumenDiario[kStr];
                 
-                let decimalHours = r.totalSeconds / 3600;
+               let decimalHours = r.totalSeconds / 3600;
                 let pay = 0;
                 
                 if (r.dayOfWeek === 0) { 
-                    pay = 150000;
+                    // 🔥 Calibración Domingo: Divide el tiempo trabajado sobre las 13 horas reglamentarias
+                    pay = (decimalHours / 13) * 150000;
                 } else {
                     pay = decimalHours * 8000;
                 }
