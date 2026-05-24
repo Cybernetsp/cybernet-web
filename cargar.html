@@ -349,17 +349,51 @@
             const proveedorManual = document.getElementById('loadProveedorManual').value.trim();
             const bloqueCuentas = document.getElementById('loadCuentasBloque').value;
 
-            // ⚡ TRADUCTOR DE FORMATO MASIVO: Detecta y cambia en milisegundos "usuario:clave" por "usuario clave"
-            let lineas = bloqueCuentas.split('\n');
-            let lineasNormalizadas = lineas.map(linea => {
-                let l = linea.trim();
-                // Si la línea contiene dos puntos y no tiene espacios ni barras divisorias comunes
-                if (l.includes(':') && !l.includes('|') && !l.includes(' ')) {
-                    return l.replace(':', ' '); // Convierte los primeros dos puntos en el espacio que espera Apps Script
+            // 🧠 ASPIRADORA INTELIGENTE CYBERNET 2026: Limpia plantillas sucias de proveedores en milisegundos
+            let textoProcesado = bloqueCuentas;
+            
+            // Evalúa si el texto contiene la estructura de bloques de un proveedor
+            if (/cuenta:/i.test(textoProcesado) && (/contraseña:/i.test(textoProcesado) || /password:/i.test(textoProcesado))) {
+                let lineasRaw = textoProcesado.split('\n');
+                let listaCuentasExtraidas = [];
+                let usuarioTemporal = "";
+                let claveTemporal = "";
+                
+                for (let i = 0; i < lineasRaw.length; i++) {
+                    let lineaLimpia = lineasRaw[i].trim();
+                    
+                    // Captura el valor que esté después de "Cuenta:" o "Id de Cuenta:" de forma segura
+                    if (/^cuenta:/i.test(lineaLimpia)) {
+                        usuarioTemporal = lineaLimpia.substring(lineaLimpia.indexOf(':') + 1).trim();
+                    } 
+                    // Captura el valor de la contraseña (soporta variaciones de escritura del proveedor)
+                    else if (/^(contraseña|contrase|password):/i.test(lineaLimpia)) {
+                        claveTemporal = lineaLimpia.substring(lineaLimpia.indexOf(':') + 1).trim();
+                        
+                        // En cuanto tiene la pareja lista, la empaqueta y limpia los temporizadores
+                        if (usuarioTemporal !== "" && claveTemporal !== "") {
+                            listaCuentasExtraidas.push(usuarioTemporal + " " + claveTemporal);
+                            usuarioTemporal = "";
+                            claveTemporal = "";
+                        }
+                    }
                 }
-                return l;
-            });
-            const bloqueCuentasFinal = lineasNormalizadas.join('\n');
+                textoProcesado = listaCuentasExtraidas.join('\n');
+                console.log("🤖 Filtro Inteligente: Se procesaron y limpiaron " + listaCuentasExtraidas.length + " cuentas estructuradas.");
+            } else {
+                // ⚡ FORMATO TRADICIONAL: Si pegas una lista limpia (correo clave / correo:clave / correo|clave)
+                let lineas = textoProcesado.split('\n');
+                let lineasNormalizadas = lineas.map(linea => {
+                    let l = linea.trim();
+                    if (l.includes(':') && !l.includes('|') && !l.includes(' ')) {
+                        return l.replace(':', ' ');
+                    }
+                    return l;
+                });
+                textoProcesado = lineasNormalizadas.join('\n');
+            }
+
+            const bloqueCuentasFinal = textoProcesado;
 
             const proveedorFinal = (selectProv === "OTRO") ? proveedorManual : selectProv;
 
