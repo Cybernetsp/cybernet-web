@@ -1915,34 +1915,44 @@
             }
         };
 
+        // 📅 PARSER DE ALTA TOLERANCIA V26: Lee fechas con hora, sin hora, con barras o con guiones
         function parseDate(fechaStr) {
-            let parts = fechaStr.split(' ');
-            if (parts.length < 2) {
-                return new Date();
+            let stringLimpio = String(fechaStr || "").trim();
+            if (!stringLimpio) return new Date();
+
+            let parts = stringLimpio.split(' ');
+            let basePart = parts[0]; 
+            
+            let dateParts = basePart.split('/');
+            if (dateParts.length === 3) {
+                return new Date(parseInt(dateParts[2], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[0], 10));
             }
             
-            let dateParts = parts[0].split('/');
-            if (dateParts.length < 3) {
-                return new Date();
+            let datePartsDash = basePart.split('-');
+            if (datePartsDash.length === 3) {
+                if (datePartsDash[0].length === 4) { 
+                    return new Date(parseInt(datePartsDash[0], 10), parseInt(datePartsDash[1], 10) - 1, parseInt(datePartsDash[2], 10));
+                } else { 
+                    return new Date(parseInt(datePartsDash[2], 10), parseInt(datePartsDash[1], 10) - 1, parseInt(datePartsDash[0], 10));
+                }
             }
-            
-            return new Date(dateParts[2], parseInt(dateParts[1]) - 1, dateParts[0]);
+            return new Date(); 
         }
 
         // Determina si una fecha pertenece a la quincena actual en curso
         function esMismaQuincena(fechaStr) {
             let d = parseDate(fechaStr);
             let hoy = new Date();
-            
+
             let diaHoy = hoy.getDate();
             let dDia = d.getDate();
             let dMes = d.getMonth();
             let dAnio = d.getFullYear();
-            
+
             if (dMes !== hoy.getMonth() || dAnio !== hoy.getFullYear()) {
                 return false;
             }
-            
+
             if (diaHoy <= 15) {
                 return (dDia >= 1 && dDia <= 15);
             } else {
@@ -1950,17 +1960,13 @@
             }
         }
 
+        // 📊 RENDERIZADOR INTELIGENTE V26: Procesa formatos hh:mm:ss, hh:mm o números enteros de horas (Muestra 1 hora exacta)
         function renderizarHorasEnPantalla(filtroBusqueda = "") {
             const container = document.getElementById('shiftsScrollArea');
-            if (!container) {
-                return;
-            }
+            if (!container) return;
             
             const userActivo = sessionStorage.getItem('active_staff');
-            let userFinal = "";
-            if (userActivo) {
-                userFinal = userActivo.toUpperCase();
-            }
+            let userFinal = userActivo ? userActivo.toUpperCase() : "";
             
             let misHoras = [];
             for (let index = 0; index < window.currentHorasStock.length; index++) {
@@ -2015,28 +2021,32 @@
                     };
                 }
                 
-                let timeParts = item.tiempo.split(':');
-            let totalSec = 0;
-            let esTiempoValido = false;
+                let timeParts = String(item.tiempo || "").split(':');
+                let totalSec = 0;
+                let esTiempoValido = false;
 
-            if (timeParts.length === 3) {
-                // Formato completo: hh:mm:ss
-                totalSec = (parseInt(timeParts[0], 10) || 0) * 3600 + (parseInt(timeParts[1], 10) || 0) * 60 + (parseInt(timeParts[2], 10) || 0);
-                esTiempoValido = true;
-            } else if (timeParts.length === 2) {
-                // Formato optimizado por Sheets: hh:mm
-                totalSec = (parseInt(timeParts[0], 10) || 0) * 3600 + (parseInt(timeParts[1], 10) || 0) * 60;
-                esTiempoValido = true;
-            }
+                if (timeParts.length === 3) {
+                    totalSec = (parseInt(timeParts[0], 10) || 0) * 3600 + (parseInt(timeParts[1], 10) || 0) * 60 + (parseInt(timeParts[2], 10) || 0);
+                    esTiempoValido = true;
+                } else if (timeParts.length === 2) {
+                    totalSec = (parseInt(timeParts[0], 10) || 0) * 3600 + (parseInt(timeParts[1], 10) || 0) * 60;
+                    esTiempoValido = true;
+                } else {
+                    let numeroPuro = parseFloat(String(item.tiempo || "").replace(',', '.'));
+                    if (!isNaN(numeroPuro) && numeroPuro > 0) {
+                        totalSec = Math.floor(numeroPuro * 3600);
+                        esTiempoValido = true;
+                    }
+                }
 
-            if (esTiempoValido) {
-                resumenDiario[groupKey].totalSeconds += totalSec;
-                if(item.filaIndex) {
-                    resumenDiario[groupKey].filasAsociadas.push(item.filaIndex);
+                if (esTiempoValido) {
+                    resumenDiario[groupKey].totalSeconds += totalSec;
+                    if(item.filaIndex) {
+                        resumenDiario[groupKey].filasAsociadas.push(item.filaIndex);
+                    }
                 }
             }
-            }
-            
+
             let keysArray = Object.keys(resumenDiario);
             let diasArray = [];
             
@@ -2044,11 +2054,10 @@
                 let kStr = keysArray[k];
                 let r = resumenDiario[kStr];
                 
-               let decimalHours = r.totalSeconds / 3600;
+                let decimalHours = r.totalSeconds / 3600;
                 let pay = 0;
                 
                 if (r.dayOfWeek === 0) { 
-                    // 🔥 Calibración Domingo: Divide el tiempo trabajado sobre las 13 horas reglamentarias
                     pay = (decimalHours / 13) * 150000;
                 } else {
                     pay = decimalHours * 8000;
@@ -2061,7 +2070,6 @@
                 let hStr = String(h).padStart(2,'0');
                 let mStr = String(m).padStart(2,'0');
                 let sStr = String(s).padStart(2,'0');
-                
                 let fmtTime = hStr + ":" + mStr + ":" + sStr;
 
                 let arrayDiasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -2097,10 +2105,8 @@
             
             let tH = Math.floor(totalSecs / 3600);
             let tM = Math.floor((totalSecs % 3600) / 60);
-            
             let tHStr = String(tH).padStart(2,'0');
             let tMStr = String(tM).padStart(2,'0');
-            
             let tFmt = tHStr + "h " + tMStr + "m";
 
             let tituloPanel = userFinal === "CAMILO" ? "📅 Quincena Global (Staff)" : "📅 Tu Quincena Actual";
@@ -2168,11 +2174,10 @@
             }
             
             let finalPayFmt = Math.round(totalPay).toLocaleString('es-CO');
-            
             let btnLiquidarHTML = "";
+
             if (userFinal === "CAMILO") {
                 let targetName = filtroBusqueda !== "" ? filtroBusqueda.toUpperCase() : "TODOS (GLOBAL)";
-                
                 let filasArray = [];
                 for(let i=0; i<misHoras.length; i++) {
                     if(misHoras[i].filaIndex) {
@@ -2207,7 +2212,6 @@
                   ${btnLiquidarHTML}
               </div>
             `;
-            
             container.innerHTML = html;
         }
 
@@ -2215,7 +2219,7 @@
             if (!filasStr) return;
             let count = filasStr.split(",").length;
             
-            if (!confirm(`⚠️ ATENCIÓN CAMILO: Estás a punto de LIQUIDAR y BORRAR DEFINITIVAMENTE ${count} turnos de ${nombreObjetivo}.\n\n¿Deseas continuar? Esta acción modificará el Google Sheets.`)) {
+            if (!confirm(`⚠️ ATENCIÓN CAMILO: Estás a punto de LIQUIDAR y BORRAR DEFINITIVAMENTE ${count} turnos de ${nombreObjetivo}.\n\n¿Deseas continuar?`)) {
                 return;
             }
 
@@ -2224,9 +2228,7 @@
             container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Liquidando y borrando turnos en Sheets...</div>';
 
             const oldScript = document.getElementById('cyber_liquidar_node');
-            if (oldScript) {
-                oldScript.remove();
-            }
+            if (oldScript) oldScript.remove();
 
             window.procesarLiquidacionSheets = function(res) {
                 const scriptNode = document.getElementById('cyber_liquidar_node');
@@ -2300,9 +2302,7 @@
         }
 
         function cargarCodigosDesdeSheets(silencioso = false) {
-            if (isFetchingCodes) {
-                return; 
-            }
+            if (isFetchingCodes) return; 
             isFetchingCodes = true;
 
             if (!silencioso && window.cyberCodesTimeout) {
@@ -2320,9 +2320,7 @@
             }
 
             const oldScript = document.getElementById('cyber_jsonp_node');
-            if (oldScript) {
-                oldScript.remove();
-            }
+            if (oldScript) oldScript.remove();
 
             const scriptElement = document.createElement('script');
             scriptElement.id = 'cyber_jsonp_node';
@@ -2333,21 +2331,14 @@
 
         window.procesarCodigosSheets = function(res) {
             isFetchingCodes = false; 
-            
-            if (window.cyberCodesTimeout) {
-                clearTimeout(window.cyberCodesTimeout);
-            }
+            if (window.cyberCodesTimeout) clearTimeout(window.cyberCodesTimeout);
 
             const oldScript = document.getElementById('cyber_jsonp_node');
-            if (oldScript) {
-                oldScript.remove();
-            }
+            if (oldScript) oldScript.remove();
 
             const container = document.getElementById('codesScrollArea');
-            
             if (res && res.status === "success") {
                 window.currentCodesStock = res.data; 
-                
                 if (document.getElementById('codesOverlay').classList.contains('open')) {
                     renderizarCodigosEnPantalla();
                 }
@@ -2360,9 +2351,7 @@
 
         function renderizarCodigosEnPantalla() {
             const container = document.getElementById('codesScrollArea');
-            if (!container) {
-                return;
-            }
+            if (!container) return;
             
             if (window.currentCodesStock.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay códigos disponibles en este momento.</div>';
@@ -2370,13 +2359,9 @@
             }
             
             let htmlCards = "";
-            
             for (let i = 0; i < window.currentCodesStock.length; i++) {
                 let item = window.currentCodesStock[i];
-                let colColor = item.colorText;
-                if (!colColor) {
-                    colColor = 'var(--ios-blue)';
-                }
+                let colColor = item.colorText || 'var(--ios-blue)';
                 
                 htmlCards += `
                   <div class="account-item-box">
@@ -2391,18 +2376,14 @@
                   </div>
                 `;
             }
-            
             container.innerHTML = htmlCards;
             filtrarCodigosInternos(); 
         }
 
         function copiarMensajeRapidoGmail(btn, index) {
             haptic();
-            
             const item = window.currentCodesStock[index];
-            if (!item) {
-                return;
-            }
+            if (!item) return;
             
             navigator.clipboard.writeText(item.copiadoRapido).then(function() {
                 const originalText = btn.innerHTML;
@@ -2430,31 +2411,20 @@
         function filtrarCodigosInternos() {
             const query = document.getElementById('searchCodesInput').value.toLowerCase();
             const cards = document.querySelectorAll('#codesScrollArea .account-item-box');
-            
             for (let i = 0; i < cards.length; i++) {
                 let card = cards[i];
-                if (card.innerText.toLowerCase().includes(query)) {
-                    card.style.display = "";
-                } else {
-                    card.style.display = "none";
-                }
+                card.style.display = card.innerText.toLowerCase().includes(query) ? "" : "none";
             }
         }
 
-        // 🔄 DETECTOR EN VIVO: Registra el momento exacto del último movimiento útil
-        // 🔄 DETECTOR DE ACTIVIDAD V25: Registra el momento exacto de interacción física útil
         function resetearInactividad() {
             if (!sessionStorage.getItem('active_staff')) return;
             window.cyberUltimaActividad = Date.now();
         }
 
-        // 🕵️‍♂️ GUARDIÁN CENTRAL ULTRA-PRECISO V25: Controla el Auto-Guardado y Descartes
+        // 🕵️‍♂️ GUARDIÁN CENTRAL ULTRA-PRECISO V26: Controla Abandono Crítico y Cierres Seguros
         function iniciarControlInactividad() {
             window.cyberUltimaActividad = Date.now();
-            
-            if (!sessionStorage.getItem('cyber_shift_start_time')) {
-                sessionStorage.setItem('cyber_shift_start_time', Date.now());
-            }
 
             window.addEventListener('mousemove', resetearInactividad);
             window.addEventListener('keypress', resetearInactividad);
@@ -2463,79 +2433,60 @@
             window.addEventListener('touchstart', resetearInactividad);
             resetearInactividad();
 
-            // 🕒 Bucle Verificador: Escanea el comportamiento en vivo cada 5 segundos
+            // 🕒 Bucle Verificador: Escanea abandono de puesto cada 5 segundos
             setInterval(function() {
                 if (!sessionStorage.getItem('active_staff')) return;
                 if (sessionStorage.getItem('active_staff').toUpperCase() === "CAMILO") return;
 
                 let ahora = Date.now();
-                let tiempoInactivo = ahora - window.cyberUltimaActividad;
-                
-                let uncommittedStart = parseInt(sessionStorage.getItem('cyber_shift_start_time')) || ahora;
-                let tiempoDesdeUltimoGuardado = ahora - uncommittedStart;
+                let tiempoInactivo = governor = ahora - window.cyberUltimaActividad;
 
-                // 🚨 REGLA 1: ABANDONO TOTAL (30 Minutos sin tocar el PC) -> Borra el tiempo muerto de la última media hora
+                // 🚨 REGLA DE ABANDONO TOTAL (30 Minutos sin tocar el PC) -> Guarda residuo útil y saca al operador
                 if (tiempoInactivo > 30 * 60 * 1000) {
-                    console.log("🚨 Guardián: Abandono total (30 min). Ejecutando descarte estricto de tiempo muerto.");
+                    console.log("🚨 Guardián: Abandono detectado. Salvando residuo y cerrando sesión por seguridad.");
                     cerrarSesionStaffPorInactividadGrave();
                     return;
-                }
-
-                // 💾 REGLA 2: AUTO-GUARDADO POR HITO DE 10 MINUTOS
-                // Si el trabajador está interactuando o regresó hace poco (tiempo inactivo menor a 2 min), envía el paquete a Sheets
-                if (tiempoDesdeUltimoGuardado >= 10 * 60 * 1000) {
-                    if (tiempoInactivo < 2 * 60 * 1000) {
-                        ejecutarAutoGuardadoParcialSmart(tiempoDesdeUltimoGuardado);
-                    } else {
-                        // Si está ausente pero no ha cumplido la media hora, retenemos el tiempo en memoria por si regresa
-                        console.log("⏳ Tiempo retenido en memoria. Esperando retorno activo o descarte por abandono.");
-                    }
                 }
             }, 5000);
         }
 
-        // 📝 GRABADOR SEGURO V25: Envía los milisegundos exactos trabajados y reinicia el ancla
-        function ejecutarAutoGuardadoParcialSmart(msA_Registrar, callbackFinal) {
-            let usuarioActivo = sessionStorage.getItem('active_staff');
-            
-            let totalSeconds = Math.floor(msA_Registrar / 1000);
-            let hours = Math.floor(totalSeconds / 3600);
-            let minutes = Math.floor((totalSeconds % 3600) / 60);
-            let seconds = totalSeconds % 60;
-            let tiempoFormateado = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
-
-            // Movemos el ancla de inicio al momento exacto actual
-            sessionStorage.setItem('cyber_shift_start_time', Date.now());
-
-            ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoFormateado, function() {
-                console.log("💾 Respaldo Cybernet exitoso: " + tiempoFormateado);
-                if (callbackFinal) callbackFinal();
-            });
-        }
-
-        // 🔒 CORTACIRCUITOS AUTOMÁTICO: Descarta la media hora de inactividad y guarda lo trabajado antes del abandono
+        // 🔒 CORTACIRCUITOS POR AUSENCIA: Salva el pedacito de tiempo útil trabajado antes de que el empleado dejara el PC solo
         function cerrarSesionStaffPorInactividadGrave() {
-            let usuarioActivo = sessionStorage.getItem('active_staff') || "STAFF";
-            let uncommittedStart = parseInt(sessionStorage.getItem('cyber_shift_start_time')) || Date.now();
-            
-            // Tiempo real trabajado = Momento del último movimiento útil - Inicio del bloque
-            let msUtiles = window.cyberUltimaActividad - uncommittedStart;
+            let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10) || Date.now();
+            let msUtiles = window.cyberUltimaActividad - lastSync;
             if (msUtiles < 0 || isNaN(msUtiles)) msUtiles = 0;
 
             function finalizarCierreLimpio() {
-                sessionStorage.removeItem('active_staff');
+                sessionStorage.clear();
                 localStorage.removeItem('cyber_saved_staff');
-                sessionStorage.removeItem('cyber_shift_start_time');
                 window.location.reload();
             }
 
             if (msUtiles > 0) {
-                ejecutarAutoGuardadoParcialSmart(msUtiles, finalizarCierreLimpio);
+                let totalSeconds = Math.floor(msUtiles / 1000);
+                let hours = Math.floor(totalSeconds / 3600);
+                let minutes = Math.floor((totalSeconds % 3600) / 60);
+                let seconds = totalSeconds % 60;
+                let tiempoFormateado = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+                const activeUser = sessionStorage.getItem('active_staff') || "Vendedor";
+
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        action: "notificarCorreo",
+                        tipo: "pulso",
+                        user: activeUser,
+                        tiempoTrabajado: tiempoFormateado
+                    })
+                }).then(finalizarCierreLimpio).catch(finalizarCierreLimpio);
             } else {
                 finalizarCierreLimpio();
             }
         }
 
+        // ⏱️ TEMPORIZADOR DE PANTALLA: Mantiene el reloj visual dinámico y evalúa hitos de 10 min
         function startShiftTimer() {
             if (!sessionStorage.getItem('cyber_shift_start_time')) {
                 sessionStorage.setItem('cyber_shift_start_time', Date.now());
@@ -2543,24 +2494,20 @@
             if (!sessionStorage.getItem('cyber_shift_accumulated_time')) {
                 sessionStorage.setItem('cyber_shift_accumulated_time', 0);
             }
+            if (!sessionStorage.getItem('cyber_last_sync_time')) {
+                sessionStorage.setItem('cyber_last_sync_time', Date.now());
+            }
 
             if (timerInterval) {
                 clearInterval(timerInterval);
             }
-            if (!sessionStorage.getItem('cyber_last_sync_time')) {
-        sessionStorage.setItem('cyber_last_sync_time', Date.now());
-    }
 
             timerInterval = setInterval(function() {
-                if (isTimerPaused) {
-                    return; 
-                }
+                if (isTimerPaused) return; 
                 
                 let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
                 let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
-                if (isNaN(accumulated)) {
-                    accumulated = 0;
-                }
+                if (isNaN(accumulated)) accumulated = 0;
                 
                 let elapsed = Date.now() - startTime;
                 let totalMs = accumulated + elapsed;
@@ -2575,130 +2522,77 @@
                 let sStr = String(seconds).padStart(2, '0');
 
                 let stElement = document.getElementById('shiftTimer');
-                if (stElement) {
-                    stElement.innerText = hStr + ":" + mStr + ":" + sStr;
+                if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
+
+                // 🔄 REVISOR DE PULSOS AUTOMÁTICOS: Detona el guardado de fondo exacto cada 10 minutos (600.000 ms)
+                let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10);
+                if (Date.now() - lastSync >= 600000) {
+                    ejecutarAutoPulsoTiempo();
                 }
-                // 🔄 REVISOR DE PULSOS: Si pasaron 10 minutos (600.000 ms) detona el guardado de fondo
-        let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10);
-        if (Date.now() - lastSync >= 600000) {
-            ejecutarAutoPulsoTiempo();
-        }
             }, 1000);
         }
 
         function obtenerTiempoFinalFormateado() {
             let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
             let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
-            
-            if (isNaN(accumulated)) {
-                accumulated = 0;
-            }
-            
+            if (isNaN(accumulated)) accumulated = 0;
             let totalMs = accumulated;
-            
             if (!isTimerPaused) {
-                let newlyElapsed = Date.now() - startTime;
-                totalMs += newlyElapsed;
+                totalMs += (Date.now() - startTime);
             }
-
             let totalSeconds = Math.floor(totalMs / 1000);
             let hours = Math.floor(totalSeconds / 3600);
             let minutes = Math.floor((totalSeconds % 3600) / 60);
             let seconds = totalSeconds % 60;
-            
-            let finalH = String(hours).padStart(2, '0');
-            let finalM = String(minutes).padStart(2, '0');
-            let finalS = String(seconds).padStart(2, '0');
-            
-            return finalH + ":" + finalM + ":" + finalS;
+            return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
         }
 
         function ejecutarNotificacionDeCorreo(vendedor, tipoAccion, tiempoTrabajado, callbackFinal) {
             if (!GOOGLE_SCRIPT_URL) {
-                if (callbackFinal) {
-                    callbackFinal();
-                }
+                if (callbackFinal) callbackFinal();
                 return;
             }
-            
-            let paramObj = {
-                action: "notificarCorreo", 
-                user: vendedor, 
-                tipo: tipoAccion,
-                tiempoTrabajado: tiempoTrabajado 
-            };
-            
+            let paramObj = { action: "notificarCorreo", user: seller = vendedor, tipo: tipoAccion, tiempoTrabajado: tiempoTrabajado };
             fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
-                headers: { 
-                    "Content-Type": "application/json" 
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(paramObj)
-            })
-            .then(function() { 
-                if (callbackFinal) {
-                    callbackFinal(); 
-                }
-            })
-            .catch(function() { 
-                if (callbackFinal) {
-                    callbackFinal(); 
-                }
-            });
+            }).then(function() { if (callbackFinal) callbackFinal(); }).catch(function() { if (callbackFinal) callbackFinal(); });
         }
 
         function validateStaffAccess(e) {
-            if (e) {
-                e.preventDefault();
-            }
+            if (e) e.preventDefault();
             haptic();
-            
             const userElement = document.getElementById('staffUser');
             const passElement = document.getElementById('staffPass');
             const remElement = document.getElementById('rememberMe');
-            
             const userInput = userElement.value.toUpperCase().trim();
             const passInput = passElement.value.trim();
             const rememberMe = remElement.checked;
-            
             const errorToast = document.getElementById('error-login-toast');
             const submitBtn = document.querySelector('#loginForm button[type="submit"]');
 
-            if (!userInput || !passInput) {
-                return;
-            }
-
+            if (!userInput || !passInput) return;
             submitBtn.disabled = true;
             submitBtn.innerText = "⏳ Verificando en Sheets...";
 
             const oldScript = document.getElementById('cyber_login_node');
-            if (oldScript) {
-                oldScript.remove();
-            }
+            if (oldScript) oldScript.remove();
 
             window.procesarLoginSheets = function(res) {
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Verificar Identidad";
-                
                 const scriptNode = document.getElementById('cyber_login_node');
-                if (scriptNode) {
-                    scriptNode.remove();
-                }
+                if (scriptNode) scriptNode.remove();
 
                 if (res && res.status === "success") {
                     errorToast.style.display = 'none';
-                    userElement.blur();
-                    passElement.blur();
-                    
+                    userElement.blur(); passElement.blur();
                     entrarAlSistema(userInput, rememberMe);
-
                 } else {
                     let errMsg = "Credenciales incorrectas en la base de datos.";
-                    if (res && res.message) {
-                        errMsg = res.message;
-                    }
-                    
+                    if (res && res.message) errMsg = res.message;
                     errorToast.innerText = "⚠️ " + errMsg;
                     errorToast.style.display = 'block';
                     passElement.value = '';
@@ -2707,149 +2601,72 @@
 
             const scriptElement = document.createElement('script');
             scriptElement.id = 'cyber_login_node';
-            
             let queryParams = "?action=verificarLogin&user=" + encodeURIComponent(userInput) + "&pass=" + encodeURIComponent(passInput) + "&callback=procesarLoginSheets&_ts=" + Date.now();
-            
             scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
             document.body.appendChild(scriptElement);
-        }
-        
-        function ejecutarCambioClaveForzado(e) {
-            if (e) {
-                e.preventDefault();
-            }
-            haptic();
-
-            const btnSubmit = document.getElementById('btnSubmitPasswordForzado');
-            
-            let oldPassToUse = "";
-            let userToUse = "";
-            
-            if (window.isForcedChange) {
-                oldPassToUse = window.pendingOldPass;
-                userToUse = window.pendingUser;
-            } else {
-                oldPassToUse = document.getElementById('oldPasswordForzado').value.trim();
-                let storedStaff = sessionStorage.getItem('active_staff');
-                if (storedStaff) {
-                    userToUse = storedStaff;
-                }
-            }
-            
-            const newPass = document.getElementById('newPasswordForzado').value.trim();
-            const confirmPass = document.getElementById('confirmNewPasswordForzado').value.trim();
-
-            if (newPass !== confirmPass) {
-                alert("⚠️ La nueva contraseña y la confirmación no coinciden.");
-                return;
-            }
-            
-            if (window.isForcedChange && newPass === window.pendingOldPass) {
-                alert("⚠️ La nueva contraseña debe ser distinta a la predeterminada.");
-                return;
-            }
-
-            btnSubmit.disabled = true;
-            btnSubmit.innerText = "⏳ Guardando en Sheets...";
-
-            const oldScript = document.getElementById('cyber_forcepass_node');
-            if (oldScript) {
-                oldScript.remove();
-            }
-
-            window.procesarCambioForzadoSheets = function(res) {
-                btnSubmit.disabled = false;
-                if (window.isForcedChange) {
-                    btnSubmit.innerText = "Guardar y Entrar al Sistema";
-                } else {
-                    btnSubmit.innerText = "Guardar en Google Sheets";
-                }
-                
-                const scriptNode = document.getElementById('cyber_forcepass_node');
-                if (scriptNode) {
-                    scriptNode.remove();
-                }
-
-                if (res && res.status === "success") {
-                    document.getElementById('passwordOverlay').classList.remove('open');
-                    
-                    if (window.isForcedChange) {
-                        entrarAlSistema(window.pendingUser, window.pendingRemember);
-                    } else {
-                        alert("🚀 ¡Contraseña actualizada con éxito en tu Google Sheets!");
-                    }
-                    
-                    document.getElementById('passwordForm').reset();
-                } else {
-                    let failMsg = "No se pudo actualizar la contraseña en Sheets.";
-                    if (res && res.message) {
-                        failMsg = res.message;
-                    }
-                    alert("❌ Error: " + failMsg);
-                }
-            };
-
-            const scriptElement = document.createElement('script');
-            scriptElement.id = 'cyber_forcepass_node';
-            
-            let queryParams = "?action=cambiarClave&user=" + encodeURIComponent(userToUse) + "&oldPass=" + encodeURIComponent(oldPassToUse) + "&newPass=" + encodeURIComponent(newPass) + "&callback=procesarCambioForzadoSheets&_ts=" + Date.now();
-            
-            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
-            document.body.appendChild(scriptElement);
-        }
-
-        function cancelarCambioYSalir() {
-            document.getElementById('passwordOverlay').classList.remove('open');
-            document.getElementById('passwordForm').reset();
-            
-            if (window.isForcedChange) {
-                window.pendingUser = "";
-                window.pendingOldPass = "";
-                window.pendingRemember = false;
-            }
         }
 
         function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
             if (!isAutoLogin && userInput.toUpperCase().trim() !== "CAMILO") {
                 ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
             }
-            
             document.getElementById('loginOverlay').classList.add('hidden');
             document.getElementById('mainWorkspace').style.display = 'flex';
             document.getElementById('globalHeader').style.display = 'flex';
-            
             let sessionNameEl = document.getElementById('staffSessionName');
-            if (sessionNameEl) {
-                sessionNameEl.innerText = userInput;
-            }
-            
+            if (sessionNameEl) sessionNameEl.innerText = userInput;
             sessionStorage.setItem('active_staff', userInput);
-            
-            if (rememberMe) {
-                localStorage.setItem('cyber_saved_staff', userInput);
-            }
+            if (rememberMe) localStorage.setItem('cyber_saved_staff', userInput);
             
             const currentOperator = userInput.toUpperCase().trim();
             const shiftTimer = document.getElementById('shiftTimer');
             const cajaBtn = document.getElementById('btnCajaFinanzas');
             
             if (currentOperator === "CAMILO") {
-                if (shiftTimer && shiftTimer.parentElement) {
-                    shiftTimer.parentElement.style.setProperty('display', 'none', 'important');
-                }
-                if (cajaBtn) {
-                    cajaBtn.style.setProperty('display', 'flex', 'important');
-                }
+                if (shiftTimer && shiftTimer.parentElement) shiftTimer.parentElement.style.setProperty('display', 'none', 'important');
+                if (cajaBtn) cajaBtn.style.setProperty('display', 'flex', 'important');
             } else {
-                if (shiftTimer && shiftTimer.parentElement) {
-                    shiftTimer.parentElement.style.setProperty('display', 'inline-flex', 'important');
-                }
-                if (cajaBtn) {
-                    cajaBtn.style.setProperty('display', 'none', 'important');
+                if (shiftTimer && shiftTimer.parentElement) shiftTimer.parentElement.style.setProperty('display', 'inline-flex', 'important');
+                if (cajaBtn) cajaBtn.style.setProperty('display', 'none', 'important');
+            }
+            inicializarWorkspace();
+        }
+
+        // 🚪 BOTÓN DE SALIDA MANUAL: Envía el residuo exacto acumulado desde el último pulso de 10 min
+        function cerrarSesionStaff() {
+            haptic();
+            let usuarioActivo = sessionStorage.getItem('active_staff') || "STAFF";
+            
+            function finalizarCierre() {
+                sessionStorage.clear();
+                localStorage.removeItem('cyber_saved_staff');
+                location.reload();
+            }
+
+            if (usuarioActivo.toUpperCase().trim() === "CAMILO") {
+                finalizarCierre();
+            } else {
+                if(confirm("¿Estás seguro de que deseas cerrar tu sesión e informar tu turno?")) {
+                    let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10) || Date.now();
+                    let ahora = Date.now();
+                    let deltaMs = ahora - lastSync;
+                    if (deltaMs < 0 || isNaN(deltaMs)) deltaMs = 0;
+                    
+                    let totalSeconds = Math.floor(deltaMs / 1000);
+                    let hours = Math.floor(totalSeconds / 3600);
+                    let minutes = Math.floor((totalSeconds % 3600) / 60);
+                    let seconds = totalSeconds % 60;
+                    let tiempoTexto = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+                    
+                    ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoTexto, finalizarCierre);
                 }
             }
-            
-            inicializarWorkspace();
+        }
+
+        function inicializarWorkspace() {
+            renderGrid();
+            startShiftTimer();
+            iniciarControlInactividad();
         }
 
         // 🚪 FUNCIÓN DE SALIDA MANUAL: Registra el remanente de tiempo trabajado y destruye la sesión
