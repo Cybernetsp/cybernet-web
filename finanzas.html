@@ -731,6 +731,14 @@
             
             construirSelectores();
             cargarDashboardFinanzas();
+
+            // 🔥 NUEVO: Auto-refrescar el tablero contable en segundo plano cada 1 minuto
+            setInterval(() => {
+                // El "if (!isWorking)" evita que se refresque la pantalla si en ese mismo segundo estás guardando un gasto manual
+                if (!isWorking) {
+                    cargarDashboardFinanzas();
+                }
+            }, 60000); // 60000 milisegundos = 1 minuto
         });
     </script>
 </body>
