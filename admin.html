@@ -901,7 +901,7 @@
                 `;
                 
                 // Al hacer clic, cierra el modal y llena los datos
-                div.onclick = function() { seleccionarCuentaModalNet(cuenta.correo, cuenta.cliente); };
+                div.onclick = function() { seleccionarCuentaModalNet(cuenta.correo, cuenta.perfil, cuenta.cliente); };
                 contenedor.appendChild(div);
             });
             
@@ -924,13 +924,14 @@
             }
         }
 
-        function seleccionarCuentaModalNet(correo, cliente) {
+        function seleccionarCuentaModalNet(correo, perfil, cliente) {
             haptic();
             const inputReno = document.getElementById('correo_reno_NETFLIX');
             const inputNombre = document.getElementById('ventaNombre');
             
             if (inputReno) {
-                inputReno.value = correo;
+                // 🔥 AQUÍ ESTÁ LA MAGIA: Pone el correo y el perfil visualmente en la caja
+                inputReno.value = correo + " | Perfil: " + perfil;
             }
             if (inputNombre && inputNombre.value.trim() === "" && cliente !== "N/A") {
                 inputNombre.value = cliente;
@@ -1069,9 +1070,9 @@
                     if (idPlat === "NETFLIX" && esRenovacionActiva) {
                         const inputReno = document.getElementById(`correo_reno_${idPlat}`);
                         if (inputReno && inputReno.value.trim() !== "") {
+                            // Envia el texto exacto de la caja (ej: "correo@cy.com | Perfil: 5")
                             correoNetflixReno = inputReno.value.trim();
                         } else {
-                            // Bloqueo de seguridad si le dio click a Enviar Venta sin haber tocado una tarjeta
                             alert("⚠️ Error: Por favor toca una de las cuentas del historial para renovarla, o escríbela en modo Manual.");
                             return; 
                         }
