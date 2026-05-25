@@ -185,12 +185,13 @@
                     </div>
 
                     <div class="pod-selector">
-                        <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); padding-left: 4px;">Día</span>
-                        <select id="appleDaySelect" class="input-ios" style="margin-bottom: 0; width: auto; padding: 4px 28px 4px 8px; background-color: transparent; border: none; font-size: 0.88rem; font-weight: 700;" onchange="actualizarFiltrosUI()"></select>
-                    </div>
+    <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); padding-left: 4px;">Día</span>
+    <select id="appleDaySelect" class="input-ios" style="margin-bottom: 0; width: auto; padding: 4px 28px 4px 8px; background-color: transparent; border: none; font-size: 0.88rem; font-weight: 700;" onchange="actualizarFiltrosUI()"></select>
+</div>
 
-                    <button type="button" class="btn-ios btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); border: 0.5px solid rgba(10, 132, 255, 0.25);" onclick="filtrarHoy()">Hoy</button>
-                </div>
+<button type="button" class="btn-ios btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); border: 0.5px solid rgba(10, 132, 255, 0.25);" onclick="filtrarHoy()">Hoy</button>
+
+<button type="button" class="btn-ios btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(255, 149, 0, 0.15); color: #ff9500; border: 0.5px solid rgba(255, 149, 0, 0.25); margin-left: 5px;" onclick="filtrarAyer()">Ayer</button>
                 
                 <div style="min-width: 200px; text-align: right;">
                     <button class="btn-ios btn-success" onclick="exportarExcelEmpresarial()" style="padding: 10px 18px; font-size: 0.88rem; border-radius: 14px; font-weight: 700; width: 100%;">
@@ -359,6 +360,21 @@
             }
             valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             input.value = "$" + valor;
+        }
+
+        function filtrarHoy() {
+            const hoy = new Date();
+            const diaActual = hoy.getDate();
+            const mesActualTexto = mesesArray[hoy.getMonth()];
+            
+            const mSelect = document.getElementById('appleMonthSelect');
+            const dSelect = document.getElementById('appleDaySelect');
+            
+            if (mSelect && dSelect) {
+                mSelect.value = mesActualTexto;
+                dSelect.value = diaActual;
+                actualizarFiltrosUI();
+            }
         }
 
         function filtrarHoy() {
