@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="global.css">
 
     <script>
         (function() {
@@ -29,297 +29,191 @@
 
     <style>
         /* =========================================================================
-           REDISEÑO DE INTERFAZ FINANZAS V15: NAVBAR FLUIDO (NO ESTÁTICO)
+           REDISEÑO DE INTERFAZ FINANZAS ADAPTABLE PREMIUM
            ========================================================================= */
         
-        .finanzas-workspace {
+        /* Barra de filtros Premium y Simétrica */
+        .filter-wrapper-ios {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
-            max-width: 1250px;
-            margin: 30px auto 40px auto; /* Ajustado de 95px a 30px porque el header ya no flota */
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 24px;
-            box-sizing: border-box;
-            padding: 0 20px;
-            animation: workspaceUp 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            gap: 20px;
         }
 
-        /* BARRA SUPERIOR MAC-OS FLUIDA (SE MUEVE CON EL SCROLL) */
-        #globalHeader {
-            position: relative !important; /* CAMBIADO: De fixed a relative para que no sea estática */
-            width: 100% !important;
-            padding: 0 25px !important; 
-            display: flex !important; 
-            align-items: center !important;
-            justify-content: space-between !important;
-            min-height: 65px !important; 
-            box-sizing: border-box !important; 
-            z-index: 9998 !important;
-            background-color: rgba(15, 15, 20, 0.85) !important; 
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-        }
-        [data-theme="light"] #globalHeader {
-            background-color: rgba(245, 245, 247, 0.85) !important; border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+        .filter-group-center {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            flex: 1;
         }
 
-        /* CONTENEDOR DE CONTROLES HORIZONTALES EN CABECERA */
-        #controlPanel {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            gap: 12px !important;
-            background-color: transparent !important;
-            backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
-            border: none !important; padding: 0 !important; width: auto !important; height: auto !important;
-            position: static !important; z-index: auto !important; margin: 0 !important; overflow: hidden !important;
+        .pod-selector {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--input-bg);
+            padding: 6px 12px;
+            border-radius: 14px;
+            border: var(--glass-border);
         }
 
-        #controlPanel .interface-control-item {
-            background: var(--input-bg) !important; 
-            border: var(--glass-border) !important; 
-            border-radius: 12px !important;
-            color: var(--text-secondary) !important; transition: var(--transition-spring) !important;
-            padding: 8px 16px !important; width: auto !important; height: 38px !important;
-            display: flex !important; flex-direction: row !important;
-            justify-content: center !important; align-items: center !important; gap: 8px !important;
-            box-shadow: var(--glass-shadow) !important; cursor: pointer !important; flex-shrink: 0 !important;
-        }
-        #controlPanel .interface-control-item:hover {
-            background: var(--input-focus) !important; color: var(--text-primary) !important;
-            border-color: var(--ios-blue) !important; transform: translateY(-1px);
-        }
-        #controlPanel .interface-control-item:active { transform: scale(0.95); }
-        #controlPanel .interface-control-item svg { width: 16px !important; height: 16px !important; stroke-width: 2 !important; margin: 0 !important; }
-        #controlPanel .interface-control-item span { font-size: 0.78rem !important; font-weight: 600 !important; letter-spacing: 0.2px !important; text-align: center !important; line-height: 1 !important; }
+        /* Layouts en Rejillas Adaptativas Bento */
+        .executive-panoramic-hub { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; width: 100%; }
+        .bento-horizontal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; width: 100%; }
+        .dist-grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; width: 100%; }
+        .workspace-action-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; width: 100%; }
 
-        /* Estructuración de Paneles de Cristal */
-        .glass-panel {
-            background: var(--glass-bg) !important;
-            backdrop-filter: blur(40px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
-            border: var(--glass-border) !important;
-            border-radius: 24px !important;
-            padding: 24px !important;
-            box-shadow: var(--glass-shadow) !important;
-            transition: var(--transition-spring) !important;
-        }
-        .glass-panel:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15) !important;
-        }
-
-        .card-title {
-            color: var(--text-secondary) !important;
-            font-size: 0.78rem !important;
-            font-weight: 700 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.8px !important;
-            display: block !important;
-            margin-bottom: 16px !important;
-            opacity: 0.8;
-        }
-
-        /* 1. BARRA DE FILTROS SUPERIOR */
-        .filter-top-bar { padding: 14px 24px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; }
-        .picker-box { display: flex !important; align-items: center !important; gap: 10px !important; }
-        .picker-box label { font-size: 0.85rem !important; font-weight: 600 !important; color: var(--text-secondary) !important; }
+        .balance-hero-section { display: flex; flex-direction: column; justify-content: center; padding-left: 10px; }
+        .main-price-lbl { font-size: 3.5rem; font-weight: 700; letter-spacing: -2px; line-height: 1; display: block; margin: 8px 0; }
         
-        .apple-select-filter {
-            background-color: var(--input-bg) !important; border: var(--glass-border) !important; color: var(--text-primary) !important;
-            padding: 8px 16px !important; border-radius: 12px !important; font-size: 0.9rem !important; font-weight: 600 !important;
-            outline: none !important; cursor: pointer !important; transition: var(--transition-spring) !important;
-        }
-        .apple-select-filter:focus { border-color: var(--ios-blue) !important; background-color: var(--input-focus) !important; }
-
-        select option { background-color: #2c2c2e !important; color: #ffffff !important; font-size: 0.95rem !important; }
-        [data-theme="light"] select option { background-color: #ffffff !important; color: #000000 !important; }
-
-        /* 2. GRAN PANEL CENTRAL PANORÁMICO */
-        .executive-panoramic-hub { display: grid !important; grid-template-columns: 1fr 1.2fr !important; gap: 24px !important; width: 100% !important; }
-        .balance-hero-section { display: flex !important; flex-direction: column !important; justify-content: center !important; padding-left: 10px !important; }
-        .main-price-lbl { font-size: 3.8rem !important; font-weight: 700 !important; letter-spacing: -2px !important; line-height: 1 !important; display: block; margin: 8px 0; }
-        
-        .status-pill-container { display: inline-flex !important; align-items: center !important; gap: 6px !important; margin-top: 10px; }
+        .status-pill-container { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ios-green); box-shadow: 0 0 10px var(--ios-green); }
 
-        /* ANILLOS DE ACTIVIDAD */
-        .chart-layout-box { display: flex !important; align-items: center !important; gap: 30px !important; }
-        .apple-ring-svg { transform: rotate(-90deg) !important; width: 130px !important; height: 130px !important; flex-shrink: 0; }
-        .ring-bg { fill: none !important; stroke: rgba(255, 255, 255, 0.05) !important; stroke-width: 11 !important; }
-        [data-theme="light"] .ring-bg { stroke: rgba(0, 0, 0, 0.04) !important; }
+        /* Anillos de Actividad SVG de Apple */
+        .chart-layout-box { display: flex; align-items: center; gap: 30px; }
+        .apple-ring-svg { transform: rotate(-90deg); width: 130px; height: 130px; flex-shrink: 0; }
+        .ring-bg { fill: none; stroke: rgba(255, 255, 255, 0.05); stroke-width: 11; }
+        [data-theme="light"] .ring-bg { stroke: rgba(0, 0, 0, 0.04); }
         
-        .ring-fill-ingresos { fill: none !important; stroke: var(--ios-blue) !important; stroke-width: 11 !important; stroke-linecap: round !important; transition: stroke-dashoffset 1s ease !important; }
-        .ring-fill-gastos { fill: none !important; stroke: var(--ios-red) !important; stroke-width: 11 !important; stroke-linecap: round !important; transition: stroke-dashoffset 1s ease !important; }
+        .ring-fill-ingresos { fill: none; stroke: var(--ios-blue); stroke-width: 11; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+        .ring-fill-gastos { fill: none; stroke: var(--ios-red); stroke-width: 11; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
 
-        .bar-chart-container { flex: 1 !important; display: flex !important; flex-direction: column !important; gap: 16px !important; }
-        .bar-row { display: flex !important; flex-direction: column !important; gap: 6px !important; }
-        .bar-meta { display: flex !important; justify-content: space-between !important; font-size: 0.82rem !important; font-weight: 600 !important; color: var(--text-secondary) !important; }
-        .bar-track { width: 100% !important; height: 6px !important; background: var(--input-bg) !important; border-radius: 10px !important; overflow: hidden !important; }
-        .bar-fill { height: 100% !important; width: 0% !important; border-radius: 10px !important; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+        /* Barras de Progreso Lineales */
+        .bar-chart-container { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+        .bar-row { display: flex; flex-direction: column; gap: 6px; }
+        .bar-meta { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); }
+        .bar-track { width: 100%; height: 6px; background: var(--input-bg); border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* 3. REJILLA HORIZONTAL BENTO (4 CONTADORES) */
-        .bento-horizontal-grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 20px !important; width: 100% !important; }
-        .bento-cell-item { padding: 18px 22px !important; display: flex !important; flex-direction: column !important; gap: 4px !important; }
-        .bento-cell-item .lbl-money { font-size: 1.6rem !important; font-weight: 700 !important; letter-spacing: -0.5px !important; }
+        /* Tarjeta de distribución táctica */
+        .distribution-hub-panel { border-top: 3px solid var(--ios-blue); background: linear-gradient(135deg, rgba(10, 132, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%); }
 
-        /* PANEL DE DISTRIBUCIÓN DE NETOS TÁCTICOS */
-        .distribution-hub-panel { border-top: 3px solid var(--ios-blue) !important; background: linear-gradient(135deg, rgba(10, 132, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%) !important; }
-        .dist-grid-layout { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 24px !important; width: 100% !important; }
-        .dist-data-card { display: flex !important; flex-direction: column !important; gap: 4px !important; }
-        .dist-data-card .dist-value { font-size: 1.85rem !important; font-weight: 700 !important; letter-spacing: -0.5px !important; }
+        /* Listado del Libro Contable de Egresos/Ingresos */
+        .apple-list-container { display: flex; flex-direction: column; background: var(--input-bg); border-radius: 16px; overflow: hidden; border: var(--glass-border); width: 100%; }
+        .apple-table-header-row { display: flex; width: 100%; padding: 12px 18px; background: var(--input-focus); border-bottom: var(--glass-border); flex-shrink: 0; }
+        .th-cell { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.3px; }
 
-        /* 4. CONSOLA DE TRABAJO INFERIOR */
-        .workspace-action-grid { display: grid !important; grid-template-columns: 1fr 1.3fr !important; gap: 24px !important; width: 100% !important; }
-        .finanzas-form { display: flex !important; flex-direction: column !important; gap: 14px !important; }
-        .form-input-container { display: flex !important; flex-direction: column !important; gap: 6px !important; }
-        .form-input-container label { font-size: 0.76rem !important; font-weight: 600 !important; color: var(--text-secondary) !important; text-transform: uppercase !important; padding-left: 2px !important; }
-        .form-input-container select, .form-input-container input { margin-bottom: 0 !important; }
+        #listaDesgloseGastos { max-height: 295px; overflow-y: auto; width: 100%; display: flex; flex-direction: column; }
+        .apple-list-row { display: flex; width: 100%; padding: 13px 18px; background: transparent; border-bottom: 0.5px solid rgba(255,255,255,0.04); align-items: center; transition: background 0.2s ease; flex-shrink: 0; }
+        [data-theme="light"] .apple-list-row { border-bottom-color: rgba(0,0,0,0.04); }
+        .td-cell { font-size: 0.88rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .td-date { width: 18%; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+        .td-price { width: 22%; font-weight: 700; font-variant-numeric: tabular-nums; }
+        .td-desc { width: 38%; font-size: 0.86rem; padding-right: 10px; text-align: left; }
+        .td-cat { width: 22%; text-align: right; color: var(--text-secondary); font-size: 0.78rem; }
 
-        /* LISTADO HISTÓRICO CON BARRA PARA DESLIZAR */
-        .apple-list-container { display: flex !important; flex-direction: column !important; background: var(--input-bg) !important; border-radius: 16px !important; overflow: hidden; border: var(--glass-border) !important; width: 100% !important; }
-        .apple-table-header-row { display: flex !important; width: 100% !important; padding: 12px 18px !important; background: var(--input-focus) !important; border-bottom: var(--glass-border) !important; flex-shrink: 0; }
-        .th-cell { font-size: 0.74rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-secondary) !important; letter-spacing: 0.3px; }
+        .empty-log-msg { text-align: center; padding: 35px; color: var(--text-secondary); font-size: 0.88rem; width: 100%; }
 
-        #listaDesgloseGastos { max-height: 295px !important; overflow-y: auto !important; width: 100% !important; display: flex !important; flex-direction: column !important; }
-        .apple-list-row { display: flex !important; width: 100% !important; padding: 13px 18px !important; background: transparent !important; border-bottom: 0.5px solid rgba(255,255,255,0.04) !important; align-items: center !important; transition: background 0.2s ease !important; flex-shrink: 0; }
-        .td-cell { font-size: 0.88rem !important; color: var(--text-primary) !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .td-date { width: 18% !important; color: var(--text-secondary) !important; font-variant-numeric: tabular-nums; }
-        .td-price { width: 22% !important; font-weight: 700; font-variant-numeric: tabular-nums; }
-        .td-desc { width: 38% !important; font-size: 0.86rem !important; padding-right: 10px; text-align: left !important; }
-        .td-cat { width: 22% !important; text-align: right !important; color: var(--text-secondary) !important; font-size: 0.78rem !important; }
-
-        .empty-log-msg { text-align: center !important; padding: 35px !important; color: var(--text-secondary) !important; font-size: 0.88rem !important; width: 100% !important; }
-
+        /* Notificación Flotante Toast iOS */
         .apple-notification-toast {
-            position: fixed !important; 
-            top: 85px !important; /* CAMBIADO: De 30px a 85px para que baje limpiamente de la barra fija */
-            left: 50% !important; 
-            transform: translateX(-50%) translateY(-100px) !important; 
-            background: rgba(30, 30, 30, 0.9) !important; 
-            border: 0.5px solid rgba(255,255,255,0.15) !important; 
-            color: #ffffff !important; 
-            backdrop-filter: blur(20px) !important; 
-            -webkit-backdrop-filter: blur(20px) !important; 
-            padding: 12px 26px !important; 
-            border-radius: 24px !important; 
-            font-size: 0.88rem !important; 
-            font-weight: 600 !important; 
-            opacity: 0 !important; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; 
-            z-index: 10000 !important; /* CAMBIADO: De 3000 a 10000 para flotar por encima de toda la web */
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4) !important;
+            position: fixed; top: 85px; left: 50%; transform: translateX(-50%) translateY(-100px); 
+            background: rgba(30, 30, 30, 0.9); border: var(--glass-border); color: #ffffff; 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
+            padding: 12px 26px; border-radius: 24px; font-size: 0.88rem; font-weight: 600; 
+            opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            z-index: 10000; box-shadow: var(--glass-shadow);
         }
-        [data-theme="light"] .apple-notification-toast { background: rgba(255, 255, 255, 0.9) !important; border-color: rgba(0,0,0,0.1) !important; color: #000000 !important; box-shadow: 0 20px 40px rgba(0,0,0,0.08) !important; }
-        .apple-notification-toast.show { transform: translateX(-50%) translateY(0) !important; opacity: 1 !important; }
+        [data-theme="light"] .apple-notification-toast { background: rgba(255, 255, 255, 0.9); color: #000000; }
+        .apple-notification-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        /* RESPONSIVO INTEGRADO */
+        /* Adaptabilidad de pantalla total (Responsivo Quirúrgico) */
+        @media (max-width: 900px) {
+            .filter-wrapper-ios { flex-direction: column; align-items: stretch; text-align: center; }
+            .filter-group-center { flex-direction: column; width: 100%; }
+            .pod-selector { width: 100%; justify-content: space-between; }
+            .pod-selector select { flex: 1; text-align: right; }
+        }
         @media (max-width: 1024px) {
-            .executive-panoramic-hub { grid-template-columns: 1fr !important; gap: 20px !important; }
-            .bento-horizontal-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; }
-            .dist-grid-layout { grid-template-columns: 1fr !important; gap: 16px !important; }
-            .workspace-action-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+            .executive-panoramic-hub { grid-template-columns: 1fr; }
+            .workspace-action-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 820px) {
-            #globalHeader { flex-direction: column !important; align-items: center !important; padding: 10px 15px !important; gap: 10px !important; min-height: auto !important; position: relative !important; }
-            .finanzas-workspace { margin-top: 24px !important; }
-            .top-left-status { justify-content: center !important; width: 100% !important; }
-            #controlPanel { width: 100% !important; justify-content: center !important; }
-            .apple-notification-toast { top: 125px !important; } /* Un poco más abajo en móbiles por el despliegue del header */
+            .global-header { flex-direction: column; align-items: center; padding: 10px 15px; gap: 10px; }
+            .apple-notification-toast { top: 125px; }
         }
         @media (max-width: 650px) {
-            .bento-horizontal-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
-            .chart-layout-box { flex-direction: column !important; text-align: center; }
-            .apple-ring-svg { margin: 0 auto !important; }
+            .chart-layout-box { flex-direction: column; text-align: center; }
+            .apple-ring-svg { margin: 0 auto; }
         }
     </style>
 </head>
 <body>
 
-    <div class="bg-orb-1"></div>
-    <div class="bg-orb-2"></div>
+    <div class="bg-orb bg-orb-1" style="background: rgba(48, 209, 88, 0.1);"></div>
+    <div class="bg-orb bg-orb-2" style="background: rgba(10, 132, 255, 0.1);"></div>
 
     <header class="global-header" id="globalHeader">
-        <div class="top-left-status" id="staffStatusBar">
-            <div class="staff-badge">
-                <span id="staffSessionName">ADMIN MAESTRO</span> • MÓDULO FINANCIERO
-            </div>
-            <div class="timer-badge" style="color: var(--ios-green) !important; border-color: rgba(48,209,88,0.25) !important;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    <polyline points="9 12 11 14 15 10"></polyline>
-                </svg>
-                <span>CONSOLIDADO OPERATIVO</span>
+        <div class="flex-row" id="staffStatusBar">
+            <div class="badge-ios badge-blue" style="color: var(--ios-green); border-color: rgba(48,209,88,0.3); background: rgba(48,209,88,0.08); font-weight: 700;">
+                <span id="staffSessionName">CAMILO</span> • MÓDULO FINANCIERO
             </div>
         </div>
 
-        <div class="control-container" id="controlPanel">
-            
-            <button class="interface-control-item" onclick="cargarDashboardFinanzas()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="23 4 23 10 17 10"></polyline>
-                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                </svg>
-                <span>REFRESCAR</span>
+        <div class="flex-row" id="controlPanel">
+            <button class="btn-ios btn-secondary" onclick="cargarDashboardFinanzas()">
+                REFRESCAR
             </button>
-
-            <button class="interface-control-item" onclick="toggleTheme()" id="theme-toggle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3"></line>
-                    <line x1="12" y1="21" x2="12" y2="23"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                    <line x1="1" y1="12" x2="3" y2="12"></line>
-                    <line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-                <span>TEMA</span>
+            <button class="btn-ios btn-secondary" onclick="window.location.href='admin.html'" style="color: var(--ios-red);">
+                VOLVER
             </button>
-
-            <button class="interface-control-item" onclick="window.location.href='admin.html'" style="color: var(--ios-red) !important;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                <span>VOLVER</span>
-            </button>
-            
         </div>
     </header>
 
-    <main class="finanzas-workspace">
+    <main class="main-workspace" style="max-width: 1250px; padding-top: 95px;">
         
-        <section class="glass-panel filter-top-bar">
-            <div class="picker-box">
-                <label>Mes de Análisis:</label>
-                <select id="appleMonthSelect" class="apple-select-filter" onchange="actualizarFiltrosUI()"></select>
+        <section class="card-ios" style="width: 100%;">
+            <div class="filter-wrapper-ios">
                 
-                <label style="margin-left: 15px;">Día:</label>
-                <select id="appleDaySelect" class="apple-select-filter" onchange="actualizarFiltrosUI()"></select>
+                <div class="flex-row" style="gap: 10px; min-width: 200px;">
+                    <div style="background: rgba(48, 209, 88, 0.15); padding: 8px; border-radius: 12px; color: var(--ios-green); display: flex; align-items: center; justify-content: center;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <div style="text-align: left;">
+                        <span style="display: block; font-size: 0.85rem; font-weight: 800; color: var(--text-primary);" id="welcomeUserName">Hola, CAMILO</span>
+                        <span style="display: block; font-size: 0.72rem; color: var(--text-secondary);">Administrador Maestro</span>
+                    </div>
+                </div>
+                
+                <div class="filter-group-center">
+                    <div class="pod-selector">
+                        <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); padding-left: 4px;">Mes</span>
+                        <select id="appleMonthSelect" class="input-ios" style="margin-bottom: 0; width: auto; padding: 4px 28px 4px 8px; background-color: transparent; border: none; font-size: 0.88rem; font-weight: 700;" onchange="actualizarFiltrosUI()"></select>
+                    </div>
+
+                    <div class="pod-selector">
+                        <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); padding-left: 4px;">Día</span>
+                        <select id="appleDaySelect" class="input-ios" style="margin-bottom: 0; width: auto; padding: 4px 28px 4px 8px; background-color: transparent; border: none; font-size: 0.88rem; font-weight: 700;" onchange="actualizarFiltrosUI()"></select>
+                    </div>
+
+                    <button type="button" class="btn-ios btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); border: 0.5px solid rgba(10, 132, 255, 0.25);" onclick="filtrarHoy()">Hoy</button>
+                </div>
+                
+                <div style="min-width: 200px; text-align: right;">
+                    <button class="btn-ios btn-success" onclick="exportarExcelEmpresarial()" style="padding: 10px 18px; font-size: 0.88rem; border-radius: 14px; font-weight: 700; width: 100%;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Exportar Reporte
+                    </button>
+                </div>
+
             </div>
-            
-            <button class="apple-select-filter" onclick="exportarExcelEmpresarial()" style="display:flex; align-items:center; gap:8px; background-color: rgba(48, 209, 88, 0.12) !important; border: 0.5px solid rgba(48, 209, 88, 0.4) !important; color: var(--ios-green) !important; height: 38px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 !important;">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                <span style="font-size: 0.8rem; font-weight:700;">EXPORTAR EXCEL</span>
-            </button>
         </section>
 
-        <section class="glass-panel executive-panoramic-hub">
+        <section class="card-ios executive-panoramic-hub" style="width: 100%;">
             
             <div class="balance-hero-section">
-                <span class="card-title" id="txtPeriodoLabel">Caja Real Mensual</span>
+                <span class="text-secondary" id="txtPeriodoLabel" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Caja Real Mensual</span>
                 <span class="main-price-lbl" id="val_neto" style="color: var(--ios-green);">$0</span>
                 <div class="status-pill-container">
                     <div class="status-dot" id="statusIndicator"></div>
-                    <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Red de balances verificada</span>
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight: 600;">Red de balances verificada</span>
                 </div>
             </div>
 
@@ -347,39 +241,39 @@
         </section>
 
         <section class="bento-horizontal-grid">
-            <div class="glass-panel bento-cell-item"><span class="card-title">Ventas Brutas</span><span class="lbl-money" id="val_ingresos" style="color: var(--ios-blue);">$0</span></div>
-            <div class="glass-panel bento-cell-item"><span class="card-title">Gastos Caja</span><span class="lbl-money" id="val_gastos" style="color: var(--ios-red);">$0</span></div>
-            <div class="glass-panel bento-cell-item"><span class="card-title">Inversiones</span><span class="lbl-money" id="val_inversiones" style="color: #ff9f0a;">$0</span></div>
-            <div class="glass-panel bento-cell-item"><span class="card-title">Staff Nómina</span><span class="lbl-money" id="val_nomina" style="color: #bf5af2;">$0</span></div>
+            <div class="card-ios"><span class="text-secondary" style="font-size: 0.75rem; font-weight:700; text-transform:uppercase;">Ventas Brutas</span><span style="font-size:1.6rem; font-weight:700; color:var(--ios-blue);" id="val_ingresos">$0</span></div>
+            <div class="card-ios"><span class="text-secondary" style="font-size: 0.75rem; font-weight:700; text-transform:uppercase;">Gastos Caja</span><span style="font-size:1.6rem; font-weight:700; color:var(--ios-red);" id="val_gastos">$0</span></div>
+            <div class="card-ios"><span class="text-secondary" style="font-size: 0.75rem; font-weight:700; text-transform:uppercase;">Inversiones</span><span style="font-size:1.6rem; font-weight:700; color:#ff9f0a;" id="val_inversiones">$0</span></div>
+            <div class="card-ios"><span class="text-secondary" style="font-size: 0.75rem; font-weight:700; text-transform:uppercase;">Staff Nómina</span><span style="font-size:1.6rem; font-weight:700; color:#bf5af2;" id="val_nomina">$0</span></div>
         </section>
 
-        <section class="glass-panel distribution-hub-panel">
-            <span class="card-title">📋 Distribución Ponderada s/ Ventas Brutas del Periodo</span>
-            <div class="dist-grid-layout">
-                <div class="dist-data-card">
-                    <span style="font-size: 0.8rem; font-weight:600; color:var(--text-secondary);">Mi Ganancia (<span id="lblPorcMio">28</span>%)</span>
-                    <span class="dist-value" id="valProyMio" style="color: var(--ios-green);">$0</span>
+        <section class="card-ios distribution-hub-panel" style="width: 100%;">
+            <span class="text-secondary mb-1" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">📋 Distribución Ponderada s/ Ventas Brutas del Periodo</span>
+            <div class="dist-grid-layout mt-1">
+                <div class="flex-col" style="gap:4px;">
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Mi Ganancia (<span id="lblPorcMio">28</span>%)</span>
+                    <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-green);" id="valProyMio">$0</span>
                 </div>
-                <div class="dist-data-card">
-                    <span style="font-size: 0.8rem; font-weight:600; color:var(--text-secondary);">Fondo del Negocio (<span id="lblPorcNegocio">55</span>%)</span>
-                    <span class="dist-value" id="valProyNegocio" style="color: var(--ios-blue);">$0</span>
+                <div class="flex-col" style="gap:4px;">
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Fondo del Negocio (<span id="lblPorcNegocio">55</span>%)</span>
+                    <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-blue);" id="valProyNegocio">$0</span>
                 </div>
-                <div class="dist-data-card">
-                    <span style="font-size: 0.8rem; font-weight:600; color:var(--text-secondary);">Reserva de Nómina (<span id="lblPorcNomina">17</span>%)</span>
-                    <span class="dist-value" id="valProyNomina" style="color: #bf5af2;">$0</span>
+                <div class="flex-col" style="gap:4px;">
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Reserva de Nómina (<span id="lblPorcNomina">17</span>%)</span>
+                    <span style="font-size: 1.85rem; font-weight: 700; color: #bf5af2;" id="valProyNomina">$0</span>
                 </div>
             </div>
         </section>
 
-        <div class="workspace-action-grid">
+        <div class="workspace-action-grid" style="width: 100%;">
             
-            <div class="glass-panel">
-                <span class="card-title" style="color: var(--text-primary) !important;">✍️ Registrar Movimiento Manual</span>
-                <form id="formFinanzas" class="finanzas-form" onsubmit="guardarTransaccion(event)">
+            <div class="card-ios" style="height: fit-content;">
+                <h3 class="card-title" style="color: var(--text-primary);">✍️ Registrar Movimiento Manual</h3>
+                <form id="formFinanzas" class="flex-col" onsubmit="guardarTransaccion(event)">
                     
-                    <div class="form-input-container">
-                        <label>Categoría Contable</label>
-                        <select id="finCategoria" class="ios-input-block" required>
+                    <div class="flex-col" style="gap: 4px;">
+                        <label class="text-secondary" style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase;">Categoría Contable</label>
+                        <select id="finCategoria" class="input-ios" required>
                             <option value="" disabled selected>Selecciona una opción...</option>
                             <option value="Comida">Comida</option>
                             <option value="Chayo">Chayo</option>
@@ -403,22 +297,24 @@
                         </select>
                     </div>
                     
-                    <div class="form-input-container">
-                        <label>Monto Operación ($)</label>
-                        <input type="number" id="finMonto" class="ios-input-block" placeholder="0" min="1" required autocomplete="off">
+                    <div class="flex-col" style="gap: 4px;">
+                        <label class="text-secondary" style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase;">Monto Operación ($)</label>
+                        <input type="text" id="finMonto" class="input-ios" placeholder="Ej: $50.000" oninput="formatearMontoEnVivoCOP(this)" required autocomplete="off">
                     </div>
-                    <div class="form-input-container">
-                        <label>Metadato / Nota Descriptiva</label>
-                        <input type="text" id="finDetalle" class="ios-input-block" placeholder="Ej: Venta de artículo usado" required autocomplete="off">
+                    
+                    <div class="flex-col" style="gap: 4px;">
+                        <label class="text-secondary" style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase;">Metadato / Nota Descriptiva</label>
+                        <input type="text" id="finDetalle" class="input-ios" placeholder="Ej: Venta de artículo usado" required autocomplete="off">
                     </div>
-                    <button type="submit" id="btnSubmit" class="btn-login-action">Archivar Movimiento</button>
+                    
+                    <button type="submit" id="btnSubmit" class="btn-ios btn-primary w-100 mt-1">Archivar Movimiento</button>
                 </form>
             </div>
 
-            <div class="glass-panel" style="display: flex; flex-direction: column;">
-                <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom: 12px;">
-                    <span class="card-title" style="color: var(--text-primary) !important; margin-bottom:0 !important;">📋 Distribución de Egresos e Ingresos</span>
-                    <span style="font-size: 0.76rem; color: var(--text-secondary); font-weight: 700;" id="txtLibroHeader">Ciclo Activo</span>
+            <div class="card-ios" style="display: flex; flex-direction: column;">
+                <div class="flex-row-between mb-1">
+                    <span class="card-title" style="color: var(--text-primary); margin-bottom: 0;">📋 Distribución de Egresos e Ingresos</span>
+                    <span class="text-secondary" style="font-size: 0.76rem; font-weight: 700;" id="txtLibroHeader">Ciclo Activo</span>
                 </div>
                 
                 <div class="apple-list-container">
@@ -455,23 +351,28 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        function toggleTheme() {
-            if (navigator.vibrate) navigator.vibrate(15);
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            let newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('cyber_theme', newTheme);
-            updateThemeIcon(newTheme);
+        function formatearMontoEnVivoCOP(input) {
+            let valor = input.value.replace(/\D/g, "");
+            if (valor === "") {
+                input.value = "";
+                return;
+            }
+            valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            input.value = "$" + valor;
         }
 
-        function updateThemeIcon(theme) {
-            const btn = document.getElementById('theme-toggle');
-            if (!btn) return;
-            if (theme === 'light') {
-                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg><span>TEMA</span>`;
-            } else {
-                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg><span>TEMA</span>`;
+        function filtrarHoy() {
+            const hoy = new Date();
+            const diaActual = hoy.getDate();
+            const mesActualTexto = mesesArray[hoy.getMonth()];
+            
+            const mSelect = document.getElementById('appleMonthSelect');
+            const dSelect = document.getElementById('appleDaySelect');
+            
+            if (mSelect && dSelect) {
+                mSelect.value = mesActualTexto;
+                dSelect.value = diaActual;
+                actualizarFiltrosUI();
             }
         }
 
@@ -577,7 +478,6 @@
             document.getElementById('val_inversiones').innerText = formatMoneda(d.inversiones);
             document.getElementById('val_nomina').innerText = formatMoneda(d.nomina);
 
-            // MOTOR DE DISTRIBUCIÓN FINANCIERA AUTOMÁTICA ADAPTATIVA
             let porcMio = 28;
             let porcNomina = 17;
             let porcNegocio = 55;
@@ -606,7 +506,6 @@
             document.getElementById('valProyNegocio').innerText = formatMoneda(Math.round(baseDinero * (porcNegocio / 100)));
             document.getElementById('valProyNomina').innerText = formatMoneda(Math.round(baseDinero * (porcNomina / 100)));
 
-            // ANILLOS DE ACTIVIDAD
             const totalFlujo = d.ingresos + d.gastos + d.inversiones + d.nomina;
             let porcIngresos = 0, porcGastos = 0;
             
@@ -663,8 +562,16 @@
         function guardarTransaccion(e) {
             e.preventDefault();
             if (isWorking) return;
-            isWorking = true;
             
+            const catVal = encodeURIComponent(document.getElementById('finCategoria').value);
+            const montoRaw = document.getElementById('finMonto').value.replace(/\D/g, "");
+            
+            if (!montoRaw || parseInt(montoRaw) <= 0) {
+                triggerToast("⚠️ Por favor ingresa un monto válido.");
+                return;
+            }
+            
+            isWorking = true;
             const btn = document.getElementById('btnSubmit');
             btn.innerText = "Procesando..."; btn.disabled = true;
 
@@ -691,15 +598,13 @@
             script.id = 'fin_post_node';
             script.classList.add('fin-post-node');
             
-            const catVal = encodeURIComponent(document.getElementById('finCategoria').value);
-            const montoVal = encodeURIComponent(document.getElementById('finMonto').value);
+            const montoVal = encodeURIComponent(montoRaw);
             const detalleVal = encodeURIComponent(document.getElementById('finDetalle').value);
             
             script.src = `${GOOGLE_SCRIPT_URL}?action=registrarTransaccionFinanciera&categoria=${catVal}&monto=${montoVal}&detalle=${detalleVal}&callback=saveCallback`;
             document.body.appendChild(script);
         }
 
-        // 🚀 NUEVA FUNCIÓN: Generador de Excel con Plantilla de Diseño Corporativo Nivel Premium
         function exportarExcelEmpresarial() {
             if (!globalFinanzasData || !globalFinanzasData.listaDetallada) {
                 triggerToast("⚠️ Espera que se sincronicen los datos contables.");
@@ -712,10 +617,8 @@
             const summary = globalFinanzasData[activePeriod];
             const movimientos = globalFinanzasData.listaDetallada;
 
-            // Determinar color de salud financiera en el balance neto
             const colorNetoExcel = (summary.neto >= 0) ? '#30d158' : '#ff453a';
 
-            // 🏛️ CONSTRUCCIÓN DEL TEMPLATE HTML CON ESTILOS AVANZADOS COMPATIBLES CON EXCEL
             let excelTemplate = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
@@ -725,22 +628,14 @@
                     table { border-collapse: collapse; margin-bottom: 20px; }
                     .main-title { font-size: 18pt; font-weight: bold; color: #0a84ff; text-align: left; }
                     .meta-info { font-size: 10pt; color: #8e8e93; font-style: italic; }
-                    
-                    /* Tarjetas de Indicadores KPI */
                     .kpi-table th { background-color: #f2f2f7; font-size: 9pt; color: #636366; text-transform: uppercase; text-align: center; font-weight: bold; padding: 6px; border: 1px solid #d1d1d6; }
                     .kpi-table td { font-size: 13pt; font-weight: bold; text-align: center; padding: 12px; border: 1px solid #d1d1d6; background-color: #ffffff; }
-                    
-                    /* Tabla de Movimientos */
                     .header-row th { background-color: #0a84ff; color: #ffffff; font-weight: bold; font-size: 11pt; padding: 10px; border: 1px solid #007aff; text-align: left; }
                     .data-row td { font-size: 10pt; padding: 8px 10px; border: 1px solid #e5e5ea; color: #2c2c2e; }
                     .zebra-row td { background-color: #f9f9fb; }
-                    
-                    /* Tipos de Moneda e Importes */
                     .money-cell { text-align: right; font-family: 'Consolas', monospace; font-size: 10.5pt; }
                     .money-ingreso { color: #248a3d; font-weight: 600; }
                     .money-egreso { color: #b3261e; }
-                    
-                    /* Totales */
                     .total-row td { font-weight: bold; background-color: #e5e5ea; border-top: 2.5px solid #1c1c1e; font-size: 11pt; padding: 10px; }
                 </style>
             </head>
@@ -790,7 +685,6 @@
                     <tbody>
             `;
 
-            // Rellenar dinámicamente las filas del libro mayor
             movimientos.forEach((item, index) => {
                 const filaZebra = (index % 2 === 0) ? '' : 'class="zebra-row"';
                 const claseMonto = (item.tipo === "INGRESO") ? 'money-ingreso' : 'money-egreso';
@@ -806,7 +700,6 @@
                 `;
             });
 
-            // Fila de Cierre con el Balance Final
             excelTemplate += `
                         <tr class="total-row">
                             <td>TOTAL NETO</td>
@@ -819,12 +712,10 @@
             </html>
             `;
 
-            // 💾 PROCESAMIENTO DE DESCARGA EN SEGUNDO PLANO (SIN ALERTAS EXTRALIMITADAS)
             const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             
-            // Nombre corporativo estético: Cybernet_Finanzas_MAYO_2026.xls
             link.href = url;
             link.setAttribute("download", `Cybernet_Finanzas_${mesSeleccionado}_2026.xls`);
             document.body.appendChild(link);
@@ -837,14 +728,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             let savedTheme = localStorage.getItem('cyber_theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeIcon(savedTheme);
             
             construirSelectores();
-            
-            let activeUser = sessionStorage.getItem('active_staff') || "ADMIN MAESTRO";
-            const sessionEl = document.getElementById('staffSessionName');
-            if(sessionEl) sessionEl.innerText = activeUser.toUpperCase();
-            
             cargarDashboardFinanzas();
         });
     </script>
