@@ -196,6 +196,11 @@
         #ventaGeneradaModalOverlay.open {
             display: flex !important;
         }
+        /* 🔥 Forzar fondo oscuro en los menús desplegables (Select) */
+        select.input-ios option {
+            background-color: rgb(28, 28, 30) !important;
+            color: #ffffff !important;
+        }
     </style>
 </head>
 <body>
@@ -647,7 +652,6 @@
                                 <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Tipo</span>
                                 <select class="input-ios" id="tipo_${plat.id}" name="ventaTipo" style="padding: 6px; font-size:0.8rem;" onchange="comprobarTipoVentaNetflix(this, '${plat.id}')" disabled>
                                     <option value="Nueva" selected>Nueva Cuenta</option>
-                                    <option value="Reno (Manual)">Reno (Manual)</option>
                                     <option value="Reno (Historial)" id="opt_historial_net" style="display: none; background: rgba(10, 132, 255, 0.2);">Reno (Elegir Cuenta)</option>
                                 </select>
                             </div>
