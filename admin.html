@@ -437,7 +437,7 @@
 
     <div class="flex-col" style="gap: 4px;">
         <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Número de Teléfono (Obligatorio)</label>
-        <input type="text" id="ventaTelefono" class="input-ios" placeholder="Ej: 3015156037" required autocomplete="new-password">
+        <input type="text" id="ventaTelefono" class="input-ios" placeholder="Ej: 3015156037" required autocomplete="new-password" oninput="buscarHistorialNetflixEnVenta(this.value)">
     </div>
 
                     <div class="flex-col mb-1" style="gap: 6px;">
@@ -505,6 +505,19 @@
                 </svg>
                 Cerrar Ventana
             </button>
+        </div>
+    </div>
+    <div class="overlay-ios" id="modalRenovacionFlotante">
+        <div class="sheet-ios" onclick="event.stopPropagation()" style="height: 75vh;">
+            <div class="sheet-header">
+                <h3 class="card-title">Cuentas del Cliente</h3>
+                <button class="btn-close-circle" onclick="cerrarModalRenovacionNet()">✕</button>
+            </div>
+            <div class="mb-1" style="padding: 0 15px;">
+                <input type="text" id="buscadorModalReno" class="input-ios" placeholder="🔍 Buscar por correo o perfil..." oninput="filtrarModalRenovacionNet()">
+            </div>
+            <div class="flex-col" id="listaCuentasModalReno" style="overflow-y: auto; flex-grow: 1; padding: 0 15px 20px 15px; gap: 10px;">
+                </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
@@ -628,22 +641,35 @@
 
                 let selectorTipo = "";
                 if (plat.permiteRenovacion) {
-                    selectorTipo = `
-                        <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
-                            <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Tipo</span>
-                            <select class="input-ios" id="tipo_${plat.id}" name="ventaTipo" style="padding: 6px; font-size:0.8rem;" onchange="comprobarTipoVentaNetflix(this, '${plat.id}')" disabled>
-                                <option value="Nueva" selected>Nueva</option>
-                                <option value="Reno">Reno</option>
-                            </select>
-                        </div>
-                    `;
+                    if (plat.id === "NETFLIX") {
+                        selectorTipo = `
+                            <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
+                                <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Tipo</span>
+                                <select class="input-ios" id="tipo_${plat.id}" name="ventaTipo" style="padding: 6px; font-size:0.8rem;" onchange="comprobarTipoVentaNetflix(this, '${plat.id}')" disabled>
+                                    <option value="Nueva" selected>Nueva Cuenta</option>
+                                    <option value="Reno (Manual)">Reno (Manual)</option>
+                                    <option value="Reno (Historial)" id="opt_historial_net" style="display: none; background: rgba(10, 132, 255, 0.2);">Reno (Elegir Cuenta)</option>
+                                </select>
+                            </div>
+                        `;
+                    } else {
+                        selectorTipo = `
+                            <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
+                                <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Tipo</span>
+                                <select class="input-ios" id="tipo_${plat.id}" name="ventaTipo" style="padding: 6px; font-size:0.8rem;" onchange="comprobarTipoVentaNetflix(this, '${plat.id}')" disabled>
+                                    <option value="Nueva" selected>Nueva</option>
+                                    <option value="Reno">Reno</option>
+                                </select>
+                            </div>
+                        `;
+                    }
                 }
 
                 let campoCorreoReno = "";
                 if (plat.id === "NETFLIX") {
                     campoCorreoReno = `
                         <div id="wrapper_correo_reno_${plat.id}" style="display: none; flex-direction: column; gap: 5px; width: 100%; margin-top: 8px;">
-                            <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Correo a Renovar (Obligatorio)</span>
+                            <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Correo Seleccionado</span>
                             <input type="email" id="correo_reno_${plat.id}" class="input-ios" style="margin-bottom: 0; padding: 10px 12px; border-radius: 10px;" placeholder="ejemplo@correo.com">
                         </div>
                     `;
@@ -766,19 +792,158 @@
             });
         }
 
-        function comprobarTipoVentaNetflix(select, id) {
+        // 🔥 MOTOR SÚPER RÁPIDO DE AUTO-SUGERENCIA (MODAL FLOTANTE)
+        window.cuentasNetflixClienteActivo = [];
+        let timeoutBusquedaNet = null;
+
+        function buscarHistorialNetflixEnVenta(telefono) {
+            let telLimpio = telefono.replace(/\D/g, "");
+            if (telLimpio.length < 8) return; 
+            
+            clearTimeout(timeoutBusquedaNet);
+            timeoutBusquedaNet = setTimeout(() => {
+                const optHistorial = document.getElementById('opt_historial_net');
+                const inputTipo = document.getElementById('tipo_NETFLIX');
+                const labelWrapper = inputTipo ? inputTipo.previousElementSibling : null;
+                
+                if (optHistorial && inputTipo) {
+                    if (labelWrapper) labelWrapper.style.color = "var(--ios-orange)";
+                    
+                    const cbName = "cb_net_search_" + Date.now();
+                    window[cbName] = function(res) {
+                        if (labelWrapper) labelWrapper.style.color = "var(--text-secondary)";
+                        const scriptNode = document.getElementById('node_' + cbName);
+                        if (scriptNode) scriptNode.remove();
+                        delete window[cbName];
+                        
+                        optHistorial.style.display = "none";
+                        window.cuentasNetflixClienteActivo = [];
+                        
+                        if (res && res.status === "success" && res.data.length > 0) {
+                            let cuentasFiltradas = res.data.filter(cuenta => cuenta.correo.toLowerCase().endsWith("@cybernetsp.com"));
+                            
+                            if (cuentasFiltradas.length > 0) {
+                                if (labelWrapper) labelWrapper.style.color = "var(--ios-green)";
+                                optHistorial.style.display = "block"; // Activa la opción "Reno (Elegir Cuenta)"
+                                window.cuentasNetflixClienteActivo = cuentasFiltradas; // Guardamos en memoria
+                                
+                                // Auto-selecciona la opción y dispara el Modal
+                                inputTipo.value = "Reno (Historial)";
+                                comprobarTipoVentaNetflix(inputTipo, 'NETFLIX');
+                            }
+                        }
+                    };
+                    
+                    const script = document.createElement('script');
+                    script.id = 'node_' + cbName;
+                    script.src = `${GOOGLE_SCRIPT_URL}?action=buscarRenovacionNetflix&tel=${encodeURIComponent(telLimpio)}&callback=${cbName}&_ts=${Date.now()}`;
+                    document.body.appendChild(script);
+                }
+            }, 800);
+        }
+
+        function comprobarTipoVentaNetflix(element, id) {
             if (id === "NETFLIX") {
-                const wrapper = document.getElementById(`wrapper_correo_reno_${id}`);
-                const input = document.getElementById(`correo_reno_${id}`);
-                if (select.value === "Reno") {
-                    if (wrapper) wrapper.style.display = "flex";
-                    if (input) input.required = true;
-                    if (input) input.focus();
+                const wrapperCorreo = document.getElementById(`wrapper_correo_reno_${id}`);
+                const inputReno = document.getElementById(`correo_reno_${id}`);
+                
+                let val = element.value; 
+
+                if (val === "Reno (Manual)") {
+                    if (wrapperCorreo) wrapperCorreo.style.display = "flex";
+                    if (inputReno) { inputReno.required = true; inputReno.value = ""; inputReno.readOnly = false; inputReno.focus(); }
+                } 
+                else if (val === "Reno (Historial)") {
+                    if (wrapperCorreo) wrapperCorreo.style.display = "flex";
+                    if (inputReno) { inputReno.required = true; inputReno.readOnly = true; }
+                    // Disparamos la nueva tarjeta visual
+                    abrirModalRenovacionNet();
                 } else {
-                    if (wrapper) wrapper.style.display = "none";
-                    if (input) { input.required = false; input.value = ""; }
+                    if (wrapperCorreo) wrapperCorreo.style.display = "none";
+                    if (inputReno) { inputReno.required = false; inputReno.value = ""; inputReno.readOnly = false; }
                 }
             }
+        }
+        // 🛠️ LÓGICA DEL MODAL FLOTANTE DE RENOVACIONES
+        function abrirModalRenovacionNet() {
+            haptic();
+            const modal = document.getElementById('modalRenovacionFlotante');
+            const contenedor = document.getElementById('listaCuentasModalReno');
+            const buscador = document.getElementById('buscadorModalReno');
+            
+            buscador.value = "";
+            contenedor.innerHTML = "";
+            
+            // Inyectar tarjetas basado en la memoria cargada
+            window.cuentasNetflixClienteActivo.forEach((cuenta) => {
+                let div = document.createElement('div');
+                div.className = "card-ios item-reno-modal";
+                div.style.padding = "15px";
+                div.style.cursor = "pointer";
+                div.style.background = "var(--glass-bg)";
+                div.setAttribute("data-search", cuenta.correo.toLowerCase() + " " + cuenta.perfil.toLowerCase());
+                
+                div.innerHTML = `
+                    <div style="color: var(--text-primary); font-weight: 700; font-size: 1rem; margin-bottom: 6px;">
+                        ${cuenta.correo}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary);">
+                        <span>Perfil: <b style="color: var(--ios-blue);">${cuenta.perfil}</b></span>
+                        <span>Cliente: <b>${cuenta.cliente}</b></span>
+                    </div>
+                `;
+                
+                // Al hacer clic, cierra el modal y llena los datos
+                div.onclick = function() { seleccionarCuentaModalNet(cuenta.correo, cuenta.cliente); };
+                contenedor.appendChild(div);
+            });
+            
+            modal.classList.add('open');
+            buscador.focus();
+        }
+
+        function cerrarModalRenovacionNet() {
+            haptic();
+            document.getElementById('modalRenovacionFlotante').classList.remove('open');
+            
+            // Si el usuario cancela y el correo está vacío, devolvemos el selector a "Nueva"
+            const inputReno = document.getElementById('correo_reno_NETFLIX');
+            if (inputReno && inputReno.value === "") {
+                const inputTipo = document.getElementById('tipo_NETFLIX');
+                if(inputTipo) {
+                    inputTipo.value = "Nueva";
+                    comprobarTipoVentaNetflix(inputTipo, 'NETFLIX');
+                }
+            }
+        }
+
+        function seleccionarCuentaModalNet(correo, cliente) {
+            haptic();
+            const inputReno = document.getElementById('correo_reno_NETFLIX');
+            const inputNombre = document.getElementById('ventaNombre');
+            
+            if (inputReno) {
+                inputReno.value = correo;
+            }
+            if (inputNombre && inputNombre.value.trim() === "" && cliente !== "N/A") {
+                inputNombre.value = cliente;
+            }
+            
+            document.getElementById('modalRenovacionFlotante').classList.remove('open');
+        }
+
+        function filtrarModalRenovacionNet() {
+            const query = document.getElementById('buscadorModalReno').value.toLowerCase().trim();
+            const items = document.querySelectorAll('.item-reno-modal');
+            
+            items.forEach(item => {
+                const searchData = item.getAttribute('data-search');
+                if (searchData.includes(query)) {
+                    item.style.display = "";
+                } else {
+                    item.style.display = "none";
+                }
+            });
         }
 
         function formatearMontoEnVivoCOP(input) {
@@ -887,15 +1052,21 @@
                     
                     let numPantallas = document.getElementById(`pantallas_${idPlat}`) ? document.getElementById(`pantallas_${idPlat}`).value : "1";
                     let numMeses = document.getElementById(`meses_${idPlat}`) ? document.getElementById(`meses_${idPlat}`).value : "1";
-                    let elTipo = document.getElementById(`tipo_${idPlat}`) ? document.getElementById(`tipo_${idPlat}`).value : "Nueva";
+                   let elTipo = document.getElementById(`tipo_${idPlat}`) ? document.getElementById(`tipo_${idPlat}`).value : "Nueva";
                     
-                    let prefixSheets = elTipo === "Reno" ? "RENO: " : "";
-                    if (elTipo === "Reno") esR = true;
+                    // 🚨 Adaptación: Reno Manual o Historial cuentan como Renovación
+                    let esRenovacionActiva = (elTipo === "Reno (Manual)" || elTipo === "Reno (Historial)");
+                    let prefixSheets = esRenovacionActiva ? "RENO: " : "";
+                    if (esRenovacionActiva) esR = true;
                     
-                    if (idPlat === "NETFLIX" && elTipo === "Reno") {
+                    if (idPlat === "NETFLIX" && esRenovacionActiva) {
                         const inputReno = document.getElementById(`correo_reno_${idPlat}`);
                         if (inputReno && inputReno.value.trim() !== "") {
                             correoNetflixReno = inputReno.value.trim();
+                        } else {
+                            // Bloqueo de seguridad si le dio click a Enviar Venta sin haber tocado una tarjeta
+                            alert("⚠️ Error: Por favor toca una de las cuentas del historial para renovarla, o escríbela en modo Manual.");
+                            return; 
                         }
                     }
 
