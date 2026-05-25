@@ -290,7 +290,7 @@
 
                 <button type="submit" class="btn-ios btn-primary w-100 mt-1">Verificar Identidad</button>
             </form>
-            <a href="/" style="display: block; margin-top: 22px; color: var(--ios-blue); font-size: 0.85rem; text-decoration: none;">← Volver al Portal de Clientes</a>
+            <a href="index.html" style="display: block; margin-top: 22px; color: var(--ios-blue); font-size: 0.85rem; text-decoration: none;">← Volver al Portal de Clientes</a>
         </div>
     </div>
 
@@ -1305,7 +1305,14 @@
                 }
 
                 document.getElementById('inputFechaShift').valueAsDate = new Date();
-                forzarRefrescoDeHoras();
+                
+                // 🔥 Si ya cargó los turnos en segundo plano, los muestra de inmediato
+                if (window.currentHorasStock && window.currentHorasStock.length > 0) {
+                    renderizarHorasEnPantalla("");
+                    cargarHorasDesdeSheets(); // Actualiza de fondo por si hay cambios
+                } else {
+                    forzarRefrescoDeHoras(); // Fallback de carga tradicional
+                }
             }
         }
 
@@ -1829,22 +1836,30 @@ if (filtroBusqueda !== "") {
         }
 
         function toggleCodesPanel() {
-            haptic();
-            const overlay = document.getElementById('codesOverlay');
-            overlay.classList.toggle('open');
-            
-            if (overlay.classList.contains('open')) {
-                forzarRefrescoDeCodigos();
-                autoRefreshCodesInterval = setInterval(function() {
-                    cargarCodigosDesdeSheets(true);
-                }, 12000);
-            } else {
-                if (autoRefreshCodesInterval) {
-                    clearInterval(autoRefreshCodesInterval);
-                    autoRefreshCodesInterval = null;
-                }
-            }
+    haptic();
+    const overlay = document.getElementById('codesOverlay');
+    overlay.classList.toggle('open');
+    
+    if (overlay.classList.contains('open')) {
+        // 🔥 Si ya cargó en segundo plano, renderiza al instante sin poner "Sincronizando..."
+        if (window.currentCodesStock && window.currentCodesStock.length > 0) {
+            renderizarCodigosEnPantalla();
+            cargarCodigosDesdeGmail(true);
+        } else {
+            forzarRefrescoDeCodigos(); // Fallback si aún no ha recuperado datos
         }
+        
+        autoRefreshCodesInterval = setInterval(function() {
+            cargarCodigosDesdeGmail(true);
+        }, 12000);
+    } else {
+        // 🛑 Esto era lo que faltaba para apagar el reloj interno al cerrar el modal
+        if (autoRefreshCodesInterval) {
+            clearInterval(autoRefreshCodesInterval);
+            autoRefreshCodesInterval = null;
+        }
+    }
+}
 
         function togglePasswordModal() {
             haptic();
@@ -2201,6 +2216,10 @@ if (filtroBusqueda !== "") {
             renderGrid();
             startShiftTimer();
             iniciarControlInactividad();
+            
+            // 🔥 pre-carga silenciosa en segundo plano desde el segundo uno
+            cargarCodigosDesdeGmail(true);
+            cargarHorasDesdeSheets();       
         }
 
         function cerrarSesionStaff() {
