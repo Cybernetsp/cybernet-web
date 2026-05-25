@@ -407,17 +407,17 @@
                 <button class="btn-close-circle" onclick="toggleVentasPanel()">✕</button>
             </div>
             <div class="flex-col" style="overflow-y: auto; flex-grow: 1; padding: 5px;">
-                <form id="formGenerarVenta" class="flex-col" onsubmit="ejecutarCreacionVentaLocal(event)">
-                    
-                    <div class="flex-col" style="gap: 4px;">
-                        <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Nombre del Cliente (Opcional)</label>
-                        <input type="text" id="ventaNombre" class="input-ios" placeholder="Ej: Juan Pérez">
-                    </div>
+                <form id="formGenerarVenta" class="flex-col" onsubmit="ejecutarCreacionVentaLocal(event)" autocomplete="off">
+    
+    <div class="flex-col" style="gap: 4px;">
+        <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Nombre del Cliente (Opcional)</label>
+        <input type="text" id="ventaNombre" class="input-ios" placeholder="Ej: Juan Pérez" autocomplete="new-password" spellcheck="false">
+    </div>
 
-                    <div class="flex-col" style="gap: 4px;">
-                        <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Número de Teléfono (Obligatorio)</label>
-                        <input type="text" id="ventaTelefono" class="input-ios" placeholder="Ej: 3015156037" required>
-                    </div>
+    <div class="flex-col" style="gap: 4px;">
+        <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Número de Teléfono (Obligatorio)</label>
+        <input type="text" id="ventaTelefono" class="input-ios" placeholder="Ej: 3015156037" required autocomplete="new-password">
+    </div>
 
                     <div class="flex-col mb-1" style="gap: 6px;">
                         <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Selecciona las Plataformas adquiridas</label>
@@ -441,7 +441,7 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="btn-ios btn-success w-100">REGISTRAR VENTA</button>
+                    <button type="submit" class="btn-ios btn-success w-100">🚀 REGISTRAR VENTA</button>
                 </form>
             </div>
         </div>
