@@ -519,7 +519,7 @@
                 <button class="btn-close-circle" onclick="cerrarModalRenovacionNet()">✕</button>
             </div>
             <div class="mb-1" style="padding: 0 15px;">
-                <input type="text" id="buscadorModalReno" class="input-ios" placeholder="🔍 Buscar por correo o perfil..." oninput="filtrarModalRenovacionNet()">
+                <input type="text" id="buscadorModalReno" class="input-ios" placeholder="🔍 Buscar por correo, perfil o nombre..." oninput="filtrarModalRenovacionNet()">
             </div>
             <div class="flex-col" id="listaCuentasModalReno" style="overflow-y: auto; flex-grow: 1; padding: 0 15px 20px 15px; gap: 10px;">
                 </div>
@@ -888,7 +888,7 @@
                 div.style.padding = "15px";
                 div.style.cursor = "pointer";
                 div.style.background = "var(--glass-bg)";
-                div.setAttribute("data-search", cuenta.correo.toLowerCase() + " " + cuenta.perfil.toLowerCase());
+                div.setAttribute("data-search", cuenta.correo.toLowerCase() + " " + cuenta.perfil.toLowerCase() + " " + cuenta.cliente.toLowerCase());
                 
                 div.innerHTML = `
                     <div style="color: var(--text-primary); font-weight: 700; font-size: 1rem; margin-bottom: 6px;">
