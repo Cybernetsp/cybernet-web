@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cybernet-cache-v4';
+const CACHE_NAME = 'cybernet-cache-v5';
 const assets = ['./', 'index.html', 'logo.jpeg'];
 
 self.addEventListener('install', e => {
