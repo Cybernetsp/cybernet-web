@@ -792,7 +792,7 @@
             });
         }
 
-        // 🔥 MOTOR SÚPER RÁPIDO DE AUTO-SUGERENCIA (MODAL FLOTANTE)
+        // 🔥 MOTOR SÚPER RÁPIDO DE AUTO-SUGERENCIA (BÚSQUEDA SILENCIOSA)
         window.cuentasNetflixClienteActivo = [];
         let timeoutBusquedaNet = null;
 
@@ -819,17 +819,20 @@
                         optHistorial.style.display = "none";
                         window.cuentasNetflixClienteActivo = [];
                         
+                        // Si el operador cambia el número y estaba en el modal, lo devolvemos a "Nueva"
+                        if (inputTipo.value === "Reno (Historial)") {
+                            inputTipo.value = "Nueva";
+                            comprobarTipoVentaNetflix(inputTipo, 'NETFLIX');
+                        }
+                        
                         if (res && res.status === "success" && res.data.length > 0) {
                             let cuentasFiltradas = res.data.filter(cuenta => cuenta.correo.toLowerCase().endsWith("@cybernetsp.com"));
                             
                             if (cuentasFiltradas.length > 0) {
+                                // Solo avisa visualmente (verde) y habilita la opción, pero NO la abre automáticamente
                                 if (labelWrapper) labelWrapper.style.color = "var(--ios-green)";
-                                optHistorial.style.display = "block"; // Activa la opción "Reno (Elegir Cuenta)"
-                                window.cuentasNetflixClienteActivo = cuentasFiltradas; // Guardamos en memoria
-                                
-                                // Auto-selecciona la opción y dispara el Modal
-                                inputTipo.value = "Reno (Historial)";
-                                comprobarTipoVentaNetflix(inputTipo, 'NETFLIX');
+                                optHistorial.style.display = "block"; 
+                                window.cuentasNetflixClienteActivo = cuentasFiltradas; 
                             }
                         }
                     };
