@@ -91,8 +91,9 @@
                     </select>
                 </div>
 
-                <div id="wrapperProveedorManual" style="display: none; width: 100%;">
-                    <input type="text" id="loadProveedorManual" class="input-ios" placeholder="Escribe el nombre del nuevo proveedor">
+                <div id="wrapperProveedorManual" style="display: none; flex-direction: column; gap: 4px; width: 100%; margin-bottom: 12px;">
+                    <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold; color: var(--ios-orange);">Nombre del Nuevo Proveedor</label>
+                    <input type="text" id="loadProveedorManual" class="input-ios" placeholder="Escribe el nombre del nuevo proveedor..." style="margin-bottom: 0;">
                 </div>
 
                 <textarea id="loadCuentasBloque" class="input-ios" style="min-height: 200px; font-family: monospace;" placeholder="Pega aquí las cuentas o la factura completa del proveedor. Formatos aceptados:&#10;correo@gmail.com clave123&#10;correo@gmail.com:clave123&#10;Texto largo de Facturas / Invoices" required></textarea>
@@ -159,20 +160,18 @@
         }
 
         // =========================================================================
-        // 🧠 NUEVA FUNCIÓN: COPIADO SEGURO CON ANIMACIÓN DE ÉXITO VERDE iOS
+        // 🧠 FUNCIÓN: COPIADO SEGURO CON ANIMACIÓN DE ÉXITO VERDE iOS
         // =========================================================================
         function copiarTextoHistorial(btn, texto) {
             haptic();
             navigator.clipboard.writeText(texto).then(function() {
                 const originalHTML = btn.innerHTML;
                 
-                // Transición interactiva visual rápida
                 btn.innerHTML = '¡Copiado! ✓';
                 btn.style.background = 'var(--ios-green)';
                 btn.style.color = '#ffffff';
                 btn.style.borderColor = 'transparent';
                 
-                // Retorno de estado limpio al segundo
                 setTimeout(function() {
                     btn.innerHTML = originalHTML;
                     btn.style.background = '';
@@ -180,7 +179,6 @@
                     btn.style.borderColor = '';
                 }, 1200);
             }).catch(function() {
-                // Fallback clásico por si falla permisos de API portapapeles
                 const textarea = document.createElement('textarea');
                 textarea.value = texto;
                 document.body.appendChild(textarea);
@@ -191,7 +189,7 @@
         }
 
         // =========================================================================
-        // 外部 RENDERING: CONEXIÓN INTERNA CON LA INTERFAZ LOG
+        // RENDERING: CONEXIÓN INTERNA CON LA INTERFAZ LOG
         // =========================================================================
         function renderizarTarjetaHistorial(plataforma, proveedor, correo, clave) {
             const msgVacio = document.getElementById('msgHistorialVacio');
@@ -238,6 +236,26 @@
                 </div>
             `;
             cajaHistorial.insertBefore(tarjetaLog, cajaHistorial.firstChild);
+        }
+
+        // ==========================================
+        // 🔥 CORREGIDO: INTERCEPTOR INYECTOR PREMIUM PARA EL APARTADO MANUAL
+        // ==========================================
+        function comprobarProveedorDinamico() {
+            const selectProv = document.getElementById('loadProveedor').value;
+            const wrapperManual = document.getElementById('wrapperProveedorManual');
+            const inputManual = document.getElementById('loadProveedorManual');
+
+            if (selectProv === "OTRO") {
+                // Forzamos el renderizado Flex-column con prioridad de renderizado del navegador
+                wrapperManual.style.setProperty('display', 'flex', 'important');
+                inputManual.required = true;
+                inputManual.focus();
+            } else {
+                wrapperManual.style.setProperty('display', 'none', 'important');
+                inputManual.required = false;
+                inputManual.value = "";
+            }
         }
 
         // ==========================================
