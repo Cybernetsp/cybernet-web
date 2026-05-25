@@ -3,700 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cybernet Staff - Panel de Mensajes</title>
+    <title>Cybernet - Panel de Mensajes</title>
     
     <link rel="icon" type="image/jpeg" href="logo.jpeg">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Cybernet Staff">
+    <meta name="apple-mobile-web-app-title" content="Cybernet">
     
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="global.css">
 
     <style>
-        /* --- ESTILOS PRINCIPALES --- */
-        #globalHeader {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            padding-right: 90px !important;
-            display: flex !important;
-            align-items: center !important;
-            min-height: 65px !important;
-            box-sizing: border-box !important;
-            z-index: 9998 !important;
-            background-color: rgba(15, 15, 20, 0.85) !important;
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-        }
-
-        [data-theme="light"] #globalHeader {
-            background-color: rgba(245, 245, 247, 0.85) !important;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-        }
-
-        .header-search-container {
-            position: absolute !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            width: 45vw !important;
-            max-width: 600px !important;
-            min-width: 250px !important;
-            z-index: 10 !important;
-        }
-
-        .header-search-container .search-input {
-            width: 100% !important;
-            box-sizing: border-box !important;
+        /* Ajuste de la cabecera superior */
+        .global-header {
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 10px 15px;
         }
         
-        #controlPanel {
-            position: fixed !important;
-            top: 0 !important;
-            right: 0 !important;
-            width: 90px !important;
-            height: 100vh !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: center !important;
-            align-items: center !important;
-            background-color: rgba(15, 15, 20, 0.85) !important;
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
-            border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-            padding: 15px 5px !important;
-            gap: 8px !important;
-            box-sizing: border-box !important;
-            z-index: 9999 !important;
-            margin: 0 !important;
-            overflow-y: auto !important; 
-        }
-
-        [data-theme="light"] #controlPanel {
-            background-color: rgba(245, 245, 247, 0.85) !important;
-            border-left: 1px solid rgba(0, 0, 0, 0.1) !important;
-        }
-
-        #controlPanel::-webkit-scrollbar {
-            width: 0px;
-            background: transparent;
-        }
-
-        #controlPanel .interface-control-item {
-            background: transparent !important;
-            border: none !important;
-            border-radius: 10px !important;
-            color: var(--text-secondary) !important;
-            transition: all 0.2s ease !important;
-            padding: 8px 2px !important;
-            width: 100% !important;
-            height: auto !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: center !important;
-            align-items: center !important;
-            gap: 4px !important;
-            box-shadow: none !important;
-            cursor: pointer !important;
-            flex-shrink: 0 !important;
-        }
-
-        #controlPanel .interface-control-item:hover {
-            background: rgba(255, 255, 255, 0.08) !important;
-            color: var(--text-primary) !important;
-        }
-
-        [data-theme="light"] #controlPanel .interface-control-item:hover {
-            background: rgba(0, 0, 0, 0.08) !important;
-        }
-
-        #controlPanel .interface-control-item svg {
-            width: 20px !important;
-            height: 20px !important;
-            stroke-width: 1.8 !important;
-            margin: 0 !important;
-        }
-
-        #controlPanel .interface-control-item span {
-            font-size: 0.6rem !important;
-            font-weight: 500 !important;
-            letter-spacing: 0.2px !important;
-            text-align: center !important;
-            line-height: 1.1 !important;
-            word-break: break-word !important;
-        }
-
-        #mainWorkspace {
-            padding-top: 85px !important; 
-            padding-right: 90px !important;
-        }
-
-        .codes-overlay, .password-overlay, .login-overlay {
-            z-index: 10000 !important;
-        }
-
-        .shift-header-actions {
+        .header-search-container {
+            flex: 1;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 15px;
+            min-width: 300px;
+            overflow: hidden;
+        }
+
+        /* 🔄 CARRUSEL AUTOMÁTICO DE PLATAFORMAS (TICKER) */
+        .ticker-wrapper {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            /* Efecto de desvanecido en los bordes */
+            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        }
+        
+        .ticker-track {
+            display: flex;
+            gap: 10px;
+            width: max-content;
+            animation: tickerScroll 20s linear infinite;
+        }
+
+        /* Pausar si el usuario pone el cursor encima */
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes tickerScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* 📱 BARRA INFERIOR ESTILO iOS (TAB BAR) */
+        .ios-bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
             width: 100%;
-        }
-
-        .action-buttons-group {
+            background: rgba(20, 20, 22, 0.85);
+            backdrop-filter: blur(35px) saturate(200%);
+            -webkit-backdrop-filter: blur(35px) saturate(200%);
+            border-top: 0.5px solid rgba(255, 255, 255, 0.15);
             display: flex;
-            gap: 12px;
+            justify-content: center;
             align-items: center;
+            padding: 10px 15px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            z-index: 1000;
+            gap: 5px;
+            overflow-x: auto;
+            scrollbar-width: none;
         }
 
-        .add-shift-btn {
-            background: linear-gradient(135deg, #34c759 0%, #248a3d 100%) !important;
-            color: white !important;
-            border: none !important;
-            padding: 8px 18px !important;
-            border-radius: 20px !important;
-            font-size: 0.85rem !important;
-            font-weight: 600 !important;
-            cursor: pointer !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3) !important;
+        [data-theme="light"] .ios-bottom-bar {
+            background: rgba(255, 255, 255, 0.85);
+            border-top: 0.5px solid rgba(0, 0, 0, 0.1);
         }
 
-        .add-shift-btn:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px rgba(52, 199, 89, 0.4) !important;
-            filter: brightness(1.1);
+        .ios-bottom-bar::-webkit-scrollbar {
+            display: none;
         }
 
-        .btn-refresh-premium {
-            background: linear-gradient(135deg, rgba(10, 132, 255, 0.15) 0%, rgba(10, 132, 255, 0.05) 100%) !important;
-            border: 1px solid rgba(10, 132, 255, 0.4) !important;
-            color: var(--ios-blue) !important;
-            padding: 8px 18px !important;
-            border-radius: 20px !important;
-            font-size: 0.85rem !important;
-            font-weight: 600 !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-            cursor: pointer !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            backdrop-filter: blur(5px) !important;
-        }
-
-        .badge-garantias {
-            position: absolute !important;
-            top: 2px !important;
-            right: 12px !important;
-            background: var(--ios-red, #ff453a) !important;
-            color: white !important;
-            font-size: 0.65rem !important;
-            font-weight: 700 !important;
-            border-radius: 50% !important;
-            width: 16px !important;
-            height: 16px !important;
-            display: none; 
-            align-items: center !important;
-            justify-content: center !important;
-            box-shadow: 0 2px 8px rgba(255, 69, 58, 0.5) !important;
-            z-index: 50 !important;
-        }
-
-        .btn-refresh-premium:hover {
-            background: rgba(10, 132, 255, 0.25) !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.2) !important;
-        }
-
-        .btn-edit-shift {
+        .ios-tab-btn {
             background: transparent;
             border: none;
-            color: var(--ios-blue);
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            display: inline-flex;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            vertical-align: middle;
-            margin-left: 8px;
-        }
-
-        .btn-edit-shift:hover {
-            background: rgba(10, 132, 255, 0.15);
-            transform: scale(1.1);
-        }
-
-        .shift-form-container {
-            display: none;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        [data-theme="light"] .shift-form-container {
-            background: rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-        }
-
-        .shift-form-container.active {
-            display: flex;
-            animation: fadeInShift 0.3s ease forwards;
-        }
-
-        @keyframes fadeInShift {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .shift-form-container input, .shift-form-container select {
-            background: var(--glass-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-primary);
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            width: 100%;
-            box-sizing: border-box;
-            outline: none;
-        }
-
-        [data-theme="light"] .shift-form-container input, 
-        [data-theme="light"] .shift-form-container select {
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .btn-submit-shift {
-            background: var(--ios-blue);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 0.95rem;
-            cursor: pointer;
-            width: 100%;
-            transition: opacity 0.2s;
-        }
-
-        .btn-submit-shift:hover { opacity: 0.8; }
-        .btn-submit-shift:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        /* --- ESTILOS ADICIONALES PARA EL MÓDULO DE VENTAS --- */
-        /* --- REDISEÑO DE CONTENEDORES Y TARJETAS DE PLATAFORMAS ESTILO APPLE --- */
-        .sales-platform-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 14px;
-            margin-top: 5px;
-            max-height: 280px;
-            overflow-y: auto;
-            padding: 5px;
-        }
-
-        .sales-platform-grid::-webkit-scrollbar {
-            width: 5px;
-        }
-        .sales-platform-grid::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-        }
-
-        .platform-sale-row {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.4, 1);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
-        }
-
-        [data-theme="light"] .platform-sale-row {
-            background: rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .platform-sale-label-check {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1rem;
+            gap: 4px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.65rem;
             font-weight: 700;
-            color: var(--text-primary);
+            letter-spacing: 0.3px;
             cursor: pointer;
-            user-select: none;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            min-width: 65px;
         }
 
-        .platform-sale-label-check input {
-            accent-color: var(--ios-blue);
-            width: 18px !important;
-            height: 18px !important;
-            cursor: pointer;
-            border-radius: 6px;
+        .ios-tab-btn svg { width: 22px; height: 22px; stroke-width: 2; }
+        .ios-tab-btn:hover { color: var(--text-primary); background: rgba(255, 255, 255, 0.1); }
+        [data-theme="light"] .ios-tab-btn:hover { background: rgba(0, 0, 0, 0.05); }
+        .ios-tab-btn:active { transform: scale(0.9); }
+
+        /* Ajuste de margen inferior del Workspace */
+        .main-workspace { padding-bottom: 120px !important; }
+
+        /* ⬆️ ANIMACIÓN DE MODALES DESDE ABAJO HACIA EL CENTRO */
+        .sheet-ios {
+            position: relative;
+            right: auto !important; 
+            margin: auto;
+            height: 85vh; 
+            max-height: 750px;
+            width: 92%;
+            max-width: 550px; 
+            border-radius: 28px;
+            border: var(--glass-border) !important;
+            transform: translateY(100vh);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
         }
 
-        /* --- CORRECCIÓN DE VISIBILIDAD DE SELECTORES EN MODO OSCURO --- */
-        .platform-type-select {
-            background: rgba(118, 118, 128, 0.2);
-            border: none;
-            color: var(--text-primary);
-            padding: 10px 12px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            outline: none;
-            width: 100%;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        /* 🔥 ESTA REGLA OBLIGA A LA LISTA FLOTANTE A VERSE GRIS OSCURO CON LETRAS BLANCAS */
-        .platform-type-select option {
-            background-color: #2c2c2e !important;
-            color: #ffffff !important;
-        }
-
-        /* Ajuste automático si cambias al modo claro */
-        [data-theme="light"] .platform-type-select option {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-        }
-
-        .platform-type-select:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-        
-        .platform-type-select:focus {
-            background: rgba(118, 118, 128, 0.3);
-        }
-
-        [data-theme="light"] .platform-sale-row {
-            background: rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .platform-sale-label-check {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            cursor: pointer;
-        }
-
-        .platform-sale-label-check input {
-            width: 16px !important;
-            height: 16px !important;
-            cursor: pointer;
-        }
-
-        .platform-type-select {
-            background: var(--bg-secondary, #2c2c2e);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-primary);
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            outline: none;
-            width: 100%;
-            cursor: pointer;
-        }
-
-        [data-theme="light"] .platform-type-select {
-            background: #ffffff;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .platform-type-select:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
+        .overlay-ios.open .sheet-ios {
+            transform: translateY(0);
         }
 
         @media (max-width: 768px) {
-            #globalHeader {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                padding: 12px 85px 12px 15px !important;
-                gap: 12px !important;
-                min-height: auto !important;
-            }
-            .header-search-container {
-                position: relative !important;
-                left: auto !important;
-                transform: none !important;
-                width: 100% !important;
-                min-width: 100% !important;
-            }
-            .top-left-status {
-                width: 100% !important;
-                display: flex !important;
-                flex-wrap: wrap !important;
-                gap: 10px !important;
-            }
-            #controlPanel {
-                width: 75px !important;
-                padding: 10px 2px !important;
-                gap: 6px !important;
-            }
-            #mainWorkspace {
-                padding-top: 130px !important; 
-                padding-right: 75px !important;
-            }
-            #controlPanel .interface-control-item {
-                padding: 6px 1px !important;
-                gap: 2px !important;
-            }
-            #controlPanel .interface-control-item span {
-                font-size: 0.55rem !important;
-            }
-            #controlPanel .interface-control-item svg {
-                width: 18px !important;
-                height: 18px !important;
-            }
-            .shift-header-actions {
-                flex-direction: column;
-                align-items: flex-start !important;
-                gap: 12px;
-            }
-            .action-buttons-group {
-                width: 100%;
-                justify-content: flex-start;
-                flex-wrap: wrap;
-            }
-            .sales-platform-grid {
-                grid-template-columns: 1fr;
-            }
+            .header-search-container { width: 100%; order: 3; }
+            .ios-bottom-bar { justify-content: flex-start; }
+            .sheet-ios { width: 100%; height: 95vh; max-height: none; border-radius: 28px 28px 0 0; align-self: flex-end;}
+        }
+        /* 📉 Reducir y compactar la tarjeta de pagos/QR */
+        #header-container .card-ios {
+            max-width: 320px !important; /* Más esbelta */
+            padding: 14px 20px !important;
+        }
+        #header-container img {
+            max-width: 140px !important; /* QR más pequeño y estético */
+        }
+        #header-container .card-title {
+            font-size: 0.95rem;
+        }
+
+        /* 📋 Arreglar los botones amontonados del modal de venta registrada */
+        #ventaGeneradaModalOverlay .modal-ios {
+            max-width: 440px;
+            padding: 22px;
+        }
+        
+        /* Forzar a que todos los botones dentro de este modal tengan espacios limpios */
+        #ventaGeneradaModalOverlay .btn-ios {
+            margin-top: 8px !important;
+            padding: 12px;
+            font-size: 0.88rem;
+            border-radius: 12px;
+            width: 100%;
+            display: block;
+        }
+        
+        /* Darle un color naranja/morado de advertencia al botón dinámico de saldo mayorista */
+        #btnCopiarSaldoRevendedor {
+            background: linear-gradient(135deg, #ff9500 0%, #ff5e00 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.2) !important;
         }
     </style>
 </head>
 <body>
 
-    <div class="bg-orb-1"></div>
-    <div class="bg-orb-2"></div>
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
     
-
     <header class="global-header" id="globalHeader" style="display: none;">
-        
-        <div class="top-left-status" id="staffStatusBar">
-            <div class="staff-badge">
+        <div class="flex-row" id="staffStatusBar">
+            <div class="badge-ios badge-blue">
                 <span id="staffSessionName">USER</span> • PORTAL DE MENSAJES
             </div>
-            <div class="timer-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;">
+            <div class="badge-ios badge-green">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
                 <span id="shiftTimer">00:00:00</span>
             </div>
-            
         </div>
-        
 
-        <div class="header-search-container" style="display: flex; align-items: center; gap: 20px; width: 100%; justify-content: space-between;">
-
-    <input type="text" id="searchInput" class="search-input" placeholder="Buscar respuesta rápida..." style="flex: 1; max-width: 350px;">
-    
-    <style>
-        .ticker-container {
-            flex: 2; 
-            min-width: 0; 
-            display: flex; 
-            align-items: center; 
-            background: transparent; 
-            padding-left: 20px;
-            border-left: 1px solid rgba(255, 255, 255, 0.1); 
-        }
-
-        .ticker-wrap {
-            position: relative;
-            display: flex;
-            align-items: center;
-            width: 100%;
-            overflow: hidden;
-            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-            mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-        }
-        
-        .ticker-track {
-            display: flex;
-            gap: 15px;
-            white-space: nowrap;
-            animation: tickerScroll 25s linear infinite;
-        }
-        
-        .ticker-track:hover {
-            animation-play-state: paused; 
-        }
-
-        @keyframes tickerScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); } 
-        }
-        
-        .btn-dot-recarga {
-            width: 10px; height: 10px; border-radius: 50%; 
-            background: var(--ios-red, #ff3b30); box-shadow: 0 0 10px var(--ios-red, #ff3b30); 
-            margin-right: 15px; cursor: pointer; flex-shrink: 0;
-            transition: background 0.3s;
-        }
-    </style>
-
-    <div class="ticker-container">
-        <div id="dotLibres" class="btn-dot-recarga" onclick="actualizarPerfilesLibres(true)" title="Toca para forzar recarga manual"></div>
-        
-        <div class="ticker-wrap">
-            <div id="contenedorPlataformasLibres" class="ticker-track">
-                <span style="font-size: 0.85rem; color: var(--text-secondary, #a1a1a6);">Sincronizando inventario...</span>
+        <div class="header-search-container">
+            <input type="text" id="searchInput" class="input-ios" style="margin-bottom: 0; max-width: 250px;" placeholder="Buscar respuesta...">
+            
+            <div class="ticker-wrapper">
+                <div id="contenedorPlataformasLibres" class="ticker-track"></div>
             </div>
-        </div>
-    </div>
-
-</div>
-        
-        
-
-        <div class="control-container" id="controlPanel">
-            
-
-            <button class="interface-control-item" id="btnCajaFinanzas" onclick="window.location.href='finanzas.html'" style="color: var(--ios-green) !important; display: none;">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
-        <line x1="12" y1="1" x2="12" y2="23"></line>
-        <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path>
-        
-    </svg>
-    <span>CAJA</span>
-</button>
-            
-            <button class="interface-control-item" onclick="toggleCodesPanel()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 12h-6l-2 3h-4l-2-3H2"></path>
-                    <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
-                </svg>
-                <span>CÓDIGOS</span>
-            </button>
-
-            <button class="interface-control-item" onclick="toggleVentasPanel()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg>
-                <span>VENTAS</span>
-            </button>
-            
-            <button class="interface-control-item" onclick="window.location.href='cargar.html'" style="color: var(--ios-green) !important;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <span>+CARGAR</span>
-            </button>
-
-            <button class="interface-control-item" onclick="toggleShiftsPanel()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span>TURNOS</span>
-            </button>
-
-            <button class="interface-control-item" onclick="toggleSearchAccountPanel()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
-                    <polyline points="17 2 12 7 7 2"></polyline>
-                </svg>
-                <span>CUENTAS</span>
-            </button>
-
-            <button class="interface-control-item" onclick="window.location.href='revendedor.html'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                <span>REVENDEDORES</span>
-            </button>
-
-            <button class="interface-control-item" onclick="window.location.href='garantia.html'" style="position: relative !important;">
-                <div id="badgeGarantiasCount" class="badge-garantias">0</div>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    <polyline points="9 12 11 14 15 10"></polyline>
-                </svg>
-                <span>GARANTÍA</span>
-            </button>
-
-            <button class="interface-control-item" onclick="window.location.href='recordatorios.html'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                </svg>
-                <span>RECORDATORIO</span>
-            </button>
-
-            <button class="interface-control-item" onclick="window.location.href='promo.html'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                </svg>
-                <span>PROMO</span>
-            </button>
-
-            
-
-            <button class="interface-control-item" onclick="toggleTheme()" id="theme-toggle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3"></line>
-                    <line x1="12" y1="21" x2="12" y2="23"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                    <line x1="1" y1="12" x2="3" y2="12"></line>
-                    <line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-                <span>TEMA</span>
-            </button>
-
-            <button class="interface-control-item" onclick="cerrarSesionStaff()" style="color: var(--ios-red) !important;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2 2V5a2 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                <span>SALIR</span>
-            </button>
-            
         </div>
     </header>
 
-    <div class="codes-overlay" id="searchAccountOverlay" onclick="toggleSearchAccountPanel()">
-        <div class="codes-sheet" onclick="event.stopPropagation()">
+    <nav class="ios-bottom-bar" id="controlPanel" style="display: none;">
+        <button class="ios-tab-btn" onclick="window.location.href='finanzas.html'" id="btnCajaFinanzas" style="display: none; color: var(--ios-green);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path></svg>
+            CAJA
+        </button>
+
+        <button class="ios-tab-btn" onclick="toggleCodesPanel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+            CÓDIGOS
+        </button>
+
+        <button class="ios-tab-btn" onclick="toggleVentasPanel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            VENTAS
+        </button>
+
+        <button class="ios-tab-btn" onclick="window.location.href='cargar.html'" style="color: var(--ios-green);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            CARGAR
+        </button>
+
+        <button class="ios-tab-btn" onclick="toggleShiftsPanel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            TURNOS
+        </button>
+
+        <button class="ios-tab-btn" onclick="toggleSearchAccountPanel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+            CUENTAS
+        </button>
+
+        <button class="ios-tab-btn" onclick="window.location.href='revendedor.html'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            DISTRIS
+        </button>
+
+        <button class="ios-tab-btn" onclick="window.location.href='garantia.html'" style="position: relative;">
+            <div id="badgeGarantiasCount" style="display:none; position:absolute; top:-2px; right:5px; background:var(--ios-red); color:white; font-size:0.6rem; border-radius:50%; width:14px; height:14px; align-items:center; justify-content:center;">0</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+            GARANTÍA
+        </button>
+
+        <button class="ios-tab-btn" onclick="window.location.href='promo.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+    </svg>
+    PROMO
+</button>
+
+        <button class="ios-tab-btn" onclick="window.location.href='recordatorios.html'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            RECORDAR
+        </button>
+
+        <button class="ios-tab-btn" onclick="cerrarSesionStaff()" style="color: var(--ios-red);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2 2V5a2 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            SALIR
+        </button>
+    </nav>
+
+    <main class="main-workspace" id="mainWorkspace" style="display: none;">
+        <div id="header-container" class="flex-row-between w-100 mb-1" style="justify-content: center;"></div>
+        <div id="grid-container" class="grid-cards"></div>
+    </main>
+
+    <div class="overlay-ios" id="loginOverlay">
+        <div class="modal-ios">
+            <div style="color: var(--ios-blue); margin-bottom: 12px; display: flex; justify-content: center;">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <h2 class="card-title text-center mb-1" style="justify-content: center;">Cybernet</h2>
+            <p class="text-secondary mb-1">Introduce tus credenciales autorizadas.</p>
+            <div id="error-login-toast" class="badge-ios badge-danger mb-1" style="display: none;"></div>
+
+            <form id="loginForm" class="flex-col" onsubmit="validateStaffAccess(event)">
+                <input type="text" id="staffUser" class="input-ios" placeholder="Nombre de Usuario" required autocomplete="username" spellcheck="false">
+                <input type="password" id="staffPass" class="input-ios" placeholder="Contraseña Especial" required autocomplete="current-password">
+                
+                <input type="checkbox" id="rememberMe" style="display: none;">
+
+                <button type="submit" class="btn-ios btn-primary w-100 mt-1">Verificar Identidad</button>
+            </form>
+            <a href="index.html" style="display: block; margin-top: 22px; color: var(--ios-blue); font-size: 0.85rem; text-decoration: none;">← Volver al Portal de Clientes</a>
+        </div>
+    </div>
+
+    <div class="overlay-ios" id="passwordOverlay">
+        <div class="modal-ios" onclick="event.stopPropagation()">
+            <h3 id="passwordModalTitle" style="color: var(--ios-red); margin-bottom: 10px;">⚠️ Actualización Obligatoria</h3>
+            <p id="passwordModalDesc" class="text-secondary mb-1">Por seguridad y políticas del sistema, debes cambiar tu contraseña predeterminada para poder ingresar al panel operativo.</p>
+            <form id="passwordForm" class="flex-col" onsubmit="ejecutarCambioClaveForzado(event)">
+                <input type="password" id="oldPasswordForzado" class="input-ios" placeholder="Contraseña Actual" style="display:none;" required>
+                <input type="password" id="newPasswordForzado" class="input-ios" placeholder="Escribe tu nueva clave" required>
+                <input type="password" id="confirmNewPasswordForzado" class="input-ios" placeholder="Confirma tu nueva clave" required>
+                
+                <button type="submit" id="btnSubmitPasswordForzado" class="btn-ios btn-primary w-100 mt-1">Guardar y Entrar al Sistema</button>
+                <button type="button" id="btnCancelPasswordForzado" class="btn-ios btn-secondary w-100 mt-1" onclick="cancelarCambioYSalir()">Cancelar y Salir</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="overlay-ios" id="searchAccountOverlay" onclick="toggleSearchAccountPanel()">
+        <div class="sheet-ios" onclick="event.stopPropagation()">
             <div class="sheet-header">
-                <h3>Buscar Cuenta Cliente</h3>
-                <button class="btn-close-sheet" onclick="toggleSearchAccountPanel()">✕</button>
+                <h3 class="card-title">Buscar Cuenta Cliente</h3>
+                <button class="btn-close-circle" onclick="toggleSearchAccountPanel()">✕</button>
             </div>
-            <div class="search-container" style="max-width: 100%; margin-bottom: 20px; display:flex; gap:10px;">
-                <input type="text" id="inputSearchAccount" class="search-input" placeholder="📱 Celular o Nombre..." onkeypress="if(event.key === 'Enter') ejecutarBusquedaCuentas()">
-                <button class="btn-refresh-action" style="padding: 0 15px;" onclick="ejecutarBusquedaCuentas()">Buscar</button>
+            <div class="flex-row mb-1">
+                <input type="text" id="inputSearchAccount" class="input-ios" style="margin-bottom:0;" placeholder="📱 Celular o Nombre..." onkeypress="if(event.key === 'Enter') ejecutarBusquedaCuentas()">
+                <button class="btn-ios btn-primary" onclick="ejecutarBusquedaCuentas()">Buscar</button>
             </div>
-            <div class="codes-scroll-area" id="searchAccountScrollArea">
+            <div class="flex-col" id="searchAccountScrollArea" style="overflow-y: auto; flex-grow: 1;">
                 <div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">
                     Escribe el número de celular o nombre del cliente y presiona Buscar. El sistema escaneará el inventario completo.
                 </div>
@@ -704,208 +327,173 @@
         </div>
     </div>
 
-    <div class="codes-overlay" id="shiftsOverlay" onclick="toggleShiftsPanel()">
-        <div class="codes-sheet" onclick="event.stopPropagation()">
-            
-            <div class="sheet-header shift-header-actions">
-                <h3>Registro de Turnos</h3>
-                <div class="action-buttons-group">
-                    <button class="add-shift-btn" id="btnToggleFormShift" onclick="toggleFormularioHoras()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Agregar
-                    </button>
-                    <button class="btn-refresh-premium" onclick="forzarRefrescoDeHoras()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                        Refrescar
-                    </button>
-                    <button class="btn-close-sheet" onclick="toggleShiftsPanel()" style="margin-left: 5px;">✕</button>
+    <div class="overlay-ios" id="codesOverlay" onclick="toggleCodesPanel()">
+        <div class="sheet-ios" onclick="event.stopPropagation()">
+            <div class="sheet-header">
+                <h3 class="card-title">Bandeja de Códigos</h3>
+                <div class="flex-row">
+                    <button class="btn-ios btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="forzarRefrescoDeCodigos()">Refrescar</button>
+                    <button class="btn-close-circle" onclick="toggleCodesPanel()">✕</button>
                 </div>
             </div>
-
-            <div class="shift-form-container" id="formularioIngresoHoras">
-                <h4 style="margin:0; color:var(--text-primary); font-size:0.95rem;">Manual: Agregar Horas Extras</h4>
-                <div style="display:flex; gap:10px; flex-wrap: wrap;">
-                    <input type="text" id="inputVendedorShift" placeholder="Vendedor (Ej: CAMILO)" style="flex:1; min-width: 120px;" disabled>
-                    <input type="text" id="inputHorasShift" placeholder="Horas (Ej: 04:30:00)" style="flex:1; min-width: 120px;">
-                    <input type="date" id="inputFechaShift" style="flex:1; min-width: 120px;">
-                </div>
-                <button class="btn-submit-shift" id="btnGuardarShiftManual" onclick="ejecutarGuardadoHorasManual()">Guardar Horas en Sheets</button>
+            <div class="mb-1">
+                <input type="text" id="searchCodesInput" class="input-ios" placeholder="🔍 Buscar por asunto o etiqueta..." oninput="filtrarCodigosInternos()">
             </div>
-
-            <div class="search-container" style="max-width: 100%; margin-bottom: 20px;">
-                <input type="text" id="searchShiftsInput" class="search-input" placeholder="🔍 Buscar por vendedor o fecha..." oninput="filtrarHorasInternas()">
-            </div>
-            
-            <div class="codes-scroll-area" id="shiftsScrollArea"></div>
+            <div class="flex-col" id="codesScrollArea" style="overflow-y: auto; flex-grow: 1;"></div>
         </div>
     </div>
 
-    <div class="password-overlay" id="editShiftModalOverlay">
-        <div class="password-card" onclick="event.stopPropagation()">
-            <h3 id="editShiftModalTitle" style="color:var(--text-primary); font-size:1.3rem;">✏️ Editar Horas</h3>
-            <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:15px;">Modifica el tiempo trabajado para este turno. El sistema borrará los registros antiguos de este día y guardará este nuevo tiempo.</p>
-            <form id="editShiftForm" onsubmit="ejecutarEdicionHoras(event)">
+    <div class="overlay-ios" id="shiftsOverlay" onclick="toggleShiftsPanel()">
+        <div class="sheet-ios" onclick="event.stopPropagation()">
+            <div class="sheet-header">
+                <h3 class="card-title">Registro de Turnos</h3>
+                <div class="flex-row">
+                    <button class="btn-ios btn-success" id="btnToggleFormShift" style="padding: 6px 12px; font-size: 0.8rem;" onclick="toggleFormularioHoras()">+ Agregar</button>
+                    <button class="btn-ios btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="forzarRefrescoDeHoras()">Refrescar</button>
+                    <button class="btn-close-circle" onclick="toggleShiftsPanel()">✕</button>
+                </div>
+            </div>
+
+            <div id="formularioIngresoHoras" class="card-ios mb-1" style="display: none; padding: 15px;">
+                <h4 style="margin:0 0 10px 0; color:var(--text-primary); font-size:0.95rem;">Manual: Agregar Horas Extras</h4>
+                <div class="flex-row flex-row-mobile-col mb-1">
+                    <input type="text" id="inputVendedorShift" class="input-ios" placeholder="Vendedor (Ej: CAMILO)" disabled>
+                    <input type="text" id="inputHorasShift" class="input-ios" placeholder="Horas (Ej: 04:30:00)">
+                    <input type="date" id="inputFechaShift" class="input-ios">
+                </div>
+                <button class="btn-ios btn-primary w-100" id="btnGuardarShiftManual" onclick="ejecutarGuardadoHorasManual()">Guardar Horas en Sheets</button>
+            </div>
+
+            <div class="mb-1">
+                <input type="text" id="searchShiftsInput" class="input-ios" placeholder="🔍 Buscar por vendedor o fecha..." oninput="filtrarHorasInternas()">
+            </div>
+            
+            <div class="flex-col" id="shiftsScrollArea" style="overflow-y: auto; flex-grow: 1;"></div>
+        </div>
+    </div>
+
+    <div class="overlay-ios" id="editShiftModalOverlay">
+        <div class="modal-ios" onclick="event.stopPropagation()">
+            <h3 id="editShiftModalTitle" class="card-title mb-1" style="justify-content: center; gap: 8px;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--ios-blue);"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+    Editar Horas
+</h3>
+            <p class="text-secondary mb-1">Modifica el tiempo trabajado para este turno. El sistema borrará los registros antiguos de este día y guardará este nuevo tiempo.</p>
+            <form id="editShiftForm" class="flex-col" onsubmit="ejecutarEdicionHoras(event)">
                 <input type="hidden" id="editShiftFilas">
                 <input type="hidden" id="editShiftVendedor">
                 <input type="hidden" id="editShiftFechaReal">
                 
-                <div style="margin-bottom:10px;">
-                    <label style="font-size:0.8rem; color:var(--text-secondary); font-weight:bold; margin-bottom:5px; display:block;">Vendedor y Día</label>
-                    <input type="text" id="editShiftDisplayInfo" class="ios-input-block" disabled style="opacity:0.7; background:var(--glass-bg);">
+                <div class="flex-col" style="text-align: left; gap: 4px;">
+                    <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Vendedor y Día</label>
+                    <input type="text" id="editShiftDisplayInfo" class="input-ios" disabled style="opacity: 0.7;">
                 </div>
                 
-                <div style="margin-bottom:20px;">
-                    <label style="font-size:0.8rem; color:var(--text-secondary); font-weight:bold; margin-bottom:5px; display:block;">Nuevo Tiempo (HH:MM:SS)</label>
-                    <input type="text" id="editShiftInputHoras" class="ios-input-block" placeholder="Ejemplo: 05:30:00" required>
+                <div class="flex-col mb-1" style="text-align: left; gap: 4px;">
+                    <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Nuevo Tiempo (HH:MM:SS)</label>
+                    <input type="text" id="editShiftInputHoras" class="input-ios" placeholder="Ejemplo: 05:30:00" required>
                 </div>
                 
-                <button type="submit" id="btnSubmitEditShift" class="btn-login-action" style="background:var(--ios-blue); box-shadow:0 4px 15px rgba(10,132,255,0.35);">Guardar Nueva Hora</button>
-                <button type="button" class="btn-login-action" style="background:rgba(118, 118, 128, 0.2); color:var(--text-primary); box-shadow:none; margin-top: 10px;" onclick="cerrarEdicionHoras()">Cancelar</button>
+                <button type="submit" id="btnSubmitEditShift" class="btn-ios btn-primary w-100">Guardar Nueva Hora</button>
+                <button type="button" class="btn-ios btn-secondary w-100 mt-1" onclick="cerrarEdicionHoras()">Cancelar</button>
             </form>
         </div>
     </div>
 
-    <div class="codes-overlay" id="codesOverlay" onclick="toggleCodesPanel()">
-        <div class="codes-sheet" onclick="event.stopPropagation()">
+    <div class="overlay-ios" id="ventasOverlay">
+        <div class="sheet-ios" onclick="event.stopPropagation()">
             <div class="sheet-header">
-                <h3>Bandeja de Códigos</h3>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <button class="btn-refresh-action" onclick="forzarRefrescoDeCodigos()">🔄 Refrescar</button>
-                    <button class="btn-close-sheet" onclick="toggleCodesPanel()">✕</button>
-                </div>
+                <h3 class="card-title">Generar Nueva Venta</h3>
+                <button class="btn-close-circle" onclick="toggleVentasPanel()">✕</button>
             </div>
-            <div class="search-container" style="max-width: 100%; margin-bottom: 20px;">
-                <input type="text" id="searchCodesInput" class="search-input" placeholder="🔍 Buscar por asunto o etiqueta..." oninput="filtrarCodigosInternos()">
-            </div>
-            <div class="codes-scroll-area" id="codesScrollArea">
-                </div>
-        </div>
-    </div>
-
-    <div class="codes-overlay" id="ventasOverlay">
-        <div class="codes-sheet" onclick="event.stopPropagation()">
-            <div class="sheet-header">
-                <h3>Generar Nueva Venta</h3>
-                <button class="btn-close-sheet" onclick="toggleVentasPanel()">✕</button>
-            </div>
-            <div class="codes-scroll-area" style="padding: 10px 5px;">
-                <form id="formGenerarVenta" onsubmit="ejecutarCreacionVentaLocal(event)">
+            <div class="flex-col" style="overflow-y: auto; flex-grow: 1; padding: 5px;">
+                <form id="formGenerarVenta" class="flex-col" onsubmit="ejecutarCreacionVentaLocal(event)">
                     
-                    <div style="margin-bottom: 12px;">
-                        <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: bold; margin-bottom: 5px; display: block;">Nombre del Cliente (Opcional)</label>
-                        <input type="text" id="ventaNombre" class="ios-input-block" placeholder="Ej: Juan Pérez">
+                    <div class="flex-col" style="gap: 4px;">
+                        <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Nombre del Cliente (Opcional)</label>
+                        <input type="text" id="ventaNombre" class="input-ios" placeholder="Ej: Juan Pérez">
                     </div>
 
-                    <div style="margin-bottom: 12px;">
-                        <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: bold; margin-bottom: 5px; display: block;">Número de Teléfono (Obligatorio)</label>
-                        <input type="text" id="ventaTelefono" class="ios-input-block" placeholder="Ej: 3015156037" required>
+                    <div class="flex-col" style="gap: 4px;">
+                        <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Número de Teléfono (Obligatorio)</label>
+                        <input type="text" id="ventaTelefono" class="input-ios" placeholder="Ej: 3015156037" required>
                     </div>
 
-                    <div style="margin-bottom: 15px;">
-                        <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: bold; margin-bottom: 6px; display: block;">Selecciona las Plataformas adquiridas</label>
-                        
-                        <input type="text" id="buscarPlataformaVenta" class="search-input" style="margin-bottom: 12px; background: var(--bg-secondary, #2c2c2e); border: 1px solid rgba(255,255,255,0.1); padding: 12px 15px; border-radius: 12px; width: 100%; box-sizing: border-box; outline: none; color: var(--text-primary);" placeholder="🔍 Buscar plataforma..." oninput="filtrarPlataformasVenta()">
-                        
-                        <div class="sales-platform-grid" id="contenedorPlataformasVenta">
-                            </div>
+                    <div class="flex-col mb-1" style="gap: 6px;">
+                        <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Selecciona las Plataformas adquiridas</label>
+                        <input type="text" id="buscarPlataformaVenta" class="input-ios" placeholder="🔍 Buscar plataforma..." oninput="filtrarPlataformasVenta()">
+                        <div class="grid-cards" id="contenedorPlataformasVenta" style="grid-template-columns: 1fr; max-height: 280px; overflow-y: auto;"></div>
                     </div>
 
-                    <div style="margin-bottom: 12px;">
-                        <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: bold; margin-bottom: 5px; display: block;">Cantidad que pagó ($ CO)</label>
-                        <input type="text" id="ventaCantidad" class="ios-input-block" placeholder="Ej: $20.000" oninput="formatearMontoEnVivoCOP(this)" required>
+                    <div class="flex-col" style="gap: 4px;">
+                        <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Cantidad que pagó ($ CO)</label>
+                        <input type="text" id="ventaCantidad" class="input-ios" placeholder="Ej: $20.000" oninput="formatearMontoEnVivoCOP(this)" required>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px; margin-bottom: 20px; width: 100%; clear: both;">
-                <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Banco / Entidad de Pago</label>
-                <select id="ventaBanco" class="ios-input-block" style="width: 100%; margin-bottom: 0; color: #ffffff;" onchange="ajustarInterfazPorMetodoPago()" required>
-                    <option value="" disabled selected style="color: #999999; background-color: #ffffff;">Seleccione cuenta de recepción</option>
-                    <option value="Nequi" style="color: #000000; background-color: #ffffff;">Nequi</option>
-                    <option value="Bre-B" style="color: #000000; background-color: #ffffff;">Bre-B</option>
-                    <option value="Ahorros Bancolombia" style="color: #000000; background-color: #ffffff;">Ahorros Bancolombia</option>
-                    <option value="Saldo Distribuidor" style="color: #000000; background-color: #ffffff;">Saldo Distribuidor</option>
-                </select>
-            </div>
+                    <div class="flex-col mb-1" style="gap: 4px;">
+                        <label class="text-secondary" style="font-size: 0.8rem; font-weight: bold;">Banco / Entidad de Pago</label>
+                        <select id="ventaBanco" class="input-ios" onchange="ajustarInterfazPorMetodoPago()" required>
+                            <option value="" disabled selected>Seleccione cuenta de recepción</option>
+                            <option value="Nequi">Nequi</option>
+                            <option value="Bre-B">Bre-B</option>
+                            <option value="Ahorros Bancolombia">Ahorros Bancolombia</option>
+                            <option value="Saldo Distribuidor">Saldo Distribuidor</option>
+                        </select>
+                    </div>
 
-                    <button type="submit" class="btn-login-action" style="background: var(--ios-green); box-shadow: 0 4px 15px rgba(48, 209, 88, 0.35); font-weight: bold;">
-                        🚀 REGISTRAR VENTA
-                    </button>
+                    <button type="submit" class="btn-ios btn-success w-100">🚀 REGISTRAR VENTA</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <div class="password-overlay" id="ventaGeneradaModalOverlay">
-        <div class="password-card" onclick="event.stopPropagation()" style="max-width: 440px; width: 92%;">
-            <h3 style="color: var(--ios-green); font-size: 1.4rem; text-align: center; margin-bottom: 8px;">✅ Venta Registrada</h3>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; margin-bottom: 20px;">La transacción ha sido empaquetada. Copia la ficha resumen para entregarla:</p>
-            
-            <textarea id="outputTextoVentaFicha" style="width: 100%; min-height: 160px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: #ffffff; padding: 12px; border-radius: 12px; font-family: monospace; font-size: 0.85rem; line-height: 1.4; outline: none; margin-bottom: 20px; resize: none;" readonly></textarea>
-            
-            <button id="btnCopiarFichaVenta" class="btn-login-action" style="background: var(--ios-blue); box-shadow:0 4px 15px rgba(10,132,255,0.35);" onclick="copiarTextoFichaVentaDefinitiva()">
-                📋 COPIAR DATOS DE LA FICHA
+    <div class="overlay-ios" id="ventaGeneradaModalOverlay">
+        <div class="modal-ios">
+            <div style="color: var(--ios-green); margin-bottom: 12px; display: flex; justify-content: center;">
+                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <div style="color: var(--ios-green); margin-bottom: 10px; display: flex; justify-content: center;">
+    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+</div>
+<h3 class="card-title" style="color: var(--ios-green); justify-content: center; margin-bottom: 4px;">Venta Registrada</h3>
+<p class="text-secondary mb-1" style="font-size: 0.88rem;">Copia la ficha resumen para entregarla al cliente:</p>
+
+<textarea id="outputTextoVentaFicha" class="input-ios" style="min-height: 160px; font-family: monospace; font-size: 0.85rem;" readonly></textarea>
+
+<button id="btnCopiarFichaVenta" class="btn-ios btn-primary w-100 mt-1" style="gap: 8px;" onclick="copiarTextoFichaVentaDefinitiva()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    Copiar Datos de la Ficha
+</button>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copiar Datos de la Ficha
             </button>
             
-            <button id="btnCopiarSaldoRevendedor" class="btn-login-action" style="background: linear-gradient(135deg, #ff9500 0%, #ff5e00 100%); color: white; box-shadow:0 4px 15px rgba(255,149,0,0.35); margin-top: 10px; display: none;" onclick="copiarTextoSaldoRevendedorDefinitiva()">
-                💵 COPIAR REPORTE DE SALDO
+            <button id="btnCopiarSaldoRevendedor" class="btn-ios w-100 mt-1" style="background: linear-gradient(135deg, #ff9500 0%, #ff5e00 100%); color: white; display: none;" onclick="copiarTextoSaldoRevendedorDefinitiva()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                Copiar Reporte de Saldo
             </button>
             
-            <button type="button" class="btn-login-action" style="background:rgba(118, 118, 128, 0.2); color:var(--text-primary); box-shadow:none; margin-top: 10px;" onclick="cerrarModalVentaGenerada()">
+            <button type="button" class="btn-ios btn-secondary w-100 mt-1" onclick="cerrarModalVentaGenerada()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
                 Cerrar Ventana
             </button>
         </div>
     </div>
 
-    <div class="password-overlay" id="passwordOverlay">
-        <div class="password-card" onclick="event.stopPropagation()">
-            <h3 id="passwordModalTitle">⚠️ Actualización Obligatoria</h3>
-            <p id="passwordModalDesc">Por seguridad y políticas del sistema, debes cambiar tu contraseña predeterminada para poder ingresar al panel operativo.</p>
-            <form id="passwordForm" onsubmit="ejecutarCambioClaveForzado(event)">
-                <input type="password" id="oldPasswordForzado" class="ios-input-block" placeholder="Contraseña Actual" style="display:none;" required>
-                <input type="password" id="newPasswordForzado" class="ios-input-block" placeholder="Escribe tu nueva clave" required>
-                <input type="password" id="confirmNewPasswordForzado" class="ios-input-block" placeholder="Confirma tu nueva clave" required>
-                
-                <button type="submit" id="btnSubmitPasswordForzado" class="btn-login-action" style="background:var(--ai-gradient); box-shadow:0 4px 15px rgba(10,132,255,0.35);">Guardar y Entrar al Sistema</button>
-                <button type="button" id="btnCancelPasswordForzado" class="btn-login-action" style="background:rgba(118, 118, 128, 0.2); color:var(--text-primary); box-shadow:none; margin-top: 10px;" onclick="cancelarCambioYSalir()">Cancelar y Salir</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="login-overlay" id="loginOverlay">
-        <div class="login-card">
-            <div class="avatar-staff">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-            </div>
-            <h2>Cybernet Staff</h2>
-            <p class="lock-instruction">Introduce tus credenciales autorizadas.</p>
-            
-            <div id="error-login-toast"></div>
-
-            <form id="loginForm" action="#" onsubmit="validateStaffAccess(event)">
-                <input type="text" id="staffUser" name="username" class="ios-input-block" placeholder="Nombre de Usuario" autocomplete="username" spellcheck="false" required>
-                <input type="password" id="staffPass" name="password" class="ios-input-block" placeholder="Contraseña Especial" autocomplete="current-password" required>
-                
-                <div class="remember-row">
-                    <input type="checkbox" id="rememberMe">
-                    <label for="rememberMe">Mantener sesión iniciada</label>
-                </div>
-
-                <button type="submit" class="btn-login-action">Verificar Identidad</button>
-            </form>
-            
-            <a href="/" class="back-link">← Volver al Portal de Clientes</a>
-        </div>
-    </div>
-
-    <div class="main-workspace" id="mainWorkspace">
-        <div id="header-container" class="header-container"></div>
-        <div id="grid-container" class="card-container"></div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
-    
+
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
         
@@ -937,10 +525,6 @@
             }
         }
         
-        // ==========================================
-        // 🔥 NUEVAS FUNCIONES PARA EL MÓDULO DE VENTAS
-        // ==========================================
-        // 📋 Matriz completa de plataformas basada estrictamente en las etiquetas de tus imágenes
         const listaPlataformasVenta = [
             { id: "NETFLIX", nombre: "NETFLIX", permitePantallas: true, permiteRenovacion: true },
             { id: "AMAZON", nombre: "AMAZON", permitePantallas: true, permiteRenovacion: false },
@@ -963,26 +547,17 @@
             { id: "MUBI", nombre: "MUBI", permitePantallas: false, permiteRenovacion: false }
         ];
 
-        // 🔄 Función modificada para limpiar el buscador y disparar el catálogo dinámico
-        // 🔄 FUNCIÓN DE APERTURA: Abre el panel manteniendo los checks guardados
         function toggleVentasPanel() {
             haptic();
             const overlay = document.getElementById('ventasOverlay');
             overlay.classList.toggle('open');
             if (overlay.classList.contains('open')) {
-                // 🔥 Quitamos renderizarPlataformasVenta() de aquí para que no destruya tus checks marcados
                 document.getElementById('buscarPlataformaVenta').value = "";
-                filtrarPlataformasVenta(); // Muestra en caliente solo las que ya dejaste palomeadas
+                filtrarPlataformasVenta(); 
                 document.getElementById('ventaNombre').focus();
             }
         }
 
-        
-        
-        
-        
-        
-        // 🛠️ FUNCIÓN DE RENDERIZADO PREMIUM CON SELECTOR DE BONOS PARA LA TARJETA DE SALDO
         function renderizarPlataformasVenta() {
             const contenedor = document.getElementById('contenedorPlataformasVenta');
             if (!contenedor) return;
@@ -994,7 +569,7 @@
                     selectorPantallas = `
                         <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
                             <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Pantallas</span>
-                            <select class="platform-type-select" id="pantallas_${plat.id}" name="ventaPantallas" disabled>
+                            <select class="input-ios" id="pantallas_${plat.id}" name="ventaPantallas" style="padding: 6px; font-size:0.8rem;" disabled>
                                 <option value="1" selected>1 Pantalla</option>
                                 <option value="2">2 Pantallas</option>
                                 <option value="3">3 Pantallas</option>
@@ -1005,13 +580,12 @@
                     `;
                 }
 
-                // 🔄 LÓGICA EXCLUSIVA: Si la tarjeta es SALDO muestra Bonos, si no, muestra Meses
                 let selectorDinamicoDerecho = "";
                 if (plat.id === "SALDO") {
                     selectorDinamicoDerecho = `
                         <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
                             <span style="font-size: 0.68rem; color: #ff9500; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">🎁 Bono %</span>
-                            <select class="platform-type-select" id="bono_${plat.id}" name="ventaBonos" style="border-color: rgba(255,149,0,0.3);" disabled>
+                            <select class="input-ios" id="bono_${plat.id}" name="ventaBonos" style="padding: 6px; font-size:0.8rem; border-color: rgba(255,149,0,0.3);" disabled>
                                 <option value="0" selected>0% Bono</option>
                                 <option value="5">5% Bono</option>
                                 <option value="10">10% Bono</option>
@@ -1026,7 +600,7 @@
                     selectorDinamicoDerecho = `
                         <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
                             <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Meses</span>
-                            <select class="platform-type-select" id="meses_${plat.id}" name="ventaMeses" disabled>
+                            <select class="input-ios" id="meses_${plat.id}" name="ventaMeses" style="padding: 6px; font-size:0.8rem;" disabled>
                                 <option value="1" selected>1 Mes</option>
                                 <option value="2">2 Meses</option>
                                 <option value="3">3 Meses</option>
@@ -1042,7 +616,7 @@
                     selectorTipo = `
                         <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
                             <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Tipo</span>
-                            <select class="platform-type-select" id="tipo_${plat.id}" name="ventaTipo" onchange="comprobarTipoVentaNetflix(this, '${plat.id}')" disabled>
+                            <select class="input-ios" id="tipo_${plat.id}" name="ventaTipo" style="padding: 6px; font-size:0.8rem;" onchange="comprobarTipoVentaNetflix(this, '${plat.id}')" disabled>
                                 <option value="Nueva" selected>Nueva</option>
                                 <option value="Reno">Reno</option>
                             </select>
@@ -1055,16 +629,16 @@
                     campoCorreoReno = `
                         <div id="wrapper_correo_reno_${plat.id}" style="display: none; flex-direction: column; gap: 5px; width: 100%; margin-top: 8px;">
                             <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Correo a Renovar (Obligatorio)</span>
-                            <input type="email" id="correo_reno_${plat.id}" class="ios-input-block" style="margin-bottom: 0; padding: 10px 12px; border-radius: 10px;" placeholder="ejemplo@correo.com">
+                            <input type="email" id="correo_reno_${plat.id}" class="input-ios" style="margin-bottom: 0; padding: 10px 12px; border-radius: 10px;" placeholder="ejemplo@correo.com">
                         </div>
                     `;
                 }
 
                 html += `
-                    <div class="platform-sale-row" id="card_plat_${plat.id}" data-nombre="${plat.nombre.toLowerCase()}" style="display: none;">
+                    <div class="card-ios" id="card_plat_${plat.id}" data-nombre="${plat.nombre.toLowerCase()}" style="display: none; padding: 15px; gap:10px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <label class="platform-sale-label-check">
-                                <input type="checkbox" name="platformCheckVenta" value="${plat.id}" onchange="comprobarDesbloqueoVentaPill(this, '${plat.id}')"> 
+                            <label style="display: flex; align-items: center; gap: 10px; font-size: 1rem; font-weight: 700; color: var(--text-primary); cursor: pointer; user-select: none;">
+                                <input type="checkbox" name="platformCheckVenta" value="${plat.id}" style="accent-color: var(--ios-blue); width: 18px; height: 18px;" onchange="comprobarDesbloqueoVentaPill(this, '${plat.id}')"> 
                                 ${plat.nombre}
                             </label>
                             <span id="badge_status_${plat.id}" style="width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); transition: all 0.3s ease;"></span>
@@ -1082,20 +656,17 @@
             contenedor.innerHTML = html;
         }
 
-        // 🔍 FILTRO INTELIGENTE: Muestra lo buscado, pero siempre mantiene a la vista lo ya seleccionado
         function filtrarPlataformasVenta() {
             const query = document.getElementById('buscarPlataformaVenta').value.toLowerCase().trim();
-            const filas = document.querySelectorAll('#contenedorPlataformasVenta .platform-sale-row');
+            const filas = document.querySelectorAll('#contenedorPlataformasVenta .card-ios');
             
             filas.forEach(fila => {
                 const nombrePlat = fila.getAttribute('data-nombre');
                 const checkbox = fila.querySelector('input[type="checkbox"]');
                 
                 if (query === "") {
-                    // Si borran la búsqueda, solo se ven las que ya tienen la palomita
                     fila.style.display = checkbox.checked ? "flex" : "none";
                 } else {
-                    // Si escriben, se ven las coincidencias y las que ya tienen palomita
                     if (nombrePlat.includes(query) || checkbox.checked) {
                         fila.style.display = "flex";
                     } else {
@@ -1105,11 +676,6 @@
             });
         }
 
-        
-        
-        
-        
-        // 🔓 CONTROL DE ILUMINACIÓN Y DESBLOQUEO ADAPTADO A RECARGAS
         function comprobarDesbloqueoVentaPill(checkbox, id) {
             haptic();
             const elPantallas = document.getElementById(`pantallas_${id}`);
@@ -1122,7 +688,7 @@
             if (checkbox.checked) {
                 if (elPantallas) elPantallas.disabled = false;
                 if (elMeses) elMeses.disabled = false;
-                if (elBono) elBono.disabled = false; // Activa los bonos
+                if (elBono) elBono.disabled = false; 
                 if (elTipo) elTipo.disabled = false;
                 
                 if (card) {
@@ -1136,12 +702,12 @@
             } else {
                 if (elPantallas) { elPantallas.disabled = true; elPantallas.value = "1"; }
                 if (elMeses) { elMeses.disabled = true; elMeses.value = "1"; }
-                if (elBono) { elBono.disabled = true; elBono.value = "0"; } // Resetea el bono
+                if (elBono) { elBono.disabled = true; elBono.value = "0"; } 
                 if (elTipo) { elTipo.disabled = true; elTipo.value = "Nueva"; }
                 
                 if (card) {
-                    card.style.background = "rgba(255, 255, 255, 0.03)";
-                    card.style.borderColor = "rgba(255, 255, 255, 0.08)";
+                    card.style.background = "var(--glass-bg)";
+                    card.style.borderColor = "var(--glass-border)";
                 }
                 if (badge) {
                     badge.style.background = "rgba(255, 255, 255, 0.15)";
@@ -1156,7 +722,6 @@
             }
         }
 
-        // 🔄 CONMUTADOR ULTRA RÁPIDO DE VISIBILIDAD (ANTI-RESET)
         function ajustarInterfazPorMetodoPago() {
             const canalPago = document.getElementById('ventaBanco').value;
             const esOperacionRecargaSaldo = (canalPago === "Saldo Distribuidor");
@@ -1186,7 +751,6 @@
             });
         }
 
-        // 👀 ESCANER EXCLUSIVO DE NETFLIX: Despliega el input si se selecciona Renovación
         function comprobarTipoVentaNetflix(select, id) {
             if (id === "NETFLIX") {
                 const wrapper = document.getElementById(`wrapper_correo_reno_${id}`);
@@ -1202,20 +766,7 @@
             }
         }
 
-        function comprobarDesbloqueoTipoVenta(checkbox) {
-            haptic();
-            const row = checkbox.closest('.platform-sale-row');
-            const select = row.querySelector('.platform-type-select');
-            if (checkbox.checked) {
-                select.disabled = false;
-            } else {
-                select.disabled = true;
-                select.value = "Cuenta Nueva";
-            }
-        }
-        // 💵 FORMATEADOR EN VIVO: Transforma números sueltos a formato $20.000 en tiempo real
         function formatearMontoEnVivoCOP(input) {
-            // Elimina cualquier carácter que no sea un número digitado
             let valor = input.value.replace(/\D/g, "");
             
             if (valor === "") {
@@ -1223,37 +774,22 @@
                 return;
               }
             
-            // Agrega los puntos de miles usando expresiones regulares quirúrgicas
             valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            
-            // Le antepone el signo de pesos colombianos
             input.value = "$" + valor;
         }
 
-        
-        
-        
-        // =====================================================================
-        // Variable global para retener la sinopsis de saldo mayorista
         window.textoSaldoRevendedorGlobal = "";
 
-        // Variable global para retener la sinopsis de saldo mayorista
-        window.textoSaldoRevendedorGlobal = "";
-
-        
-        // 🚀 ENVIAR VENTA O PROCESAR RECARGA INTEGRADA DE DISTRIBUIDORES
         function ejecutarCreacionVentaLocal(e) {
             e.preventDefault();
             haptic();
 
             const nombre = document.getElementById('ventaNombre').value.trim();
             const telefono = document.getElementById('ventaTelefono').value.replace(/\s+/g, '').trim();
-            // 🧼 Extrae el texto formateado, le quita los símbolos y lo vuelve un número puro para el Sheets
             const cantidadRaw = document.getElementById('ventaCantidad').value.replace(/\D/g, "");
             const cantidad = parseFloat(cantidadRaw) || 0;
             const banco = document.getElementById('ventaBanco').value;
 
-            // 🔥 CANDADO INTELIGENTE: Si seleccionaron la tarjeta "SALDO", es una recarga directa
             const recargaSaldoChequeada = document.querySelector('input[name="platformCheckVenta"][value="SALDO"]')?.checked;
 
             if (recargaSaldoChequeada) {
@@ -1272,7 +808,6 @@
                     delete window[callbackName];
 
                     if (res && res.status === "success") {
-                        // Creamos una ficha de WhatsApp especializada para recargas mayoristas
                         let fichaRecarga = `🔔 *NOTIFICACIÓN DE RECARGA CYBERNET* 🚀\n`;
                         fichaRecarga += `────────────────────\n`;
                         fichaRecarga += `👤 *Distribuidor:* ${res.revendedor}\n`;
@@ -1284,13 +819,24 @@
                         fichaRecarga += `✨ _¡Tu saldo acumulado ya se encuentra disponible para compras!_`;
 
                         window.textoSaldoRevendedorGlobal = "";
-                        document.getElementById('btnCopiarSaldoRevendedor').style.display = "none"; 
+                        
+                        let btnSaldo = document.getElementById('btnCopiarSaldoRevendedor');
+                        if (!btnSaldo) {
+                            btnSaldo = document.createElement('button');
+                            btnSaldo.id = 'btnCopiarSaldoRevendedor';
+                            btnSaldo.className = 'btn-ios w-100 mt-1';
+                            btnSaldo.style.background = 'linear-gradient(135deg, #ff9500 0%, #ff5e00 100%)';
+                            btnSaldo.style.color = 'white';
+                            btnSaldo.onclick = copiarTextoSaldoRevendedorDefinitiva;
+                            btnSaldo.innerText = '💵 COPIAR REPORTE DE SALDO';
+                            document.getElementById('btnCopiarFichaVenta').insertAdjacentElement('afterend', btnSaldo);
+                        }
+                        btnSaldo.style.display = "none"; 
                         
                         document.getElementById('ventasOverlay').classList.remove('open');
                         document.getElementById('outputTextoVentaFicha').value = fichaRecarga;
                         document.getElementById('ventaGeneradaModalOverlay').classList.add('open');
 
-                        // ✨ LIMPIEZA POST-RECARGA EXITOSA
                         document.getElementById('formGenerarVenta').reset();
                         const checksABorrar = document.getElementsByName('platformCheckVenta');
                         for (let c = 0; c < checksABorrar.length; c++) {
@@ -1312,9 +858,6 @@
                 return;
             }
 
-            // =========================================================================
-            // LÓGICA TRADICIONAL PARA VENTA DE CUENTAS DE STREAMING (SI NO ES RECARGA)
-            // =========================================================================
             const checkboxes = document.getElementsByName('platformCheckVenta');
             let plataformasAdquiridas = false;
             let descripcionSheetsArray = [];
@@ -1374,7 +917,7 @@
                         return 0;
                     });
 
-                    const nombreCliente = nombre !== "" ? nombre : "Cliente";
+                    const nombreCliente = nombre !== "" ? nombre : "";
                     let intro = `🌟 *¡Hola ${nombreCliente}!*\n\n`;
                     intro += esR ? `Tu servicio ha sido *RENOVADO* con éxito. Mantienes tus mismos accesos:` : `Tu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
                     
@@ -1402,7 +945,18 @@
 
                     const mensajeFinalFicha = intro + cuerpo + soporte + `\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
-                    const btnSaldo = document.getElementById('btnCopiarSaldoRevendedor');
+                    let btnSaldo = document.getElementById('btnCopiarSaldoRevendedor');
+                    if (!btnSaldo) {
+                        btnSaldo = document.createElement('button');
+                        btnSaldo.id = 'btnCopiarSaldoRevendedor';
+                        btnSaldo.className = 'btn-ios w-100 mt-1';
+                        btnSaldo.style.background = 'linear-gradient(135deg, #ff9500 0%, #ff5e00 100%)';
+                        btnSaldo.style.color = 'white';
+                        btnSaldo.onclick = copiarTextoSaldoRevendedorDefinitiva;
+                        btnSaldo.innerText = '💵 COPIAR REPORTE DE SALDO';
+                        document.getElementById('btnCopiarFichaVenta').insertAdjacentElement('afterend', btnSaldo);
+                    }
+
                     if (res.esRevendedor) {
                         let montoDescontado = res.valorCobrado || 0; 
                         let distribuidorNombre = res.nombreRevendedor || telefono;
@@ -1417,7 +971,6 @@
                     document.getElementById('outputTextoVentaFicha').value = mensajeFinalFicha;
                     document.getElementById('ventaGeneradaModalOverlay').classList.add('open');
 
-                    // ✨ LIMPIEZA EXCLUSIVA POST-VENTA TRADICIONAL EXITOSA
                     document.getElementById('formGenerarVenta').reset();
                     const checksABorrar = document.getElementsByName('platformCheckVenta');
                     for (let c = 0; c < checksABorrar.length; c++) {
@@ -1428,7 +981,6 @@
                         document.getElementById('buscarPlataformaVenta').value = "";
                     }
 
-                    // ⚠️ RECEPTOR DE ALERTA DE STOCK CRÍTICO
                     if (res.alertasStock && res.alertasStock.length > 0) {
                         let avisoTexto = "⚠️ ¡ALERTA DE INVENTARIO CRÍTICO! ⚠️\n───────────────────────────\n";
                         res.alertasStock.forEach(a => {
@@ -1452,7 +1004,6 @@
             document.body.appendChild(script);
         }
 
-        // 💵 FUNCIÓN COMPLEMENTARIA PARA COPIAR EL REPORTE DE SALDOS
         function copiarTextoSaldoRevendedorDefinitiva() {
             haptic();
             const btn = document.getElementById('btnCopiarSaldoRevendedor');
@@ -1462,11 +1013,11 @@
                 btn.style.background = 'var(--ios-green)';
                 setTimeout(function() {
                     btn.innerHTML = originalText;
-                    btn.style.background = '';
+                    btn.style.background = 'linear-gradient(135deg, #ff9500 0%, #ff5e00 100%)';
                 }, 1500);
             });
         }
-        // =====================================================================
+        
         function copiarTextoFichaVentaDefinitiva() {
             haptic();
             const texto = document.getElementById('outputTextoVentaFicha').value;
@@ -1503,7 +1054,6 @@
             document.getElementById('ventaGeneradaModalOverlay').classList.remove('open');
         }
 
-        // 🔄 DETECTOR EN VIVO DE REPORTES PENDIENTES
         function actualizarBadgeGarantias() {
             const oldScript = document.getElementById('cyber_badge_garantias_node');
             if (oldScript) oldScript.remove();
@@ -1512,7 +1062,28 @@
                 const scriptNode = document.getElementById('cyber_badge_garantias_node');
                 if (scriptNode) scriptNode.remove();
 
-                const badge = document.getElementById('badgeGarantiasCount');
+                const btnGarantia = document.querySelector('button[onclick="window.location.href=\'garantia.html\'"]');
+                let badge = document.getElementById('badgeGarantiasCount');
+                
+                if (btnGarantia && !badge) {
+                    badge = document.createElement('div');
+                    badge.id = 'badgeGarantiasCount';
+                    badge.style.display = 'none';
+                    badge.style.position = 'absolute';
+                    badge.style.top = '-2px';
+                    badge.style.right = '5px';
+                    badge.style.background = 'var(--ios-red)';
+                    badge.style.color = 'white';
+                    badge.style.fontSize = '0.6rem';
+                    badge.style.borderRadius = '50%';
+                    badge.style.width = '14px';
+                    badge.style.height = '14px';
+                    badge.style.alignItems = 'center';
+                    badge.style.justifyContent = 'center';
+                    btnGarantia.style.position = 'relative';
+                    btnGarantia.appendChild(badge);
+                }
+
                 if (res && res.status === "success" && badge) {
                     const count = res.data.length;
                     if (count > 0) {
@@ -1554,9 +1125,9 @@
             }
             
             if (theme === 'light') {
-                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg><span>TEMA</span>`;
+                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
             } else {
-                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg><span>TEMA</span>`;
+                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
             }
         }
 
@@ -1605,21 +1176,21 @@
                     for (let i = 0; i < data.length; i++) {
                         let item = data[i];
                         htmlCards += `
-                          <div class="account-item-box">
-                              <div class="account-header-line">
-                                  <span class="platform-tag" style="color:var(--ios-blue)">${item.plataforma}</span>
-                                  <span class="time-tag">Vence: ${item.vencimiento}</span>
+                          <div class="card-ios mb-1" style="padding: 15px; gap: 8px;">
+                              <div class="flex-row-between" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px;">
+                                  <span style="color:var(--ios-blue); font-weight:700; font-size:0.9rem;">${item.plataforma}</span>
+                                  <span style="color:var(--text-secondary); font-size:0.8rem;">Vence: ${item.vencimiento}</span>
                               </div>
-                              <div class="credential-row">Cliente: <span>${item.cliente}</span></div>
-                              <div class="credential-row">Teléfono: <span>${item.telefono}</span></div>
+                              <div style="font-size:0.85rem; color:var(--text-secondary);">Cliente: <span style="color:var(--text-primary); font-weight:600;">${item.cliente}</span></div>
+                              <div style="font-size:0.85rem; color:var(--text-secondary);">Teléfono: <span style="color:var(--text-primary); font-weight:600;">${item.telefono}</span></div>
                               
-                              <div class="credential-row" style="margin-top:6px;">Correo: <span style="color:var(--ios-green); font-weight:700; user-select:all; cursor:pointer;" title="Clic para copiar solo el correo" onclick="copiarDatoAislado(this, '${item.correo}')">${item.correo}</span></div>
+                              <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:6px;">Correo: <span style="color:var(--ios-green); font-weight:700; user-select:all; cursor:pointer;" title="Clic para copiar solo el correo" onclick="copiarDatoAislado(this, '${item.correo}')">${item.correo}</span></div>
                               
-                              <div class="credential-row">Clave: <span style="color:var(--ios-red); font-weight:700; user-select:all; cursor:pointer;" title="Clic para copiar solo la clave" onclick="copiarDatoAislado(this, '${item.clave}')">${item.clave}</span></div>
+                              <div style="font-size:0.85rem; color:var(--text-secondary);">Clave: <span style="color:var(--ios-red); font-weight:700; user-select:all; cursor:pointer;" title="Clic para copiar solo la clave" onclick="copiarDatoAislado(this, '${item.clave}')">${item.clave}</span></div>
                               
-                              <div class="credential-row">Perfil: <span style="font-weight:700;">${item.perfil}</span> | PIN: <span style="font-weight:700;">${item.pin}</span></div>
+                              <div style="font-size:0.85rem; color:var(--text-secondary);">Perfil: <span style="color:var(--text-primary); font-weight:700;">${item.perfil}</span> | PIN: <span style="color:var(--text-primary); font-weight:700;">${item.pin}</span></div>
                               
-                              <button class="copy-btn-action" style="margin-top:12px;" onclick="copiarCuentaCompleta(this, ${i})">📋 COPIAR DATOS DE LA CUENTA</button>
+                              <button class="btn-ios btn-secondary mt-1 w-100" onclick="copiarCuentaCompleta(this, ${i})">📋 COPIAR DATOS</button>
                           </div>
                         `;
                     }
@@ -1720,7 +1291,7 @@
             
             if (overlay.classList.contains('open')) {
                 document.getElementById('searchShiftsInput').value = "";
-                document.getElementById('formularioIngresoHoras').classList.remove('active');
+                document.getElementById('formularioIngresoHoras').style.display = 'none';
                 
                 const userActivo = sessionStorage.getItem('active_staff') || "";
                 const inpVendedor = document.getElementById('inputVendedorShift');
@@ -1741,9 +1312,11 @@
         function toggleFormularioHoras() {
             haptic();
             const form = document.getElementById('formularioIngresoHoras');
-            form.classList.toggle('active');
-            if (form.classList.contains('active')) {
+            if (form.style.display === 'none') {
+                form.style.display = 'flex';
                 document.getElementById('inputHorasShift').focus();
+            } else {
+                form.style.display = 'none';
             }
         }
 
@@ -1790,7 +1363,7 @@
                 btn.disabled = false;
                 btn.innerText = "Guardar Horas en Sheets";
                 document.getElementById('inputHorasShift').value = "";
-                document.getElementById('formularioIngresoHoras').classList.remove('active');
+                document.getElementById('formularioIngresoHoras').style.display = 'none';
                 forzarRefrescoDeHoras(); 
             })
             .catch(function(e) { 
@@ -1915,7 +1488,6 @@
             }
         };
 
-        // 📅 PARSER DE ALTA TOLERANCIA V26: Lee fechas con hora, sin hora, con barras o con guiones
         function parseDate(fechaStr) {
             let stringLimpio = String(fechaStr || "").trim();
             if (!stringLimpio) return new Date();
@@ -1939,7 +1511,6 @@
             return new Date(); 
         }
 
-        // Determina si una fecha pertenece a la quincena actual en curso
         function esMismaQuincena(fechaStr) {
             let d = parseDate(fechaStr);
             let hoy = new Date();
@@ -1960,7 +1531,7 @@
             }
         }
 
-        // 📊 RENDERIZADOR INTELIGENTE V26: Procesa formatos hh:mm:ss, hh:mm o números enteros de horas (Muestra 1 hora exacta)
+        // 📊 RENDERIZADOR CORREGIDO
         function renderizarHorasEnPantalla(filtroBusqueda = "") {
             const container = document.getElementById('shiftsScrollArea');
             if (!container) return;
@@ -2109,22 +1680,22 @@
             let tMStr = String(tM).padStart(2,'0');
             let tFmt = tHStr + "h " + tMStr + "m";
 
-            let tituloPanel = userFinal === "CAMILO" ? "📅 Quincena Global (Staff)" : "📅 Tu Quincena Actual";
-            if (filtroBusqueda !== "") {
-                tituloPanel = "📅 Resultados de Búsqueda";
-            }
+            let tituloPanel = userFinal === "CAMILO" ? "Quincena Global" : "Tu Quincena Actual";
+if (filtroBusqueda !== "") {
+    tituloPanel = "Resultados de Búsqueda";
+}
 
             let html = `
-              <div class="account-item-box" style="padding:15px 10px;">
+              <div class="card-ios" style="padding:15px 10px;">
                   <h4 style="text-align:center; color:var(--ios-blue); font-size:1.1rem; margin-bottom:5px;">${tituloPanel}</h4>
                   <p style="text-align:center; color:var(--text-secondary); font-size:0.8rem; margin-bottom:15px;">Lun-Sáb: $8.000/hr | Dom: $150.000/día</p>
                   
-                  <table class="shifts-table">
+                  <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                       <thead>
                           <tr>
-                              <th>Día</th>
-                              <th>Horas</th>
-                              <th>Pago</th>
+                              <th style="padding: 12px 10px; text-align: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Día</th>
+                              <th style="padding: 12px 10px; text-align: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Horas</th>
+                              <th style="padding: 12px 10px; text-align: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Pago</th>
                           </tr>
                       </thead>
                       <tbody>
@@ -2148,7 +1719,7 @@
                     
                     if (puedeEditar) {
                         btnEditarIndividual = `
-                        <button class="btn-edit-shift" onclick="abrirEdicionHoras('${dInfo.vendedor}', '${dInfo.fechaText}', '${dInfo.fechaExactaOrigen}', '${dInfo.hoursFmt}', '${filasStrInd}')" title="Editar tiempo">
+                        <button style="background: transparent; border: none; color: var(--ios-blue); cursor: pointer; padding: 5px; border-radius: 8px; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; margin-left: 8px;" onclick="abrirEdicionHoras('${dInfo.vendedor}', '${dInfo.fechaText}', '${dInfo.fechaExactaOrigen}', '${dInfo.hoursFmt}', '${filasStrInd}')" title="Editar tiempo">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>`;
                     }
@@ -2162,9 +1733,9 @@
                 
                 html += `
                           <tr>
-                              <td><strong>${dInfo.diaNombre}</strong>${vendedorLabel}<br><span style="font-size:0.7rem; color:var(--text-secondary);">${dInfo.fechaText}</span></td>
-                              <td style="color:var(--ios-green); font-family:monospace; font-weight:bold; vertical-align: middle;">${dInfo.hoursFmt}</td>
-                              <td style="font-weight:600; vertical-align: middle; white-space: nowrap;">
+                              <td style="padding: 12px 10px; text-align: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); font-size: 0.95rem; color: var(--text-primary); vertical-align: middle;"><strong>${dInfo.diaNombre}</strong>${vendedorLabel}<br><span style="font-size:0.7rem; color:var(--text-secondary);">${dInfo.fechaText}</span></td>
+                              <td style="padding: 12px 10px; text-align: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); font-size: 0.95rem; color: var(--text-primary); vertical-align: middle; color:var(--ios-green); font-family:monospace; font-weight:bold;">${dInfo.hoursFmt}</td>
+                              <td style="padding: 12px 10px; text-align: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); font-size: 0.95rem; color: var(--text-primary); vertical-align: middle; font-weight:600; white-space: nowrap;">
                                   $${payFormatted} 
                                   ${btnEditarIndividual} 
                                   ${btnLiquidarIndividual}
@@ -2189,7 +1760,7 @@
                 if (filasArray.length > 0) {
                     btnLiquidarHTML = `
                     <div style="margin-top:20px; text-align:center;">
-                        <button class="btn-login-action" style="background:var(--ios-red); color:white; font-weight:bold; margin:0; box-shadow:none;" onclick="ejecutarLiquidacion('${targetName}', '${filasStr}')">💵 LIQUIDAR PAGO (${targetName})</button>
+                        <button class="btn-ios btn-danger w-100" onclick="ejecutarLiquidacion('${targetName}', '${filasStr}')">💵 LIQUIDAR PAGO (${targetName})</button>
                         <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">⚠️ Esto borrará estos ${filasArray.length} turnos de la base de datos.</p>
                     </div>
                     `;
@@ -2364,15 +1935,15 @@
                 let colColor = item.colorText || 'var(--ios-blue)';
                 
                 htmlCards += `
-                  <div class="account-item-box">
-                      <div class="account-header-line">
-                          <span class="platform-tag" style="color:${colColor}">${item.plataforma}</span>
-                          <span class="time-tag">⏰ ${item.hora}</span>
+                  <div class="card-ios mb-1" style="padding: 15px; gap: 8px;">
+                      <div class="flex-row-between" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px;">
+                          <span style="color:${colColor}; font-weight:700; font-size:0.85rem; text-transform: uppercase;">${item.plataforma}</span>
+                          <span style="font-size:0.75rem; color:var(--text-secondary); font-family: monospace;">⏰ ${item.hora}</span>
                       </div>
-                      <div class="credential-row">Cliente: <span>${item.correo}</span></div>
-                      <div class="credential-row">Acción: <span>${item.accion}</span></div>
-                      <div class="credential-row" style="margin-bottom:6px;">Código / Enlace: <span style="color:var(--ios-blue); font-weight:700;">${item.codigoLink}</span></div>
-                      <button class="copy-btn-action" onclick="copiarMensajeRapidoGmail(this, ${i})">📋 COPIAR MENSAJE RÁPIDO</button>
+                      <div style="font-size:0.85rem; color:var(--text-secondary);">Cliente: <span style="color:var(--text-primary); font-weight:600;">${item.correo}</span></div>
+                      <div style="font-size:0.85rem; color:var(--text-secondary);">Acción: <span style="color:var(--text-primary); font-weight:600;">${item.accion}</span></div>
+                      <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:6px;">Código / Enlace: <span style="color:var(--ios-blue); font-weight:700; word-break: break-all;">${item.codigoLink}</span></div>
+                      <button class="btn-ios btn-secondary w-100" onclick="copiarMensajeRapidoGmail(this, ${i})">📋 COPIAR MENSAJE RÁPIDO</button>
                   </div>
                 `;
             }
@@ -2410,7 +1981,7 @@
 
         function filtrarCodigosInternos() {
             const query = document.getElementById('searchCodesInput').value.toLowerCase();
-            const cards = document.querySelectorAll('#codesScrollArea .account-item-box');
+            const cards = document.querySelectorAll('#codesScrollArea .card-ios');
             for (let i = 0; i < cards.length; i++) {
                 let card = cards[i];
                 card.style.display = card.innerText.toLowerCase().includes(query) ? "" : "none";
@@ -2422,7 +1993,6 @@
             window.cyberUltimaActividad = Date.now();
         }
 
-        // 🕵️‍♂️ GUARDIÁN CENTRAL ULTRA-PRECISO V26: Controla Abandono Crítico y Cierres Seguros
         function iniciarControlInactividad() {
             window.cyberUltimaActividad = Date.now();
 
@@ -2433,24 +2003,20 @@
             window.addEventListener('touchstart', resetearInactividad);
             resetearInactividad();
 
-            // 🕒 Bucle Verificador: Escanea abandono de puesto cada 5 segundos
             setInterval(function() {
                 if (!sessionStorage.getItem('active_staff')) return;
                 if (sessionStorage.getItem('active_staff').toUpperCase() === "CAMILO") return;
 
                 let ahora = Date.now();
-                let tiempoInactivo = governor = ahora - window.cyberUltimaActividad;
+                let tiempoInactivo = ahora - window.cyberUltimaActividad;
 
-                // 🚨 REGLA DE ABANDONO TOTAL (30 Minutos sin tocar el PC) -> Guarda residuo útil y saca al operador
                 if (tiempoInactivo > 30 * 60 * 1000) {
-                    console.log("🚨 Guardián: Abandono detectado. Salvando residuo y cerrando sesión por seguridad.");
                     cerrarSesionStaffPorInactividadGrave();
                     return;
                 }
             }, 5000);
         }
 
-        // 🔒 CORTACIRCUITOS POR AUSENCIA: Salva el pedacito de tiempo útil trabajado antes de que el empleado dejara el PC solo
         function cerrarSesionStaffPorInactividadGrave() {
             let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10) || Date.now();
             let msUtiles = window.cyberUltimaActividad - lastSync;
@@ -2486,7 +2052,6 @@
             }
         }
 
-        // ⏱️ TEMPORIZADOR DE PANTALLA: Mantiene el reloj visual dinámico y evalúa hitos de 10 min
         function startShiftTimer() {
             if (!sessionStorage.getItem('cyber_shift_start_time')) {
                 sessionStorage.setItem('cyber_shift_start_time', Date.now());
@@ -2524,7 +2089,6 @@
                 let stElement = document.getElementById('shiftTimer');
                 if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
 
-                // 🔄 REVISOR DE PULSOS AUTOMÁTICOS: Detona el guardado de fondo exacto cada 10 minutos (600.000 ms)
                 let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10);
                 if (Date.now() - lastSync >= 600000) {
                     ejecutarAutoPulsoTiempo();
@@ -2552,7 +2116,7 @@
                 if (callbackFinal) callbackFinal();
                 return;
             }
-            let paramObj = { action: "notificarCorreo", user: seller = vendedor, tipo: tipoAccion, tiempoTrabajado: tiempoTrabajado };
+            let paramObj = { action: "notificarCorreo", user: vendedor, tipo: tipoAccion, tiempoTrabajado: tiempoTrabajado };
             fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
@@ -2610,9 +2174,10 @@
             if (!isAutoLogin && userInput.toUpperCase().trim() !== "CAMILO") {
                 ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
             }
-            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('loginOverlay').classList.remove('open');
             document.getElementById('mainWorkspace').style.display = 'flex';
             document.getElementById('globalHeader').style.display = 'flex';
+            document.getElementById('controlPanel').style.display = 'flex'; 
             let sessionNameEl = document.getElementById('staffSessionName');
             if (sessionNameEl) sessionNameEl.innerText = userInput;
             sessionStorage.setItem('active_staff', userInput);
@@ -2632,14 +2197,20 @@
             inicializarWorkspace();
         }
 
-        // 🚪 BOTÓN DE SALIDA MANUAL: Envía el residuo exacto acumulado desde el último pulso de 10 min
+        function inicializarWorkspace() {
+            renderGrid();
+            startShiftTimer();
+            iniciarControlInactividad();
+        }
+
         function cerrarSesionStaff() {
             haptic();
             let usuarioActivo = sessionStorage.getItem('active_staff') || "STAFF";
             
             function finalizarCierre() {
-                sessionStorage.clear();
+                sessionStorage.removeItem('active_staff');
                 localStorage.removeItem('cyber_saved_staff');
+                sessionStorage.removeItem('cyber_shift_start_time');
                 location.reload();
             }
 
@@ -2661,41 +2232,6 @@
                     ejecutarNotificacionDeCorreo(usuarioActivo, "cierre", tiempoTexto, finalizarCierre);
                 }
             }
-        }
-
-        function inicializarWorkspace() {
-            renderGrid();
-            startShiftTimer();
-            iniciarControlInactividad();
-        }
-
-        // 🚪 FUNCIÓN DE SALIDA MANUAL: Registra el remanente de tiempo trabajado y destruye la sesión
-        function cerrarSesionStaff() {
-            haptic();
-            let usuarioActivo = sessionStorage.getItem('active_staff') || "STAFF";
-            
-            function finalizarCierre() {
-                sessionStorage.removeItem('active_staff');
-                localStorage.removeItem('cyber_saved_staff');
-                sessionStorage.removeItem('cyber_shift_start_time');
-                location.reload();
-            }
-
-            if (usuarioActivo.toUpperCase().trim() === "CAMILO") {
-                finalizarCierre();
-            } else {
-                let uncommittedStart = parseInt(sessionStorage.getItem('cyber_shift_start_time')) || Date.now();
-                let msTrabajados = Date.now() - uncommittedStart;
-                if (msTrabajados < 0) msTrabajados = 0;
-
-                ejecutarAutoGuardadoParcialSmart(msTrabajados, finalizarCierre);
-            }
-        }
-
-        function inicializarWorkspace() {
-            renderGrid();
-            startShiftTimer();
-            iniciarControlInactividad();
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -2720,97 +2256,37 @@
                 
                 sessionStorage.setItem('active_staff', user); 
                 entrarAlSistema(user, false, true);
+            } else {
+                document.getElementById('loginOverlay').classList.add('open');
             }
         });
 
         const qrPrincipal = {
             titulo: 'PAGOS',
             imagenUrl: 'https://i.postimg.cc/ydfJzvp8/unnamed.png',
-            texto: `Te comparto nuestra llave para el pago de tu servicio desde cualquier entidad bancaria:
-
-📌 *Llave:* 0090878219
-👤 *Verificar nombre:* REF CYBERNET
-
-⚠️ *Nota:* Esta llave es exclusiva para pagos mediante Bre-B desde cualquier banco.
-
-*Pasos para activar tu servicio:* 1️⃣ Realiza la transferencia.
-2️⃣ Envía el comprobante de pago por este medio.
-3️⃣ ¡Recibe tu acceso y empieza a disfrutar! 🚀🎬`
+            texto: `Te comparto nuestra llave para el pago de tu servicio desde cualquier entidad bancaria:\n\n📌 *Llave:* 0090878219\n👤 *Verificar nombre:* REF CYBERNET\n\n⚠️ *Nota:* Esta llave es exclusiva para pagos mediante Bre-B desde cualquier banco.\n\n*Pasos para activar tu servicio:* 1️⃣ Realiza la transferencia.\n2️⃣ Envía el comprobante de pago por este medio.\n3️⃣ ¡Recibe tu acceso y empieza a disfrutar! 🚀🎬`
         };
 
         const elementosGrid = [
             {
                 titulo: 'ADS',
-                texto: `¡Hola! 👋 ¡Bienvenido a Cybernet! 🎬
-
-Aprovecha nuestra *SUPER PROMO* de hoy:
-
-🔥 *2 PLATAFORMAS POR SOLO $9.900:*
-_(Disney+ estandar, Hbo Max, Paramount+, Vix+, Crunchyroll o Plex)._
-
-🥳 *AMAZON PRIME VIDEO:* por hoy a tan solo $ 9.900
-
-🎁 *OFERTA DE BIENVENIDA:*
-📺 *NETFLIX PREMIUM:* Solo por hoy a $12.500.
-
-¿Cuál te activo ahora mismo?`
+                texto: `¡Hola! 👋 ¡Bienvenido a Cybernet! 🎬\n\nAprovecha nuestra *SUPER PROMO* de hoy:\n\n🔥 *2 PLATAFORMAS POR SOLO $9.900:*\n_(Disney+ estandar, Hbo Max, Paramount+, Vix+, Crunchyroll o Plex)._\n\n🥳 *AMAZON PRIME VIDEO:* por hoy a tan solo $ 9.900\n\n🎁 *OFERTA DE BIENVENIDA:*\n📺 *NETFLIX PREMIUM:* Solo por hoy a $12.500.\n\n¿Cuál te activo ahora mismo?`
             },
             {
                 titulo: 'NEQUI',
-                texto: `💳 *_Realiza tu pago rápido, fácil y seguro_* ⚡
-
-📲 *_Métodos disponibles y confiables:_*
-
-💜 *_Nequi o Daviplata:_* 3015156037
-
-📸 Envía la captura del comprobante y tu servicio quedará activo al instante 🚀`
+                texto: `💳 *_Realiza tu pago rápido, fácil y seguro_* ⚡\n\n📲 *_Métodos disponibles y confiables:_*\n\n💜 *_Nequi o Daviplata:_* 3015156037\n\n📸 Envía la captura del comprobante y tu servicio quedará activo al instante 🚀`
             },
             {
                 titulo: 'COMBOS',
-                texto: `💻 ¡Arma tu combo streaming a tu medida con *_NETFLIX PREMIUM!_* 🎉📺
-
-🔥 *_Plataformas disponibles para escoger:_*
-Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV
-
-0️⃣ Netflix solo → 💰 *_$14.500_* 😔 _(Opción Tradicional)_
-
-1️⃣ Netflix + 1 plataforma → 💰 *_$20.000_* _¡TOP VENTAS!_ 🔥🏆
-2️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL_ 🚀✨
-3️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎
-
-4️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_
-5️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_
-6️⃣ Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_
-7️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_
-
-*Netflix* cuenta con una página de códigos disponible las 24 horas, los 7 días de la semana.`
+                texto: `💻 ¡Arma tu combo streaming a tu medida con *_NETFLIX PREMIUM!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n\n0️⃣ Netflix solo → 💰 *_$14.500_* 😔 _(Opción Tradicional)_\n\n1️⃣ Netflix + 1 plataforma → 💰 *_$20.000_* _¡TOP VENTAS!_ 🔥🏆\n2️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL_ 🚀✨\n3️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎\n\n4️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_\n5️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_\n6️⃣ Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_\n7️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_\n\n*Netflix* cuenta con una página de códigos disponible las 24 horas, los 7 días de la semana.`
             },
             {
                 titulo: 'COMBOS SIN NETFLIX',
-                texto: `💻 ¡Arma tu combo streaming a tu medida con *_Sin Netflix!_* 🎉📺
-
-🔥 *_Plataformas disponibles para escoger:_*
-Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV
- 
-1️⃣ 2 Plataformas = 💰 *_$13.000_* 😱 
-2️⃣ 3 Plataformas = 💰 *_$16.000_* 😱 
-3️⃣ 4 Plataformas = 💰 *_$18.000_* 😱 
-
-4️⃣ Disney Premium + 1 plataforma =  💰 *_$20.000_* 😱
-5️⃣ Disney Premium + 2 plataformas =  💰 *_$22.000_* 😱
-6️⃣ Disney Premium + 3 plataformas =  💰 *_$24.000_* 😱`
+                texto: `💻 ¡Arma tu combo streaming a tu medida con *_Sin Netflix!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n \n1️⃣ 2 Plataformas = 💰 *_$13.000_* 😱 \n2️⃣ 3 Plataformas = 💰 *_$16.000_* 😱 \n3️⃣ 4 Plataformas = 💰 *_$18.000_* 😱 \n\n4️⃣ Disney Premium + 1 plataforma =  💰 *_$20.000_* 😱\n5️⃣ Disney Premium + 2 plataformas =  💰 *_$22.000_* 😱\n6️⃣ Disney Premium + 3 plataformas =  💰 *_$24.000_* 😱`
             },
             {
                 titulo: 'INDIVIDUALES',
-                texto: `💻✨ *Plataformas Individuales – Cybernet* 🚀🎬  
-📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 📡 Vix → *$8.500*
-⚽ Metegol → *$15.000* 🎨 Canva Pro (1 mes) → *$20.000*
-🎶 Spotify (1 mes) → *$14.000* 🎶 YouTube Premium (1 mes) → *$14.000*
-🎶 Deezer (1 mes) → *$12.000* 🎬 *Diferencias Disney+* 💙  
-👉 Estándar →  📺 Con anuncios, sin ESPN
-👉 Premium →  🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil
-
-💜 *En Cybernet no hay trucos,* solo entretenimiento real y herramientas para tu día a día 🍿✨`
+                texto: `💻✨ *Plataformas Individuales – Cybernet* 🚀🎬  \n📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 📡 Vix → *$8.500*\n⚽ Metegol → *$15.000* 🎨 Canva Pro (1 mes) → *$20.000*\n🎶 Spotify (1 mes) → *$14.000* 🎶 YouTube Premium (1 mes) → *$14.000*\n🎶 Deezer (1 mes) → *$12.000* 🎬 *Diferencias Disney+* 💙  \n👉 Estándar →  📺 Con anuncios, sin ESPN\n👉 Premium →  🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil\n\n💜 *En Cybernet no hay trucos,* solo entretenimiento real y herramientas para tu día a día 🍿✨`
             },
             {
                 titulo: 'GRACIAS',
@@ -2938,11 +2414,11 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
         const headerContainer = document.getElementById('header-container');
 
         headerContainer.innerHTML = `
-          <div class="card qr-card">
-            <h2 class="card-title">${qrPrincipal.titulo}</h2>
-            <img src="${qrPrincipal.imagenUrl}" alt="QR" class="qr-image" onerror="this.style.display='none'; this.nextElementSibling.innerText='⚠️ Error cargando la llave QR. Revisa la conexión.'; this.nextElementSibling.style.color='var(--ios-red)';">
-            <span class="qr-hint">(Mantén presionado o clic derecho para copiar imagen)</span>
-            <button class="copy-btn copy-text-btn" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
+          <div class="card-ios w-100" style="max-width: 440px;">
+            <h2 class="card-title text-center" style="justify-content:center;">${qrPrincipal.titulo}</h2>
+            <img src="${qrPrincipal.imagenUrl}" alt="QR" style="max-width:210px; width:100%; border-radius:16px; border:var(--glass-border); box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto;" onerror="this.style.display='none'; this.nextElementSibling.innerText='⚠️ Error cargando la llave QR. Revisa la conexión.'; this.nextElementSibling.style.color='var(--ios-red)';">
+            <span class="text-secondary text-center" style="font-size:0.75rem; margin-top:-8px; font-weight:500;">(Mantén presionado o clic derecho para copiar imagen)</span>
+            <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
           </div>
         `;
 
@@ -2960,10 +2436,10 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
             for (let f = 0; f < filtrados.length; f++) {
                 let currentItem = filtrados[f];
                 const card = document.createElement('div');
-                card.className = 'card';
+                card.className = 'card-ios';
                 card.innerHTML = `
-                  <h2 class="card-title">${currentItem.titulo}</h2>
-                  <button class="copy-btn copy-text-btn" data-clipboard-text="${currentItem.texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
+                  <h2 class="card-title" style="justify-content:center;">${currentItem.titulo}</h2>
+                  <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${currentItem.texto.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">COPIAR TEXTO</button>
                 `;
                 gridContainer.appendChild(card);
             }
@@ -2978,17 +2454,21 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
         clipboard.on('success', function (e) {
             haptic();
             const btn = e.trigger;
-            const card = btn.closest('.card');
+            const card = btn.closest('.card-ios');
             const originalText = btn.textContent;
             
             btn.textContent = '¡COPIADO!';
-            btn.classList.add('copy-btn-red');
-            card.classList.add('active'); 
+            btn.classList.remove('btn-secondary');
+            btn.classList.add('btn-danger');
+            card.style.borderColor = 'var(--ios-red)';
+            card.style.boxShadow = '0 0 20px rgba(255, 69, 58, 0.25)';
             
             setTimeout(function() {
                 btn.textContent = originalText;
-                btn.classList.remove('copy-btn-red');
-                card.classList.remove('active');
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-secondary');
+                card.style.borderColor = 'var(--glass-border)';
+                card.style.boxShadow = 'var(--glass-shadow)';
             }, 1500);
         });
     </script>
@@ -2996,21 +2476,15 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
     function actualizarPerfilesLibres(manual = false) {
         if(manual) haptic();
         
-        const dot = document.getElementById('dotLibres');
         const container = document.getElementById('contenedorPlataformasLibres');
         
-        if(dot) {
-            dot.style.background = "var(--ios-red)"; 
-            dot.style.boxShadow = "0 0 8px var(--ios-red)";
-        }
-
         const callbackName = "cb_libres_" + Date.now();
         window[callbackName] = function(res) {
             if(res && res.status === "success" && container) {
                 let htmlPildoras = "";
                 
                 if (res.data.length === 0) {
-                    htmlPildoras = '<span style="font-size: 0.8rem; color: var(--ios-red); font-weight: 600;">Sin inventario</span>';
+                    htmlPildoras = '<span class="badge-ios badge-danger">Sin inventario</span>';
                     container.innerHTML = htmlPildoras;
                 } else {
                     res.data.forEach(item => {
@@ -3040,12 +2514,8 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
                         `;
                     });
                     
+                    // DUPLICAR PARA QUE EL CARRUSEL SEA INFINITO (SEAMLESS LOOP)
                     container.innerHTML = htmlPildoras + htmlPildoras;
-                }
-                
-                if(dot) {
-                    dot.style.background = "var(--ios-green)";
-                    dot.style.boxShadow = "0 0 8px var(--ios-green)";
                 }
             }
             
@@ -3069,11 +2539,9 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
             actualizarPerfilesLibres(false);
         }, 300000);
 
-        // 🔥 OBLIGATORIO: Construye el catálogo de plataformas una sola vez al cargar la web
         renderizarPlataformasVenta();
     });
 
-    // 🤖 MOTOR BACKGROUND: Envía el fragmento neto trabajado en los últimos 10 minutos
         function ejecutarAutoPulsoTiempo() {
             let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10) || Date.now();
             let ahora = Date.now();
@@ -3087,26 +2555,23 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
             let tiempoTexto = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
             const activeUser = sessionStorage.getItem('active_staff') || "Vendedor";
             
-            // Actualizamos la marca para el siguiente bloque de 10 minutos
             sessionStorage.setItem('cyber_last_sync_time', ahora);
             
-            // Petición silenciosa en segundo plano
             fetch("https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec", {
                 method: "POST",
                 mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     action: "notificarCorreo",
-                    tipo: "pulso", // Avisa a Google que es un fragmento intermedio
+                    tipo: "pulso",
                     user: activeUser,
                     tiempoTrabajado: tiempoTexto
                 })
             })
             .then(() => console.log("✅ Auto-Guardado: Bloque de " + tiempoTexto + " salvado en la nube."))
-            .catch(() => sessionStorage.setItem('cyber_last_sync_time', lastSync)); // Si cae internet, reintenta en el próximo ciclo sumando el tiempo
+            .catch(() => sessionStorage.setItem('cyber_last_sync_time', lastSync)); 
         }
 
-        // 🚪 BOTÓN DE CIERRE: Envía únicamente el residuo final acumulado desde el último pulso
         function ejecutarCierreSesionDefinitivo() {
             if(confirm("¿Estás seguro de que deseas cerrar tu sesión e informar tu turno?")) {
                 let lastSync = parseInt(sessionStorage.getItem('cyber_last_sync_time'), 10) || Date.now();
@@ -3121,27 +2586,23 @@ Amazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex
                 let tiempoTexto = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
                 const activeUser = sessionStorage.getItem('active_staff') || "Vendedor";
                 
-                // Cambia el botón para evitar doble clic
-                const btn = document.querySelector('.btn-logout-action') || document.body;
-                btn.innerText = "⏳ Liquidando turno...";
-                
                 fetch("https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec", {
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         action: "notificarCorreo",
-                        tipo: "cierre", // Detona el cierre oficial y tu correo de resumen
+                        tipo: "cierre",
                         user: activeUser,
                         tiempoTrabajado: tiempoTexto
                     })
                 })
                 .then(() => {
                     sessionStorage.clear();
-                    window.location.href = "login.html";
+                    window.location.reload();
                 });
             }
         }
-</script>
+    </script>
 </body>
 </html>
