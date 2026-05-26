@@ -6,26 +6,73 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Cybernet Staff - Promo</title>
+    <title>Cybernet Staff - Recordatorios de Pago</title>
 
     <link rel="icon" type="image/jpeg" href="logo.jpeg" />
-    <meta name="theme-color" content="#0b0e14" />
+    <meta name="theme-color" content="#0a0a0c" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
+    <meta name="apple-mobile-web-app-title" content="Recordatorios" />
 
     <link rel="stylesheet" href="global.css" />
+
+    <style>
+      /* Animación nativa de carga */
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .spin-anim {
+        animation: spin 1s linear infinite;
+      }
+
+      /* Ajuste fino para el botón de la cabecera */
+      .btn-header-back {
+        width: auto;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        border-radius: 12px;
+        margin: 0;
+        box-shadow: none;
+      }
+
+      /* Estados vacíos premium */
+      .empty-state-premium {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 40px 10px;
+        color: var(--text-secondary);
+        gap: 12px;
+        grid-column: span 2;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+    </style>
   </head>
   <body>
     <div class="bg-orb bg-orb-1"></div>
     <div class="bg-orb bg-orb-2"></div>
 
+    <div id="appleToast" class="apple-notification-toast"></div>
+
     <header class="global-header" id="globalHeader">
       <div class="flex-row" id="staffStatusBar">
-        <div class="badge-ios badge-blue">
-          <span id="staffSessionName">USER</span> • PROMO
+        <div
+          class="badge-ios badge-blue"
+          style="
+            color: var(--ios-purple);
+            border-color: rgba(191, 90, 242, 0.3);
+            background: rgba(191, 90, 242, 0.1);
+          "
+        >
+          <span id="staffSessionName">STAFF</span> • MULTI-WHATSAPP
         </div>
         <div class="badge-ios badge-green" id="timerBadgeContainer">
           <svg
@@ -42,357 +89,602 @@
           <span id="shiftTimer">00:00:00</span>
         </div>
       </div>
-      <button
-        class="btn-ios btn-secondary"
-        onclick="window.location.href = 'admin.html'"
-      >
-        ← Volver
-      </button>
+
+      <div class="flex-row">
+        <button
+          class="btn-ios btn-secondary btn-header-back"
+          onclick="window.location.href = 'admin.html'"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="margin-right: 4px; vertical-align: bottom"
+          >
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Volver
+        </button>
+      </div>
     </header>
 
-    <main class="main-workspace workspace-promo">
-      <div class="card-ios">
-        <div
-          class="flex-row-between mb-1"
-          style="
-            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 15px;
-          "
-        >
-          <h2 class="card-title">Generador de Promociones</h2>
-          <div class="badge-ios badge-blue" id="badgeTotalClients">
-            0 clientes
+    <div class="recordatorios-container">
+      <div class="workspace-column">
+        <div class="card-ios">
+          <div
+            class="flex-row-between"
+            style="
+              border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+              padding-bottom: 12px;
+              margin-bottom: 15px;
+            "
+          >
+            <h2 class="card-title" style="margin-bottom: 0">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--ios-purple)"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                ></path>
+              </svg>
+              WhatsApp 1
+            </h2>
+            <span id="contadorW1" class="badge-ios badge-blue">0 clientes</span>
+          </div>
+
+          <select id="periodoW1" class="input-ios" style="margin-bottom: 12px">
+            <option value="hoy" selected>Vencen: Hoy</option>
+            <option value="ayer">Vencieron: Ayer</option>
+            <option value="antes_ayer">Vencieron: Antes de Ayer</option>
+            <option value="tres_dias">Por Vencer: En 3 Días</option>
+          </select>
+
+          <button class="btn-ios btn-primary w-100" onclick="sincronizarW1()">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="margin-right: 6px; vertical-align: bottom"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            Sincronizar Panel 1
+          </button>
+
+          <div class="blocks-area-container mt-1" id="bloquesW1">
+            <div
+              style="
+                text-align: center;
+                padding: 15px;
+                color: var(--text-secondary);
+                font-size: 0.85rem;
+                border: 1px dashed rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                grid-column: span 2;
+              "
+            >
+              Sincroniza para ver los bloques de enlaces.
+            </div>
           </div>
         </div>
 
-        <button
-          id="btnFetchContacts"
-          class="btn-ios btn-primary w-100 mb-1"
-          style="padding: 16px; font-size: 1.05rem"
-          onclick="iniciarSincronizacion()"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            style="margin-right: 6px; vertical-align: middle"
+        <div class="card-ios" style="flex-grow: 1">
+          <h2
+            class="card-title"
+            style="
+              border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+              padding-bottom: 12px;
+            "
           >
-            <path
-              d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-            ></path>
-          </svg>
-          Generar Promo
-        </button>
-
-        <div id="blockButtonsContainer" class="blocks-container"></div>
-      </div>
-
-      <div class="card-ios">
-        <div
-          class="card-title mb-1"
-          style="
-            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 15px;
-          "
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
-          Lista de Mensajes
-        </div>
-
-        <div id="promoGridContainer" class="contacts-grid">
-          <div class="status-empty">
-            Presiona "Generar Promo" para extraer los clientes de la base de
-            datos.
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="margin-right: 4px"
+            >
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            Lista de Mensajes (W1)
+          </h2>
+          <div class="reminders-scroll-area" id="listaIndividualW1">
+            <div class="empty-state-premium">
+              <svg
+                class="spin-anim"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="12" y1="2" x2="12" y2="6"></line>
+                <line x1="12" y1="18" x2="12" y2="22"></line>
+                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+                <line x1="2" y1="12" x2="6" y2="12"></line>
+                <line x1="18" y1="12" x2="22" y2="12"></line>
+                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+              </svg>
+              <span>En espera de sincronización...</span>
+            </div>
           </div>
         </div>
       </div>
-    </main>
 
-    <div
-      id="globalToast"
-      class="overlay-ios"
-      style="background: transparent; pointer-events: none; z-index: 10000"
-    >
-      <div
-        style="
-          position: fixed;
-          bottom: 30px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: rgba(30, 30, 35, 0.95);
-          backdrop-filter: blur(15px);
-          border: var(--glass-border);
-          color: white;
-          padding: 12px 24px;
-          border-radius: 30px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          box-shadow: var(--glass-shadow);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        "
-      >
-        <span id="toastIcon">✅</span>
-        <span id="toastText">Acción completada</span>
+      <div class="workspace-column">
+        <div class="card-ios">
+          <div
+            class="flex-row-between"
+            style="
+              border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+              padding-bottom: 12px;
+              margin-bottom: 15px;
+            "
+          >
+            <h2 class="card-title" style="margin-bottom: 0">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--ios-green)"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                ></path>
+              </svg>
+              WhatsApp 2
+            </h2>
+            <span id="contadorW2" class="badge-ios badge-green"
+              >0 clientes</span
+            >
+          </div>
+
+          <select id="periodoW2" class="input-ios" style="margin-bottom: 12px">
+            <option value="tres_dias" selected>Por Vencer: En 3 Días</option>
+            <option value="hoy">Vencen: Hoy</option>
+            <option value="ayer">Vencieron: Ayer</option>
+            <option value="antes_ayer">Vencieron: Antes de Ayer</option>
+          </select>
+
+          <button class="btn-ios btn-success w-100" onclick="sincronizarW2()">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="margin-right: 6px; vertical-align: bottom"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            Sincronizar Panel 2
+          </button>
+
+          <div class="blocks-area-container mt-1" id="bloquesW2">
+            <div
+              style="
+                text-align: center;
+                padding: 15px;
+                color: var(--text-secondary);
+                font-size: 0.85rem;
+                border: 1px dashed rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                grid-column: span 2;
+              "
+            >
+              Sincroniza para ver los bloques de enlaces.
+            </div>
+          </div>
+        </div>
+
+        <div class="card-ios" style="flex-grow: 1">
+          <h2
+            class="card-title"
+            style="
+              border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+              padding-bottom: 12px;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="margin-right: 4px"
+            >
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            Lista de Mensajes (W2)
+          </h2>
+          <div class="reminders-scroll-area" id="listaIndividualW2">
+            <div class="empty-state-premium">
+              <svg
+                class="spin-anim"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="12" y1="2" x2="12" y2="6"></line>
+                <line x1="12" y1="18" x2="12" y2="22"></line>
+                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+                <line x1="2" y1="12" x2="6" y2="12"></line>
+                <line x1="18" y1="12" x2="22" y2="12"></line>
+                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+              </svg>
+              <span>En espera de sincronización...</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <script>
-      const GOOGLE_SCRIPT_URL =
+      const RECORDATORIOS_API_URL =
         "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
 
-      let isFetching = false;
-      let globalContacts = [];
-      let currentBlockIndex = 0;
-      const CHUNK_SIZE = 10;
-
       let timerInterval = null;
-      let temporizadorInactividad = null;
-      const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;
       let isTimerPaused = false;
 
-      function hapticFeedback() {
+      window.estadoW1 = { data: [], tachados: new Set(), periodo: "hoy" };
+      window.estadoW2 = { data: [], tachados: new Set(), periodo: "tres_dias" };
+
+      function haptic() {
         if (navigator.vibrate) navigator.vibrate(15);
       }
 
-      function showToast(message, isError = false) {
-        const toast = document.getElementById("globalToast");
-        const toastText = document.getElementById("toastText");
-        const toastIcon = document.getElementById("toastIcon");
-
-        toastText.innerText = message;
-        toastIcon.innerText = isError ? "❌" : "✅";
-        toast.classList.add("open");
-        setTimeout(() => {
-          toast.classList.remove("open");
-        }, 3000);
+      // Sistema de Toast Nativo Apple (Con soporte para SVGs inyectados)
+      function triggerToast(msgHTML) {
+        const toast = document.getElementById("appleToast");
+        toast.innerHTML = msgHTML;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
       }
 
-      function iniciarSincronizacion() {
-        if (isFetching) return;
+      function guardarEstadoEnLocal(refName) {
+        let estado = refName === "W1" ? window.estadoW1 : window.estadoW2;
+        let objetoParaGuardar = {
+          data: estado.data,
+          tachados: Array.from(estado.tachados),
+          periodo: document.getElementById("periodo" + refName).value,
+        };
+        localStorage.setItem(
+          "cyber_reminders_" + refName,
+          JSON.stringify(objetoParaGuardar),
+        );
+      }
 
-        hapticFeedback();
-        isFetching = true;
-        globalContacts = [];
-        currentBlockIndex = 0;
+      function cargarEstadoDeLocal() {
+        ["W1", "W2"].forEach((refName) => {
+          let guardado = localStorage.getItem("cyber_reminders_" + refName);
+          if (guardado) {
+            let parsed = JSON.parse(guardado);
+            let estado = refName === "W1" ? window.estadoW1 : window.estadoW2;
 
-        const btn = document.getElementById("btnFetchContacts");
-        const badge = document.getElementById("badgeTotalClients");
-        const blockContainer = document.getElementById("blockButtonsContainer");
-        const gridContainer = document.getElementById("promoGridContainer");
+            estado.data = parsed.data || [];
+            estado.tachados = new Set(parsed.tachados || []);
+            estado.periodo =
+              parsed.periodo || (refName === "W1" ? "hoy" : "tres_dias");
 
-        btn.disabled = true;
-        btn.innerHTML = "⏳ Generando Promo...";
-        blockContainer.innerHTML = "";
-        gridContainer.innerHTML =
-          '<div class="status-empty">⏳ Extrayendo clientes del historial y aplicando motor 60/40...</div>';
-        badge.innerText = "0 clientes";
+            document.getElementById("periodo" + refName).value = estado.periodo;
 
-        const oldScript = document.getElementById("cyber_promo_node");
+            if (estado.data.length > 0) {
+              document.getElementById("contador" + refName).innerText =
+                `${estado.data.length} clientes`;
+              renderizarBloques(estado.data, "bloques" + refName);
+              renderizarLista(estado, "listaIndividual" + refName, refName);
+            }
+          }
+        });
+      }
+
+      function sincronizarW1() {
+        haptic();
+        const containerLista = document.getElementById("listaIndividualW1");
+        const containerBloques = document.getElementById("bloquesW1");
+        const periodo = document.getElementById("periodoW1").value;
+
+        containerLista.innerHTML = `
+            <div class="empty-state-premium">
+                <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+                <span>Escaneando NETFLIX en Sheets...</span>
+            </div>`;
+
+        containerBloques.innerHTML =
+          '<div style="text-align:center; padding:15px; color:var(--text-secondary); font-size:0.85rem; grid-column: span 2;">Procesando...</div>';
+
+        const oldScript = document.getElementById("cyber_reminders_w1");
         if (oldScript) oldScript.remove();
 
-        window.procesarSincronizacion = function (res) {
-          isFetching = false;
-          btn.disabled = false;
-          btn.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                    </svg>
-                    Generar Promo
-                `;
-
-          const scriptNode = document.getElementById("cyber_promo_node");
+        window.procesarRespuestaW1 = function (res) {
+          const scriptNode = document.getElementById("cyber_reminders_w1");
           if (scriptNode) scriptNode.remove();
 
           if (res && res.status === "success") {
-            let data = res.data;
+            window.estadoW1.data = res.data;
+            window.estadoW1.tachados = new Set();
+            window.estadoW1.periodo = periodo;
 
-            if (!data || data.length === 0) {
-              gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">⚠️ No quedan clientes disponibles en el Histórico.</div>`;
+            guardarEstadoEnLocal("W1");
+            document.getElementById("contadorW1").innerText =
+              `${res.data.length} clientes`;
+
+            if (res.data.length === 0) {
+              containerLista.innerHTML = `
+                <div class="empty-state-premium" style="color:var(--ios-green);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <span>Todo limpio en este periodo para W1.</span>
+                </div>`;
+              containerBloques.innerHTML = "";
               return;
             }
 
-            let uniqueMap = new Map();
-            for (let i = 0; i < data.length; i++) {
-              let item = data[i];
-              let tel = item.tel;
-              if (tel && tel.trim() !== "" && !uniqueMap.has(tel.trim())) {
-                uniqueMap.set(tel.trim(), item);
-              }
-            }
-
-            globalContacts = Array.from(uniqueMap.values()).slice(0, 20);
-
-            if (globalContacts.length === 0) {
-              gridContainer.innerHTML = `<div class="status-empty">⚠️ Registros inválidos.</div>`;
-              return;
-            }
-
-            badge.innerText = `${globalContacts.length} clientes`;
-            showToast(
-              `Éxito. Se prepararon ${globalContacts.length} contactos listos.`,
-            );
-
-            crearBotonesBloques();
+            renderizarBloques(window.estadoW1.data, "bloquesW1");
+            renderizarLista(window.estadoW1, "listaIndividualW1", "W1");
           } else {
-            let errMsg = "Error de conexión.";
-            if (res && res.message) errMsg = res.message;
-            gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">❌ ${errMsg}</div>`;
+            containerLista.innerHTML = `
+                <div class="empty-state-premium" style="color:var(--ios-red);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    <span>Error: ${res ? res.message : "Fallo de conexión"}</span>
+                </div>`;
           }
         };
 
         const scriptElement = document.createElement("script");
-        scriptElement.id = "cyber_promo_node";
-        let queryParams =
-          "?action=generarPromosWeb&callback=procesarSincronizacion&_ts=" +
-          Date.now();
-        scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+        scriptElement.id = "cyber_reminders_w1";
+        scriptElement.src = `${RECORDATORIOS_API_URL}?action=obtenerRecordatorios&periodo=${encodeURIComponent(periodo)}&callback=procesarRespuestaW1&_ts=${Date.now()}`;
         document.body.appendChild(scriptElement);
       }
 
-      function crearBotonesBloques() {
-        const blockContainer = document.getElementById("blockButtonsContainer");
-        blockContainer.innerHTML = "";
+      function sincronizarW2() {
+        haptic();
+        const containerLista = document.getElementById("listaIndividualW2");
+        const containerBloques = document.getElementById("bloquesW2");
+        const periodo = document.getElementById("periodoW2").value;
 
-        const totalBlocks = Math.ceil(globalContacts.length / CHUNK_SIZE);
+        containerLista.innerHTML = `
+            <div class="empty-state-premium">
+                <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+                <span>Escaneando NETFLIX en Sheets...</span>
+            </div>`;
+        containerBloques.innerHTML =
+          '<div style="text-align:center; padding:15px; color:var(--text-secondary); font-size:0.85rem; grid-column: span 2;">Procesando...</div>';
 
-        for (let i = 0; i < totalBlocks; i++) {
-          let start = i * CHUNK_SIZE + 1;
-          let end = Math.min((i + 1) * CHUNK_SIZE, globalContacts.length);
+        const oldScript = document.getElementById("cyber_reminders_w2");
+        if (oldScript) oldScript.remove();
 
-          const btn = document.createElement("button");
-          btn.className = `btn-block ${i === 0 ? "active" : ""}`;
-          btn.id = `btnBlock_${i}`;
+        window.procesarRespuestaW2 = function (res) {
+          const scriptNode = document.getElementById("cyber_reminders_w2");
+          if (scriptNode) scriptNode.remove();
+
+          if (res && res.status === "success") {
+            window.estadoW2.data = res.data;
+            window.estadoW2.tachados = new Set();
+            window.estadoW2.periodo = periodo;
+
+            guardarEstadoEnLocal("W2");
+            document.getElementById("contadorW2").innerText =
+              `${res.data.length} clientes`;
+
+            if (res.data.length === 0) {
+              containerLista.innerHTML = `
+                <div class="empty-state-premium" style="color:var(--ios-green);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <span>Todo limpio en este periodo para W2.</span>
+                </div>`;
+              containerBloques.innerHTML = "";
+              return;
+            }
+
+            renderizarBloques(window.estadoW2.data, "bloquesW2");
+            renderizarLista(window.estadoW2, "listaIndividualW2", "W2");
+          } else {
+            containerLista.innerHTML = `
+                <div class="empty-state-premium" style="color:var(--ios-red);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    <span>Error: ${res ? res.message : "Desconocido"}</span>
+                </div>`;
+          }
+        };
+
+        const scriptElement = document.createElement("script");
+        scriptElement.id = "cyber_reminders_w2";
+        scriptElement.src = `${RECORDATORIOS_API_URL}?action=obtenerRecordatorios&periodo=${encodeURIComponent(periodo)}&callback=procesarRespuestaW2&_ts=${Date.now()}`;
+        document.body.appendChild(scriptElement);
+      }
+
+      function renderizarBloques(dataArray, contenedorId) {
+        const container = document.getElementById(contenedorId);
+        container.innerHTML = "";
+
+        let total = dataArray.length;
+        let tamanoBloque = 20;
+        let totalBloques = Math.ceil(total / tamanoBloque);
+
+        for (let b = 0; b < totalBloques; b++) {
+          let inicio = b * tamanoBloque + 1;
+          let fin = Math.min((b + 1) * tamanoBloque, total);
+
+          let btn = document.createElement("button");
+          btn.className = "btn-ios btn-secondary mt-1";
+          btn.style.fontSize = "0.85rem";
           btn.innerHTML = `
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="14" width="7" height="7"></rect>
-                        <rect x="3" y="14" width="7" height="7"></rect>
-                    </svg>
-                    Bloque (${start}-${end})
-                `;
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            Bloque (${inicio}-${fin})
+          `;
 
-          btn.onclick = () => mostrarBloque(i);
-          blockContainer.appendChild(btn);
+          btn.onclick = function () {
+            haptic();
+            let bloqueTexto = "";
+            for (let i = b * tamanoBloque; i < fin; i++) {
+              bloqueTexto += `${i + 1}. wa.me/${dataArray[i].tel}\n`;
+            }
+
+            navigator.clipboard.writeText(bloqueTexto.trim()).then(() => {
+              let originalHTML = btn.innerHTML;
+              btn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                ¡Copiado!
+              `;
+              btn.style.background = "var(--ios-green)";
+              btn.style.color = "white";
+              btn.style.borderColor = "var(--ios-green)";
+
+              triggerToast(`
+                <div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <span>Bloque de contactos copiado</span>
+                </div>
+              `);
+
+              setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.style.background = "";
+                btn.style.color = "";
+                btn.style.borderColor = "";
+              }, 1200);
+            });
+          };
+          container.appendChild(btn);
         }
-
-        mostrarBloque(0);
       }
 
-      function mostrarBloque(blockIndex) {
-        hapticFeedback();
-        currentBlockIndex = blockIndex;
+      function renderizarLista(estadoObj, contenedorId, refName) {
+        const container = document.getElementById(contenedorId);
+        let html = "";
 
-        const allBtns = document.querySelectorAll(".btn-block");
-        allBtns.forEach((b) => b.classList.remove("active"));
-        const activeBtn = document.getElementById(`btnBlock_${blockIndex}`);
-        if (activeBtn) activeBtn.classList.add("active");
+        estadoObj.data.forEach((item, index) => {
+          let msgEscaped = encodeURIComponent(item.mensaje);
+          let rowId = `row-${refName}-${index}`;
+          let claseTachado = estadoObj.tachados.has(index) ? "tachado" : "";
 
-        const startIndex = blockIndex * CHUNK_SIZE;
-        const endIndex = startIndex + CHUNK_SIZE;
-        const loteActual = globalContacts.slice(startIndex, endIndex);
-
-        const gridContainer = document.getElementById("promoGridContainer");
-        gridContainer.innerHTML = "";
-
-        loteActual.forEach((item, localIndex) => {
-          const absoluteIndex = startIndex + localIndex;
-          const visualIndex = absoluteIndex + 1;
-
-          const safeMessage = item.mensaje
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
-
-          const card = document.createElement("div");
-          card.className = "contact-card";
-          card.innerHTML = `
-                    <div class="contact-left">
-                        <div class="index-badge">${visualIndex}</div>
-                        <div class="phone-text" id="phone_text_${absoluteIndex}">${item.tel}</div>
+          html += `
+                <div class="reminder-row-box ${claseTachado}" id="${rowId}">
+                    <div class="reminder-left-info">
+                        <div class="reminder-number">${index + 1}</div>
+                        <div class="reminder-link-text">${item.tel}</div>
                     </div>
-                    <div class="contact-right">
-                        <button class="btn-icon" title="Copiar Mensaje de Promo" onclick="copiarAlPortapapeles('${safeMessage}', this, ${absoluteIndex})">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                        </button>
-                    </div>
-                `;
-          gridContainer.appendChild(card);
+                    <button class="btn-ios btn-secondary" style="padding:8px 12px; color:var(--ios-blue);" onclick="copiarMsg(this, '${msgEscaped}', '${rowId}', '${refName}', ${index})">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>`;
         });
+        container.innerHTML = html;
       }
 
-      function copiarAlPortapapeles(texto, btnElement, indexToCross) {
-        hapticFeedback();
+      function copiarMsg(btn, msgEncoded, rowId, refName, indexObj) {
+        haptic();
+        const mensajeFinal = decodeURIComponent(msgEncoded);
+
         navigator.clipboard
-          .writeText(texto)
+          .writeText(mensajeFinal)
           .then(() => {
-            efectoBotonExito(btnElement);
-            marcarNumeroComoEnviado(indexToCross);
+            marcarTachadoUniversal(btn, rowId, refName, indexObj);
           })
           .catch(() => {
             const textarea = document.createElement("textarea");
-            textarea.value = texto;
+            textarea.value = mensajeFinal;
             document.body.appendChild(textarea);
             textarea.select();
             document.execCommand("copy");
-            window.getSelection().removeAllRanges();
-            efectoBotonExito(btnElement);
-            marcarNumeroComoEnviado(indexToCross);
+            textarea.remove();
+            marcarTachadoUniversal(btn, rowId, refName, indexObj);
           });
       }
 
-      function marcarNumeroComoEnviado(index) {
-        const phoneEl = document.getElementById("phone_text_" + index);
-        if (phoneEl) {
-          phoneEl.classList.add("crossed-out");
+      function marcarTachadoUniversal(btn, rowId, refName, indexObj) {
+        if (refName === "W1") {
+          window.estadoW1.tachados.add(indexObj);
+          guardarEstadoEnLocal("W1");
         }
-      }
+        if (refName === "W2") {
+          window.estadoW2.tachados.add(indexObj);
+          guardarEstadoEnLocal("W2");
+        }
 
-      function efectoBotonExito(btn) {
+        const row = document.getElementById(rowId);
+        if (row) row.classList.add("tachado");
+
         const originalHTML = btn.innerHTML;
-        btn.classList.add("success");
-        btn.innerHTML = `
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-            `;
+        btn.style.background = "var(--ios-green)";
+        btn.style.color = "white";
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
 
         setTimeout(() => {
-          btn.classList.remove("success");
+          btn.style.background = "";
+          btn.style.color = "";
           btn.innerHTML = originalHTML;
         }, 1500);
       }
 
+      // Funciones de Turno e Inactividad
       function startShiftTimer() {
-        if (!sessionStorage.getItem("cyber_shift_start_time")) {
+        if (!sessionStorage.getItem("cyber_shift_start_time"))
           sessionStorage.setItem("cyber_shift_start_time", Date.now());
-        }
-        if (!sessionStorage.getItem("cyber_shift_accumulated_time")) {
+        if (!sessionStorage.getItem("cyber_shift_accumulated_time"))
           sessionStorage.setItem("cyber_shift_accumulated_time", 0);
-        }
         if (timerInterval) clearInterval(timerInterval);
 
         timerInterval = setInterval(function () {
@@ -423,46 +715,23 @@
         }, 1000);
       }
 
-      function resetearInactividad() {
-        if (!sessionStorage.getItem("active_staff")) return;
-        if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
-        temporizadorInactividad = setTimeout(() => {
-          if (sessionStorage.getItem("active_staff")) {
-            alert(
-              "⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.",
-            );
-            window.location.href = "admin.html";
-          }
-        }, INACTIVITY_LOGOUT_LIMIT);
-      }
-
-      function iniciarControlInactividad() {
-        window.addEventListener("mousemove", resetearInactividad);
-        window.addEventListener("keypress", resetearInactividad);
-        window.addEventListener("click", resetearInactividad);
-        window.addEventListener("scroll", resetearInactividad);
-        window.addEventListener("touchstart", resetearInactividad);
-        resetearInactividad();
-      }
-
       window.addEventListener("DOMContentLoaded", () => {
+        const activeUser = sessionStorage.getItem("active_staff");
+        if (activeUser) {
+          document.getElementById("staffSessionName").innerText =
+            activeUser.toUpperCase();
+          if (activeUser.toUpperCase() !== "CAMILO") {
+            startShiftTimer();
+          } else {
+            const timerBadge = document.getElementById("timerBadgeContainer");
+            if (timerBadge) timerBadge.style.display = "none";
+          }
+        }
+
         let savedTheme = localStorage.getItem("cyber_theme") || "dark";
         document.documentElement.setAttribute("data-theme", savedTheme);
 
-        let activeUser = sessionStorage.getItem("active_staff") || "STAFF";
-        document.getElementById("staffSessionName").innerText =
-          activeUser.toUpperCase();
-
-        // 🛑 CRITERIO DE FILTRADO CAMILO PARA EL CUENTAMINUTOS
-        if (activeUser.toUpperCase() !== "CAMILO") {
-          startShiftTimer();
-          iniciarControlInactividad();
-        } else {
-          const timerBadge = document.getElementById("timerBadgeContainer");
-          if (timerBadge) {
-            timerBadge.style.display = "none";
-          }
-        }
+        cargarEstadoDeLocal();
       });
     </script>
   </body>
