@@ -64,7 +64,7 @@
         /* Layouts en Rejillas Adaptativas Bento */
         .executive-panoramic-hub { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; width: 100%; }
         .bento-horizontal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; width: 100%; }
-        .dist-grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; width: 100%; }
+        .dist-grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; width: 100%; }
         .workspace-action-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; width: 100%; }
 
         .balance-hero-section { display: flex; flex-direction: column; justify-content: center; padding-left: 10px; }
@@ -270,6 +270,10 @@
                     <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Enviado por Jeisson</span>
                     <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-green);" id="valProyJeisson">$0</span>
                 </div>
+                <div class="flex-col" style="gap:4px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Mi Ganancia + Jeisson</span>
+                    <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-green);" id="valProyMioMasJeisson">$0</span>
+                </div>
             </div>
         </section>
 
@@ -299,11 +303,6 @@
                 <div class="flex-col" style="gap:4px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
                     <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Descuento Sugerido (Hoy)</span>
                     <span style="font-size: 1.85rem; font-weight: 700; color: #ff9f0a;" id="valDescuentoHoy">$0</span>
-                </div>
-
-                <div class="flex-col" style="gap:4px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Ganancia Líquida (Para ti)</span>
-                    <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-green);" id="valGananciaLiquida">$0</span>
                 </div>
             </div>
         </section>
@@ -521,13 +520,12 @@
             document.body.appendChild(script);
         }
 
-        // 🔥 NUEVA FUNCIÓN PARA CALCULAR LA DEUDA REACTIVA (CORREGIDA) 🔥
+        // 🔥 FUNCIÓN PARA CALCULAR LA DEUDA REACTIVA (SIMPLIFICADA) 🔥
         function calcularDescuentoDeuda() {
             const modo = document.getElementById('modoDescuentoDeuda').value;
             const deudaInput = document.getElementById('valDeudaTotal').value.replace(/\D/g, "");
             const deuda = parseFloat(deudaInput) || 0;
             
-            // 1. Mostrar u ocultar el campo de días SOLO basándose en lo que eliges en el menú
             if (modo === 'dias') {
                 document.getElementById('divDiasDeuda').style.display = 'block';
             } else {
@@ -536,7 +534,6 @@
 
             let descuento = 0;
 
-            // 2. Calcular matemáticamente si la deuda es mayor a cero
             if (deuda > 0) {
                 if (modo === '90') {
                     descuento = Math.round(currentMiGananciaBruta * 0.90);
@@ -548,14 +545,7 @@
                 }
             }
 
-            // 3. Actualizar la interfaz
-            const gananciaLiquida = currentMiGananciaBruta - descuento;
-
             document.getElementById('valDescuentoHoy').innerText = formatMoneda(descuento);
-            
-            const elLiquida = document.getElementById('valGananciaLiquida');
-            elLiquida.innerText = formatMoneda(gananciaLiquida);
-            elLiquida.style.color = gananciaLiquida >= 0 ? 'var(--ios-green)' : '#ff453a';
         }
 
         function renderDashboard() {
@@ -564,6 +554,7 @@
             const d = globalFinanzasData[activePeriod];
             if (!d) return;
 
+            // 🔥 INYECTAR LA DEUDA AUTOMÁTICA DESDE LA BASE DE DATOS 🔥
             document.getElementById('valDeudaTotal').value = formatMoneda(globalFinanzasData.deudaActual || 0);
 
             const netEl = document.getElementById('val_neto');
@@ -594,7 +585,7 @@
             const elJeisson = document.getElementById('valProyJeisson');
             if (elJeisson) elJeisson.innerText = formatMoneda(sumaJeisson);
 
-            // 2. Restar Extras de Ventas Brutas
+            // 2. Restar TODOS los Extras (incluido Jeisson) de las Ventas Brutas Totales
             let ventasBrutasReales = (d.ingresos || 0) - sumaIngresoExtra;
             if (ventasBrutasReales < 0) ventasBrutasReales = 0;
 
@@ -626,16 +617,25 @@
             document.getElementById('lblPorcNegocio').innerText = porcNegocio;
             document.getElementById('lblPorcNomina').innerText = porcNomina;
 
+            // 3. Calcular la distribución usando SOLO las Ventas Brutas Reales
             let baseDinero = ventasBrutasReales;
+            
+            // 4. Inyectar los Ingresos Extras (MENOS Jeisson) a "Mi Ganancia"
             let miGananciaBase = Math.round(baseDinero * (porcMio / 100));
-            let miGananciaTotal = miGananciaBase + sumaIngresoExtra;
+            let extrasSinJeisson = sumaIngresoExtra - sumaJeisson;
+            let miGananciaNeta = miGananciaBase + extrasSinJeisson;
 
-            // Guardamos la ganancia total para usarla en la calculadora de deuda
-            currentMiGananciaBruta = miGananciaTotal;
-
-            document.getElementById('valProyMio').innerText = formatMoneda(miGananciaTotal);
+            document.getElementById('valProyMio').innerText = formatMoneda(miGananciaNeta);
             document.getElementById('valProyNegocio').innerText = formatMoneda(Math.round(baseDinero * (porcNegocio / 100)));
             document.getElementById('valProyNomina').innerText = formatMoneda(Math.round(baseDinero * (porcNomina / 100)));
+
+            // 🔥 NUEVA TARJETA: SUMATORIA TOTAL (Mi Ganancia Neta + Jeisson)
+            let totalMioYJeisson = miGananciaNeta + sumaJeisson;
+            const elMioMasJeisson = document.getElementById('valProyMioMasJeisson');
+            if (elMioMasJeisson) elMioMasJeisson.innerText = formatMoneda(totalMioYJeisson);
+
+            // Guardamos la ganancia total (incluyendo Jeisson) para la calculadora de deuda
+            currentMiGananciaBruta = totalMioYJeisson;
 
             const totalFlujo = d.ingresos + d.gastos + d.inversiones + d.nomina;
             let porcIngresos = 0, porcGastos = 0;
