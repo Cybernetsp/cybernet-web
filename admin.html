@@ -19,10 +19,23 @@
 
     <link rel="stylesheet" href="global.css" />
 
+    <style>
+      /* Animación nativa de carga (Reemplazo del emoji de reloj de arena) */
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .spin-anim {
+        animation: spin 1s linear infinite;
+      }
+    </style>
   </head>
   <body>
     <div class="bg-orb bg-orb-1"></div>
     <div class="bg-orb bg-orb-2"></div>
+
+    <div id="appleToast" class="apple-notification-toast"></div>
 
     <header class="global-header" id="globalHeader" style="display: none">
       <div class="flex-row" id="staffStatusBar">
@@ -354,7 +367,7 @@
         <form
           id="loginForm"
           class="flex-col"
-          onsubmit="validateStaffAccess(event)"
+          onssubmit="validateStaffAccess(event)"
         >
           <input
             type="text"
@@ -398,9 +411,30 @@
       <div class="modal-ios" onclick="event.stopPropagation()">
         <h3
           id="passwordModalTitle"
-          style="color: var(--ios-red); margin-bottom: 10px"
+          style="
+            color: var(--ios-red);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+          "
         >
-          ⚠️ Actualización Obligatoria
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path
+              d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+            ></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          Actualización Obligatoria
         </h3>
         <p id="passwordModalDesc" class="text-secondary mb-1">
           Por seguridad y políticas del sistema, debes cambiar tu contraseña
@@ -467,7 +501,7 @@
             id="inputSearchAccount"
             class="input-ios"
             style="margin-bottom: 0"
-            placeholder="📱 Celular o Nombre..."
+            placeholder="Celular o Nombre..."
             onkeypress="if (event.key === 'Enter') ejecutarBusquedaCuentas();"
           />
           <button
@@ -504,9 +538,26 @@
           <div class="flex-row">
             <button
               class="btn-ios btn-secondary"
-              style="padding: 6px 12px; font-size: 0.8rem"
+              style="
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+              "
               onclick="forzarRefrescoDeCodigos()"
             >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
               Refrescar
             </button>
             <button class="btn-close-circle" onclick="toggleCodesPanel()">
@@ -519,7 +570,7 @@
             type="text"
             id="searchCodesInput"
             class="input-ios"
-            placeholder="🔍 Buscar por asunto o etiqueta..."
+            placeholder="Buscar por asunto o etiqueta..."
             oninput="filtrarCodigosInternos()"
           />
         </div>
@@ -546,9 +597,26 @@
             </button>
             <button
               class="btn-ios btn-secondary"
-              style="padding: 6px 12px; font-size: 0.8rem"
+              style="
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+              "
               onclick="forzarRefrescoDeHoras()"
             >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
               Refrescar
             </button>
             <button class="btn-close-circle" onclick="toggleShiftsPanel()">
@@ -601,7 +669,7 @@
             type="text"
             id="searchShiftsInput"
             class="input-ios"
-            placeholder="🔍 Buscar por vendedor o fecha..."
+            placeholder="Buscar por vendedor o fecha..."
             oninput="filtrarHorasInternas()"
           />
         </div>
@@ -763,7 +831,7 @@
                 type="text"
                 id="buscarPlataformaVenta"
                 class="input-ios"
-                placeholder="🔍 Buscar plataforma..."
+                placeholder="Buscar plataforma..."
                 oninput="filtrarPlataformasVenta()"
               />
               <div
@@ -1019,10 +1087,24 @@
                   color: var(--ios-orange);
                   border-color: rgba(255, 159, 10, 0.3);
                   margin-bottom: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
                 "
                 onclick="cargarResumenProveedores()"
               >
-                🔄 Actualizar
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+                Actualizar
               </button>
             </div>
             <div style="width: 100%; overflow-x: auto">
@@ -1083,7 +1165,31 @@
                         color: var(--text-secondary);
                       "
                     >
-                      ⏳ Sincronizando métricas...
+                      <svg
+                        class="spin-anim"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        style="vertical-align: middle; margin-right: 6px"
+                      >
+                        <line x1="12" y1="2" x2="12" y2="6"></line>
+                        <line x1="12" y1="18" x2="12" y2="22"></line>
+                        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                        <line
+                          x1="16.24"
+                          y1="16.24"
+                          x2="19.07"
+                          y2="19.07"
+                        ></line>
+                        <line x1="2" y1="12" x2="6" y2="12"></line>
+                        <line x1="18" y1="12" x2="22" y2="12"></line>
+                        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+                      </svg>
+                      Sincronizando métricas...
                     </td>
                   </tr>
                 </tbody>
@@ -1335,16 +1441,35 @@
                   <path
                     d="M14 2H6a2 2 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
                   ></path>
-                  <polyline points="14 2 14 8 20 8"></polyline></svg
-                >Cuentas Reportadas Activas
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                Cuentas Reportadas
               </h4>
               <button
                 type="button"
                 class="btn-ios btn-secondary"
-                style="padding: 4px 12px; font-size: 0.72rem; margin-bottom: 0"
+                style="
+                  padding: 4px 12px;
+                  font-size: 0.72rem;
+                  margin-bottom: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                "
                 onclick="cargarGarantias()"
               >
-                🔄 Actualizar
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+                Actualizar
               </button>
             </div>
             <div
@@ -1360,7 +1485,26 @@
                   font-size: 0.85rem;
                 "
               >
-                ⏳ Cargando garantías pendientes...
+                <svg
+                  class="spin-anim"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  style="vertical-align: middle; margin-right: 6px"
+                >
+                  <line x1="12" y1="2" x2="12" y2="6"></line>
+                  <line x1="12" y1="18" x2="12" y2="22"></line>
+                  <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                  <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+                  <line x1="2" y1="12" x2="6" y2="12"></line>
+                  <line x1="18" y1="12" x2="22" y2="12"></line>
+                  <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                  <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+                </svg>
+                Cargando garantías...
               </div>
             </div>
           </div>
@@ -1389,7 +1533,20 @@
             justify-content: center;
           "
         >
-          ✅ Resolver Cuenta
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          Resolver Cuenta
         </h3>
         <p
           class="text-secondary text-center mb-1"
@@ -1592,7 +1749,7 @@
             type="text"
             id="buscadorModalReno"
             class="input-ios"
-            placeholder="🔍 Buscar por correo, perfil o nombre..."
+            placeholder="Buscar por correo, perfil o nombre..."
             oninput="filtrarModalRenovacionNet()"
           />
         </div>
@@ -1796,10 +1953,26 @@
                 flex: 1;
                 padding: 8px;
                 margin-bottom: 0;
+                display: flex;
+                align-items: center;
+                gap: 6px;
               "
               onclick="volverMenuNetflix()"
             >
-              ⬅ Volver al menú
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              Volver al menú
             </button>
             <button
               type="button"
@@ -1812,10 +1985,26 @@
                 flex: 1;
                 padding: 8px;
                 margin-bottom: 0;
+                display: flex;
+                align-items: center;
+                gap: 6px;
               "
               onclick="refrescarCortesEnVivo(this)"
             >
-              🔄 Refrescar Lista
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              Refrescar Lista
             </button>
           </div>
 
@@ -1846,8 +2035,29 @@
             padding-bottom: 12px;
           "
         >
-          <h3 class="card-title" style="color: var(--ios-green)">
-            Corte Exitoso ✅
+          <h3
+            class="card-title"
+            style="
+              color: var(--ios-green);
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            Corte Exitoso
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
           </h3>
           <button
             class="btn-close-circle"
@@ -2089,7 +2299,6 @@
           document.getElementById("ventaNombre").focus();
         }
       }
-
       // =========================================================================
       // 📥 MÓDULO INTEGRADO: CARGA EN LOTE Y GESTIÓN DE PROVEEDORES
       // =========================================================================
@@ -2170,19 +2379,21 @@
           selectProv === "OTRO" ? proveedorManual : selectProv;
 
         if (bloqueCuentasFinal.trim() === "") {
-          alert(
-            "⚠️ No se detectaron credenciales válidas (correo o clave) en el cuadro.",
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>No se detectaron credenciales válidas.</span></div>`,
           );
           return;
         }
 
         if (selectProv === "OTRO" && proveedorFinal === "") {
-          alert("⚠️ Por favor escribe el nombre del nuevo proveedor.");
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> <span>Escribe el nombre del nuevo proveedor.</span></div>`,
+          );
           return;
         }
 
         btnSubmit.disabled = true;
-        btnSubmit.innerText = "⏳ Inyectando Lote en Sheets...";
+        btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Inyectando en Sheets...`;
 
         const oldScript = document.getElementById("cyber_cargamasiva_node");
         if (oldScript) oldScript.remove();
@@ -2195,10 +2406,8 @@
           btnSubmit.innerText = "Cargar Cuentas en Lote";
 
           if (res && res.status === "success") {
-            // 🚨 CORREGIDO: Cambiado de triggerToast a alert nativo para evitar el crash
-            alert(
-              "🚀 " +
-                (res.message || "Lote cargado con éxito en Google Sheets."),
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${res.message || "Lote cargado con éxito."}</span></div>`,
             );
 
             let cacheTurno = JSON.parse(
@@ -2234,11 +2443,10 @@
             document.getElementById("formCargarCuentas").reset();
             document.getElementById("wrapperProveedorManual").style.display =
               "none";
-            cargarResumenProveedores(); // Actualiza la tabla de salud de proveedores automáticamente
+            cargarResumenProveedores();
           } else {
-            alert(
-              "❌ Error de Inserción: " +
-                (res ? res.message : "Fallo de comunicación."),
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Error: ${res ? res.message : "Fallo de comunicación."}</span></div>`,
             );
           }
         };
@@ -2249,12 +2457,16 @@
         scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
         document.body.appendChild(scriptElement);
       }
+
       function cargarResumenProveedores() {
         const tbody = document.getElementById("tablaResumenProveedores");
         if (!tbody) return;
 
         const oldScript = document.getElementById("cyber_prov_summary_node");
         if (oldScript) oldScript.remove();
+
+        tbody.innerHTML =
+          '<tr><td colspan="3" style="text-align: center; padding: 15px; color: var(--text-secondary);"><svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle; margin-right:6px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Sincronizando métricas...</td></tr>';
 
         window.procesarResumenProveedores = function (res) {
           const scriptNode = document.getElementById("cyber_prov_summary_node");
@@ -2278,14 +2490,14 @@
             let html = "";
             for (let prov in conteo) {
               let cant = conteo[prov];
-              let alarmaTexto = "🟢 Estable";
+              let alarmaTexto = "Estable";
               let alarmaColor = "var(--ios-green)";
 
               if (cant > 4) {
-                alarmaTexto = "🔴 Crítico";
+                alarmaTexto = "Crítico";
                 alarmaColor = "var(--ios-red)";
               } else if (cant > 0) {
-                alarmaTexto = "🟠 Riesgo";
+                alarmaTexto = "Riesgo";
                 alarmaColor = "var(--ios-orange)";
               }
 
@@ -2299,7 +2511,7 @@
             tbody.innerHTML = html;
           } else {
             tbody.innerHTML =
-              '<tr><td colspan="3" style="text-align: center; color: var(--ios-red);">❌ Error al sincronizar.</td></tr>';
+              '<tr><td colspan="3" style="text-align: center; color: var(--ios-red);">Error al sincronizar.</td></tr>';
           }
           delete window.procesarResumenProveedores;
         };
@@ -2364,20 +2576,18 @@
       function refrescarCortesEnVivo(btn) {
         haptic();
         let oldText = btn.innerHTML;
-        btn.innerHTML = "⏳ Buscando...";
+        btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Buscando...`;
         btn.disabled = true;
 
-        // Volvemos a disparar tu buscador maestro de cortes
         abrirPanelCortesNet();
 
-        // Devolvemos el botón a la normalidad después de que el script responda
         setTimeout(() => {
           btn.innerHTML = oldText;
           btn.disabled = false;
         }, 1000);
       }
 
-      // Generador de clave fácil para TV (Ej: luna23@@)
+      // Generador de clave fácil para TV
       function generarClaveNetflixTV() {
         const palabras = [
           "luna",
@@ -2394,7 +2604,7 @@
           "rey",
         ];
         const p = palabras[Math.floor(Math.random() * palabras.length)];
-        const n = Math.floor(Math.random() * 90) + 10; // Número entre 10 y 99
+        const n = Math.floor(Math.random() * 90) + 10;
         return p + n + "@@";
       }
 
@@ -2405,7 +2615,7 @@
 
         const contenedor = document.getElementById("listaCuentasCorte");
         contenedor.innerHTML =
-          '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Buscando perfiles vencidos en Sheets...</div>';
+          '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg><br>Buscando perfiles vencidos en Sheets...</div>';
 
         const cbName = "cb_cortes_" + Date.now();
         window[cbName] = function (res) {
@@ -2418,14 +2628,14 @@
           if (res && res.status === "success") {
             if (res.data.length === 0) {
               contenedor.innerHTML =
-                '<div style="text-align:center; padding:30px; color:var(--ios-green); font-weight:bold;">✨ ¡Todo limpio! No hay perfiles vencidos.</div>';
+                '<div style="text-align:center; padding:30px; color:var(--ios-green); font-weight:bold;">¡Todo limpio! No hay perfiles vencidos.</div>';
               return;
             }
 
             res.data.forEach((cuenta, index) => {
               let claveNuevaSugerida = generarClaveNetflixTV();
               let perfilesTexto = cuenta.perfilesVencidos.join(", ");
-              let perfilesOcultosSeguros = cuenta.perfilesVencidos.join("|||"); // 🛡️ Separador blindado
+              let perfilesOcultosSeguros = cuenta.perfilesVencidos.join("|||");
 
               let div = document.createElement("div");
               div.className = "card-ios";
@@ -2483,7 +2693,7 @@
               contenedor.appendChild(div);
             });
           } else {
-            contenedor.innerHTML = `<div style="color:var(--ios-red); text-align:center;">❌ Error: ${res ? res.message : "Fallo de conexión"}</div>`;
+            contenedor.innerHTML = `<div style="color:var(--ios-red); text-align:center;">Error: ${res ? res.message : "Fallo de conexión"}</div>`;
           }
         };
 
@@ -2493,22 +2703,28 @@
         document.body.appendChild(script);
       }
 
-      // 💫 Animaciones fluidas para los botones de ícono (Copiado)
+      // Sistema de Toast Nativo (Reemplazo moderno de notificaciones)
+      function triggerToast(msgHTML) {
+        const toast = document.getElementById("appleToast");
+        toast.innerHTML = msgHTML;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      }
+
       function copiarTextoRapido(btn, texto) {
         haptic();
         navigator.clipboard.writeText(texto).then(() => {
-          // Guardamos el estado original
           let oldBg = btn.style.background;
           let oldColor = btn.style.color;
 
-          // Efecto de iluminación verde y rebote
           btn.style.background = "var(--ios-green)";
           btn.style.color = "#ffffff";
           btn.style.transform = "scale(1.15)";
 
-          triggerToast("✅ Copiado al portapapeles");
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Copiado al portapapeles</span></div>`,
+          );
 
-          // Regresa a la normalidad suavemente
           setTimeout(() => {
             btn.style.background = oldBg;
             btn.style.color = oldColor;
@@ -2528,7 +2744,9 @@
           btn.style.color = "#ffffff";
           btn.style.transform = "scale(1.1)";
 
-          triggerToast("✅ Nueva clave copiada");
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Nueva clave copiada</span></div>`,
+          );
 
           setTimeout(() => {
             btn.style.background = oldBg;
@@ -2549,7 +2767,7 @@
         haptic();
         const nuevaClave = document.getElementById(idInputNuevaClave).value;
 
-        btn.innerHTML = "⏳ Operando en Sheets...";
+        btn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Operando en Sheets...`;
         btn.disabled = true;
         btn.style.opacity = "0.7";
 
@@ -2560,7 +2778,7 @@
           delete window[cbName];
 
           if (res && res.status === "success") {
-            btn.innerHTML = "¡Completado! 🎉";
+            btn.innerHTML = "¡Completado!";
             btn.style.background = "var(--ios-green)";
             btn.style.color = "white";
             btn.closest(".card-ios").style.opacity = "0.4";
@@ -2600,7 +2818,6 @@
             div.style.justifyContent = "space-between";
             div.style.alignItems = "center";
 
-            // Limpiamos los textos para que ocupen el mínimo espacio
             let pinTexto = cli.pin ? ` | PIN: ${cli.pin}` : "";
             let nombreTexto = cli.nombre ? ` • ${cli.nombre}` : "";
 
@@ -2636,7 +2853,9 @@
           btn.style.borderColor = "transparent";
           btn.style.transform = "scale(1.03)";
 
-          triggerToast("✅ Bloque de WA copiado");
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Bloque copiado</span></div>`,
+          );
 
           setTimeout(() => {
             btn.style.background = oldBg;
@@ -2681,7 +2900,7 @@
           if (plat.id === "SALDO") {
             selectorDinamicoDerecho = `
                         <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
-                            <span style="font-size: 0.68rem; color: #ff9500; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">🎁 Bono %</span>
+                            <span style="font-size: 0.68rem; color: #ff9500; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Bono %</span>
                             <select class="input-ios" id="bono_${plat.id}" name="ventaBonos" style="padding: 6px; font-size:0.8rem; border-color: rgba(255,149,0,0.3);" disabled>
                                 <option value="0" selected>0% Bono</option>
                                 <option value="5">5% Bono</option>
@@ -2716,7 +2935,7 @@
                                 <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Tipo</span>
                                 <select class="input-ios" id="tipo_${plat.id}" name="ventaTipo" style="padding: 6px; font-size:0.8rem;" onchange="comprobarTipoVentaNetflix(this, '${plat.id}')" disabled>
                                     <option value="Nueva" selected>Nueva Cuenta</option>
-                                    <option value="Reno (Historial)" id="opt_historial_net" style="display: none; background: rgba(10, 132, 255, 0.2);">Reno (Elegir Cuenta)</option>
+                                    <option value="Reno (Historial)" id="opt_historial_net" style="display: none; background: rgba(10, 132, 255, 0.2);">Reno (Elegir)</option>
                                 </select>
                             </div>
                         `;
@@ -2891,7 +3110,6 @@
         });
       }
 
-      // 🔥 MOTOR SÚPER RÁPIDO DE AUTO-SUGERENCIA (BÚSQUEDA SILENCIOSA)
       window.cuentasNetflixClienteActivo = [];
       let timeoutBusquedaNet = null;
 
@@ -2921,7 +3139,6 @@
               optHistorial.style.display = "none";
               window.cuentasNetflixClienteActivo = [];
 
-              // Si el operador cambia el número y estaba en el modal, lo devolvemos a "Nueva"
               if (inputTipo.value === "Reno (Historial)") {
                 inputTipo.value = "Nueva";
                 comprobarTipoVentaNetflix(inputTipo, "NETFLIX");
@@ -2933,7 +3150,6 @@
                 );
 
                 if (cuentasFiltradas.length > 0) {
-                  // Solo avisa visualmente (verde) y habilita la opción, pero NO la abre automáticamente
                   if (labelWrapper)
                     labelWrapper.style.color = "var(--ios-green)";
                   optHistorial.style.display = "block";
@@ -2973,7 +3189,6 @@
               inputReno.required = true;
               inputReno.readOnly = true;
             }
-            // Disparamos la nueva tarjeta visual
             abrirModalRenovacionNet();
           } else {
             if (wrapperCorreo) wrapperCorreo.style.display = "none";
@@ -2985,7 +3200,7 @@
           }
         }
       }
-      // 🛠️ LÓGICA DEL MODAL FLOTANTE DE RENOVACIONES
+
       function abrirModalRenovacionNet() {
         haptic();
         const modal = document.getElementById("modalRenovacionFlotante");
@@ -2995,7 +3210,6 @@
         buscador.value = "";
         contenedor.innerHTML = "";
 
-        // Inyectar tarjetas basado en la memoria cargada
         window.cuentasNetflixClienteActivo.forEach((cuenta) => {
           let div = document.createElement("div");
           div.className = "card-ios item-reno-modal";
@@ -3021,7 +3235,6 @@
                     </div>
                 `;
 
-          // Al hacer clic, cierra el modal y llena los datos
           div.onclick = function () {
             seleccionarCuentaModalNet(
               cuenta.correo,
@@ -3042,7 +3255,6 @@
           .getElementById("modalRenovacionFlotante")
           .classList.remove("open");
 
-        // Si el usuario cancela y el correo está vacío, devolvemos el selector a "Nueva"
         const inputReno = document.getElementById("correo_reno_NETFLIX");
         if (inputReno && inputReno.value === "") {
           const inputTipo = document.getElementById("tipo_NETFLIX");
@@ -3059,7 +3271,6 @@
         const inputNombre = document.getElementById("ventaNombre");
 
         if (inputReno) {
-          // 🔥 AQUÍ ESTÁ LA MAGIA: Pone el correo y el perfil visualmente en la caja
           inputReno.value = correo + " | Perfil: " + perfil;
         }
         if (
@@ -3131,13 +3342,12 @@
             '#formGenerarVenta button[type="submit"]',
           );
           btnSubmit.disabled = true;
-          btnSubmit.innerText =
-            "⏳ Aplicando bono y cargando saldo en Sheets...";
+          btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Aplicando bono...`;
 
           const callbackName = "cb_recarga_" + Date.now();
           window[callbackName] = function (res) {
             btnSubmit.disabled = false;
-            btnSubmit.innerText = "🚀 GENERAR VENTA COMPLETA";
+            btnSubmit.innerText = "REGISTRAR VENTA COMPLETA";
 
             const scriptNode = document.getElementById("node_" + callbackName);
             if (scriptNode) scriptNode.remove();
@@ -3166,8 +3376,12 @@
                 btnSaldo.style.background =
                   "linear-gradient(135deg, #ff9500 0%, #ff5e00 100%)";
                 btnSaldo.style.color = "white";
+                btnSaldo.style.display = "flex";
+                btnSaldo.style.alignItems = "center";
+                btnSaldo.style.justifyContent = "center";
+                btnSaldo.style.gap = "8px";
                 btnSaldo.onclick = copiarTextoSaldoRevendedorDefinitiva;
-                btnSaldo.innerText = "💵 COPIAR REPORTE DE SALDO";
+                btnSaldo.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> COPIAR REPORTE DE SALDO`;
                 document
                   .getElementById("btnCopiarFichaVenta")
                   .insertAdjacentElement("afterend", btnSaldo);
@@ -3230,7 +3444,6 @@
               ? document.getElementById(`tipo_${idPlat}`).value
               : "Nueva";
 
-            // 🚨 Adaptación: Reno Manual o Historial cuentan como Renovación
             let esRenovacionActiva =
               elTipo === "Reno (Manual)" || elTipo === "Reno (Historial)";
             let prefixSheets = esRenovacionActiva ? "RENO: " : "";
@@ -3241,7 +3454,6 @@
                 `correo_reno_${idPlat}`,
               );
               if (inputReno && inputReno.value.trim() !== "") {
-                // Envia el texto exacto de la caja (ej: "correo@cy.com | Perfil: 5")
                 correoNetflixReno = inputReno.value.trim();
               } else {
                 alert(
@@ -3272,12 +3484,12 @@
           '#formGenerarVenta button[type="submit"]',
         );
         btnSubmit.disabled = true;
-        btnSubmit.innerText = "⏳ Extrayendo cuentas e inyectando en Sheets...";
+        btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Procesando Venta...`;
 
         const callbackName = "cb_venta_" + Date.now();
         window[callbackName] = function (res) {
           btnSubmit.disabled = false;
-          btnSubmit.innerText = "🚀 GENERAR VENTA COMPLETA";
+          btnSubmit.innerText = "REGISTRAR VENTA COMPLETA";
 
           const scriptNode = document.getElementById("node_" + callbackName);
           if (scriptNode) scriptNode.remove();
@@ -3337,8 +3549,12 @@
               btnSaldo.style.background =
                 "linear-gradient(135deg, #ff9500 0%, #ff5e00 100%)";
               btnSaldo.style.color = "white";
+              btnSaldo.style.display = "flex";
+              btnSaldo.style.alignItems = "center";
+              btnSaldo.style.justifyContent = "center";
+              btnSaldo.style.gap = "8px";
               btnSaldo.onclick = copiarTextoSaldoRevendedorDefinitiva;
-              btnSaldo.innerText = "💵 COPIAR REPORTE DE SALDO";
+              btnSaldo.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> COPIAR REPORTE DE SALDO`;
               document
                 .getElementById("btnCopiarFichaVenta")
                 .insertAdjacentElement("afterend", btnSaldo);
@@ -3348,7 +3564,7 @@
               let montoDescontado = res.valorCobrado || 0;
               let distribuidorNombre = res.nombreRevendedor || telefono;
               window.textoSaldoRevendedorGlobal = `🔔 *NOTIFICACIÓN DE SALDO CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${distribuidorNombre}\n📉 *Débito por compra:* -$${Math.round(montoDescontado).toLocaleString("es-CO")}\n💰 *Saldo Disponible:* $${Math.round(res.saldoQuedante).toLocaleString("es-CO")}\n────────────────────\n✨ _¡Gracias por tu compra mayorista en Cybernet!_`;
-              if (btnSaldo) btnSaldo.style.display = "block";
+              if (btnSaldo) btnSaldo.style.display = "flex";
             } else {
               window.textoSaldoRevendedorGlobal = "";
               if (btnSaldo) btnSaldo.style.display = "none";
@@ -3409,8 +3625,13 @@
           .writeText(window.textoSaldoRevendedorGlobal)
           .then(function () {
             const originalText = btn.innerHTML;
-            btn.innerHTML = "¡SALDO COPIADO CON ÉXITO! 🚀";
+            btn.innerHTML = "¡SALDO COPIADO CON ÉXITO!";
             btn.style.background = "var(--ios-green)";
+
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Saldo copiado</span></div>`,
+            );
+
             setTimeout(function () {
               btn.innerHTML = originalText;
               btn.style.background =
@@ -3428,8 +3649,13 @@
           .writeText(texto)
           .then(function () {
             const originalText = btn.innerHTML;
-            btn.innerHTML = "¡FICHA COPIADA AL PORTAPAPELES! 🚀";
+            btn.innerHTML = "¡FICHA COPIADA!";
             btn.style.background = "var(--ios-green)";
+
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Ficha enviada al portapapeles</span></div>`,
+            );
+
             setTimeout(function () {
               btn.innerHTML = originalText;
               btn.style.background = "";
@@ -3444,8 +3670,13 @@
             textarea.remove();
 
             const originalText = btn.innerHTML;
-            btn.innerHTML = "¡FICHA COPIADA AL PORTAPAPELES! 🚀";
+            btn.innerHTML = "¡FICHA COPIADA!";
             btn.style.background = "var(--ios-green)";
+
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Ficha enviada al portapapeles</span></div>`,
+            );
+
             setTimeout(function () {
               btn.innerHTML = originalText;
               btn.style.background = "";
@@ -3470,29 +3701,7 @@
           );
           if (scriptNode) scriptNode.remove();
 
-          const btnGarantia = document.querySelector(
-            "button[onclick=\"window.location.href='garantia.html'\"]",
-          );
           let badge = document.getElementById("badgeGarantiasCount");
-
-          if (btnGarantia && !badge) {
-            badge = document.createElement("div");
-            badge.id = "badgeGarantiasCount";
-            badge.style.display = "none";
-            badge.style.position = "absolute";
-            badge.style.top = "-2px";
-            badge.style.right = "5px";
-            badge.style.background = "var(--ios-red)";
-            badge.style.color = "white";
-            badge.style.fontSize = "0.6rem";
-            badge.style.borderRadius = "50%";
-            badge.style.width = "14px";
-            badge.style.height = "14px";
-            badge.style.alignItems = "center";
-            badge.style.justifyContent = "center";
-            btnGarantia.style.position = "relative";
-            btnGarantia.appendChild(badge);
-          }
 
           if (res && res.status === "success" && badge) {
             const count = res.data.length;
@@ -3533,16 +3742,7 @@
       }
 
       function updateThemeIcon(theme) {
-        const btn = document.getElementById("theme-toggle");
-        if (!btn) {
-          return;
-        }
-
-        if (theme === "light") {
-          btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
-        } else {
-          btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
-        }
+        // Mantenido por si decides agregar el botón de tema luego
       }
 
       function toggleSearchAccountPanel() {
@@ -3563,12 +3763,12 @@
 
         if (query === "") {
           container.innerHTML =
-            '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⚠️ Por favor ingresa un número celular o nombre para buscar.</div>';
+            '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><br>Por favor ingresa un número celular o nombre para buscar.</div>';
           return;
         }
 
         container.innerHTML =
-          '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Escaneando base de datos de 18 plataformas en vivo...</div>';
+          '<div style="text-align:center; padding:30px; color:var(--ios-blue); font-size:0.9rem;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg><br>Escaneando base de datos de 18 plataformas en vivo...</div>';
 
         const oldScript = document.getElementById("cyber_search_node");
         if (oldScript) {
@@ -3587,7 +3787,7 @@
 
             if (data.length === 0) {
               container.innerHTML =
-                '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No se encontraron cuentas activas asociadas a "' +
+                '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>No se encontraron cuentas activas asociadas a "' +
                 query +
                 '".</div>';
               return;
@@ -3599,7 +3799,7 @@
               htmlCards += `
                           <div class="card-ios mb-1" style="padding: 15px; gap: 8px;">
                               <div class="flex-row-between" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px;">
-                                  <span style="color:var(--ios-blue); font-weight:700; font-size:0.9rem;">${item.plataforma}</span>
+                                  <span style="color:var(--ios-blue); font-weight:700; font-size:0.9rem; text-transform: uppercase;">${item.plataforma}</span>
                                   <span style="color:var(--text-secondary); font-size:0.8rem;">Vence: ${item.vencimiento}</span>
                               </div>
                               <div style="font-size:0.85rem; color:var(--text-secondary);">Cliente: <span style="color:var(--text-primary); font-weight:600;">${item.cliente}</span></div>
@@ -3611,7 +3811,10 @@
                               
                               <div style="font-size:0.85rem; color:var(--text-secondary);">Perfil: <span style="color:var(--text-primary); font-weight:700;">${item.perfil}</span> | PIN: <span style="color:var(--text-primary); font-weight:700;">${item.pin}</span></div>
                               
-                              <button class="btn-ios btn-secondary mt-1 w-100" onclick="copiarCuentaCompleta(this, ${i})">📋 COPIAR DATOS</button>
+                              <button class="btn-ios btn-secondary mt-1 w-100" style="display:flex; align-items:center; justify-content:center; gap:6px;" onclick="copiarCuentaCompleta(this, ${i})">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                COPIAR DATOS
+                              </button>
                           </div>
                         `;
             }
@@ -3621,7 +3824,7 @@
             if (res && res.message) {
               errMsg = res.message;
             }
-            container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red); font-weight:600; line-height:1.4;">❌ ${errMsg}</div>`;
+            container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red); font-weight:600; line-height:1.4;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>${errMsg}</div>`;
           }
         };
 
@@ -3678,10 +3881,15 @@
           .writeText(textoCompleto)
           .then(function () {
             let originalText = btn.innerHTML;
-            btn.innerHTML = "¡COPIADO CON ÉXITO! 🚀";
+            btn.innerHTML = "¡COPIADO CON ÉXITO!";
             btn.style.background = "var(--ios-green)";
             btn.style.color = "white";
             btn.style.borderColor = "transparent";
+
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Datos copiados</span></div>`,
+            );
+
             setTimeout(function () {
               btn.innerHTML = originalText;
               btn.style.background = "";
@@ -3698,10 +3906,15 @@
             textarea.remove();
 
             let originalText = btn.innerHTML;
-            btn.innerHTML = "¡COPIADO CON ÉXITO! 🚀";
+            btn.innerHTML = "¡COPIADO CON ÉXITO!";
             btn.style.background = "var(--ios-green)";
             btn.style.color = "white";
             btn.style.borderColor = "transparent";
+
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Datos copiados</span></div>`,
+            );
+
             setTimeout(function () {
               btn.innerHTML = originalText;
               btn.style.background = "";
@@ -3737,12 +3950,11 @@
 
           document.getElementById("inputFechaShift").valueAsDate = new Date();
 
-          // 🔥 Si ya cargó los turnos en segundo plano, los muestra de inmediato
           if (window.currentHorasStock && window.currentHorasStock.length > 0) {
             renderizarHorasEnPantalla("");
-            cargarHorasDesdeSheets(); // Actualiza de fondo por si hay cambios
+            cargarHorasDesdeSheets();
           } else {
-            forzarRefrescoDeHoras(); // Fallback de carga tradicional
+            forzarRefrescoDeHoras();
           }
         }
       }
@@ -3768,8 +3980,8 @@
         const fechaInput = document.getElementById("inputFechaShift").value;
 
         if (!vendedor || !horasStr || !fechaInput) {
-          alert(
-            "⚠️ Por favor completa todos los campos (Vendedor, Horas y Fecha).",
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> <span>Completa todos los campos.</span></div>`,
           );
           return;
         }
@@ -3782,7 +3994,7 @@
 
         const btn = document.getElementById("btnGuardarShiftManual");
         btn.disabled = true;
-        btn.innerText = "⏳ Enviando correo y guardando...";
+        btn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Guardando...`;
 
         const partsF = fechaInput.split("-");
         const fechaObj = new Date(
@@ -3815,8 +4027,8 @@
           body: JSON.stringify(paramObj),
         })
           .then(function () {
-            alert(
-              "✅ Las horas se han ingresado y calculado correctamente en Sheets.",
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Las horas se han ingresado correctamente.</span></div>`,
             );
             btn.disabled = false;
             btn.innerText = "Guardar Horas en Sheets";
@@ -3826,8 +4038,8 @@
             forzarRefrescoDeHoras();
           })
           .catch(function (e) {
-            alert(
-              "❌ Ocurrió un error enviando la petición. Verifica tu conexión.",
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Ocurrió un error. Verifica tu conexión.</span></div>`,
             );
             btn.disabled = false;
             btn.innerText = "Guardar Horas en Sheets";
@@ -3881,7 +4093,7 @@
         }
 
         btnSubmit.disabled = true;
-        btnSubmit.innerText = "⏳ Guardando...";
+        btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Guardando...`;
 
         const oldScript = document.getElementById("cyber_edit_shift_node");
         if (oldScript) oldScript.remove();
@@ -3923,7 +4135,7 @@
       function forzarRefrescoDeHoras() {
         haptic();
         document.getElementById("shiftsScrollArea").innerHTML =
-          '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando Base de Horas...</div>';
+          '<div style="text-align:center; padding:30px; color:var(--ios-blue); font-size:0.9rem;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg><br>Sincronizando Base de Horas...</div>';
         cargarHorasDesdeSheets();
       }
 
@@ -3969,11 +4181,10 @@
           }
         } else {
           if (container) {
-            container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No se pudo cargar los turnos.</div>`;
+            container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>No se pudo cargar los turnos.</div>`;
           }
         }
       };
-
       function parseDate(fechaStr) {
         let stringLimpio = String(fechaStr || "").trim();
         if (!stringLimpio) return new Date();
@@ -4068,7 +4279,7 @@
 
         if (misHoras.length === 0) {
           container.innerHTML =
-            '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay turnos que coincidan con la búsqueda actual.</div>';
+            '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>No hay turnos que coincidan con la búsqueda actual.</div>';
           return;
         }
 
@@ -4231,7 +4442,7 @@
 
           let vendedorLabel = "";
           if (userFinal === "CAMILO") {
-            vendedorLabel = `<br><span style="color:var(--ios-blue); font-size:0.75rem; font-weight:bold;">👤 ${dInfo.vendedor}</span>`;
+            vendedorLabel = `<br><span style="color:var(--ios-blue); font-size:0.75rem; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ${dInfo.vendedor}</span>`;
           }
 
           let puedeEditar =
@@ -4252,7 +4463,7 @@
             if (userFinal === "CAMILO") {
               let targetInd = dInfo.vendedor + " el " + dInfo.fechaText;
               btnLiquidarIndividual = `
-                        <span style="cursor:pointer; font-size:1.1rem; margin-left:4px; vertical-align:middle; display:inline-block;" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Liquidar y Borrar este día">💵</span>`;
+                        <span style="cursor:pointer; font-size:1.1rem; margin-left:4px; vertical-align:middle; display:inline-block; color:var(--ios-green);" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Liquidar y Borrar este día"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path></svg></span>`;
             }
           }
 
@@ -4288,8 +4499,11 @@
           if (filasArray.length > 0) {
             btnLiquidarHTML = `
                     <div style="margin-top:20px; text-align:center;">
-                        <button class="btn-ios btn-danger w-100" onclick="ejecutarLiquidacion('${targetName}', '${filasStr}')">💵 LIQUIDAR PAGO (${targetName})</button>
-                        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">⚠️ Esto borrará estos ${filasArray.length} turnos de la base de datos.</p>
+                        <button class="btn-ios btn-danger w-100" style="display:flex; justify-content:center; align-items:center; gap:8px;" onclick="ejecutarLiquidacion('${targetName}', '${filasStr}')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path></svg>
+                            LIQUIDAR PAGO (${targetName})
+                        </button>
+                        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px; display:flex; align-items:center; justify-content:center; gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Esto borrará estos ${filasArray.length} turnos de la base de datos.</p>
                     </div>
                     `;
           }
@@ -4320,7 +4534,7 @@
 
         if (
           !confirm(
-            `⚠️ ATENCIÓN CAMILO: Estás a punto de LIQUIDAR y BORRAR DEFINITIVAMENTE ${count} turnos de ${nombreObjetivo}.\n\n¿Deseas continuar?`,
+            `ATENCIÓN CAMILO: Estás a punto de LIQUIDAR y BORRAR DEFINITIVAMENTE ${count} turnos de ${nombreObjetivo}.\n\n¿Deseas continuar?`,
           )
         ) {
           return;
@@ -4329,7 +4543,7 @@
         haptic();
         const container = document.getElementById("shiftsScrollArea");
         container.innerHTML =
-          '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Liquidando y borrando turnos en Sheets...</div>';
+          '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg><br>Liquidando y borrando turnos en Sheets...</div>';
 
         const oldScript = document.getElementById("cyber_liquidar_node");
         if (oldScript) oldScript.remove();
@@ -4339,14 +4553,16 @@
           if (scriptNode) scriptNode.remove();
 
           if (res && res.status === "success") {
-            alert(
-              `✅ Liquidación exitosa. Se borraron ${res.eliminadas} registros de la base de datos.`,
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Liquidación exitosa. Se borraron ${res.eliminadas} registros.</span></div>`,
             );
             forzarRefrescoDeHoras();
           } else {
             let errMsg = "Error al liquidar.";
             if (res && res.message) errMsg = res.message;
-            alert("❌ " + errMsg);
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>${errMsg}</span></div>`,
+            );
             forzarRefrescoDeHoras();
           }
         };
@@ -4375,19 +4591,17 @@
         overlay.classList.toggle("open");
 
         if (overlay.classList.contains("open")) {
-          // 🔥 Si ya cargó en segundo plano, renderiza al instante sin poner "Sincronizando..."
           if (window.currentCodesStock && window.currentCodesStock.length > 0) {
             renderizarCodigosEnPantalla();
             cargarCodigosDesdeGmail(true);
           } else {
-            forzarRefrescoDeCodigos(); // Fallback si aún no ha recuperado datos
+            forzarRefrescoDeCodigos();
           }
 
           autoRefreshCodesInterval = setInterval(function () {
             cargarCodigosDesdeGmail(true);
           }, 12000);
         } else {
-          // 🛑 Esto era lo que faltaba para apagar el reloj interno al cerrar el modal
           if (autoRefreshCodesInterval) {
             clearInterval(autoRefreshCodesInterval);
             autoRefreshCodesInterval = null;
@@ -4403,8 +4617,8 @@
           overlay.classList.remove("open");
         } else {
           window.isForcedChange = false;
-          document.getElementById("passwordModalTitle").innerText =
-            "🔑 Cambiar Contraseña";
+          document.getElementById("passwordModalTitle").innerHTML =
+            `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Actualización Obligatoria`;
           document.getElementById("passwordModalDesc").innerText =
             "Actualiza tu clave personal de acceso al sistema.";
           document.getElementById("oldPasswordForzado").style.display = "block";
@@ -4422,7 +4636,7 @@
       function forzarRefrescoDeCodigos() {
         haptic();
         document.getElementById("codesScrollArea").innerHTML =
-          '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando bandeja de Gmail...</div>';
+          '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg><br>Sincronizando bandeja de Gmail...</div>';
         cargarCodigosDesdeSheets(false);
       }
 
@@ -4438,7 +4652,7 @@
           window.cyberCodesTimeout = setTimeout(function () {
             const container = document.getElementById("codesScrollArea");
             if (container && container.innerHTML.includes("Sincronizando")) {
-              container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay códigos disponibles en este momento.</div>`;
+              container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>No hay códigos disponibles en este momento.</div>`;
             }
             isFetchingCodes = false;
           }, 12000);
@@ -4478,7 +4692,7 @@
             (container.innerHTML.includes("Sincronizando") ||
               container.children.length === 0)
           ) {
-            container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay códigos disponibles en este momento.</div>`;
+            container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>No hay códigos disponibles en este momento.</div>`;
           }
         }
       };
@@ -4489,7 +4703,7 @@
 
         if (window.currentCodesStock.length === 0) {
           container.innerHTML =
-            '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">⚠️ No hay códigos disponibles en este momento.</div>';
+            '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>No hay códigos disponibles en este momento.</div>';
           return;
         }
 
@@ -4502,12 +4716,15 @@
                   <div class="card-ios mb-1" style="padding: 15px; gap: 8px;">
                       <div class="flex-row-between" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px;">
                           <span style="color:${colColor}; font-weight:700; font-size:0.85rem; text-transform: uppercase;">${item.plataforma}</span>
-                          <span style="font-size:0.75rem; color:var(--text-secondary); font-family: monospace;">⏰ ${item.hora}</span>
+                          <span style="font-size:0.75rem; color:var(--text-secondary); font-family: monospace; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${item.hora}</span>
                       </div>
                       <div style="font-size:0.85rem; color:var(--text-secondary);">Cliente: <span style="color:var(--text-primary); font-weight:600;">${item.correo}</span></div>
                       <div style="font-size:0.85rem; color:var(--text-secondary);">Acción: <span style="color:var(--text-primary); font-weight:600;">${item.accion}</span></div>
                       <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:6px;">Código / Enlace: <span style="color:var(--ios-blue); font-weight:700; word-break: break-all;">${item.codigoLink}</span></div>
-                      <button class="btn-ios btn-secondary w-100" onclick="copiarMensajeRapidoGmail(this, ${i})">COPIAR MENSAJE</button>
+                      <button class="btn-ios btn-secondary w-100" style="display:flex; justify-content:center; align-items:center; gap:8px;" onclick="copiarMensajeRapidoGmail(this, ${i})">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        COPIAR MENSAJE
+                      </button>
                   </div>
                 `;
         }
@@ -4524,7 +4741,7 @@
           .writeText(item.copiadoRapido)
           .then(function () {
             const originalText = btn.innerHTML;
-            btn.innerHTML = "¡COPIADO CON ÉXITO!";
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> ¡COPIADO CON ÉXITO!`;
             btn.style.background = "var(--ios-green)";
             btn.style.color = "white";
             btn.style.borderColor = "transparent";
@@ -4543,6 +4760,19 @@
             textarea.select();
             document.execCommand("copy");
             textarea.remove();
+
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> ¡COPIADO CON ÉXITO!`;
+            btn.style.background = "var(--ios-green)";
+            btn.style.color = "white";
+            btn.style.borderColor = "transparent";
+
+            setTimeout(function () {
+              btn.innerHTML = originalText;
+              btn.style.background = "";
+              btn.style.color = "";
+              btn.style.borderColor = "";
+            }, 1500);
           });
       }
 
@@ -4756,7 +4986,7 @@
 
         if (!userInput || !passInput) return;
         submitBtn.disabled = true;
-        submitBtn.innerText = "⏳ Verificando en Sheets...";
+        submitBtn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Verificando...`;
 
         const oldScript = document.getElementById("cyber_login_node");
         if (oldScript) oldScript.remove();
@@ -4775,7 +5005,8 @@
           } else {
             let errMsg = "Credenciales incorrectas en la base de datos.";
             if (res && res.message) errMsg = res.message;
-            errorToast.innerText = "⚠️ " + errMsg;
+
+            errorToast.innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>${errMsg}</span></div>`;
             errorToast.style.display = "block";
             passElement.value = "";
           }
@@ -4810,7 +5041,7 @@
         const currentOperator = userInput.toUpperCase().trim();
         const shiftTimer = document.getElementById("shiftTimer");
         const cajaBtn = document.getElementById("btnCajaFinanzas");
-        const suspendidasBtn = document.getElementById("btnSuspendidas"); // 👈 Captura el nuevo botón
+        const suspendidasBtn = document.getElementById("btnSuspendidas");
 
         if (currentOperator === "CAMILO") {
           if (shiftTimer && shiftTimer.parentElement)
@@ -4822,7 +5053,7 @@
           if (cajaBtn)
             cajaBtn.style.setProperty("display", "flex", "important");
           if (suspendidasBtn)
-            suspendidasBtn.style.setProperty("display", "flex", "important"); // 👈 Te lo muestra a ti
+            suspendidasBtn.style.setProperty("display", "flex", "important");
         } else {
           if (shiftTimer && shiftTimer.parentElement)
             shiftTimer.parentElement.style.setProperty(
@@ -4833,7 +5064,7 @@
           if (cajaBtn)
             cajaBtn.style.setProperty("display", "none", "important");
           if (suspendidasBtn)
-            suspendidasBtn.style.setProperty("display", "none", "important"); // 👈 Se lo oculta a los vendedores
+            suspendidasBtn.style.setProperty("display", "none", "important");
         }
         inicializarWorkspace();
       }
@@ -4903,7 +5134,6 @@
         document.documentElement.setAttribute("data-theme", savedTheme);
         updateThemeIcon(savedTheme);
 
-        // 🧠 CACHÉ AUTOMÁTICO: Reconstruye las tarjetas cargadas en la sesión actual
         let cacheTurno = JSON.parse(
           sessionStorage.getItem("cyber_history_cargas") || "[]",
         );
@@ -5087,7 +5317,7 @@
       headerContainer.innerHTML = `
           <div class="card-ios w-100" style="max-width: 440px;">
             <h2 class="card-title text-center" style="justify-content:center;">${qrPrincipal.titulo}</h2>
-            <img src="${qrPrincipal.imagenUrl}" alt="QR" style="max-width:210px; width:100%; border-radius:16px; border:var(--glass-border); box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto;" onerror="this.style.display='none'; this.nextElementSibling.innerText='⚠️ Error cargando la llave QR. Revisa la conexión.'; this.nextElementSibling.style.color='var(--ios-red)';">
+            <img src="${qrPrincipal.imagenUrl}" alt="QR" style="max-width:210px; width:100%; border-radius:16px; border:var(--glass-border); box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto;" onerror="this.style.display='none'; this.nextElementSibling.innerText='Error cargando la llave QR. Revisa la conexión.'; this.nextElementSibling.style.color='var(--ios-red)';">
             <span class="text-secondary text-center" style="font-size:0.75rem; margin-top:-8px; font-weight:500;">(Mantén presionado o clic derecho para copiar imagen)</span>
             <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">COPIAR TEXTO</button>
           </div>
@@ -5130,7 +5360,7 @@
         const card = btn.closest(".card-ios");
         const originalText = btn.textContent;
 
-        btn.textContent = "¡COPIADO!";
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡COPIADO!`;
         btn.classList.remove("btn-secondary");
         btn.classList.add("btn-danger");
         card.style.borderColor = "var(--ios-red)";
@@ -5144,6 +5374,7 @@
           card.style.boxShadow = "var(--glass-shadow)";
         }, 1500);
       });
+
       function actualizarPerfilesLibres(manual = false) {
         if (manual) haptic();
 
@@ -5307,432 +5538,7 @@
           });
         }
       }
-
-      // =========================================================================
-      // 🛡️ MÓDULO INTEGRADO: CENTRO DE OPERACIONES DE GARANTÍAS
-      // =========================================================================
-      let isFetchingGarantias = false;
-
-      function toggleGarantiasPanel() {
-        haptic();
-        const overlay = document.getElementById("garantiasOverlay");
-        overlay.classList.toggle("open");
-
-        if (overlay.classList.contains("open")) {
-          cargarGarantias();
-        }
-      }
-
-      function verificarTipoProblema() {
-        const select = document.getElementById("repTipoProblema");
-        const textarea = document.getElementById("repDesc");
-
-        if (select.value === "OTRA") {
-          textarea.style.setProperty("display", "block", "important");
-          textarea.setAttribute("required", "true");
-          textarea.focus();
-        } else {
-          textarea.style.setProperty("display", "none", "important");
-          textarea.removeAttribute("required");
-          textarea.value = "";
-        }
-      }
-
-      function ejecutarReporte(e) {
-        e.preventDefault();
-        haptic();
-
-        const btnSubmit = document.getElementById("btnSubmitReporte");
-        const plataforma = document.getElementById("repPlataforma").value;
-        const correo = document.getElementById("repCorreo").value;
-        const clave = document.getElementById("repClave").value;
-        const tipoProblema = document.getElementById("repTipoProblema").value;
-        let descripcion = tipoProblema;
-
-        if (tipoProblema === "OTRA") {
-          descripcion = document.getElementById("repDesc").value.trim();
-        }
-
-        btnSubmit.disabled = true;
-        btnSubmit.innerText = "⏳ Enviando Reporte...";
-
-        const oldScript = document.getElementById("cyber_reporte_node");
-        if (oldScript) oldScript.remove();
-
-        window.procesarReporteSheets = function (res) {
-          const scriptNode = document.getElementById("cyber_reporte_node");
-          if (scriptNode) scriptNode.remove();
-
-          btnSubmit.disabled = false;
-          btnSubmit.innerText = "Enviar a Garantía";
-
-          if (res && res.status === "success") {
-            alert("🚀 " + (res.message || "Reporte ingresado correctamente."));
-            document.getElementById("formReportar").reset();
-            verificarTipoProblema();
-            cargarGarantias();
-            if (typeof actualizarBadgeGarantias === "function")
-              actualizarBadgeGarantias();
-          } else {
-            alert("❌ Error: " + (res ? res.message : "Desconocido"));
-          }
-        };
-
-        const scriptElement = document.createElement("script");
-        scriptElement.id = "cyber_reporte_node";
-        let queryParams = `?action=reportarGarantia&plataforma=${encodeURIComponent(plataforma)}&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}&descripcion=${encodeURIComponent(descripcion)}&callback=procesarReporteSheets&_ts=${Date.now()}`;
-        scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
-        document.body.appendChild(scriptElement);
-      }
-
-      function cargarGarantias() {
-        if (isFetchingGarantias) return;
-        isFetchingGarantias = true;
-
-        const container = document.getElementById("listaGarantias");
-        container.innerHTML =
-          '<div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">⏳ Sincronizando tickets...</div>';
-
-        const oldScript = document.getElementById("cyber_getgarantias_node");
-        if (oldScript) oldScript.remove();
-
-        window.procesarListaGarantiasSheets = function (res) {
-          isFetchingGarantias = false;
-          const scriptNode = document.getElementById("cyber_getgarantias_node");
-          if (scriptNode) scriptNode.remove();
-
-          if (res && res.status === "success") {
-            renderizarListaGarantiasDefinitiva(res.data);
-          } else {
-            container.innerHTML =
-              '<div style="text-align:center; padding:20px; color:var(--ios-red); font-weight:600; font-size:0.85rem;">❌ Error al sincronizar base de datos.</div>';
-          }
-        };
-
-        const scriptElement = document.createElement("script");
-        scriptElement.id = "cyber_getgarantias_node";
-        let queryParams = `?action=obtenerGarantias&callback=procesarListaGarantiasSheets&_ts=${Date.now()}`;
-        scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
-        document.body.appendChild(scriptElement);
-      }
-
-      function copiarTextoReporteGarantia(btn, texto) {
-        haptic();
-        navigator.clipboard.writeText(texto).then(() => {
-          const originalText = btn.innerHTML;
-          btn.innerHTML = "¡Copiado! ✓";
-          btn.style.background = "var(--ios-orange)";
-          btn.style.color = "#ffffff";
-          btn.style.transform = "scale(1.03)";
-          setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.style.background = "";
-            btn.style.color = "";
-            btn.style.transform = "scale(1)";
-          }, 1200);
-        });
-      }
-
-      function abrirModalResolverGarantia(fila, correo, plataforma) {
-        haptic();
-        document.getElementById("resolverFila").value = fila;
-        document.getElementById("resolverCorreoViejo").value = correo;
-        document.getElementById("resolverPlataforma").value = plataforma;
-        document.getElementById("resNuevoCorreo").value = correo;
-        document
-          .getElementById("resolverGarantiaOverlay")
-          .classList.add("open");
-      }
-
-      // 🔒 FUNCIÓN AGREGADA: Evita que el sistema colapse al cerrar o limpiar el modal
-      function cerrarModalResolver() {
-        haptic();
-        const overlay = document.getElementById("resolverGarantiaOverlay");
-        if (overlay) overlay.classList.remove("open");
-        const form = document.getElementById("formResolverGarantia");
-        if (form) form.reset();
-      }
-
-      // 🚀 MOTOR DE RESOLUCIÓN BLINDADO
-      function ejecutarResolverGarantia(e) {
-        if (e) e.preventDefault(); // 🛡️ Línea maestra: evita que la página se recargue bajo cualquier condición
-        haptic();
-
-        const btnSubmit = document.getElementById("btnSubmitResolver");
-        const fila = document.getElementById("resolverFila").value;
-        const plat = document.getElementById("resolverPlataforma").value;
-        const correoViejo = document.getElementById(
-          "resolverCorreoViejo",
-        ).value;
-        const nuevoCorreo = document.getElementById("resNuevoCorreo").value;
-        const nuevaClave = document.getElementById("resNuevaClave").value;
-
-        // 🛡️ Escudo de seguridad: Si no hay fila seleccionada, frena el envío para que no rompa nada
-        if (!fila || !plat) {
-          alert(
-            "⚠️ Error técnico: No se detectaron los datos del ticket original. Cierra el modal e intenta de nuevo.",
-          );
-          return;
-        }
-
-        btnSubmit.disabled = true;
-        btnSubmit.innerText = "⏳ Guardando Solución...";
-
-        const oldScript = document.getElementById("cyber_resolver_node");
-        if (oldScript) oldScript.remove();
-
-        window.procesarResolucionSheets = function (res) {
-          const scriptNode = document.getElementById("cyber_resolver_node");
-          if (scriptNode) scriptNode.remove();
-
-          btnSubmit.disabled = false;
-          btnSubmit.innerText = "Guardar y Resolver";
-
-          if (res && res.status === "success") {
-            alert("🚀 ¡Ticket solucionado con éxito en Google Sheets!");
-            cerrarModalResolver(); // Ahora sí se ejecutará de forma perfecta
-            cargarGarantias(); // Refresca automáticamente tu bandeja de reclamos activos
-          } else {
-            alert(
-              "❌ Error en Sheets: " +
-                (res ? res.message : "No se pudo actualizar el registro."),
-            );
-          }
-          delete window.procesarResolucionSheets;
-        };
-
-        const scriptElement = document.createElement("script");
-        scriptElement.id = "cyber_resolver_node";
-        scriptElement.src =
-          GOOGLE_SCRIPT_URL +
-          `?action=resolverGarantia&filaIndex=${encodeURIComponent(fila)}&plataforma=${encodeURIComponent(plat)}&correoViejo=${encodeURIComponent(correoViejo)}&nuevoCorreo=${encodeURIComponent(nuevoCorreo)}&nuevaClave=${encodeURIComponent(nuevaClave)}&callback=procesarResolucionSheets&_ts=${Date.now()}`;
-        document.body.appendChild(scriptElement);
-      }
-
-      // 🔒 BLINDAJE DE SCROLL: Congela el fondo si hay algún modal abierto
-      const observadorModalesScroll = new MutationObserver(() => {
-        const algunModalAbierto = document.querySelector(".overlay-ios.open");
-        if (algunModalAbierto) {
-          document.body.style.overflow = "hidden";
-        } else {
-          document.body.style.overflow = "";
-        }
-      });
-
-      // Activar el vigilante al cargar la página
-      document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll(".overlay-ios").forEach((modal) => {
-          observadorModalesScroll.observe(modal, {
-            attributes: true,
-            attributeFilter: ["class"],
-          });
-        });
-      });
-
-      // =========================================================================
-      // 🛡️ MOTOR OPERATIVO: CONTROL INTEGRADO DE GARANTÍAS (PROCESOS SHEETS)
-      // =========================================================================
-      function cargarGarantias() {
-        if (isFetchingGarantias) return;
-        isFetchingGarantias = true;
-        const container = document.getElementById("listaGarantias");
-        container.innerHTML =
-          '<div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">⏳ Sincronizando tickets...</div>';
-
-        if (document.getElementById("cyber_getgarantias_node"))
-          document.getElementById("cyber_getgarantias_node").remove();
-
-        window.procesarListaGarantiasSheets = function (res) {
-          isFetchingGarantias = false;
-          if (document.getElementById("cyber_getgarantias_node"))
-            document.getElementById("cyber_getgarantias_node").remove();
-          if (res && res.status === "success") {
-            renderizarListaGarantiasDefinitiva(res.data);
-          } else {
-            container.innerHTML =
-              '<div style="text-align:center; padding:20px; color:var(--ios-red); font-weight:600; font-size:0.85rem;">❌ Error al sincronizar base de datos.</div>';
-          }
-        };
-
-        const scriptElement = document.createElement("script");
-        scriptElement.id = "cyber_getgarantias_node";
-        scriptElement.src =
-          GOOGLE_SCRIPT_URL +
-          `?action=obtenerGarantias&callback=procesarListaGarantiasSheets&_ts=${Date.now()}`;
-        document.body.appendChild(scriptElement);
-      }
-
-      function renderizarListaGarantiasDefinitiva(data) {
-        const container = document.getElementById("listaGarantias");
-        if (!data || data.length === 0) {
-          container.innerHTML =
-            '<div style="text-align:center; padding:20px; color:var(--ios-green); font-weight:600; font-size:0.85rem;">✨ ¡Excelente! No hay tickets pendientes.</div>';
-          return;
-        }
-        let html = "";
-        data.forEach((item) => {
-          const textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${item.plataforma}\n📧 *Correo:* ${item.correo}\n🔑 *Clave:* ${item.clave}\n👤 *Proveedor:* ${item.proveedor}\n📅 *Fecha de Compra:* ${item.fechaCompra || "No Registrada"}\n💬 *Motivo:* ${item.desc}`;
-          const safeReporte = encodeURIComponent(textoReporte);
-          html += `
-                <div class="card-ios" style="padding: 12px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); display: flex; flex-direction: column; gap: 6px; margin-bottom:0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.06); padding-bottom: 4px;">
-                        <span style="color:var(--ios-blue); font-weight:800; font-size:0.9rem;">${item.plataforma}</span>
-                        <div style="font-size: 0.68rem; color: var(--text-secondary); text-align: right; line-height: 1.2;">Reporte: <b>${item.fecha}</b></div>
-                    </div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);">
-                        <div>📧 Correo: <span style="color:var(--text-primary); user-select:all;">${item.correo}</span></div>
-                        <div>🔐 Clave: <span style="color:var(--text-primary); user-select:all;">${item.clave}</span></div>
-                        <div>👤 Proveedor: <span style="color:var(--ios-orange); font-weight:600;">${item.proveedor || "Desconocido"}</span></div>
-                    </div>
-                    <div style="font-size: 0.78rem; background: rgba(0, 0, 0, 0.15); padding: 6px 10px; border-radius: 8px;">💬 ${item.desc}</div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn-ios btn-secondary" style="flex:1; padding: 6px; font-size:0.75rem; margin-bottom:0;" onclick="copiarTextoRapido(this, decodeURIComponent('${safeReporte}'))">Copiar Ficha</button>
-                        <button class="btn-ios btn-success" style="flex:1; padding: 6px; font-size:0.75rem; margin-bottom:0;" onclick="abrirModalResolverGarantia('${item.filaIndex}', '${item.correo}', '${item.plataforma}')">Resolver</button>
-                    </div>
-                </div>`;
-        });
-        container.innerHTML = html;
-      }
-
-      function abrirModalResolverGarantia(fila, correo, plataforma) {
-        haptic();
-        document.getElementById("resolverFila").value = fila;
-        document.getElementById("resolverCorreoViejo").value = correo;
-        document.getElementById("resolverPlataforma").value = plataforma;
-        document.getElementById("resNuevoCorreo").value = correo;
-        document
-          .getElementById("resolverGarantiaOverlay")
-          .classList.add("open");
-      }
-      function actualizarPerfilesLibres(manual = false) {
-        if (manual) haptic();
-        const container = document.getElementById(
-          "contenedorPlataformasLibres",
-        );
-        const callbackName = "cb_libres_" + Date.now();
-
-        window[callbackName] = function (res) {
-          if (res && res.status === "success" && container) {
-            let htmlPildoras = "";
-            if (res.data.length === 0) {
-              htmlPildoras =
-                '<span class="badge-ios badge-danger">Sin inventario</span>';
-              container.innerHTML = htmlPildoras;
-            } else {
-              res.data.forEach((item) => {
-                let colorBg, colorTxt, borderCol;
-                if (item.libres > 2) {
-                  colorBg = "rgba(10, 132, 255, 0.15)";
-                  colorTxt = "#64d2ff";
-                  borderCol = "rgba(10, 132, 255, 0.3)";
-                } else if (item.libres === 2) {
-                  colorBg = "rgba(255, 149, 0, 0.15)";
-                  colorTxt = "#ff9f0a";
-                  borderCol = "rgba(255, 149, 0, 0.4)";
-                } else {
-                  colorBg = "rgba(255, 69, 58, 0.15)";
-                  colorTxt = "#ff453a";
-                  borderCol = "rgba(255, 69, 58, 0.4)";
-                }
-                htmlPildoras += `<div style="background: ${colorBg}; color: ${colorTxt}; padding: 4px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: 1px solid ${borderCol}; display: flex; align-items: center; gap: 6px; flex-shrink: 0;"><span style="text-transform: uppercase; letter-spacing: 0.5px;">${item.plat}</span><span style="font-size: 0.95rem; color: #ffffff;">${item.libres}</span></div>`;
-              });
-              container.innerHTML = htmlPildoras + htmlPildoras;
-            }
-          }
-          delete window[callbackName];
-          const scriptNode = document.getElementById("node_" + callbackName);
-          if (scriptNode) scriptNode.remove();
-        };
-
-        const script = document.createElement("script");
-        script.id = "node_" + callbackName;
-        script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPerfilesLibres&callback=${callbackName}`;
-        document.body.appendChild(script);
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(() => {
-          actualizarPerfilesLibres(false);
-        }, 1000);
-        setInterval(() => {
-          actualizarPerfilesLibres(false);
-        }, 300000);
-        renderizarPlataformasVenta();
-      });
-
-      function ejecutarAutoPulsoTiempo() {
-        let lastSync =
-          parseInt(sessionStorage.getItem("cyber_last_sync_time"), 10) ||
-          Date.now();
-        let ahora = Date.now();
-        let deltaMs = ahora - lastSync;
-        let totalSeconds = Math.floor(deltaMs / 1000);
-        let hours = Math.floor(totalSeconds / 3600);
-        let minutes = Math.floor((totalSeconds % 3600) / 60);
-        let seconds = totalSeconds % 60;
-        let tiempoTexto =
-          String(hours).padStart(2, "0") +
-          ":" +
-          String(minutes).padStart(2, "0") +
-          ":" +
-          String(seconds).padStart(2, "0");
-        const activeUser = sessionStorage.getItem("active_staff") || "Vendedor";
-        sessionStorage.setItem("cyber_last_sync_time", ahora);
-
-        fetch(GOOGLE_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "notificarCorreo",
-            tipo: "pulso",
-            user: activeUser,
-            tiempoTrabajado: tiempoTexto,
-          }),
-        }).catch(() =>
-          sessionStorage.setItem("cyber_last_sync_time", lastSync),
-        );
-      }
-
-      function ejecutarCierreSesionDefinitivo() {
-        if (
-          confirm(
-            "¿Estás seguro de que deseas cerrar tu sesión e informar tu turno?",
-          )
-        ) {
-          let lastSync =
-            parseInt(sessionStorage.getItem("cyber_last_sync_time"), 10) ||
-            Date.now();
-          let deltaMs = Date.now() - lastSync;
-          let totalSeconds = Math.floor(deltaMs / 1000);
-          let hours = Math.floor(totalSeconds / 3600);
-          let minutes = Math.floor((totalSeconds % 3600) / 60);
-          let seconds = totalSeconds % 60;
-          let tiempoTexto =
-            String(hours).padStart(2, "0") +
-            ":" +
-            String(minutes).padStart(2, "0") +
-            ":" +
-            String(seconds).padStart(2, "0");
-          const activeUser =
-            sessionStorage.getItem("active_staff") || "Vendedor";
-
-          fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "notificarCorreo",
-              tipo: "cierre",
-              user: activeUser,
-              tiempoTrabajado: tiempoTexto,
-            }),
-          }).then(() => {
-            sessionStorage.clear();
-            window.location.reload();
-          });
-        }
-      }
     </script>
   </body>
 </html>
+
