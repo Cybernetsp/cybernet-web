@@ -3681,14 +3681,15 @@ if (filtroBusqueda !== "") {
             document.getElementById('resolverGarantiaOverlay').classList.add('open');
         }
 
-        // 🔓 FUNCIÓN DE CONTROL: Cierra el modal de resolución (¡Esta te faltaba agregarla!)
+        // 🔒 FUNCIÓN AGREGADA: Evita que el sistema colapse al cerrar o limpiar el modal
         function cerrarModalResolver() {
             haptic();
             const overlay = document.getElementById('resolverGarantiaOverlay');
             if (overlay) overlay.classList.remove('open');
-            const form = document.getElementById('formFormResolverGarantia');
+            const form = document.getElementById('formResolverGarantia');
             if (form) form.reset();
         }
+    </script>
 
         // 🚀 MOTOR DE RESOLUCIÓN BLINDADO
         function ejecutarResolverGarantia(e) {
