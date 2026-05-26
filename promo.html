@@ -1,327 +1,289 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es" data-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Cybernet Staff - Promo</title>
-    
-    <link rel="icon" type="image/jpeg" href="logo.jpeg">
-    <meta name="theme-color" content="#0b0e14">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <link rel="stylesheet" href="global.css">
-    
-    <style>
-        /* Ajustes específicos para el espacio de trabajo de promociones */
-        .workspace-promo {
-            max-width: 900px;
-            width: 100%;
-        }
 
-        /* 📱 ESTILOS ADAPTADOS PARA CLASES GENERADAS POR JS */
-        .blocks-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            width: 100%;
-        }
+    <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+    <meta name="theme-color" content="#0b0e14" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
 
-        /* Botones de Bloques de paginación dinámicos */
-        .btn-block {
-            flex: 1;
-            min-width: 140px;
-            background: rgba(48, 209, 88, 0.12);
-            border: 1px solid rgba(48, 209, 88, 0.3);
-            color: var(--ios-green);
-            padding: 14px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition-spring);
-        }
-        .btn-block:hover { background: rgba(48, 209, 88, 0.2); }
-        .btn-block.active {
-            background: var(--ios-green);
-            color: white;
-            border-color: var(--ios-green);
-            box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3);
-        }
-
-        /* Rejilla de contactos */
-        .contacts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 15px;
-            width: 100%;
-        }
-
-        /* Tarjetas de contacto individuales */
-        .contact-card {
-            background: var(--input-bg);
-            border: var(--glass-border);
-            border-radius: 16px;
-            padding: 14px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition-spring);
-        }
-        .contact-card:hover { background: var(--input-focus); border-color: rgba(255,255,255,0.1); }
-
-        .contact-left, .contact-right { display: flex; align-items: center; gap: 15px; }
-
-        .index-badge {
-            background: rgba(255,255,255,0.05);
-            color: var(--text-secondary);
-            width: 30px; height: 30px;
-            display: flex; justify-content: center; align-items: center;
-            border-radius: 50%; font-size: 0.85rem; font-weight: 700;
-        }
-        [data-theme="light"] .index-badge { background: rgba(0,0,0,0.05); }
-
-        .phone-text {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--ios-blue);
-            font-family: monospace;
-            letter-spacing: 0.5px;
-            transition: var(--transition-spring);
-        }
-
-        /* Estado del número copiado (Tachado elegante) */
-        .crossed-out {
-            text-decoration: line-through;
-            opacity: 0.35;
-            color: var(--text-secondary);
-        }
-
-        /* Icono de copiado rápido */
-        .btn-icon {
-            background: rgba(255,255,255,0.05);
-            border: var(--glass-border);
-            color: var(--text-secondary);
-            width: 40px; height: 40px;
-            border-radius: 12px;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: var(--transition-spring);
-        }
-        [data-theme="light"] .btn-icon { background: rgba(0,0,0,0.03); }
-        .btn-icon:hover { color: var(--text-primary); background: rgba(255,255,255,0.1); }
-        
-        .btn-icon.success {
-            background: rgba(48, 209, 88, 0.2) !important;
-            color: #30d158 !important;
-            border-color: rgba(48, 209, 88, 0.4) !important;
-        }
-
-        .status-empty {
-            text-align: center; padding: 40px;
-            color: var(--text-secondary); font-size: 1rem;
-            font-weight: 500; grid-column: 1 / -1;
-            width: 100%;
-        }
-
-        @media (max-width: 600px) {
-            .global-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-            .btn-block { min-width: 100%; }
-            .phone-text { font-size: 0.95rem; }
-        }
-    </style>
-</head>
-<body>
-
+    <link rel="stylesheet" href="global.css" />
+  </head>
+  <body>
     <div class="bg-orb bg-orb-1"></div>
     <div class="bg-orb bg-orb-2"></div>
 
     <header class="global-header" id="globalHeader">
-        <div class="flex-row" id="staffStatusBar">
-            <div class="badge-ios badge-blue">
-                <span id="staffSessionName">USER</span> • PROMO
-            </div>
-            <div class="badge-ios badge-green" id="timerBadgeContainer">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span id="shiftTimer">00:00:00</span>
-            </div>
+      <div class="flex-row" id="staffStatusBar">
+        <div class="badge-ios badge-blue">
+          <span id="staffSessionName">USER</span> • PROMO
         </div>
-        <button class="btn-ios btn-secondary" onclick="window.location.href='admin.html'">
-            ← Volver
-        </button>
+        <div class="badge-ios badge-green" id="timerBadgeContainer">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span id="shiftTimer">00:00:00</span>
+        </div>
+      </div>
+      <button
+        class="btn-ios btn-secondary"
+        onclick="window.location.href = 'admin.html'"
+      >
+        ← Volver
+      </button>
     </header>
 
     <main class="main-workspace workspace-promo">
-        
-        <div class="card-ios">
-            <div class="flex-row-between mb-1" style="border-bottom: 0.5px solid rgba(255,255,255,0.08); padding-bottom: 15px;">
-                <h2 class="card-title">Generador de Promociones</h2>
-                <div class="badge-ios badge-blue" id="badgeTotalClients">0 clientes</div>
-            </div>
-            
-            <button id="btnFetchContacts" class="btn-ios btn-primary w-100 mb-1" style="padding: 16px; font-size: 1.05rem;" onclick="iniciarSincronizacion()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                </svg>
-                Generar Promo
-            </button>
-
-            <div id="blockButtonsContainer" class="blocks-container"></div>
+      <div class="card-ios">
+        <div
+          class="flex-row-between mb-1"
+          style="
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 15px;
+          "
+        >
+          <h2 class="card-title">Generador de Promociones</h2>
+          <div class="badge-ios badge-blue" id="badgeTotalClients">
+            0 clientes
+          </div>
         </div>
 
-        <div class="card-ios">
-            <div class="card-title mb-1" style="border-bottom: 0.5px solid rgba(255,255,255,0.08); padding-bottom: 15px;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                Lista de Mensajes
-            </div>
+        <button
+          id="btnFetchContacts"
+          class="btn-ios btn-primary w-100 mb-1"
+          style="padding: 16px; font-size: 1.05rem"
+          onclick="iniciarSincronizacion()"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="margin-right: 6px; vertical-align: middle"
+          >
+            <path
+              d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+            ></path>
+          </svg>
+          Generar Promo
+        </button>
 
-            <div id="promoGridContainer" class="contacts-grid">
-                <div class="status-empty">
-                    Presiona "Generar Promo" para extraer los clientes de la base de datos.
-                </div>
-            </div>
+        <div id="blockButtonsContainer" class="blocks-container"></div>
+      </div>
+
+      <div class="card-ios">
+        <div
+          class="card-title mb-1"
+          style="
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 15px;
+          "
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Lista de Mensajes
         </div>
 
+        <div id="promoGridContainer" class="contacts-grid">
+          <div class="status-empty">
+            Presiona "Generar Promo" para extraer los clientes de la base de
+            datos.
+          </div>
+        </div>
+      </div>
     </main>
 
-    <div id="globalToast" class="overlay-ios" style="background:transparent; pointer-events:none; z-index:10000;">
-        <div style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:rgba(30,30,35,0.95); backdrop-filter:blur(15px); border:var(--glass-border); color:white; padding:12px 24px; border-radius:30px; font-size:0.9rem; font-weight:600; box-shadow:var(--glass-shadow); display:flex; align-items:center; gap:8px;">
-            <span id="toastIcon">✅</span>
-            <span id="toastText">Acción completada</span>
-        </div>
+    <div
+      id="globalToast"
+      class="overlay-ios"
+      style="background: transparent; pointer-events: none; z-index: 10000"
+    >
+      <div
+        style="
+          position: fixed;
+          bottom: 30px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(30, 30, 35, 0.95);
+          backdrop-filter: blur(15px);
+          border: var(--glass-border);
+          color: white;
+          padding: 12px 24px;
+          border-radius: 30px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          box-shadow: var(--glass-shadow);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        "
+      >
+        <span id="toastIcon">✅</span>
+        <span id="toastText">Acción completada</span>
+      </div>
     </div>
 
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
-        
-        let isFetching = false;
-        let globalContacts = []; 
-        let currentBlockIndex = 0;
-        const CHUNK_SIZE = 10; 
+      const GOOGLE_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
 
-        let timerInterval = null;
-        let temporizadorInactividad = null;
-        const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;
-        let isTimerPaused = false;
+      let isFetching = false;
+      let globalContacts = [];
+      let currentBlockIndex = 0;
+      const CHUNK_SIZE = 10;
 
-        function hapticFeedback() { 
-            if (navigator.vibrate) navigator.vibrate(15); 
-        }
+      let timerInterval = null;
+      let temporizadorInactividad = null;
+      const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;
+      let isTimerPaused = false;
 
-        function showToast(message, isError = false) {
-            const toast = document.getElementById('globalToast');
-            const toastText = document.getElementById('toastText');
-            const toastIcon = document.getElementById('toastIcon');
+      function hapticFeedback() {
+        if (navigator.vibrate) navigator.vibrate(15);
+      }
 
-            toastText.innerText = message;
-            toastIcon.innerText = isError ? "❌" : "✅";
-            toast.classList.add('open');
-            setTimeout(() => { toast.classList.remove('open'); }, 3000);
-        }
+      function showToast(message, isError = false) {
+        const toast = document.getElementById("globalToast");
+        const toastText = document.getElementById("toastText");
+        const toastIcon = document.getElementById("toastIcon");
 
-        function iniciarSincronizacion() {
-            if (isFetching) return;
-            
-            hapticFeedback();
-            isFetching = true;
-            globalContacts = [];
-            currentBlockIndex = 0;
-            
-            const btn = document.getElementById('btnFetchContacts');
-            const badge = document.getElementById('badgeTotalClients');
-            const blockContainer = document.getElementById('blockButtonsContainer');
-            const gridContainer = document.getElementById('promoGridContainer');
+        toastText.innerText = message;
+        toastIcon.innerText = isError ? "❌" : "✅";
+        toast.classList.add("open");
+        setTimeout(() => {
+          toast.classList.remove("open");
+        }, 3000);
+      }
 
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Generando Promo...';
-            blockContainer.innerHTML = "";
-            gridContainer.innerHTML = '<div class="status-empty">⏳ Extrayendo clientes del historial y aplicando motor 60/40...</div>';
-            badge.innerText = "0 clientes";
+      function iniciarSincronizacion() {
+        if (isFetching) return;
 
-            const oldScript = document.getElementById('cyber_promo_node');
-            if (oldScript) oldScript.remove();
+        hapticFeedback();
+        isFetching = true;
+        globalContacts = [];
+        currentBlockIndex = 0;
 
-            window.procesarSincronizacion = function(res) {
-                isFetching = false;
-                btn.disabled = false;
-                btn.innerHTML = `
+        const btn = document.getElementById("btnFetchContacts");
+        const badge = document.getElementById("badgeTotalClients");
+        const blockContainer = document.getElementById("blockButtonsContainer");
+        const gridContainer = document.getElementById("promoGridContainer");
+
+        btn.disabled = true;
+        btn.innerHTML = "⏳ Generando Promo...";
+        blockContainer.innerHTML = "";
+        gridContainer.innerHTML =
+          '<div class="status-empty">⏳ Extrayendo clientes del historial y aplicando motor 60/40...</div>';
+        badge.innerText = "0 clientes";
+
+        const oldScript = document.getElementById("cyber_promo_node");
+        if (oldScript) oldScript.remove();
+
+        window.procesarSincronizacion = function (res) {
+          isFetching = false;
+          btn.disabled = false;
+          btn.innerHTML = `
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;">
                         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                     </svg>
                     Generar Promo
                 `;
 
-                const scriptNode = document.getElementById('cyber_promo_node');
-                if (scriptNode) scriptNode.remove();
+          const scriptNode = document.getElementById("cyber_promo_node");
+          if (scriptNode) scriptNode.remove();
 
-                if (res && res.status === "success") {
-                    let data = res.data;
-                    
-                    if (!data || data.length === 0) {
-                        gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">⚠️ No quedan clientes disponibles en el Histórico.</div>`;
-                        return;
-                    }
+          if (res && res.status === "success") {
+            let data = res.data;
 
-                    let uniqueMap = new Map();
-                    for (let i = 0; i < data.length; i++) {
-                        let item = data[i];
-                        let tel = item.tel;
-                        if (tel && tel.trim() !== "" && !uniqueMap.has(tel.trim())) {
-                            uniqueMap.set(tel.trim(), item);
-                        }
-                    }
+            if (!data || data.length === 0) {
+              gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">⚠️ No quedan clientes disponibles en el Histórico.</div>`;
+              return;
+            }
 
-                    globalContacts = Array.from(uniqueMap.values()).slice(0, 20);
-                    
-                    if (globalContacts.length === 0) {
-                        gridContainer.innerHTML = `<div class="status-empty">⚠️ Registros inválidos.</div>`;
-                        return;
-                    }
+            let uniqueMap = new Map();
+            for (let i = 0; i < data.length; i++) {
+              let item = data[i];
+              let tel = item.tel;
+              if (tel && tel.trim() !== "" && !uniqueMap.has(tel.trim())) {
+                uniqueMap.set(tel.trim(), item);
+              }
+            }
 
-                    badge.innerText = `${globalContacts.length} clientes`;
-                    showToast(`Éxito. Se prepararon ${globalContacts.length} contactos listos.`);
+            globalContacts = Array.from(uniqueMap.values()).slice(0, 20);
 
-                    crearBotonesBloques();
+            if (globalContacts.length === 0) {
+              gridContainer.innerHTML = `<div class="status-empty">⚠️ Registros inválidos.</div>`;
+              return;
+            }
 
-                } else {
-                    let errMsg = "Error de conexión.";
-                    if (res && res.message) errMsg = res.message;
-                    gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">❌ ${errMsg}</div>`;
-                }
-            };
+            badge.innerText = `${globalContacts.length} clientes`;
+            showToast(
+              `Éxito. Se prepararon ${globalContacts.length} contactos listos.`,
+            );
 
-            const scriptElement = document.createElement('script');
-            scriptElement.id = 'cyber_promo_node';
-            let queryParams = "?action=generarPromosWeb&callback=procesarSincronizacion&_ts=" + Date.now();
-            scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
-            document.body.appendChild(scriptElement);
-        }
+            crearBotonesBloques();
+          } else {
+            let errMsg = "Error de conexión.";
+            if (res && res.message) errMsg = res.message;
+            gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">❌ ${errMsg}</div>`;
+          }
+        };
 
-        function crearBotonesBloques() {
-            const blockContainer = document.getElementById('blockButtonsContainer');
-            blockContainer.innerHTML = "";
+        const scriptElement = document.createElement("script");
+        scriptElement.id = "cyber_promo_node";
+        let queryParams =
+          "?action=generarPromosWeb&callback=procesarSincronizacion&_ts=" +
+          Date.now();
+        scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+        document.body.appendChild(scriptElement);
+      }
 
-            const totalBlocks = Math.ceil(globalContacts.length / CHUNK_SIZE);
+      function crearBotonesBloques() {
+        const blockContainer = document.getElementById("blockButtonsContainer");
+        blockContainer.innerHTML = "";
 
-            for (let i = 0; i < totalBlocks; i++) {
-                let start = (i * CHUNK_SIZE) + 1;
-                let end = Math.min((i + 1) * CHUNK_SIZE, globalContacts.length);
-                
-                const btn = document.createElement('button');
-                btn.className = `btn-block ${i === 0 ? 'active' : ''}`;
-                btn.id = `btnBlock_${i}`;
-                btn.innerHTML = `
+        const totalBlocks = Math.ceil(globalContacts.length / CHUNK_SIZE);
+
+        for (let i = 0; i < totalBlocks; i++) {
+          let start = i * CHUNK_SIZE + 1;
+          let end = Math.min((i + 1) * CHUNK_SIZE, globalContacts.length);
+
+          const btn = document.createElement("button");
+          btn.className = `btn-block ${i === 0 ? "active" : ""}`;
+          btn.id = `btnBlock_${i}`;
+          btn.innerHTML = `
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="3" width="7" height="7"></rect>
                         <rect x="14" y="3" width="7" height="7"></rect>
@@ -330,39 +292,41 @@
                     </svg>
                     Bloque (${start}-${end})
                 `;
-                
-                btn.onclick = () => mostrarBloque(i);
-                blockContainer.appendChild(btn);
-            }
 
-            mostrarBloque(0);
+          btn.onclick = () => mostrarBloque(i);
+          blockContainer.appendChild(btn);
         }
 
-        function mostrarBloque(blockIndex) {
-            hapticFeedback();
-            currentBlockIndex = blockIndex;
+        mostrarBloque(0);
+      }
 
-            const allBtns = document.querySelectorAll('.btn-block');
-            allBtns.forEach(b => b.classList.remove('active'));
-            const activeBtn = document.getElementById(`btnBlock_${blockIndex}`);
-            if (activeBtn) activeBtn.classList.add('active');
+      function mostrarBloque(blockIndex) {
+        hapticFeedback();
+        currentBlockIndex = blockIndex;
 
-            const startIndex = blockIndex * CHUNK_SIZE;
-            const endIndex = startIndex + CHUNK_SIZE;
-            const loteActual = globalContacts.slice(startIndex, endIndex);
+        const allBtns = document.querySelectorAll(".btn-block");
+        allBtns.forEach((b) => b.classList.remove("active"));
+        const activeBtn = document.getElementById(`btnBlock_${blockIndex}`);
+        if (activeBtn) activeBtn.classList.add("active");
 
-            const gridContainer = document.getElementById('promoGridContainer');
-            gridContainer.innerHTML = "";
+        const startIndex = blockIndex * CHUNK_SIZE;
+        const endIndex = startIndex + CHUNK_SIZE;
+        const loteActual = globalContacts.slice(startIndex, endIndex);
 
-            loteActual.forEach((item, localIndex) => {
-                const absoluteIndex = startIndex + localIndex;
-                const visualIndex = absoluteIndex + 1; 
+        const gridContainer = document.getElementById("promoGridContainer");
+        gridContainer.innerHTML = "";
 
-                const safeMessage = item.mensaje.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        loteActual.forEach((item, localIndex) => {
+          const absoluteIndex = startIndex + localIndex;
+          const visualIndex = absoluteIndex + 1;
 
-                const card = document.createElement('div');
-                card.className = 'contact-card';
-                card.innerHTML = `
+          const safeMessage = item.mensaje
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+
+          const card = document.createElement("div");
+          card.className = "contact-card";
+          card.innerHTML = `
                     <div class="contact-left">
                         <div class="index-badge">${visualIndex}</div>
                         <div class="phone-text" id="phone_text_${absoluteIndex}">${item.tel}</div>
@@ -376,120 +340,130 @@
                         </button>
                     </div>
                 `;
-                gridContainer.appendChild(card);
-            });
-        }
+          gridContainer.appendChild(card);
+        });
+      }
 
-        function copiarAlPortapapeles(texto, btnElement, indexToCross) {
-            hapticFeedback();
-            navigator.clipboard.writeText(texto).then(() => {
-                efectoBotonExito(btnElement);
-                marcarNumeroComoEnviado(indexToCross);
-            }).catch(() => {
-                const textarea = document.createElement('textarea');
-                textarea.value = texto;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                window.getSelection().removeAllRanges();
-                efectoBotonExito(btnElement);
-                marcarNumeroComoEnviado(indexToCross);
-            });
-        }
+      function copiarAlPortapapeles(texto, btnElement, indexToCross) {
+        hapticFeedback();
+        navigator.clipboard
+          .writeText(texto)
+          .then(() => {
+            efectoBotonExito(btnElement);
+            marcarNumeroComoEnviado(indexToCross);
+          })
+          .catch(() => {
+            const textarea = document.createElement("textarea");
+            textarea.value = texto;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            window.getSelection().removeAllRanges();
+            efectoBotonExito(btnElement);
+            marcarNumeroComoEnviado(indexToCross);
+          });
+      }
 
-        function marcarNumeroComoEnviado(index) {
-            const phoneEl = document.getElementById('phone_text_' + index);
-            if (phoneEl) {
-                phoneEl.classList.add('crossed-out');
-            }
+      function marcarNumeroComoEnviado(index) {
+        const phoneEl = document.getElementById("phone_text_" + index);
+        if (phoneEl) {
+          phoneEl.classList.add("crossed-out");
         }
+      }
 
-        function efectoBotonExito(btn) {
-            const originalHTML = btn.innerHTML;
-            btn.classList.add('success');
-            btn.innerHTML = `
+      function efectoBotonExito(btn) {
+        const originalHTML = btn.innerHTML;
+        btn.classList.add("success");
+        btn.innerHTML = `
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
             `;
 
-            setTimeout(() => {
-                btn.classList.remove('success');
-                btn.innerHTML = originalHTML;
-            }, 1500);
+        setTimeout(() => {
+          btn.classList.remove("success");
+          btn.innerHTML = originalHTML;
+        }, 1500);
+      }
+
+      function startShiftTimer() {
+        if (!sessionStorage.getItem("cyber_shift_start_time")) {
+          sessionStorage.setItem("cyber_shift_start_time", Date.now());
         }
-
-        function startShiftTimer() {
-            if (!sessionStorage.getItem('cyber_shift_start_time')) {
-                sessionStorage.setItem('cyber_shift_start_time', Date.now());
-            }
-            if (!sessionStorage.getItem('cyber_shift_accumulated_time')) {
-                sessionStorage.setItem('cyber_shift_accumulated_time', 0);
-            }
-            if (timerInterval) clearInterval(timerInterval);
-
-            timerInterval = setInterval(function() {
-                if (isTimerPaused) return; 
-                
-                let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
-                let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
-                if (isNaN(accumulated)) accumulated = 0;
-                
-                let elapsed = Date.now() - startTime;
-                let totalMs = accumulated + elapsed;
-                
-                let totalSeconds = Math.floor(totalMs / 1000);
-                let hours = Math.floor(totalSeconds / 3600);
-                let minutes = Math.floor((totalSeconds % 3600) / 60);
-                let seconds = totalSeconds % 60;
-
-                let hStr = String(hours).padStart(2, '0');
-                let mStr = String(minutes).padStart(2, '0');
-                let sStr = String(seconds).padStart(2, '0');
-
-                let stElement = document.getElementById('shiftTimer');
-                if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
-            }, 1000);
+        if (!sessionStorage.getItem("cyber_shift_accumulated_time")) {
+          sessionStorage.setItem("cyber_shift_accumulated_time", 0);
         }
+        if (timerInterval) clearInterval(timerInterval);
 
-        function resetearInactividad() {
-            if (!sessionStorage.getItem('active_staff')) return;
-            if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
-            temporizadorInactividad = setTimeout(() => {
-                if (sessionStorage.getItem('active_staff')) {
-                    alert("⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.");
-                    window.location.href = 'admin.html'; 
-                }
-            }, INACTIVITY_LOGOUT_LIMIT);
+        timerInterval = setInterval(function () {
+          if (isTimerPaused) return;
+
+          let startTime = parseInt(
+            sessionStorage.getItem("cyber_shift_start_time"),
+          );
+          let accumulated = parseInt(
+            sessionStorage.getItem("cyber_shift_accumulated_time"),
+          );
+          if (isNaN(accumulated)) accumulated = 0;
+
+          let elapsed = Date.now() - startTime;
+          let totalMs = accumulated + elapsed;
+
+          let totalSeconds = Math.floor(totalMs / 1000);
+          let hours = Math.floor(totalSeconds / 3600);
+          let minutes = Math.floor((totalSeconds % 3600) / 60);
+          let seconds = totalSeconds % 60;
+
+          let hStr = String(hours).padStart(2, "0");
+          let mStr = String(minutes).padStart(2, "0");
+          let sStr = String(seconds).padStart(2, "0");
+
+          let stElement = document.getElementById("shiftTimer");
+          if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
+        }, 1000);
+      }
+
+      function resetearInactividad() {
+        if (!sessionStorage.getItem("active_staff")) return;
+        if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
+        temporizadorInactividad = setTimeout(() => {
+          if (sessionStorage.getItem("active_staff")) {
+            alert(
+              "⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.",
+            );
+            window.location.href = "admin.html";
+          }
+        }, INACTIVITY_LOGOUT_LIMIT);
+      }
+
+      function iniciarControlInactividad() {
+        window.addEventListener("mousemove", resetearInactividad);
+        window.addEventListener("keypress", resetearInactividad);
+        window.addEventListener("click", resetearInactividad);
+        window.addEventListener("scroll", resetearInactividad);
+        window.addEventListener("touchstart", resetearInactividad);
+        resetearInactividad();
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        let savedTheme = localStorage.getItem("cyber_theme") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+
+        let activeUser = sessionStorage.getItem("active_staff") || "STAFF";
+        document.getElementById("staffSessionName").innerText =
+          activeUser.toUpperCase();
+
+        // 🛑 CRITERIO DE FILTRADO CAMILO PARA EL CUENTAMINUTOS
+        if (activeUser.toUpperCase() !== "CAMILO") {
+          startShiftTimer();
+          iniciarControlInactividad();
+        } else {
+          const timerBadge = document.getElementById("timerBadgeContainer");
+          if (timerBadge) {
+            timerBadge.style.display = "none";
+          }
         }
-
-        function iniciarControlInactividad() {
-            window.addEventListener('mousemove', resetearInactividad);
-            window.addEventListener('keypress', resetearInactividad);
-            window.addEventListener('click', resetearInactividad);
-            window.addEventListener('scroll', resetearInactividad);
-            window.addEventListener('touchstart', resetearInactividad);
-            resetearInactividad(); 
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            let savedTheme = localStorage.getItem('cyber_theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-
-            let activeUser = sessionStorage.getItem('active_staff') || "STAFF";
-            document.getElementById('staffSessionName').innerText = activeUser.toUpperCase();
-
-            // 🛑 CRITERIO DE FILTRADO CAMILO PARA EL CUENTAMINUTOS
-            if (activeUser.toUpperCase() !== "CAMILO") {
-                startShiftTimer();
-                iniciarControlInactividad();
-            } else {
-                const timerBadge = document.getElementById('timerBadgeContainer');
-                if (timerBadge) {
-                    timerBadge.style.display = 'none';
-                }
-            }
-        });
+      });
     </script>
-</body>
+  </body>
 </html>
