@@ -9,7 +9,7 @@
     <title>Cybernet Staff - Promo</title>
 
     <link rel="icon" type="image/jpeg" href="logo.jpeg" />
-    <meta name="theme-color" content="#0b0e14" />
+    <meta name="theme-color" content="#0a0a0c" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
@@ -17,10 +17,34 @@
     />
 
     <link rel="stylesheet" href="global.css" />
+
+    <style>
+      /* Animación nativa de carga (Reemplazo del emoji ⏳) */
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .spin-anim {
+        animation: spin 1s linear infinite;
+      }
+
+      /* Ajuste fino para el botón de la cabecera */
+      .btn-header-back {
+        width: auto;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        border-radius: 12px;
+        margin: 0;
+        box-shadow: none;
+      }
+    </style>
   </head>
   <body>
     <div class="bg-orb bg-orb-1"></div>
     <div class="bg-orb bg-orb-2"></div>
+
+    <div id="appleToast" class="apple-notification-toast"></div>
 
     <header class="global-header" id="globalHeader">
       <div class="flex-row" id="staffStatusBar">
@@ -43,10 +67,24 @@
         </div>
       </div>
       <button
-        class="btn-ios btn-secondary"
+        class="btn-ios btn-secondary btn-header-back"
         onclick="window.location.href = 'admin.html'"
       >
-        ← Volver
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="margin-right: 4px; vertical-align: bottom"
+        >
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Volver
       </button>
     </header>
 
@@ -55,11 +93,27 @@
         <div
           class="flex-row-between mb-1"
           style="
-            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 15px;
           "
         >
-          <h2 class="card-title">Generador de Promociones</h2>
+          <h2 class="card-title" style="margin: 0">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              ></polygon>
+            </svg>
+            Motor de Promociones
+          </h2>
           <div class="badge-ios badge-blue" id="badgeTotalClients">
             0 clientes
           </div>
@@ -67,7 +121,7 @@
 
         <button
           id="btnFetchContacts"
-          class="btn-ios btn-primary w-100 mb-1"
+          class="btn-ios btn-primary w-100 mt-1"
           style="padding: 16px; font-size: 1.05rem"
           onclick="iniciarSincronizacion()"
         >
@@ -89,15 +143,20 @@
           Generar Promo
         </button>
 
-        <div id="blockButtonsContainer" class="blocks-container"></div>
+        <div
+          id="blockButtonsContainer"
+          class="blocks-container"
+          style="margin-top: 15px"
+        ></div>
       </div>
 
       <div class="card-ios">
         <div
           class="card-title mb-1"
           style="
-            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 15px;
+            margin-bottom: 20px;
           "
         >
           <svg
@@ -105,7 +164,7 @@
             height="22"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="currentColor"
+            stroke="var(--ios-green)"
             stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -115,47 +174,42 @@
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
-          Lista de Mensajes
+          Directorio Generado
         </div>
 
         <div id="promoGridContainer" class="contacts-grid">
-          <div class="status-empty">
-            Presiona "Generar Promo" para extraer los clientes de la base de
-            datos.
+          <div
+            class="status-empty"
+            style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 12px;
+              color: var(--text-secondary);
+            "
+          >
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+            <span
+              >Presiona "Generar Promo" para extraer los clientes de la base de
+              datos.</span
+            >
           </div>
         </div>
       </div>
     </main>
-
-    <div
-      id="globalToast"
-      class="overlay-ios"
-      style="background: transparent; pointer-events: none; z-index: 10000"
-    >
-      <div
-        style="
-          position: fixed;
-          bottom: 30px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: rgba(30, 30, 35, 0.95);
-          backdrop-filter: blur(15px);
-          border: var(--glass-border);
-          color: white;
-          padding: 12px 24px;
-          border-radius: 30px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          box-shadow: var(--glass-shadow);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        "
-      >
-        <span id="toastIcon">✅</span>
-        <span id="toastText">Acción completada</span>
-      </div>
-    </div>
 
     <script>
       const GOOGLE_SCRIPT_URL =
@@ -175,17 +229,12 @@
         if (navigator.vibrate) navigator.vibrate(15);
       }
 
-      function showToast(message, isError = false) {
-        const toast = document.getElementById("globalToast");
-        const toastText = document.getElementById("toastText");
-        const toastIcon = document.getElementById("toastIcon");
-
-        toastText.innerText = message;
-        toastIcon.innerText = isError ? "❌" : "✅";
-        toast.classList.add("open");
-        setTimeout(() => {
-          toast.classList.remove("open");
-        }, 3000);
+      // Sistema de Toast Nativo Apple (Con soporte para SVGs inyectados)
+      function triggerToast(msgHTML) {
+        const toast = document.getElementById("appleToast");
+        toast.innerHTML = msgHTML;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
       }
 
       function iniciarSincronizacion() {
@@ -202,10 +251,19 @@
         const gridContainer = document.getElementById("promoGridContainer");
 
         btn.disabled = true;
-        btn.innerHTML = "⏳ Generando Promo...";
+
+        // SVG Animado (Reemplazo del reloj de arena)
+        btn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Generando Promo...`;
+
         blockContainer.innerHTML = "";
-        gridContainer.innerHTML =
-          '<div class="status-empty">⏳ Extrayendo clientes del historial y aplicando motor 60/40...</div>';
+
+        // SVG Animado de carga central
+        gridContainer.innerHTML = `
+            <div class="status-empty" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--ios-blue);">
+                <svg class="spin-anim" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+                <span style="font-weight: 600;">Extrayendo clientes y aplicando motor 60/40...</span>
+            </div>`;
+
         badge.innerText = "0 clientes";
 
         const oldScript = document.getElementById("cyber_promo_node");
@@ -228,7 +286,11 @@
             let data = res.data;
 
             if (!data || data.length === 0) {
-              gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">⚠️ No quedan clientes disponibles en el Histórico.</div>`;
+              gridContainer.innerHTML = `
+                <div class="status-empty" style="display:flex; align-items:center; justify-content:center; gap:8px; color:var(--ios-orange); font-weight: 600;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    No quedan clientes disponibles en el Histórico.
+                </div>`;
               return;
             }
 
@@ -244,20 +306,33 @@
             globalContacts = Array.from(uniqueMap.values()).slice(0, 20);
 
             if (globalContacts.length === 0) {
-              gridContainer.innerHTML = `<div class="status-empty">⚠️ Registros inválidos.</div>`;
+              gridContainer.innerHTML = `
+                <div class="status-empty" style="display:flex; align-items:center; justify-content:center; gap:8px; color:var(--ios-red); font-weight: 600;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    Registros inválidos en la base de datos.
+                </div>`;
               return;
             }
 
             badge.innerText = `${globalContacts.length} clientes`;
-            showToast(
-              `Éxito. Se prepararon ${globalContacts.length} contactos listos.`,
-            );
+
+            // Toast de éxito con SVG
+            triggerToast(`
+                <div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <span>Se prepararon ${globalContacts.length} contactos listos.</span>
+                </div>
+            `);
 
             crearBotonesBloques();
           } else {
-            let errMsg = "Error de conexión.";
-            if (res && res.message) errMsg = res.message;
-            gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">❌ ${errMsg}</div>`;
+            let errMsg =
+              res && res.message ? res.message : "Error de conexión.";
+            gridContainer.innerHTML = `
+                <div class="status-empty" style="display:flex; align-items:center; justify-content:center; gap:8px; color:var(--ios-red); font-weight: 600;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    ${errMsg}
+                </div>`;
           }
         };
 
@@ -333,7 +408,7 @@
                     </div>
                     <div class="contact-right">
                         <button class="btn-icon" title="Copiar Mensaje de Promo" onclick="copiarAlPortapapeles('${safeMessage}', this, ${absoluteIndex})">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                             </svg>
@@ -359,6 +434,8 @@
             textarea.select();
             document.execCommand("copy");
             window.getSelection().removeAllRanges();
+            textarea.remove();
+
             efectoBotonExito(btnElement);
             marcarNumeroComoEnviado(indexToCross);
           });
@@ -374,8 +451,9 @@
       function efectoBotonExito(btn) {
         const originalHTML = btn.innerHTML;
         btn.classList.add("success");
+        // Reemplaza el ícono de copiar por un "Check" SVG
         btn.innerHTML = `
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
                     <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
             `;
@@ -386,6 +464,7 @@
         }, 1500);
       }
 
+      // Funciones de Turno e Inactividad
       function startShiftTimer() {
         if (!sessionStorage.getItem("cyber_shift_start_time")) {
           sessionStorage.setItem("cyber_shift_start_time", Date.now());
@@ -453,7 +532,7 @@
         document.getElementById("staffSessionName").innerText =
           activeUser.toUpperCase();
 
-        // 🛑 CRITERIO DE FILTRADO CAMILO PARA EL CUENTAMINUTOS
+        // Si es Camilo, no muestra el contador
         if (activeUser.toUpperCase() !== "CAMILO") {
           startShiftTimer();
           iniciarControlInactividad();
