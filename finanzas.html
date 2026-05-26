@@ -91,6 +91,7 @@
 
         /* Tarjeta de distribución táctica */
         .distribution-hub-panel { border-top: 3px solid var(--ios-blue); background: linear-gradient(135deg, rgba(10, 132, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%); }
+        .debt-hub-panel { border-top: 3px solid #ff9f0a; background: linear-gradient(135deg, rgba(255, 159, 10, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%); }
 
         /* Listado del Libro Contable de Egresos/Ingresos */
         .apple-list-container { display: flex; flex-direction: column; background: var(--input-bg); border-radius: 16px; overflow: hidden; border: var(--glass-border); width: 100%; }
@@ -134,6 +135,7 @@
         @media (max-width: 820px) {
             .global-header { flex-direction: column; align-items: center; padding: 10px 15px; gap: 10px; }
             .apple-notification-toast { top: 125px; }
+            .dist-grid-layout > div { border-left: none !important; padding-left: 0 !important; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
         }
         @media (max-width: 650px) {
             .chart-layout-box { flex-direction: column; text-align: center; }
@@ -185,13 +187,14 @@
                     </div>
 
                     <div class="pod-selector">
-    <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); padding-left: 4px;">Día</span>
-    <select id="appleDaySelect" class="input-ios" style="margin-bottom: 0; width: auto; padding: 4px 28px 4px 8px; background-color: transparent; border: none; font-size: 0.88rem; font-weight: 700;" onchange="actualizarFiltrosUI()"></select>
-</div>
+                        <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); padding-left: 4px;">Día</span>
+                        <select id="appleDaySelect" class="input-ios" style="margin-bottom: 0; width: auto; padding: 4px 28px 4px 8px; background-color: transparent; border: none; font-size: 0.88rem; font-weight: 700;" onchange="actualizarFiltrosUI()"></select>
+                    </div>
 
-<button type="button" class="btn-ios btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); border: 0.5px solid rgba(10, 132, 255, 0.25);" onclick="filtrarHoy()">Hoy</button>
+                    <button type="button" class="btn-ios btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); border: 0.5px solid rgba(10, 132, 255, 0.25);" onclick="filtrarHoy()">Hoy</button>
 
-<button type="button" class="btn-ios btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(255, 149, 0, 0.15); color: #ff9500; border: 0.5px solid rgba(255, 149, 0, 0.25); margin-left: 5px;" onclick="filtrarAyer()">Ayer</button>
+                    <button type="button" class="btn-ios btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(255, 149, 0, 0.15); color: #ff9500; border: 0.5px solid rgba(255, 149, 0, 0.25); margin-left: 5px;" onclick="filtrarAyer()">Ayer</button>
+                </div>
                 
                 <div style="min-width: 200px; text-align: right;">
                     <button class="btn-ios btn-success" onclick="exportarExcelEmpresarial()" style="padding: 10px 18px; font-size: 0.88rem; border-radius: 14px; font-weight: 700; width: 100%;">
@@ -260,8 +263,47 @@
                     <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-blue);" id="valProyNegocio">$0</span>
                 </div>
                 <div class="flex-col" style="gap:4px;">
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Reserva de Nómina (<span id="lblPorcNomina">17</span>%)</span>
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Reserva Nómina (<span id="lblPorcNomina">17</span>%)</span>
                     <span style="font-size: 1.85rem; font-weight: 700; color: #bf5af2;" id="valProyNomina">$0</span>
+                </div>
+                <div class="flex-col" style="gap:4px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Enviado por Jeisson</span>
+                    <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-green);" id="valProyJeisson">$0</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card-ios debt-hub-panel" style="width: 100%;">
+            <div class="flex-row-between mb-1">
+                <span class="text-secondary" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">⚖️ Amortización de Deuda al Negocio</span>
+                <div class="badge-ios" style="background: rgba(255,159,10,0.1); color: #ff9f0a; border: 1px solid rgba(255,159,10,0.3); font-size: 0.7rem; font-weight: 800; padding: 4px 8px;">CALCULADORA EN VIVO</div>
+            </div>
+            
+            <div class="dist-grid-layout mt-1">
+                <div class="flex-col" style="gap:4px;">
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Escribe tu Deuda Actual ($)</span>
+                    <input type="text" id="valDeudaTotal" class="input-ios" value="$0" oninput="formatearMontoEnVivoCOP(this); calcularDescuentoDeuda();" placeholder="$0" style="font-size: 1.85rem; font-weight: 700; color: #ff453a; background: transparent; border: none; padding: 0; text-align: left; box-shadow: none;">
+                </div>
+                
+                <div class="flex-col" style="gap:4px; justify-content: center;">
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Modo de Pago</span>
+                    <select id="modoDescuentoDeuda" class="input-ios" style="font-size: 0.8rem; padding: 6px 12px; font-weight: 700;" onchange="calcularDescuentoDeuda()">
+                        <option value="90">Descontar 90% de mi ganancia</option>
+                        <option value="dias">Dividir deuda en X días</option>
+                    </select>
+                    <div id="divDiasDeuda" style="display: none; margin-top: 5px;">
+                        <input type="number" id="inputDiasDeuda" class="input-ios" placeholder="Días (Ej: 15)" value="5" min="1" oninput="calcularDescuentoDeuda()" style="font-size: 0.8rem; padding: 6px 12px; width: 100%;">
+                    </div>
+                </div>
+
+                <div class="flex-col" style="gap:4px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Descuento Sugerido (Hoy)</span>
+                    <span style="font-size: 1.85rem; font-weight: 700; color: #ff9f0a;" id="valDescuentoHoy">$0</span>
+                </div>
+
+                <div class="flex-col" style="gap:4px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Ganancia Líquida (Para ti)</span>
+                    <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-green);" id="valGananciaLiquida">$0</span>
                 </div>
             </div>
         </section>
@@ -289,7 +331,8 @@
                             <option value="Otros">Otros</option>
                             <option value="Netflix">Netflix</option>
                             <option value="Cuentas (amazon, disney, etc)">Cuentas (amazon, disney, etc)</option>
-                            <option value="Adelanto">Adelanto</option>
+                            <option value="Adelanto">🔴 Pedir Adelanto (Me endeuda)</option>
+                            <option value="Abono Deuda">🟢 Abono a Deuda (Pago al negocio)</option>
                             <option value="Pago ayudantes">Pago ayudantes</option>
                             <option value="Angelica">Angelica</option>
                             <option value="Disney premium">Disney premium</option>
@@ -343,6 +386,7 @@
         let activePeriod = 'mes';
         let isWorking = false;
         let activeQueryId = 0;
+        let currentMiGananciaBruta = 0; // Variable global para usar en la calculadora de deuda
 
         const mesesArray = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
 
@@ -377,17 +421,19 @@
             }
         }
 
-        function filtrarHoy() {
-            const hoy = new Date();
-            const diaActual = hoy.getDate();
-            const mesActualTexto = mesesArray[hoy.getMonth()];
+        function filtrarAyer() {
+            const ayer = new Date();
+            ayer.setDate(ayer.getDate() - 1); 
+            
+            const diaAyer = ayer.getDate();
+            const mesAyerTexto = mesesArray[ayer.getMonth()];
             
             const mSelect = document.getElementById('appleMonthSelect');
             const dSelect = document.getElementById('appleDaySelect');
             
             if (mSelect && dSelect) {
-                mSelect.value = mesActualTexto;
-                dSelect.value = diaActual;
+                mSelect.value = mesAyerTexto;
+                dSelect.value = diaAyer;
                 actualizarFiltrosUI();
             }
         }
@@ -475,11 +521,50 @@
             document.body.appendChild(script);
         }
 
+        // 🔥 NUEVA FUNCIÓN PARA CALCULAR LA DEUDA REACTIVA (CORREGIDA) 🔥
+        function calcularDescuentoDeuda() {
+            const modo = document.getElementById('modoDescuentoDeuda').value;
+            const deudaInput = document.getElementById('valDeudaTotal').value.replace(/\D/g, "");
+            const deuda = parseFloat(deudaInput) || 0;
+            
+            // 1. Mostrar u ocultar el campo de días SOLO basándose en lo que eliges en el menú
+            if (modo === 'dias') {
+                document.getElementById('divDiasDeuda').style.display = 'block';
+            } else {
+                document.getElementById('divDiasDeuda').style.display = 'none';
+            }
+
+            let descuento = 0;
+
+            // 2. Calcular matemáticamente si la deuda es mayor a cero
+            if (deuda > 0) {
+                if (modo === '90') {
+                    descuento = Math.round(currentMiGananciaBruta * 0.90);
+                    // No pagar más de lo que se debe
+                    if (descuento > deuda) descuento = deuda;
+                } else {
+                    let dias = parseInt(document.getElementById('inputDiasDeuda').value) || 1;
+                    descuento = Math.round(deuda / dias);
+                }
+            }
+
+            // 3. Actualizar la interfaz
+            const gananciaLiquida = currentMiGananciaBruta - descuento;
+
+            document.getElementById('valDescuentoHoy').innerText = formatMoneda(descuento);
+            
+            const elLiquida = document.getElementById('valGananciaLiquida');
+            elLiquida.innerText = formatMoneda(gananciaLiquida);
+            elLiquida.style.color = gananciaLiquida >= 0 ? 'var(--ios-green)' : '#ff453a';
+        }
+
         function renderDashboard() {
             if (!globalFinanzasData) return;
             
             const d = globalFinanzasData[activePeriod];
             if (!d) return;
+
+            document.getElementById('valDeudaTotal').value = formatMoneda(globalFinanzasData.deudaActual || 0);
 
             const netEl = document.getElementById('val_neto');
             const indicator = document.getElementById('statusIndicator');
@@ -489,7 +574,31 @@
             netEl.style.color = statusColor;
             if(indicator) indicator.style.background = statusColor;
 
-            document.getElementById('val_ingresos').innerText = formatMoneda(d.ingresos);
+            // 1. Identificar "Ingresos Extras" y "Aportes Jeisson"
+            let sumaIngresoExtra = 0;
+            let sumaJeisson = 0;
+            const itemsTemp = globalFinanzasData.listaDetallada || [];
+            
+            itemsTemp.forEach(item => {
+                const esCategoriaExtra = (item.categoria === "➕ Ingreso Extra" || item.categoria === "Ingreso Extra");
+                const detalleTexto = item.detalle ? item.detalle.toLowerCase() : "";
+                const esJeisson = detalleTexto.includes("jeisson");
+
+                if ((esCategoriaExtra || esJeisson) && item.tipo === "INGRESO") {
+                    let valorMonto = parseFloat(item.monto) || 0;
+                    sumaIngresoExtra += valorMonto;
+                    if (esJeisson) sumaJeisson += valorMonto;
+                }
+            });
+
+            const elJeisson = document.getElementById('valProyJeisson');
+            if (elJeisson) elJeisson.innerText = formatMoneda(sumaJeisson);
+
+            // 2. Restar Extras de Ventas Brutas
+            let ventasBrutasReales = (d.ingresos || 0) - sumaIngresoExtra;
+            if (ventasBrutasReales < 0) ventasBrutasReales = 0;
+
+            document.getElementById('val_ingresos').innerText = formatMoneda(ventasBrutasReales);
             document.getElementById('val_gastos').innerText = formatMoneda(d.gastos);
             document.getElementById('val_inversiones').innerText = formatMoneda(d.inversiones);
             document.getElementById('val_nomina').innerText = formatMoneda(d.nomina);
@@ -517,8 +626,14 @@
             document.getElementById('lblPorcNegocio').innerText = porcNegocio;
             document.getElementById('lblPorcNomina').innerText = porcNomina;
 
-            let baseDinero = d.ingresos || 0;
-            document.getElementById('valProyMio').innerText = formatMoneda(Math.round(baseDinero * (porcMio / 100)));
+            let baseDinero = ventasBrutasReales;
+            let miGananciaBase = Math.round(baseDinero * (porcMio / 100));
+            let miGananciaTotal = miGananciaBase + sumaIngresoExtra;
+
+            // Guardamos la ganancia total para usarla en la calculadora de deuda
+            currentMiGananciaBruta = miGananciaTotal;
+
+            document.getElementById('valProyMio').innerText = formatMoneda(miGananciaTotal);
             document.getElementById('valProyNegocio').innerText = formatMoneda(Math.round(baseDinero * (porcNegocio / 100)));
             document.getElementById('valProyNomina').innerText = formatMoneda(Math.round(baseDinero * (porcNomina / 100)));
 
@@ -557,6 +672,8 @@
             const items = globalFinanzasData.listaDetallada || [];
             if(items.length === 0) {
                 container.innerHTML = '<div class="empty-log-msg">No se registran movimientos en el rango de tiempo seleccionado.</div>';
+                // Calculamos deuda antes de salir si no hay items
+                calcularDescuentoDeuda();
                 return;
             }
 
@@ -573,6 +690,9 @@
                 `;
             });
             container.innerHTML = htmlBuffer;
+
+            // Al terminar de renderizar todo el dashboard, corremos la calculadora de deuda
+            calcularDescuentoDeuda();
         }
 
         function guardarTransaccion(e) {
@@ -748,13 +868,11 @@
             construirSelectores();
             cargarDashboardFinanzas();
 
-            // 🔥 NUEVO: Auto-refrescar el tablero contable en segundo plano cada 1 minuto
             setInterval(() => {
-                // El "if (!isWorking)" evita que se refresque la pantalla si en ese mismo segundo estás guardando un gasto manual
                 if (!isWorking) {
                     cargarDashboardFinanzas();
                 }
-            }, 60000); // 60000 milisegundos = 1 minuto
+            }, 60000); 
         });
     </script>
 </body>
