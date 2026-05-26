@@ -3,8 +3,6 @@ const CACHE_NAME = 'cybernet-cache-v6'; // Subimos la versión para forzar la li
 // Solo guardamos el index y el logo. El admin.html queda fuera.
 const assets = [
   './', 
-  'index.html', 
-  'logo.jpeg'
 ];
 
 self.addEventListener('install', e => {
