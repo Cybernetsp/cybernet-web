@@ -237,6 +237,15 @@
             CAJA
         </button>
 
+        <button class="ios-tab-btn" onclick="window.location.href='suspendidas.html'" id="btnSuspendidas" style="display: none; color: var(--ios-red);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+            SUSPENDIDAS
+        </button>
+
         <button class="ios-tab-btn" onclick="toggleNetflixManagerPanel()" style="color: #E50914;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
@@ -508,6 +517,7 @@
                                 <option value="PLEX">PLEX</option>
                                 <option value="CRUNCHYROLL">CRUNCHYROLL</option>
                                 <option value="VIX">VIX</option>
+                                <option value="UNIVERSAL">UNIVERSAL</option>
                                 <option value="PARAMOUNT">PARAMOUNT</option>
                                 <option value="METEGOL">METEGOL</option>
                                 <option value="CANVA">CANVA</option>
@@ -806,6 +816,7 @@
             { id: "CANVA", nombre: "CANVA", permitePantallas: false, permiteRenovacion: false },
             { id: "CAPCUT", nombre: "CAPCUT", permitePantallas: false, permiteRenovacion: false },
             { id: "METEGOL", nombre: "METEGOL", permitePantallas: false, permiteRenovacion: false },
+            { id: "UNIVERSAL", nombre: "UNIVERSAL", permitePantallas: false, permiteRenovacion: false },
             { id: "DEEZER", nombre: "DEEZER", permitePantallas: false, permiteRenovacion: false },
             { id: "MUBI", nombre: "MUBI", permitePantallas: false, permiteRenovacion: false }
         ];
@@ -3123,13 +3134,16 @@ if (filtroBusqueda !== "") {
             const currentOperator = userInput.toUpperCase().trim();
             const shiftTimer = document.getElementById('shiftTimer');
             const cajaBtn = document.getElementById('btnCajaFinanzas');
+            const suspendidasBtn = document.getElementById('btnSuspendidas'); // 👈 Captura el nuevo botón
             
             if (currentOperator === "CAMILO") {
                 if (shiftTimer && shiftTimer.parentElement) shiftTimer.parentElement.style.setProperty('display', 'none', 'important');
                 if (cajaBtn) cajaBtn.style.setProperty('display', 'flex', 'important');
+                if (suspendidasBtn) suspendidasBtn.style.setProperty('display', 'flex', 'important'); // 👈 Te lo muestra a ti
             } else {
                 if (shiftTimer && shiftTimer.parentElement) shiftTimer.parentElement.style.setProperty('display', 'inline-flex', 'important');
                 if (cajaBtn) cajaBtn.style.setProperty('display', 'none', 'important');
+                if (suspendidasBtn) suspendidasBtn.style.setProperty('display', 'none', 'important'); // 👈 Se lo oculta a los vendedores
             }
             inicializarWorkspace();
         }
