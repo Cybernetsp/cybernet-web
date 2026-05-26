@@ -544,10 +544,6 @@
   <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
   </button>
 
-  <a href="admin.html" id="staff-toggle" class="staff-toggle-btn" onclick="haptic()" aria-label="Portal de Equipo">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="4"></line><line x1="8" y1="2" x2="8" y2="4"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-  </a>
-
   <div class="bg-orb-1"></div>
   <div class="bg-orb-2"></div>
 
@@ -867,13 +863,19 @@
     function filterServices() { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { const query = document.getElementById('searchServices').value.toLowerCase(); const cards = document.querySelectorAll('.service-card'); cards.forEach(card => { const content = card.textContent.toLowerCase(); if (content.includes(query)) card.style.display = "flex"; else card.style.display = "none"; }); }, 300); }
   </script>
   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('Cybernet App lista para instalar'))
-        .catch(err => console.log('Error al registrar la App', err));
-    });
-  }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Aquí es donde está el truco: le decimos que instale la versión 2
+    navigator.serviceWorker.register('sw.js?v=2.0')
+      .then(reg => {
+        console.log('Cybernet App lista para instalar');
+        
+        // Esto obliga al celular a buscar cambios nuevos en segundo plano
+        reg.update(); 
+      })
+      .catch(err => console.log('Error al registrar la App', err));
+  });
+}
 </script>
 </body>
 </html>
