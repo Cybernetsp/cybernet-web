@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cybernet-cache-v6'; // Subimos la versión para forzar la limpieza
+const CACHE_NAME = 'cybernet-cache-v7'; // Subimos la versión para forzar la limpieza
 
 // Solo guardamos el index y el logo. El admin.html queda fuera.
 const assets = [
