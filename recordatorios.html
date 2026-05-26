@@ -1,543 +1,469 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es" data-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cybernet Staff - Recordatorios de Pago</title>
-    
-    <link rel="icon" type="image/jpeg" href="logo.jpeg">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Cybernet Recordatorios">
-    
-    <link rel="stylesheet" href="global.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Cybernet Staff - Promo</title>
 
-    <style>
-        /* Diseño de Dos Espacios de Trabajo Paralelos (W1 y W2) */
-        .recordatorios-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr; 
-            gap: 25px;
-            width: 100%;
-            max-width: 1400px; 
-            margin: 0 auto;
-            padding-top: 95px;
-            padding-bottom: 50px;
-            padding-left: 20px;
-            padding-right: 20px;
-            box-sizing: border-box;
-        }
+    <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+    <meta name="theme-color" content="#0b0e14" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
 
-        .workspace-column {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .blocks-area-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px;
-            max-height: 250px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        .blocks-area-container::-webkit-scrollbar { width: 4px; }
-        .blocks-area-container::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
-
-        /* --- LISTA DE ENLACES INDIVIDUALES COMPACTA --- */
-        .reminders-scroll-area {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            max-height: 500px;
-            overflow-y: auto;
-            padding-right: 5px;
-            align-content: start;
-        }
-        .reminders-scroll-area::-webkit-scrollbar { width: 4px; }
-        .reminders-scroll-area::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
-
-        .reminder-row-box {
-            background: var(--input-bg);
-            border: var(--glass-border);
-            border-radius: 14px;
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            transition: var(--transition-spring);
-        }
-        .reminder-row-box:hover { border-color: var(--ios-purple); }
-
-        /* Estado completado (Tachado) */
-        .reminder-row-box.tachado {
-            opacity: 0.4;
-            border-color: var(--ios-green);
-            background: rgba(48, 209, 88, 0.05);
-        }
-        .reminder-row-box.tachado .reminder-link-text {
-            text-decoration: line-through;
-            color: var(--text-secondary);
-        }
-        .reminder-row-box.tachado .reminder-number {
-            background: var(--ios-green);
-            color: white;
-        }
-
-        .reminder-left-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            overflow: hidden;
-        }
-
-        .reminder-number {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--text-secondary);
-            background: rgba(118, 118, 128, 0.15);
-            min-width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .reminder-link-text {
-            font-size: 0.95rem;
-            font-family: monospace;
-            font-weight: bold;
-            color: var(--ios-blue);
-            user-select: all;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        @media (max-width: 1100px) {
-            .reminders-scroll-area { grid-template-columns: 1fr; }
-            .blocks-area-container { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 768px) {
-            .recordatorios-container { grid-template-columns: 1fr; padding-top: 140px; }
-            .global-header { flex-direction: column; align-items: flex-start; gap: 15px; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="bg-orb bg-orb-1" style="background: rgba(191, 90, 242, 0.12);"></div>
-    <div class="bg-orb bg-orb-2" style="background: rgba(10, 132, 255, 0.12);"></div>
+    <link rel="stylesheet" href="global.css" />
+  </head>
+  <body>
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
 
     <header class="global-header" id="globalHeader">
-        <div class="flex-row" id="staffStatusBar">
-            <div class="badge-ios badge-blue" style="color: var(--ios-purple); border-color: rgba(191, 90, 242, 0.3);">
-                <span id="staffSessionName">STAFF</span> • GESTOR MULTI-WHATSAPP
-            </div>
-            <div class="badge-ios badge-green" id="timerBadgeContainer">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span id="shiftTimer">00:00:00</span>
-            </div>
+      <div class="flex-row" id="staffStatusBar">
+        <div class="badge-ios badge-blue">
+          <span id="staffSessionName">USER</span> • PROMO
         </div>
-
-        <div class="flex-row">
-            <button class="btn-ios btn-secondary" onclick="window.location.href='admin.html'">
-                ← Volver al Panel
-            </button>
+        <div class="badge-ios badge-green" id="timerBadgeContainer">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span id="shiftTimer">00:00:00</span>
         </div>
+      </div>
+      <button
+        class="btn-ios btn-secondary"
+        onclick="window.location.href = 'admin.html'"
+      >
+        ← Volver
+      </button>
     </header>
 
-    <div class="recordatorios-container">
-        
-        <div class="workspace-column">
-            
-            <div class="card-ios">
-                <div class="flex-row-between" style="border-bottom: 0.5px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
-                    <h2 class="card-title" style="margin-bottom:0;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-purple)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        WhatsApp 1 (Generador)
-                    </h2>
-                    <span id="contadorW1" class="badge-ios badge-blue">0 clientes</span>
-                </div>
-
-                <select id="periodoW1" class="input-ios" style="margin-bottom: 0;">
-                    <option value="hoy" selected>🗓️ Vencen: Hoy</option>
-                    <option value="ayer">🗓️ Vencieron: Ayer</option>
-                    <option value="antes_ayer">🗓️ Vencieron: Antes de Ayer</option>
-                    <option value="tres_dias">🗓️ Por Vencer: En 3 Días</option>
-                </select>
-                
-                <button class="btn-ios btn-primary w-100" onclick="sincronizarW1()">
-                    Sincronizar Panel 1
-                </button>
-
-                <div class="blocks-area-container" id="bloquesW1">
-                    <div style="text-align:center; padding:15px; color:var(--text-secondary); font-size:0.85rem; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; grid-column: span 2;">
-                        Sincroniza para ver los bloques de enlaces.
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-ios" style="flex-grow: 1;">
-                <h2 class="card-title" style="border-bottom: 0.5px solid rgba(255,255,255,0.08); padding-bottom: 12px;">📋 Lista de Mensajes (W1)</h2>
-                <div class="reminders-scroll-area" id="listaIndividualW1">
-                    <div style="text-align:center; padding:40px 10px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">
-                        ⏳ En espera de sincronización...
-                    </div>
-                </div>
-            </div>
-
+    <main class="main-workspace workspace-promo">
+      <div class="card-ios">
+        <div
+          class="flex-row-between mb-1"
+          style="
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 15px;
+          "
+        >
+          <h2 class="card-title">Generador de Promociones</h2>
+          <div class="badge-ios badge-blue" id="badgeTotalClients">
+            0 clientes
+          </div>
         </div>
 
-        <div class="workspace-column">
-            
-            <div class="card-ios">
-                <div class="flex-row-between" style="border-bottom: 0.5px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
-                    <h2 class="card-title" style="margin-bottom:0;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        WhatsApp 2 (Generador)
-                    </h2>
-                    <span id="contadorW2" class="badge-ios badge-green">0 clientes</span>
-                </div>
+        <button
+          id="btnFetchContacts"
+          class="btn-ios btn-primary w-100 mb-1"
+          style="padding: 16px; font-size: 1.05rem"
+          onclick="iniciarSincronizacion()"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="margin-right: 6px; vertical-align: middle"
+          >
+            <path
+              d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+            ></path>
+          </svg>
+          Generar Promo
+        </button>
 
-                <select id="periodoW2" class="input-ios" style="margin-bottom: 0;">
-                    <option value="tres_dias" selected>🗓️ Por Vencer: En 3 Días</option>
-                    <option value="hoy">🗓️ Vencen: Hoy</option>
-                    <option value="ayer">🗓️ Vencieron: Ayer</option>
-                    <option value="antes_ayer">🗓️ Vencieron: Antes de Ayer</option>
-                </select>
-                
-                <button class="btn-ios btn-success w-100" onclick="sincronizarW2()">
-                    Sincronizar Panel 2
-                </button>
+        <div id="blockButtonsContainer" class="blocks-container"></div>
+      </div>
 
-                <div class="blocks-area-container" id="bloquesW2">
-                    <div style="text-align:center; padding:15px; color:var(--text-secondary); font-size:0.85rem; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; grid-column: span 2;">
-                        Sincroniza para ver los bloques de enlaces.
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-ios" style="flex-grow: 1;">
-                <h2 class="card-title" style="border-bottom: 0.5px solid rgba(255,255,255,0.08); padding-bottom: 12px;">📋 Lista de Mensajes (W2)</h2>
-                <div class="reminders-scroll-area" id="listaIndividualW2">
-                    <div style="text-align:center; padding:40px 10px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">
-                        ⏳ En espera de sincronización...
-                    </div>
-                </div>
-            </div>
-
+      <div class="card-ios">
+        <div
+          class="card-title mb-1"
+          style="
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 15px;
+          "
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Lista de Mensajes
         </div>
 
+        <div id="promoGridContainer" class="contacts-grid">
+          <div class="status-empty">
+            Presiona "Generar Promo" para extraer los clientes de la base de
+            datos.
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div
+      id="globalToast"
+      class="overlay-ios"
+      style="background: transparent; pointer-events: none; z-index: 10000"
+    >
+      <div
+        style="
+          position: fixed;
+          bottom: 30px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(30, 30, 35, 0.95);
+          backdrop-filter: blur(15px);
+          border: var(--glass-border);
+          color: white;
+          padding: 12px 24px;
+          border-radius: 30px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          box-shadow: var(--glass-shadow);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        "
+      >
+        <span id="toastIcon">✅</span>
+        <span id="toastText">Acción completada</span>
+      </div>
     </div>
 
     <script>
-        const RECORDATORIOS_API_URL = "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
-        
-        let timerInterval = null;
-        let isTimerPaused = false;
-        
-        window.estadoW1 = { data: [], tachados: new Set(), periodo: 'hoy' };
-        window.estadoW2 = { data: [], tachados: new Set(), periodo: 'tres_dias' };
+      const GOOGLE_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
 
-        function haptic() { 
-            if (navigator.vibrate) navigator.vibrate(15); 
-        }
+      let isFetching = false;
+      let globalContacts = [];
+      let currentBlockIndex = 0;
+      const CHUNK_SIZE = 10;
 
-        function guardarEstadoEnLocal(refName) {
-            let estado = refName === 'W1' ? window.estadoW1 : window.estadoW2;
-            let objetoParaGuardar = {
-                data: estado.data,
-                tachados: Array.from(estado.tachados), 
-                periodo: document.getElementById('periodo' + refName).value
-            };
-            localStorage.setItem('cyber_reminders_' + refName, JSON.stringify(objetoParaGuardar));
-        }
+      let timerInterval = null;
+      let temporizadorInactividad = null;
+      const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;
+      let isTimerPaused = false;
 
-        function cargarEstadoDeLocal() {
-            ['W1', 'W2'].forEach(refName => {
-                let guardado = localStorage.getItem('cyber_reminders_' + refName);
-                if (guardado) {
-                    let parsed = JSON.parse(guardado);
-                    let estado = refName === 'W1' ? window.estadoW1 : window.estadoW2;
-                    
-                    estado.data = parsed.data || [];
-                    estado.tachados = new Set(parsed.tachados || []);
-                    estado.periodo = parsed.periodo || (refName === 'W1' ? 'hoy' : 'tres_dias');
-                    
-                    document.getElementById('periodo' + refName).value = estado.periodo;
+      function hapticFeedback() {
+        if (navigator.vibrate) navigator.vibrate(15);
+      }
 
-                    if (estado.data.length > 0) {
-                        document.getElementById('contador' + refName).innerText = `${estado.data.length} clientes`;
-                        renderizarBloques(estado.data, 'bloques' + refName);
-                        renderizarLista(estado, 'listaIndividual' + refName, refName);
-                    }
-                }
-            });
-        }
+      function showToast(message, isError = false) {
+        const toast = document.getElementById("globalToast");
+        const toastText = document.getElementById("toastText");
+        const toastIcon = document.getElementById("toastIcon");
 
-        function sincronizarW1() {
-            haptic();
-            const containerLista = document.getElementById('listaIndividualW1');
-            const containerBloques = document.getElementById('bloquesW1');
-            const periodo = document.getElementById('periodoW1').value;
-            
-            containerLista.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">⏳ Escaneando NETFLIX para W1...</div>';
-            containerBloques.innerHTML = '<div style="text-align:center; padding:15px; color:var(--text-secondary); font-size:0.85rem; grid-column: span 2;">Procesando...</div>';
-            
-            const oldScript = document.getElementById('cyber_reminders_w1');
-            if (oldScript) oldScript.remove();
+        toastText.innerText = message;
+        toastIcon.innerText = isError ? "❌" : "✅";
+        toast.classList.add("open");
+        setTimeout(() => {
+          toast.classList.remove("open");
+        }, 3000);
+      }
 
-            window.procesarRespuestaW1 = function(res) {
-                const scriptNode = document.getElementById('cyber_reminders_w1');
-                if (scriptNode) scriptNode.remove();
+      function iniciarSincronizacion() {
+        if (isFetching) return;
 
-                if (res && res.status === "success") {
-                    window.estadoW1.data = res.data;
-                    window.estadoW1.tachados = new Set(); 
-                    window.estadoW1.periodo = periodo;
-                    
-                    guardarEstadoEnLocal('W1'); 
-                    
-                    document.getElementById('contadorW1').innerText = `${res.data.length} clientes`;
-                    
-                    if (res.data.length === 0) {
-                        containerLista.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">✨ Todo limpio en este periodo para W1.</div>';
-                        containerBloques.innerHTML = '';
-                        return;
-                    }
-                    
-                    renderizarBloques(window.estadoW1.data, 'bloquesW1');
-                    renderizarLista(window.estadoW1, 'listaIndividualW1', 'W1');
-                } else {
-                    containerLista.innerHTML = `<div style="text-align:center; padding:40px; color:var(--ios-red); font-weight:600; grid-column: span 2;">❌ Error: ${res ? res.message : "Desconocido"}</div>`;
-                }
-            };
+        hapticFeedback();
+        isFetching = true;
+        globalContacts = [];
+        currentBlockIndex = 0;
 
-            const scriptElement = document.createElement('script');
-            scriptElement.id = 'cyber_reminders_w1';
-            let queryParams = `?action=obtenerRecordatorios&periodo=${encodeURIComponent(periodo)}&callback=procesarRespuestaW1&_ts=${Date.now()}`;
-            scriptElement.src = RECORDATORIOS_API_URL + queryParams;
-            document.body.appendChild(scriptElement);
-        }
+        const btn = document.getElementById("btnFetchContacts");
+        const badge = document.getElementById("badgeTotalClients");
+        const blockContainer = document.getElementById("blockButtonsContainer");
+        const gridContainer = document.getElementById("promoGridContainer");
 
-        function sincronizarW2() {
-            haptic();
-            const containerLista = document.getElementById('listaIndividualW2');
-            const containerBloques = document.getElementById('bloquesW2');
-            const periodo = document.getElementById('periodoW2').value;
-            
-            containerLista.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">⏳ Escaneando NETFLIX para W2...</div>';
-            containerBloques.innerHTML = '<div style="text-align:center; padding:15px; color:var(--text-secondary); font-size:0.85rem; grid-column: span 2;">Procesando...</div>';
-            
-            const oldScript = document.getElementById('cyber_reminders_w2');
-            if (oldScript) oldScript.remove();
+        btn.disabled = true;
+        btn.innerHTML = "⏳ Generando Promo...";
+        blockContainer.innerHTML = "";
+        gridContainer.innerHTML =
+          '<div class="status-empty">⏳ Extrayendo clientes del historial y aplicando motor 60/40...</div>';
+        badge.innerText = "0 clientes";
 
-            window.procesarRespuestaW2 = function(res) {
-                const scriptNode = document.getElementById('cyber_reminders_w2');
-                if (scriptNode) scriptNode.remove();
+        const oldScript = document.getElementById("cyber_promo_node");
+        if (oldScript) oldScript.remove();
 
-                if (res && res.status === "success") {
-                    window.estadoW2.data = res.data;
-                    window.estadoW2.tachados = new Set(); 
-                    window.estadoW2.periodo = periodo;
+        window.procesarSincronizacion = function (res) {
+          isFetching = false;
+          btn.disabled = false;
+          btn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                    </svg>
+                    Generar Promo
+                `;
 
-                    guardarEstadoEnLocal('W2'); 
-                    
-                    document.getElementById('contadorW2').innerText = `${res.data.length} clientes`;
-                    
-                    if (res.data.length === 0) {
-                        containerLista.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:0.9rem; grid-column: span 2;">✨ Todo limpio en este periodo para W2.</div>';
-                        containerBloques.innerHTML = '';
-                        return;
-                    }
-                    
-                    renderizarBloques(window.estadoW2.data, 'bloquesW2');
-                    renderizarLista(window.estadoW2, 'listaIndividualW2', 'W2');
-                } else {
-                    containerLista.innerHTML = `<div style="text-align:center; padding:40px; color:var(--ios-red); font-weight:600; grid-column: span 2;">❌ Error: ${res ? res.message : "Desconocido"}</div>`;
-                }
-            };
+          const scriptNode = document.getElementById("cyber_promo_node");
+          if (scriptNode) scriptNode.remove();
 
-            const scriptElement = document.createElement('script');
-            scriptElement.id = 'cyber_reminders_w2';
-            let queryParams = `?action=obtenerRecordatorios&periodo=${encodeURIComponent(periodo)}&callback=procesarRespuestaW2&_ts=${Date.now()}`;
-            scriptElement.src = RECORDATORIOS_API_URL + queryParams;
-            document.body.appendChild(scriptElement);
-        }
+          if (res && res.status === "success") {
+            let data = res.data;
 
-        function renderizarBloques(dataArray, contenedorId) {
-            const container = document.getElementById(contenedorId);
-            container.innerHTML = "";
-
-            let total = dataArray.length;
-            let tamanoBloque = 20;
-            let totalBloques = Math.ceil(total / tamanoBloque);
-
-            for (let b = 0; b < totalBloques; b++) {
-                let inicio = b * tamanoBloque + 1;
-                let fin = Math.min((b + 1) * tamanoBloque, total);
-
-                let btn = document.createElement('button');
-                btn.className = "btn-ios btn-secondary mt-1";
-                btn.style.fontSize = "0.85rem";
-                btn.innerText = `📲 Bloque (${inicio}-${fin})`;
-
-                btn.onclick = function() {
-                    haptic();
-                    let bloqueTexto = "";
-                    for (let i = b * tamanoBloque; i < fin; i++) {
-                        bloqueTexto += `${i + 1}. wa.me/${dataArray[i].tel}\n`;
-                    }
-
-                    navigator.clipboard.writeText(bloqueTexto.trim()).then(() => {
-                        let originalText = btn.innerText;
-                        btn.innerText = "¡Copiado! ✔️";
-                        btn.style.background = "var(--ios-green)";
-                        btn.style.color = "white";
-                        setTimeout(() => {
-                            btn.innerText = originalText;
-                            btn.style.background = "";
-                            btn.style.color = "";
-                        }, 1200);
-                    });
-                };
-                container.appendChild(btn);
+            if (!data || data.length === 0) {
+              gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">⚠️ No quedan clientes disponibles en el Histórico.</div>`;
+              return;
             }
+
+            let uniqueMap = new Map();
+            for (let i = 0; i < data.length; i++) {
+              let item = data[i];
+              let tel = item.tel;
+              if (tel && tel.trim() !== "" && !uniqueMap.has(tel.trim())) {
+                uniqueMap.set(tel.trim(), item);
+              }
+            }
+
+            globalContacts = Array.from(uniqueMap.values()).slice(0, 20);
+
+            if (globalContacts.length === 0) {
+              gridContainer.innerHTML = `<div class="status-empty">⚠️ Registros inválidos.</div>`;
+              return;
+            }
+
+            badge.innerText = `${globalContacts.length} clientes`;
+            showToast(
+              `Éxito. Se prepararon ${globalContacts.length} contactos listos.`,
+            );
+
+            crearBotonesBloques();
+          } else {
+            let errMsg = "Error de conexión.";
+            if (res && res.message) errMsg = res.message;
+            gridContainer.innerHTML = `<div class="status-empty" style="color:var(--ios-red);">❌ ${errMsg}</div>`;
+          }
+        };
+
+        const scriptElement = document.createElement("script");
+        scriptElement.id = "cyber_promo_node";
+        let queryParams =
+          "?action=generarPromosWeb&callback=procesarSincronizacion&_ts=" +
+          Date.now();
+        scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+        document.body.appendChild(scriptElement);
+      }
+
+      function crearBotonesBloques() {
+        const blockContainer = document.getElementById("blockButtonsContainer");
+        blockContainer.innerHTML = "";
+
+        const totalBlocks = Math.ceil(globalContacts.length / CHUNK_SIZE);
+
+        for (let i = 0; i < totalBlocks; i++) {
+          let start = i * CHUNK_SIZE + 1;
+          let end = Math.min((i + 1) * CHUNK_SIZE, globalContacts.length);
+
+          const btn = document.createElement("button");
+          btn.className = `btn-block ${i === 0 ? "active" : ""}`;
+          btn.id = `btnBlock_${i}`;
+          btn.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Bloque (${start}-${end})
+                `;
+
+          btn.onclick = () => mostrarBloque(i);
+          blockContainer.appendChild(btn);
         }
 
-        function renderizarLista(estadoObj, contenedorId, refName) {
-            const container = document.getElementById(contenedorId);
-            let html = "";
-            
-            estadoObj.data.forEach((item, index) => {
-                let msgEscaped = encodeURIComponent(item.mensaje);
-                let rowId = `row-${refName}-${index}`;
-                let claseTachado = estadoObj.tachados.has(index) ? 'tachado' : '';
-                
-                html += `
-                <div class="reminder-row-box ${claseTachado}" id="${rowId}">
-                    <div class="reminder-left-info">
-                        <div class="reminder-number">${index + 1}</div>
-                        <div class="reminder-link-text">${item.tel}</div>
+        mostrarBloque(0);
+      }
+
+      function mostrarBloque(blockIndex) {
+        hapticFeedback();
+        currentBlockIndex = blockIndex;
+
+        const allBtns = document.querySelectorAll(".btn-block");
+        allBtns.forEach((b) => b.classList.remove("active"));
+        const activeBtn = document.getElementById(`btnBlock_${blockIndex}`);
+        if (activeBtn) activeBtn.classList.add("active");
+
+        const startIndex = blockIndex * CHUNK_SIZE;
+        const endIndex = startIndex + CHUNK_SIZE;
+        const loteActual = globalContacts.slice(startIndex, endIndex);
+
+        const gridContainer = document.getElementById("promoGridContainer");
+        gridContainer.innerHTML = "";
+
+        loteActual.forEach((item, localIndex) => {
+          const absoluteIndex = startIndex + localIndex;
+          const visualIndex = absoluteIndex + 1;
+
+          const safeMessage = item.mensaje
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+
+          const card = document.createElement("div");
+          card.className = "contact-card";
+          card.innerHTML = `
+                    <div class="contact-left">
+                        <div class="index-badge">${visualIndex}</div>
+                        <div class="phone-text" id="phone_text_${absoluteIndex}">${item.tel}</div>
                     </div>
-                    <button class="btn-ios btn-secondary" style="padding:6px 10px; color:var(--ios-blue);" onclick="copiarMsg(this, '${msgEscaped}', '${rowId}', '${refName}', ${index})">
-                        📋
-                    </button>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        function copiarMsg(btn, msgEncoded, rowId, refName, indexObj) {
-            haptic();
-            const mensajeFinal = decodeURIComponent(msgEncoded);
-            
-            navigator.clipboard.writeText(mensajeFinal).then(() => {
-                marcarTachadoUniversal(btn, rowId, refName, indexObj);
-            }).catch(() => {
-                const textarea = document.createElement('textarea');
-                textarea.value = mensajeFinal;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                textarea.remove();
-                marcarTachadoUniversal(btn, rowId, refName, indexObj);
-            });
-        }
-
-        function marcarTachadoUniversal(btn, rowId, refName, indexObj) {
-            if(refName === 'W1') {
-                window.estadoW1.tachados.add(indexObj);
-                guardarEstadoEnLocal('W1');
-            }
-            if(refName === 'W2') {
-                window.estadoW2.tachados.add(indexObj);
-                guardarEstadoEnLocal('W2');
-            }
-
-            const row = document.getElementById(rowId);
-            if(row) row.classList.add('tachado');
-
-            const originalHTML = btn.innerHTML;
-            btn.style.background = 'var(--ios-green)';
-            btn.style.color = 'white';
-            btn.innerHTML = `✔️`;
-            
-            setTimeout(() => {
-                btn.style.background = '';
-                btn.style.color = '';
-                btn.innerHTML = originalHTML;
-            }, 1500);
-        }
-
-        function startShiftTimer() {
-            if (!sessionStorage.getItem('cyber_shift_start_time')) {
-                sessionStorage.setItem('cyber_shift_start_time', Date.now());
-            }
-            if (!sessionStorage.getItem('cyber_shift_accumulated_time')) {
-                sessionStorage.setItem('cyber_shift_accumulated_time', 0);
-            }
-
-            if (timerInterval) clearInterval(timerInterval);
-
-            timerInterval = setInterval(function() {
-                if (isTimerPaused) return; 
-                
-                let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
-                let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
-                if (isNaN(accumulated)) accumulated = 0;
-                
-                let elapsed = Date.now() - startTime;
-                let totalMs = accumulated + elapsed;
-                
-                let totalSeconds = Math.floor(totalMs / 1000);
-                let hours = Math.floor(totalSeconds / 3600);
-                let minutes = Math.floor((totalSeconds % 3600) / 60);
-                let seconds = totalSeconds % 60;
-
-                let hStr = String(hours).padStart(2, '0');
-                let mStr = String(minutes).padStart(2, '0');
-                let sStr = String(seconds).padStart(2, '0');
-
-                let stElement = document.getElementById('shiftTimer');
-                if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
-            }, 1000);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const activeUser = sessionStorage.getItem('active_staff');
-            if(activeUser) {
-                document.getElementById('staffSessionName').innerText = activeUser.toUpperCase();
-                
-                // 🛑 REGLA: Si el usuario es CAMILO, se bloquea y oculta el contador de horas
-                if (activeUser.toUpperCase() !== "CAMILO") {
-                    startShiftTimer();
-                } else {
-                    const timerBadge = document.getElementById('timerBadgeContainer');
-                    if (timerBadge) {
-                        timerBadge.style.display = 'none';
-                    }
-                }
-            }
-
-            let savedTheme = localStorage.getItem('cyber_theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-
-            cargarEstadoDeLocal();
+                    <div class="contact-right">
+                        <button class="btn-icon" title="Copiar Mensaje de Promo" onclick="copiarAlPortapapeles('${safeMessage}', this, ${absoluteIndex})">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+          gridContainer.appendChild(card);
         });
+      }
+
+      function copiarAlPortapapeles(texto, btnElement, indexToCross) {
+        hapticFeedback();
+        navigator.clipboard
+          .writeText(texto)
+          .then(() => {
+            efectoBotonExito(btnElement);
+            marcarNumeroComoEnviado(indexToCross);
+          })
+          .catch(() => {
+            const textarea = document.createElement("textarea");
+            textarea.value = texto;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            window.getSelection().removeAllRanges();
+            efectoBotonExito(btnElement);
+            marcarNumeroComoEnviado(indexToCross);
+          });
+      }
+
+      function marcarNumeroComoEnviado(index) {
+        const phoneEl = document.getElementById("phone_text_" + index);
+        if (phoneEl) {
+          phoneEl.classList.add("crossed-out");
+        }
+      }
+
+      function efectoBotonExito(btn) {
+        const originalHTML = btn.innerHTML;
+        btn.classList.add("success");
+        btn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            `;
+
+        setTimeout(() => {
+          btn.classList.remove("success");
+          btn.innerHTML = originalHTML;
+        }, 1500);
+      }
+
+      function startShiftTimer() {
+        if (!sessionStorage.getItem("cyber_shift_start_time")) {
+          sessionStorage.setItem("cyber_shift_start_time", Date.now());
+        }
+        if (!sessionStorage.getItem("cyber_shift_accumulated_time")) {
+          sessionStorage.setItem("cyber_shift_accumulated_time", 0);
+        }
+        if (timerInterval) clearInterval(timerInterval);
+
+        timerInterval = setInterval(function () {
+          if (isTimerPaused) return;
+
+          let startTime = parseInt(
+            sessionStorage.getItem("cyber_shift_start_time"),
+          );
+          let accumulated = parseInt(
+            sessionStorage.getItem("cyber_shift_accumulated_time"),
+          );
+          if (isNaN(accumulated)) accumulated = 0;
+
+          let elapsed = Date.now() - startTime;
+          let totalMs = accumulated + elapsed;
+
+          let totalSeconds = Math.floor(totalMs / 1000);
+          let hours = Math.floor(totalSeconds / 3600);
+          let minutes = Math.floor((totalSeconds % 3600) / 60);
+          let seconds = totalSeconds % 60;
+
+          let hStr = String(hours).padStart(2, "0");
+          let mStr = String(minutes).padStart(2, "0");
+          let sStr = String(seconds).padStart(2, "0");
+
+          let stElement = document.getElementById("shiftTimer");
+          if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
+        }, 1000);
+      }
+
+      function resetearInactividad() {
+        if (!sessionStorage.getItem("active_staff")) return;
+        if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
+        temporizadorInactividad = setTimeout(() => {
+          if (sessionStorage.getItem("active_staff")) {
+            alert(
+              "⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.",
+            );
+            window.location.href = "admin.html";
+          }
+        }, INACTIVITY_LOGOUT_LIMIT);
+      }
+
+      function iniciarControlInactividad() {
+        window.addEventListener("mousemove", resetearInactividad);
+        window.addEventListener("keypress", resetearInactividad);
+        window.addEventListener("click", resetearInactividad);
+        window.addEventListener("scroll", resetearInactividad);
+        window.addEventListener("touchstart", resetearInactividad);
+        resetearInactividad();
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        let savedTheme = localStorage.getItem("cyber_theme") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+
+        let activeUser = sessionStorage.getItem("active_staff") || "STAFF";
+        document.getElementById("staffSessionName").innerText =
+          activeUser.toUpperCase();
+
+        // 🛑 CRITERIO DE FILTRADO CAMILO PARA EL CUENTAMINUTOS
+        if (activeUser.toUpperCase() !== "CAMILO") {
+          startShiftTimer();
+          iniciarControlInactividad();
+        } else {
+          const timerBadge = document.getElementById("timerBadgeContainer");
+          if (timerBadge) {
+            timerBadge.style.display = "none";
+          }
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
