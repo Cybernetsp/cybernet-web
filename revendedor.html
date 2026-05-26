@@ -1,322 +1,371 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es" data-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Cybernet - Módulo Revendedores</title>
-    
-    <link rel="icon" type="image/jpeg" href="logo.jpeg">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Cybernet Revendedores">
-    
-    <link rel="stylesheet" href="global.css">
-    
-    <style>
-        /* Diseño de Rejilla de Columnas Bento */
-        .revendedor-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            width: 100%;
-        }
-        
-        /* Contenedor Interno de Selección de Cantidades */
-        .checkbox-container {
-            height: 260px; 
-            overflow-y: auto; 
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.15);
-            border-radius: 12px;
-            border: var(--glass-border);
-        }
-        [data-theme="light"] .checkbox-container { background: rgba(255, 255, 255, 0.4); }
-        .checkbox-container::-webkit-scrollbar { width: 4px; }
-        .checkbox-container::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
 
-        /* Ajuste de inputs numéricos del catálogo */
-        .checkbox-container input[type="number"] {
-            width: 60px; 
-            padding: 6px; 
-            border-radius: 8px; 
-            border: var(--glass-border); 
-            background: rgba(255,255,255,0.05); 
-            color: #fff; 
-            text-align: center; 
-            font-weight: bold;
-            outline: none;
-            transition: var(--transition-spring);
-        }
-        [data-theme="light"] .checkbox-container input[type="number"] { background: rgba(0,0,0,0.05); color: #000; }
-        .checkbox-container input[type="number"]:focus { border-color: var(--ios-purple); }
+    <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Cybernet Revendedores" />
 
-        /* Formato Limpio y Compacto para la Tabla de Saldos */
-        .distris-table {
-            width: 100%; 
-            border-collapse: collapse; 
-        }
-        .distris-table th, .distris-table td {
-            padding: 10px; 
-            text-align: left; 
-            border-bottom: 0.5px solid rgba(255,255,255,0.08);
-            vertical-align: middle;
-        }
-        [data-theme="light"] .distris-table th, [data-theme="light"] .distris-table td { border-bottom-color: rgba(0,0,0,0.08); }
-        
-        .distris-table th {
-            font-size: 0.8rem; 
-            color: var(--text-secondary); 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            background: var(--page-bg);
-            z-index: 10;
-        }
+    <link rel="stylesheet" href="global.css" />
+  </head>
+  <body>
+    <div
+      class="bg-orb bg-orb-1"
+      style="background: rgba(191, 90, 242, 0.12)"
+    ></div>
+    <div
+      class="bg-orb bg-orb-2"
+      style="background: rgba(94, 92, 230, 0.12)"
+    ></div>
 
-        .saldo-verde { color: var(--ios-green); font-weight: bold; font-family: monospace; font-size: 1.05rem; }
-        .saldo-rojo { color: var(--ios-red); font-weight: bold; font-family: monospace; font-size: 1.05rem; }
-
-        .trash-icon-btn, .copy-icon-btn {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .trash-icon-btn { font-size: 1.1rem; padding: 5px; }
-        .copy-icon-btn {
-            font-size: 0.95rem;
-            padding: 4px 6px;
-            margin-left: 8px;
-            background: rgba(118, 118, 128, 0.15);
-            border-radius: 8px;
-            border: 0.5px solid rgba(255, 255, 255, 0.05);
-            vertical-align: middle;
-        }
-        [data-theme="light"] .copy-icon-btn { background: rgba(118, 118, 128, 0.12); border-color: rgba(0,0,0,0.05); }
-        .trash-icon-btn:hover, .copy-icon-btn:hover { transform: scale(1.2); }
-        .copy-icon-btn:active { transform: scale(0.9); }
-
-        @media (max-width: 900px) {
-            .revendedor-grid { grid-template-columns: 1fr; }
-            .global-header { flex-direction: column; align-items: flex-start; gap: 15px; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="bg-orb bg-orb-1" style="background: rgba(191, 90, 242, 0.12);"></div>
-    <div class="bg-orb bg-orb-2" style="background: rgba(94, 92, 230, 0.12);"></div>
-
-    <div id="iosToast" class="overlay-ios" style="background:transparent; pointer-events:none; z-index:5001;">
-        <div style="position:fixed; bottom:40px; left:50%; transform:translateX(-50%); background:rgba(30,30,32,0.9); backdrop-filter:blur(25px); color:white; padding:14px 24px; border-radius:25px; font-size:0.9rem; font-weight:600; box-shadow:var(--glass-shadow); border:var(--glass-border);"></div>
+    <div
+      id="iosToast"
+      class="overlay-ios"
+      style="background: transparent; pointer-events: none; z-index: 5001"
+    >
+      <div
+        style="
+          position: fixed;
+          bottom: 40px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(30, 30, 32, 0.9);
+          backdrop-filter: blur(25px);
+          color: white;
+          padding: 14px 24px;
+          border-radius: 25px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          box-shadow: var(--glass-shadow);
+          border: var(--glass-border);
+        "
+      ></div>
     </div>
 
     <header class="global-header" id="globalHeader">
-        <div class="flex-row" id="staffStatusBar">
-            <div class="badge-ios badge-blue" style="color: var(--ios-purple); border-color: rgba(191, 90, 242, 0.3);">
-                <span id="staffSessionName">USER</span> • MÓDULO REVENDEDORES
-            </div>
-            <div class="badge-ios badge-green" id="timerBadgeContainer">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span id="shiftTimer">00:00:00</span>
-            </div>
+      <div class="flex-row" id="staffStatusBar">
+        <div
+          class="badge-ios badge-blue"
+          style="
+            color: var(--ios-purple);
+            border-color: rgba(191, 90, 242, 0.3);
+          "
+        >
+          <span id="staffSessionName">USER</span> • MÓDULO REVENDEDORES
         </div>
+        <div class="badge-ios badge-green" id="timerBadgeContainer">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span id="shiftTimer">00:00:00</span>
+        </div>
+      </div>
 
-        <div class="flex-row">
-            <button class="btn-ios btn-secondary" onclick="window.location.href='admin.html'">
-                ← Volver al Panel
-            </button>
-        </div>
+      <div class="flex-row">
+        <button
+          class="btn-ios btn-secondary"
+          onclick="window.location.href = 'admin.html'"
+        >
+          ← Volver al Panel
+        </button>
+      </div>
     </header>
 
-    <main class="main-workspace" style="max-width: 1300px; width: 100%;">
-        
-        <div class="revendedor-grid">
-            
-            <div class="flex-col">
-                
-                <div class="card-ios">
-                    <h2 class="card-title" style="color: var(--ios-purple); justify-content: center;">💸 Debitar Pantallas</h2>
-                    <form id="formDescuento" class="flex-col" onsubmit="ejecutarDescuento(event)">
-                        
-                        <input type="text" id="inputRevendedor" list="listaRevendedores" class="input-ios" placeholder="📱 Escribe Celular o Nombre..." required autocomplete="off">
-                        <datalist id="listaRevendedores"></datalist>
-                        
-                        <select id="selectMesesDebito" class="input-ios" required>
-                            <option value="1" selected>⏳ Vigencia del servicio: 1 Mes</option>
-                            <option value="2">⏳ Vigencia del servicio: 2 Meses</option>
-                            <option value="3">⏳ Vigencia del servicio: 3 Meses</option>
-                            <option value="4">⏳ Vigencia del servicio: 4 Meses</option>
-                            <option value="5">⏳ Vigencia del servicio: 5 Meses</option>
-                        </select>
-                        
-                        <div class="checkbox-container" id="grupoPlataformas">
-                            <div style="text-align:center; padding:50px 0; color:var(--text-secondary); font-size:0.9rem;">⏳ Sincronizando catálogo de precios de la nube...</div>
-                        </div>
+    <main class="main-workspace" style="max-width: 1300px; width: 100%">
+      <div class="revendedor-grid">
+        <div class="flex-col">
+          <div class="card-ios">
+            <h2
+              class="card-title"
+              style="color: var(--ios-purple); justify-content: center"
+            >
+              💸 Debitar Pantallas
+            </h2>
+            <form
+              id="formDescuento"
+              class="flex-col"
+              onsubmit="ejecutarDescuento(event)"
+            >
+              <input
+                type="text"
+                id="inputRevendedor"
+                list="listaRevendedores"
+                class="input-ios"
+                placeholder="📱 Escribe Celular o Nombre..."
+                required
+                autocomplete="off"
+              />
+              <datalist id="listaRevendedores"></datalist>
 
-                        <button type="submit" id="btnDescontar" class="btn-ios btn-primary w-100" style="padding: 14px;">Efectuar Descuento Global</button>
-                    </form>
+              <select id="selectMesesDebito" class="input-ios" required>
+                <option value="1" selected>
+                  ⏳ Vigencia del servicio: 1 Mes
+                </option>
+                <option value="2">⏳ Vigencia del servicio: 2 Meses</option>
+                <option value="3">⏳ Vigencia del servicio: 3 Meses</option>
+                <option value="4">⏳ Vigencia del servicio: 4 Meses</option>
+                <option value="5">⏳ Vigencia del servicio: 5 Meses</option>
+              </select>
+
+              <div class="checkbox-container" id="grupoPlataformas">
+                <div
+                  style="
+                    text-align: center;
+                    padding: 50px 0;
+                    color: var(--text-secondary);
+                    font-size: 0.9rem;
+                  "
+                >
+                  ⏳ Sincronizando catálogo de precios de la nube...
                 </div>
+              </div>
 
-                <div class="card-ios">
-                    <h2 class="card-title" style="color: var(--ios-green); justify-content: center;">💵 Agregar Saldo</h2>
-                    <form id="formRecarga" class="flex-col" onsubmit="ejecutarRecarga(event)">
-                        
-                        <input type="text" id="inputRecargaRevendedor" list="listaRevendedores" class="input-ios" placeholder="📱 Selecciona o Escribe Nuevo Revendedor..." required autocomplete="off">
-                        
-                        <input type="number" id="inputMontoRecarga" class="input-ios" placeholder="💰 Monto Base Recargado (Sin puntos)" required min="1000">
+              <button
+                type="submit"
+                id="btnDescontar"
+                class="btn-ios btn-primary w-100"
+                style="padding: 14px"
+              >
+                Efectuar Descuento Global
+              </button>
+            </form>
+          </div>
 
-                        <select id="selectBono" class="input-ios" required>
-                            <option value="0" selected>🎁 Bono de Regalo: 0% (Sin Bono)</option>
-                            <option value="5">🎁 Bono de Regalo: 5% Adicional</option>
-                            <option value="10">🎁 Bono de Regalo: 10% Adicional</option>
-                            <option value="15">🎁 Bono de Regalo: 15% Adicional</option>
-                            <option value="20">🎁 Bono de Regalo: 20% Adicional</option>
-                            <option value="25">🎁 Bono de Regalo: 25% Adicional</option>
-                            <option value="30">🎁 Bono de Regalo: 30% Adicional</option>
-                        </select>
+          <div class="card-ios">
+            <h2
+              class="card-title"
+              style="color: var(--ios-green); justify-content: center"
+            >
+              💵 Agregar Saldo
+            </h2>
+            <form
+              id="formRecarga"
+              class="flex-col"
+              onsubmit="ejecutarRecarga(event)"
+            >
+              <input
+                type="text"
+                id="inputRecargaRevendedor"
+                list="listaRevendedores"
+                class="input-ios"
+                placeholder="📱 Selecciona o Escribe Nuevo Revendedor..."
+                required
+                autocomplete="off"
+              />
 
-                        <button type="submit" id="btnRecargar" class="btn-ios btn-success w-100" style="padding: 14px;">Agregar Saldo al Libro</button>
-                    </form>
-                </div>
+              <input
+                type="number"
+                id="inputMontoRecarga"
+                class="input-ios"
+                placeholder="💰 Monto Base Recargado (Sin puntos)"
+                required
+                min="1000"
+              />
 
-            </div>
+              <select id="selectBono" class="input-ios" required>
+                <option value="0" selected>
+                  🎁 Bono de Regalo: 0% (Sin Bono)
+                </option>
+                <option value="5">🎁 Bono de Regalo: 5% Adicional</option>
+                <option value="10">🎁 Bono de Regalo: 10% Adicional</option>
+                <option value="15">🎁 Bono de Regalo: 15% Adicional</option>
+                <option value="20">🎁 Bono de Regalo: 20% Adicional</option>
+                <option value="25">🎁 Bono de Regalo: 25% Adicional</option>
+                <option value="30">🎁 Bono de Regalo: 30% Adicional</option>
+              </select>
 
-            <div class="card-ios" style="justify-content: flex-start;">
-                <h2 class="card-title" style="justify-content: center;">📊 Saldos Actuales</h2>
-                
-                <input type="text" id="searchTablaDistris" class="input-ios" placeholder="🔍 Filtrar revendedor en la tabla..." oninput="filtrarTablaRevendedores()">
-                
-                <button class="btn-ios btn-secondary w-100 mb-1" onclick="cargarDistribuidores()">🔄 Refrescar Saldos Manual</button>
-                
-                <div class="table-container" style="width: 100%; overflow-x: auto; max-height: 520px; overflow-y: auto;">
-                    <table class="distris-table">
-                        <thead>
-                            <tr>
-                                <th>Celular / Revendedor</th>
-                                <th>Saldo Disponible</th>
-                                <th style="text-align: center; width: 40px;">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaDistribuidores">
-                            <tr>
-                                <td colspan="3" style="text-align: center; color: var(--text-secondary);">⏳ Sincronizando saldos...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
+              <button
+                type="submit"
+                id="btnRecargar"
+                class="btn-ios btn-success w-100"
+                style="padding: 14px"
+              >
+                Agregar Saldo al Libro
+              </button>
+            </form>
+          </div>
         </div>
 
+        <div class="card-ios" style="justify-content: flex-start">
+          <h2 class="card-title" style="justify-content: center">
+            📊 Saldos Actuales
+          </h2>
+
+          <input
+            type="text"
+            id="searchTablaDistris"
+            class="input-ios"
+            placeholder="🔍 Filtrar revendedor en la tabla..."
+            oninput="filtrarTablaRevendedores()"
+          />
+
+          <button
+            class="btn-ios btn-secondary w-100 mb-1"
+            onclick="cargarDistribuidores()"
+          >
+            🔄 Refrescar Saldos Manual
+          </button>
+
+          <div
+            class="table-container"
+            style="
+              width: 100%;
+              overflow-x: auto;
+              max-height: 520px;
+              overflow-y: auto;
+            "
+          >
+            <table class="distris-table">
+              <thead>
+                <tr>
+                  <th>Celular / Revendedor</th>
+                  <th>Saldo Disponible</th>
+                  <th style="text-align: center; width: 40px">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tablaDistribuidores">
+                <tr>
+                  <td
+                    colspan="3"
+                    style="text-align: center; color: var(--text-secondary)"
+                  >
+                    ⏳ Sincronizando saldos...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </main>
-    
+
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
+      const GOOGLE_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
 
-        let timerInterval = null;
-        let temporizadorInactividad = null;
-        let temporizadorCierreTotal = null;
-        let isTimerPaused = false;
+      let timerInterval = null;
+      let temporizadorInactividad = null;
+      let temporizadorCierreTotal = null;
+      let isTimerPaused = false;
 
-        const INACTIVITY_LIMIT = 15 * 60 * 1000;         
-        const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;  
+      const INACTIVITY_LIMIT = 15 * 60 * 1000;
+      const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;
 
-        function haptic() { 
-            if (navigator.vibrate) navigator.vibrate(15); 
-        }
+      function haptic() {
+        if (navigator.vibrate) navigator.vibrate(15);
+      }
 
-        function formatearMoneda(valorStr) {
-            let valorNum = parseFloat(String(valorStr).replace(/[^\d.-]/g, ''));
-            if (isNaN(valorNum)) return "$0";
-            if (valorNum > 0 && valorNum < 1000) valorNum = valorNum * 1000;
-            return "$" + valorNum.toLocaleString('es-CO');
-        }
+      function formatearMoneda(valorStr) {
+        let valorNum = parseFloat(String(valorStr).replace(/[^\d.-]/g, ""));
+        if (isNaN(valorNum)) return "$0";
+        if (valorNum > 0 && valorNum < 1000) valorNum = valorNum * 1000;
+        return "$" + valorNum.toLocaleString("es-CO");
+      }
 
-        function cargarPreciosDeSheets() {
-            const container = document.getElementById('grupoPlataformas');
-            const oldScript = document.getElementById('script_get_precios');
-            if (oldScript) oldScript.remove();
+      function cargarPreciosDeSheets() {
+        const container = document.getElementById("grupoPlataformas");
+        const oldScript = document.getElementById("script_get_precios");
+        if (oldScript) oldScript.remove();
 
-            window.procesarPreciosWeb = function(res) {
-                if (res && res.status === "success") {
-                    let lista = res.data;
-                    let html = "";
-                    lista.forEach(item => {
-                        html += `
+        window.procesarPreciosWeb = function (res) {
+          if (res && res.status === "success") {
+            let lista = res.data;
+            let html = "";
+            lista.forEach((item) => {
+              html += `
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
                             <label style="font-size: 0.9rem;">📱 ${item.nombre} - ${formatearMoneda(item.precio)}</label>
                             <input type="number" name="cant_plataforma" data-value="${item.codigo}" data-name="${item.nombre}" min="0" max="10" value="0">
                         </div>`;
-                    });
-                    container.innerHTML = html;
-                } else {
-                    container.innerHTML = `<div style="text-align:center; padding:50px 0; color:var(--ios-red);">❌ Error cargando catálogo: ${res.message}</div>`;
-                }
-            };
-
-            const scriptElement = document.createElement('script');
-            scriptElement.id = 'script_get_precios';
-            scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerPrecios&callback=procesarPreciosWeb&_ts=" + Date.now();
-            document.body.appendChild(scriptElement);
-        }
-
-        function copiarSaldo(nombre, saldoFormateado) {
-            haptic();
-            const textoWhatsApp = `*CYBERNET STREAMING* 🚀\n\nEstimado(a) *${nombre}*,\n\nTe informamos que tu saldo disponible actual en el sistema es de: *${saldoFormateado}* 💵\n\n¡Gracias por tu confianza y preferencia! ✨`;
-            
-            navigator.clipboard.writeText(textoWhatsApp).then(() => {
-                const toast = document.getElementById('iosToast');
-                toast.querySelector('div').innerHTML = `<span>📋 Reporte de ${nombre} copiado con éxito</span>`;
-                toast.classList.add('show');
-                setTimeout(() => { toast.classList.remove('show'); }, 2200);
             });
-        }
+            container.innerHTML = html;
+          } else {
+            container.innerHTML = `<div style="text-align:center; padding:50px 0; color:var(--ios-red);">❌ Error cargando catálogo: ${res.message}</div>`;
+          }
+        };
 
-        function cargarDistribuidores() {
-            const tbody = document.getElementById('tablaDistribuidores');
-            const oldScript = document.getElementById('script_get_distris');
-            if (oldScript) oldScript.remove();
+        const scriptElement = document.createElement("script");
+        scriptElement.id = "script_get_precios";
+        scriptElement.src =
+          GOOGLE_SCRIPT_URL +
+          "?action=obtenerPrecios&callback=procesarPreciosWeb&_ts=" +
+          Date.now();
+        document.body.appendChild(scriptElement);
+      }
 
-            window.procesarDistribuidores = function(res) {
-                if (res && res.status === "success") {
-                    let data = res.data;
-                    if (data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary);">No hay distribuidores registrados.</td></tr>';
-                        return;
-                    }
-                    
-                    data.sort(function(a, b) {
-                        let saldoA = parseFloat(String(a.saldo).replace(/[^\d.-]/g, '')) || 0;
-                        let saldoB = parseFloat(String(b.saldo).replace(/[^\d.-]/g, '')) || 0;
-                        if (saldoA > 0 && saldoA < 1000) saldoA = saldoA * 1000;
-                        if (saldoB > 0 && saldoB < 1000) saldoB = saldoB * 1000;
-                        return saldoB - saldoA;
-                    });
-                    
-                    let html = "";
-                    let datalistHtml = "";
+      function copiarSaldo(nombre, saldoFormateado) {
+        haptic();
+        const textoWhatsApp = `*CYBERNET STREAMING* 🚀\n\nEstimado(a) *${nombre}*,\n\nTe informamos que tu saldo disponible actual en el sistema es de: *${saldoFormateado}* 💵\n\n¡Gracias por tu confianza y preferencia! ✨`;
 
-                    for(let i = 0; i < data.length; i++) {
-                        let d = data[i];
-                        let saldoLimpio = parseFloat(String(d.saldo).replace(/[^\d.-]/g, '')) || 0;
-                        if (saldoLimpio > 0 && saldoLimpio < 1000) saldoLimpio = saldoLimpio * 1000;
-                        let claseSaldo = saldoLimpio > 5000 ? 'saldo-verde' : 'saldo-rojo';
-                        let saldoTexto = formatearMoneda(d.saldo);
-                        let nombreLimpioParaClick = d.nombre.replace(/'/g, "\\'");
+        navigator.clipboard.writeText(textoWhatsApp).then(() => {
+          const toast = document.getElementById("iosToast");
+          toast.querySelector("div").innerHTML =
+            `<span>📋 Reporte de ${nombre} copiado con éxito</span>`;
+          toast.classList.add("show");
+          setTimeout(() => {
+            toast.classList.remove("show");
+          }, 2200);
+        });
+      }
 
-                        html += `
+      function cargarDistribuidores() {
+        const tbody = document.getElementById("tablaDistribuidores");
+        const oldScript = document.getElementById("script_get_distris");
+        if (oldScript) oldScript.remove();
+
+        window.procesarDistribuidores = function (res) {
+          if (res && res.status === "success") {
+            let data = res.data;
+            if (data.length === 0) {
+              tbody.innerHTML =
+                '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary);">No hay distribuidores registrados.</td></tr>';
+              return;
+            }
+
+            data.sort(function (a, b) {
+              let saldoA =
+                parseFloat(String(a.saldo).replace(/[^\d.-]/g, "")) || 0;
+              let saldoB =
+                parseFloat(String(b.saldo).replace(/[^\d.-]/g, "")) || 0;
+              if (saldoA > 0 && saldoA < 1000) saldoA = saldoA * 1000;
+              if (saldoB > 0 && saldoB < 1000) saldoB = saldoB * 1000;
+              return saldoB - saldoA;
+            });
+
+            let html = "";
+            let datalistHtml = "";
+
+            for (let i = 0; i < data.length; i++) {
+              let d = data[i];
+              let saldoLimpio =
+                parseFloat(String(d.saldo).replace(/[^\d.-]/g, "")) || 0;
+              if (saldoLimpio > 0 && saldoLimpio < 1000)
+                saldoLimpio = saldoLimpio * 1000;
+              let claseSaldo =
+                saldoLimpio > 5000 ? "saldo-verde" : "saldo-rojo";
+              let saldoTexto = formatearMoneda(d.saldo);
+              let nombreLimpioParaClick = d.nombre.replace(/'/g, "\\'");
+
+              html += `
                         <tr class="distri-row">
                             <td style="border-bottom: 0.5px solid rgba(255,255,255,0.05);"><strong>${d.nombre}</strong><br><span style="color:var(--text-secondary); font-size:0.8rem;">📱 ${d.telefono}</span></td>
                             <td class="${claseSaldo}" style="white-space: nowrap; border-bottom: 0.5px solid rgba(255,255,255,0.05);">
@@ -328,282 +377,357 @@
                             </td>
                         </tr>`;
 
-                        datalistHtml += `<option value="${d.nombre}">Tel: ${d.telefono}</option><option value="${d.telefono}">Nombre: ${d.nombre}</option>`;
-                    }
-                    tbody.innerHTML = html;
-                    document.getElementById('listaRevendedores').innerHTML = datalistHtml;
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--ios-red);">❌ Error al cargar datos: ${res.message || 'Desconocido'}</td></tr>`;
-                }
-            };
-
-            const scriptElement = document.createElement('script');
-            scriptElement.id = 'script_get_distris';
-            scriptElement.src = GOOGLE_SCRIPT_URL + "?action=obtenerDistribuidores&callback=procesarDistribuidores&_ts=" + Date.now();
-            document.body.appendChild(scriptElement);
-        }
-
-        function solicitarEliminacion(nombreRevendedor) {
-            haptic();
-            if (!nombreRevendedor) return;
-            if (!confirm(`⚠️ ADVERTENCIA DE SEGURIDAD ⚠️\n\n¿Estás absolutamente seguro de eliminar por completo al revendedor "${nombreRevendedor}" de la base de datos?\n\nEsta acción borrará permanentemente su saldo y registro del Google Sheets.`)) return;
-
-            const tbody = document.getElementById('tablaDistribuidores');
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary);">⏳ Eliminando registro del Sheets...</td></tr>';
-
-            const oldScript = document.getElementById('script_delete_distri');
-            if (oldScript) oldScript.remove();
-
-            window.procesarEliminacion = function(res) {
-                if (res && res.status === "success") {
-                    alert(`🗑️ Éxito: El revendedor "${res.eliminado}" ha sido borrado del sistema.`);
-                    cargarDistribuidores(); 
-                } else {
-                    alert(`❌ Error al eliminar: ${res.message || 'Fallo interno.'}`);
-                    cargarDistribuidores();
-                }
-            };
-
-            const scriptElement = document.createElement('script');
-            scriptElement.id = 'script_delete_distri';
-            scriptElement.src = GOOGLE_SCRIPT_URL + `?action=eliminarRevendedor&revendedor=${encodeURIComponent(nombreRevendedor)}&callback=procesarEliminacion&_ts=${Date.now()}`;
-            document.body.appendChild(scriptElement);
-        }
-
-        function filtrarTablaRevendedores() {
-            const query = document.getElementById('searchTablaDistris').value.toLowerCase();
-            const rows = document.querySelectorAll('.distri-row');
-            for(let i = 0; i < rows.length; i++) {
-                rows[i].style.display = rows[i].innerText.toLowerCase().includes(query) ? "" : "none";
+              datalistHtml += `<option value="${d.nombre}">Tel: ${d.telefono}</option><option value="${d.telefono}">Nombre: ${d.nombre}</option>`;
             }
+            tbody.innerHTML = html;
+            document.getElementById("listaRevendedores").innerHTML =
+              datalistHtml;
+          } else {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--ios-red);">❌ Error al cargar datos: ${res.message || "Desconocido"}</td></tr>`;
+          }
+        };
+
+        const scriptElement = document.createElement("script");
+        scriptElement.id = "script_get_distris";
+        scriptElement.src =
+          GOOGLE_SCRIPT_URL +
+          "?action=obtenerDistribuidores&callback=procesarDistribuidores&_ts=" +
+          Date.now();
+        document.body.appendChild(scriptElement);
+      }
+
+      function solicitarEliminacion(nombreRevendedor) {
+        haptic();
+        if (!nombreRevendedor) return;
+        if (
+          !confirm(
+            `⚠️ ADVERTENCIA DE SEGURIDAD ⚠️\n\n¿Estás absolutamente seguro de eliminar por completo al revendedor "${nombreRevendedor}" de la base de datos?\n\nEsta acción borrará permanentemente su saldo y registro del Google Sheets.`,
+          )
+        )
+          return;
+
+        const tbody = document.getElementById("tablaDistribuidores");
+        tbody.innerHTML =
+          '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary);">⏳ Eliminando registro del Sheets...</td></tr>';
+
+        const oldScript = document.getElementById("script_delete_distri");
+        if (oldScript) oldScript.remove();
+
+        window.procesarEliminacion = function (res) {
+          if (res && res.status === "success") {
+            alert(
+              `🗑️ Éxito: El revendedor "${res.eliminado}" ha sido borrado del sistema.`,
+            );
+            cargarDistribuidores();
+          } else {
+            alert(`❌ Error al eliminar: ${res.message || "Fallo interno."}`);
+            cargarDistribuidores();
+          }
+        };
+
+        const scriptElement = document.createElement("script");
+        scriptElement.id = "script_delete_distri";
+        scriptElement.src =
+          GOOGLE_SCRIPT_URL +
+          `?action=eliminarRevendedor&revendedor=${encodeURIComponent(nombreRevendedor)}&callback=procesarEliminacion&_ts=${Date.now()}`;
+        document.body.appendChild(scriptElement);
+      }
+
+      function filtrarTablaRevendedores() {
+        const query = document
+          .getElementById("searchTablaDistris")
+          .value.toLowerCase();
+        const rows = document.querySelectorAll(".distri-row");
+        for (let i = 0; i < rows.length; i++) {
+          rows[i].style.display = rows[i].innerText
+            .toLowerCase()
+            .includes(query)
+            ? ""
+            : "none";
         }
+      }
 
-        function ejecutarDescuento(e) {
-            e.preventDefault();
-            haptic();
+      function ejecutarDescuento(e) {
+        e.preventDefault();
+        haptic();
 
-            const revendedor = document.getElementById('inputRevendedor').value.trim();
-            const meses = parseInt(document.getElementById('selectMesesDebito').value) || 1;
-            const inputsCantidad = document.querySelectorAll('input[name="cant_plataforma"]');
-            
-            let plataformasSeleccionadas = [];
-            let resumenNombres = [];
-            let totalDébitosFinales = 0;
+        const revendedor = document
+          .getElementById("inputRevendedor")
+          .value.trim();
+        const meses =
+          parseInt(document.getElementById("selectMesesDebito").value) || 1;
+        const inputsCantidad = document.querySelectorAll(
+          'input[name="cant_plataforma"]',
+        );
 
-            inputsCantidad.forEach(input => {
-                let cantidadPantallas = parseInt(input.value) || 0;
-                if (cantidadPantallas > 0) {
-                    let codigoPlat = input.getAttribute('data-value');
-                    let nombreEstetico = input.getAttribute('data-name');
-                    let totalItemsMultiplicados = cantidadPantallas * meses;
-                    totalDébitosFinales += totalItemsMultiplicados;
-                    resumenNombres.push(`▪ ${nombreEstetico}: ${cantidadPantallas} pantallas × ${meses} m (Total: ${totalItemsMultiplicados} débitos)`);
-                    for (let k = 0; k < totalItemsMultiplicados; k++) plataformasSeleccionadas.push(codigoPlat);
-                }
-            });
-            
-            if (totalDébitosFinales === 0) {
-                alert("⚠️ Por favor, ingresa una cantidad mayor a 0 en al menos una plataforma.");
-                return;
-            }
+        let plataformasSeleccionadas = [];
+        let resumenNombres = [];
+        let totalDébitosFinales = 0;
 
-            const stringPlataformas = plataformasSeleccionadas.join(",");
-            if (!revendedor) return;
-
-            let msjConfirma = `¿Confirmas efectuar el débito global con las siguientes vigencias multiplicadas por mes?\n\n`;
-            for(let j=0; j<resumenNombres.length; j++) msjConfirma += `${resumenNombres[j]}\n`;
-            msjConfirma += `\n👤 Revendedor: ${revendedor}`;
-
-            if(!confirm(msjConfirma)) return;
-
-            const btn = document.getElementById('btnDescontar');
-            btn.disabled = true;
-            btn.innerText = "⏳ Procesando Débito...";
-
-            const oldScript = document.getElementById('script_debit_distri');
-            if (oldScript) oldScript.remove();
-
-            window.procesarDescuento = function(res) {
-                btn.disabled = false;
-                btn.innerText = "Efectuar Descuento Global";
-
-                if (res && res.status === "success") {
-                    alert(`✅ ¡Débito Exitoso!\n\nRevendedor: ${res.revendedor}\nDescuento Total: ${formatearMoneda(res.debitado)}\nNuevo Saldo: ${formatearMoneda(res.saldoQuedante)}`);
-                    document.getElementById('formDescuento').reset();
-                    cargarDistribuidores(); 
-                    cargarPreciosDeSheets(); 
-                } else {
-                    alert(`❌ Error al procesar:\n\n${res.message || 'Verifica los datos y vuelve a intentar.'}`);
-                }
-            };
-
-            const scriptElement = document.createElement('script');
-            scriptElement.id = 'script_debit_distri';
-            let params = `?action=descontarSaldoRevendedor&revendedor=${encodeURIComponent(revendedor)}&plataformas=${encodeURIComponent(stringPlataformas)}&meses=1&callback=procesarDescuento&_ts=${Date.now()}`;
-            scriptElement.src = GOOGLE_SCRIPT_URL + params;
-            document.body.appendChild(scriptElement);
-        }
-
-        function ejecutarRecarga(e) {
-            e.preventDefault();
-            haptic();
-
-            const revendedor = document.getElementById('inputRecargaRevendedor').value.trim();
-            const montoBase = parseFloat(document.getElementById('inputMontoRecarga').value.trim());
-            const bonoPorcentaje = parseFloat(document.getElementById('selectBono').value);
-
-            if (!revendedor || isNaN(montoBase) || montoBase <= 0) {
-                alert("⚠️ Ingresa un nombre válido y un monto mayor a 0.");
-                return;
-            }
-
-            const montoBono = montoBase * (bonoPorcentaje / 100);
-            const totalRecarga = montoBase + montoBono;
-
-            if(!confirm(`¿Deseas aplicar esta recarga?\n\n👤 Revendedor: ${revendedor}\n💵 Monto Base: ${formatearMoneda(montoBase)}\n🎁 Bono (${bonoPorcentaje}%): ${formatearMoneda(montoBono)}\n💰 TOTAL A SUMAR: ${formatearMoneda(totalRecarga)}`)) return;
-
-            const btn = document.getElementById('btnRecargar');
-            btn.disabled = true;
-            btn.innerText = "⏳ Procesando Recarga...";
-
-            const oldScript = document.getElementById('script_recharge_distri');
-            if (oldScript) oldScript.remove();
-
-            window.procesarRecarga = function(res) {
-                btn.disabled = false;
-                btn.innerText = "Agregar Saldo al Libro";
-
-                if (res && res.status === "success") {
-                    alert(`✅ ¡Recarga Exitosa!\n\nRevendedor: ${res.revendedor}\nAgregado a cuenta: ${formatearMoneda(res.recargado)}\nNuevo Saldo Total: ${formatearMoneda(res.nuevoSaldo)}`);
-                    document.getElementById('formRecarga').reset();
-                    cargarDistribuidores(); 
-                } else {
-                    alert(`❌ Error al procesar:\n\n${res.message || 'Verifica los datos y vuelve a intentar.'}`);
-                }
-            };
-
-            const scriptElement = document.createElement('script');
-            scriptElement.id = 'script_recharge_distri';
-            let params = `?action=recargarSaldo&revendedor=${encodeURIComponent(revendedor)}&totalRecarga=${encodeURIComponent(totalRecarga)}&callback=procesarRecarga&_ts=${Date.now()}`;
-            scriptElement.src = GOOGLE_SCRIPT_URL + params;
-            document.body.appendChild(scriptElement);
-        }
-
-        function resetearInactividad() {
-            if (!sessionStorage.getItem('active_staff')) return; 
-
-            if (isTimerPaused) {
-                isTimerPaused = false;
-                sessionStorage.setItem('cyber_shift_start_time', Date.now());
-                const tBadge = document.querySelector('.timer-badge');
-                if (tBadge) { tBadge.style.color = 'var(--ios-green)'; tBadge.style.borderColor = 'var(--glass-border)'; }
-                const sTimer = document.getElementById('shiftTimer');
-                if (sTimer) sTimer.innerText = "Reanudando...";
-            }
-
-            if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
-            if (temporizadorCierreTotal) clearTimeout(temporizadorCierreTotal);
-            
-            temporizadorInactividad = setTimeout(() => {
-                if (sessionStorage.getItem('active_staff') && !isTimerPaused) {
-                    isTimerPaused = true;
-                    let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
-                    let currentAccumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
-                    if (isNaN(currentAccumulated)) currentAccumulated = 0;
-                    let newlyElapsed = Date.now() - startTime;
-                    let validTime = newlyElapsed - INACTIVITY_LIMIT;
-                    if (validTime < 0) validTime = 0;
-                    
-                    sessionStorage.setItem('cyber_shift_accumulated_time', currentAccumulated + validTime);
-                    
-                    const tBadge2 = document.querySelector('.timer-badge');
-                    if (tBadge2) { tBadge2.style.color = '#ffcc00'; tBadge2.style.borderColor = '#ffcc00'; }
-                    const sTimer2 = document.getElementById('shiftTimer');
-                    if (sTimer2) sTimer2.innerText = "PAUSADO";
-
-                    alert("⏳ Por inactividad (15 minutos), el cronómetro de tu turno se ha pausado.\nMueve el mouse o toca la pantalla para reanudar el conteo de horas.");
-                }
-            }, INACTIVITY_LIMIT); 
-
-            temporizadorCierreTotal = setTimeout(() => {
-                if (sessionStorage.getItem('active_staff')) {
-                    alert("⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.");
-                    sessionStorage.removeItem('active_staff');
-                    localStorage.removeItem('cyber_saved_staff');
-                    sessionStorage.removeItem('cyber_shift_start_time');
-                    sessionStorage.removeItem('cyber_shift_accumulated_time');
-                    window.location.href = 'admin.html';
-                }
-            }, INACTIVITY_LOGOUT_LIMIT);
-        }
-
-        function iniciarControlInactividad() {
-            window.addEventListener('mousemove', resetearInactividad);
-            window.addEventListener('keypress', resetearInactividad);
-            window.addEventListener('click', resetearInactividad);
-            window.addEventListener('scroll', resetearInactividad);
-            window.addEventListener('touchstart', resetearInactividad);
-            resetearInactividad(); 
-        }
-
-        function startShiftTimer() {
-            if (!sessionStorage.getItem('cyber_shift_start_time')) sessionStorage.setItem('cyber_shift_start_time', Date.now());
-            if (!sessionStorage.getItem('cyber_shift_accumulated_time')) sessionStorage.setItem('cyber_shift_accumulated_time', 0);
-            if (timerInterval) clearInterval(timerInterval);
-
-            timerInterval = setInterval(function() {
-                if (isTimerPaused) return; 
-                
-                let startTime = parseInt(sessionStorage.getItem('cyber_shift_start_time'));
-                let accumulated = parseInt(sessionStorage.getItem('cyber_shift_accumulated_time'));
-                if (isNaN(accumulated)) accumulated = 0;
-                
-                let elapsed = Date.now() - startTime;
-                let totalMs = accumulated + elapsed;
-                
-                let totalSeconds = Math.floor(totalMs / 1000);
-                let hours = Math.floor(totalSeconds / 3600);
-                let minutes = Math.floor((totalSeconds % 3600) / 60);
-                let seconds = totalSeconds % 60;
-
-                let hStr = String(hours).padStart(2, '0');
-                let mStr = String(minutes).padStart(2, '0');
-                let sStr = String(seconds).padStart(2, '0');
-
-                let stElement = document.getElementById('shiftTimer');
-                if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
-            }, 1000);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            let savedTheme = localStorage.getItem('cyber_theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-
-            let activeUser = sessionStorage.getItem('active_staff');
-            if (!activeUser) {
-                window.location.href = 'admin.html';
-                return;
-            }
-
-            let sessionNameEl = document.getElementById('staffSessionName');
-            if (sessionNameEl) sessionNameEl.innerText = activeUser;
-
-            // 🛑 CRITERIO DE FILTRADO CAMILO PARA EL CRONÓMETRO DE HORAS
-            if (activeUser.toUpperCase() !== "CAMILO") {
-                startShiftTimer();
-                iniciarControlInactividad();
-            } else {
-                const timerBadge = document.getElementById('timerBadgeContainer');
-                if (timerBadge) timerBadge.style.display = 'none';
-            }
-            
-            setTimeout(() => {
-                cargarDistribuidores();
-                cargarPreciosDeSheets(); 
-            }, 300);
-
-            setInterval(() => { cargarDistribuidores(); }, 60000);
+        inputsCantidad.forEach((input) => {
+          let cantidadPantallas = parseInt(input.value) || 0;
+          if (cantidadPantallas > 0) {
+            let codigoPlat = input.getAttribute("data-value");
+            let nombreEstetico = input.getAttribute("data-name");
+            let totalItemsMultiplicados = cantidadPantallas * meses;
+            totalDébitosFinales += totalItemsMultiplicados;
+            resumenNombres.push(
+              `▪ ${nombreEstetico}: ${cantidadPantallas} pantallas × ${meses} m (Total: ${totalItemsMultiplicados} débitos)`,
+            );
+            for (let k = 0; k < totalItemsMultiplicados; k++)
+              plataformasSeleccionadas.push(codigoPlat);
+          }
         });
+
+        if (totalDébitosFinales === 0) {
+          alert(
+            "⚠️ Por favor, ingresa una cantidad mayor a 0 en al menos una plataforma.",
+          );
+          return;
+        }
+
+        const stringPlataformas = plataformasSeleccionadas.join(",");
+        if (!revendedor) return;
+
+        let msjConfirma = `¿Confirmas efectuar el débito global con las siguientes vigencias multiplicadas por mes?\n\n`;
+        for (let j = 0; j < resumenNombres.length; j++)
+          msjConfirma += `${resumenNombres[j]}\n`;
+        msjConfirma += `\n👤 Revendedor: ${revendedor}`;
+
+        if (!confirm(msjConfirma)) return;
+
+        const btn = document.getElementById("btnDescontar");
+        btn.disabled = true;
+        btn.innerText = "⏳ Procesando Débito...";
+
+        const oldScript = document.getElementById("script_debit_distri");
+        if (oldScript) oldScript.remove();
+
+        window.procesarDescuento = function (res) {
+          btn.disabled = false;
+          btn.innerText = "Efectuar Descuento Global";
+
+          if (res && res.status === "success") {
+            alert(
+              `✅ ¡Débito Exitoso!\n\nRevendedor: ${res.revendedor}\nDescuento Total: ${formatearMoneda(res.debitado)}\nNuevo Saldo: ${formatearMoneda(res.saldoQuedante)}`,
+            );
+            document.getElementById("formDescuento").reset();
+            cargarDistribuidores();
+            cargarPreciosDeSheets();
+          } else {
+            alert(
+              `❌ Error al procesar:\n\n${res.message || "Verifica los datos y vuelve a intentar."}`,
+            );
+          }
+        };
+
+        const scriptElement = document.createElement("script");
+        scriptElement.id = "script_debit_distri";
+        let params = `?action=descontarSaldoRevendedor&revendedor=${encodeURIComponent(revendedor)}&plataformas=${encodeURIComponent(stringPlataformas)}&meses=1&callback=procesarDescuento&_ts=${Date.now()}`;
+        scriptElement.src = GOOGLE_SCRIPT_URL + params;
+        document.body.appendChild(scriptElement);
+      }
+
+      function ejecutarRecarga(e) {
+        e.preventDefault();
+        haptic();
+
+        const revendedor = document
+          .getElementById("inputRecargaRevendedor")
+          .value.trim();
+        const montoBase = parseFloat(
+          document.getElementById("inputMontoRecarga").value.trim(),
+        );
+        const bonoPorcentaje = parseFloat(
+          document.getElementById("selectBono").value,
+        );
+
+        if (!revendedor || isNaN(montoBase) || montoBase <= 0) {
+          alert("⚠️ Ingresa un nombre válido y un monto mayor a 0.");
+          return;
+        }
+
+        const montoBono = montoBase * (bonoPorcentaje / 100);
+        const totalRecarga = montoBase + montoBono;
+
+        if (
+          !confirm(
+            `¿Deseas aplicar esta recarga?\n\n👤 Revendedor: ${revendedor}\n💵 Monto Base: ${formatearMoneda(montoBase)}\n🎁 Bono (${bonoPorcentaje}%): ${formatearMoneda(montoBono)}\n💰 TOTAL A SUMAR: ${formatearMoneda(totalRecarga)}`,
+          )
+        )
+          return;
+
+        const btn = document.getElementById("btnRecargar");
+        btn.disabled = true;
+        btn.innerText = "⏳ Procesando Recarga...";
+
+        const oldScript = document.getElementById("script_recharge_distri");
+        if (oldScript) oldScript.remove();
+
+        window.procesarRecarga = function (res) {
+          btn.disabled = false;
+          btn.innerText = "Agregar Saldo al Libro";
+
+          if (res && res.status === "success") {
+            alert(
+              `✅ ¡Recarga Exitosa!\n\nRevendedor: ${res.revendedor}\nAgregado a cuenta: ${formatearMoneda(res.recargado)}\nNuevo Saldo Total: ${formatearMoneda(res.nuevoSaldo)}`,
+            );
+            document.getElementById("formRecarga").reset();
+            cargarDistribuidores();
+          } else {
+            alert(
+              `❌ Error al procesar:\n\n${res.message || "Verifica los datos y vuelve a intentar."}`,
+            );
+          }
+        };
+
+        const scriptElement = document.createElement("script");
+        scriptElement.id = "script_recharge_distri";
+        let params = `?action=recargarSaldo&revendedor=${encodeURIComponent(revendedor)}&totalRecarga=${encodeURIComponent(totalRecarga)}&callback=procesarRecarga&_ts=${Date.now()}`;
+        scriptElement.src = GOOGLE_SCRIPT_URL + params;
+        document.body.appendChild(scriptElement);
+      }
+
+      function resetearInactividad() {
+        if (!sessionStorage.getItem("active_staff")) return;
+
+        if (isTimerPaused) {
+          isTimerPaused = false;
+          sessionStorage.setItem("cyber_shift_start_time", Date.now());
+          const tBadge = document.querySelector(".timer-badge");
+          if (tBadge) {
+            tBadge.style.color = "var(--ios-green)";
+            tBadge.style.borderColor = "var(--glass-border)";
+          }
+          const sTimer = document.getElementById("shiftTimer");
+          if (sTimer) sTimer.innerText = "Reanudando...";
+        }
+
+        if (temporizadorInactividad) clearTimeout(temporizadorInactividad);
+        if (temporizadorCierreTotal) clearTimeout(temporizadorCierreTotal);
+
+        temporizadorInactividad = setTimeout(() => {
+          if (sessionStorage.getItem("active_staff") && !isTimerPaused) {
+            isTimerPaused = true;
+            let startTime = parseInt(
+              sessionStorage.getItem("cyber_shift_start_time"),
+            );
+            let currentAccumulated = parseInt(
+              sessionStorage.getItem("cyber_shift_accumulated_time"),
+            );
+            if (isNaN(currentAccumulated)) currentAccumulated = 0;
+            let newlyElapsed = Date.now() - startTime;
+            let validTime = newlyElapsed - INACTIVITY_LIMIT;
+            if (validTime < 0) validTime = 0;
+
+            sessionStorage.setItem(
+              "cyber_shift_accumulated_time",
+              currentAccumulated + validTime,
+            );
+
+            const tBadge2 = document.querySelector(".timer-badge");
+            if (tBadge2) {
+              tBadge2.style.color = "#ffcc00";
+              tBadge2.style.borderColor = "#ffcc00";
+            }
+            const sTimer2 = document.getElementById("shiftTimer");
+            if (sTimer2) sTimer2.innerText = "PAUSADO";
+
+            alert(
+              "⏳ Por inactividad (15 minutos), el cronómetro de tu turno se ha pausado.\nMueve el mouse o toca la pantalla para reanudar el conteo de horas.",
+            );
+          }
+        }, INACTIVITY_LIMIT);
+
+        temporizadorCierreTotal = setTimeout(() => {
+          if (sessionStorage.getItem("active_staff")) {
+            alert(
+              "⏳ Tu sesión se ha cerrado automáticamente tras 30 minutos de inactividad.",
+            );
+            sessionStorage.removeItem("active_staff");
+            localStorage.removeItem("cyber_saved_staff");
+            sessionStorage.removeItem("cyber_shift_start_time");
+            sessionStorage.removeItem("cyber_shift_accumulated_time");
+            window.location.href = "admin.html";
+          }
+        }, INACTIVITY_LOGOUT_LIMIT);
+      }
+
+      function iniciarControlInactividad() {
+        window.addEventListener("mousemove", resetearInactividad);
+        window.addEventListener("keypress", resetearInactividad);
+        window.addEventListener("click", resetearInactividad);
+        window.addEventListener("scroll", resetearInactividad);
+        window.addEventListener("touchstart", resetearInactividad);
+        resetearInactividad();
+      }
+
+      function startShiftTimer() {
+        if (!sessionStorage.getItem("cyber_shift_start_time"))
+          sessionStorage.setItem("cyber_shift_start_time", Date.now());
+        if (!sessionStorage.getItem("cyber_shift_accumulated_time"))
+          sessionStorage.setItem("cyber_shift_accumulated_time", 0);
+        if (timerInterval) clearInterval(timerInterval);
+
+        timerInterval = setInterval(function () {
+          if (isTimerPaused) return;
+
+          let startTime = parseInt(
+            sessionStorage.getItem("cyber_shift_start_time"),
+          );
+          let accumulated = parseInt(
+            sessionStorage.getItem("cyber_shift_accumulated_time"),
+          );
+          if (isNaN(accumulated)) accumulated = 0;
+
+          let elapsed = Date.now() - startTime;
+          let totalMs = accumulated + elapsed;
+
+          let totalSeconds = Math.floor(totalMs / 1000);
+          let hours = Math.floor(totalSeconds / 3600);
+          let minutes = Math.floor((totalSeconds % 3600) / 60);
+          let seconds = totalSeconds % 60;
+
+          let hStr = String(hours).padStart(2, "0");
+          let mStr = String(minutes).padStart(2, "0");
+          let sStr = String(seconds).padStart(2, "0");
+
+          let stElement = document.getElementById("shiftTimer");
+          if (stElement) stElement.innerText = hStr + ":" + mStr + ":" + sStr;
+        }, 1000);
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        let savedTheme = localStorage.getItem("cyber_theme") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+
+        let activeUser = sessionStorage.getItem("active_staff");
+        if (!activeUser) {
+          window.location.href = "admin.html";
+          return;
+        }
+
+        let sessionNameEl = document.getElementById("staffSessionName");
+        if (sessionNameEl) sessionNameEl.innerText = activeUser;
+
+        // 🛑 CRITERIO DE FILTRADO CAMILO PARA EL CRONÓMETRO DE HORAS
+        if (activeUser.toUpperCase() !== "CAMILO") {
+          startShiftTimer();
+          iniciarControlInactividad();
+        } else {
+          const timerBadge = document.getElementById("timerBadgeContainer");
+          if (timerBadge) timerBadge.style.display = "none";
+        }
+
+        setTimeout(() => {
+          cargarDistribuidores();
+          cargarPreciosDeSheets();
+        }, 300);
+
+        setInterval(() => {
+          cargarDistribuidores();
+        }, 60000);
+      });
     </script>
-</body>
+  </body>
 </html>
