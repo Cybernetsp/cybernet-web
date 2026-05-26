@@ -1,881 +1,1310 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es" data-theme="dark">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Centro de Códigos - Cybernet Bot Web</title>
-  
-  <link rel="icon" type="image/jpeg" href="logo.jpeg">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Cybernet">
-  <link rel="apple-touch-icon" href="logo.jpeg">
-  
-  <style>
-    /* =========================================
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Centro de Códigos - Cybernet</title>
+
+    <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Cybernet" />
+    <link rel="apple-touch-icon" href="logo.jpeg" />
+
+    <style>
+      /* =========================================
        SISTEMA DE VARIABLES: MODO CLARO Y OSCURO (APPLE ECOSYSTEM)
        ========================================= */
-    :root {
-      /* COLORES NATIVOS APPLE (CONSTANTES) */
-      --ios-blue: #0a84ff;
-      --ios-green: #30d158;
-      --ios-red: #ff453a;
-      --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
-      --transition-spring: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-    }
+      :root {
+        /* COLORES NATIVOS APPLE (CONSTANTES) */
+        --ios-blue: #0a84ff;
+        --ios-green: #30d158;
+        --ios-red: #ff453a;
+        --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
+        --transition-spring:
+          transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease,
+          color 0.3s ease, border-color 0.3s ease;
+      }
 
-    [data-theme="dark"] {
-      --page-bg: #000000;
-      --text-primary: #ffffff;
-      --text-secondary: rgba(235, 235, 245, 0.6);
-      
-      /* Liquid Glass Oscuro */
-      --glass-bg: rgba(30, 30, 35, 0.45);
-      --glass-border: 0.5px solid rgba(255, 255, 255, 0.15);
-      --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      
-      /* Modales y Tarjetas */
-      --modal-bg: rgba(28, 28, 30, 0.85);
-      --card-bg: rgba(44, 44, 46, 0.6);
-      --card-border: 0.5px solid rgba(255, 255, 255, 0.08);
-      --card-header-bg: rgba(255, 255, 255, 0.05);
-      --card-header-border: 0.5px solid rgba(255, 255, 255, 0.1);
-      --card-row-border: 0.5px solid rgba(255, 255, 255, 0.08);
-      
-      /* Botones Generales */
-      --btn-bg: #2c2c2e;
-      --btn-hover: #3a3a3c;
-      --btn-icon-bg: rgba(255, 255, 255, 0.12);
-      --btn-icon-active: rgba(255, 255, 255, 0.25);
-      --btn-transparent-active: rgba(255, 255, 255, 0.08);
-      
-      /* Inputs y Buscadores */
-      --input-bg: rgba(0, 0, 0, 0.3);
-      --input-border: 1px solid rgba(255, 255, 255, 0.1);
-      --search-bg: rgba(118, 118, 128, 0.24);
-      --search-focus: rgba(118, 118, 128, 0.35);
-      
-      /* Orbes */
-      --orb-1: rgba(10, 132, 255, 0.2);
-      --orb-2: rgba(255, 69, 58, 0.15);
-      
-      --scrollbar-thumb: rgba(255, 255, 255, 0.2);
-      --toast-bg: rgba(44, 44, 46, 0.8);
-    }
+      [data-theme="dark"] {
+        --page-bg: #000000;
+        --text-primary: #ffffff;
+        --text-secondary: rgba(235, 235, 245, 0.6);
 
-    [data-theme="light"] {
-      --ios-blue: #007aff;
-      --ios-green: #34c759;
-      --ios-red: #ff3b30;
-      
-      --page-bg: #f2f2f7;
-      --text-primary: #000000;
-      --text-secondary: rgba(60, 60, 67, 0.6);
-      
-      /* Liquid Glass Claro */
-      --glass-bg: rgba(255, 255, 255, 0.65);
-      --glass-border: 0.5px solid rgba(0, 0, 0, 0.1);
-      --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-      
-      /* Modales y Tarjetas */
-      --modal-bg: rgba(255, 255, 255, 0.85);
-      --card-bg: #ffffff;
-      --card-border: 0.5px solid rgba(0, 0, 0, 0.05);
-      --card-header-bg: rgba(0, 0, 0, 0.02);
-      --card-header-border: 0.5px solid rgba(0, 0, 0, 0.05);
-      --card-row-border: 0.5px solid rgba(0, 0, 0, 0.05);
-      
-      /* Botones Generales */
-      --btn-bg: #ffffff;
-      --btn-hover: #e5e5ea;
-      --btn-icon-bg: rgba(0, 0, 0, 0.05);
-      --btn-icon-active: rgba(0, 0, 0, 0.15);
-      --btn-transparent-active: rgba(0, 0, 0, 0.05);
-      
-      /* Inputs y Buscadores */
-      --input-bg: rgba(255, 255, 255, 0.6);
-      --input-border: 1px solid rgba(0, 0, 0, 0.1);
-      --search-bg: rgba(118, 118, 128, 0.12);
-      --search-focus: rgba(118, 118, 128, 0.2);
-      
-      /* Orbes */
-      --orb-1: rgba(10, 132, 255, 0.1);
-      --orb-2: rgba(255, 69, 58, 0.08);
-      
-      --scrollbar-thumb: rgba(0, 0, 0, 0.2);
-      --toast-bg: rgba(255, 255, 255, 0.9);
-    }
+        /* Liquid Glass Oscuro */
+        --glass-bg: rgba(30, 30, 35, 0.45);
+        --glass-border: 0.5px solid rgba(255, 255, 255, 0.15);
+        --glass-shadow:
+          0 24px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-      -webkit-font-smoothing: antialiased; 
-      -moz-osx-font-smoothing: grayscale;
-    }
-    
-    body { 
-      background-color: var(--page-bg); 
-      color: var(--text-primary); 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: center; 
-      align-items: center; 
-      min-height: 100vh; 
-      padding: 20px; 
-      position: relative; 
-      overflow-x: hidden;
-      transition: background-color 0.4s ease, color 0.4s ease;
-    }
+        /* Modales y Tarjetas */
+        --modal-bg: rgba(28, 28, 30, 0.85);
+        --card-bg: rgba(44, 44, 46, 0.6);
+        --card-border: 0.5px solid rgba(255, 255, 255, 0.08);
+        --card-header-bg: rgba(255, 255, 255, 0.05);
+        --card-header-border: 0.5px solid rgba(255, 255, 255, 0.1);
+        --card-row-border: 0.5px solid rgba(255, 255, 255, 0.08);
 
-    /* BOTÓN CAMBIO DE TEMA DERECHO */
-    .theme-toggle-btn {
-      position: absolute; 
-      top: 25px; 
-      right: 25px; 
-      width: 45px; 
-      height: 45px; 
-      border-radius: 50%;
-      background: var(--glass-bg); 
-      backdrop-filter: blur(20px); 
-      -webkit-backdrop-filter: blur(20px);
-      border: var(--glass-border); 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-      display: flex;
-      align-items: center; 
-      justify-content: center; 
-      cursor: pointer; 
-      z-index: 100;
-      transition: var(--transition-spring); 
-      color: var(--text-primary);
-    }
-    .theme-toggle-btn:active { transform: scale(0.9); }
+        /* Botones Generales */
+        --btn-bg: #2c2c2e;
+        --btn-hover: #3a3a3c;
+        --btn-icon-bg: rgba(255, 255, 255, 0.12);
+        --btn-icon-active: rgba(255, 255, 255, 0.25);
+        --btn-transparent-active: rgba(255, 255, 255, 0.08);
 
-    /* BOTÓN TRABAJADORES IZQUIERDO */
-    .staff-toggle-btn {
-      position: absolute; 
-      top: 25px; 
-      left: 25px; 
-      width: 45px; 
-      height: 45px; 
-      border-radius: 50%;
-      background: var(--glass-bg); 
-      backdrop-filter: blur(20px); 
-      -webkit-backdrop-filter: blur(20px);
-      border: var(--glass-border); 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-      display: flex;
-      align-items: center; 
-      justify-content: center; 
-      cursor: pointer; 
-      z-index: 100;
-      transition: var(--transition-spring); 
-      color: var(--text-primary); 
-      text-decoration: none;
-    }
-    .staff-toggle-btn:active { transform: scale(0.9); }
+        /* Inputs y Buscadores */
+        --input-bg: rgba(0, 0, 0, 0.3);
+        --input-border: 1px solid rgba(255, 255, 255, 0.1);
+        --search-bg: rgba(118, 118, 128, 0.24);
+        --search-focus: rgba(118, 118, 128, 0.35);
 
-    .bg-orb-1 {
-      position: fixed; 
-      top: -10%; 
-      left: -10%; 
-      width: 50vw; 
-      height: 50vw;
-      background: radial-gradient(circle, var(--orb-1) 0%, transparent 70%);
-      z-index: -1; 
-      pointer-events: none; 
-      transition: background 0.4s ease;
-    }
-    .bg-orb-2 {
-      position: fixed; 
-      bottom: -10%; 
-      right: -10%; 
-      width: 60vw; 
-      height: 60vw;
-      background: radial-gradient(circle, var(--orb-2) 0%, transparent 70%);
-      z-index: -1; 
-      pointer-events: none; 
-      transition: background 0.4s ease;
-    }
+        /* Orbes */
+        --orb-1: rgba(10, 132, 255, 0.2);
+        --orb-2: rgba(255, 69, 58, 0.15);
 
-    .container {
-      background: var(--glass-bg); 
-      backdrop-filter: blur(40px) saturate(180%); 
-      -webkit-backdrop-filter: blur(40px) saturate(180%);
-      border: var(--glass-border); 
-      border-radius: 32px; 
-      padding: 50px 35px; 
-      width: 100%; 
-      max-width: 480px;
-      text-align: center; 
-      position: relative; 
-      box-shadow: var(--glass-shadow); 
-      margin-bottom: 40px;
-      animation: appleFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
-      transition: var(--transition-spring);
-    }
-    
-    @keyframes appleFadeIn {
-      from { opacity: 0; transform: scale(0.95) translateY(10px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    
-    h2 { 
-      color: var(--text-primary); 
-      font-size: 1.8rem; 
-      margin-bottom: 10px; 
-      letter-spacing: -0.5px; 
-      font-weight: 700; 
-      transition: color 0.3s ease; 
-    }
-    
-    .instruction { 
-      color: var(--text-secondary); 
-      font-size: 0.95rem; 
-      margin-bottom: 35px; 
-      line-height: 1.5; 
-      font-weight: 400; 
-      transition: color 0.3s ease; 
-    }
-    
-    #error-toast {
-      display: none; 
-      background: var(--toast-bg); 
-      backdrop-filter: blur(20px); 
-      -webkit-backdrop-filter: blur(20px);
-      color: var(--ios-red); 
-      padding: 14px 20px; 
-      border-radius: 16px; 
-      font-size: 0.9rem; 
-      font-weight: 600;
-      margin-bottom: 25px; 
-      border: 0.5px solid rgba(255, 69, 58, 0.3); 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      animation: shakeIOS 0.4s ease-in-out;
-    }
+        --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+        --toast-bg: rgba(44, 44, 46, 0.8);
+      }
 
-    @keyframes shakeIOS {
-      0%, 100% { transform: translateX(0); } 
-      20% { transform: translateX(-6px); }
-      40% { transform: translateX(6px); } 
-      60% { transform: translateX(-4px); } 
-      80% { transform: translateX(4px); }
-    }
+      [data-theme="light"] {
+        --ios-blue: #007aff;
+        --ios-green: #34c759;
+        --ios-red: #ff3b30;
 
-    .step { display: none; }
-    .step.active { display: block; animation: appleSlideUp 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
-    @keyframes appleSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        --page-bg: #f2f2f7;
+        --text-primary: #000000;
+        --text-secondary: rgba(60, 60, 67, 0.6);
 
-    input {
-      width: 100%; 
-      padding: 16px 20px; 
-      margin-bottom: 20px; 
-      border-radius: 16px;
-      border: var(--input-border); 
-      background: var(--input-bg); 
-      color: var(--text-primary);
-      font-size: 1.1rem; 
-      outline: none; 
-      text-align: center; 
-      transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
-      caret-color: var(--ios-blue);
-    }
-    input:focus { border-color: var(--ios-blue); box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3); }
-    input::placeholder { color: var(--text-secondary); }
-    
-    button.btn-general {
-      width: 100%; 
-      padding: 16px; 
-      margin-bottom: 15px; 
-      border-radius: 16px;
-      border: var(--glass-border); 
-      background: var(--btn-bg); 
-      color: var(--text-primary);
-      font-size: 1rem; 
-      font-weight: 600; 
-      cursor: pointer; 
-      transition: var(--transition-spring);
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 10px;
-    }
-    button.btn-general:active:not(:disabled) { transform: scale(0.96); opacity: 0.8; }
-    button.btn-general:hover:not(:disabled) { background: var(--btn-hover); }
-    button.btn-general:disabled { opacity: 0.4; cursor: not-allowed; }
-    
-    button.btn-primary { 
-      width: 100%; 
-      padding: 16px; 
-      margin-bottom: 15px; 
-      border-radius: 16px; 
-      font-size: 1rem; 
-      font-weight: 600; 
-      cursor: pointer;
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 10px; 
-      transition: var(--transition-spring);
-      background: var(--ios-red); 
-      color: white; 
-      border: none; 
-      box-shadow: 0 4px 15px rgba(255, 69, 58, 0.3);
-    }
-    button.btn-primary:active:not(:disabled) { transform: scale(0.96); }
-    button.btn-primary:hover:not(:disabled) { background: #ff5147; box-shadow: 0 6px 20px rgba(255, 69, 58, 0.4); }
-    button.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* Liquid Glass Claro */
+        --glass-bg: rgba(255, 255, 255, 0.65);
+        --glass-border: 0.5px solid rgba(0, 0, 0, 0.1);
+        --glass-shadow:
+          0 24px 48px rgba(0, 0, 0, 0.05),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5);
 
-    .btn-status { 
-      width: 100%; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 8px; 
-      cursor: pointer; 
-      transition: var(--transition-spring);
-      background: transparent; 
-      border: 1px solid var(--card-border); 
-      color: var(--text-secondary); 
-      font-size: 0.85rem; 
-      font-weight: 600; 
-      margin-top: 10px; 
-      border-radius: 30px; 
-      padding: 12px;
-    }
-    .btn-status:active { transform: scale(0.96); background: var(--btn-transparent-active); }
-    .dot { width: 8px; height: 8px; background: var(--ios-green); border-radius: 50%; box-shadow: 0 0 8px var(--ios-green); }
-    
-    .loader { 
-      border: 4px solid var(--btn-icon-bg); 
-      border-top: 4px solid var(--ios-red); 
-      border-radius: 50%; 
-      width: 45px; 
-      height: 45px; 
-      animation: spinLoader 1s linear infinite; 
-      margin: 0 auto 20px auto; 
-    }
-    @keyframes spinLoader { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Modales y Tarjetas */
+        --modal-bg: rgba(255, 255, 255, 0.85);
+        --card-bg: #ffffff;
+        --card-border: 0.5px solid rgba(0, 0, 0, 0.05);
+        --card-header-bg: rgba(0, 0, 0, 0.02);
+        --card-header-border: 0.5px solid rgba(0, 0, 0, 0.05);
+        --card-row-border: 0.5px solid rgba(0, 0, 0, 0.05);
 
-    /* MODAL DE SERVICIOS */
-    .modal-overlay {
-      display: none; 
-      position: fixed; 
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6); 
-      backdrop-filter: blur(5px); 
-      -webkit-backdrop-filter: blur(5px);
-      justify-content: center; 
-      align-items: flex-end; 
-      z-index: 10000; 
-      padding: 15px;
-    }
-    
-    .modal-content {
-      background: var(--modal-bg); 
-      backdrop-filter: blur(50px) saturate(200%); 
-      -webkit-backdrop-filter: blur(50px) saturate(200%);
-      border: var(--glass-border); 
-      padding: 40px 20px 30px 20px; 
-      border-radius: 32px;
-      width: 100%; 
-      max-width: 500px; 
-      max-height: 85vh; 
-      box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
-      animation: sheetSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); 
-      position: relative;
-      display: flex; 
-      flex-direction: column; 
-      overflow: hidden;
-      transition: background 0.3s ease, transform 0.1s linear;
-    }
-    
-    .modal-grip {
-      position: absolute; 
-      top: 12px; 
-      left: 50%; 
-      transform: translateX(-50%);
-      width: 40px; 
-      height: 5px;
-      background: var(--text-secondary); 
-      border-radius: 10px; 
-      opacity: 0.5;
-      cursor: grab;
-    }
-    @keyframes sheetSlideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
+        /* Botones Generales */
+        --btn-bg: #ffffff;
+        --btn-hover: #e5e5ea;
+        --btn-icon-bg: rgba(0, 0, 0, 0.05);
+        --btn-icon-active: rgba(0, 0, 0, 0.15);
+        --btn-transparent-active: rgba(0, 0, 0, 0.05);
 
-    /* CORRECCIÓN DE RENDIMIENTO EN SCROLL DE CELDAS (SOLUCIÓN DEL REBOTE DE iOS) */
-    #cardsWrapper {
-      overflow-y: auto; 
-      flex-grow: 1; 
-      padding-right: 5px; 
-      padding-left: 5px; 
-      margin-bottom: 10px; 
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch; /* Activa el scroll suave nativo en iOS */
-      overscroll-behavior: contain; /* Encierra el rebote del scroll dentro de la caja, sin mover el fondo */
-    }
-    
-    .service-card {
-      background: var(--card-bg); 
-      border-radius: 14px; 
-      margin-bottom: 20px; 
-      border: var(--card-border);
-      overflow: hidden; 
-      display: flex; 
-      flex-direction: column; 
-      transition: background 0.3s ease, border-color 0.3s ease;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
+        /* Inputs y Buscadores */
+        --input-bg: rgba(255, 255, 255, 0.6);
+        --input-border: 1px solid rgba(0, 0, 0, 0.1);
+        --search-bg: rgba(118, 118, 128, 0.12);
+        --search-focus: rgba(118, 118, 128, 0.2);
 
-    .card-platform-header {
-      background: var(--card-header-bg); 
-      padding: 14px 18px; 
-      border-bottom: var(--card-header-border); 
-      display: flex; 
-      align-items: center; 
-      justify-content: space-between;
-    }
+        /* Orbes */
+        --orb-1: rgba(10, 132, 255, 0.1);
+        --orb-2: rgba(255, 69, 58, 0.08);
 
-    .platform-name-wrapper { display: flex; align-items: center; gap: 8px; }
-    .platform-name-text { color: var(--text-primary); font-size: 1.05rem; font-weight: 600; letter-spacing: 0.2px; }
+        --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+        --toast-bg: rgba(255, 255, 255, 0.9);
+      }
 
-    .data-row { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      padding: 14px 18px; 
-      font-size: 0.95rem; 
-      border-bottom: var(--card-row-border); 
-      background: transparent; 
-    }
-    .data-row.last-row { border-bottom: none; }
-    .data-label { color: var(--text-secondary); font-weight: 400; }
-    .data-content-wrapper { display: flex; align-items: center; gap: 12px; flex-grow: 1; justify-content: flex-end; max-width: 75%; }
-    .data-val { color: var(--text-primary); font-weight: 500; text-align: right; word-break: break-all; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
 
-    .btn-copy-mini {
-      background: var(--btn-icon-bg); 
-      border: none; 
-      color: var(--text-primary); 
-      width: 30px; 
-      height: 30px; 
-      border-radius: 50%; 
-      cursor: pointer; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      flex-shrink: 0; 
-      transition: background 0.2s, transform 0.2s; 
-      padding: 0;
-    }
-    .btn-copy-mini:active:not(:disabled) { transform: scale(0.85); background: var(--btn-icon-active); }
-    .btn-copy-mini svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; }
-    
-    .client-footer-info { padding: 10px 18px; background: rgba(0,0,0,0.03); border-bottom: var(--card-row-border); }
-    .client-small-text { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.2px; display: flex; align-items: center; gap: 6px; }
+      body {
+        background-color: var(--page-bg);
+        color: var(--text-primary);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+        overflow-x: hidden;
+        transition:
+          background-color 0.4s ease,
+          color 0.4s ease;
+      }
 
-    .btn-copy-all-bottom {
-      background: transparent; 
-      color: var(--ios-blue); 
-      border: none; 
-      padding: 16px; 
-      border-radius: 0;
-      font-size: 0.95rem; 
-      font-weight: 600; 
-      width: 100%; 
-      margin-top: 0; 
-      transition: background 0.2s;
-      border-top: var(--card-row-border); 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      gap: 8px; 
-      cursor: pointer;
-    }
-    .btn-copy-all-bottom:active:not(:disabled) { background: var(--btn-transparent-active); }
-    .btn-copy-all-bottom.copied { color: var(--ios-green) !important; background: rgba(48, 209, 88, 0.1) !important; }
+      /* BOTÓN CAMBIO DE TEMA DERECHO */
+      .theme-toggle-btn {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: var(--glass-border);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100;
+        transition: var(--transition-spring);
+        color: var(--text-primary);
+      }
+      .theme-toggle-btn:active {
+        transform: scale(0.9);
+      }
 
-    .btn-close-modal {
-      width: 100%; 
-      padding: 14px; 
-      border-radius: 14px; 
-      border: none; 
-      font-size: 0.95rem; 
-      font-weight: 600; 
-      cursor: pointer;
-      background: var(--btn-icon-bg); 
-      color: var(--text-primary); 
-      transition: var(--transition-spring); 
-      margin-top: 15px;
-    }
-    .btn-close-modal:active { transform: scale(0.97); background: var(--btn-icon-active); }
+      /* BOTÓN TRABAJADORES IZQUIERDO */
+      .staff-toggle-btn {
+        position: absolute;
+        top: 25px;
+        left: 25px;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: var(--glass-border);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100;
+        transition: var(--transition-spring);
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+      .staff-toggle-btn:active {
+        transform: scale(0.9);
+      }
 
-    footer { text-align: center; color: var(--text-secondary); font-size: 0.75rem; padding: 30px; font-weight: 400; }
-    .back-link { display: block; margin-top: 25px; color: var(--ios-blue); cursor: pointer; font-size: 0.9rem; font-weight: 500; text-decoration: none; }
-    .back-link:hover { text-decoration: underline; }
-    
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
+      .bg-orb-1 {
+        position: fixed;
+        top: -10%;
+        left: -10%;
+        width: 50vw;
+        height: 50vw;
+        background: radial-gradient(circle, var(--orb-1) 0%, transparent 70%);
+        z-index: -1;
+        pointer-events: none;
+        transition: background 0.4s ease;
+      }
+      .bg-orb-2 {
+        position: fixed;
+        bottom: -10%;
+        right: -10%;
+        width: 60vw;
+        height: 60vw;
+        background: radial-gradient(circle, var(--orb-2) 0%, transparent 70%);
+        z-index: -1;
+        pointer-events: none;
+        transition: background 0.4s ease;
+      }
 
-    /* SPOTLIGHT BUSCADOR */
-    .search-wrapper { width: 100%; margin-bottom: 20px; position: relative; padding: 0 5px; }
-    #searchServices {
-      width: 100%; 
-      padding: 12px 12px 12px 38px; 
-      border-radius: 12px; 
-      font-size: 0.95rem;
-      background: var(--search-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") no-repeat 14px center;
-      border: none; 
-      color: var(--text-primary); 
-      transition: background 0.3s ease;
-    }
-    #searchServices:focus { background: var(--search-focus); box-shadow: none; outline: none; }
-    #searchServices::placeholder { color: var(--text-secondary); }
-  </style>
-</head>
-<body>
+      .container {
+        background: var(--glass-bg);
+        backdrop-filter: blur(40px) saturate(180%);
+        -webkit-backdrop-filter: blur(40px) saturate(180%);
+        border: var(--glass-border);
+        border-radius: 32px;
+        padding: 50px 35px;
+        width: 100%;
+        max-width: 480px;
+        text-align: center;
+        position: relative;
+        box-shadow: var(--glass-shadow);
+        margin-bottom: 40px;
+        animation: appleFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        transition: var(--transition-spring);
+      }
 
-  <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
-  </button>
+      @keyframes appleFadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
 
-  <div class="bg-orb-1"></div>
-  <div class="bg-orb-2"></div>
+      h2 {
+        color: var(--text-primary);
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+        font-weight: 700;
+        transition: color 0.3s ease;
+      }
 
-  <div class="container">
-    <h2 id="main-title">Centro de Códigos</h2>
-    <div id="error-toast"></div>
-    
-    <div id="step-1" class="step active">
-      <p class="instruction">Ingresa tu <b>número de celular</b> asociado a la compra 📲</p>
-      <input type="tel" id="telefono" placeholder="Ej: 301 XXX XXXX" maxlength="12">
-      <button class="btn-primary" onclick="changeStep(2)">Continuar</button>
-      
-      <button id="btn-open-services" class="btn-status" onclick="openServices()">
-        <div class="dot"></div> VER MIS SERVICIOS ACTIVOS
-      </button>
-    </div>
+      .instruction {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 35px;
+        line-height: 1.5;
+        font-weight: 400;
+        transition: color 0.3s ease;
+      }
 
-    <div id="step-2" class="step">
-      <p class="instruction">¿Qué plataforma deseas gestionar hoy? 👇</p>
-      <button class="btn-primary" onclick="setPlat('NETFLIX')">🔴 Netflix</button>
-      <button class="btn-general" style="color: var(--ios-blue);" onclick="setPlat('DISNEY')">🔵 Disney Premium</button>
-      <span class="back-link" onclick="changeStep(1)">← Volver al inicio</span>
-    </div>
+      #error-toast {
+        display: none;
+        background: var(--toast-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        color: var(--ios-red);
+        padding: 14px 20px;
+        border-radius: 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        border: 0.5px solid rgba(255, 69, 58, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        animation: shakeIOS 0.4s ease-in-out;
+      }
 
-    <div id="step-3" class="step">
-      <p class="instruction">Selecciona el tipo de solicitud 👇</p>
-      <button class="btn-general" onclick="setOp(1)">🔑 Código de Inicio Sesión</button>
-      <button class="btn-general" onclick="setOp(2)">✈️ Código 'Estoy de Viaje'</button>
-      <button class="btn-general" onclick="setOp(3)">📧 Enlace de Inicio</button>
-      <span class="back-link" onclick="changeStep(2)">← Volver</span>
-    </div>
+      @keyframes shakeIOS {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20% {
+          transform: translateX(-6px);
+        }
+        40% {
+          transform: translateX(6px);
+        }
+        60% {
+          transform: translateX(-4px);
+        }
+        80% {
+          transform: translateX(4px);
+        }
+      }
 
-    <div id="step-4" class="step">
-      <p class="instruction">Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com) 📧</p>
-      <input type="email" id="correo" placeholder="ejemplo@cybernetsp.com" spellcheck="false">
-      <button id="btn-rastrear" class="btn-primary" onclick="executeSearch()">Rastrear Código</button>
-      <span class="back-link" onclick="changeStep(2)">← Volver</span>
-    </div>
+      .step {
+        display: none;
+      }
+      .step.active {
+        display: block;
+        animation: appleSlideUp 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+      @keyframes appleSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-    <div id="step-5" class="step">
-      <div class="loader"></div>
-      <p style="color: var(--text-secondary); font-weight: 500; font-size: 0.95rem;">Conectando con Cybernet...</p>
-    </div>
+      input {
+        width: 100%;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        border-radius: 16px;
+        border: var(--input-border);
+        background: var(--input-bg);
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        outline: none;
+        text-align: center;
+        transition:
+          border-color 0.3s,
+          box-shadow 0.3s,
+          background 0.3s;
+        caret-color: var(--ios-blue);
+      }
+      input:focus {
+        border-color: var(--ios-blue);
+        box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3);
+      }
+      input::placeholder {
+        color: var(--text-secondary);
+      }
 
-    <div id="step-6" class="step">
-      <h2 id="res-title">--</h2>
-      <p id="res-desc" class="instruction"></p>
-      <div id="res-box-code" style="background: rgba(255, 69, 58, 0.1); border: 1px dashed var(--ios-red); padding: 35px; border-radius: 20px; margin-bottom: 30px; display:none;">
-        <div id="val-code" style="font-size: 3.5rem; font-weight: 700; color: var(--text-primary); letter-spacing: 8px; font-variant-numeric: tabular-nums; transition: color 0.3s;"></div>
-        <div id="val-timer" style="color: var(--ios-red); font-size: 1rem; margin-top: 15px; font-weight: 600;"></div>
+      button.btn-general {
+        width: 100%;
+        padding: 16px;
+        margin-bottom: 15px;
+        border-radius: 16px;
+        border: var(--glass-border);
+        background: var(--btn-bg);
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-spring);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      button.btn-general:active:not(:disabled) {
+        transform: scale(0.96);
+        opacity: 0.8;
+      }
+      button.btn-general:hover:not(:disabled) {
+        background: var(--btn-hover);
+      }
+      button.btn-general:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      button.btn-primary {
+        width: 100%;
+        padding: 16px;
+        margin-bottom: 15px;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: var(--transition-spring);
+        background: var(--ios-red);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 15px rgba(255, 69, 58, 0.3);
+      }
+      button.btn-primary:active:not(:disabled) {
+        transform: scale(0.96);
+      }
+      button.btn-primary:hover:not(:disabled) {
+        background: #ff5147;
+        box-shadow: 0 6px 20px rgba(255, 69, 58, 0.4);
+      }
+      button.btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-status {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: var(--transition-spring);
+        background: transparent;
+        border: 1px solid var(--card-border);
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 10px;
+        border-radius: 30px;
+        padding: 12px;
+      }
+      .btn-status:active {
+        transform: scale(0.96);
+        background: var(--btn-transparent-active);
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        background: var(--ios-green);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--ios-green);
+      }
+
+      .loader {
+        border: 4px solid var(--btn-icon-bg);
+        border-top: 4px solid var(--ios-red);
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        animation: spinLoader 1s linear infinite;
+        margin: 0 auto 20px auto;
+      }
+      @keyframes spinLoader {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* MODAL DE SERVICIOS */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        justify-content: center;
+        align-items: flex-end;
+        z-index: 10000;
+        padding: 15px;
+      }
+
+      .modal-content {
+        background: var(--modal-bg);
+        backdrop-filter: blur(50px) saturate(200%);
+        -webkit-backdrop-filter: blur(50px) saturate(200%);
+        border: var(--glass-border);
+        padding: 40px 20px 30px 20px;
+        border-radius: 32px;
+        width: 100%;
+        max-width: 500px;
+        max-height: 85vh;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+        animation: sheetSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition:
+          background 0.3s ease,
+          transform 0.1s linear;
+      }
+
+      .modal-grip {
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 5px;
+        background: var(--text-secondary);
+        border-radius: 10px;
+        opacity: 0.5;
+        cursor: grab;
+      }
+      @keyframes sheetSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* CORRECCIÓN DE RENDIMIENTO EN SCROLL DE CELDAS (SOLUCIÓN DEL REBOTE DE iOS) */
+      #cardsWrapper {
+        overflow-y: auto;
+        flex-grow: 1;
+        padding-right: 5px;
+        padding-left: 5px;
+        margin-bottom: 10px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch; /* Activa el scroll suave nativo en iOS */
+        overscroll-behavior: contain; /* Encierra el rebote del scroll dentro de la caja, sin mover el fondo */
+      }
+
+      .service-card {
+        background: var(--card-bg);
+        border-radius: 14px;
+        margin-bottom: 20px;
+        border: var(--card-border);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition:
+          background 0.3s ease,
+          border-color 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .card-platform-header {
+        background: var(--card-header-bg);
+        padding: 14px 18px;
+        border-bottom: var(--card-header-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .platform-name-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .platform-name-text {
+        color: var(--text-primary);
+        font-size: 1.05rem;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+      }
+
+      .data-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 18px;
+        font-size: 0.95rem;
+        border-bottom: var(--card-row-border);
+        background: transparent;
+      }
+      .data-row.last-row {
+        border-bottom: none;
+      }
+      .data-label {
+        color: var(--text-secondary);
+        font-weight: 400;
+      }
+      .data-content-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-grow: 1;
+        justify-content: flex-end;
+        max-width: 75%;
+      }
+      .data-val {
+        color: var(--text-primary);
+        font-weight: 500;
+        text-align: right;
+        word-break: break-all;
+      }
+
+      .btn-copy-mini {
+        background: var(--btn-icon-bg);
+        border: none;
+        color: var(--text-primary);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition:
+          background 0.2s,
+          transform 0.2s;
+        padding: 0;
+      }
+      .btn-copy-mini:active:not(:disabled) {
+        transform: scale(0.85);
+        background: var(--btn-icon-active);
+      }
+      .btn-copy-mini svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2.5;
+      }
+
+      .client-footer-info {
+        padding: 10px 18px;
+        background: rgba(0, 0, 0, 0.03);
+        border-bottom: var(--card-row-border);
+      }
+      .client-small-text {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .btn-copy-all-bottom {
+        background: transparent;
+        color: var(--ios-blue);
+        border: none;
+        padding: 16px;
+        border-radius: 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 0;
+        transition: background 0.2s;
+        border-top: var(--card-row-border);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+      .btn-copy-all-bottom:active:not(:disabled) {
+        background: var(--btn-transparent-active);
+      }
+      .btn-copy-all-bottom.copied {
+        color: var(--ios-green) !important;
+        background: rgba(48, 209, 88, 0.1) !important;
+      }
+
+      .btn-close-modal {
+        width: 100%;
+        padding: 14px;
+        border-radius: 14px;
+        border: none;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--btn-icon-bg);
+        color: var(--text-primary);
+        transition: var(--transition-spring);
+        margin-top: 15px;
+      }
+      .btn-close-modal:active {
+        transform: scale(0.97);
+        background: var(--btn-icon-active);
+      }
+
+      footer {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        padding: 30px;
+        font-weight: 400;
+      }
+      .back-link {
+        display: block;
+        margin-top: 25px;
+        color: var(--ios-blue);
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+      }
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb);
+        border-radius: 10px;
+      }
+
+      /* SPOTLIGHT BUSCADOR */
+      .search-wrapper {
+        width: 100%;
+        margin-bottom: 20px;
+        position: relative;
+        padding: 0 5px;
+      }
+      #searchServices {
+        width: 100%;
+        padding: 12px 12px 12px 38px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        background: var(--search-bg)
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E")
+          no-repeat 14px center;
+        border: none;
+        color: var(--text-primary);
+        transition: background 0.3s ease;
+      }
+      #searchServices:focus {
+        background: var(--search-focus);
+        box-shadow: none;
+        outline: none;
+      }
+      #searchServices::placeholder {
+        color: var(--text-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      id="theme-toggle"
+      class="theme-toggle-btn"
+      onclick="toggleTheme()"
+      aria-label="Cambiar tema"
+    ></button>
+
+    <div class="bg-orb-1"></div>
+    <div class="bg-orb-2"></div>
+
+    <div class="container">
+      <h2 id="main-title">Centro de Códigos</h2>
+      <div id="error-toast"></div>
+
+      <div id="step-1" class="step active">
+        <p class="instruction">
+          Ingresa tu <b>número de celular</b> asociado a la compra 📲
+        </p>
+        <input
+          type="tel"
+          id="telefono"
+          placeholder="Ej: 301 XXX XXXX"
+          maxlength="12"
+        />
+        <button class="btn-primary" onclick="changeStep(2)">Continuar</button>
+
+        <button
+          id="btn-open-services"
+          class="btn-status"
+          onclick="openServices()"
+        >
+          <div class="dot"></div>
+          VER MIS SERVICIOS ACTIVOS
+        </button>
       </div>
-      <div id="res-box-link" style="display:none; margin-bottom: 30px;">
-        <a id="val-link" href="#" target="_blank" style="text-decoration:none;"><button class="btn-primary" onclick="haptic()">✅ Autorizar Acceso</button></a>
+
+      <div id="step-2" class="step">
+        <p class="instruction">¿Qué plataforma deseas gestionar hoy? 👇</p>
+        <button class="btn-primary" onclick="setPlat('NETFLIX')">
+          🔴 Netflix
+        </button>
+        <button
+          class="btn-general"
+          style="color: var(--ios-blue)"
+          onclick="setPlat('DISNEY')"
+        >
+          🔵 Disney Premium
+        </button>
+        <span class="back-link" onclick="changeStep(1)"
+          >← Volver al inicio</span
+        >
       </div>
-      <button class="btn-primary" onclick="executeSearch()">🔄 Reintentar Búsqueda</button>
-      <span class="back-link" onclick="reloadAll()">Nueva Consulta</span>
-    </div>
-  </div>
 
-  <div id="modalServices" class="modal-overlay">
-    <div class="modal-content" id="modalContentInner">
-      <div class="modal-grip"></div>
-      <h3 style="margin-bottom: 25px; font-weight: 700; color: var(--text-primary); text-align: center; font-size: 1.25rem; margin-top: 10px;">Mis Cuentas Cybernet</h3>
-      <div class="search-wrapper">
-        <input type="text" id="searchServices" placeholder="Buscar plataforma o correo..." onkeyup="filterServices()">
+      <div id="step-3" class="step">
+        <p class="instruction">Selecciona el tipo de solicitud 👇</p>
+        <button class="btn-general" onclick="setOp(1)">
+          🔑 Código de Inicio Sesión
+        </button>
+        <button class="btn-general" onclick="setOp(2)">
+          ✈️ Código 'Estoy de Viaje'
+        </button>
+        <button class="btn-general" onclick="setOp(3)">
+          📧 Enlace de Inicio
+        </button>
+        <span class="back-link" onclick="changeStep(2)">← Volver</span>
       </div>
-      <div id="cardsWrapper"></div>
-      <button class="btn-close-modal" onclick="closeModal()">Cerrar Ventana</button>
+
+      <div id="step-4" class="step">
+        <p class="instruction">
+          Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com) 📧
+        </p>
+        <input
+          type="email"
+          id="correo"
+          placeholder="ejemplo@cybernetsp.com"
+          spellcheck="false"
+        />
+        <button id="btn-rastrear" class="btn-primary" onclick="executeSearch()">
+          Rastrear Código
+        </button>
+        <span class="back-link" onclick="changeStep(2)">← Volver</span>
+      </div>
+
+      <div id="step-5" class="step">
+        <div class="loader"></div>
+        <p
+          style="
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.95rem;
+          "
+        >
+          Conectando con Cybernet...
+        </p>
+      </div>
+
+      <div id="step-6" class="step">
+        <h2 id="res-title">--</h2>
+        <p id="res-desc" class="instruction"></p>
+        <div
+          id="res-box-code"
+          style="
+            background: rgba(255, 69, 58, 0.1);
+            border: 1px dashed var(--ios-red);
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: none;
+          "
+        >
+          <div
+            id="val-code"
+            style="
+              font-size: 3.5rem;
+              font-weight: 700;
+              color: var(--text-primary);
+              letter-spacing: 8px;
+              font-variant-numeric: tabular-nums;
+              transition: color 0.3s;
+            "
+          ></div>
+          <div
+            id="val-timer"
+            style="
+              color: var(--ios-red);
+              font-size: 1rem;
+              margin-top: 15px;
+              font-weight: 600;
+            "
+          ></div>
+        </div>
+        <div id="res-box-link" style="display: none; margin-bottom: 30px">
+          <a
+            id="val-link"
+            href="#"
+            target="_blank"
+            style="text-decoration: none"
+            ><button class="btn-primary" onclick="haptic()">
+              ✅ Autorizar Acceso
+            </button></a
+          >
+        </div>
+        <button class="btn-primary" onclick="executeSearch()">
+          🔄 Reintentar Búsqueda
+        </button>
+        <span class="back-link" onclick="reloadAll()">Nueva Consulta</span>
+      </div>
     </div>
-  </div>
 
-  <script>
-    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec"; 
-    let globalData = { telefono: '', plataforma: '', opcion: 1, correo: '' };
+    <div id="modalServices" class="modal-overlay">
+      <div class="modal-content" id="modalContentInner">
+        <div class="modal-grip"></div>
+        <h3
+          style="
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            font-size: 1.25rem;
+            margin-top: 10px;
+          "
+        >
+          Mis Cuentas Cybernet
+        </h3>
+        <div class="search-wrapper">
+          <input
+            type="text"
+            id="searchServices"
+            placeholder="Buscar plataforma o correo..."
+            onkeyup="filterServices()"
+          />
+        </div>
+        <div id="cardsWrapper"></div>
+        <button class="btn-close-modal" onclick="closeModal()">
+          Cerrar Ventana
+        </button>
+      </div>
+    </div>
 
-    /* =========================================
+    <script>
+      const GOOGLE_URL =
+        "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec";
+      let globalData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
+
+      /* =========================================
        1. LÓGICA DEL MODO CLARO Y OSCURO (THEME)
        ========================================= */
-    function toggleTheme() {
+      function toggleTheme() {
         haptic();
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('cyber_theme', newTheme);
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "light" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("cyber_theme", newTheme);
         updateThemeIcon(newTheme);
-    }
+      }
 
-    function updateThemeIcon(theme) {
-        const btn = document.getElementById('theme-toggle');
-        if (theme === 'light') {
-            btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+      function updateThemeIcon(theme) {
+        const btn = document.getElementById("theme-toggle");
+        if (theme === "light") {
+          btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
         } else {
-            btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+          btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
         }
-    }
+      }
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('cyber_theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
+      window.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("cyber_theme") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
         updateThemeIcon(savedTheme);
 
-        const phoneInput = document.getElementById('telefono');
-        const emailInput = document.getElementById('correo');
+        const phoneInput = document.getElementById("telefono");
+        const emailInput = document.getElementById("correo");
 
-        if(localStorage.getItem('cyber_phone')) phoneInput.value = localStorage.getItem('cyber_phone');
-        if(localStorage.getItem('cyber_email')) emailInput.value = localStorage.getItem('cyber_email');
+        if (localStorage.getItem("cyber_phone"))
+          phoneInput.value = localStorage.getItem("cyber_phone");
+        if (localStorage.getItem("cyber_email"))
+          emailInput.value = localStorage.getItem("cyber_email");
 
-        phoneInput.addEventListener('input', function(e) {
-            let val = this.value.replace(/\D/g, ''); 
-            if (val.length > 3 && val.length <= 6) {
-                val = val.slice(0,3) + ' ' + val.slice(3);
-            } else if (val.length > 6) {
-                val = val.slice(0,3) + ' ' + val.slice(3,6) + ' ' + val.slice(6,10);
-            }
-            this.value = val;
-            localStorage.setItem('cyber_phone', this.value);
+        phoneInput.addEventListener("input", function (e) {
+          let val = this.value.replace(/\D/g, "");
+          if (val.length > 3 && val.length <= 6) {
+            val = val.slice(0, 3) + " " + val.slice(3);
+          } else if (val.length > 6) {
+            val =
+              val.slice(0, 3) + " " + val.slice(3, 6) + " " + val.slice(6, 10);
+          }
+          this.value = val;
+          localStorage.setItem("cyber_phone", this.value);
         });
 
-        emailInput.addEventListener('input', function() {
-            localStorage.setItem('cyber_email', this.value);
+        emailInput.addEventListener("input", function () {
+          localStorage.setItem("cyber_email", this.value);
         });
 
         /* REPARACIÓN DEL SENSOR TÁCTIL (PULL-TO-CLOSE) PARA DEJAR DESLIZAR LA PANTALLA LIBREMENTE */
-        let startY = 0; let currentY = 0;
-        const modalContent = document.getElementById('modalContentInner');
-        const cardsWrapper = document.getElementById('cardsWrapper');
-        
-        modalContent.addEventListener('touchstart', (e) => { 
+        let startY = 0;
+        let currentY = 0;
+        const modalContent = document.getElementById("modalContentInner");
+        const cardsWrapper = document.getElementById("cardsWrapper");
+
+        modalContent.addEventListener(
+          "touchstart",
+          (e) => {
             // ¡Se arregló! Solo arrastra si el scroll de las tarjetas está en el límite superior
             if (cardsWrapper.scrollTop <= 0) {
-                startY = e.touches[0].clientY; 
+              startY = e.touches[0].clientY;
             } else {
-                startY = 0; 
+              startY = 0;
             }
-        }, {passive: true});
-        
-        modalContent.addEventListener('touchmove', (e) => { 
-            if (!startY) return; 
-            currentY = e.touches[0].clientY; 
-            let diff = currentY - startY; 
-            if (diff > 0) { 
-                modalContent.style.transform = `translateY(${diff}px)`; 
-                modalContent.style.transition = 'none'; 
-            } 
-        }, {passive: true});
-        
-        modalContent.addEventListener('touchend', (e) => { 
-            if (!startY) return; 
-            let diff = currentY - startY; 
-            modalContent.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'; 
-            if (diff > 120) closeModal(); 
-            modalContent.style.transform = ''; 
-            startY = 0; currentY = 0; 
+          },
+          { passive: true },
+        );
+
+        modalContent.addEventListener(
+          "touchmove",
+          (e) => {
+            if (!startY) return;
+            currentY = e.touches[0].clientY;
+            let diff = currentY - startY;
+            if (diff > 0) {
+              modalContent.style.transform = `translateY(${diff}px)`;
+              modalContent.style.transition = "none";
+            }
+          },
+          { passive: true },
+        );
+
+        modalContent.addEventListener("touchend", (e) => {
+          if (!startY) return;
+          let diff = currentY - startY;
+          modalContent.style.transition =
+            "transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)";
+          if (diff > 120) closeModal();
+          modalContent.style.transform = "";
+          startY = 0;
+          currentY = 0;
         });
-    });
+      });
 
-    function haptic() { if (navigator.vibrate) navigator.vibrate(15); }
+      function haptic() {
+        if (navigator.vibrate) navigator.vibrate(15);
+      }
 
-    function handleDynamicCopy(button, type) {
+      function handleDynamicCopy(button, type) {
         haptic();
         let textToCopy = "";
-        
-        if (type === 'all') {
-            textToCopy = decodeURIComponent(button.getAttribute('data-raw'));
-        } else if (type === 'mail') {
-            textToCopy = decodeURIComponent(button.getAttribute('data-mail'));
-        } else if (type === 'pass') {
-            textToCopy = decodeURIComponent(button.getAttribute('data-pass'));
+
+        if (type === "all") {
+          textToCopy = decodeURIComponent(button.getAttribute("data-raw"));
+        } else if (type === "mail") {
+          textToCopy = decodeURIComponent(button.getAttribute("data-mail"));
+        } else if (type === "pass") {
+          textToCopy = decodeURIComponent(button.getAttribute("data-pass"));
         }
 
         navigator.clipboard.writeText(textToCopy).then(() => {
-            if(type === 'all') {
-                const originalText = button.innerText;
-                button.innerHTML = "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg> ¡Copiado!";
-                button.classList.add('copied');
-                setTimeout(() => {
-                    button.innerText = originalText;
-                    button.classList.remove('copied');
-                }, 1500);
-            } else {
-                const originalHTML = button.innerHTML;
-                button.innerHTML = "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg>";
-                setTimeout(() => {
-                    button.innerHTML = originalHTML;
-                }, 1200);
-            }
+          if (type === "all") {
+            const originalText = button.innerText;
+            button.innerHTML =
+              "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg> ¡Copiado!";
+            button.classList.add("copied");
+            setTimeout(() => {
+              button.innerText = originalText;
+              button.classList.remove("copied");
+            }, 1500);
+          } else {
+            const originalHTML = button.innerHTML;
+            button.innerHTML =
+              "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg>";
+            setTimeout(() => {
+              button.innerHTML = originalHTML;
+            }, 1200);
+          }
         });
-    }
-
-    function buildServiceCard(raw, plat) {
-      const nameMatch = raw.match(/Hola\s*\*([^*]+)\*/i) || raw.match(/^\*([^*]+)\*/);
-      let userName = nameMatch ? nameMatch[1].trim() : "";
-      if (["cliente", "cuenta", "general", "usuario"].includes(userName.toLowerCase())) userName = ""; 
-
-      const mMatch = raw.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
-      const cMatch = raw.match(/(?:CONTRASEÑA|CLAVE|PASSWORD):?\s*\*?([^*🛒\n]+)\*?/i);
-      const dMatch = raw.match(/(?:FECHA DE VENCIMIENTO|VENCE|EXPIRA):?\s*\*?([^*🛒\n]+)\*?/i);
-
-      const pMatches = [...raw.matchAll(/Nombre Del Perfil:\*?\s*([^*|🛒\n]+)/gi)];
-      const pinMatches = [...raw.matchAll(/Pin Del Perfil:\*?\s*([^*|🛒\n]+)/gi)];
-
-      let profilesHtml = ''; const clean = (s) => s ? s.replace(/\*/g, '').trim() : '';
-      const maxLines = Math.max(pMatches.length, pinMatches.length);
-      for (let i = 0; i < maxLines; i++) {
-          const profileVal = pMatches[i] ? clean(pMatches[i][1]) : '';
-          const pinVal = pinMatches[i] ? clean(pinMatches[i][1]) : '';
-          if (profileVal) profilesHtml += `<div class="data-row"><span class="data-label">Perfil:</span> <span class="data-val">${profileVal}</span></div>`;
-          if (pinVal) profilesHtml += `<div class="data-row"><span class="data-label">PIN Perfil:</span> <span class="data-val" style="color:var(--text-primary); font-weight:700;">${pinVal}</span></div>`;
       }
 
-      const mail = clean(mMatch ? mMatch[1] : '');
-      const pass = clean(cMatch ? cMatch[1] : '');
-      const date = clean(dMatch ? dMatch[1] : '');
-      if (!mail.includes('@')) return '';
+      function buildServiceCard(raw, plat) {
+        const nameMatch =
+          raw.match(/Hola\s*\*([^*]+)\*/i) || raw.match(/^\*([^*]+)\*/);
+        let userName = nameMatch ? nameMatch[1].trim() : "";
+        if (
+          ["cliente", "cuenta", "general", "usuario"].includes(
+            userName.toLowerCase(),
+          )
+        )
+          userName = "";
 
-      const charCode = String.fromCharCode(96);
-      const safeRaw = raw.split(charCode).join('\\' + charCode).split('$').join('\\$');
-      const encodedRaw = encodeURIComponent(raw);
-      const encodedMail = encodeURIComponent(mail);
-      const encodedPass = encodeURIComponent(pass);
-      const iconCopy = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+        const mMatch = raw.match(/(?:CORREO|EMAIL):?\s*\*?([^*🛒\n]+)\*?/i);
+        const cMatch = raw.match(
+          /(?:CONTRASEÑA|CLAVE|PASSWORD):?\s*\*?([^*🛒\n]+)\*?/i,
+        );
+        const dMatch = raw.match(
+          /(?:FECHA DE VENCIMIENTO|VENCE|EXPIRA):?\s*\*?([^*🛒\n]+)\*?/i,
+        );
 
-      return `
+        const pMatches = [
+          ...raw.matchAll(/Nombre Del Perfil:\*?\s*([^*|🛒\n]+)/gi),
+        ];
+        const pinMatches = [
+          ...raw.matchAll(/Pin Del Perfil:\*?\s*([^*|🛒\n]+)/gi),
+        ];
+
+        let profilesHtml = "";
+        const clean = (s) => (s ? s.replace(/\*/g, "").trim() : "");
+        const maxLines = Math.max(pMatches.length, pinMatches.length);
+        for (let i = 0; i < maxLines; i++) {
+          const profileVal = pMatches[i] ? clean(pMatches[i][1]) : "";
+          const pinVal = pinMatches[i] ? clean(pinMatches[i][1]) : "";
+          if (profileVal)
+            profilesHtml += `<div class="data-row"><span class="data-label">Perfil:</span> <span class="data-val">${profileVal}</span></div>`;
+          if (pinVal)
+            profilesHtml += `<div class="data-row"><span class="data-label">PIN Perfil:</span> <span class="data-val" style="color:var(--text-primary); font-weight:700;">${pinVal}</span></div>`;
+        }
+
+        const mail = clean(mMatch ? mMatch[1] : "");
+        const pass = clean(cMatch ? cMatch[1] : "");
+        const date = clean(dMatch ? dMatch[1] : "");
+        if (!mail.includes("@")) return "";
+
+        const charCode = String.fromCharCode(96);
+        const safeRaw = raw
+          .split(charCode)
+          .join("\\" + charCode)
+          .split("$")
+          .join("\\$");
+        const encodedRaw = encodeURIComponent(raw);
+        const encodedMail = encodeURIComponent(mail);
+        const encodedPass = encodeURIComponent(pass);
+        const iconCopy = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+
+        return `
         <div class="service-card">
           <div class="card-platform-header">
             <div class="platform-name-wrapper"><span style="font-size:1.2rem;">📺</span><span class="platform-name-text">${plat}</span></div>
           </div>
-          ${userName ? `<div class="client-footer-info"><span class="client-small-text"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Titular: ${userName}</span></div>` : ''}
+          ${userName ? `<div class="client-footer-info"><span class="client-small-text"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Titular: ${userName}</span></div>` : ""}
           <div class="data-row"><span class="data-row">Correo</span><div class="data-content-wrapper"><span class="data-val">${mail}</span><button class="btn-copy-mini" data-mail="${encodedMail}" onclick="handleDynamicCopy(this, 'mail')">${iconCopy}</button></div></div>
-          ${pass ? `<div class="data-row"><span class="data-row">Contraseña</span><div class="data-content-wrapper"><span class="data-val">${pass}</span><button class="btn-copy-mini" data-pass="${encodedPass}" onclick="handleDynamicCopy(this, 'pass')">${iconCopy}</button></div></div>` : ''}
+          ${pass ? `<div class="data-row"><span class="data-row">Contraseña</span><div class="data-content-wrapper"><span class="data-val">${pass}</span><button class="btn-copy-mini" data-pass="${encodedPass}" onclick="handleDynamicCopy(this, 'pass')">${iconCopy}</button></div></div>` : ""}
           ${profilesHtml}
-          <div class="data-row last-row"><span class="data-row">Vencimiento</span><span class="data-val" style="color:var(--ios-red); font-weight:600;">${date || 'A CONVENIR'}</span></div>
+          <div class="data-row last-row"><span class="data-row">Vencimiento</span><span class="data-val" style="color:var(--ios-red); font-weight:600;">${date || "A CONVENIR"}</span></div>
           <button class="btn-copy-all-bottom" data-raw="${encodedRaw}" onclick="handleDynamicCopy(this, 'all')">Copiar todo el texto</button>
         </div>
       `;
-    }
-
-    async function openServices() {
-      haptic();
-      let t = document.getElementById('telefono').value.replace(/\D/g, '').trim();
-      if (t.length < 7) return fireError("⚠️ Ingresa tu número celular.");
-      
-      const modal = document.getElementById('modalServices');
-      const box = document.getElementById('cardsWrapper');
-      const btnOpen = document.getElementById('btn-open-services');
-      
-      if(document.getElementById('searchServices')) document.getElementById('searchServices').value = "";
-      modal.style.display = 'flex';
-      
-      // BLOQUEAMOS EL SCROLL DEL FONDO AL ABRIR
-      document.body.style.overflow = 'hidden';
-
-      box.innerHTML = '<div class="loader" style="border-top-color:var(--ios-blue);"></div><p style="text-align:center; color:var(--text-secondary); font-size:0.9rem;">Sincronizando con Cybernet iCloud...</p>';
-      btnOpen.disabled = true;
-      
-      try {
-        const resp = await fetch(`${GOOGLE_URL}?accion=servicios&telefono=${t}`);
-        const json = await resp.json();
-        if (json.exito && json.servicios.length > 0) {
-          box.innerHTML = ""; let validCount = 0;
-          json.servicios.forEach(s => { if(s.info) { const card = buildServiceCard(s.info, s.plataforma); if (card) { box.innerHTML += card; validCount++; } } });
-          if (validCount === 0) box.innerHTML = '<p style="color:var(--text-secondary); text-align:center; font-size:0.9rem;">No hay correos registrados.</p>';
-        } else { box.innerHTML = '<p style="color:var(--text-secondary); text-align:center; font-size:0.9rem;">Sin servicios vinculados.</p>'; }
-      } catch (e) { box.innerHTML = '<p style="color:var(--ios-red); text-align:center; font-size:0.9rem;">Error de conexión.</p>'; } finally { btnOpen.disabled = false; }
-    }
-
-    function closeModal() { 
-        haptic(); 
-        document.getElementById('modalServices').style.display = 'none'; 
-        // LIBERAMOS EL SCROLL DEL FONDO AL CERRAR
-        document.body.style.overflow = ''; 
-    }
-    window.onclick = (e) => { if(e.target == document.getElementById('modalServices')) closeModal(); }
-    window.addEventListener('keydown', (e) => { if(e.key === "Escape") closeModal(); });
-
-    function changeStep(n) {
-      haptic();
-      if(n === 2) {
-        let t = document.getElementById('telefono').value.replace(/\D/g, '').trim();
-        if(t.length < 7) return fireError("❌ El número es muy corto.");
-        globalData.telefono = t;
       }
-      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-      document.getElementById('step-' + n).classList.add('active');
-    }
 
-    function setPlat(p) { globalData.plataforma = p; changeStep(p === 'NETFLIX' ? 3 : 4); }
-    function setOp(o) { globalData.opcion = o; changeStep(4); }
-    function reloadAll() { document.getElementById('telefono').value = ''; document.getElementById('correo').value = ''; changeStep(1); }
-    function fireError(m) { haptic(); const t = document.getElementById('error-toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 5000); }
+      async function openServices() {
+        haptic();
+        let t = document
+          .getElementById("telefono")
+          .value.replace(/\D/g, "")
+          .trim();
+        if (t.length < 7) return fireError("⚠️ Ingresa tu número celular.");
 
-    async function executeSearch() {
-      haptic();
-      let m = document.getElementById('correo').value.toLowerCase().trim();
-      if(!m.includes('@')) return fireError("❌ Correo inválido.");
-      const btnTrack = document.getElementById('btn-rastrear');
-      globalData.correo = m; changeStep(5); btnTrack.disabled = true;
-      try {
-        const query = new URLSearchParams(globalData);
-        const resp = await fetch(`${GOOGLE_URL}?${query.toString()}`);
-        const res = await resp.json();
-        changeStep(6); document.getElementById('res-box-code').style.display = 'none'; document.getElementById('res-box-link').style.display = 'none';
-        if(res.exito) {
-          document.getElementById('res-title').innerText = "¡LOCALIZADO!";
-          let finalMsg = (res.msj && res.msj !== "undefined" && res.msj !== "null") ? res.msj : "Información recuperada:";
-          document.getElementById('res-desc').innerText = finalMsg;
-          if(res.tipo === 'codigo') {
-            document.getElementById('res-box-code').style.display = 'block';
-            document.getElementById('val-code').innerText = res.valor;
-            document.getElementById('val-timer').innerText = `Vence en: ${res.tiempo}`;
-          } else if (res.tipo === 'link') { document.getElementById('res-box-link').style.display = 'block'; document.getElementById('val-link').href = res.valor; }
-        } else { document.getElementById('res-title').innerText = "SIN RESULTADOS"; document.getElementById('res-desc').innerText = res.msj || "No hay datos para este correo."; }
-      } catch (err) { changeStep(6); document.getElementById('res-desc').innerText = "Error de conexión."; } finally { btnTrack.disabled = false; }
-    }
+        const modal = document.getElementById("modalServices");
+        const box = document.getElementById("cardsWrapper");
+        const btnOpen = document.getElementById("btn-open-services");
 
-    let searchTimeout = null;
-    function filterServices() { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { const query = document.getElementById('searchServices').value.toLowerCase(); const cards = document.querySelectorAll('.service-card'); cards.forEach(card => { const content = card.textContent.toLowerCase(); if (content.includes(query)) card.style.display = "flex"; else card.style.display = "none"; }); }, 300); }
-  </script>
-  <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // Aquí es donde está el truco: le decimos que instale la versión 2
-    navigator.serviceWorker.register('sw.js?v=7.0')
-      .then(reg => {
-        console.log('Cybernet App lista para instalar');
-        
-        // Esto obliga al celular a buscar cambios nuevos en segundo plano
-        reg.update(); 
-      })
-      .catch(err => console.log('Error al registrar la App', err));
-  });
-}
-</script>
-</body>
+        if (document.getElementById("searchServices"))
+          document.getElementById("searchServices").value = "";
+        modal.style.display = "flex";
+
+        // BLOQUEAMOS EL SCROLL DEL FONDO AL ABRIR
+        document.body.style.overflow = "hidden";
+
+        box.innerHTML =
+          '<div class="loader" style="border-top-color:var(--ios-blue);"></div><p style="text-align:center; color:var(--text-secondary); font-size:0.9rem;">Sincronizando con Cybernet iCloud...</p>';
+        btnOpen.disabled = true;
+
+        try {
+          const resp = await fetch(
+            `${GOOGLE_URL}?accion=servicios&telefono=${t}`,
+          );
+          const json = await resp.json();
+          if (json.exito && json.servicios.length > 0) {
+            box.innerHTML = "";
+            let validCount = 0;
+            json.servicios.forEach((s) => {
+              if (s.info) {
+                const card = buildServiceCard(s.info, s.plataforma);
+                if (card) {
+                  box.innerHTML += card;
+                  validCount++;
+                }
+              }
+            });
+            if (validCount === 0)
+              box.innerHTML =
+                '<p style="color:var(--text-secondary); text-align:center; font-size:0.9rem;">No hay correos registrados.</p>';
+          } else {
+            box.innerHTML =
+              '<p style="color:var(--text-secondary); text-align:center; font-size:0.9rem;">Sin servicios vinculados.</p>';
+          }
+        } catch (e) {
+          box.innerHTML =
+            '<p style="color:var(--ios-red); text-align:center; font-size:0.9rem;">Error de conexión.</p>';
+        } finally {
+          btnOpen.disabled = false;
+        }
+      }
+
+      function closeModal() {
+        haptic();
+        document.getElementById("modalServices").style.display = "none";
+        // LIBERAMOS EL SCROLL DEL FONDO AL CERRAR
+        document.body.style.overflow = "";
+      }
+      window.onclick = (e) => {
+        if (e.target == document.getElementById("modalServices")) closeModal();
+      };
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal();
+      });
+
+      function changeStep(n) {
+        haptic();
+        if (n === 2) {
+          let t = document
+            .getElementById("telefono")
+            .value.replace(/\D/g, "")
+            .trim();
+          if (t.length < 7) return fireError("❌ El número es muy corto.");
+          globalData.telefono = t;
+        }
+        document
+          .querySelectorAll(".step")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById("step-" + n).classList.add("active");
+      }
+
+      function setPlat(p) {
+        globalData.plataforma = p;
+        changeStep(p === "NETFLIX" ? 3 : 4);
+      }
+      function setOp(o) {
+        globalData.opcion = o;
+        changeStep(4);
+      }
+      function reloadAll() {
+        document.getElementById("telefono").value = "";
+        document.getElementById("correo").value = "";
+        changeStep(1);
+      }
+      function fireError(m) {
+        haptic();
+        const t = document.getElementById("error-toast");
+        t.innerText = m;
+        t.style.display = "block";
+        setTimeout(() => (t.style.display = "none"), 5000);
+      }
+
+      async function executeSearch() {
+        haptic();
+        let m = document.getElementById("correo").value.toLowerCase().trim();
+        if (!m.includes("@")) return fireError("❌ Correo inválido.");
+        const btnTrack = document.getElementById("btn-rastrear");
+        globalData.correo = m;
+        changeStep(5);
+        btnTrack.disabled = true;
+        try {
+          const query = new URLSearchParams(globalData);
+          const resp = await fetch(`${GOOGLE_URL}?${query.toString()}`);
+          const res = await resp.json();
+          changeStep(6);
+          document.getElementById("res-box-code").style.display = "none";
+          document.getElementById("res-box-link").style.display = "none";
+          if (res.exito) {
+            document.getElementById("res-title").innerText = "¡LOCALIZADO!";
+            let finalMsg =
+              res.msj && res.msj !== "undefined" && res.msj !== "null"
+                ? res.msj
+                : "Información recuperada:";
+            document.getElementById("res-desc").innerText = finalMsg;
+            if (res.tipo === "codigo") {
+              document.getElementById("res-box-code").style.display = "block";
+              document.getElementById("val-code").innerText = res.valor;
+              document.getElementById("val-timer").innerText =
+                `Vence en: ${res.tiempo}`;
+            } else if (res.tipo === "link") {
+              document.getElementById("res-box-link").style.display = "block";
+              document.getElementById("val-link").href = res.valor;
+            }
+          } else {
+            document.getElementById("res-title").innerText = "SIN RESULTADOS";
+            document.getElementById("res-desc").innerText =
+              res.msj || "No hay datos para este correo.";
+          }
+        } catch (err) {
+          changeStep(6);
+          document.getElementById("res-desc").innerText = "Error de conexión.";
+        } finally {
+          btnTrack.disabled = false;
+        }
+      }
+
+      let searchTimeout = null;
+      function filterServices() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          const query = document
+            .getElementById("searchServices")
+            .value.toLowerCase();
+          const cards = document.querySelectorAll(".service-card");
+          cards.forEach((card) => {
+            const content = card.textContent.toLowerCase();
+            if (content.includes(query)) card.style.display = "flex";
+            else card.style.display = "none";
+          });
+        }, 300);
+      }
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          // Aquí es donde está el truco: le decimos que instale la versión 2
+          navigator.serviceWorker
+            .register("sw.js?v=9.0")
+            .then((reg) => {
+              console.log("Cybernet App lista para instalar");
+
+              // Esto obliga al celular a buscar cambios nuevos en segundo plano
+              reg.update();
+            })
+            .catch((err) => console.log("Error al registrar la App", err));
+        });
+      }
+    </script>
+  </body>
 </html>
