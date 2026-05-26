@@ -1,15 +1,18 @@
-const CACHE_NAME = 'cybernet-cache-v7'; // Subimos la versión para forzar la limpieza
+const CACHE_NAME = 'cybernet-cache-v8'; // Súbele una versión más por si acaso
 
-// Solo guardamos el index y el logo. El admin.html queda fuera.
 const assets = [
   './', 
+  'index.html', 
+  'logo.jpeg'
 ];
 
 self.addEventListener('install', e => {
+  // 1. ESTA LÍNEA ES NUEVA: Obliga a instalarse de inmediato sin esperar
+  self.skipWaiting(); 
+  
   e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(assets)));
 });
 
-// Esta función es vital: borrará la caché vieja que tenía atrapado tu diseño anterior
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys => {
@@ -19,6 +22,9 @@ self.addEventListener('activate', e => {
       );
     })
   );
+  
+  // 2. ESTA LÍNEA ES NUEVA: Toma el control de la pantalla en este mismo segundo
+  self.clients.claim(); 
 });
 
 self.addEventListener('fetch', e => {
