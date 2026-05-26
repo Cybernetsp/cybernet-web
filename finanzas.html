@@ -1,686 +1,1116 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es" data-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Cybernet - Control Financiero</title>
-    
-    <link rel="icon" type="image/jpeg" href="logo.jpeg">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <link rel="stylesheet" href="global.css">
+
+    <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+
+    <link rel="stylesheet" href="global.css" />
 
     <script>
-        (function() {
-            // Escanear si hay una sesión activa en la memoria del navegador
-            let sessionUser = sessionStorage.getItem('active_staff') || localStorage.getItem('cyber_saved_staff');
-            
-            if (!sessionUser || sessionUser.toUpperCase().trim() !== "CAMILO") {
-                // Si la sesión está vacía o el usuario NO es Camilo, bloquear y redirigir de inmediato
-                window.location.replace("admin.html");
-            } else {
-                // Si eres tú, asegurar que la sesión permanezca activa en este módulo
-                sessionStorage.setItem('active_staff', "CAMILO");
-            }
-        })();
+      (function () {
+        // Escanear si hay una sesión activa en la memoria del navegador
+        let sessionUser =
+          sessionStorage.getItem("active_staff") ||
+          localStorage.getItem("cyber_saved_staff");
+
+        if (!sessionUser || sessionUser.toUpperCase().trim() !== "CAMILO") {
+          // Si la sesión está vacía o el usuario NO es Camilo, bloquear y redirigir de inmediato
+          window.location.replace("admin.html");
+        } else {
+          // Si eres tú, asegurar que la sesión permanezca activa en este módulo
+          sessionStorage.setItem("active_staff", "CAMILO");
+        }
+      })();
     </script>
-
-    <style>
-        /* =========================================================================
-           REDISEÑO DE INTERFAZ FINANZAS ADAPTABLE PREMIUM
-           ========================================================================= */
-        
-        /* Barra de filtros Premium y Simétrica */
-        .filter-wrapper-ios {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            gap: 20px;
-        }
-
-        .filter-group-center {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 12px;
-            justify-content: center;
-            flex: 1;
-        }
-
-        .pod-selector {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--input-bg);
-            padding: 6px 12px;
-            border-radius: 14px;
-            border: var(--glass-border);
-        }
-
-        /* Layouts en Rejillas Adaptativas Bento */
-        .executive-panoramic-hub { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; width: 100%; }
-        .bento-horizontal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; width: 100%; }
-        .dist-grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; width: 100%; }
-        .workspace-action-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; width: 100%; }
-
-        .balance-hero-section { display: flex; flex-direction: column; justify-content: center; padding-left: 10px; }
-        .main-price-lbl { font-size: 3.5rem; font-weight: 700; letter-spacing: -2px; line-height: 1; display: block; margin: 8px 0; }
-        
-        .status-pill-container { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ios-green); box-shadow: 0 0 10px var(--ios-green); }
-
-        /* Anillos de Actividad SVG de Apple */
-        .chart-layout-box { display: flex; align-items: center; gap: 30px; }
-        .apple-ring-svg { transform: rotate(-90deg); width: 130px; height: 130px; flex-shrink: 0; }
-        .ring-bg { fill: none; stroke: rgba(255, 255, 255, 0.05); stroke-width: 11; }
-        [data-theme="light"] .ring-bg { stroke: rgba(0, 0, 0, 0.04); }
-        
-        .ring-fill-ingresos { fill: none; stroke: var(--ios-blue); stroke-width: 11; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
-        .ring-fill-gastos { fill: none; stroke: var(--ios-red); stroke-width: 11; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
-
-        /* Barras de Progreso Lineales */
-        .bar-chart-container { flex: 1; display: flex; flex-direction: column; gap: 16px; }
-        .bar-row { display: flex; flex-direction: column; gap: 6px; }
-        .bar-meta { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); }
-        .bar-track { width: 100%; height: 6px; background: var(--input-bg); border-radius: 10px; overflow: hidden; }
-        .bar-fill { height: 100%; width: 0%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        /* Tarjeta de distribución táctica */
-        .distribution-hub-panel { border-top: 3px solid var(--ios-blue); background: linear-gradient(135deg, rgba(10, 132, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%); }
-        .debt-hub-panel { border-top: 3px solid #ff9f0a; background: linear-gradient(135deg, rgba(255, 159, 10, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%); }
-
-        /* Listado del Libro Contable de Egresos/Ingresos */
-        .apple-list-container { display: flex; flex-direction: column; background: var(--input-bg); border-radius: 16px; overflow: hidden; border: var(--glass-border); width: 100%; }
-        .apple-table-header-row { display: flex; width: 100%; padding: 12px 18px; background: var(--input-focus); border-bottom: var(--glass-border); flex-shrink: 0; }
-        .th-cell { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.3px; }
-
-        #listaDesgloseGastos { max-height: 295px; overflow-y: auto; width: 100%; display: flex; flex-direction: column; }
-        .apple-list-row { display: flex; width: 100%; padding: 13px 18px; background: transparent; border-bottom: 0.5px solid rgba(255,255,255,0.04); align-items: center; transition: background 0.2s ease; flex-shrink: 0; }
-        [data-theme="light"] .apple-list-row { border-bottom-color: rgba(0,0,0,0.04); }
-        .td-cell { font-size: 0.88rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .td-date { width: 18%; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
-        .td-price { width: 22%; font-weight: 700; font-variant-numeric: tabular-nums; }
-        .td-desc { width: 38%; font-size: 0.86rem; padding-right: 10px; text-align: left; }
-        .td-cat { width: 22%; text-align: right; color: var(--text-secondary); font-size: 0.78rem; }
-
-        .empty-log-msg { text-align: center; padding: 35px; color: var(--text-secondary); font-size: 0.88rem; width: 100%; }
-
-        /* Notificación Flotante Toast iOS */
-        .apple-notification-toast {
-            position: fixed; top: 85px; left: 50%; transform: translateX(-50%) translateY(-100px); 
-            background: rgba(30, 30, 30, 0.9); border: var(--glass-border); color: #ffffff; 
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
-            padding: 12px 26px; border-radius: 24px; font-size: 0.88rem; font-weight: 600; 
-            opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            z-index: 10000; box-shadow: var(--glass-shadow);
-        }
-        [data-theme="light"] .apple-notification-toast { background: rgba(255, 255, 255, 0.9); color: #000000; }
-        .apple-notification-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-        /* Adaptabilidad de pantalla total (Responsivo Quirúrgico) */
-        @media (max-width: 900px) {
-            .filter-wrapper-ios { flex-direction: column; align-items: stretch; text-align: center; }
-            .filter-group-center { flex-direction: column; width: 100%; }
-            .pod-selector { width: 100%; justify-content: space-between; }
-            .pod-selector select { flex: 1; text-align: right; }
-        }
-        @media (max-width: 1024px) {
-            .executive-panoramic-hub { grid-template-columns: 1fr; }
-            .workspace-action-grid { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 820px) {
-            .global-header { flex-direction: column; align-items: center; padding: 10px 15px; gap: 10px; }
-            .apple-notification-toast { top: 125px; }
-            .dist-grid-layout > div { border-left: none !important; padding-left: 0 !important; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
-        }
-        @media (max-width: 650px) {
-            .chart-layout-box { flex-direction: column; text-align: center; }
-            .apple-ring-svg { margin: 0 auto; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="bg-orb bg-orb-1" style="background: rgba(48, 209, 88, 0.1);"></div>
-    <div class="bg-orb bg-orb-2" style="background: rgba(10, 132, 255, 0.1);"></div>
+  </head>
+  <body>
+    <div
+      class="bg-orb bg-orb-1"
+      style="background: rgba(48, 209, 88, 0.1)"
+    ></div>
+    <div
+      class="bg-orb bg-orb-2"
+      style="background: rgba(10, 132, 255, 0.1)"
+    ></div>
 
     <header class="global-header" id="globalHeader">
-        <div class="flex-row" id="staffStatusBar">
-            <div class="badge-ios badge-blue" style="color: var(--ios-green); border-color: rgba(48,209,88,0.3); background: rgba(48,209,88,0.08); font-weight: 700;">
-                <span id="staffSessionName">CAMILO</span> • MÓDULO FINANCIERO
-            </div>
+      <div class="flex-row" id="staffStatusBar">
+        <div
+          class="badge-ios badge-blue"
+          style="
+            color: var(--ios-green);
+            border-color: rgba(48, 209, 88, 0.3);
+            background: rgba(48, 209, 88, 0.08);
+            font-weight: 700;
+          "
+        >
+          <span id="staffSessionName">CAMILO</span> • MÓDULO FINANCIERO
         </div>
+      </div>
 
-        <div class="flex-row" id="controlPanel">
-            <button class="btn-ios btn-secondary" onclick="cargarDashboardFinanzas()">
-                REFRESCAR
-            </button>
-            <button class="btn-ios btn-secondary" onclick="window.location.href='admin.html'" style="color: var(--ios-red);">
-                VOLVER
-            </button>
-        </div>
+      <div class="flex-row" id="controlPanel">
+        <button
+          class="btn-ios btn-secondary"
+          onclick="cargarDashboardFinanzas()"
+        >
+          REFRESCAR
+        </button>
+        <button
+          class="btn-ios btn-secondary"
+          onclick="window.location.href = 'admin.html'"
+          style="color: var(--ios-red)"
+        >
+          VOLVER
+        </button>
+      </div>
     </header>
 
-    <main class="main-workspace" style="max-width: 1250px; padding-top: 95px;">
-        
-        <section class="card-ios" style="width: 100%;">
-            <div class="filter-wrapper-ios">
-                
-                <div class="flex-row" style="gap: 10px; min-width: 200px;">
-                    <div style="background: rgba(48, 209, 88, 0.15); padding: 8px; border-radius: 12px; color: var(--ios-green); display: flex; align-items: center; justify-content: center;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    </div>
-                    <div style="text-align: left;">
-                        <span style="display: block; font-size: 0.85rem; font-weight: 800; color: var(--text-primary);" id="welcomeUserName">Hola, CAMILO</span>
-                        <span style="display: block; font-size: 0.72rem; color: var(--text-secondary);">Administrador Maestro</span>
-                    </div>
-                </div>
-                
-                <div class="filter-group-center">
-                    <div class="pod-selector">
-                        <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); padding-left: 4px;">Mes</span>
-                        <select id="appleMonthSelect" class="input-ios" style="margin-bottom: 0; width: auto; padding: 4px 28px 4px 8px; background-color: transparent; border: none; font-size: 0.88rem; font-weight: 700;" onchange="actualizarFiltrosUI()"></select>
-                    </div>
-
-                    <div class="pod-selector">
-                        <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); padding-left: 4px;">Día</span>
-                        <select id="appleDaySelect" class="input-ios" style="margin-bottom: 0; width: auto; padding: 4px 28px 4px 8px; background-color: transparent; border: none; font-size: 0.88rem; font-weight: 700;" onchange="actualizarFiltrosUI()"></select>
-                    </div>
-
-                    <button type="button" class="btn-ios btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); border: 0.5px solid rgba(10, 132, 255, 0.25);" onclick="filtrarHoy()">Hoy</button>
-
-                    <button type="button" class="btn-ios btn-secondary" style="padding: 6px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(255, 149, 0, 0.15); color: #ff9500; border: 0.5px solid rgba(255, 149, 0, 0.25); margin-left: 5px;" onclick="filtrarAyer()">Ayer</button>
-                </div>
-                
-                <div style="min-width: 200px; text-align: right;">
-                    <button class="btn-ios btn-success" onclick="exportarExcelEmpresarial()" style="padding: 10px 18px; font-size: 0.88rem; border-radius: 14px; font-weight: 700; width: 100%;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Exportar Reporte
-                    </button>
-                </div>
-
+    <main class="main-workspace" style="max-width: 1250px; padding-top: 95px">
+      <section class="card-ios" style="width: 100%">
+        <div class="filter-wrapper-ios">
+          <div class="flex-row" style="gap: 10px; min-width: 200px">
+            <div
+              style="
+                background: rgba(48, 209, 88, 0.15);
+                padding: 8px;
+                border-radius: 12px;
+                color: var(--ios-green);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
             </div>
-        </section>
-
-        <section class="card-ios executive-panoramic-hub" style="width: 100%;">
-            
-            <div class="balance-hero-section">
-                <span class="text-secondary" id="txtPeriodoLabel" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Caja Real Mensual</span>
-                <span class="main-price-lbl" id="val_neto" style="color: var(--ios-green);">$0</span>
-                <div class="status-pill-container">
-                    <div class="status-dot" id="statusIndicator"></div>
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight: 600;">Red de balances verificada</span>
-                </div>
+            <div style="text-align: left">
+              <span
+                style="
+                  display: block;
+                  font-size: 0.85rem;
+                  font-weight: 800;
+                  color: var(--text-primary);
+                "
+                id="welcomeUserName"
+                >Hola, CAMILO</span
+              >
+              <span
+                style="
+                  display: block;
+                  font-size: 0.72rem;
+                  color: var(--text-secondary);
+                "
+                >Administrador Maestro</span
+              >
             </div>
+          </div>
 
-            <div class="chart-layout-box" style="border-left: 1px solid rgba(255,255,255,0.06); padding-left: 20px;">
-                <svg class="apple-ring-svg" viewBox="0 0 100 100">
-                    <circle class="ring-bg" cx="50" cy="50" r="40"></circle>
-                    <circle class="ring-fill-ingresos" id="appleRingVentas" cx="50" cy="50" r="40"></circle>
-                    
-                    <circle class="ring-bg" cx="50" cy="50" r="26"></circle>
-                    <circle class="ring-fill-gastos" id="appleRingGastos" cx="50" cy="50" r="26"></circle>
-                </svg>
-
-                <div class="bar-chart-container">
-                    <div class="bar-row">
-                        <div class="bar-meta"><span>Ingresos Totales</span><span id="txtBarPorcIngresos">0%</span></div>
-                        <div class="bar-track"><div class="bar-fill" id="barFillIngresos" style="background: var(--ios-blue);"></div></div>
-                    </div>
-                    <div class="bar-row">
-                        <div class="bar-meta"><span>Gastos Operativos</span><span id="txtBarPorcGastos">0%</span></div>
-                        <div class="bar-track"><div class="bar-fill" id="barFillGastos" style="background: var(--ios-red);"></div></div>
-                    </div>
-                </div>
-            </div>
-
-        </section>
-
-        <section class="bento-horizontal-grid">
-            <div class="card-ios"><span class="text-secondary" style="font-size: 0.75rem; font-weight:700; text-transform:uppercase;">Ventas Brutas</span><span style="font-size:1.6rem; font-weight:700; color:var(--ios-blue);" id="val_ingresos">$0</span></div>
-            <div class="card-ios"><span class="text-secondary" style="font-size: 0.75rem; font-weight:700; text-transform:uppercase;">Gastos Caja</span><span style="font-size:1.6rem; font-weight:700; color:var(--ios-red);" id="val_gastos">$0</span></div>
-            <div class="card-ios"><span class="text-secondary" style="font-size: 0.75rem; font-weight:700; text-transform:uppercase;">Inversiones</span><span style="font-size:1.6rem; font-weight:700; color:#ff9f0a;" id="val_inversiones">$0</span></div>
-            <div class="card-ios"><span class="text-secondary" style="font-size: 0.75rem; font-weight:700; text-transform:uppercase;">Staff Nómina</span><span style="font-size:1.6rem; font-weight:700; color:#bf5af2;" id="val_nomina">$0</span></div>
-        </section>
-
-        <section class="card-ios distribution-hub-panel" style="width: 100%;">
-            <span class="text-secondary mb-1" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">📋 Distribución Ponderada s/ Ventas Brutas del Periodo</span>
-            <div class="dist-grid-layout mt-1">
-                <div class="flex-col" style="gap:4px;">
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Mi Ganancia (<span id="lblPorcMio">28</span>%)</span>
-                    <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-green);" id="valProyMio">$0</span>
-                </div>
-                <div class="flex-col" style="gap:4px;">
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Fondo del Negocio (<span id="lblPorcNegocio">55</span>%)</span>
-                    <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-blue);" id="valProyNegocio">$0</span>
-                </div>
-                <div class="flex-col" style="gap:4px;">
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Reserva Nómina (<span id="lblPorcNomina">17</span>%)</span>
-                    <span style="font-size: 1.85rem; font-weight: 700; color: #bf5af2;" id="valProyNomina">$0</span>
-                </div>
-                <div class="flex-col" style="gap:4px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Enviado por Jeisson</span>
-                    <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-green);" id="valProyJeisson">$0</span>
-                </div>
-                <div class="flex-col" style="gap:4px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Mi Ganancia + Jeisson</span>
-                    <span style="font-size: 1.85rem; font-weight: 700; color: var(--ios-green);" id="valProyMioMasJeisson">$0</span>
-                </div>
-            </div>
-        </section>
-
-        <section class="card-ios debt-hub-panel" style="width: 100%;">
-            <div class="flex-row-between mb-1">
-                <span class="text-secondary" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">⚖️ Amortización de Deuda al Negocio</span>
-                <div class="badge-ios" style="background: rgba(255,159,10,0.1); color: #ff9f0a; border: 1px solid rgba(255,159,10,0.3); font-size: 0.7rem; font-weight: 800; padding: 4px 8px;">CALCULADORA EN VIVO</div>
-            </div>
-            
-            <div class="dist-grid-layout mt-1">
-                <div class="flex-col" style="gap:4px;">
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Escribe tu Deuda Actual ($)</span>
-                    <input type="text" id="valDeudaTotal" class="input-ios" value="$0" oninput="formatearMontoEnVivoCOP(this); calcularDescuentoDeuda();" placeholder="$0" style="font-size: 1.85rem; font-weight: 700; color: #ff453a; background: transparent; border: none; padding: 0; text-align: left; box-shadow: none;">
-                </div>
-                
-                <div class="flex-col" style="gap:4px; justify-content: center;">
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Modo de Pago</span>
-                    <select id="modoDescuentoDeuda" class="input-ios" style="font-size: 0.8rem; padding: 6px 12px; font-weight: 700;" onchange="calcularDescuentoDeuda()">
-                        <option value="90">Descontar 90% de mi ganancia</option>
-                        <option value="dias">Dividir deuda en X días</option>
-                    </select>
-                    <div id="divDiasDeuda" style="display: none; margin-top: 5px;">
-                        <input type="number" id="inputDiasDeuda" class="input-ios" placeholder="Días (Ej: 15)" value="5" min="1" oninput="calcularDescuentoDeuda()" style="font-size: 0.8rem; padding: 6px 12px; width: 100%;">
-                    </div>
-                </div>
-
-                <div class="flex-col" style="gap:4px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
-                    <span class="text-secondary" style="font-size: 0.8rem; font-weight:600;">Descuento Sugerido (Hoy)</span>
-                    <span style="font-size: 1.85rem; font-weight: 700; color: #ff9f0a;" id="valDescuentoHoy">$0</span>
-                </div>
-            </div>
-        </section>
-
-        <div class="workspace-action-grid" style="width: 100%;">
-            
-            <div class="card-ios" style="height: fit-content;">
-                <h3 class="card-title" style="color: var(--text-primary);">✍️ Registrar Movimiento Manual</h3>
-                <form id="formFinanzas" class="flex-col" onsubmit="guardarTransaccion(event)">
-                    
-                    <div class="flex-col" style="gap: 4px;">
-                        <label class="text-secondary" style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase;">Categoría Contable</label>
-                        <select id="finCategoria" class="input-ios" required>
-                            <option value="" disabled selected>Selecciona una opción...</option>
-                            <option value="Comida">Comida</option>
-                            <option value="Chayo">Chayo</option>
-                            <option value="Salud/médicos">Salud/médicos</option>
-                            <option value="Vivienda">Vivienda</option>
-                            <option value="Transporte">Transporte</option>
-                            <option value="Gastos personales">Gastos personales</option>
-                            <option value="Mascotas">Mascotas</option>
-                            <option value="Servicios (luz, agua, gas, etc.)">Servicios (luz, agua, gas, etc.)</option>
-                            <option value="Facebook">Facebook</option>
-                            <option value="Deuda">Deuda</option>
-                            <option value="Otros">Otros</option>
-                            <option value="Netflix">Netflix</option>
-                            <option value="Cuentas (amazon, disney, etc)">Cuentas (amazon, disney, etc)</option>
-                            <option value="Adelanto">🔴 Pedir Adelanto (Me endeuda)</option>
-                            <option value="Abono Deuda">🟢 Abono a Deuda (Pago al negocio)</option>
-                            <option value="Pago ayudantes">Pago ayudantes</option>
-                            <option value="Angelica">Angelica</option>
-                            <option value="Disney premium">Disney premium</option>
-                            <option value="Ingreso Extra">➕ Ingreso Extra</option>
-                            <option value="Inyección Capital">➕ Inyección Capital</option>
-                        </select>
-                    </div>
-                    
-                    <div class="flex-col" style="gap: 4px;">
-                        <label class="text-secondary" style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase;">Monto Operación ($)</label>
-                        <input type="text" id="finMonto" class="input-ios" placeholder="Ej: $50.000" oninput="formatearMontoEnVivoCOP(this)" required autocomplete="off">
-                    </div>
-                    
-                    <div class="flex-col" style="gap: 4px;">
-                        <label class="text-secondary" style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase;">Metadato / Nota Descriptiva</label>
-                        <input type="text" id="finDetalle" class="input-ios" placeholder="Ej: Venta de artículo usado" required autocomplete="off">
-                    </div>
-                    
-                    <button type="submit" id="btnSubmit" class="btn-ios btn-primary w-100 mt-1">Archivar Movimiento</button>
-                </form>
+          <div class="filter-group-center">
+            <div class="pod-selector">
+              <span
+                style="
+                  font-size: 0.8rem;
+                  font-weight: 600;
+                  color: var(--text-secondary);
+                  padding-left: 4px;
+                "
+                >Mes</span
+              >
+              <select
+                id="appleMonthSelect"
+                class="input-ios"
+                style="
+                  margin-bottom: 0;
+                  width: auto;
+                  padding: 4px 28px 4px 8px;
+                  background-color: transparent;
+                  border: none;
+                  font-size: 0.88rem;
+                  font-weight: 700;
+                "
+                onchange="actualizarFiltrosUI()"
+              ></select>
             </div>
 
-            <div class="card-ios" style="display: flex; flex-direction: column;">
-                <div class="flex-row-between mb-1">
-                    <span class="card-title" style="color: var(--text-primary); margin-bottom: 0;">📋 Distribución de Egresos e Ingresos</span>
-                    <span class="text-secondary" style="font-size: 0.76rem; font-weight: 700;" id="txtLibroHeader">Ciclo Activo</span>
-                </div>
-                
-                <div class="apple-list-container">
-                    <div class="apple-table-header-row">
-                        <span class="th-cell" style="width: 18%;">Fecha</span>
-                        <span class="th-cell" style="width: 22%;">Valor</span>
-                        <span class="th-cell" style="width: 38%;">Descripción</span>
-                        <span class="th-cell" style="width: 22%; text-align: right;">Categoría</span>
-                    </div>
-                    <div id="listaDesgloseGastos">
-                        <div class="empty-log-msg">Sincronizando registros contables...</div>
-                    </div>
-                </div>
+            <div class="pod-selector">
+              <span
+                style="
+                  font-size: 0.8rem;
+                  font-weight: 600;
+                  color: var(--text-secondary);
+                  padding-left: 4px;
+                "
+                >Día</span
+              >
+              <select
+                id="appleDaySelect"
+                class="input-ios"
+                style="
+                  margin-bottom: 0;
+                  width: auto;
+                  padding: 4px 28px 4px 8px;
+                  background-color: transparent;
+                  border: none;
+                  font-size: 0.88rem;
+                  font-weight: 700;
+                "
+                onchange="actualizarFiltrosUI()"
+              ></select>
             </div>
 
+            <button
+              type="button"
+              class="btn-ios btn-secondary"
+              style="
+                padding: 6px 16px;
+                font-size: 0.85rem;
+                font-weight: 700;
+                border-radius: 12px;
+                background: rgba(10, 132, 255, 0.15);
+                color: var(--ios-blue);
+                border: 0.5px solid rgba(10, 132, 255, 0.25);
+              "
+              onclick="filtrarHoy()"
+            >
+              Hoy
+            </button>
+
+            <button
+              type="button"
+              class="btn-ios btn-secondary"
+              style="
+                padding: 6px 16px;
+                font-size: 0.85rem;
+                font-weight: 700;
+                border-radius: 12px;
+                background: rgba(255, 149, 0, 0.15);
+                color: #ff9500;
+                border: 0.5px solid rgba(255, 149, 0, 0.25);
+                margin-left: 5px;
+              "
+              onclick="filtrarAyer()"
+            >
+              Ayer
+            </button>
+          </div>
+
+          <div style="min-width: 200px; text-align: right">
+            <button
+              class="btn-ios btn-success"
+              onclick="exportarExcelEmpresarial()"
+              style="
+                padding: 10px 18px;
+                font-size: 0.88rem;
+                border-radius: 14px;
+                font-weight: 700;
+                width: 100%;
+              "
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="margin-right: 4px; vertical-align: middle"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Exportar Reporte
+            </button>
+          </div>
         </div>
+      </section>
+
+      <section class="card-ios executive-panoramic-hub" style="width: 100%">
+        <div class="balance-hero-section">
+          <span
+            class="text-secondary"
+            id="txtPeriodoLabel"
+            style="
+              font-size: 0.85rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            "
+            >Caja Real Mensual</span
+          >
+          <span
+            class="main-price-lbl"
+            id="val_neto"
+            style="color: var(--ios-green)"
+            >$0</span
+          >
+          <div class="status-pill-container">
+            <div class="status-dot" id="statusIndicator"></div>
+            <span
+              class="text-secondary"
+              style="font-size: 0.8rem; font-weight: 600"
+              >Red de balances verificada</span
+            >
+          </div>
+        </div>
+
+        <div
+          class="chart-layout-box"
+          style="
+            border-left: 1px solid rgba(255, 255, 255, 0.06);
+            padding-left: 20px;
+          "
+        >
+          <svg class="apple-ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="40"></circle>
+            <circle
+              class="ring-fill-ingresos"
+              id="appleRingVentas"
+              cx="50"
+              cy="50"
+              r="40"
+            ></circle>
+
+            <circle class="ring-bg" cx="50" cy="50" r="26"></circle>
+            <circle
+              class="ring-fill-gastos"
+              id="appleRingGastos"
+              cx="50"
+              cy="50"
+              r="26"
+            ></circle>
+          </svg>
+
+          <div class="bar-chart-container">
+            <div class="bar-row">
+              <div class="bar-meta">
+                <span>Ingresos Totales</span
+                ><span id="txtBarPorcIngresos">0%</span>
+              </div>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  id="barFillIngresos"
+                  style="background: var(--ios-blue)"
+                ></div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-meta">
+                <span>Gastos Operativos</span
+                ><span id="txtBarPorcGastos">0%</span>
+              </div>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  id="barFillGastos"
+                  style="background: var(--ios-red)"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bento-horizontal-grid">
+        <div class="card-ios">
+          <span
+            class="text-secondary"
+            style="
+              font-size: 0.75rem;
+              font-weight: 700;
+              text-transform: uppercase;
+            "
+            >Ventas Brutas</span
+          ><span
+            style="font-size: 1.6rem; font-weight: 700; color: var(--ios-blue)"
+            id="val_ingresos"
+            >$0</span
+          >
+        </div>
+        <div class="card-ios">
+          <span
+            class="text-secondary"
+            style="
+              font-size: 0.75rem;
+              font-weight: 700;
+              text-transform: uppercase;
+            "
+            >Gastos Caja</span
+          ><span
+            style="font-size: 1.6rem; font-weight: 700; color: var(--ios-red)"
+            id="val_gastos"
+            >$0</span
+          >
+        </div>
+        <div class="card-ios">
+          <span
+            class="text-secondary"
+            style="
+              font-size: 0.75rem;
+              font-weight: 700;
+              text-transform: uppercase;
+            "
+            >Inversiones</span
+          ><span
+            style="font-size: 1.6rem; font-weight: 700; color: #ff9f0a"
+            id="val_inversiones"
+            >$0</span
+          >
+        </div>
+        <div class="card-ios">
+          <span
+            class="text-secondary"
+            style="
+              font-size: 0.75rem;
+              font-weight: 700;
+              text-transform: uppercase;
+            "
+            >Staff Nómina</span
+          ><span
+            style="font-size: 1.6rem; font-weight: 700; color: #bf5af2"
+            id="val_nomina"
+            >$0</span
+          >
+        </div>
+      </section>
+
+      <section class="card-ios distribution-hub-panel" style="width: 100%">
+        <span
+          class="text-secondary mb-1"
+          style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase"
+          >📋 Distribución Ponderada s/ Ventas Brutas del Periodo</span
+        >
+        <div class="dist-grid-layout mt-1">
+          <div class="flex-col" style="gap: 4px">
+            <span
+              class="text-secondary"
+              style="font-size: 0.8rem; font-weight: 600"
+              >Mi Ganancia (<span id="lblPorcMio">28</span>%)</span
+            >
+            <span
+              style="
+                font-size: 1.85rem;
+                font-weight: 700;
+                color: var(--ios-green);
+              "
+              id="valProyMio"
+              >$0</span
+            >
+          </div>
+          <div class="flex-col" style="gap: 4px">
+            <span
+              class="text-secondary"
+              style="font-size: 0.8rem; font-weight: 600"
+              >Fondo del Negocio (<span id="lblPorcNegocio">55</span>%)</span
+            >
+            <span
+              style="
+                font-size: 1.85rem;
+                font-weight: 700;
+                color: var(--ios-blue);
+              "
+              id="valProyNegocio"
+              >$0</span
+            >
+          </div>
+          <div class="flex-col" style="gap: 4px">
+            <span
+              class="text-secondary"
+              style="font-size: 0.8rem; font-weight: 600"
+              >Reserva Nómina (<span id="lblPorcNomina">17</span>%)</span
+            >
+            <span
+              style="font-size: 1.85rem; font-weight: 700; color: #bf5af2"
+              id="valProyNomina"
+              >$0</span
+            >
+          </div>
+          <div
+            class="flex-col"
+            style="
+              gap: 4px;
+              border-left: 1px solid rgba(255, 255, 255, 0.1);
+              padding-left: 15px;
+            "
+          >
+            <span
+              class="text-secondary"
+              style="font-size: 0.8rem; font-weight: 600"
+              >Enviado por Jeisson</span
+            >
+            <span
+              style="
+                font-size: 1.85rem;
+                font-weight: 700;
+                color: var(--ios-green);
+              "
+              id="valProyJeisson"
+              >$0</span
+            >
+          </div>
+          <div
+            class="flex-col"
+            style="
+              gap: 4px;
+              border-left: 1px solid rgba(255, 255, 255, 0.1);
+              padding-left: 15px;
+            "
+          >
+            <span
+              class="text-secondary"
+              style="font-size: 0.8rem; font-weight: 600"
+              >Mi Ganancia + Jeisson</span
+            >
+            <span
+              style="
+                font-size: 1.85rem;
+                font-weight: 700;
+                color: var(--ios-green);
+              "
+              id="valProyMioMasJeisson"
+              >$0</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="card-ios debt-hub-panel" style="width: 100%">
+        <div class="flex-row-between mb-1">
+          <span
+            class="text-secondary"
+            style="
+              font-size: 0.8rem;
+              font-weight: 700;
+              text-transform: uppercase;
+            "
+            >⚖️ Amortización de Deuda al Negocio</span
+          >
+          <div
+            class="badge-ios"
+            style="
+              background: rgba(255, 159, 10, 0.1);
+              color: #ff9f0a;
+              border: 1px solid rgba(255, 159, 10, 0.3);
+              font-size: 0.7rem;
+              font-weight: 800;
+              padding: 4px 8px;
+            "
+          >
+            CALCULADORA EN VIVO
+          </div>
+        </div>
+
+        <div class="dist-grid-layout mt-1">
+          <div class="flex-col" style="gap: 4px">
+            <span
+              class="text-secondary"
+              style="font-size: 0.8rem; font-weight: 600"
+              >Escribe tu Deuda Actual ($)</span
+            >
+            <input
+              type="text"
+              id="valDeudaTotal"
+              class="input-ios"
+              value="$0"
+              oninput="
+                formatearMontoEnVivoCOP(this);
+                calcularDescuentoDeuda();
+              "
+              placeholder="$0"
+              style="
+                font-size: 1.85rem;
+                font-weight: 700;
+                color: #ff453a;
+                background: transparent;
+                border: none;
+                padding: 0;
+                text-align: left;
+                box-shadow: none;
+              "
+            />
+          </div>
+
+          <div class="flex-col" style="gap: 4px; justify-content: center">
+            <span
+              class="text-secondary"
+              style="font-size: 0.8rem; font-weight: 600"
+              >Modo de Pago</span
+            >
+            <select
+              id="modoDescuentoDeuda"
+              class="input-ios"
+              style="font-size: 0.8rem; padding: 6px 12px; font-weight: 700"
+              onchange="calcularDescuentoDeuda()"
+            >
+              <option value="90">Descontar 90% de mi ganancia</option>
+              <option value="dias">Dividir deuda en X días</option>
+            </select>
+            <div id="divDiasDeuda" style="display: none; margin-top: 5px">
+              <input
+                type="number"
+                id="inputDiasDeuda"
+                class="input-ios"
+                placeholder="Días (Ej: 15)"
+                value="5"
+                min="1"
+                oninput="calcularDescuentoDeuda()"
+                style="font-size: 0.8rem; padding: 6px 12px; width: 100%"
+              />
+            </div>
+          </div>
+
+          <div
+            class="flex-col"
+            style="
+              gap: 4px;
+              border-left: 1px solid rgba(255, 255, 255, 0.1);
+              padding-left: 15px;
+            "
+          >
+            <span
+              class="text-secondary"
+              style="font-size: 0.8rem; font-weight: 600"
+              >Descuento Sugerido (Hoy)</span
+            >
+            <span
+              style="font-size: 1.85rem; font-weight: 700; color: #ff9f0a"
+              id="valDescuentoHoy"
+              >$0</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <div class="workspace-action-grid" style="width: 100%">
+        <div class="card-ios" style="height: fit-content">
+          <h3 class="card-title" style="color: var(--text-primary)">
+            ✍️ Registrar Movimiento Manual
+          </h3>
+          <form
+            id="formFinanzas"
+            class="flex-col"
+            onsubmit="guardarTransaccion(event)"
+          >
+            <div class="flex-col" style="gap: 4px">
+              <label
+                class="text-secondary"
+                style="
+                  font-size: 0.76rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                "
+                >Categoría Contable</label
+              >
+              <select id="finCategoria" class="input-ios" required>
+                <option value="" disabled selected>
+                  Selecciona una opción...
+                </option>
+                <option value="Comida">Comida</option>
+                <option value="Chayo">Chayo</option>
+                <option value="Salud/médicos">Salud/médicos</option>
+                <option value="Vivienda">Vivienda</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Gastos personales">Gastos personales</option>
+                <option value="Mascotas">Mascotas</option>
+                <option value="Servicios (luz, agua, gas, etc.)">
+                  Servicios (luz, agua, gas, etc.)
+                </option>
+                <option value="Facebook">Facebook</option>
+                <option value="Deuda">Deuda</option>
+                <option value="Otros">Otros</option>
+                <option value="Netflix">Netflix</option>
+                <option value="Cuentas (amazon, disney, etc)">
+                  Cuentas (amazon, disney, etc)
+                </option>
+                <option value="Adelanto">🔴 Pedir Adelanto (Me endeuda)</option>
+                <option value="Abono Deuda">
+                  🟢 Abono a Deuda (Pago al negocio)
+                </option>
+                <option value="Pago ayudantes">Pago ayudantes</option>
+                <option value="Angelica">Angelica</option>
+                <option value="Disney premium">Disney premium</option>
+                <option value="Ingreso Extra">➕ Ingreso Extra</option>
+                <option value="Inyección Capital">➕ Inyección Capital</option>
+              </select>
+            </div>
+
+            <div class="flex-col" style="gap: 4px">
+              <label
+                class="text-secondary"
+                style="
+                  font-size: 0.76rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                "
+                >Monto Operación ($)</label
+              >
+              <input
+                type="text"
+                id="finMonto"
+                class="input-ios"
+                placeholder="Ej: $50.000"
+                oninput="formatearMontoEnVivoCOP(this)"
+                required
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="flex-col" style="gap: 4px">
+              <label
+                class="text-secondary"
+                style="
+                  font-size: 0.76rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                "
+                >Metadato / Nota Descriptiva</label
+              >
+              <input
+                type="text"
+                id="finDetalle"
+                class="input-ios"
+                placeholder="Ej: Venta de artículo usado"
+                required
+                autocomplete="off"
+              />
+            </div>
+
+            <button
+              type="submit"
+              id="btnSubmit"
+              class="btn-ios btn-primary w-100 mt-1"
+            >
+              Archivar Movimiento
+            </button>
+          </form>
+        </div>
+
+        <div class="card-ios" style="display: flex; flex-direction: column">
+          <div class="flex-row-between mb-1">
+            <span
+              class="card-title"
+              style="color: var(--text-primary); margin-bottom: 0"
+              >📋 Distribución de Egresos e Ingresos</span
+            >
+            <span
+              class="text-secondary"
+              style="font-size: 0.76rem; font-weight: 700"
+              id="txtLibroHeader"
+              >Ciclo Activo</span
+            >
+          </div>
+
+          <div class="apple-list-container">
+            <div class="apple-table-header-row">
+              <span class="th-cell" style="width: 18%">Fecha</span>
+              <span class="th-cell" style="width: 22%">Valor</span>
+              <span class="th-cell" style="width: 38%">Descripción</span>
+              <span class="th-cell" style="width: 22%; text-align: right"
+                >Categoría</span
+              >
+            </div>
+            <div id="listaDesgloseGastos">
+              <div class="empty-log-msg">
+                Sincronizando registros contables...
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
 
     <div id="appleToast" class="apple-notification-toast"></div>
 
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
-        
-        let globalFinanzasData = null;
-        let activePeriod = 'mes';
-        let isWorking = false;
-        let activeQueryId = 0;
-        let currentMiGananciaBruta = 0; // Variable global para usar en la calculadora de deuda
+      const GOOGLE_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
 
-        const mesesArray = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+      let globalFinanzasData = null;
+      let activePeriod = "mes";
+      let isWorking = false;
+      let activeQueryId = 0;
+      let currentMiGananciaBruta = 0; // Variable global para usar en la calculadora de deuda
 
-        function triggerToast(msg) {
-            const toast = document.getElementById('appleToast');
-            toast.innerText = msg; toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+      const mesesArray = [
+        "ENERO",
+        "FEBRERO",
+        "MARZO",
+        "ABRIL",
+        "MAYO",
+        "JUNIO",
+        "JULIO",
+        "AGOSTO",
+        "SEPTIEMBRE",
+        "OCTUBRE",
+        "NOVIEMBRE",
+        "DICIEMBRE",
+      ];
+
+      function triggerToast(msg) {
+        const toast = document.getElementById("appleToast");
+        toast.innerText = msg;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      }
+
+      function formatearMontoEnVivoCOP(input) {
+        let valor = input.value.replace(/\D/g, "");
+        if (valor === "") {
+          input.value = "";
+          return;
+        }
+        valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        input.value = "$" + valor;
+      }
+
+      function filtrarHoy() {
+        const hoy = new Date();
+        const diaActual = hoy.getDate();
+        const mesActualTexto = mesesArray[hoy.getMonth()];
+
+        const mSelect = document.getElementById("appleMonthSelect");
+        const dSelect = document.getElementById("appleDaySelect");
+
+        if (mSelect && dSelect) {
+          mSelect.value = mesActualTexto;
+          dSelect.value = diaActual;
+          actualizarFiltrosUI();
+        }
+      }
+
+      function filtrarAyer() {
+        const ayer = new Date();
+        ayer.setDate(ayer.getDate() - 1);
+
+        const diaAyer = ayer.getDate();
+        const mesAyerTexto = mesesArray[ayer.getMonth()];
+
+        const mSelect = document.getElementById("appleMonthSelect");
+        const dSelect = document.getElementById("appleDaySelect");
+
+        if (mSelect && dSelect) {
+          mSelect.value = mesAyerTexto;
+          dSelect.value = diaAyer;
+          actualizarFiltrosUI();
+        }
+      }
+
+      function formatMoneda(v) {
+        return (
+          "$" +
+          parseFloat(v || 0).toLocaleString("es-CO", {
+            maximumFractionDigits: 0,
+          })
+        );
+      }
+
+      function construirSelectores() {
+        const mSelect = document.getElementById("appleMonthSelect");
+        const dSelect = document.getElementById("appleDaySelect");
+
+        mSelect.innerHTML = "";
+        mesesArray.forEach((m) => {
+          const opt = document.createElement("option");
+          opt.value = m;
+          opt.innerText = m.charAt(0) + m.slice(1).toLowerCase();
+          mSelect.appendChild(opt);
+        });
+
+        dSelect.innerHTML = '<option value="TODOS">Todo el mes</option>';
+        for (let i = 1; i <= 31; i++) {
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.innerText = "Día " + i;
+          dSelect.appendChild(opt);
         }
 
-        function formatearMontoEnVivoCOP(input) {
-            let valor = input.value.replace(/\D/g, "");
-            if (valor === "") {
-                input.value = "";
-                return;
-            }
-            valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            input.value = "$" + valor;
+        const mesActualIdx = new Date().getMonth();
+        mSelect.selectedIndex = mesActualIdx;
+      }
+
+      function actualizarFiltrosUI() {
+        const mes = document.getElementById("appleMonthSelect").value;
+        const dia = document.getElementById("appleDaySelect").value;
+
+        activePeriod = dia === "TODOS" ? "mes" : "dia";
+
+        actualizarBotonesDock();
+        document.getElementById("txtLibroHeader").innerText = "Libro de " + mes;
+
+        triggerToast(
+          `📅 Sincronizando: ${mes} - ${dia === "TODOS" ? "Mes Completo" : "Día " + dia}`,
+        );
+        cargarDashboardFinanzas();
+      }
+
+      function actualizarBotonesDock() {
+        const labels = { dia: "Caja Real del Día", mes: "Caja Real Mensual" };
+        const titleEl = document.getElementById("txtPeriodoLabel");
+        if (titleEl) {
+          titleEl.innerText = labels[activePeriod] || "Caja Real";
+        }
+      }
+
+      function cargarDashboardFinanzas() {
+        const container = document.getElementById("listaDesgloseGastos");
+        container.innerHTML =
+          '<div class="empty-log-msg">⏳ Conectando con Google Cloud Contable...</div>';
+
+        const mes = document.getElementById("appleMonthSelect").value || "MAYO";
+        const dia = document.getElementById("appleDaySelect").value || "TODOS";
+
+        const currentQueryId = ++activeQueryId;
+        const callbackName = `renderCallback_${currentQueryId}`;
+
+        document
+          .querySelectorAll(".fin-engine-node")
+          .forEach((node) => node.remove());
+
+        window[callbackName] = function (res) {
+          delete window[callbackName];
+          const scriptNode = document.getElementById(`node_${currentQueryId}`);
+          if (scriptNode) scriptNode.remove();
+
+          if (currentQueryId !== activeQueryId) return;
+
+          if (res.status === "success") {
+            globalFinanzasData = res.data;
+            renderDashboard();
+          } else {
+            container.innerHTML =
+              '<div class="empty-log-msg">❌ Error al actualizar balances.</div>';
+          }
+        };
+
+        const script = document.createElement("script");
+        script.id = `node_${currentQueryId}`;
+        script.classList.add("fin-engine-node");
+        script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDashboardFinanzas&mes=${mes}&dia=${dia}&callback=${callbackName}&_ts=${Date.now()}`;
+        document.body.appendChild(script);
+      }
+
+      // 🔥 FUNCIÓN PARA CALCULAR LA DEUDA REACTIVA (SIMPLIFICADA) 🔥
+      function calcularDescuentoDeuda() {
+        const modo = document.getElementById("modoDescuentoDeuda").value;
+        const deudaInput = document
+          .getElementById("valDeudaTotal")
+          .value.replace(/\D/g, "");
+        const deuda = parseFloat(deudaInput) || 0;
+
+        if (modo === "dias") {
+          document.getElementById("divDiasDeuda").style.display = "block";
+        } else {
+          document.getElementById("divDiasDeuda").style.display = "none";
         }
 
-        function filtrarHoy() {
-            const hoy = new Date();
-            const diaActual = hoy.getDate();
-            const mesActualTexto = mesesArray[hoy.getMonth()];
-            
-            const mSelect = document.getElementById('appleMonthSelect');
-            const dSelect = document.getElementById('appleDaySelect');
-            
-            if (mSelect && dSelect) {
-                mSelect.value = mesActualTexto;
-                dSelect.value = diaActual;
-                actualizarFiltrosUI();
-            }
+        let descuento = 0;
+
+        if (deuda > 0) {
+          if (modo === "90") {
+            descuento = Math.round(currentMiGananciaBruta * 0.9);
+            // No pagar más de lo que se debe
+            if (descuento > deuda) descuento = deuda;
+          } else {
+            let dias =
+              parseInt(document.getElementById("inputDiasDeuda").value) || 1;
+            descuento = Math.round(deuda / dias);
+          }
         }
 
-        function filtrarAyer() {
-            const ayer = new Date();
-            ayer.setDate(ayer.getDate() - 1); 
-            
-            const diaAyer = ayer.getDate();
-            const mesAyerTexto = mesesArray[ayer.getMonth()];
-            
-            const mSelect = document.getElementById('appleMonthSelect');
-            const dSelect = document.getElementById('appleDaySelect');
-            
-            if (mSelect && dSelect) {
-                mSelect.value = mesAyerTexto;
-                dSelect.value = diaAyer;
-                actualizarFiltrosUI();
-            }
+        document.getElementById("valDescuentoHoy").innerText =
+          formatMoneda(descuento);
+      }
+
+      function renderDashboard() {
+        if (!globalFinanzasData) return;
+
+        const d = globalFinanzasData[activePeriod];
+        if (!d) return;
+
+        // 🔥 INYECTAR LA DEUDA AUTOMÁTICA DESDE LA BASE DE DATOS 🔥
+        document.getElementById("valDeudaTotal").value = formatMoneda(
+          globalFinanzasData.deudaActual || 0,
+        );
+
+        const netEl = document.getElementById("val_neto");
+        const indicator = document.getElementById("statusIndicator");
+
+        netEl.innerText = formatMoneda(d.neto);
+        const statusColor = d.neto >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+        netEl.style.color = statusColor;
+        if (indicator) indicator.style.background = statusColor;
+
+        // 1. Identificar "Ingresos Extras" y "Aportes Jeisson"
+        let sumaIngresoExtra = 0;
+        let sumaJeisson = 0;
+        const itemsTemp = globalFinanzasData.listaDetallada || [];
+
+        itemsTemp.forEach((item) => {
+          const esCategoriaExtra =
+            item.categoria === "➕ Ingreso Extra" ||
+            item.categoria === "Ingreso Extra";
+          const detalleTexto = item.detalle ? item.detalle.toLowerCase() : "";
+          const esJeisson = detalleTexto.includes("jeisson");
+
+          if ((esCategoriaExtra || esJeisson) && item.tipo === "INGRESO") {
+            let valorMonto = parseFloat(item.monto) || 0;
+            sumaIngresoExtra += valorMonto;
+            if (esJeisson) sumaJeisson += valorMonto;
+          }
+        });
+
+        const elJeisson = document.getElementById("valProyJeisson");
+        if (elJeisson) elJeisson.innerText = formatMoneda(sumaJeisson);
+
+        // 2. Restar TODOS los Extras (incluido Jeisson) de las Ventas Brutas Totales
+        let ventasBrutasReales = (d.ingresos || 0) - sumaIngresoExtra;
+        if (ventasBrutasReales < 0) ventasBrutasReales = 0;
+
+        document.getElementById("val_ingresos").innerText =
+          formatMoneda(ventasBrutasReales);
+        document.getElementById("val_gastos").innerText = formatMoneda(
+          d.gastos,
+        );
+        document.getElementById("val_inversiones").innerText = formatMoneda(
+          d.inversiones,
+        );
+        document.getElementById("val_nomina").innerText = formatMoneda(
+          d.nomina,
+        );
+
+        let porcMio = 28;
+        let porcNomina = 17;
+        let porcNegocio = 55;
+
+        const mesActivo = document.getElementById("appleMonthSelect").value;
+        const diaActivo = document.getElementById("appleDaySelect").value;
+
+        if (mesActivo === "MAYO") {
+          if (
+            diaActivo !== "TODOS" &&
+            parseInt(diaActivo) >= 1 &&
+            parseInt(diaActivo) <= 15
+          ) {
+            porcMio = 30;
+            porcNomina = 15;
+            porcNegocio = 55;
+          } else if (diaActivo === "TODOS") {
+            porcMio = 29;
+            porcNomina = 16;
+            porcNegocio = 55;
+          }
         }
 
-        function formatMoneda(v) {
-            return "$" + parseFloat(v || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 });
+        document.getElementById("lblPorcMio").innerText = porcMio;
+        document.getElementById("lblPorcNegocio").innerText = porcNegocio;
+        document.getElementById("lblPorcNomina").innerText = porcNomina;
+
+        // 3. Calcular la distribución usando SOLO las Ventas Brutas Reales
+        let baseDinero = ventasBrutasReales;
+
+        // 4. Inyectar los Ingresos Extras (MENOS Jeisson) a "Mi Ganancia"
+        let miGananciaBase = Math.round(baseDinero * (porcMio / 100));
+        let extrasSinJeisson = sumaIngresoExtra - sumaJeisson;
+        let miGananciaNeta = miGananciaBase + extrasSinJeisson;
+
+        document.getElementById("valProyMio").innerText =
+          formatMoneda(miGananciaNeta);
+        document.getElementById("valProyNegocio").innerText = formatMoneda(
+          Math.round(baseDinero * (porcNegocio / 100)),
+        );
+        document.getElementById("valProyNomina").innerText = formatMoneda(
+          Math.round(baseDinero * (porcNomina / 100)),
+        );
+
+        // 🔥 NUEVA TARJETA: SUMATORIA TOTAL (Mi Ganancia Neta + Jeisson)
+        let totalMioYJeisson = miGananciaNeta + sumaJeisson;
+        const elMioMasJeisson = document.getElementById("valProyMioMasJeisson");
+        if (elMioMasJeisson)
+          elMioMasJeisson.innerText = formatMoneda(totalMioYJeisson);
+
+        // Guardamos la ganancia total (incluyendo Jeisson) para la calculadora de deuda
+        currentMiGananciaBruta = totalMioYJeisson;
+
+        const totalFlujo = d.ingresos + d.gastos + d.inversiones + d.nomina;
+        let porcIngresos = 0,
+          porcGastos = 0;
+
+        if (totalFlujo > 0) {
+          porcIngresos = Math.round((d.ingresos / totalFlujo) * 100);
+          porcGastos = Math.round(
+            ((d.gastos + d.inversiones + d.nomina) / totalFlujo) * 100,
+          );
         }
 
-        function construirSelectores() {
-            const mSelect = document.getElementById('appleMonthSelect');
-            const dSelect = document.getElementById('appleDaySelect');
-            
-            mSelect.innerHTML = "";
-            mesesArray.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m;
-                opt.innerText = m.charAt(0) + m.slice(1).toLowerCase();
-                mSelect.appendChild(opt);
-            });
+        document.getElementById("txtBarPorcIngresos").innerText =
+          porcIngresos + "%";
+        document.getElementById("barFillIngresos").style.width =
+          porcIngresos + "%";
+        document.getElementById("txtBarPorcGastos").innerText =
+          porcGastos + "%";
+        document.getElementById("barFillGastos").style.width = porcGastos + "%";
 
-            dSelect.innerHTML = '<option value="TODOS">Todo el mes</option>';
-            for(let i = 1; i <= 31; i++) {
-                const opt = document.createElement('option');
-                opt.value = i;
-                opt.innerText = "Día " + i;
-                dSelect.appendChild(opt);
-            }
-
-            const mesActualIdx = new Date().getMonth();
-            mSelect.selectedIndex = mesActualIdx;
+        const circVentas = 251.3;
+        const strokeDashoffsetVentas =
+          circVentas - (porcIngresos / 100) * circVentas;
+        const ringVentas = document.getElementById("appleRingVentas");
+        if (ringVentas) {
+          ringVentas.style.strokeDasharray = circVentas;
+          ringVentas.style.strokeDashoffset = strokeDashoffsetVentas;
         }
 
-        function actualizarFiltrosUI() {
-            const mes = document.getElementById('appleMonthSelect').value;
-            const dia = document.getElementById('appleDaySelect').value;
-
-            activePeriod = (dia === "TODOS") ? 'mes' : 'dia';
-            
-            actualizarBotonesDock();
-            document.getElementById('txtLibroHeader').innerText = "Libro de " + mes;
-            
-            triggerToast(`📅 Sincronizando: ${mes} - ${dia === "TODOS" ? "Mes Completo" : "Día " + dia}`);
-            cargarDashboardFinanzas();
+        const circGastos = 163.3;
+        const strokeDashoffsetGastos =
+          circGastos - (porcGastos / 100) * circGastos;
+        const ringGastos = document.getElementById("appleRingGastos");
+        if (ringGastos) {
+          ringGastos.style.strokeDasharray = circGastos;
+          ringGastos.style.strokeDashoffset = strokeDashoffsetGastos;
         }
 
-        function actualizarBotonesDock() {
-            const labels = { 'dia': 'Caja Real del Día', 'mes': 'Caja Real Mensual' };
-            const titleEl = document.getElementById('txtPeriodoLabel');
-            if (titleEl) {
-                titleEl.innerText = labels[activePeriod] || 'Caja Real';
-            }
+        const container = document.getElementById("listaDesgloseGastos");
+        container.innerHTML = "";
+
+        const items = globalFinanzasData.listaDetallada || [];
+        if (items.length === 0) {
+          container.innerHTML =
+            '<div class="empty-log-msg">No se registran movimientos en el rango de tiempo seleccionado.</div>';
+          // Calculamos deuda antes de salir si no hay items
+          calcularDescuentoDeuda();
+          return;
         }
 
-        function cargarDashboardFinanzas() {
-            const container = document.getElementById('listaDesgloseGastos');
-            container.innerHTML = '<div class="empty-log-msg">⏳ Conectando con Google Cloud Contable...</div>';
-
-            const mes = document.getElementById('appleMonthSelect').value || "MAYO";
-            const dia = document.getElementById('appleDaySelect').value || "TODOS";
-
-            const currentQueryId = ++activeQueryId;
-            const callbackName = `renderCallback_${currentQueryId}`;
-
-            document.querySelectorAll('.fin-engine-node').forEach(node => node.remove());
-
-            window[callbackName] = function(res) {
-                delete window[callbackName];
-                const scriptNode = document.getElementById(`node_${currentQueryId}`);
-                if (scriptNode) scriptNode.remove();
-
-                if (currentQueryId !== activeQueryId) return;
-
-                if (res.status === "success") {
-                    globalFinanzasData = res.data;
-                    renderDashboard();
-                } else {
-                    container.innerHTML = '<div class="empty-log-msg">❌ Error al actualizar balances.</div>';
-                }
-            };
-
-            const script = document.createElement('script');
-            script.id = `node_${currentQueryId}`;
-            script.classList.add('fin-engine-node');
-            script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDashboardFinanzas&mes=${mes}&dia=${dia}&callback=${callbackName}&_ts=${Date.now()}`;
-            document.body.appendChild(script);
-        }
-
-        // 🔥 FUNCIÓN PARA CALCULAR LA DEUDA REACTIVA (SIMPLIFICADA) 🔥
-        function calcularDescuentoDeuda() {
-            const modo = document.getElementById('modoDescuentoDeuda').value;
-            const deudaInput = document.getElementById('valDeudaTotal').value.replace(/\D/g, "");
-            const deuda = parseFloat(deudaInput) || 0;
-            
-            if (modo === 'dias') {
-                document.getElementById('divDiasDeuda').style.display = 'block';
-            } else {
-                document.getElementById('divDiasDeuda').style.display = 'none';
-            }
-
-            let descuento = 0;
-
-            if (deuda > 0) {
-                if (modo === '90') {
-                    descuento = Math.round(currentMiGananciaBruta * 0.90);
-                    // No pagar más de lo que se debe
-                    if (descuento > deuda) descuento = deuda;
-                } else {
-                    let dias = parseInt(document.getElementById('inputDiasDeuda').value) || 1;
-                    descuento = Math.round(deuda / dias);
-                }
-            }
-
-            document.getElementById('valDescuentoHoy').innerText = formatMoneda(descuento);
-        }
-
-        function renderDashboard() {
-            if (!globalFinanzasData) return;
-            
-            const d = globalFinanzasData[activePeriod];
-            if (!d) return;
-
-            // 🔥 INYECTAR LA DEUDA AUTOMÁTICA DESDE LA BASE DE DATOS 🔥
-            document.getElementById('valDeudaTotal').value = formatMoneda(globalFinanzasData.deudaActual || 0);
-
-            const netEl = document.getElementById('val_neto');
-            const indicator = document.getElementById('statusIndicator');
-            
-            netEl.innerText = formatMoneda(d.neto);
-            const statusColor = (d.neto >= 0) ? 'var(--ios-green)' : 'var(--ios-red)';
-            netEl.style.color = statusColor;
-            if(indicator) indicator.style.background = statusColor;
-
-            // 1. Identificar "Ingresos Extras" y "Aportes Jeisson"
-            let sumaIngresoExtra = 0;
-            let sumaJeisson = 0;
-            const itemsTemp = globalFinanzasData.listaDetallada || [];
-            
-            itemsTemp.forEach(item => {
-                const esCategoriaExtra = (item.categoria === "➕ Ingreso Extra" || item.categoria === "Ingreso Extra");
-                const detalleTexto = item.detalle ? item.detalle.toLowerCase() : "";
-                const esJeisson = detalleTexto.includes("jeisson");
-
-                if ((esCategoriaExtra || esJeisson) && item.tipo === "INGRESO") {
-                    let valorMonto = parseFloat(item.monto) || 0;
-                    sumaIngresoExtra += valorMonto;
-                    if (esJeisson) sumaJeisson += valorMonto;
-                }
-            });
-
-            const elJeisson = document.getElementById('valProyJeisson');
-            if (elJeisson) elJeisson.innerText = formatMoneda(sumaJeisson);
-
-            // 2. Restar TODOS los Extras (incluido Jeisson) de las Ventas Brutas Totales
-            let ventasBrutasReales = (d.ingresos || 0) - sumaIngresoExtra;
-            if (ventasBrutasReales < 0) ventasBrutasReales = 0;
-
-            document.getElementById('val_ingresos').innerText = formatMoneda(ventasBrutasReales);
-            document.getElementById('val_gastos').innerText = formatMoneda(d.gastos);
-            document.getElementById('val_inversiones').innerText = formatMoneda(d.inversiones);
-            document.getElementById('val_nomina').innerText = formatMoneda(d.nomina);
-
-            let porcMio = 28;
-            let porcNomina = 17;
-            let porcNegocio = 55;
-
-            const mesActivo = document.getElementById('appleMonthSelect').value;
-            const diaActivo = document.getElementById('appleDaySelect').value;
-
-            if (mesActivo === "MAYO") {
-                if (diaActivo !== "TODOS" && parseInt(diaActivo) >= 1 && parseInt(diaActivo) <= 15) {
-                    porcMio = 30;
-                    porcNomina = 15;
-                    porcNegocio = 55;
-                } else if (diaActivo === "TODOS") {
-                    porcMio = 29;
-                    porcNomina = 16;
-                    porcNegocio = 55;
-                }
-            }
-
-            document.getElementById('lblPorcMio').innerText = porcMio;
-            document.getElementById('lblPorcNegocio').innerText = porcNegocio;
-            document.getElementById('lblPorcNomina').innerText = porcNomina;
-
-            // 3. Calcular la distribución usando SOLO las Ventas Brutas Reales
-            let baseDinero = ventasBrutasReales;
-            
-            // 4. Inyectar los Ingresos Extras (MENOS Jeisson) a "Mi Ganancia"
-            let miGananciaBase = Math.round(baseDinero * (porcMio / 100));
-            let extrasSinJeisson = sumaIngresoExtra - sumaJeisson;
-            let miGananciaNeta = miGananciaBase + extrasSinJeisson;
-
-            document.getElementById('valProyMio').innerText = formatMoneda(miGananciaNeta);
-            document.getElementById('valProyNegocio').innerText = formatMoneda(Math.round(baseDinero * (porcNegocio / 100)));
-            document.getElementById('valProyNomina').innerText = formatMoneda(Math.round(baseDinero * (porcNomina / 100)));
-
-            // 🔥 NUEVA TARJETA: SUMATORIA TOTAL (Mi Ganancia Neta + Jeisson)
-            let totalMioYJeisson = miGananciaNeta + sumaJeisson;
-            const elMioMasJeisson = document.getElementById('valProyMioMasJeisson');
-            if (elMioMasJeisson) elMioMasJeisson.innerText = formatMoneda(totalMioYJeisson);
-
-            // Guardamos la ganancia total (incluyendo Jeisson) para la calculadora de deuda
-            currentMiGananciaBruta = totalMioYJeisson;
-
-            const totalFlujo = d.ingresos + d.gastos + d.inversiones + d.nomina;
-            let porcIngresos = 0, porcGastos = 0;
-            
-            if (totalFlujo > 0) {
-                porcIngresos = Math.round((d.ingresos / totalFlujo) * 100);
-                porcGastos = Math.round(((d.gastos + d.inversiones + d.nomina) / totalFlujo) * 100);
-            }
-
-            document.getElementById('txtBarPorcIngresos').innerText = porcIngresos + "%";
-            document.getElementById('barFillIngresos').style.width = porcIngresos + "%";
-            document.getElementById('txtBarPorcGastos').innerText = porcGastos + "%";
-            document.getElementById('barFillGastos').style.width = porcGastos + "%";
-
-            const circVentas = 251.3;
-            const strokeDashoffsetVentas = circVentas - (porcIngresos / 100) * circVentas;
-            const ringVentas = document.getElementById('appleRingVentas');
-            if(ringVentas) {
-                ringVentas.style.strokeDasharray = circVentas;
-                ringVentas.style.strokeDashoffset = strokeDashoffsetVentas;
-            }
-
-            const circGastos = 163.3;
-            const strokeDashoffsetGastos = circGastos - (porcGastos / 100) * circGastos;
-            const ringGastos = document.getElementById('appleRingGastos');
-            if(ringGastos) {
-                ringGastos.style.strokeDasharray = circGastos;
-                ringGastos.style.strokeDashoffset = strokeDashoffsetGastos;
-            }
-
-            const container = document.getElementById('listaDesgloseGastos');
-            container.innerHTML = "";
-            
-            const items = globalFinanzasData.listaDetallada || [];
-            if(items.length === 0) {
-                container.innerHTML = '<div class="empty-log-msg">No se registran movimientos en el rango de tiempo seleccionado.</div>';
-                // Calculamos deuda antes de salir si no hay items
-                calcularDescuentoDeuda();
-                return;
-            }
-
-            let htmlBuffer = "";
-            items.forEach(item => {
-                const priceColor = (item.tipo === "INGRESO") ? 'var(--ios-green)' : 'var(--ios-red)';
-                htmlBuffer += `
+        let htmlBuffer = "";
+        items.forEach((item) => {
+          const priceColor =
+            item.tipo === "INGRESO" ? "var(--ios-green)" : "var(--ios-red)";
+          htmlBuffer += `
                     <div class="apple-list-row">
                         <span class="td-cell td-date">${item.fecha}</span>
                         <span class="td-cell td-price" style="color: ${priceColor} !important;">${formatMoneda(item.monto)}</span>
@@ -688,74 +1118,88 @@
                         <span class="td-cell td-cat">${item.categoria}</span>
                     </div>
                 `;
-            });
-            container.innerHTML = htmlBuffer;
+        });
+        container.innerHTML = htmlBuffer;
 
-            // Al terminar de renderizar todo el dashboard, corremos la calculadora de deuda
-            calcularDescuentoDeuda();
+        // Al terminar de renderizar todo el dashboard, corremos la calculadora de deuda
+        calcularDescuentoDeuda();
+      }
+
+      function guardarTransaccion(e) {
+        e.preventDefault();
+        if (isWorking) return;
+
+        const catVal = encodeURIComponent(
+          document.getElementById("finCategoria").value,
+        );
+        const montoRaw = document
+          .getElementById("finMonto")
+          .value.replace(/\D/g, "");
+
+        if (!montoRaw || parseInt(montoRaw) <= 0) {
+          triggerToast("⚠️ Por favor ingresa un monto válido.");
+          return;
         }
 
-        function guardarTransaccion(e) {
-            e.preventDefault();
-            if (isWorking) return;
-            
-            const catVal = encodeURIComponent(document.getElementById('finCategoria').value);
-            const montoRaw = document.getElementById('finMonto').value.replace(/\D/g, "");
-            
-            if (!montoRaw || parseInt(montoRaw) <= 0) {
-                triggerToast("⚠️ Por favor ingresa un monto válido.");
-                return;
-            }
-            
-            isWorking = true;
-            const btn = document.getElementById('btnSubmit');
-            btn.innerText = "Procesando..."; btn.disabled = true;
+        isWorking = true;
+        const btn = document.getElementById("btnSubmit");
+        btn.innerText = "Procesando...";
+        btn.disabled = true;
 
-            document.querySelectorAll('.fin-post-node').forEach(node => node.remove());
+        document
+          .querySelectorAll(".fin-post-node")
+          .forEach((node) => node.remove());
 
-            window.saveCallback = function(res) {
-                isWorking = false;
-                btn.innerText = "Archivar Movimiento"; btn.disabled = false;
-                
-                const postNode = document.getElementById('fin_post_node');
-                if (postNode) postNode.remove();
-                delete window.saveCallback;
-                
-                if (res.status === "success") {
-                    triggerToast("✅ Guardado en Google Sheets con éxito");
-                    document.getElementById('formFinanzas').reset();
-                    cargarDashboardFinanzas();
-                } else {
-                    triggerToast("❌ Error al archivar: " + res.message);
-                }
-            };
+        window.saveCallback = function (res) {
+          isWorking = false;
+          btn.innerText = "Archivar Movimiento";
+          btn.disabled = false;
 
-            const script = document.createElement('script');
-            script.id = 'fin_post_node';
-            script.classList.add('fin-post-node');
-            
-            const montoVal = encodeURIComponent(montoRaw);
-            const detalleVal = encodeURIComponent(document.getElementById('finDetalle').value);
-            
-            script.src = `${GOOGLE_SCRIPT_URL}?action=registrarTransaccionFinanciera&categoria=${catVal}&monto=${montoVal}&detalle=${detalleVal}&callback=saveCallback`;
-            document.body.appendChild(script);
+          const postNode = document.getElementById("fin_post_node");
+          if (postNode) postNode.remove();
+          delete window.saveCallback;
+
+          if (res.status === "success") {
+            triggerToast("✅ Guardado en Google Sheets con éxito");
+            document.getElementById("formFinanzas").reset();
+            cargarDashboardFinanzas();
+          } else {
+            triggerToast("❌ Error al archivar: " + res.message);
+          }
+        };
+
+        const script = document.createElement("script");
+        script.id = "fin_post_node";
+        script.classList.add("fin-post-node");
+
+        const montoVal = encodeURIComponent(montoRaw);
+        const detalleVal = encodeURIComponent(
+          document.getElementById("finDetalle").value,
+        );
+
+        script.src = `${GOOGLE_SCRIPT_URL}?action=registrarTransaccionFinanciera&categoria=${catVal}&monto=${montoVal}&detalle=${detalleVal}&callback=saveCallback`;
+        document.body.appendChild(script);
+      }
+
+      function exportarExcelEmpresarial() {
+        if (!globalFinanzasData || !globalFinanzasData.listaDetallada) {
+          triggerToast("⚠️ Espera que se sincronicen los datos contables.");
+          return;
         }
 
-        function exportarExcelEmpresarial() {
-            if (!globalFinanzasData || !globalFinanzasData.listaDetallada) {
-                triggerToast("⚠️ Espera que se sincronicen los datos contables.");
-                return;
-            }
+        const mesSeleccionado =
+          document.getElementById("appleMonthSelect").value;
+        const diaSeleccionado = document.getElementById("appleDaySelect").value;
+        const periodoTexto =
+          diaSeleccionado === "TODOS"
+            ? `MES DE ${mesSeleccionado}`
+            : `DÍA ${diaSeleccionado} DE ${mesSeleccionado}`;
+        const summary = globalFinanzasData[activePeriod];
+        const movimientos = globalFinanzasData.listaDetallada;
 
-            const mesSeleccionado = document.getElementById('appleMonthSelect').value;
-            const diaSeleccionado = document.getElementById('appleDaySelect').value;
-            const periodoTexto = (diaSeleccionado === "TODOS") ? `MES DE ${mesSeleccionado}` : `DÍA ${diaSeleccionado} DE ${mesSeleccionado}`;
-            const summary = globalFinanzasData[activePeriod];
-            const movimientos = globalFinanzasData.listaDetallada;
+        const colorNetoExcel = summary.neto >= 0 ? "#30d158" : "#ff453a";
 
-            const colorNetoExcel = (summary.neto >= 0) ? '#30d158' : '#ff453a';
-
-            let excelTemplate = `
+        let excelTemplate = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
                 <meta charset="UTF-8">
@@ -779,7 +1223,7 @@
                 <table>
                     <tr><td class="main-title" colspan="4">CYBERNET STREAMING S.A.S.</td></tr>
                     <tr><td class="meta-info" colspan="4">INFORME DE CONSOLIDACIÓN FINANCIERA EJECUTIVA</td></tr>
-                    <tr><td class="meta-info" colspan="4">Periodo Evaluado: ${periodoTexto} | Fecha de Generación: ${new Date().toLocaleDateString('es-CO')}</td></tr>
+                    <tr><td class="meta-info" colspan="4">Periodo Evaluado: ${periodoTexto} | Fecha de Generación: ${new Date().toLocaleDateString("es-CO")}</td></tr>
                 </table>
                 <br>
 
@@ -795,11 +1239,11 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td style="color: #0a84ff;">$${parseFloat(summary.ingresos).toLocaleString('es-CO')}</td>
-                            <td style="color: #ff453a;">$${parseFloat(summary.gastos).toLocaleString('es-CO')}</td>
-                            <td style="color: #ff9f0a;">$${parseFloat(summary.inversiones).toLocaleString('es-CO')}</td>
-                            <td style="color: #bf5af2;">$${parseFloat(summary.nomina).toLocaleString('es-CO')}</td>
-                            <td style="background-color: #f2f2f7; color: ${colorNetoExcel}; font-size: 15pt;">$${parseFloat(summary.neto).toLocaleString('es-CO')}</td>
+                            <td style="color: #0a84ff;">$${parseFloat(summary.ingresos).toLocaleString("es-CO")}</td>
+                            <td style="color: #ff453a;">$${parseFloat(summary.gastos).toLocaleString("es-CO")}</td>
+                            <td style="color: #ff9f0a;">$${parseFloat(summary.inversiones).toLocaleString("es-CO")}</td>
+                            <td style="color: #bf5af2;">$${parseFloat(summary.nomina).toLocaleString("es-CO")}</td>
+                            <td style="background-color: #f2f2f7; color: ${colorNetoExcel}; font-size: 15pt;">$${parseFloat(summary.neto).toLocaleString("es-CO")}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -821,25 +1265,26 @@
                     <tbody>
             `;
 
-            movimientos.forEach((item, index) => {
-                const filaZebra = (index % 2 === 0) ? '' : 'class="zebra-row"';
-                const claseMonto = (item.tipo === "INGRESO") ? 'money-ingreso' : 'money-egreso';
-                const signo = (item.tipo === "INGRESO") ? '' : '-';
+        movimientos.forEach((item, index) => {
+          const filaZebra = index % 2 === 0 ? "" : 'class="zebra-row"';
+          const claseMonto =
+            item.tipo === "INGRESO" ? "money-ingreso" : "money-egreso";
+          const signo = item.tipo === "INGRESO" ? "" : "-";
 
-                excelTemplate += `
+          excelTemplate += `
                     <tr class="data-row ${filaZebra}">
                         <td>${item.fecha}</td>
-                        <td class="money-cell ${claseMonto}">${signo}$${parseFloat(item.monto).toLocaleString('es-CO')}</td>
+                        <td class="money-cell ${claseMonto}">${signo}$${parseFloat(item.monto).toLocaleString("es-CO")}</td>
                         <td>${item.detalle}</td>
                         <td>${item.categoria}</td>
                     </tr>
                 `;
-            });
+        });
 
-            excelTemplate += `
+        excelTemplate += `
                         <tr class="total-row">
                             <td>TOTAL NETO</td>
-                            <td style="text-align: right; color: ${colorNetoExcel}; font-family: 'Consolas', monospace;">$${parseFloat(summary.neto).toLocaleString('es-CO')}</td>
+                            <td style="text-align: right; color: ${colorNetoExcel}; font-family: 'Consolas', monospace;">$${parseFloat(summary.neto).toLocaleString("es-CO")}</td>
                             <td colspan="2" style="color: #636366; font-size: 9pt; font-weight: normal; font-style: italic; text-align: right;">Cierre de libro contable Cybernet verificado por sistema •</td>
                         </tr>
                     </tbody>
@@ -848,32 +1293,37 @@
             </html>
             `;
 
-            const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            
-            link.href = url;
-            link.setAttribute("download", `Cybernet_Finanzas_${mesSeleccionado}_2026.xls`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            triggerToast(`📈 Excel de ${mesSeleccionado} exportado exitosamente.`);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            let savedTheme = localStorage.getItem('cyber_theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            
-            construirSelectores();
-            cargarDashboardFinanzas();
-
-            setInterval(() => {
-                if (!isWorking) {
-                    cargarDashboardFinanzas();
-                }
-            }, 60000); 
+        const blob = new Blob([excelTemplate], {
+          type: "application/vnd.ms-excel;charset=utf-8;",
         });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+
+        link.href = url;
+        link.setAttribute(
+          "download",
+          `Cybernet_Finanzas_${mesSeleccionado}_2026.xls`,
+        );
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        triggerToast(`📈 Excel de ${mesSeleccionado} exportado exitosamente.`);
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        let savedTheme = localStorage.getItem("cyber_theme") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+
+        construirSelectores();
+        cargarDashboardFinanzas();
+
+        setInterval(() => {
+          if (!isWorking) {
+            cargarDashboardFinanzas();
+          }
+        }, 60000);
+      });
     </script>
-</body>
+  </body>
 </html>
