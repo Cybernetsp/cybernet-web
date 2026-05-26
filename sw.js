@@ -2,8 +2,6 @@ const CACHE_NAME = 'cybernet-cache-v8'; // Súbele una versión más por si acas
 
 const assets = [
   './', 
-  'index.html', 
-  'logo.jpeg'
 ];
 
 self.addEventListener('install', e => {
