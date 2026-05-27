@@ -400,6 +400,62 @@
         </div>
       </section>
 
+      <section class="card-ios" style="width: 100%">
+        <div class="flex-row-between mb-1">
+          <span
+            class="text-secondary"
+            style="
+              font-size: 0.8rem;
+              font-weight: 700;
+              text-transform: uppercase;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-purple)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              ></polygon>
+            </svg>
+            Rentabilidad Real por Plataforma (Ventas vs Costos)
+          </span>
+        </div>
+        <div id="rankingPlataformasVentas" class="flex-col" style="gap: 16px">
+          <div class="empty-log-msg" style="padding: 15px">
+            <svg
+              class="spin-anim"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              style="vertical-align: middle; margin-right: 6px"
+            >
+              <line x1="12" y1="2" x2="12" y2="6"></line>
+              <line x1="12" y1="18" x2="12" y2="22"></line>
+              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+              <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+              <line x1="2" y1="12" x2="6" y2="12"></line>
+              <line x1="18" y1="12" x2="22" y2="12"></line>
+              <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+              <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+            </svg>
+            Calculando rentabilidad...
+          </div>
+        </div>
+      </section>
+
       <section class="card-ios distribution-hub-panel" style="width: 100%">
         <span
           class="text-secondary mb-1"
@@ -508,9 +564,25 @@
               font-size: 0.8rem;
               font-weight: 700;
               text-transform: uppercase;
+              display: flex;
+              align-items: center;
+              gap: 6px;
             "
-            >⚖️ Amortización de Deuda al Negocio</span
           >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+              ></path>
+            </svg>
+            Amortización de Deuda al Negocio
+          </span>
           <div
             class="badge-ios"
             style="
@@ -610,7 +682,22 @@
       <div class="workspace-action-grid" style="width: 100%">
         <div class="card-ios" style="height: fit-content">
           <h3 class="card-title" style="color: var(--text-primary)">
-            ✍️ Registrar Movimiento Manual
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 20h9"></path>
+              <path
+                d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+              ></path>
+            </svg>
+            Registrar Movimiento Manual
           </h3>
           <form
             id="formFinanzas"
@@ -715,9 +802,34 @@
           <div class="flex-row-between mb-1">
             <span
               class="card-title"
-              style="color: var(--text-primary); margin-bottom: 0"
-              >📋 Distribución de Egresos e Ingresos</span
+              style="
+                color: var(--text-primary);
+                margin-bottom: 0;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+              "
             >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--ios-blue)"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                ></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              Distribución de Egresos e Ingresos
+            </span>
             <span
               class="text-secondary"
               style="font-size: 0.76rem; font-weight: 700"
@@ -755,6 +867,7 @@
       let activePeriod = "mes";
       let isWorking = false;
       let activeQueryId = 0;
+      let activeRentabilidadQueryId = 0;
       let currentMiGananciaBruta = 0; // Variable global para usar en la calculadora de deuda
 
       const mesesArray = [
@@ -772,9 +885,9 @@
         "DICIEMBRE",
       ];
 
-      function triggerToast(msg) {
+      function triggerToast(msgHTML) {
         const toast = document.getElementById("appleToast");
-        toast.innerText = msg;
+        toast.innerHTML = msgHTML;
         toast.classList.add("show");
         setTimeout(() => toast.classList.remove("show"), 3000);
       }
@@ -864,7 +977,7 @@
         document.getElementById("txtLibroHeader").innerText = "Libro de " + mes;
 
         triggerToast(
-          `📅 Sincronizando: ${mes} - ${dia === "TODOS" ? "Mes Completo" : "Día " + dia}`,
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-blue);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> <span>Sincronizando: ${mes} - ${dia === "TODOS" ? "Mes Completo" : "Día " + dia}</span></div>`,
         );
         cargarDashboardFinanzas();
       }
@@ -877,16 +990,106 @@
         }
       }
 
+      // NUEVO: Función para llamar al backend de Rentabilidad
+      function cargarRentabilidadPlataformas() {
+        const container = document.getElementById("rankingPlataformasVentas");
+        if (!container) return;
+        container.innerHTML =
+          '<div class="empty-log-msg"><svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle; margin-right:6px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Procesando ventas vs costos...</div>';
+
+        const mes = document.getElementById("appleMonthSelect").value || "MAYO";
+
+        const currentQueryId = ++activeRentabilidadQueryId;
+        const callbackName = `renderRentCallback_${currentQueryId}`;
+
+        document
+          .querySelectorAll(".rent-engine-node")
+          .forEach((node) => node.remove());
+
+        window[callbackName] = function (res) {
+          delete window[callbackName];
+          const scriptNode = document.getElementById(
+            `node_rent_${currentQueryId}`,
+          );
+          if (scriptNode) scriptNode.remove();
+
+          if (currentQueryId !== activeRentabilidadQueryId) return;
+
+          if (res.status === "success") {
+            let html = "";
+            let data = res.data;
+
+            if (data.length === 0) {
+              container.innerHTML =
+                '<div class="empty-log-msg">No hay ventas registradas en este periodo.</div>';
+              return;
+            }
+
+            // Encontrar el max ganancia para calcular porcentajes de la barra visual
+            let maxGanancia = Math.max(
+              ...data.map((d) => Math.abs(d.gananciaNeta)),
+            );
+            if (maxGanancia === 0) maxGanancia = 1;
+
+            let colors = [
+              "var(--ios-purple)",
+              "var(--ios-blue)",
+              "var(--ios-orange)",
+              "var(--ios-green)",
+              "#ff453a",
+            ];
+
+            data.forEach((r, idx) => {
+              let color = colors[idx % colors.length];
+              let pctBar = Math.round(
+                (Math.abs(r.gananciaNeta) / maxGanancia) * 100,
+              );
+              if (r.gananciaNeta < 0) color = "var(--ios-red)";
+
+              html += `
+                    <div class="bar-row">
+                        <div class="bar-meta">
+                        <span style="color:var(--text-primary); font-weight:700;">${r.plataforma} <span style="color:var(--text-secondary); font-size:0.75rem; font-weight:500;">(${r.ventas} ventas)</span></span>
+                        <div style="display:flex; flex-direction:column; text-align:right;">
+                            <span style="color:${color}; font-weight:800; font-size:1.05rem;">${formatMoneda(r.gananciaNeta)} <span style="font-size:0.7rem; color:var(--text-secondary);">NETO</span></span>
+                            <span style="font-size:0.7rem; color:var(--text-secondary);">Bruto: ${formatMoneda(r.ingresoBruto)}</span>
+                        </div>
+                        </div>
+                        <div class="bar-track" style="height: 8px; background: rgba(255,255,255,0.05); margin-top:2px;">
+                        <div class="bar-fill" style="width: ${pctBar}%; background: ${color}; box-shadow: 0 0 10px ${color};"></div>
+                        </div>
+                    </div>
+                    `;
+            });
+            container.innerHTML = html;
+          } else {
+            container.innerHTML =
+              '<div class="empty-log-msg" style="color:var(--ios-red);">❌ Error al calcular rentabilidad: ' +
+              res.message +
+              "</div>";
+          }
+        };
+
+        const script = document.createElement("script");
+        script.id = `node_rent_${currentQueryId}`;
+        script.classList.add("rent-engine-node");
+        script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerRentabilidad&mes=${mes}&callback=${callbackName}&_ts=${Date.now()}`;
+        document.body.appendChild(script);
+      }
+
       function cargarDashboardFinanzas() {
         const container = document.getElementById("listaDesgloseGastos");
         container.innerHTML =
-          '<div class="empty-log-msg">⏳ Conectando con Google Cloud Contable...</div>';
+          '<div class="empty-log-msg"><svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Conectando con Google Cloud Contable...</div>';
 
         const mes = document.getElementById("appleMonthSelect").value || "MAYO";
         const dia = document.getElementById("appleDaySelect").value || "TODOS";
 
         const currentQueryId = ++activeQueryId;
         const callbackName = `renderCallback_${currentQueryId}`;
+
+        // Cargar también la rentabilidad en paralelo
+        cargarRentabilidadPlataformas();
 
         document
           .querySelectorAll(".fin-engine-node")
@@ -904,7 +1107,7 @@
             renderDashboard();
           } else {
             container.innerHTML =
-              '<div class="empty-log-msg">❌ Error al actualizar balances.</div>';
+              '<div class="empty-log-msg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-red)" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> Error al actualizar balances.</div>';
           }
         };
 
@@ -1137,13 +1340,15 @@
           .value.replace(/\D/g, "");
 
         if (!montoRaw || parseInt(montoRaw) <= 0) {
-          triggerToast("⚠️ Por favor ingresa un monto válido.");
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> <span>Por favor ingresa un monto válido.</span></div>`,
+          );
           return;
         }
 
         isWorking = true;
         const btn = document.getElementById("btnSubmit");
-        btn.innerText = "Procesando...";
+        btn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Procesando...`;
         btn.disabled = true;
 
         document
@@ -1160,11 +1365,15 @@
           delete window.saveCallback;
 
           if (res.status === "success") {
-            triggerToast("✅ Guardado en Google Sheets con éxito");
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Guardado con éxito</span></div>`,
+            );
             document.getElementById("formFinanzas").reset();
             cargarDashboardFinanzas();
           } else {
-            triggerToast("❌ Error al archivar: " + res.message);
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Error al archivar: ${res.message}</span></div>`,
+            );
           }
         };
 
@@ -1183,7 +1392,9 @@
 
       function exportarExcelEmpresarial() {
         if (!globalFinanzasData || !globalFinanzasData.listaDetallada) {
-          triggerToast("⚠️ Espera que se sincronicen los datos contables.");
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> <span>Espera que se sincronicen los datos.</span></div>`,
+          );
           return;
         }
 
@@ -1308,7 +1519,9 @@
         link.click();
         document.body.removeChild(link);
 
-        triggerToast(`📈 Excel de ${mesSeleccionado} exportado exitosamente.`);
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> <span>Excel exportado exitosamente.</span></div>`,
+        );
       }
 
       document.addEventListener("DOMContentLoaded", () => {
