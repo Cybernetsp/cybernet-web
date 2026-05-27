@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Centro de Códigos - Cybernet</title>
+    <title>Centro de Códigos - Cybernet Bot Web</title>
 
     <link rel="icon" type="image/jpeg" href="logo.jpeg" />
     <link rel="manifest" href="manifest.json" />
@@ -736,6 +736,43 @@
       #searchServices::placeholder {
         color: var(--text-secondary);
       }
+
+      /* Clases inyectadas para Toast y Animaciones */
+      .apple-notification-toast {
+        position: fixed;
+        top: 85px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100px);
+        background: rgba(30, 30, 30, 0.9);
+        border: var(--glass-border);
+        color: #ffffff;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        padding: 12px 26px;
+        border-radius: 24px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 10000;
+        box-shadow: var(--glass-shadow);
+      }
+      [data-theme="light"] .apple-notification-toast {
+        background: rgba(255, 255, 255, 0.9);
+        color: #000000;
+      }
+      .apple-notification-toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .spin-anim {
+        animation: spin 1s linear infinite;
+      }
     </style>
   </head>
   <body>
@@ -746,8 +783,31 @@
       aria-label="Cambiar tema"
     ></button>
 
+    <a
+      href="admin.html"
+      id="staff-link-btn"
+      class="staff-toggle-btn"
+      aria-label="Área Staff"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+    </a>
+
     <div class="bg-orb-1"></div>
     <div class="bg-orb-2"></div>
+
+    <div id="appleToast" class="apple-notification-toast"></div>
 
     <div class="container">
       <h2 id="main-title">Centro de Códigos</h2>
@@ -755,7 +815,20 @@
 
       <div id="step-1" class="step active">
         <p class="instruction">
-          Ingresa tu <b>número de celular</b> asociado a la compra 📲
+          Ingresa tu <b>número de celular</b> asociado a la compra
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            style="vertical-align: middle; margin-left: 4px"
+          >
+            <path
+              d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"
+            ></path>
+          </svg>
         </p>
         <input
           type="tel"
@@ -776,16 +849,48 @@
       </div>
 
       <div id="step-2" class="step">
-        <p class="instruction">¿Qué plataforma deseas gestionar hoy? 👇</p>
-        <button class="btn-primary" onclick="setPlat('NETFLIX')">
-          🔴 Netflix
+        <p class="instruction">¿Qué plataforma deseas gestionar hoy?</p>
+        <button
+          class="btn-primary"
+          style="
+            background: #e50914;
+            border: none;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+          "
+          onclick="setPlat('NETFLIX')"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+            <polyline points="17 2 12 7 7 2"></polyline>
+            <line x1="12" y1="12" x2="12" y2="17"></line>
+            <line x1="9.5" y1="14.5" x2="14.5" y2="14.5"></line>
+          </svg>
+          Netflix
         </button>
         <button
           class="btn-general"
           style="color: var(--ios-blue)"
           onclick="setPlat('DISNEY')"
         >
-          🔵 Disney Premium
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <polyline points="9 12 11 14 15 10"></polyline>
+          </svg>
+          Disney Premium
         </button>
         <span class="back-link" onclick="changeStep(1)"
           >← Volver al inicio</span
@@ -793,22 +898,61 @@
       </div>
 
       <div id="step-3" class="step">
-        <p class="instruction">Selecciona el tipo de solicitud 👇</p>
+        <p class="instruction">Selecciona el tipo de solicitud</p>
         <button class="btn-general" onclick="setOp(1)">
-          🔑 Código de Inicio Sesión
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path
+              d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"
+            ></path>
+          </svg>
+          Código de Inicio Sesión
         </button>
         <button class="btn-general" onclick="setOp(2)">
-          ✈️ Código 'Estoy de Viaje'
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path
+              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+            ></path>
+          </svg>
+          Código 'Estoy de Viaje'
         </button>
         <button class="btn-general" onclick="setOp(3)">
-          📧 Enlace de Inicio
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path
+              d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+            ></path>
+            <path
+              d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+            ></path>
+          </svg>
+          Enlace de Inicio
         </button>
         <span class="back-link" onclick="changeStep(2)">← Volver</span>
       </div>
 
       <div id="step-4" class="step">
         <p class="instruction">
-          Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com) 📧
+          Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com)
         </p>
         <input
           type="email"
@@ -817,6 +961,17 @@
           spellcheck="false"
         />
         <button id="btn-rastrear" class="btn-primary" onclick="executeSearch()">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
           Rastrear Código
         </button>
         <span class="back-link" onclick="changeStep(2)">← Volver</span>
@@ -876,13 +1031,51 @@
             href="#"
             target="_blank"
             style="text-decoration: none"
-            ><button class="btn-primary" onclick="haptic()">
-              ✅ Autorizar Acceso
+            ><button
+              class="btn-primary"
+              style="
+                background: var(--ios-green);
+                box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3);
+              "
+              onclick="haptic()"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              Autorizar Acceso
             </button></a
           >
         </div>
-        <button class="btn-primary" onclick="executeSearch()">
-          🔄 Reintentar Búsqueda
+        <button
+          class="btn-primary"
+          style="
+            background: var(--btn-bg);
+            color: var(--text-primary);
+            border: var(--glass-border);
+            box-shadow: none;
+          "
+          onclick="executeSearch()"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          Reintentar Búsqueda
         </button>
         <span class="back-link" onclick="reloadAll()">Nueva Consulta</span>
       </div>
@@ -922,6 +1115,13 @@
       const GOOGLE_URL =
         "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec";
       let globalData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
+
+      function triggerToast(msgHTML) {
+        const toast = document.getElementById("appleToast");
+        toast.innerHTML = msgHTML;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      }
 
       /* =========================================
        1. LÓGICA DEL MODO CLARO Y OSCURO (THEME)
@@ -1041,6 +1241,10 @@
             button.innerHTML =
               "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg> ¡Copiado!";
             button.classList.add("copied");
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Datos copiados</span></div>`,
+            );
+
             setTimeout(() => {
               button.innerText = originalText;
               button.classList.remove("copied");
@@ -1049,6 +1253,10 @@
             const originalHTML = button.innerHTML;
             button.innerHTML =
               "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg>";
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Copiado</span></div>`,
+            );
+
             setTimeout(() => {
               button.innerHTML = originalHTML;
             }, 1200);
@@ -1110,17 +1318,26 @@
         const encodedPass = encodeURIComponent(pass);
         const iconCopy = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 
+        let iconPlat = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>`;
+        if (plat.includes("NETFLIX"))
+          iconPlat = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E50914" stroke-width="2.5"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline><line x1="12" y1="12" x2="12" y2="17"></line><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"></line></svg>`;
+        else if (plat.includes("DISNEY"))
+          iconPlat = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>`;
+
         return `
         <div class="service-card">
           <div class="card-platform-header">
-            <div class="platform-name-wrapper"><span style="font-size:1.2rem;">📺</span><span class="platform-name-text">${plat}</span></div>
+            <div class="platform-name-wrapper">${iconPlat}<span class="platform-name-text">${plat}</span></div>
           </div>
           ${userName ? `<div class="client-footer-info"><span class="client-small-text"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Titular: ${userName}</span></div>` : ""}
-          <div class="data-row"><span class="data-row">Correo</span><div class="data-content-wrapper"><span class="data-val">${mail}</span><button class="btn-copy-mini" data-mail="${encodedMail}" onclick="handleDynamicCopy(this, 'mail')">${iconCopy}</button></div></div>
-          ${pass ? `<div class="data-row"><span class="data-row">Contraseña</span><div class="data-content-wrapper"><span class="data-val">${pass}</span><button class="btn-copy-mini" data-pass="${encodedPass}" onclick="handleDynamicCopy(this, 'pass')">${iconCopy}</button></div></div>` : ""}
+          <div class="data-row"><span class="data-label">Correo</span><div class="data-content-wrapper"><span class="data-val">${mail}</span><button class="btn-copy-mini" data-mail="${encodedMail}" onclick="handleDynamicCopy(this, 'mail')">${iconCopy}</button></div></div>
+          ${pass ? `<div class="data-row"><span class="data-label">Contraseña</span><div class="data-content-wrapper"><span class="data-val">${pass}</span><button class="btn-copy-mini" data-pass="${encodedPass}" onclick="handleDynamicCopy(this, 'pass')">${iconCopy}</button></div></div>` : ""}
           ${profilesHtml}
-          <div class="data-row last-row"><span class="data-row">Vencimiento</span><span class="data-val" style="color:var(--ios-red); font-weight:600;">${date || "A CONVENIR"}</span></div>
-          <button class="btn-copy-all-bottom" data-raw="${encodedRaw}" onclick="handleDynamicCopy(this, 'all')">Copiar todo el texto</button>
+          <div class="data-row last-row"><span class="data-label">Vencimiento</span><span class="data-val" style="color:var(--ios-red); font-weight:600;">${date || "A CONVENIR"}</span></div>
+          <button class="btn-copy-all-bottom" data-raw="${encodedRaw}" onclick="handleDynamicCopy(this, 'all')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 
+            Copiar todo el texto
+          </button>
         </div>
       `;
       }
@@ -1131,7 +1348,7 @@
           .getElementById("telefono")
           .value.replace(/\D/g, "")
           .trim();
-        if (t.length < 7) return fireError("⚠️ Ingresa tu número celular.");
+        if (t.length < 7) return fireError("Ingresa tu número celular.");
 
         const modal = document.getElementById("modalServices");
         const box = document.getElementById("cardsWrapper");
@@ -1167,14 +1384,14 @@
             });
             if (validCount === 0)
               box.innerHTML =
-                '<p style="color:var(--text-secondary); text-align:center; font-size:0.9rem;">No hay correos registrados.</p>';
+                '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>No hay correos registrados.</div>';
           } else {
             box.innerHTML =
-              '<p style="color:var(--text-secondary); text-align:center; font-size:0.9rem;">Sin servicios vinculados.</p>';
+              '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>Sin servicios vinculados.</div>';
           }
         } catch (e) {
           box.innerHTML =
-            '<p style="color:var(--ios-red); text-align:center; font-size:0.9rem;">Error de conexión.</p>';
+            '<div style="text-align:center; padding:30px; color:var(--ios-red); font-weight:600;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>Error de conexión.</div>';
         } finally {
           btnOpen.disabled = false;
         }
@@ -1200,7 +1417,7 @@
             .getElementById("telefono")
             .value.replace(/\D/g, "")
             .trim();
-          if (t.length < 7) return fireError("❌ El número es muy corto.");
+          if (t.length < 7) return fireError("El número es muy corto.");
           globalData.telefono = t;
         }
         document
@@ -1222,18 +1439,18 @@
         document.getElementById("correo").value = "";
         changeStep(1);
       }
+
       function fireError(m) {
         haptic();
-        const t = document.getElementById("error-toast");
-        t.innerText = m;
-        t.style.display = "block";
-        setTimeout(() => (t.style.display = "none"), 5000);
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>${m}</span></div>`,
+        );
       }
 
       async function executeSearch() {
         haptic();
         let m = document.getElementById("correo").value.toLowerCase().trim();
-        if (!m.includes("@")) return fireError("❌ Correo inválido.");
+        if (!m.includes("@")) return fireError("Correo inválido.");
         const btnTrack = document.getElementById("btn-rastrear");
         globalData.correo = m;
         changeStep(5);
@@ -1246,7 +1463,8 @@
           document.getElementById("res-box-code").style.display = "none";
           document.getElementById("res-box-link").style.display = "none";
           if (res.exito) {
-            document.getElementById("res-title").innerText = "¡LOCALIZADO!";
+            document.getElementById("res-title").innerHTML =
+              `<span style="color:var(--ios-green); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> ¡LOCALIZADO!</span>`;
             let finalMsg =
               res.msj && res.msj !== "undefined" && res.msj !== "null"
                 ? res.msj
@@ -1262,7 +1480,8 @@
               document.getElementById("val-link").href = res.valor;
             }
           } else {
-            document.getElementById("res-title").innerText = "SIN RESULTADOS";
+            document.getElementById("res-title").innerHTML =
+              `<span style="color:var(--ios-orange); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> SIN RESULTADOS</span>`;
             document.getElementById("res-desc").innerText =
               res.msj || "No hay datos para este correo.";
           }
@@ -1295,7 +1514,7 @@
         window.addEventListener("load", () => {
           // Aquí es donde está el truco: le decimos que instale la versión 2
           navigator.serviceWorker
-            .register("sw.js?v=9.0")
+            .register("sw.js?v=10.0")
             .then((reg) => {
               console.log("Cybernet App lista para instalar");
 
