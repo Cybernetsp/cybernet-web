@@ -1493,3 +1493,36 @@ body:has(.overlay-ios.open) .global-header {
   border-radius: 20px;
   transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
+/* Brillo dinámico de carga estilo iOS */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 8px;
+  color: transparent !important;
+}
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+/* Píldora gris superior en los modales */
+.sheet-ios::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
