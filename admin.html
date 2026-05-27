@@ -2129,8 +2129,8 @@
         style="
           display: flex;
           flex-direction: column;
-          height: 85vh;
-          max-height: 780px;
+          height: auto;
+          max-height: 85vh;
         "
       >
         <div
@@ -6007,6 +6007,15 @@
           return;
         }
 
+        // 🏦 DICCIONARIO DE CUENTAS NEQUI DEL STAFF
+        const numerosNequi = {
+          KATHERINE: "3126117630",
+          MANUEL: "3205386975",
+          PABLO: "3153991383",
+          MANUP: "3153991383", // Por si está registrado como MANUP
+          ANGELICA: "3015156037",
+        };
+
         let html = "";
         listaNomina.forEach((empData) => {
           // Si no es Camilo, ocultar a los demás
@@ -6016,6 +6025,21 @@
           let desc = parseFloat(empData.descontado) || 0;
           let neto = parseFloat(empData.neto) || 0;
           let colorNeto = neto >= 0 ? "var(--ios-blue)" : "var(--ios-red)";
+
+          // 💳 HTML DEL NÚMERO NEQUI (Se muestra si existe en el diccionario)
+          let nequiNum = numerosNequi[empData.empleado];
+          let nequiHtml = "";
+          if (nequiNum) {
+            nequiHtml = `
+                    <div style="display:flex; align-items:center; gap:6px;">
+                       <span style="background:rgba(224, 0, 150, 0.15); color:#ff37a6; padding:2px 6px; border-radius:6px; font-size:0.65rem; font-weight:800; border: 1px solid rgba(224, 0, 150, 0.3);">NEQUI</span>
+                       <span style="color:var(--text-primary); font-size:0.8rem; font-family:monospace; font-weight:bold; letter-spacing: 0.5px;">${nequiNum}</span>
+                       <button style="background:rgba(10, 132, 255, 0.15); border:none; border-radius:6px; width:26px; height:26px; display:flex; align-items:center; justify-content:center; color:var(--ios-blue); cursor:pointer; transition:all 0.2s;" onclick="copiarTextoRapido(this, '${nequiNum}')" title="Copiar Nequi">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                       </button>
+                    </div>
+                 `;
+          }
 
           // 🔥 BOTÓN EXCLUSIVO PARA CAMILO
           let btnPagar = "";
@@ -6030,7 +6054,12 @@
 
           html += `
                <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-left:3px solid var(--ios-blue); border-radius:10px; padding:10px 12px; margin-bottom:8px;">
-                  <h4 style="margin:0 0 6px 0; font-size:0.85rem; color:var(--text-primary); text-transform:uppercase;">${empData.empleado}</h4>
+                  
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+                      <h4 style="margin:0; font-size:0.9rem; color:var(--text-primary); text-transform:uppercase;">${empData.empleado}</h4>
+                      ${nequiHtml}
+                  </div>
+
                   <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:2px;">
                      <span style="color:var(--text-secondary);">Horas Trabajadas:</span>
                      <span style="color:var(--ios-green); font-weight:700;">$${Math.round(ganado).toLocaleString("es-CO")}</span>
