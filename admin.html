@@ -860,6 +860,9 @@
                 <option value="Bre-B">Bre-B</option>
                 <option value="Ahorros Bancolombia">Ahorros Bancolombia</option>
                 <option value="Saldo Distribuidor">Saldo Distribuidor</option>
+                <option id="optPagoNomina" value="NÓMINA">
+                  Descontar de Nómina
+                </option>
               </select>
             </div>
 
@@ -2277,6 +2280,14 @@
           document.getElementById("buscarPlataformaVenta").value = "";
           filtrarPlataformasVenta();
           document.getElementById("ventaNombre").focus();
+
+          // LÍNEAS NUEVAS: Identificar al empleado activo
+          const optNomina = document.getElementById("optPagoNomina");
+          if (optNomina) {
+            const staffActivo =
+              sessionStorage.getItem("active_staff") || "STAFF";
+            optNomina.value = "NÓMINA: " + staffActivo.toUpperCase();
+          }
         }
       }
       // =========================================================================
@@ -5658,6 +5669,58 @@
         }, 300000);
 
         renderizarPlataformasVenta();
+      });
+
+      // =========================================================================
+      // VIGILANTE EN VIVO ULTRA COMPATIBLE CON iOS (INYECCIÓN DE DOM)
+      // =========================================================================
+      document.addEventListener("DOMContentLoaded", () => {
+        const inputTelefonoVenta = document.getElementById("ventaTelefono");
+        const selectBanco = document.getElementById("ventaBanco");
+        const optNomina = document.getElementById("optPagoNomina");
+
+        // Clonamos y guardamos la opción en la memoria antes de borrarla del menú
+        let copiaOptNomina = null;
+        if (optNomina) {
+          copiaOptNomina = optNomina.cloneNode(true);
+          optNomina.remove(); // La sacamos del menú de inmediato al cargar la página
+        }
+
+        if (inputTelefonoVenta && selectBanco && copiaOptNomina) {
+          inputTelefonoVenta.addEventListener("input", function () {
+            // Limpiamos el número quitando espacios, guiones o letras
+            const telLimpio = this.value.replace(/\D/g, "").trim();
+
+            // Los 4 números oficiales de tu staff
+            const empleadosNumeros = [
+              "3205386975",
+              "3126117630",
+              "3107137371",
+              "3015156037",
+            ];
+
+            // Verificamos si la opción ya está metida en el select actual
+            const yaExisteEnMenu = document.getElementById("optPagoNomina");
+
+            if (empleadosNumeros.includes(telLimpio)) {
+              if (!yaExisteEnMenu) {
+                // Si el número coincide y no está en el menú, la inyectamos al final
+                selectBanco.appendChild(copiaOptNomina);
+                triggerToast(
+                  "✨ Teléfono de Staff detectado. Opción Nómina habilitada.",
+                );
+              }
+            } else {
+              if (yaExisteEnMenu) {
+                // Si el número cambia a uno normal y la opción estaba puesta, la destruimos
+                if (selectBanco.value === "NÓMINA") {
+                  selectBanco.selectedIndex = 0; // Reseteamos la selección
+                }
+                yaExisteEnMenu.remove(); // La borramos físicamente de la pantalla
+              }
+            }
+          });
+        }
       });
 
       function ejecutarAutoPulsoTiempo() {
