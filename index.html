@@ -21,6 +21,200 @@
 
     <style>
       /* =========================================
+         ESTILOS DEL CHATBOT CON BOTONES (QUICK REPLIES)
+         ========================================= */
+      .chat-fab-btn {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--ai-gradient);
+        color: white;
+        border: none;
+        box-shadow: 0 8px 20px rgba(10, 132, 255, 0.4);
+        cursor: pointer;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-spring);
+      }
+      .chat-fab-btn:active {
+        transform: scale(0.9);
+      }
+      .chat-fab-btn:hover {
+        box-shadow: 0 10px 25px rgba(10, 132, 255, 0.5);
+      }
+
+      /* Burbuja de pensamiento sobre el botón */
+      .chat-tooltip-ios {
+        position: fixed;
+        bottom: 95px;
+        right: 25px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: var(--glass-border);
+        padding: 12px 16px;
+        border-radius: 18px;
+        border-bottom-right-radius: 4px;
+        box-shadow: var(--glass-shadow);
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 9998;
+        animation:
+          floatTooltip 3s ease-in-out infinite,
+          appleFadeIn 0.5s ease-out;
+        transition:
+          opacity 0.3s,
+          visibility 0.3s;
+      }
+      .chat-tooltip-ios .close-tooltip {
+        background: rgba(118, 118, 128, 0.2);
+        border: none;
+        color: var(--text-secondary);
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+      }
+      .chat-tooltip-ios .close-tooltip:active {
+        transform: scale(0.9);
+        background: rgba(118, 118, 128, 0.4);
+      }
+      @keyframes floatTooltip {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+
+      .chat-window-ios {
+        position: fixed;
+        bottom: 100px;
+        right: 25px;
+        width: 350px;
+        height: 550px;
+        max-height: 80vh;
+        max-width: calc(100vw - 50px);
+        background: var(--sheet-modal-bg);
+        backdrop-filter: blur(40px) saturate(200%);
+        -webkit-backdrop-filter: blur(40px) saturate(200%);
+        border: var(--glass-border);
+        border-radius: 28px;
+        box-shadow: var(--glass-shadow);
+        z-index: 9998;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.95) translateY(20px);
+        transform-origin: bottom right;
+        transition: var(--transition-spring);
+      }
+      .chat-window-ios.open {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1) translateY(0);
+      }
+
+      .chat-header {
+        padding: 15px 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      [data-theme="light"] .chat-header {
+        background: rgba(0, 0, 0, 0.02);
+        border-bottom-color: rgba(0, 0, 0, 0.08);
+      }
+
+      .chat-body {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .chat-bubble {
+        max-width: 85%;
+        padding: 12px 16px;
+        border-radius: 20px;
+        font-size: 0.95rem;
+        line-height: 1.4;
+        animation: appleFadeIn 0.3s ease;
+      }
+      .chat-bubble.bot {
+        align-self: flex-start;
+        background: var(--input-bg);
+        color: var(--text-primary);
+        border-bottom-left-radius: 4px;
+      }
+      .chat-bubble.user {
+        align-self: flex-end;
+        background: var(--ios-blue);
+        color: white;
+        border-bottom-right-radius: 4px;
+      }
+
+      /* Panel de Botones Interactivos */
+      .chat-options {
+        padding: 15px 20px 20px;
+        background: rgba(255, 255, 255, 0.02);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: opacity 0.3s ease;
+      }
+      [data-theme="light"] .chat-options {
+        background: rgba(0, 0, 0, 0.01);
+        border-top-color: rgba(0, 0, 0, 0.08);
+      }
+
+      .chat-option-btn {
+        background: rgba(10, 132, 255, 0.1);
+        color: var(--ios-blue);
+        border: 1px solid rgba(10, 132, 255, 0.3);
+        padding: 12px 15px;
+        border-radius: 18px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-spring);
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .chat-option-btn:hover {
+        background: rgba(10, 132, 255, 0.15);
+      }
+      .chat-option-btn:active {
+        transform: scale(0.98);
+        background: rgba(10, 132, 255, 0.2);
+      }
+
+      /* =========================================
        SISTEMA DE VARIABLES: MODO CLARO Y OSCURO (APPLE ECOSYSTEM)
        ========================================= */
       :root {
@@ -836,7 +1030,13 @@
           placeholder="Ej: 301 XXX XXXX"
           maxlength="12"
         />
-        <button class="btn-primary" onclick="changeStep(2)">Continuar</button>
+        <button
+          id="btn-continuar-step1"
+          class="btn-primary"
+          onclick="verificarCelularYContinuar()"
+        >
+          Continuar
+        </button>
 
         <button
           id="btn-open-services"
@@ -951,8 +1151,8 @@
       </div>
 
       <div id="step-4" class="step">
-        <p class="instruction">
-          Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com)
+        <p class="instruction" id="instruction-correo">
+          Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com) 📧
         </p>
         <input
           type="email"
@@ -1111,10 +1311,183 @@
       </div>
     </div>
 
+    <div id="chat-tooltip" class="chat-tooltip-ios">
+      <span style="display: flex; align-items: center; gap: 6px">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <path
+            d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+          ></path>
+        </svg>
+        ¿Dudas con la página? ¡Escríbeme!
+      </span>
+      <button
+        class="close-tooltip"
+        onclick="document.getElementById('chat-tooltip').style.display = 'none'"
+      >
+        ✕
+      </button>
+    </div>
+
+    <button id="chat-fab" class="chat-fab-btn" onclick="toggleChat()">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+        ></path>
+      </svg>
+    </button>
+
+    <div class="chat-window-ios" id="chat-window">
+      <div class="chat-header">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <div
+            style="
+              width: 32px;
+              height: 32px;
+              background: var(--ai-gradient);
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                d="M12 2a2 2 0 0 1 2 2c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2z"
+              ></path>
+              <path d="M19 14v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4"></path>
+              <path d="M12 22V14"></path>
+              <path d="M5 8h14"></path>
+            </svg>
+          </div>
+          <div>
+            <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary)">
+              Asistente Cybernet
+            </h4>
+            <span
+              style="
+                font-size: 0.7rem;
+                color: var(--ios-green);
+                font-weight: 600;
+              "
+              >En línea</span
+            >
+          </div>
+        </div>
+        <button
+          style="
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            cursor: pointer;
+          "
+          onclick="toggleChat()"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="chat-body" id="chat-body">
+        <div class="chat-bubble bot">
+          ¡Hola! 👋 Soy el asistente virtual de Cybernet. Elige una opción para
+          ayudarte rápido:
+        </div>
+      </div>
+
+      <div class="chat-options" id="chat-options">
+        <button
+          class="chat-option-btn"
+          onclick="sendQuickReply('¿Cómo funciona la página?')"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          ¿Cómo funciona la página?
+        </button>
+        <button
+          class="chat-option-btn"
+          onclick="sendQuickReply('Mi código dice incorrecto o expirado')"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          Mi código dice Error/Expirado
+        </button>
+        <button
+          class="chat-option-btn"
+          onclick="sendQuickReply('No encuentro mi cuenta')"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          No encuentro mi cuenta
+        </button>
+      </div>
+    </div>
+
     <script>
       const GOOGLE_URL =
         "https://script.google.com/macros/s/AKfycbyk2_OGWfJ9qTSKOuRVo7bcspAKBRUn_WLEdP28GuabQ5z7cDYShYhMlHfCiuTOoQ66/exec";
       let globalData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
+
+      // Variable global para detectar si es VIP (Distribuidor)
+      window.isDistri = false;
 
       function triggerToast(msgHTML) {
         const toast = document.getElementById("appleToast");
@@ -1183,7 +1556,6 @@
         modalContent.addEventListener(
           "touchstart",
           (e) => {
-            // ¡Se arregló! Solo arrastra si el scroll de las tarjetas está en el límite superior
             if (cardsWrapper.scrollTop <= 0) {
               startY = e.touches[0].clientY;
             } else {
@@ -1342,6 +1714,58 @@
       `;
       }
 
+      // NUEVA FUNCIÓN PARA VALIDAR CELULAR Y DISTRIBUIDOR
+      async function verificarCelularYContinuar() {
+        haptic();
+        let t = document
+          .getElementById("telefono")
+          .value.replace(/\D/g, "")
+          .trim();
+        if (t.length < 7) {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>El número es muy corto.</span></div>`,
+          );
+          return;
+        }
+        globalData.telefono = t;
+
+        const btn = document.getElementById("btn-continuar-step1");
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Verificando...`;
+
+        try {
+          // Llama a Google Sheets para comprobar si está en la hoja DISTRIBUIDORES
+          const resp = await fetch(
+            `${GOOGLE_URL}?accion=verificarDistri&telefono=${t}`,
+          );
+          const data = await resp.json();
+          window.isDistri = data.esDistri === true;
+        } catch (err) {
+          // Si hay error de red, asumimos false por seguridad
+          window.isDistri = false;
+        }
+
+        // Modificamos el texto del paso 4 dependiendo de si es VIP o no
+        const instCorreo = document.getElementById("instruction-correo");
+        if (window.isDistri) {
+          instCorreo.innerHTML =
+            "Ingresa el <b>correo</b> de la cuenta 📧<br><span style='display:block; margin-top:5px; font-size:0.8rem; color:var(--ios-green); font-weight:700;'>🔓 Acceso Distribuidor VIP Activado</span>";
+        } else {
+          instCorreo.innerHTML =
+            "Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com) 📧";
+        }
+
+        btn.disabled = false;
+        btn.innerText = originalText;
+
+        // Saltamos al paso 2
+        document
+          .querySelectorAll(".step")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById("step-2").classList.add("active");
+      }
+
       async function openServices() {
         haptic();
         let t = document
@@ -1412,14 +1836,6 @@
 
       function changeStep(n) {
         haptic();
-        if (n === 2) {
-          let t = document
-            .getElementById("telefono")
-            .value.replace(/\D/g, "")
-            .trim();
-          if (t.length < 7) return fireError("El número es muy corto.");
-          globalData.telefono = t;
-        }
         document
           .querySelectorAll(".step")
           .forEach((s) => s.classList.remove("active"));
@@ -1439,7 +1855,6 @@
         document.getElementById("correo").value = "";
         changeStep(1);
       }
-
       function fireError(m) {
         haptic();
         triggerToast(
@@ -1451,6 +1866,12 @@
         haptic();
         let m = document.getElementById("correo").value.toLowerCase().trim();
         if (!m.includes("@")) return fireError("Correo inválido.");
+
+        // Bloqueo de seguridad: Si no es distribuidor, DEBE ser @cybernetsp.com
+        if (!window.isDistri && !m.endsWith("@cybernetsp.com")) {
+          return fireError("Solo disponible para correos @cybernetsp.com");
+        }
+
         const btnTrack = document.getElementById("btn-rastrear");
         globalData.correo = m;
         changeStep(5);
@@ -1514,7 +1935,7 @@
         window.addEventListener("load", () => {
           // Aquí es donde está el truco: le decimos que instale la versión 2
           navigator.serviceWorker
-            .register("sw.js?v=10.0")
+            .register("sw.js?v=11.0")
             .then((reg) => {
               console.log("Cybernet App lista para instalar");
 
@@ -1523,6 +1944,72 @@
             })
             .catch((err) => console.log("Error al registrar la App", err));
         });
+      }
+
+      /* =========================================
+         LÓGICA DEL CHATBOT
+         ========================================= */
+      function toggleChat() {
+        haptic();
+        const chatWindow = document.getElementById("chat-window");
+        const tooltip = document.getElementById("chat-tooltip");
+
+        chatWindow.classList.toggle("open");
+
+        // Esconder el tooltip si se abre el chat
+        if (chatWindow.classList.contains("open") && tooltip) {
+          tooltip.style.display = "none";
+        }
+      }
+
+      function sendQuickReply(question) {
+        haptic();
+
+        // 1. Mostrar el mensaje del usuario
+        appendChatMessage(question, "user");
+
+        // Bloquear botones temporalmente para evitar spam
+        const optionsDiv = document.getElementById("chat-options");
+        optionsDiv.style.opacity = "0.5";
+        optionsDiv.style.pointerEvents = "none";
+
+        // 2. Simular que el bot está pensando
+        setTimeout(() => {
+          let botReply = "";
+
+          if (question === "¿Cómo funciona la página?") {
+            botReply =
+              "¡Es muy fácil y rápido! 🚀 Sigue estos 4 pasos:\n\n1️⃣ **Tu celular:** Ingresa el número con el que hiciste la compra y dale a 'Continuar'.\n2️⃣ **Elige:** Selecciona si tu pantalla es de Netflix o Disney.\n3️⃣ **Elige el código:** Toca el tipo de código que te está pidiendo tu TV (Inicio de sesión, Estoy de Viaje o Enlace).\n4️⃣ **Tu correo:** Escribe el correo de tu cuenta y dale a 'Rastrear'.\n\n✨ ¡Y listo! El sistema te mostrará tu código en pantalla al instante.";
+          } else if (question === "Mi código dice incorrecto o expirado") {
+            botReply =
+              "¡No te preocupes, es normal! 😎\n\nPor seguridad, los códigos de Netflix cambian y **vencen cada 15 minutos** ⏰.\n\nSi tu TV dice que es incorrecto, significa que el tiempo se agotó. La solución es muy simple:\n\n👉 Cierra esta ventana, dale clic al botón **'Nueva Consulta'** y vuelve a buscar tu correo. El sistema te dará un código totalmente nuevo y fresco. ¡Inténtalo y escríbelo rápido en tu TV! 📺🏃‍♂️";
+          } else if (question === "No encuentro mi cuenta") {
+            botReply =
+              "Si el sistema te dice 'Sin Resultados', suele ser por un pequeño error de escritura. 🧐\n\nPor favor verifica esto:\n\n👉 Asegúrate de escribir el correo **exactamente igual** a como te lo entregamos.\n👉 Recuerda que debe terminar en **@cybernetsp.com** 📧 (sin espacios al final).\n\nSi estás seguro de que está bien escrito y aún no sale, ponte en contacto con nosotros para ayudarte de inmediato. 🛠️";
+          }
+
+          appendChatMessage(botReply, "bot");
+
+          // Restaurar botones
+          optionsDiv.style.opacity = "1";
+          optionsDiv.style.pointerEvents = "auto";
+        }, 1000);
+      }
+
+      function appendChatMessage(text, sender) {
+        const chatBody = document.getElementById("chat-body");
+        const bubble = document.createElement("div");
+        bubble.className = `chat-bubble ${sender}`;
+
+        // Convertir los saltos de línea \n en <br> y las negritas ** en <b>
+        let htmlText = text.replace(/\n/g, "<br>");
+        htmlText = htmlText.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+
+        bubble.innerHTML = htmlText;
+        chatBody.appendChild(bubble);
+
+        // Hacer scroll automático hacia abajo
+        chatBody.scrollTop = chatBody.scrollHeight;
       }
     </script>
   </body>
