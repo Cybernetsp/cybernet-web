@@ -928,7 +928,7 @@
         const dSelect = document.getElementById("appleDaySelect");
 
         if (mSelect && dSelect) {
-          mSelect.value = mesAyerTexto;
+          mSelect.value = mesActualTexto;
           dSelect.value = diaAyer;
           actualizarFiltrosUI();
         }
@@ -990,7 +990,7 @@
         }
       }
 
-      // NUEVO: Función para llamar al backend de Rentabilidad
+      // Función para llamar al backend de Rentabilidad Real Adaptada
       function cargarRentabilidadPlataformas() {
         const container = document.getElementById("rankingPlataformasVentas");
         if (!container) return;
@@ -1169,30 +1169,46 @@
         netEl.style.color = statusColor;
         if (indicator) indicator.style.background = statusColor;
 
-        // 1. Identificar "Ingresos Extras" y "Aportes Jeisson"
+        // 1. Identificar "Ingresos Extras", "Aportes Jeisson" y "Exclusiones Angelica"
         let sumaIngresoExtra = 0;
         let sumaJeisson = 0;
+        let sumaAngelica = 0; // 🔥 Separamos a Angélica por completo
+
         const itemsTemp = globalFinanzasData.listaDetallada || [];
 
         itemsTemp.forEach((item) => {
-          const esCategoriaExtra =
-            item.categoria === "➕ Ingreso Extra" ||
-            item.categoria === "Ingreso Extra";
+          const catTexto = item.categoria ? item.categoria.toLowerCase() : "";
           const detalleTexto = item.detalle ? item.detalle.toLowerCase() : "";
-          const esJeisson = detalleTexto.includes("jeisson");
 
-          if ((esCategoriaExtra || esJeisson) && item.tipo === "INGRESO") {
+          const esCategoriaExtra = catTexto.includes("ingreso extra");
+          const esJeisson =
+            detalleTexto.includes("jeisson") || catTexto.includes("jeisson");
+
+          // Ampliamos la búsqueda: Si dice "angelica" en CUALQUIER LADO, se extrae por completo
+          const esAngelica =
+            catTexto.includes("angelica") || detalleTexto.includes("angelica");
+
+          if (item.tipo === "INGRESO") {
             let valorMonto = parseFloat(item.monto) || 0;
-            sumaIngresoExtra += valorMonto;
-            if (esJeisson) sumaJeisson += valorMonto;
+
+            if (esAngelica) {
+              // 🔴 TODO lo que diga Angelica se excluye de las ventas y ganancias
+              sumaAngelica += valorMonto;
+            } else if (esCategoriaExtra || esJeisson) {
+              sumaIngresoExtra += valorMonto;
+              if (esJeisson) {
+                sumaJeisson += valorMonto;
+              }
+            }
           }
         });
 
         const elJeisson = document.getElementById("valProyJeisson");
         if (elJeisson) elJeisson.innerText = formatMoneda(sumaJeisson);
 
-        // 2. Restar TODOS los Extras (incluido Jeisson) de las Ventas Brutas Totales
-        let ventasBrutasReales = (d.ingresos || 0) - sumaIngresoExtra;
+        // 2. Restar TODOS los Extras y ABSOLUTAMENTE TODO lo de Angélica de las Ventas Brutas Totales
+        let ventasBrutasReales =
+          (d.ingresos || 0) - sumaIngresoExtra - sumaAngelica;
         if (ventasBrutasReales < 0) ventasBrutasReales = 0;
 
         document.getElementById("val_ingresos").innerText =
@@ -1260,12 +1276,14 @@
         // Guardamos la ganancia total (incluyendo Jeisson) para la calculadora de deuda
         currentMiGananciaBruta = totalMioYJeisson;
 
-        const totalFlujo = d.ingresos + d.gastos + d.inversiones + d.nomina;
+        // 🚀 CORRECCIÓN DEL CÁLCULO DE FLUJO PARA GRÁFICAS: Se usa la venta real para no distorsionar
+        const totalFlujo =
+          ventasBrutasReales + d.gastos + d.inversiones + d.nomina;
         let porcIngresos = 0,
           porcGastos = 0;
 
         if (totalFlujo > 0) {
-          porcIngresos = Math.round((d.ingresos / totalFlujo) * 100);
+          porcIngresos = Math.round((ventasBrutasReales / totalFlujo) * 100);
           porcGastos = Math.round(
             ((d.gastos + d.inversiones + d.nomina) / totalFlujo) * 100,
           );
@@ -1520,7 +1538,7 @@
         document.body.removeChild(link);
 
         triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> <span>Excel exportado exitosamente.</span></div>`,
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> <span>Excel exportado exitosamente.</span></div>`,
         );
       }
 
