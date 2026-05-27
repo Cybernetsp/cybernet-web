@@ -1455,3 +1455,41 @@ select.input-ios option {
     gap: 15px;
   }
 }
+/* Interruptor iOS Nativo */
+.toggle-ios {
+  appearance: none;
+  width: 50px;
+  height: 30px;
+  background: var(--input-bg);
+  border-radius: 30px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  border: var(--glass-border);
+  transition: background 0.3s ease;
+}
+.toggle-ios::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.toggle-ios:checked {
+  background: var(--ios-green);
+}
+.toggle-ios:checked::after {
+  transform: translateX(20px);
+}
+/* Cuando el overlay se abre, el workspace se va hacia atrás */
+body:has(.overlay-ios.open) .main-workspace,
+body:has(.overlay-ios.open) .global-header {
+  transform: scale(0.93) translateY(-10px);
+  border-radius: 20px;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
