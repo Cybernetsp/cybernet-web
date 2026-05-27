@@ -96,26 +96,6 @@
 
       <button
         class="ios-tab-btn"
-        onclick="window.location.href = 'suspendidas.html'"
-        id="btnSuspendidas"
-        style="display: none; color: var(--ios-red)"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="15" y1="9" x2="9" y2="15"></line>
-          <line x1="9" y1="9" x2="15" y2="15"></line>
-        </svg>
-        SUSPENDIDAS
-      </button>
-
-      <button
-        class="ios-tab-btn"
         onclick="toggleNetflixManagerPanel()"
         style="color: #e50914"
       >
@@ -5281,7 +5261,6 @@
         const currentOperator = userInput.toUpperCase().trim();
         const shiftTimer = document.getElementById("shiftTimer");
         const cajaBtn = document.getElementById("btnCajaFinanzas");
-        const suspendidasBtn = document.getElementById("btnSuspendidas");
 
         if (currentOperator === "CAMILO") {
           if (shiftTimer && shiftTimer.parentElement)
@@ -5292,8 +5271,6 @@
             );
           if (cajaBtn)
             cajaBtn.style.setProperty("display", "flex", "important");
-          if (suspendidasBtn)
-            suspendidasBtn.style.setProperty("display", "flex", "important");
         } else {
           if (shiftTimer && shiftTimer.parentElement)
             shiftTimer.parentElement.style.setProperty(
@@ -5303,8 +5280,6 @@
             );
           if (cajaBtn)
             cajaBtn.style.setProperty("display", "none", "important");
-          if (suspendidasBtn)
-            suspendidasBtn.style.setProperty("display", "none", "important");
         }
         inicializarWorkspace();
       }
