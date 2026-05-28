@@ -94,6 +94,44 @@
         CAJA
       </button>
 
+      <div
+        id="btnRegistroVentas"
+        style="
+          display: none;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: #0a84ff;
+          padding: 0 6px;
+        "
+        onclick="abrirModalRegistroVentas()"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="margin-bottom: 3px"
+        >
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <span
+          style="
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+          "
+          >Registros</span
+        >
+      </div>
+
       <button
         class="ios-tab-btn"
         onclick="toggleNetflixManagerPanel()"
@@ -2596,6 +2634,187 @@
               </button>
             </form>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay-ios" id="modalRegistroVentas" style="z-index: 15000">
+      <div
+        class="modal-ios"
+        style="
+          max-width: 95%;
+          width: 1000px;
+          max-height: 90vh;
+          display: flex;
+          flex-direction: column;
+        "
+        onclick="event.stopPropagation()"
+      >
+        <div
+          class="flex-row-between"
+          style="
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+          "
+        >
+          <h3
+            class="card-title"
+            style="
+              color: var(--ios-blue);
+              margin: 0;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="9" y1="21" x2="9" y2="9"></line>
+            </svg>
+            Historial de Ventas
+          </h3>
+          <button
+            type="button"
+            style="
+              background: var(--ios-red);
+              color: white;
+              border: none;
+              border-radius: 50%;
+              width: 26px;
+              height: 26px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+            "
+            onclick="
+              document
+                .getElementById('modalRegistroVentas')
+                .classList.remove('open')
+            "
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div style="margin-bottom: 10px">
+          <input
+            type="text"
+            id="buscadorRegistroVentas"
+            class="input-ios"
+            style="margin-bottom: 0"
+            placeholder="Buscar por Nombre, Celular o Fecha (ej: 28/05)..."
+            oninput="filtrarRegistroVentas()"
+          />
+        </div>
+
+        <div style="overflow-x: auto; overflow-y: auto; flex-grow: 1">
+          <table
+            style="
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 0.85rem;
+              text-align: left;
+            "
+          >
+            <thead>
+              <tr
+                style="
+                  background: rgba(10, 132, 255, 0.05);
+                  color: var(--ios-blue);
+                "
+              >
+                <th
+                  style="
+                    padding: 12px;
+                    border-bottom: 2px solid rgba(10, 132, 255, 0.2);
+                  "
+                >
+                  Fecha
+                </th>
+                <th
+                  style="
+                    padding: 12px;
+                    border-bottom: 2px solid rgba(10, 132, 255, 0.2);
+                  "
+                >
+                  Hora
+                </th>
+                <th
+                  style="
+                    padding: 12px;
+                    border-bottom: 2px solid rgba(10, 132, 255, 0.2);
+                  "
+                >
+                  Nombre
+                </th>
+                <th
+                  style="
+                    padding: 12px;
+                    border-bottom: 2px solid rgba(10, 132, 255, 0.2);
+                  "
+                >
+                  Número
+                </th>
+                <th
+                  style="
+                    padding: 12px;
+                    border-bottom: 2px solid rgba(10, 132, 255, 0.2);
+                  "
+                >
+                  Descripción
+                </th>
+                <th
+                  style="
+                    padding: 12px;
+                    border-bottom: 2px solid rgba(10, 132, 255, 0.2);
+                  "
+                >
+                  Valor
+                </th>
+                <th
+                  style="
+                    padding: 12px;
+                    border-bottom: 2px solid rgba(10, 132, 255, 0.2);
+                  "
+                >
+                  Entidad
+                </th>
+                <th
+                  style="
+                    padding: 12px;
+                    border-bottom: 2px solid rgba(10, 132, 255, 0.2);
+                  "
+                >
+                  Tipo
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tablaRegistroVentasBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -5876,6 +6095,11 @@
         const currentOperator = userInput.toUpperCase().trim();
         const shiftTimer = document.getElementById("shiftTimer");
         const cajaBtn = document.getElementById("btnCajaFinanzas");
+        const btnRegistro = document.getElementById("btnRegistroVentas");
+
+        // El botón de Registros lo ven TODOS
+        if (btnRegistro)
+          btnRegistro.style.setProperty("display", "flex", "important");
 
         if (currentOperator === "CAMILO") {
           if (shiftTimer && shiftTimer.parentElement)
@@ -6833,6 +7057,123 @@
         script.id = "node_" + cbName;
         script.src = `${GOOGLE_SCRIPT_URL}?action=cambiarCuenta&telCliente=${encodeURIComponent(telCliente)}&nombreCliente=${encodeURIComponent(nombreCliente)}&cambiosJSON=${encodeURIComponent(JSON.stringify(cambiosArray))}&callback=${cbName}&_ts=${Date.now()}`;
         document.body.appendChild(script);
+      }
+      // =========================================================================
+      // 📊 LÓGICA FRONTEND: REGISTRO DE VENTAS (SEGURIDAD Y RENDERIZADO)
+      // =========================================================================
+
+      // ⚠️ IMPORTANTE: Aquí debes leer tu variable global que almacena la sesión actual.
+      // Modifica esto si tu login usa localStorage, por ejemplo: localStorage.getItem("usuarioActual")
+      const usuarioSesionActual = "camilo";
+
+      // 🔒 CANDADO 1: Mostrar el botón SOLO si la sesión es de "camilo"
+      document.addEventListener("DOMContentLoaded", function () {
+        if (usuarioSesionActual.trim().toLowerCase() === "camilo") {
+          const btnRegistro = document.getElementById("btnRegistroVentas");
+          if (btnRegistro) btnRegistro.style.display = "flex"; // <-- Cambiado a "flex" para mantener el diseño
+        }
+      });
+
+      // =========================================================================
+      // 📊 LÓGICA FRONTEND: REGISTRO DE VENTAS (LIBRE) Y BUSCADOR AVANZADO
+      // =========================================================================
+
+      function abrirModalRegistroVentas() {
+        if (typeof haptic === "function") haptic();
+
+        document.getElementById("modalRegistroVentas").classList.add("open");
+        document.getElementById("buscadorRegistroVentas").value = ""; // Limpiar buscador
+        const tbody = document.getElementById("tablaRegistroVentasBody");
+
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: var(--text-secondary);">Cargando registros de ventas... <svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:bottom; margin-left:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg></td></tr>`;
+
+        const cbName = "cb_ventas_" + Date.now();
+        window[cbName] = function (res) {
+          const node = document.getElementById("node_" + cbName);
+          if (node) node.remove();
+          delete window[cbName];
+
+          if (res && res.status === "success") {
+            let rowsHtml = "";
+            res.data.reverse(); // Ventas nuevas arriba
+
+            res.data.forEach((row) => {
+              let fechaHoraStr = row[0] || "";
+              let fecha = fechaHoraStr;
+              let hora = "";
+
+              let partes = fechaHoraStr.split(" ");
+              if (partes.length >= 2) {
+                fecha = partes[0];
+                hora = partes.slice(1).join(" ");
+              }
+
+              let nombre = row[1] || "";
+              let numero = row[2] || "";
+              let desc = row[3] || "";
+              let valor = row[4] || "";
+              let banco = row[5] || "";
+              let tipo = row[6] || "";
+
+              rowsHtml += `
+                          <tr class="fila-registro-venta" style="border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.02)'" onmouseout="this.style.background='transparent'">
+                              <td class="col-fecha" style="padding: 10px 8px; color: var(--text-secondary);">${fecha}</td>
+                              <td style="padding: 10px 8px; color: var(--text-secondary);">${hora}</td>
+                              <td class="col-nombre" style="padding: 10px 8px; color: var(--text-primary);">${nombre}</td>
+                              <td class="col-numero" style="padding: 10px 8px; color: var(--text-primary);">${numero}</td>
+                              <td style="padding: 10px 8px; color: var(--ios-blue);">${desc}</td>
+                              <td style="padding: 10px 8px; color: var(--ios-green);">${valor}</td>
+                              <td style="padding: 10px 8px; color: var(--text-primary);">${banco}</td>
+                              <td style="padding: 10px 8px; color: var(--text-secondary);">${tipo}</td>
+                          </tr>
+                      `;
+            });
+
+            if (res.data.length === 0) {
+              rowsHtml = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: var(--text-secondary);">No hay ventas registradas en la base de datos.</td></tr>`;
+            }
+
+            tbody.innerHTML = rowsHtml;
+          } else {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color:var(--ios-red);">❌ Error: ${res ? res.message : "Fallo de conexión."}</td></tr>`;
+          }
+        };
+
+        const script = document.createElement("script");
+        script.id = "node_" + cbName;
+        script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerRegistroVentas&callback=${cbName}&_ts=${Date.now()}`;
+        document.body.appendChild(script);
+      }
+
+      // 🔥 FUNCIÓN DEL BUSCADOR EN TIEMPO REAL (POR NOMBRE, NÚMERO O FECHA) 🔥
+      function filtrarRegistroVentas() {
+        const query = document
+          .getElementById("buscadorRegistroVentas")
+          .value.toLowerCase()
+          .trim();
+        const filas = document.querySelectorAll(".fila-registro-venta");
+
+        filas.forEach((fila) => {
+          const fecha = fila
+            .querySelector(".col-fecha")
+            .innerText.toLowerCase();
+          const nombre = fila
+            .querySelector(".col-nombre")
+            .innerText.toLowerCase();
+          const numero = fila
+            .querySelector(".col-numero")
+            .innerText.toLowerCase();
+
+          if (
+            nombre.includes(query) ||
+            numero.includes(query) ||
+            fecha.includes(query)
+          ) {
+            fila.style.display = "";
+          } else {
+            fila.style.display = "none";
+          }
+        });
       }
     </script>
   </body>
