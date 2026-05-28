@@ -2286,6 +2286,22 @@
 
       const INACTIVITY_LOGOUT_LIMIT = 30 * 60 * 1000;
 
+      // 🔥 CEREBRO DE COMBOS: Guarda los meses y los replica en cascada
+      window.ultimoMesesSeleccionado = "1";
+
+      function actualizarMesesGlobal(valor) {
+        window.ultimoMesesSeleccionado = valor;
+
+        // Si cambias los meses de una, cambia automáticamente todas las que ya tengas marcadas
+        const checkboxes = document.getElementsByName("platformCheckVenta");
+        checkboxes.forEach((cb) => {
+          if (cb.checked && cb.value !== "SALDO") {
+            const elM = document.getElementById(`meses_${cb.value}`);
+            if (elM) elM.value = valor;
+          }
+        });
+      }
+
       window.pendingUser = "";
       window.pendingOldPass = "";
       window.pendingRemember = false;
@@ -3055,7 +3071,7 @@
             selectorDinamicoDerecho = `
                         <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
                             <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Meses</span>
-                            <select class="input-ios" id="meses_${plat.id}" name="ventaMeses" style="padding: 6px; font-size:0.8rem;" disabled>
+                            <select class="input-ios" id="meses_${plat.id}" name="ventaMeses" style="padding: 6px; font-size:0.8rem;" onchange="actualizarMesesGlobal(this.value)" disabled>
                                 <option value="1" selected>1 Mes</option>
                                 <option value="2">2 Meses</option>
                                 <option value="3">3 Meses</option>
@@ -3159,7 +3175,11 @@
 
         if (checkbox.checked) {
           if (elPantallas) elPantallas.disabled = false;
-          if (elMeses) elMeses.disabled = false;
+          if (elMeses) {
+            elMeses.disabled = false;
+            // 🔥 Copia automáticamente los meses que seleccionaste en la primera plataforma
+            elMeses.value = window.ultimoMesesSeleccionado || "1";
+          }
           if (elBono) elBono.disabled = false;
           if (elTipo) elTipo.disabled = false;
 
@@ -3475,13 +3495,27 @@
           'input[name="platformCheckVenta"][value="SALDO"]',
         )?.checked;
 
+        const btnSubmit = document.querySelector(
+          '#formGenerarVenta button[type="submit"]',
+        );
+
+        // 💼 CASO A: RECARGA DE SALDO DISTRIBUIDOR
         if (recargaSaldoChequeada) {
           const bonoElegido = document.getElementById("bono_SALDO").value;
-          const btnSubmit = document.querySelector(
-            '#formGenerarVenta button[type="submit"]',
-          );
+
+          let avisoRecarga =
+            `❓ ¿CONFIRMAR INYECCIÓN DE SALDO? 💼\n\n` +
+            `👤 Distribuidor: ${nombre || telefono}\n` +
+            `🏦 Cuenta Origen: ${banco}\n` +
+            `💰 Monto Recarga: $${cantidad.toLocaleString("es-CO")}\n` +
+            `🎁 Bono Aplicado: ${bonoElegido}%\n\n` +
+            `¿Estás seguro de que los datos son correctos?`;
+
+          if (!confirm(avisoRecarga)) return;
+
+          // Deshabilitamos el botón y ponemos el spinner de carga en la misma ventana
           btnSubmit.disabled = true;
-          btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Aplicando bono...`;
+          btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Inyectando saldo...`;
 
           const callbackName = "cb_recarga_" + Date.now();
           window[callbackName] = function (res) {
@@ -3493,60 +3527,16 @@
             delete window[callbackName];
 
             if (res && res.status === "success") {
-              let fichaRecarga = `🔔 *NOTIFICACIÓN DE RECARGA CYBERNET* 🚀\n`;
-              fichaRecarga += `────────────────────\n`;
-              fichaRecarga += `👤 *Distribuidor:* ${res.revendedor}\n`;
-              fichaRecarga += `💰 *Monto Inyectado:* $${Math.round(res.recargadoBase).toLocaleString("es-CO")}\n`;
-              fichaRecarga += `🎁 *Bono Otorgado:* ${res.bonoAplicado}%\n`;
-              fichaRecarga += `📈 *Saldo de Regalo:* +$${Math.round(res.regaloAdicional).toLocaleString("es-CO")}\n`;
-              fichaRecarga += `💵 *Nuevo Saldo Total:* $${Math.round(res.nuevoSaldo).toLocaleString("es-CO")}\n`;
-              fichaRecarga += `────────────────────\n`;
-              fichaRecarga += `✨ _¡Tu saldo acumulado ya se encuentra disponible para compras!_`;
+              let Richmond = `🔔 *NOTIFICACIÓN DE RECARGA CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${res.revendedor}\n💰 *Monto Inyectado:* $${Math.round(res.recargadoBase).toLocaleString("es-CO")}\n🎁 *Bono Otorgado:* ${res.bonoAplicado}%\n📈 *Saldo de Regalo:* +$${Math.round(res.regaloAdicional).toLocaleString("es-CO")}\n💵 *Nuevo Saldo Total:* $${Math.round(res.nuevoSaldo).toLocaleString("es-CO")}\n────────────────────\n✨ _¡Tu saldo acumulado ya se encuentra disponible para compras!_`;
 
-              window.textoSaldoRevendedorGlobal = "";
-
-              let btnSaldo = document.getElementById(
-                "btnCopiarSaldoRevendedor",
-              );
-              if (!btnSaldo) {
-                btnSaldo = document.createElement("button");
-                btnSaldo.id = "btnCopiarSaldoRevendedor";
-                btnSaldo.className = "btn-ios w-100 mt-1";
-                btnSaldo.style.background =
-                  "linear-gradient(135deg, #ff9500 0%, #ff5e00 100%)";
-                btnSaldo.style.color = "white";
-                btnSaldo.style.display = "flex";
-                btnSaldo.style.alignItems = "center";
-                btnSaldo.style.justifyContent = "center";
-                btnSaldo.style.gap = "8px";
-                btnSaldo.onclick = copiarTextoSaldoRevendedorDefinitiva;
-                btnSaldo.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> COPIAR REPORTE DE SALDO`;
-                document
-                  .getElementById("btnCopiarFichaVenta")
-                  .insertAdjacentElement("afterend", btnSaldo);
-              }
-              btnSaldo.style.display = "none";
-
+              // Solo ahora que fue exitoso, cerramos y abrimos la ficha
               document.getElementById("ventasOverlay").classList.remove("open");
-              document.getElementById("outputTextoVentaFicha").value =
-                fichaRecarga;
+              document.getElementById("outputTextoVentaFicha").value = Richmond;
               document
                 .getElementById("ventaGeneradaModalOverlay")
                 .classList.add("open");
-
               document.getElementById("formGenerarVenta").reset();
-              const checksABorrar =
-                document.getElementsByName("platformCheckVenta");
-              for (let c = 0; c < checksABorrar.length; c++) {
-                checksABorrar[c].checked = false;
-                comprobarDesbloqueoVentaPill(
-                  checksABorrar[c],
-                  checksABorrar[c].value,
-                );
-              }
-              if (document.getElementById("buscarPlataformaVenta")) {
-                document.getElementById("buscarPlataformaVenta").value = "";
-              }
+              cargarResumenProveedores();
             } else {
               alert(
                 "❌ Error: " + (res ? res.message : "Fallo al inyectar saldo."),
@@ -3561,9 +3551,11 @@
           return;
         }
 
+        // 🎬 CASO B: VENTAS DE PANTALLAS TRADICIONALES
         const checkboxes = document.getElementsByName("platformCheckVenta");
         let plataformasAdquiridas = false;
         let descripcionSheetsArray = [];
+        let resumenConfirmarArray = [];
         let correoNetflixReno = "";
         let esR = false;
         let memoriaMeses = {};
@@ -3608,6 +3600,9 @@
             descripcionSheetsArray.push(
               `${prefixSheets}${numPantallas} ${platNombreScript}`,
             );
+            resumenConfirmarArray.push(
+              `   •  ${numPantallas}x ${platNombreScript} ➔ [${numMeses} Mes(es) / ${elTipo}]`,
+            );
           }
         }
 
@@ -3619,11 +3614,25 @@
         }
 
         const descripcionFinalSheets = descripcionSheetsArray.join(" + ");
-        const btnSubmit = document.querySelector(
-          '#formGenerarVenta button[type="submit"]',
-        );
+
+        let mensajeVenta =
+          `❓ ¿CONFIRMAR REGISTRO DE VENTA? 🍿\n` +
+          `────────────────────────────\n` +
+          `👤 Cliente: ${nombre || "No especificado"}\n` +
+          `📞 Celular: ${telefono}\n` +
+          `🏦 Recibe: ${banco}\n` +
+          `💰 Valor Cobrado: $${cantidad.toLocaleString("es-CO")}\n\n` +
+          `📺 Cuentas a entregar:\n` +
+          resumenConfirmarArray.join("\n") +
+          `\n` +
+          `────────────────────────────\n` +
+          `¿Estás seguro de que los datos ingresados son correctos?`;
+
+        if (!confirm(mensajeVenta)) return;
+
+        // Cambiamos el estado del botón en la misma ventana sin cerrarla
         btnSubmit.disabled = true;
-        btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Procesando Venta...`;
+        btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Conectando con Sheets...`;
 
         const callbackName = "cb_venta_" + Date.now();
         window[callbackName] = function (res) {
@@ -3642,7 +3651,7 @@
               return 0;
             });
 
-            const nombreCliente = nombre !== "" ? nombre : "";
+            const nombreCliente = (Clair = nombre !== "" ? nombre : "");
             let intro = `🌟 *¡Hola ${nombreCliente}!*\n\n`;
             intro += esR
               ? `Tu servicio ha sido *RENOVADO* con éxito. Mantienes tus mismos accesos:`
@@ -3652,28 +3661,21 @@
             bloques.forEach((b) => {
               let etiquetaUser = b.id === "IPTV" ? "Usuario" : "Correo";
               let etiquetaPerfil = b.id === "IPTV" ? "URL" : "Perfil";
-
               let mesesComprados = memoriaMeses[b.id] || "1";
               let textoMeses =
                 mesesComprados > 1 ? ` (${mesesComprados} Meses)` : "";
 
-              cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n`;
-              cuerpo += `────────────────────\n`;
-              cuerpo += `👤 *${etiquetaUser}:* ${b.correo}\n`;
-              cuerpo += `🔐 *Contraseña:* ${b.clave}\n`;
-
+              cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n────────────────────\n👤 *${etiquetaUser}:* ${b.correo}\n🔐 *Contraseña:* ${b.clave}\n`;
               if (
                 b.id === "IPTV" ||
                 (b.perfil && b.perfil !== "" && b.perfil !== "N/A")
-              ) {
+              )
                 cuerpo += `🌐 *${etiquetaPerfil}:* ${b.perfil}\n`;
-              }
               if (b.pin && b.pin !== "") cuerpo += `📍 *Pin:* ${b.pin}\n`;
               cuerpo += `📅 *Vence:* ${b.venc}\n`;
             });
 
             let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
-
             const mensajeFinalFicha =
               intro +
               cuerpo +
@@ -3681,24 +3683,6 @@
               `\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
             let btnSaldo = document.getElementById("btnCopiarSaldoRevendedor");
-            if (!btnSaldo) {
-              btnSaldo = document.createElement("button");
-              btnSaldo.id = "btnCopiarSaldoRevendedor";
-              btnSaldo.className = "btn-ios w-100 mt-1";
-              btnSaldo.style.background =
-                "linear-gradient(135deg, #ff9500 0%, #ff5e00 100%)";
-              btnSaldo.style.color = "white";
-              btnSaldo.style.display = "flex";
-              btnSaldo.style.alignItems = "center";
-              btnSaldo.style.justifyContent = "center";
-              btnSaldo.style.gap = "8px";
-              btnSaldo.onclick = copiarTextoSaldoRevendedorDefinitiva;
-              btnSaldo.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> COPIAR REPORTE DE SALDO`;
-              document
-                .getElementById("btnCopiarFichaVenta")
-                .insertAdjacentElement("afterend", btnSaldo);
-            }
-
             if (res.esRevendedor) {
               let montoDescontado = res.valorCobrado || 0;
               let distribuidorNombre = res.nombreRevendedor || telefono;
@@ -3709,6 +3693,7 @@
               if (btnSaldo) btnSaldo.style.display = "none";
             }
 
+            // Cerramos la ventana de ventas ÚNICAMENTE cuando todo salió bien y abrimos la de éxito
             document.getElementById("ventasOverlay").classList.remove("open");
             document.getElementById("outputTextoVentaFicha").value =
               mensajeFinalFicha;
@@ -3716,6 +3701,7 @@
               .getElementById("ventaGeneradaModalOverlay")
               .classList.add("open");
 
+            // Reseteo del formulario
             document.getElementById("formGenerarVenta").reset();
             const checksABorrar =
               document.getElementsByName("platformCheckVenta");
@@ -3726,9 +3712,8 @@
                 checksABorrar[c].value,
               );
             }
-            if (document.getElementById("buscarPlataformaVenta")) {
+            if (document.getElementById("buscarPlataformaVenta"))
               document.getElementById("buscarPlataformaVenta").value = "";
-            }
 
             if (res.alertasStock && res.alertasStock.length > 0) {
               let avisoTexto =
@@ -3736,9 +3721,6 @@
               res.alertasStock.forEach((a) => {
                 avisoTexto += `🚨 Plataforma: ${a.plat} ➔ ¡Solo quedan ${a.cant} perfiles libres!\n`;
               });
-              avisoTexto +=
-                "───────────────────────────\n👉 ¡Toca CORTAR perfiles caídos o COMPRAR más cuentas inmediatamente!";
-
               setTimeout(() => {
                 alert(avisoTexto);
               }, 600);
