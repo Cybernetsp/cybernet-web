@@ -6774,21 +6774,22 @@
           delete window[cbName];
 
           if (res && res.status === "success") {
-            // 🎬 FICHA PREMIUM FORMATO ACTUALIZADO 🎬
-            let fichaFinal = "";
+            // 🔥 ENCABEZADO IDÉNTICO A TU NUEVA PLANTILLA 🔥
+            let nombreSaludo = nombreCliente ? " " + nombreCliente : "";
+            let fichaFinal = `🌟 ¡Hola${nombreSaludo}!\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
 
-            res.data.forEach((d, index) => {
-              if (index > 0) fichaFinal += `\n\n────────────────────\n\n`;
-
-              let perfilPinTexto = "";
-              if (d.perfil || d.pin) {
-                let pVal = d.perfil ? d.perfil : "1";
-                let iVal = d.pin ? d.pin : "No requiere";
-                perfilPinTexto = `\n👤 Nombre Del Perfil: ${pVal} | Pin Del Perfil: ${iVal}`;
+            res.data.forEach((d) => {
+              let perfilTexto = d.perfil ? `\n🌐 Perfil: ${d.perfil}` : "";
+              if (d.pin) {
+                perfilTexto += ` | PIN: ${d.pin}`; // Si tiene PIN se anota de una vez en la misma línea
               }
 
-              fichaFinal += `🎬 Tu cuenta de *${d.plataforma}* ha sido activada correctamente ✅\n\nEstos son tus datos de acceso:\n\n📧 Correo: ${d.correo}\n🔐 Contraseña: ${d.clave}${perfilPinTexto}\n\n📅 Fecha de Vencimiento: ${d.vencimiento}`;
+              // Bloque dinámico por cada plataforma del cambio
+              fichaFinal += `\n\n🎬 DETALLES DE ${d.plataforma} ✅\n────────────────────\n👤 Correo: ${d.correo}\n🔐 Contraseña: ${d.clave}${perfilTexto}\n📅 Vence: ${d.vencimiento}`;
             });
+
+            // 🔥 TEXTO DE GARANTÍA E INFO IMPORTANTE AL FINAL 🔥
+            fichaFinal += `\n\n📢 INFORMACIÓN IMPORTANTE: \n────────────────────\n⚠️ Garantía activa: Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 Soporte: Si presentas algún inconveniente, infórmanos de inmediato para brindarte una solución rápida.\n\n💎 Disfruta tu servicio.\n✨ ¡Gracias por elegirnos! ✨`;
 
             document
               .getElementById("cambioCuentaOverlay")
@@ -6801,7 +6802,7 @@
             modalExito.querySelector(".card-title").innerText =
               "Cambio Exitoso";
             document.getElementById("btnCopiarFichaVenta").innerHTML =
-              `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar Datos de Acceso`;
+              `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar Ficha Completa`;
 
             let btnSaldo = document.getElementById("btnCopiarSaldoRevendedor");
             if (btnSaldo) btnSaldo.style.display = "none";
