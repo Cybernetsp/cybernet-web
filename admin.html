@@ -3673,6 +3673,11 @@
                 cuerpo += `🌐 *${etiquetaPerfil}:* ${b.perfil}\n`;
               if (b.pin && b.pin !== "") cuerpo += `📍 *Pin:* ${b.pin}\n`;
               cuerpo += `📅 *Vence:* ${b.venc}\n`;
+
+              // 🔥 NUEVO: Recordatorio automatizado estético para la web de códigos
+              if (b.id === "NETFLIX") {
+                cuerpo += `🤖 *¿NECESITAS CÓDIGO DE ACCESO?*\nObtenlo al instante de forma automática 24/7 sin esperar soporte ingresando a nuestra web:\n🌐 https://www.cybernetsp.com/\n`;
+              }
             });
 
             let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
