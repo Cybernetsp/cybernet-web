@@ -6774,21 +6774,20 @@
           delete window[cbName];
 
           if (res && res.status === "success") {
-            // 🔥 NUEVO FORMATO DE WHATSAPP IDÉNTICO AL DE VENTAS 🔥
+            // 🎬 FICHA PREMIUM FORMATO ACTUALIZADO 🎬
             let fichaFinal = "";
-            let nombreParaFicha = nombreCliente ? nombreCliente : telCliente; // Toma el nombre o el número
-            let saludo = nombreParaFicha
-              ? `Hola *${nombreParaFicha}*, `
-              : `Hola, `;
 
             res.data.forEach((d, index) => {
               if (index > 0) fichaFinal += `\n\n────────────────────\n\n`;
 
-              let p = d.perfil ? `\n🌐 *Perfil:* ${d.perfil}` : "";
-              let i = d.pin ? `\n📍 *Pin:* ${d.pin}` : "";
+              let perfilPinTexto = "";
+              if (d.perfil || d.pin) {
+                let pVal = d.perfil ? d.perfil : "1";
+                let iVal = d.pin ? d.pin : "No requiere";
+                perfilPinTexto = `\n👤 Nombre Del Perfil: ${pVal} | Pin Del Perfil: ${iVal}`;
+              }
 
-              // Texto exacto estilo ventas
-              fichaFinal += `${saludo}Tu cuenta de *${d.plataforma}* ha sido activada correctamente ✅\n\nEstos son tus nuevos datos de acceso:\n\n👤 *Correo:* ${d.correo}\n🔐 *Contraseña:* ${d.clave}${p}${i}\n📅 *Vencimiento:* ${d.vencimiento}`;
+              fichaFinal += `🎬 Tu cuenta de *${d.plataforma}* ha sido activada correctamente ✅\n\nEstos son tus datos de acceso:\n\n📧 Correo: ${d.correo}\n🔐 Contraseña: ${d.clave}${perfilPinTexto}\n\n📅 Fecha de Vencimiento: ${d.vencimiento}`;
             });
 
             document
@@ -6820,7 +6819,12 @@
             document.getElementById("cambioTelCliente").value = "";
             document.getElementById("cambioNombreCliente").value = "";
           } else {
-            alert("❌ Error: " + (res ? res.message : "Fallo de red"));
+            alert(
+              "❌ Error: " +
+                (res
+                  ? res.message
+                  : "Fallo de conexión. No se pudo procesar el lote."),
+            );
           }
         };
 
