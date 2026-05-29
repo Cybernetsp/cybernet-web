@@ -1115,3 +1115,10 @@ select.input-ios option {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
 }
+/* Recuperar las 2 columnas de la sección de Distribuidores */
+.revendedor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  width: 100%;
+}
