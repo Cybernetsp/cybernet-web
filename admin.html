@@ -7546,6 +7546,15 @@
       // =========================================================================
 
       function iniciarCreacionCuentaNetflix(btn) {
+        // 🛠️ FILTRO DE SEGURIDAD PREVIO: Pregunta antes de gastar recursos
+        let preConfirmacion = confirm(
+          "❓ ¿Estás seguro de que deseas CREAR UNA CUENTA NUEVA de Netflix en este momento?\n\n(Esto procesará un PIN de Refácil e iniciará la creación del correo)",
+        );
+
+        // Si el usuario presiona "Cancelar", la función se corta aquí y no hace nada
+        if (!preConfirmacion) return;
+
+        // Si presionó "Aceptar", continúa con el flujo normal:
         if (typeof haptic === "function") haptic();
 
         const contenidoOriginal = btn.innerHTML;
@@ -7582,7 +7591,7 @@
             document.getElementById("displayCtaPinesPerfiles").innerHTML =
               htmlPerfiles;
 
-            // 🛠️ CONDICIONAL AGREGADA: Al darle al botón verde, salta el aviso obligatorio
+            // Condicional de guardado: Al darle al botón verde, salta el aviso obligatorio de verificación
             const btnGuardar = document.getElementById(
               "btnGuardarMaestroNetflix",
             );
@@ -7593,10 +7602,6 @@
                 "¿Ya verificaste el correo de la cuenta correctamente y deseas continuar con el guardado maestro?";
 
               if (confirm(advertencia)) {
-                // Si el usuario presiona "Aceptar", se cierra el modal y se guarda en Sheets
-                document
-                  .getElementById("cuentaGeneratedModalOverlay")
-                  .classList.remove("open"); // Ajustado a tu ID de CSS
                 document
                   .getElementById("cuentaGeneradaModalOverlay")
                   .classList.remove("open");
@@ -7616,7 +7621,7 @@
           }
         };
 
-        // 🛠️ DETECTOR DE CREADOR: Busca la variable del empleado logueado en tu plataforma
+        // Detector de creador para la columna L de PINESMES
         const empleadoActivo =
           typeof usuarioGlobal !== "undefined"
             ? usuarioGlobal
@@ -7626,7 +7631,6 @@
 
         const script = document.createElement("script");
         script.id = "node_" + cbName;
-        // 🚀 SE ENVÍA EL PARÁMETRO '&user=' DIRECTO A GOOGLE
         script.src = `${GOOGLE_SCRIPT_URL}?action=generarNuevaCuenta&user=${encodeURIComponent(empleadoActivo)}&callback=${cbName}&_ts=${Date.now()}`;
         document.body.appendChild(script);
       }
@@ -7708,4 +7712,3 @@
     </script>
   </body>
 </html>
-
