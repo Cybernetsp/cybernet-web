@@ -32,9 +32,6 @@
     </style>
   </head>
   <body>
-    <div class="bg-orb bg-orb-1"></div>
-    <div class="bg-orb bg-orb-2"></div>
-
     <div id="appleToast" class="apple-notification-toast"></div>
 
     <header class="global-header" id="globalHeader" style="display: none">
@@ -2298,9 +2295,12 @@
             style="
               position: sticky;
               top: 0;
-              background: rgba(20, 20, 22, 0.75);
-              backdrop-filter: blur(20px);
-              -webkit-backdrop-filter: blur(20px);
+              background: rgba(
+                20,
+                20,
+                22,
+                0.98
+              ); /* Fondo casi sólido sin desenfoque */
               padding: 15px;
               border-bottom: 1px solid rgba(255, 255, 255, 0.05);
               z-index: 10;
@@ -2824,9 +2824,7 @@
       id="cuentaGeneradaModalOverlay"
       style="
         z-index: 16000;
-        background: rgba(0, 0, 0, 0.82);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        background: rgba(15, 15, 15, 0.95); /* Fondo oscuro liso */
       "
     >
       <div
