@@ -3152,10 +3152,6 @@ function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
         "important",
       );
     if (cajaBtn) cajaBtn.style.setProperty("display", "flex", "important");
-
-    // MOSTRAR BOTÓN DE SUSPENDIDAS A CAMILO
-    const btnSusp = document.getElementById("btnSuspendidas");
-    if (btnSusp) btnSusp.style.setProperty("display", "flex", "important");
   } else {
     if (shiftTimer && shiftTimer.parentElement)
       shiftTimer.parentElement.style.setProperty(
@@ -3164,10 +3160,6 @@ function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
         "important",
       );
     if (cajaBtn) cajaBtn.style.setProperty("display", "none", "important");
-
-    // OCULTAR BOTÓN DE SUSPENDIDAS AL RESTO
-    const btnSusp = document.getElementById("btnSuspendidas");
-    if (btnSusp) btnSusp.style.setProperty("display", "none", "important");
   }
   inicializarWorkspace();
 }
@@ -3885,50 +3877,78 @@ window.pagarNominaEmpleado = function (empleado, netoAPagar) {
   document.body.appendChild(script);
 };
 
+// =========================================================================
+// 💸 APLICAR ADELANTOS O DESCUENTOS A LA NÓMINA DE UN EMPLEADO
+// =========================================================================
 function ejecutarDescuentoNominaManual(e) {
   e.preventDefault();
-  haptic();
+  if (typeof haptic === "function") haptic();
+
+  const empleado = document.getElementById("descNomEmpleado").value;
+  const tipo = document.getElementById("descNomTipo").value; // Extrae si es ADELANTO o DESCUENTO
+  const montoRaw = document.getElementById("descNomMonto").value;
+  let concepto = document.getElementById("descNomConcepto").value;
+
+  // Limpiamos el formato de moneda para enviar solo el número al backend
+  const monto = parseFloat(montoRaw.replace(/[^0-9]/g, ""));
+
+  if (!empleado || isNaN(monto) || monto <= 0 || concepto.trim() === "") {
+    alert("⚠️ Por favor completa todos los campos correctamente.");
+    return;
+  }
+
+  // Unimos el tipo con el concepto para que en tu Excel se lea claro: "ADELANTO - Préstamo"
+  const conceptoFinal = `${tipo} - ${concepto.trim()}`;
+
   const btn = document.getElementById("btnSubmitDescNom");
-  const emp = document.getElementById("descNomEmpleado").value;
-  const montoRaw = document
-    .getElementById("descNomMonto")
-    .value.replace(/\D/g, "");
-  const concepto = document.getElementById("descNomConcepto").value.trim();
-
-  if (!emp || !montoRaw || !concepto) return;
-
+  const originalText = btn.innerHTML;
+  btn.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> Aplicando...`;
   btn.disabled = true;
-  btn.innerHTML = "Aplicando en Sheets...";
 
-  const cbName = "cb_desc_nom_" + Date.now();
-  window[cbName] = function (res) {
+  const scriptNode = document.createElement("script");
+  const callbackName = "cbDescNom_" + Date.now();
+
+  window[callbackName] = function (res) {
+    btn.innerHTML = originalText;
     btn.disabled = false;
-    btn.innerHTML = "Aplicar Descuento";
-    const node = document.getElementById("node_" + cbName);
-    if (node) node.remove();
-    delete window[cbName];
+    delete window[callbackName];
+    scriptNode.remove();
 
     if (res && res.status === "success") {
-      triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Descuento aplicado.</span></div>`,
+      alert(
+        `✅ ${tipo} de $${monto.toLocaleString("es-CO")} aplicado correctamente a ${empleado}.\n\nSe descontará automáticamente de su nómina.`,
       );
+
+      // Limpiar campos
       document.getElementById("descNomMonto").value = "";
       document.getElementById("descNomConcepto").value = "";
 
-      // Al aplicar el descuento, refresca visualmente la pantalla de nomina
-      const btnRef = document.querySelector(
-        "#nominaOverlay .btn-ios.btn-secondary",
-      );
-      refrescarTotalNominaEnVivo(btnRef);
+      // 🔥 Si tienes la función para refrescar la nómina, la llamamos aquí
+      if (typeof refrescarTotalNominaEnVivo === "function") {
+        const refreshBtn = document.querySelector(
+          "#nominaOverlay .btn-secondary",
+        );
+        if (refreshBtn) refrescarTotalNominaEnVivo(refreshBtn);
+      }
     } else {
-      alert("❌ Error: " + (res ? res.message : "Fallo de red"));
+      alert("❌ ERROR:\n\n" + (res ? res.message : "Desconocido"));
     }
   };
 
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=agregarDescuentoNomina&empleado=${encodeURIComponent(emp)}&monto=${encodeURIComponent(montoRaw)}&concepto=${encodeURIComponent(concepto)}&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
+  scriptNode.id = "script_desc_nom";
+  scriptNode.src =
+    GOOGLE_SCRIPT_URL +
+    "?action=agregarDescuentoNomina&empleado=" +
+    encodeURIComponent(empleado) +
+    "&monto=" +
+    encodeURIComponent(monto) +
+    "&concepto=" +
+    encodeURIComponent(conceptoFinal) +
+    "&callback=" +
+    callbackName +
+    "&_ts=" +
+    Date.now();
+  document.body.appendChild(scriptNode);
 }
 // =========================================================================
 // LÓGICA: CAMBIO DE CUENTA INTERACTIVO (CELULAR OBLIGATORIO)
@@ -4352,16 +4372,7 @@ function copiarTextoAisladoDirecto(elemento, texto) {
     }, 1000);
   });
 }
-function toggleSuspendidasPanel() {
-  if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("suspendidasOverlay");
-  if (overlay) overlay.classList.toggle("open");
-}
-function toggleNeyopPanel() {
-  if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("neyopOverlay");
-  if (overlay) overlay.classList.toggle("open");
-}
+
 // =========================================================================
 // MÓDULO WEB INTEGRADO: MOTOR DE PROMOCIONES MASIVAS
 // =========================================================================
@@ -5051,4 +5062,451 @@ function filtrarTablaRevendedores() {
       ? ""
       : "none";
   }
+}
+
+// =========================================================================
+// 📈 MÓDULO FINANCIERO INTEGRADO (SPA) - RESTAURADO
+// =========================================================================
+
+let globalFinanzasData = null;
+let activePeriod = "mes";
+let isWorking = false;
+let activeQueryId = 0;
+let activeRentabilidadQueryId = 0;
+let currentMiGananciaBruta = 0;
+const mesesArray = [
+  "ENERO",
+  "FEBRERO",
+  "MARZO",
+  "ABRIL",
+  "MAYO",
+  "JUNIO",
+  "JULIO",
+  "AGOSTO",
+  "SEPTIEMBRE",
+  "OCTUBRE",
+  "NOVIEMBRE",
+  "DICIEMBRE",
+];
+
+function toggleFinanzasPanel() {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("finanzasOverlay");
+  if (overlay) {
+    overlay.classList.toggle("open");
+    if (overlay.classList.contains("open")) {
+      construirSelectores();
+      cargarDashboardFinanzas();
+    }
+  }
+}
+
+function filtrarHoy() {
+  const hoy = new Date();
+  const mSelect = document.getElementById("appleMonthSelect");
+  const dSelect = document.getElementById("appleDaySelect");
+  if (mSelect && dSelect) {
+    mSelect.value = mesesArray[hoy.getMonth()];
+    dSelect.value = hoy.getDate();
+    actualizarFiltrosUI();
+  }
+}
+
+function filtrarAyer() {
+  const ayer = new Date();
+  ayer.setDate(ayer.getDate() - 1);
+  const mSelect = document.getElementById("appleMonthSelect");
+  const dSelect = document.getElementById("appleDaySelect");
+  if (mSelect && dSelect) {
+    mSelect.value = mesesArray[ayer.getMonth()];
+    dSelect.value = ayer.getDate();
+    actualizarFiltrosUI();
+  }
+}
+function filtrarMes() {
+  if (typeof haptic === "function") haptic();
+  const hoy = new Date();
+  const mSelect = document.getElementById("appleMonthSelect");
+  const dSelect = document.getElementById("appleDaySelect");
+  if (mSelect && dSelect) {
+    mSelect.value = mesesArray[hoy.getMonth()];
+    dSelect.value = "TODOS"; // Fuerza el selector a "Todo el mes"
+    actualizarFiltrosUI();
+  }
+}
+
+function formatMoneda(v) {
+  return (
+    "$" +
+    parseFloat(v || 0).toLocaleString("es-CO", { maximumFractionDigits: 0 })
+  );
+}
+
+function construirSelectores() {
+  const mSelect = document.getElementById("appleMonthSelect");
+  const dSelect = document.getElementById("appleDaySelect");
+
+  if (mSelect.options.length > 0) return;
+
+  mSelect.innerHTML = "";
+  mesesArray.forEach((m) => {
+    const opt = document.createElement("option");
+    opt.value = m;
+    opt.innerText = m.charAt(0) + m.slice(1).toLowerCase();
+    mSelect.appendChild(opt);
+  });
+
+  dSelect.innerHTML = '<option value="TODOS">Todo el mes</option>';
+  for (let i = 1; i <= 31; i++) {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.innerText = "Día " + i;
+    dSelect.appendChild(opt);
+  }
+  mSelect.selectedIndex = new Date().getMonth();
+}
+
+function actualizarFiltrosUI() {
+  const mes = document.getElementById("appleMonthSelect").value;
+  const dia = document.getElementById("appleDaySelect").value;
+  activePeriod = dia === "TODOS" ? "mes" : "dia";
+
+  document.getElementById("txtPeriodoLabel").innerText =
+    activePeriod === "mes" ? "Caja Real Mensual" : "Caja Real del Día";
+  document.getElementById("txtLibroHeader").innerText = "Libro de " + mes;
+
+  cargarDashboardFinanzas();
+}
+
+// 💥 AQUÍ SE RESTAURA EL DISEÑO DE LAS BARRAS DE RENTABILIDAD
+function cargarRentabilidadPlataformas() {
+  const container = document.getElementById("rankingPlataformasVentas");
+  if (!container) return;
+  container.innerHTML =
+    '<div class="empty-log-msg">Calculando rentabilidad...</div>';
+
+  const mes = document.getElementById("appleMonthSelect").value || "MAYO";
+  const currentQueryId = ++activeRentabilidadQueryId;
+  const callbackName = `renderRentCallback_${currentQueryId}`;
+
+  document
+    .querySelectorAll(".rent-engine-node")
+    .forEach((node) => node.remove());
+
+  window[callbackName] = function (res) {
+    delete window[callbackName];
+    if (currentQueryId !== activeRentabilidadQueryId) return;
+
+    if (res.status === "success") {
+      let html = "";
+      let data = res.data;
+
+      if (data.length === 0) {
+        container.innerHTML =
+          '<div class="empty-log-msg">No hay ventas registradas.</div>';
+        return;
+      }
+
+      let maxGanancia =
+        Math.max(...data.map((d) => Math.abs(d.gananciaNeta))) || 1;
+      let colors = [
+        "var(--ios-purple)",
+        "var(--ios-blue)",
+        "var(--ios-orange)",
+        "var(--ios-green)",
+        "#ff453a",
+      ];
+
+      data.forEach((r, idx) => {
+        let color =
+          r.gananciaNeta < 0 ? "var(--ios-red)" : colors[idx % colors.length];
+        let pctBar = Math.round((Math.abs(r.gananciaNeta) / maxGanancia) * 100);
+
+        html += `
+                    <div class="bar-row">
+                        <div class="bar-meta">
+                        <span style="color:var(--text-primary); font-weight:700;">${r.plataforma} <span style="color:var(--text-secondary); font-size:0.75rem; font-weight:500;">(${r.ventas} ventas)</span></span>
+                        <div style="display:flex; flex-direction:column; text-align:right;">
+                            <span style="color:${color}; font-weight:800; font-size:1.05rem;">${formatMoneda(r.gananciaNeta)} <span style="font-size:0.7rem; color:var(--text-secondary);">NETO</span></span>
+                            <span style="font-size:0.7rem; color:var(--text-secondary);">Bruto: ${formatMoneda(r.ingresoBruto)}</span>
+                        </div>
+                        </div>
+                        <div class="bar-track" style="height: 8px; background: rgba(255,255,255,0.05); margin-top:2px;">
+                        <div class="bar-fill" style="width: ${pctBar}%; background: ${color}; box-shadow: 0 0 10px ${color};"></div>
+                        </div>
+                    </div>
+                `;
+      });
+      container.innerHTML = html;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.classList.add("rent-engine-node");
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerRentabilidad&mes=${mes}&callback=${callbackName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+}
+
+function cargarDashboardFinanzas() {
+  const container = document.getElementById("listaDesgloseGastos");
+  container.innerHTML =
+    '<div class="empty-log-msg">Conectando con Google Cloud Contable...</div>';
+
+  const mes = document.getElementById("appleMonthSelect").value || "MAYO";
+  const dia = document.getElementById("appleDaySelect").value || "TODOS";
+  const currentQueryId = ++activeQueryId;
+  const callbackName = `renderCallback_${currentQueryId}`;
+
+  cargarRentabilidadPlataformas();
+  document
+    .querySelectorAll(".fin-engine-node")
+    .forEach((node) => node.remove());
+
+  window[callbackName] = function (res) {
+    delete window[callbackName];
+    if (currentQueryId !== activeQueryId) return;
+
+    if (res.status === "success") {
+      globalFinanzasData = res.data;
+      renderDashboard();
+    } else {
+      container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">Error al actualizar balances.</div>`;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.classList.add("fin-engine-node");
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDashboardFinanzas&mes=${mes}&dia=${dia}&callback=${callbackName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+}
+
+function calcularDescuentoDeuda() {
+  const modo = document.getElementById("modoDescuentoDeuda").value;
+  const deudaInput = document
+    .getElementById("valDeudaTotal")
+    .value.replace(/\D/g, "");
+  const deuda = parseFloat(deudaInput) || 0;
+
+  document.getElementById("divDiasDeuda").style.display =
+    modo === "dias" ? "block" : "none";
+
+  let descuento = 0;
+  if (deuda > 0) {
+    if (modo === "90") {
+      descuento = Math.round(currentMiGananciaBruta * 0.9);
+      if (descuento > deuda) descuento = deuda;
+    } else {
+      let dias = parseInt(document.getElementById("inputDiasDeuda").value) || 1;
+      descuento = Math.round(deuda / dias);
+    }
+  }
+  document.getElementById("valDescuentoHoy").innerText =
+    formatMoneda(descuento);
+}
+
+function renderDashboard() {
+  if (!globalFinanzasData) return;
+  const d = globalFinanzasData[activePeriod];
+  if (!d) return;
+
+  document.getElementById("valDeudaTotal").value = formatMoneda(
+    globalFinanzasData.deudaActual || 0,
+  );
+
+  const netEl = document.getElementById("val_neto");
+  netEl.innerText = formatMoneda(d.neto);
+  netEl.style.color = d.neto >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+
+  let sumaIngresoExtra = 0,
+    sumaJeisson = 0,
+    sumaAngelica = 0;
+  const itemsTemp = globalFinanzasData.listaDetallada || [];
+
+  itemsTemp.forEach((item) => {
+    const cat = (item.categoria || "").toLowerCase();
+    const det = (item.detalle || "").toLowerCase();
+    if (item.tipo === "INGRESO") {
+      let val = parseFloat(item.monto) || 0;
+      if (cat.includes("angelica") || det.includes("angelica"))
+        sumaAngelica += val;
+      else if (
+        cat.includes("ingreso extra") ||
+        det.includes("jeisson") ||
+        cat.includes("jeisson")
+      ) {
+        sumaIngresoExtra += val;
+        if (det.includes("jeisson") || cat.includes("jeisson"))
+          sumaJeisson += val;
+      }
+    }
+  });
+
+  document.getElementById("valProyJeisson").innerText =
+    formatMoneda(sumaJeisson);
+  let ventasBrutasReales = Math.max(
+    0,
+    (d.ingresos || 0) - sumaIngresoExtra - sumaAngelica,
+  );
+
+  document.getElementById("val_ingresos").innerText =
+    formatMoneda(ventasBrutasReales);
+  document.getElementById("val_gastos").innerText = formatMoneda(d.gastos);
+  document.getElementById("val_inversiones").innerText = formatMoneda(
+    d.inversiones,
+  );
+  document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
+
+  let pM = 28,
+    pNom = 17,
+    pNeg = 55;
+  const m = document.getElementById("appleMonthSelect").value;
+  const dia = document.getElementById("appleDaySelect").value;
+
+  if (m === "MAYO") {
+    if (dia !== "TODOS" && parseInt(dia) <= 15) {
+      pM = 30;
+      pNom = 15;
+    } else if (dia === "TODOS") {
+      pM = 29;
+      pNom = 16;
+    }
+  }
+
+  document.getElementById("lblPorcMio").innerText = pM;
+  document.getElementById("lblPorcNegocio").innerText = pNeg;
+  document.getElementById("lblPorcNomina").innerText = pNom;
+
+  let base = ventasBrutasReales;
+  let miGananciaNeta =
+    Math.round(base * (pM / 100)) + (sumaIngresoExtra - sumaJeisson);
+
+  document.getElementById("valProyMio").innerText =
+    formatMoneda(miGananciaNeta);
+  document.getElementById("valProyNegocio").innerText = formatMoneda(
+    Math.round(base * (pNeg / 100)),
+  );
+  document.getElementById("valProyNomina").innerText = formatMoneda(
+    Math.round(base * (pNom / 100)),
+  );
+
+  currentMiGananciaBruta = miGananciaNeta + sumaJeisson;
+  document.getElementById("valProyMioMasJeisson").innerText = formatMoneda(
+    currentMiGananciaBruta,
+  );
+
+  const totalFlujo = ventasBrutasReales + d.gastos + d.inversiones + d.nomina;
+  let pctIn =
+    totalFlujo > 0 ? Math.round((ventasBrutasReales / totalFlujo) * 100) : 0;
+  let pctOut =
+    totalFlujo > 0
+      ? Math.round(((d.gastos + d.inversiones + d.nomina) / totalFlujo) * 100)
+      : 0;
+
+  document.getElementById("txtBarPorcIngresos").innerText = pctIn + "%";
+  document.getElementById("barFillIngresos").style.width = pctIn + "%";
+  document.getElementById("txtBarPorcGastos").innerText = pctOut + "%";
+  document.getElementById("barFillGastos").style.width = pctOut + "%";
+
+  const circVentas = 251.3;
+  const strokeDashoffsetVentas = circVentas - (pctIn / 100) * circVentas;
+  const ringVentas = document.getElementById("appleRingVentas");
+  if (ringVentas) {
+    ringVentas.style.strokeDasharray = circVentas;
+    ringVentas.style.strokeDashoffset = strokeDashoffsetVentas;
+  }
+
+  const circGastos = 163.3;
+  const strokeDashoffsetGastos = circGastos - (pctOut / 100) * circGastos;
+  const ringGastos = document.getElementById("appleRingGastos");
+  if (ringGastos) {
+    ringGastos.style.strokeDasharray = circGastos;
+    ringGastos.style.strokeDashoffset = strokeDashoffsetGastos;
+  }
+
+  // 💥 AQUÍ SE RESTAURA EL DISEÑO APPLE LIST PARA LAS TRANSACCIONES
+  const container = document.getElementById("listaDesgloseGastos");
+  if (itemsTemp.length === 0) {
+    container.innerHTML =
+      '<div class="empty-log-msg">No hay movimientos.</div>';
+    calcularDescuentoDeuda();
+    return;
+  }
+
+  let htmlBuffer = "";
+  itemsTemp.forEach((item) => {
+    const priceColor =
+      item.tipo === "INGRESO" ? "var(--ios-green)" : "var(--ios-red)";
+    htmlBuffer += `
+            <div class="apple-list-row">
+                <span class="td-cell td-date">${item.fecha}</span>
+                <span class="td-cell td-price" style="color: ${priceColor} !important;">${formatMoneda(item.monto)}</span>
+                <span class="td-cell td-desc" title="${item.detalle}">${item.detalle}</span>
+                <span class="td-cell td-cat">${item.categoria}</span>
+            </div>
+        `;
+  });
+  container.innerHTML = htmlBuffer;
+  calcularDescuentoDeuda();
+}
+
+function guardarTransaccion(e) {
+  e.preventDefault();
+  if (isWorking) return;
+
+  const catVal = encodeURIComponent(
+    document.getElementById("finCategoria").value,
+  );
+  const montoRaw = document.getElementById("finMonto").value.replace(/\D/g, "");
+
+  if (!montoRaw || parseInt(montoRaw) <= 0) {
+    alert("Ingresa un monto válido.");
+    return;
+  }
+
+  isWorking = true;
+  const btn = document.getElementById("btnSubmit");
+  const originalText = btn.innerText;
+  btn.innerText = "Procesando...";
+  btn.disabled = true;
+
+  window.saveCallbackFinanzas = function (res) {
+    isWorking = false;
+    btn.innerText = originalText;
+    btn.disabled = false;
+    delete window.saveCallbackFinanzas;
+
+    if (res.status === "success") {
+      document.getElementById("formFinanzas").reset();
+      cargarDashboardFinanzas();
+    } else {
+      alert("Error: " + res.message);
+    }
+  };
+
+  const script = document.createElement("script");
+  script.src = `${GOOGLE_SCRIPT_URL}?action=registrarTransaccionFinanciera&categoria=${catVal}&monto=${montoRaw}&detalle=${encodeURIComponent(document.getElementById("finDetalle").value)}&callback=saveCallbackFinanzas&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+}
+
+function exportarExcelEmpresarial() {
+  if (!globalFinanzasData) {
+    alert("Espera que carguen los datos primero.");
+    return;
+  }
+  // Lógica rápida de exportación CSV basada en globalFinanzasData.listaDetallada
+  let csvContent =
+    "data:text/csv;charset=utf-8,FECHA,MONTO,DETALLE,CATEGORIA,TIPO\n";
+  globalFinanzasData.listaDetallada.forEach((row) => {
+    csvContent += `${row.fecha},${row.monto},"${row.detalle}","${row.categoria}",${row.tipo}\n`;
+  });
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute(
+    "download",
+    `Finanzas_Cybernet_${document.getElementById("appleMonthSelect").value}.csv`,
+  );
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }
