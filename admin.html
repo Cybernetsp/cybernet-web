@@ -73,9 +73,9 @@
     <nav class="ios-bottom-bar" id="controlPanel" style="display: none">
       <button
         class="ios-tab-btn"
-        onclick="window.location.href = 'finanzas.html'"
+        onclick="toggleFinanzasPanel()"
         id="btnCajaFinanzas"
-        style="display: none; color: var(--ios-green)"
+        style="color: var(--ios-green)"
       >
         <svg
           viewBox="0 0 24 24"
@@ -89,26 +89,6 @@
           <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path>
         </svg>
         CAJA
-      </button>
-
-      <button
-        class="ios-tab-btn"
-        id="btnSuspendidas"
-        onclick="toggleSuspendidasPanel()"
-        style="display: none; color: var(--ios-red)"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="15" y1="9" x2="9" y2="15"></line>
-          <line x1="9" y1="9" x2="15" y2="15"></line>
-        </svg>
-        BLOQUEOS
       </button>
 
       <div
@@ -2601,7 +2581,7 @@
                 font-size: 0.95rem;
               "
             >
-              Agregar Descuento Manual
+              Registrar Adelanto / Descuento
             </h4>
             <form
               class="flex-col"
@@ -2622,12 +2602,23 @@
                 <option value="ANGELICA">ANGELICA</option>
                 <option value="KATHERINE">KATHERINE</option>
               </select>
+
+              <select
+                id="descNomTipo"
+                class="input-ios"
+                style="margin: 0"
+                required
+              >
+                <option value="ADELANTO">Adelanto de Sueldo</option>
+                <option value="DESCUENTO">Descuento / Multa</option>
+              </select>
+
               <input
                 type="text"
                 id="descNomMonto"
                 class="input-ios"
                 style="margin: 0"
-                placeholder="Monto a descontar (Ej: 10000)"
+                placeholder="Monto (Ej: $50.000)"
                 oninput="formatearMontoEnVivoCOP(this)"
                 required
               />
@@ -2636,7 +2627,7 @@
                 id="descNomConcepto"
                 class="input-ios"
                 style="margin: 0"
-                placeholder="Concepto (Ej: 1 Disney Premium)"
+                placeholder="Motivo (Ej: Préstamo almuerzo)"
                 required
               />
               <button
@@ -2644,7 +2635,7 @@
                 id="btnSubmitDescNom"
                 class="btn-ios btn-danger w-100 mt-1"
               >
-                Aplicar Descuento
+                Aplicar a la Nómina
               </button>
             </form>
           </div>
@@ -3198,170 +3189,7 @@
         </div>
       </div>
     </div>
-    <div class="overlay-ios" id="suspendidasOverlay">
-      <div class="sheet-ios" onclick="event.stopPropagation()">
-        <div
-          class="sheet-header"
-          style="
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 12px;
-            align-items: center;
-          "
-        >
-          <h3
-            class="card-title"
-            style="color: var(--ios-red); font-size: 1.05rem"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              style="margin-right: 4px"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="15" y1="9" x2="9" y2="15"></line>
-              <line x1="9" y1="9" x2="15" y2="15"></line>
-            </svg>
-            Bloqueos
-          </h3>
 
-          <div style="display: flex; align-items: center; gap: 8px">
-            <button
-              class="btn-ios btn-secondary"
-              style="
-                padding: 6px 12px;
-                font-size: 0.75rem;
-                color: var(--ios-purple);
-                background: rgba(191, 90, 242, 0.1);
-                border-color: rgba(191, 90, 242, 0.3);
-                margin: 0;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-              "
-              onclick="toggleNeyopPanel()"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                <path d="M2 17l10 5 10-5"></path>
-                <path d="M2 12l10 5 10-5"></path>
-              </svg>
-              NEYOP
-            </button>
-            <button
-              class="btn-close-circle"
-              style="margin: 0"
-              onclick="toggleSuspendidasPanel()"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-
-        <div
-          class="flex-col"
-          style="padding: 15px; overflow-y: auto; flex-grow: 1"
-        >
-          <div
-            class="empty-log-msg"
-            style="color: var(--text-secondary); margin-top: 20px"
-          >
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              style="margin-bottom: 10px; opacity: 0.5"
-            >
-              <path
-                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 9.36l-7.1 7.1a1 1 0 0 1-1.4 0l-2.8-2.8a1 1 0 0 1 0-1.4l7.1-7.1a6 6 0 0 1 9.36-7.94z"
-              ></path>
-            </svg>
-            <br />Módulo de suspendidas en construcción... <br />Aquí irá la
-            base de datos.
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="overlay-ios" id="neyopOverlay" style="z-index: 17000">
-      <div class="sheet-ios" onclick="event.stopPropagation()">
-        <div
-          class="sheet-header"
-          style="
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 12px;
-            align-items: center;
-          "
-        >
-          <h3
-            class="card-title"
-            style="color: var(--ios-purple); font-size: 1.05rem"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              style="margin-right: 4px"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-              <path d="M2 17l10 5 10-5"></path>
-              <path d="M2 12l10 5 10-5"></path>
-            </svg>
-            Módulo NEYOP
-          </h3>
-          <button
-            class="btn-close-circle"
-            style="margin: 0"
-            onclick="toggleNeyopPanel()"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div
-          class="flex-col"
-          style="padding: 15px; overflow-y: auto; flex-grow: 1"
-        >
-          <div
-            class="empty-log-msg"
-            style="color: var(--text-secondary); margin-top: 20px"
-          >
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              style="margin-bottom: 10px; opacity: 0.5"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <br />Entorno NEYOP en construcción... <br />Listo para programar la
-            base de datos.
-          </div>
-        </div>
-      </div>
-    </div>
     <div class="overlay-ios" id="promoOverlay">
       <div class="sheet-ios" onclick="event.stopPropagation()">
         <div
@@ -4067,6 +3895,872 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="overlay-ios" id="finanzasOverlay" style="z-index: 10000">
+      <div
+        class="sheet-ios"
+        onclick="event.stopPropagation()"
+        style="
+          max-width: 1250px !important;
+          width: 98%;
+          height: 95vh;
+          max-height: 900px;
+          display: flex;
+          flex-direction: column;
+          padding: 0;
+        "
+      >
+        <div
+          class="sheet-header"
+          style="
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: center;
+          "
+        >
+          <h3
+            class="card-title"
+            style="
+              color: var(--ios-green);
+              font-size: 1.1rem;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+            </svg>
+            Módulo Financiero
+          </h3>
+          <div style="display: flex; gap: 8px">
+            <button
+              class="btn-ios btn-secondary"
+              style="padding: 6px 12px; font-size: 0.8rem; border-radius: 8px"
+              onclick="exportarExcelEmpresarial()"
+            >
+              📥 Exportar Reporte
+            </button>
+            <button
+              class="btn-ios btn-secondary"
+              style="padding: 6px 12px; font-size: 0.8rem; border-radius: 8px"
+              onclick="cargarDashboardFinanzas()"
+            >
+              🔄 Refrescar
+            </button>
+            <button
+              class="btn-close-circle"
+              style="margin: 0"
+              onclick="toggleFinanzasPanel()"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div
+          style="
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: transparent;
+          "
+        >
+          <section class="card-ios" style="width: 100%; margin: 0">
+            <div class="filter-wrapper-ios">
+              <div class="flex-row" style="gap: 10px; min-width: 200px">
+                <div
+                  style="
+                    background: rgba(48, 209, 88, 0.15);
+                    padding: 8px;
+                    border-radius: 12px;
+                    color: var(--ios-green);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <div style="text-align: left">
+                  <span
+                    style="
+                      display: block;
+                      font-size: 0.85rem;
+                      font-weight: 800;
+                      color: var(--text-primary);
+                    "
+                    id="welcomeUserName"
+                    >Filtros de Búsqueda</span
+                  >
+                  <span
+                    style="
+                      display: block;
+                      font-size: 0.72rem;
+                      color: var(--text-secondary);
+                    "
+                    >Base de Datos Contable</span
+                  >
+                </div>
+              </div>
+              <div class="filter-group-center">
+                <div class="pod-selector">
+                  <span
+                    style="
+                      font-size: 0.8rem;
+                      font-weight: 600;
+                      color: var(--text-secondary);
+                      padding-left: 4px;
+                    "
+                    >Mes</span
+                  >
+                  <select
+                    id="appleMonthSelect"
+                    class="input-ios"
+                    style="
+                      margin-bottom: 0;
+                      width: auto;
+                      padding: 4px 28px 4px 8px;
+                      background-color: transparent;
+                      border: none;
+                      font-size: 0.88rem;
+                      font-weight: 700;
+                    "
+                    onchange="actualizarFiltrosUI()"
+                  ></select>
+                </div>
+                <div class="pod-selector">
+                  <span
+                    style="
+                      font-size: 0.8rem;
+                      font-weight: 600;
+                      color: var(--text-secondary);
+                      padding-left: 4px;
+                    "
+                    >Día</span
+                  >
+                  <select
+                    id="appleDaySelect"
+                    class="input-ios"
+                    style="
+                      margin-bottom: 0;
+                      width: auto;
+                      padding: 4px 28px 4px 8px;
+                      background-color: transparent;
+                      border: none;
+                      font-size: 0.88rem;
+                      font-weight: 700;
+                    "
+                    onchange="actualizarFiltrosUI()"
+                  ></select>
+                </div>
+
+                <button
+                  type="button"
+                  class="btn-ios btn-secondary"
+                  style="
+                    padding: 6px 16px;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    border-radius: 12px;
+                    background: rgba(10, 132, 255, 0.15);
+                    color: var(--ios-blue);
+                    border: 0.5px solid rgba(10, 132, 255, 0.25);
+                  "
+                  onclick="filtrarHoy()"
+                >
+                  Hoy
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-ios btn-secondary"
+                  style="
+                    padding: 6px 16px;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    border-radius: 12px;
+                    background: rgba(255, 149, 0, 0.15);
+                    color: #ff9500;
+                    border: 0.5px solid rgba(255, 149, 0, 0.25);
+                    margin-left: 5px;
+                  "
+                  onclick="filtrarAyer()"
+                >
+                  Ayer
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-ios btn-secondary"
+                  style="
+                    padding: 6px 16px;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    border-radius: 12px;
+                    background: rgba(48, 209, 88, 0.15);
+                    color: var(--ios-green);
+                    border: 0.5px solid rgba(48, 209, 88, 0.25);
+                    margin-left: 5px;
+                  "
+                  onclick="filtrarMes()"
+                >
+                  Mes
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section
+            class="card-ios executive-panoramic-hub"
+            style="width: 100%; margin: 0"
+          >
+            <div class="balance-hero-section">
+              <span
+                class="text-secondary"
+                id="txtPeriodoLabel"
+                style="
+                  font-size: 0.85rem;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                "
+                >Caja Real Mensual</span
+              >
+              <span
+                class="main-price-lbl"
+                id="val_neto"
+                style="color: var(--ios-green)"
+                >$0</span
+              >
+              <div class="status-pill-container">
+                <div class="status-dot" id="statusIndicator"></div>
+                <span
+                  class="text-secondary"
+                  style="font-size: 0.8rem; font-weight: 600"
+                  >Red de balances verificada</span
+                >
+              </div>
+            </div>
+            <div
+              class="chart-layout-box"
+              style="
+                border-left: 1px solid rgba(255, 255, 255, 0.06);
+                padding-left: 20px;
+              "
+            >
+              <svg class="apple-ring-svg" viewBox="0 0 100 100">
+                <circle class="ring-bg" cx="50" cy="50" r="40"></circle>
+                <circle
+                  class="ring-fill-ingresos"
+                  id="appleRingVentas"
+                  cx="50"
+                  cy="50"
+                  r="40"
+                ></circle>
+                <circle class="ring-bg" cx="50" cy="50" r="26"></circle>
+                <circle
+                  class="ring-fill-gastos"
+                  id="appleRingGastos"
+                  cx="50"
+                  cy="50"
+                  r="26"
+                ></circle>
+              </svg>
+              <div class="bar-chart-container">
+                <div class="bar-row">
+                  <div class="bar-meta">
+                    <span>Ingresos Totales</span
+                    ><span id="txtBarPorcIngresos">0%</span>
+                  </div>
+                  <div class="bar-track">
+                    <div
+                      class="bar-fill"
+                      id="barFillIngresos"
+                      style="background: var(--ios-blue)"
+                    ></div>
+                  </div>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-meta">
+                    <span>Gastos Operativos</span
+                    ><span id="txtBarPorcGastos">0%</span>
+                  </div>
+                  <div class="bar-track">
+                    <div
+                      class="bar-fill"
+                      id="barFillGastos"
+                      style="background: var(--ios-red)"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="bento-horizontal-grid" style="margin: 0">
+            <div class="card-ios" style="margin: 0">
+              <span
+                class="text-secondary"
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                "
+                >Ventas Brutas</span
+              ><span
+                style="
+                  font-size: 1.6rem;
+                  font-weight: 700;
+                  color: var(--ios-blue);
+                "
+                id="val_ingresos"
+                >$0</span
+              >
+            </div>
+            <div class="card-ios" style="margin: 0">
+              <span
+                class="text-secondary"
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                "
+                >Gastos Caja</span
+              ><span
+                style="
+                  font-size: 1.6rem;
+                  font-weight: 700;
+                  color: var(--ios-red);
+                "
+                id="val_gastos"
+                >$0</span
+              >
+            </div>
+            <div class="card-ios" style="margin: 0">
+              <span
+                class="text-secondary"
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                "
+                >Inversiones</span
+              ><span
+                style="font-size: 1.6rem; font-weight: 700; color: #ff9f0a"
+                id="val_inversiones"
+                >$0</span
+              >
+            </div>
+            <div class="card-ios" style="margin: 0">
+              <span
+                class="text-secondary"
+                style="
+                  font-size: 0.75rem;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                "
+                >Staff Nómina</span
+              ><span
+                style="font-size: 1.6rem; font-weight: 700; color: #bf5af2"
+                id="val_nomina"
+                >$0</span
+              >
+            </div>
+          </section>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+              gap: 20px;
+            "
+          >
+            <section class="card-ios" style="width: 100%; margin: 0">
+              <div class="flex-row-between mb-1">
+                <span
+                  class="text-secondary"
+                  style="
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                  "
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--ios-purple)"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                    ></polygon>
+                  </svg>
+                  Rentabilidad Real por Plataforma (Ventas vs Costos)
+                </span>
+              </div>
+              <div
+                id="rankingPlataformasVentas"
+                class="flex-col"
+                style="gap: 16px; max-height: 250px; overflow-y: auto"
+              >
+                <div class="empty-log-msg" style="padding: 15px">
+                  Calculando rentabilidad...
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="card-ios distribution-hub-panel"
+              style="width: 100%; margin: 0"
+            >
+              <span
+                class="text-secondary mb-1"
+                style="
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                "
+                >📋 Distribución Ponderada s/ Ventas Brutas</span
+              >
+              <div class="dist-grid-layout mt-1">
+                <div class="flex-col" style="gap: 4px">
+                  <span
+                    class="text-secondary"
+                    style="font-size: 0.8rem; font-weight: 600"
+                    >Mi Ganancia (<span id="lblPorcMio">28</span>%)</span
+                  ><span
+                    style="
+                      font-size: 1.85rem;
+                      font-weight: 700;
+                      color: var(--ios-green);
+                    "
+                    id="valProyMio"
+                    >$0</span
+                  >
+                </div>
+                <div class="flex-col" style="gap: 4px">
+                  <span
+                    class="text-secondary"
+                    style="font-size: 0.8rem; font-weight: 600"
+                    >Fondo Negocio (<span id="lblPorcNegocio">55</span>%)</span
+                  ><span
+                    style="
+                      font-size: 1.85rem;
+                      font-weight: 700;
+                      color: var(--ios-blue);
+                    "
+                    id="valProyNegocio"
+                    >$0</span
+                  >
+                </div>
+                <div class="flex-col" style="gap: 4px">
+                  <span
+                    class="text-secondary"
+                    style="font-size: 0.8rem; font-weight: 600"
+                    >Reserva Nómina (<span id="lblPorcNomina">17</span>%)</span
+                  ><span
+                    style="font-size: 1.85rem; font-weight: 700; color: #bf5af2"
+                    id="valProyNomina"
+                    >$0</span
+                  >
+                </div>
+                <div
+                  class="flex-col"
+                  style="
+                    gap: 4px;
+                    border-left: 1px solid rgba(255, 255, 255, 0.1);
+                    padding-left: 15px;
+                  "
+                >
+                  <span
+                    class="text-secondary"
+                    style="font-size: 0.8rem; font-weight: 600"
+                    >Enviado por Jeisson</span
+                  ><span
+                    style="
+                      font-size: 1.85rem;
+                      font-weight: 700;
+                      color: var(--ios-green);
+                    "
+                    id="valProyJeisson"
+                    >$0</span
+                  >
+                </div>
+                <div
+                  class="flex-col"
+                  style="
+                    gap: 4px;
+                    border-left: 1px solid rgba(255, 255, 255, 0.1);
+                    padding-left: 15px;
+                  "
+                >
+                  <span
+                    class="text-secondary"
+                    style="font-size: 0.8rem; font-weight: 600"
+                    >Ganancia Total (+ Jeisson)</span
+                  ><span
+                    style="
+                      font-size: 1.85rem;
+                      font-weight: 700;
+                      color: var(--ios-green);
+                    "
+                    id="valProyMioMasJeisson"
+                    >$0</span
+                  >
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="workspace-action-grid" style="width: 100%; margin: 0">
+            <section
+              class="card-ios debt-hub-panel"
+              style="
+                width: 100%;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+              "
+            >
+              <div class="flex-row-between mb-1">
+                <span
+                  class="text-secondary"
+                  style="
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                  "
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                    ></path>
+                  </svg>
+                  Amortización de Deuda al Negocio
+                </span>
+                <div
+                  class="badge-ios"
+                  style="
+                    background: rgba(255, 159, 10, 0.1);
+                    color: #ff9f0a;
+                    border: 1px solid rgba(255, 159, 10, 0.3);
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    padding: 4px 8px;
+                  "
+                >
+                  CALCULADORA EN VIVO
+                </div>
+              </div>
+              <div class="dist-grid-layout mt-1" style="flex-grow: 1">
+                <div class="flex-col" style="gap: 4px">
+                  <span
+                    class="text-secondary"
+                    style="font-size: 0.8rem; font-weight: 600"
+                    >Escribe tu Deuda Actual ($)</span
+                  >
+                  <input
+                    type="text"
+                    id="valDeudaTotal"
+                    class="input-ios"
+                    value="$0"
+                    oninput="
+                      formatearMontoEnVivoCOP(this);
+                      calcularDescuentoDeuda();
+                    "
+                    placeholder="$0"
+                    style="
+                      font-size: 1.85rem;
+                      font-weight: 700;
+                      color: #ff453a;
+                      background: transparent;
+                      border: none;
+                      padding: 0;
+                      text-align: left;
+                      box-shadow: none;
+                    "
+                  />
+                </div>
+                <div class="flex-col" style="gap: 4px; justify-content: center">
+                  <span
+                    class="text-secondary"
+                    style="font-size: 0.8rem; font-weight: 600"
+                    >Modo de Pago</span
+                  >
+                  <select
+                    id="modoDescuentoDeuda"
+                    class="input-ios"
+                    style="
+                      font-size: 0.8rem;
+                      padding: 6px 12px;
+                      font-weight: 700;
+                    "
+                    onchange="calcularDescuentoDeuda()"
+                  >
+                    <option value="90">Descontar 90% de mi ganancia</option>
+                    <option value="dias">Dividir deuda en X días</option>
+                  </select>
+                  <div id="divDiasDeuda" style="display: none; margin-top: 5px">
+                    <input
+                      type="number"
+                      id="inputDiasDeuda"
+                      class="input-ios"
+                      placeholder="Días (Ej: 15)"
+                      value="5"
+                      min="1"
+                      oninput="calcularDescuentoDeuda()"
+                      style="font-size: 0.8rem; padding: 6px 12px; width: 100%"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="flex-col"
+                  style="
+                    gap: 4px;
+                    border-left: 1px solid rgba(255, 255, 255, 0.1);
+                    padding-left: 15px;
+                  "
+                >
+                  <span
+                    class="text-secondary"
+                    style="font-size: 0.8rem; font-weight: 600"
+                    >Descuento Sugerido (Hoy)</span
+                  >
+                  <span
+                    style="font-size: 1.85rem; font-weight: 700; color: #ff9f0a"
+                    id="valDescuentoHoy"
+                    >$0</span
+                  >
+                </div>
+              </div>
+            </section>
+
+            <div class="card-ios" style="height: fit-content; margin: 0">
+              <h3 class="card-title" style="color: var(--text-primary)">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--ios-blue)"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 20h9"></path>
+                  <path
+                    d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                  ></path>
+                </svg>
+                Registrar Movimiento Manual
+              </h3>
+              <form
+                id="formFinanzas"
+                class="flex-col"
+                onsubmit="guardarTransaccion(event)"
+              >
+                <div class="flex-col" style="gap: 4px">
+                  <label
+                    class="text-secondary"
+                    style="
+                      font-size: 0.76rem;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                    "
+                    >Categoría Contable</label
+                  >
+                  <select id="finCategoria" class="input-ios" required>
+                    <option value="" disabled selected>
+                      Selecciona una opción...
+                    </option>
+                    <option value="Comida">Comida</option>
+                    <option value="Chayo">Chayo</option>
+                    <option value="Salud/médicos">Salud/médicos</option>
+                    <option value="Vivienda">Vivienda</option>
+                    <option value="Transporte">Transporte</option>
+                    <option value="Gastos personales">Gastos personales</option>
+                    <option value="Mascotas">Mascotas</option>
+                    <option value="Servicios (luz, agua, gas, etc.)">
+                      Servicios (luz, agua, gas, etc.)
+                    </option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="Deuda">Deuda</option>
+                    <option value="Otros">Otros</option>
+                    <option value="Netflix">Netflix</option>
+                    <option value="Cuentas (amazon, disney, etc)">
+                      Cuentas (amazon, disney, etc)
+                    </option>
+                    <option value="Adelanto">
+                      🔴 Pedir Adelanto (Me endeuda)
+                    </option>
+                    <option value="Abono Deuda">
+                      🟢 Abono a Deuda (Pago al negocio)
+                    </option>
+                    <option value="Pago ayudantes">Pago ayudantes</option>
+                    <option value="Angelica">Angelica</option>
+                    <option value="Disney premium">Disney premium</option>
+                    <option value="Ingreso Extra">➕ Ingreso Extra</option>
+                    <option value="Inyección Capital">
+                      ➕ Inyección Capital
+                    </option>
+                  </select>
+                </div>
+                <div class="flex-col" style="gap: 4px">
+                  <label
+                    class="text-secondary"
+                    style="
+                      font-size: 0.76rem;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                    "
+                    >Monto Operación ($)</label
+                  >
+                  <input
+                    type="text"
+                    id="finMonto"
+                    class="input-ios"
+                    placeholder="Ej: $50.000"
+                    oninput="formatearMontoEnVivoCOP(this)"
+                    required
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="flex-col" style="gap: 4px">
+                  <label
+                    class="text-secondary"
+                    style="
+                      font-size: 0.76rem;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                    "
+                    >Nota Descriptiva</label
+                  >
+                  <input
+                    type="text"
+                    id="finDetalle"
+                    class="input-ios"
+                    placeholder="Ej: Venta de artículo usado"
+                    required
+                    autocomplete="off"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  id="btnSubmit"
+                  class="btn-ios btn-primary w-100 mt-1"
+                >
+                  Archivar Movimiento
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div
+            class="card-ios"
+            style="
+              display: flex;
+              flex-direction: column;
+              margin: 0;
+              width: 100%;
+            "
+          >
+            <div class="flex-row-between mb-1">
+              <span
+                class="card-title"
+                style="
+                  color: var(--text-primary);
+                  margin-bottom: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                "
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--ios-blue)"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  ></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Distribución de Egresos e Ingresos
+              </span>
+              <span
+                class="text-secondary"
+                style="font-size: 0.76rem; font-weight: 700"
+                id="txtLibroHeader"
+                >Ciclo Activo</span
+              >
+            </div>
+            <div class="apple-list-container">
+              <div class="apple-table-header-row">
+                <span class="th-cell" style="width: 18%">Fecha</span>
+                <span class="th-cell" style="width: 22%">Valor</span>
+                <span class="th-cell" style="width: 38%">Descripción</span>
+                <span class="th-cell" style="width: 22%; text-align: right"
+                  >Categoría</span
+                >
+              </div>
+              <div id="listaDesgloseGastos">
+                <div class="empty-log-msg">
+                  Sincronizando registros contables...
+                </div>
+              </div>
             </div>
           </div>
         </div>
