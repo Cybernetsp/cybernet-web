@@ -3165,7 +3165,7 @@ function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
 }
 
 function inicializarWorkspace() {
-  renderGrid();
+  cargarPlantillasDesdeSheets(); // 👈 Descarga los mensajes en vivo al entrar
   startShiftTimer();
   iniciarControlInactividad();
   cargarHorasDesdeSheets();
@@ -5509,4 +5509,88 @@ function exportarExcelEmpresarial() {
   document.body.appendChild(link);
   link.click();
   link.remove();
+}
+
+// =========================================================================
+// 🚀 MOTOR DINÁMICO: CARGAR TEXTOS Y MENSAJES DESDE GOOGLE SHEETS
+// =========================================================================
+window.currentGridStock = []; // Memoria global para las plantillas descargadas
+
+function cargarPlantillasDesdeSheets() {
+  const container = document.getElementById("grid-container");
+  if (container)
+    container.innerHTML =
+      '<div class="empty-log-msg">Sincronizando mensajes desde Sheets...</div>';
+
+  const cbName = "cb_plantillas_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      const data = res.data;
+      window.currentGridStock = [];
+
+      data.forEach((item) => {
+        // Si el título es PAGOS, se renderiza de forma especial en la parte del QR
+        if (item.titulo.toUpperCase() === "PAGOS") {
+          const headerContainer = document.getElementById("header-container");
+          if (headerContainer) {
+            headerContainer.innerHTML = `
+              <div class="card-ios w-100" style="max-width: 440px;">
+                <h2 class="card-title text-center" style="justify-content:center;">${item.titulo}</h2>
+                <img src="${item.imagenUrl}" alt="QR" style="max-width:210px; width:100%; border-radius:16px; border:var(--glass-border); box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto;">
+                <span class="text-secondary text-center" style="font-size:0.75rem; margin-top:-8px; font-weight:500;">(Mantén presionado o clic derecho para copiar imagen)</span>
+                <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${item.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">COPIAR TEXTO</button>
+              </div>
+            `;
+          }
+        } else {
+          // Si es cualquier otro mensaje, va para las tarjetas del buscador inferior
+          window.currentGridStock.push(item);
+        }
+      });
+
+      // Una vez distribuidos, pintamos el catálogo en pantalla
+      renderGrid("");
+    } else {
+      if (container)
+        container.innerHTML =
+          '<div class="empty-log-msg" style="color:var(--ios-red);">❌ Error al descargar mensajes.</div>';
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPlantillas&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+}
+
+// Reemplazo de tu antigua función renderGrid por una que lea la memoria de Sheets
+function renderGrid(filtro = "") {
+  const gridContainer = document.getElementById("grid-container");
+  if (!gridContainer || !window.currentGridStock) return;
+  gridContainer.innerHTML = "";
+
+  // Filtramos las tarjetas según lo que escribas en el buscador superior
+  let filtrados = window.currentGridStock.filter((item) =>
+    item.titulo.toLowerCase().includes(filtro.toLowerCase()),
+  );
+
+  if (filtrados.length === 0) {
+    gridContainer.innerHTML =
+      '<div class="empty-log-msg">No se encontraron plantillas con ese nombre.</div>';
+    return;
+  }
+
+  filtrados.forEach((currentItem) => {
+    const card = document.createElement("div");
+    card.className = "card-ios";
+    card.innerHTML = `
+      <h2 class="card-title" style="justify-content:center;">${currentItem.titulo}</h2>
+      <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${currentItem.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">COPIAR TEXTO</button>
+    `;
+    gridContainer.appendChild(card);
+  });
 }
