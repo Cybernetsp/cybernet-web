@@ -976,13 +976,6 @@
       onclick="toggleTheme()"
       aria-label="Cambiar tema"
     ></button>
-
-    <a
-      href="admin.html"
-      id="staff-link-btn"
-      class="staff-toggle-btn"
-      aria-label="Área Staff"
-    >
       <svg
         width="20"
         height="20"
@@ -1935,7 +1928,7 @@
         window.addEventListener("load", () => {
           // Aquí es donde está el truco: le decimos que instale la versión 2
           navigator.serviceWorker
-            .register("sw.js?v=12.0")
+            .register("sw.js?v=13.0")
             .then((reg) => {
               console.log("Cybernet App lista para instalar");
 
