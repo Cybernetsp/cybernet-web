@@ -217,7 +217,8 @@ function comprobarProveedorDinamico() {
 
 function ejecutarCargaLote(e) {
   e.preventDefault();
-  haptic();
+  // Si tienes una función haptic() definida en tu JS, déjala; si no, coméntala.
+  if (typeof haptic === "function") haptic();
 
   const btnSubmit = document.getElementById("btnSubmitCarga");
   const plataforma = document.getElementById("loadPlataforma").value;
@@ -227,41 +228,80 @@ function ejecutarCargaLote(e) {
     .value.trim();
   const bloqueCuentas = document.getElementById("loadCuentasBloque").value;
 
-  const regexEmailPass =
-    /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})[:\s|]([^\s\n\r]+)/g;
-  let matches;
   let listaCuentasExtraidas = [];
 
-  while ((matches = regexEmailPass.exec(bloqueCuentas)) !== null) {
-    let user = matches[1].trim();
-    let pass = matches[2].trim();
-    if (
-      user &&
-      pass &&
-      pass.length > 1 &&
-      !pass.toLowerCase().includes("valor") &&
-      !pass.toLowerCase().includes("subtotal")
-    ) {
-      listaCuentasExtraidas.push(user + " " + pass);
+  // =========================================================================
+  // 1. NUEVA LÓGICA: Detección de Bloques Detallados (Cuenta: ... Contraseña: ...)
+  // =========================================================================
+  const esBloqueDetallado =
+    /(?:Cuenta|Correo|Email):\s*([^\n\r]+)/i.test(bloqueCuentas) &&
+    /(?:Contraseña|Clave|Password):\s*([^\n\r]+)/i.test(bloqueCuentas);
+
+  if (esBloqueDetallado) {
+    const regexCuenta = /(?:Cuenta|Correo|Email):\s*([^\s\n\r]+)/gi;
+    const regexClave = /(?:Contraseña|Clave|Password):\s*([^\s\n\r]+)/gi;
+
+    let cuentas = [];
+    let matchC;
+    while ((matchC = regexCuenta.exec(bloqueCuentas)) !== null) {
+      cuentas.push(matchC[1].trim());
+    }
+
+    let claves = [];
+    let matchP;
+    while ((matchP = regexClave.exec(bloqueCuentas)) !== null) {
+      claves.push(matchP[1].trim());
+    }
+
+    // Emparejamos los correos con sus respectivas contraseñas
+    const limite = Math.min(cuentas.length, claves.length);
+    for (let i = 0; i < limite; i++) {
+      if (cuentas[i] && claves[i]) {
+        listaCuentasExtraidas.push(cuentas[i] + " " + claves[i]);
+      }
     }
   }
+  // =========================================================================
+  // 2. LÓGICA CLÁSICA: Extracción Tradicional (correo:clave o correo clave)
+  // =========================================================================
+  else {
+    const regexEmailPass =
+      /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})[:\s|]+([^\s\n\r]+)/g;
+    let matches;
 
-  if (listaCuentasExtraidas.length === 0) {
-    let lineas = bloqueCuentas.split("\n");
-    listaCuentasExtraidas = lineas
-      .map((linea) => {
-        let l = linea.trim();
-        if (l.includes(":") && !l.includes("|") && !l.includes(" ")) {
-          return l.replace(":", " ");
-        }
-        return l;
-      })
-      .filter((l) => l.length > 0);
+    while ((matches = regexEmailPass.exec(bloqueCuentas)) !== null) {
+      let user = matches[1].trim();
+      let pass = matches[2].trim();
+      if (
+        user &&
+        pass &&
+        pass.length > 1 &&
+        !pass.toLowerCase().includes("valor") &&
+        !pass.toLowerCase().includes("subtotal")
+      ) {
+        listaCuentasExtraidas.push(user + " " + pass);
+      }
+    }
+
+    // Modo rescate extremo línea por línea si falla el Regex
+    if (listaCuentasExtraidas.length === 0) {
+      let lineas = bloqueCuentas.split("\n");
+      listaCuentasExtraidas = lineas
+        .map((linea) => {
+          let l = linea.trim();
+          if (l.includes(":") && !l.includes("|") && !l.includes(" ")) {
+            return l.replace(":", " ");
+          }
+          return l;
+        })
+        .filter((l) => l.length > 0 && l.includes("@")); // Nos aseguramos que al menos tenga un @
+    }
   }
 
   const bloqueCuentasFinal = listaCuentasExtraidas.join("\n");
   const proveedorFinal = selectProv === "OTRO" ? proveedorManual : selectProv;
 
+  // Validación de extracción vacía
   if (bloqueCuentasFinal.trim() === "") {
     triggerToast(
       `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>No se detectaron credenciales válidas.</span></div>`,
@@ -269,6 +309,7 @@ function ejecutarCargaLote(e) {
     return;
   }
 
+  // Validación de proveedor manual
   if (selectProv === "OTRO" && proveedorFinal === "") {
     triggerToast(
       `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> <span>Escribe el nombre del nuevo proveedor.</span></div>`,
@@ -276,12 +317,14 @@ function ejecutarCargaLote(e) {
     return;
   }
 
+  // Interfaz de carga
   btnSubmit.disabled = true;
   btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Inyectando en Sheets...`;
 
   const oldScript = document.getElementById("cyber_cargamasiva_node");
   if (oldScript) oldScript.remove();
 
+  // Función de retorno desde Apps Script
   window.procesarCargaLoteSheets = function (res) {
     const scriptNode = document.getElementById("cyber_cargamasiva_node");
     if (scriptNode) scriptNode.remove();
@@ -311,12 +354,15 @@ function ejecutarCargaLote(e) {
             clave: claveUser,
           });
 
-          renderizarTarjetaHistorial(
-            plataforma,
-            proveedorFinal,
-            correoUser,
-            claveUser,
-          );
+          // Si tienes esta función, la llamamos para actualizar la UI
+          if (typeof renderizarTarjetaHistorial === "function") {
+            renderizarTarjetaHistorial(
+              plataforma,
+              proveedorFinal,
+              correoUser,
+              claveUser,
+            );
+          }
         }
       });
 
@@ -326,7 +372,10 @@ function ejecutarCargaLote(e) {
       );
       document.getElementById("formCargarCuentas").reset();
       document.getElementById("wrapperProveedorManual").style.display = "none";
-      cargarResumenProveedores();
+
+      // Actualizamos UI
+      if (typeof cargarResumenProveedores === "function")
+        cargarResumenProveedores();
     } else {
       triggerToast(
         `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Error: ${res ? res.message : "Fallo de comunicación."}</span></div>`,
@@ -337,7 +386,7 @@ function ejecutarCargaLote(e) {
   const scriptElement = document.createElement("script");
   scriptElement.id = "cyber_cargamasiva_node";
   let queryParams = `?action=cargarCuentasMasivo&plataforma=${encodeURIComponent(plataforma)}&proveedor=${encodeURIComponent(proveedorFinal)}&bloqueCuentas=${encodeURIComponent(bloqueCuentasFinal)}&callback=procesarCargaLoteSheets&_ts=${Date.now()}`;
-  scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
+  scriptElement.src = GOOGLE_SCRIPT_URL + queryParams; // Asegúrate de tener GOOGLE_SCRIPT_URL definida en tu JS
   document.body.appendChild(scriptElement);
 }
 
