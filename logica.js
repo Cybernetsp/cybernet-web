@@ -1266,6 +1266,14 @@ function ejecutarCreacionVentaLocal(e) {
       if (res && res.status === "success") {
         let Richmond = `🔔 *NOTIFICACIÓN DE RECARGA CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${res.revendedor}\n💰 *Monto Inyectado:* $${Math.round(res.recargadoBase).toLocaleString("es-CO")}\n🎁 *Bono Otorgado:* ${res.bonoAplicado}%\n📈 *Saldo de Regalo:* +$${Math.round(res.regaloAdicional).toLocaleString("es-CO")}\n💵 *Nuevo Saldo Total:* $${Math.round(res.nuevoSaldo).toLocaleString("es-CO")}\n────────────────────\n✨ _¡Tu saldo acumulado ya se encuentra disponible para compras!_`;
 
+        // =========================================================================
+        // 🔥 SOLUCIÓN AQUÍ: Sincronizamos la variable global y mostramos el botón
+        // =========================================================================
+        window.textoSaldoRevendedorGlobal = Richmond;
+        let btnSaldo = document.getElementById("btnCopiarSaldoRevendedor");
+        if (btnSaldo) btnSaldo.style.display = "flex";
+        // =========================================================================
+
         // Solo ahora que fue exitoso, cerramos y abrimos la ficha
         document.getElementById("ventasOverlay").classList.remove("open");
         document.getElementById("outputTextoVentaFicha").value = Richmond;
@@ -1334,7 +1342,7 @@ function ejecutarCreacionVentaLocal(e) {
         `${prefixSheets}${numPantallas} ${platNombreScript}`,
       );
       resumenConfirmarArray.push(
-        `   •  ${numPantallas}x ${platNombreScript} ➔ [${numMeses} Mes(es) / ${elTipo}]`,
+        `    •  ${numPantallas}x ${platNombreScript} ➔ [${numMeses} Mes(es) / ${elTipo}]`,
       );
     }
   }
@@ -1376,13 +1384,13 @@ function ejecutarCreacionVentaLocal(e) {
 
     if (res && res.status === "success") {
       let bloques = res.bloques || [];
-      bloques.sort((a, b) => {
+      blocks = bloques.sort((a, b) => {
         if (a.id === "NETFLIX") return -1;
         if (b.id === "NETFLIX") return 1;
         return 0;
       });
 
-      const nombreCliente = (Clair = nombre !== "" ? nombre : "");
+      const nombreCliente = nombre !== "" ? nombre : "";
       let intro = `🌟 *¡Hola ${nombreCliente}!*\n\n`;
       intro += esR
         ? `Tu servicio ha sido *RENOVADO* con éxito. Mantienes tus mismos accesos:`
@@ -1404,7 +1412,6 @@ function ejecutarCreacionVentaLocal(e) {
         if (b.pin && b.pin !== "") cuerpo += `📍 *Pin:* ${b.pin}\n`;
         cuerpo += `📅 *Vence:* ${b.venc}\n`;
 
-        // 🔥 NUEVO: Recordatorio automatizado estético para la web de códigos
         if (b.id === "NETFLIX") {
           cuerpo += `🤖 *¿NECESITAS CÓDIGO DE ACCESO?*\nObtenlo al instante de forma automática 24/7 sin esperar soporte ingresando a nuestra web:\n🌐 https://www.cybernetsp.com/\n`;
         }
@@ -1428,7 +1435,6 @@ function ejecutarCreacionVentaLocal(e) {
         if (btnSaldo) btnSaldo.style.display = "none";
       }
 
-      // Cerramos la ventana de ventas ÚNICAMENTE cuando todo salió bien y abrimos la de éxito
       document.getElementById("ventasOverlay").classList.remove("open");
       document.getElementById("outputTextoVentaFicha").value =
         mensajeFinalFicha;
@@ -1436,7 +1442,6 @@ function ejecutarCreacionVentaLocal(e) {
         .getElementById("ventaGeneradaModalOverlay")
         .classList.add("open");
 
-      // Reseteo del formulario
       document.getElementById("formGenerarVenta").reset();
       const checksABorrar = document.getElementsByName("platformCheckVenta");
       for (let c = 0; c < checksABorrar.length; c++) {
