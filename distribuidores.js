@@ -811,6 +811,24 @@ function procesarCompraDistribuidor() {
           inputNombreCliente !== "" ? inputNombreCliente : "Cliente";
         let textoFicha = `🌟 ¡Hola, ${nombreMensaje}!\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos: 👇\n\n`;
 
+        // 🔥 NUEVO: Formateador de Fecha de Compra (ej. 5-jun)
+        const mesesCortos = [
+          "ene",
+          "feb",
+          "mar",
+          "abr",
+          "may",
+          "jun",
+          "jul",
+          "ago",
+          "sep",
+          "oct",
+          "nov",
+          "dic",
+        ];
+        const fechaActual = new Date();
+        const fechaCompraFormateada = `${fechaActual.getDate()}-${mesesCortos[fechaActual.getMonth()]}`;
+
         if (res.bloques && res.bloques.length > 0) {
           res.bloques.forEach((bloque) => {
             textoFicha += `🎬 DETALLES DE ${bloque.id.replace(/-/g, " ").toUpperCase()} ✅\n────────────────────\n📧 Correo: ${bloque.correo}\n🔐 Contraseña: ${bloque.clave}\n`;
@@ -822,7 +840,9 @@ function procesarCompraDistribuidor() {
               textoFicha += `👤 Perfil: ${bloque.perfil}\n`;
             if (bloque.pin && bloque.pin !== "N/A" && bloque.pin !== "")
               textoFicha += `🔑 Pin del Perfil: ${bloque.pin}\n`;
-            textoFicha += `📅 Fecha de Vencimiento: ${bloque.venc.toLowerCase()}\n🛒 Fecha de Compra: Hoy\n\n`;
+
+            // 🔥 APLICACIÓN DE LA FECHA FORMATEADA
+            textoFicha += `📅 Fecha de Vencimiento: ${bloque.venc.toLowerCase()}\n🛒 Fecha de Compra: ${fechaCompraFormateada}\n\n`;
           });
         } else {
           textoFicha += `Tus cuentas han sido procesadas correctamente. Míralas en tu casillero.\n\n`;
