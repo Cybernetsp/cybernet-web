@@ -883,8 +883,27 @@ function procesarCompraDistribuidor() {
         document.getElementById("successCheckoutOverlay").classList.add("open");
         bloquearScroll();
 
+        // Limpiamos la memoria del carrito
         window.carrito = [];
         document.getElementById("cartClientName").value = "";
+
+        // 🔥 FIX CRÍTICO: Obliga al modal flotante a borrarse visualmente y quedar limpio
+        actualizarCarritoUI();
+
+        // Tu fix de saldo real en vivo que ya aplicamos:
+        if (res.saldoQuedante !== undefined) {
+          window.saldoNumericoActual = parseFloat(res.saldoQuedante);
+        } else {
+          window.saldoNumericoActual -= totalCost;
+        }
+        sessionStorage.setItem(
+          "active_distri_saldo",
+          window.saldoNumericoActual,
+        );
+
+        actualizarSaldoUI();
+        cargarStockEnTienda();
+        // ... resto del código
 
         // 🔥 FIX: Tomar el saldo oficial exacto devuelto por Sheets (Base de Datos)
         if (res.saldoQuedante !== undefined) {
