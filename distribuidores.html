@@ -1,0 +1,1399 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cybernet - Portal Mayoristas</title>
+    <link rel="stylesheet" href="global.css" />
+    <style>
+      /* =========================================================================
+       ESTILOS EXCLUSIVOS DEL PORTAL B2B
+       ========================================================================= */
+      .tienda-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        width: 100%;
+      }
+      @media (max-width: 900px) {
+        .tienda-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+      .grid-tienda {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 14px;
+      }
+      .platform-card-shop {
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .platform-card-shop:hover {
+        transform: translateY(-4px);
+        border-color: rgba(10, 132, 255, 0.3) !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+      }
+      .cart-item-row {
+        animation: fadeIn 0.2s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .credential-pill {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+      }
+      .credential-pill:hover {
+        background: rgba(10, 132, 255, 0.08);
+        border-color: rgba(10, 132, 255, 0.2);
+      }
+
+      /* Modales Flotantes */
+      .overlay-modal-code {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 12000;
+        justify-content: center;
+        align-items: center;
+      }
+      .overlay-modal-code.open {
+        display: flex;
+      }
+      .code-step {
+        display: none;
+        animation: appleSlideUp 0.4s ease;
+      }
+      .code-step.active {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      @keyframes appleSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .btn-code-option {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--text-primary);
+        padding: 16px;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.2s;
+      }
+      .btn-code-option:active {
+        transform: scale(0.97);
+      }
+      .btn-code-option:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .back-link-code {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        text-decoration: none;
+        font-weight: 600;
+        text-align: center;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body
+    style="
+      padding: 0;
+      margin: 0;
+      background: var(--main-bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family:
+        -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto,
+        Helvetica, Arial, sans-serif;
+    "
+  >
+    <div
+      id="loginSection"
+      style="
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+      "
+    >
+      <div
+        class="modal-ios"
+        style="
+          max-width: 400px;
+          width: 100%;
+          padding: 40px 24px 32px 24px;
+          border-radius: 32px;
+          text-align: center;
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
+          backdrop-filter: blur(20px);
+        "
+      >
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+          "
+        >
+          <div
+            style="
+              background: rgba(48, 209, 88, 0.15);
+              color: var(--ios-green);
+              padding: 14px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 16px;
+              border: 1px solid rgba(48, 209, 88, 0.2);
+            "
+          >
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h2
+            class="card-title"
+            style="
+              justify-content: center;
+              color: var(--text-primary);
+              font-size: 1.6rem;
+              font-weight: 800;
+              letter-spacing: -0.5px;
+              margin: 0 0 4px 0;
+            "
+          >
+            Cybernet Mayoristas
+          </h2>
+          <p
+            id="txtLoginInstruccion"
+            class="text-secondary"
+            style="font-size: 0.9rem; margin: 0; line-height: 1.4"
+          >
+            Ingresa tu número de celular registrado para iniciar la verificación
+            de credenciales.
+          </p>
+        </div>
+
+        <div class="flex-col" style="gap: 20px">
+          <div
+            id="stepTelefono"
+            class="flex-col"
+            style="gap: 14px; width: 100%"
+          >
+            <input
+              type="text"
+              id="distriLoginTelefono"
+              class="input-ios"
+              placeholder="Celular (Ej: 3205386975)"
+              required
+              style="
+                border-radius: 18px;
+                padding: 14px 20px;
+                margin-bottom: 0;
+                text-align: center;
+                font-weight: bold;
+                font-size: 1.1rem;
+                letter-spacing: 0.5px;
+              "
+            />
+            <button
+              type="button"
+              id="btnVerificarTelefono"
+              onclick="verificarTelefonoDistribuidor()"
+              class="btn-ios btn-success w-100"
+              style="
+                padding: 16px;
+                font-size: 1rem;
+                font-weight: 800;
+                border-radius: 50px;
+                box-shadow: 0 4px 15px rgba(48, 209, 88, 0.25);
+              "
+            >
+              Continuar →
+            </button>
+          </div>
+
+          <div
+            id="stepCorreoRegistrar"
+            class="flex-col"
+            style="display: none; gap: 14px; width: 100%"
+          >
+            <div
+              style="
+                background: rgba(255, 149, 0, 0.08);
+                border: 1px solid rgba(255, 149, 0, 0.2);
+                border-radius: 14px;
+                padding: 12px;
+                font-size: 0.85rem;
+                color: var(--ios-orange);
+                font-weight: 600;
+                line-height: 1.4;
+              "
+            >
+              ⚠️ Tu cuenta no posee un correo en el sistema. Escríbelo para
+              registrarlo y recibir tu código de acceso.
+            </div>
+            <input
+              type="email"
+              id="distriCorreoRegistrarInput"
+              class="input-ios"
+              placeholder="nuevo@correo.com"
+              style="
+                border-radius: 18px;
+                padding: 14px 20px;
+                margin-bottom: 0;
+                text-align: center;
+                font-weight: 600;
+              "
+            />
+            <button
+              type="button"
+              id="btnRegistrarEmailYEnviar"
+              onclick="registrarEmailYEnviarCodigo()"
+              class="btn-ios btn-primary w-100"
+              style="
+                padding: 16px;
+                font-size: 1rem;
+                font-weight: 800;
+                border-radius: 50px;
+                background: var(--ios-orange);
+                border: none;
+              "
+            >
+              Registrar y Enviar Código
+            </button>
+            <a href="#" onclick="regresarAlPasoInicial()" class="back-link-code"
+              >← Cambiar número</a
+            >
+          </div>
+
+          <div
+            id="stepTokenVerificar"
+            class="flex-col"
+            style="display: none; gap: 14px; width: 100%"
+          >
+            <div
+              style="
+                background: rgba(48, 209, 88, 0.08);
+                border: 1px solid rgba(48, 209, 88, 0.15);
+                border-radius: 14px;
+                padding: 12px;
+                font-size: 0.85rem;
+                color: var(--ios-green);
+                font-weight: 600;
+                line-height: 1.4;
+              "
+              id="txtAvisoTokenDespachado"
+            >
+              Código enviado automáticamente a tu correo.
+            </div>
+            <input
+              type="text"
+              id="distriLoginTokenInput"
+              class="input-ios"
+              placeholder="******"
+              maxlength="6"
+              style="
+                border-radius: 18px;
+                padding: 14px 20px;
+                margin-bottom: 0;
+                text-align: center;
+                font-weight: 900;
+                font-size: 1.5rem;
+                letter-spacing: 6px;
+                color: var(--ios-green);
+              "
+            />
+            <button
+              type="button"
+              id="btnVerificarCodigoFinal"
+              onclick="verificarCodigoDeSeguridadFinal()"
+              class="btn-ios btn-success w-100"
+              style="
+                padding: 16px;
+                font-size: 1rem;
+                font-weight: 800;
+                border-radius: 50px;
+                box-shadow: 0 4px 15px rgba(48, 209, 88, 0.25);
+              "
+            >
+              Verificar e Ingresar
+            </button>
+            <a href="#" onclick="regresarAlPasoInicial()" class="back-link-code"
+              >← Cancelar / Cambiar número</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="dashboardSection"
+      class="flex-col"
+      style="
+        display: none;
+        width: 100%;
+        min-height: 100vh;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 25px 20px;
+        box-sizing: border-box;
+        gap: 20px;
+        align-self: flex-start;
+      "
+    >
+      <div
+        class="flex-row-between"
+        style="
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
+          padding: 16px 24px;
+          border-radius: 24px;
+          backdrop-filter: blur(20px);
+          flex-wrap: wrap;
+          gap: 12px;
+          width: 100%;
+          box-sizing: border-box;
+        "
+      >
+        <div style="display: flex; align-items: center; gap: 12px">
+          <div
+            style="
+              background: rgba(10, 132, 255, 0.1);
+              color: var(--ios-blue);
+              padding: 10px;
+              border-radius: 14px;
+              border: 1px solid rgba(10, 132, 255, 0.15);
+              font-weight: bold;
+              font-size: 1.2rem;
+            "
+          >
+            💼
+          </div>
+          <div style="text-align: left">
+            <h2
+              id="distriWelcomeName"
+              style="
+                margin: 0;
+                font-size: 1.2rem;
+                font-weight: 800;
+                color: var(--text-primary);
+              "
+            >
+              Cargando...
+            </h2>
+            <span
+              id="distriWelcomePhone"
+              style="
+                font-size: 0.8rem;
+                color: var(--text-secondary);
+                font-family: monospace;
+              "
+              >Tel: --</span
+            >
+          </div>
+        </div>
+        <div
+          style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap"
+        >
+          <button
+            onclick="abrirCentroCodigos()"
+            class="btn-ios btn-primary"
+            style="
+              padding: 10px 20px;
+              border-radius: 50px;
+              font-weight: 700;
+              margin: 0;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Códigos
+          </button>
+          <div
+            style="
+              background: rgba(48, 209, 88, 0.1);
+              border: 1px solid rgba(48, 209, 88, 0.2);
+              padding: 8px 16px;
+              border-radius: 30px;
+              font-weight: 800;
+              color: var(--ios-green);
+              font-family: monospace;
+            "
+            id="distriBarBalance"
+          >
+            $--
+          </div>
+          <button
+            onclick="cerrarSesionDistribuidor()"
+            class="btn-ios btn-secondary"
+            style="
+              padding: 10px 20px;
+              border-radius: 50px;
+              color: var(--ios-red);
+              font-weight: 700;
+              margin: 0;
+            "
+          >
+            Salir ✕
+          </button>
+        </div>
+      </div>
+
+      <div class="tienda-layout">
+        <div class="flex-col" style="gap: 16px">
+          <div
+            class="card-ios"
+            style="
+              padding: 20px;
+              margin: 0;
+              display: flex;
+              flex-direction: column;
+              gap: 14px;
+            "
+          >
+            <div
+              class="flex-row-between"
+              style="
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                padding-bottom: 10px;
+              "
+            >
+              <h3
+                style="
+                  margin: 0;
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  color: var(--text-primary);
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                "
+              >
+                🛍️ Catálogo Mayorista
+              </h3>
+              <input
+                type="text"
+                id="searchShopInput"
+                class="input-ios"
+                placeholder="Buscar plataforma..."
+                oninput="filtrarTiendaLocal()"
+                style="
+                  margin-bottom: 0;
+                  max-width: 200px;
+                  padding: 8px 14px;
+                  border-radius: 12px;
+                  font-size: 0.85rem;
+                "
+              />
+            </div>
+            <div class="grid-tienda" id="shopCatalogContainer"></div>
+          </div>
+        </div>
+
+        <div class="flex-col" style="gap: 20px">
+          <div
+            class="card-ios"
+            style="
+              padding: 20px;
+              margin: 0;
+              background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.01) 0%,
+                rgba(0, 0, 0, 0.2) 100%
+              );
+              display: flex;
+              flex-direction: column;
+              gap: 14px;
+              position: sticky;
+              top: 20px;
+            "
+          >
+            <h4
+              style="
+                margin: 0;
+                font-size: 0.95rem;
+                font-weight: 800;
+                color: var(--ios-blue);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                padding-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              "
+            >
+              🛒 Carrito de Compras
+              <span
+                id="cartCountBadge"
+                style="
+                  background: var(--ios-blue);
+                  color: white;
+                  font-size: 0.75rem;
+                  padding: 2px 8px;
+                  border-radius: 10px;
+                  font-weight: 800;
+                  margin-left: auto;
+                "
+                >0</span
+              >
+            </h4>
+
+            <div
+              id="cartItemsContainer"
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                max-height: 180px;
+                overflow-y: auto;
+                padding-right: 2px;
+              "
+            >
+              <div
+                style="
+                  text-align: center;
+                  color: var(--text-secondary);
+                  font-size: 0.85rem;
+                  padding: 20px 0;
+                "
+              >
+                Tu carrito está vacío.
+              </div>
+            </div>
+
+            <div class="flex-col" style="gap: 6px; margin-top: 4px">
+              <label
+                class="text-secondary"
+                style="
+                  font-size: 0.72rem;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  text-align: left;
+                  padding-left: 2px;
+                "
+                >Nombre de tu Cliente (Opcional)</label
+              >
+              <input
+                type="text"
+                id="cartClientName"
+                class="input-ios"
+                placeholder="Ej: Juan Pérez"
+                style="
+                  border-radius: 14px;
+                  padding: 11px 16px;
+                  margin-bottom: 0;
+                  font-size: 0.9rem;
+                "
+              />
+            </div>
+
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                padding-top: 12px;
+                font-size: 0.85rem;
+              "
+            >
+              <div
+                class="flex-row-between"
+                style="color: var(--text-secondary)"
+              >
+                <span>Saldo Actual:</span>
+                <span
+                  id="cartTotalSaldo"
+                  style="font-family: monospace; font-weight: bold"
+                  >$0</span
+                >
+              </div>
+              <div
+                class="flex-row-between"
+                style="
+                  color: var(--text-primary);
+                  font-size: 1.05rem;
+                  font-weight: 800;
+                  margin-top: 4px;
+                "
+              >
+                <span>TOTAL PEDIDO:</span>
+                <span
+                  id="cartTotalCost"
+                  style="color: var(--ios-blue); font-family: monospace"
+                  >$0</span
+                >
+              </div>
+            </div>
+
+            <button
+              id="btnCheckoutShop"
+              onclick="procesarCompraDistribuidor()"
+              class="btn-ios btn-primary w-100"
+              style="
+                padding: 14px;
+                font-weight: 800;
+                font-size: 0.95rem;
+                border-radius: 50px;
+                margin-top: 4px;
+              "
+              disabled
+            >
+              CONFIRMAR COMPRA
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="card-ios"
+        style="padding: 24px; width: 100%; box-sizing: border-box; margin: 0"
+      >
+        <div
+          class="flex-row-between"
+          style="
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+          "
+        >
+          <h3
+            style="
+              margin: 0;
+              font-size: 1.05rem;
+              font-weight: 800;
+              color: var(--text-primary);
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            📺 Bóveda de Cuentas
+          </h3>
+          <div style="display: flex; gap: 10px; width: 100%; max-width: 450px">
+            <input
+              type="text"
+              id="inputCasilleroSearch"
+              class="input-ios"
+              placeholder="Buscar por correo o nombre del cliente..."
+              style="
+                margin-bottom: 0;
+                flex-grow: 1;
+                border-radius: 12px;
+                padding: 10px 14px;
+              "
+            />
+            <button
+              class="btn-ios btn-primary"
+              onclick="buscarCasilleroDistri()"
+              id="btnBuscarCasillero"
+              style="margin: 0; border-radius: 12px; padding: 10px 16px"
+            >
+              Buscar
+            </button>
+          </div>
+        </div>
+
+        <div
+          style="
+            width: 100%;
+            overflow-x: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+          "
+        >
+          <table
+            style="
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 0.9rem;
+              text-align: left;
+              min-width: 650px;
+            "
+          >
+            <thead>
+              <tr
+                style="
+                  background: rgba(255, 255, 255, 0.02);
+                  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                "
+              >
+                <th
+                  style="
+                    padding: 14px 16px;
+                    font-size: 0.75rem;
+                    font-weight: 800;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                    width: 15%;
+                  "
+                >
+                  Vencimiento
+                </th>
+                <th
+                  style="
+                    padding: 14px 16px;
+                    font-size: 0.75rem;
+                    font-weight: 800;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                    width: 35%;
+                  "
+                >
+                  Plataforma / Cliente
+                </th>
+                <th
+                  style="
+                    padding: 14px 16px;
+                    font-size: 0.75rem;
+                    font-weight: 800;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                    width: 50%;
+                  "
+                >
+                  Datos de Acceso
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tablaMisComprasDistriBody">
+              <tr>
+                <td
+                  colspan="3"
+                  style="
+                    text-align: center;
+                    padding: 30px;
+                    color: var(--text-secondary);
+                  "
+                >
+                  Utiliza el buscador de arriba para encontrar las cuentas que
+                  has comprado.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="overlay-modal-code"
+      id="successCheckoutOverlay"
+      style="z-index: 13000"
+    >
+      <div
+        class="modal-ios"
+        style="
+          max-width: 450px;
+          width: 95%;
+          padding: 32px 24px;
+          border-radius: 32px;
+          text-align: center;
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
+          backdrop-filter: blur(40px);
+        "
+      >
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 16px;
+          "
+        >
+          <div
+            style="
+              background: rgba(48, 209, 88, 0.15);
+              color: var(--ios-green);
+              padding: 12px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 12px;
+              border: 1px solid rgba(48, 209, 88, 0.2);
+            "
+          >
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <h3
+            class="card-title"
+            style="
+              margin: 0;
+              font-size: 1.4rem;
+              color: var(--text-primary);
+              font-weight: 800;
+            "
+          >
+            ¡Pedido Entregado!
+          </h3>
+          <p
+            id="successCheckoutDesc"
+            class="text-secondary"
+            style="font-size: 0.85rem; margin-top: 6px"
+          >
+            Copia los accesos para enviárselos a tu cliente.
+          </p>
+        </div>
+
+        <div
+          style="
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: left;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            font-family: monospace;
+          "
+          id="cajaTextoFichas"
+        ></div>
+
+        <button
+          class="btn-ios btn-success w-100"
+          id="btnCopiarFichasCheckout"
+          onclick="copiarCuentasCheckout()"
+          style="
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 800;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(48, 209, 88, 0.25);
+            margin-bottom: 12px;
+          "
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            style="margin-right: 6px; vertical-align: middle"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path
+              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            ></path>
+          </svg>
+          Copiar Mensaje
+        </button>
+
+        <a
+          id="btnWhatsAppActivacion"
+          href="#"
+          target="_blank"
+          style="display: none; text-decoration: none"
+        >
+          <button
+            class="btn-ios w-100"
+            style="
+              background: #25d366;
+              color: white;
+              padding: 16px;
+              font-size: 1rem;
+              font-weight: 800;
+              border-radius: 50px;
+              box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+              margin-bottom: 12px;
+              border: none;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+              ></path>
+            </svg>
+            Solicitar Activación por WhatsApp
+          </button>
+        </a>
+
+        <button
+          class="btn-ios btn-secondary w-100"
+          onclick="cerrarModalExitoCheckout()"
+          style="
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 50px;
+          "
+        >
+          Cerrar Ventana
+        </button>
+      </div>
+    </div>
+
+    <div class="overlay-modal-code" id="codesCenterOverlay">
+      <div
+        class="modal-ios"
+        style="
+          max-width: 420px;
+          width: 95%;
+          padding: 32px 24px;
+          border-radius: 32px;
+          text-align: center;
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
+          backdrop-filter: blur(40px);
+        "
+      >
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+          "
+        >
+          <div
+            style="
+              background: rgba(10, 132, 255, 0.15);
+              color: var(--ios-blue);
+              padding: 12px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 12px;
+              border: 1px solid rgba(10, 132, 255, 0.2);
+            "
+          >
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h3
+            class="card-title"
+            style="
+              margin: 0;
+              font-size: 1.4rem;
+              color: var(--text-primary);
+              font-weight: 800;
+            "
+          >
+            Centro de Códigos
+          </h3>
+          <p class="text-secondary" style="font-size: 0.85rem; margin-top: 6px">
+            Obtén el código de validación de tus pantallas automáticamente.
+          </p>
+        </div>
+
+        <div id="codeStep1" class="code-step active">
+          <p
+            style="
+              color: var(--text-secondary);
+              font-size: 0.9rem;
+              font-weight: 600;
+              text-align: left;
+              margin: 0;
+            "
+          >
+            ¿De qué plataforma es la cuenta?
+          </p>
+          <button
+            class="btn-code-option"
+            style="color: #e50914"
+            onclick="setCodigoPlat('NETFLIX')"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+              <polyline points="17 2 12 7 7 2"></polyline>
+              <line x1="12" y1="12" x2="12" y2="17"></line>
+              <line x1="9.5" y1="14.5" x2="14.5" y2="14.5"></line>
+            </svg>
+            Netflix
+          </button>
+          <button
+            class="btn-code-option"
+            style="color: var(--ios-blue)"
+            onclick="setCodigoPlat('DISNEY')"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <polyline points="9 12 11 14 15 10"></polyline>
+            </svg>
+            Disney Premium
+          </button>
+          <a class="back-link-code" onclick="cerrarCentroCodigos()">Cancelar</a>
+        </div>
+
+        <div id="codeStep2" class="code-step">
+          <p
+            style="
+              color: var(--text-secondary);
+              font-size: 0.9rem;
+              font-weight: 600;
+              text-align: left;
+              margin: 0;
+            "
+          >
+            ¿Qué tipo de código solicita el TV?
+          </p>
+          <button class="btn-code-option" onclick="setCodigoOp(1)">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"
+              ></path>
+            </svg>
+            Código de Inicio Sesión
+          </button>
+          <button class="btn-code-option" onclick="setCodigoOp(2)">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+              ></path>
+            </svg>
+            Código 'Estoy de Viaje'
+          </button>
+          <button class="btn-code-option" onclick="setCodigoOp(3)">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+              ></path>
+              <path
+                d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+              ></path>
+            </svg>
+            Enlace de Aprobación
+          </button>
+          <a class="back-link-code" onclick="changeCodeStep(1)"
+            >← Volver atrás</a
+          >
+        </div>
+
+        <div id="codeStep3" class="code-step">
+          <p
+            style="
+              color: var(--text-secondary);
+              font-size: 0.9rem;
+              font-weight: 600;
+              text-align: left;
+              margin: 0;
+            "
+          >
+            Escribe el correo de la cuenta:
+          </p>
+          <input
+            type="email"
+            id="inputCorreoCodigo"
+            class="input-ios"
+            placeholder="ejemplo@cybernetsp.com"
+            style="
+              border-radius: 16px;
+              padding: 16px 20px;
+              font-size: 1rem;
+              text-align: center;
+              margin-bottom: 0;
+            "
+          />
+          <button
+            class="btn-ios btn-primary w-100"
+            id="btnRastrearCodigo"
+            onclick="rastrearCodigo()"
+            style="
+              padding: 16px;
+              font-weight: 800;
+              border-radius: 50px;
+              margin-top: 14px;
+            "
+          >
+            Rastrear Código
+          </button>
+          <a class="back-link-code" onclick="changeCodeStep(1)">← Cancelar</a>
+        </div>
+
+        <div id="codeStep4" class="code-step">
+          <div
+            style="
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 120px;
+            "
+          >
+            <svg
+              class="spin-anim"
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 2v4"></path>
+            </svg>
+          </div>
+          <p style="color: var(--ios-blue); font-weight: 600; margin: 0">
+            Buscando en la bandeja de entrada...
+          </p>
+        </div>
+
+        <div id="codeStep5" class="code-step">
+          <h2
+            id="codeResultTitle"
+            style="
+              color: var(--ios-green);
+              font-size: 1.4rem;
+              margin: 0;
+              font-weight: 800;
+            "
+          >
+            --
+          </h2>
+          <p
+            id="codeResultDesc"
+            style="color: var(--text-secondary); font-size: 0.9rem; margin: 0"
+          >
+            --
+          </p>
+
+          <div
+            id="codeResultBox"
+            style="
+              background: rgba(255, 69, 58, 0.1);
+              border: 1px dashed var(--ios-red);
+              padding: 30px 20px;
+              border-radius: 20px;
+              margin: 10px 0;
+              display: none;
+            "
+          >
+            <div
+              id="codeVal"
+              style="
+                font-size: 3rem;
+                font-weight: 800;
+                color: var(--text-primary);
+                letter-spacing: 8px;
+                font-variant-numeric: tabular-nums;
+              "
+            ></div>
+            <div
+              id="codeTimer"
+              style="
+                color: var(--ios-red);
+                font-size: 0.9rem;
+                font-weight: 700;
+                margin-top: 10px;
+              "
+            ></div>
+          </div>
+
+          <div id="linkResultBox" style="margin: 10px 0; display: none">
+            <a
+              id="linkVal"
+              href="#"
+              target="_blank"
+              style="text-decoration: none"
+            >
+              <button
+                class="btn-ios w-100"
+                style="
+                  background: var(--ios-green);
+                  color: white;
+                  border: none;
+                  padding: 16px;
+                  font-weight: 800;
+                  border-radius: 50px;
+                  font-size: 1rem;
+                "
+              >
+                Abrir Enlace de Aprobación
+              </button>
+            </a>
+          </div>
+
+          <button
+            class="btn-ios btn-secondary w-100"
+            onclick="rastrearCodigo()"
+            style="
+              padding: 14px;
+              font-weight: 700;
+              border-radius: 50px;
+              margin-top: 10px;
+            "
+          >
+            Reintentar Búsqueda
+          </button>
+          <a class="back-link-code" onclick="changeCodeStep(1)"
+            >Hacer nueva consulta</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="appleToast"
+      class="toast-ios"
+      style="
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.15, 0.85, 0.35, 1);
+        background: rgba(30, 30, 30, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 12px 24px;
+        border-radius: 50px;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        font-weight: 700;
+      "
+    ></div>
+
+    <script src="distribuidores.js"></script>
+  </body>
+</html>
