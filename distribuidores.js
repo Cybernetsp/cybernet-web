@@ -9,125 +9,128 @@ window.distriTelefonoCache = "";
 window.distriCorreoRegistradoEnSheets = "";
 window.fichasCheckoutPendientes = "";
 
+// =========================================================================
+// 🎨 CATÁLOGO DE PRODUCTOS (Logotipos Originales Vectorizados)
+// =========================================================================
 const catálogoProductos = [
   {
     id: "NETFLIX",
     nombre: "Netflix Premium",
     precio: 10000,
     color: "#E50914",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5.5 0v24h4.8V12.6L14 24h4.5V0h-4.8v11.4L9.3 0H5.5z"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6.1 2v20h3.5v-9.7l5.2 9.7h3.1V2h-3.5v9.5l-5.1-9.5H6.1z"/></svg>`,
   },
   {
     id: "DISNEY-PREMIUM",
     nombre: "Disney+ Premium",
     precio: 10000,
     color: "#1AE1FF",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 16c4-6 11-8 18-4M12 6c-3 0-5 3-5 6s2 6 5 6 5-3 5-6-2-6-5-6z"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.17 12.18c-.8.81-2.07 1.24-3.5 1.24-2.46 0-4.14-1.25-4.14-3.07 0-1.92 1.83-3.05 4.38-3.05 1.05 0 2.05.24 2.82.6l-1 1.94c-.58-.26-1.24-.4-1.8-.4-1.3 0-2.08.5-2.08 1.13 0 .62.77 1.05 2.02 1.05.7 0 1.26-.13 1.7-.35l1.6 1.91zM20 9h-1.5V7.5h-1V9H16v1h1.5v1.5h1V10H20V9z"/></svg>`,
   },
   {
     id: "AMAZON",
     nombre: "Prime Video",
     precio: 5000,
     color: "#00A8E1",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13.5c4.5 3 13.5 3 18 0M16.5 14.5c.5-.2 2.5-.5 3.5-.5s-1 1.8-1.5 2.5"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 14.8c-.86 1.34-2.58 2.68-5.65 2.68-2.67 0-4.66-.75-5.91-1.45L5 15.35c1.4.74 3.73 1.55 6.45 1.55 3.32 0 5.48-1.52 6.2-2.1z"/><path d="M19 13.5c0-.66-.94-.85-1.36-.31l-1.04 1.34c-.16.21.11.47.33.31l1.41-.98c.45-.31.66.19.66.19z"/></svg>`,
   },
   {
     id: "DISNEY-ESTANDAR",
     nombre: "Disney+ Estándar",
     precio: 4000,
     color: "#0063e5",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.17 12.18c-.8.81-2.07 1.24-3.5 1.24-2.46 0-4.14-1.25-4.14-3.07 0-1.92 1.83-3.05 4.38-3.05 1.05 0 2.05.24 2.82.6l-1 1.94c-.58-.26-1.24-.4-1.8-.4-1.3 0-2.08.5-2.08 1.13 0 .62.77 1.05 2.02 1.05.7 0 1.26-.13 1.7-.35l1.6 1.91zM20 9h-1.5V7.5h-1V9H16v1h1.5v1.5h1V10H20V9z"/></svg>`,
   },
   {
     id: "HBO-MAX",
     nombre: "Max (HBO)",
     precio: 3000,
     color: "#5856d6",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M2 8v8h2v-5l2 3 2-3v5h2V8H8L6 11 4 8zm10 8l1-8h2l1 8h-1.5l-.3-2h-1.4l-.3 2H12zm1.6-3h1l-.5-3-.5 3zm4.4-5l1.5 3L21 8h1.5l-2.2 4 2.2 4H21l-1.5-3-1.5 3h-1.5l2.2-4L16.5 8z"/></svg>`,
   },
   {
     id: "PARAMOUNT",
     nombre: "Paramount+",
     precio: 3000,
     color: "#0078ff",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-6 10h12l-6-10zm-3 11l3 4 3-4H9zm10-5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM5 10a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm4-5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm6 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>`,
   },
   {
     id: "VIX",
     nombre: "Vix+",
     precio: 3000,
     color: "#ff9500",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 4l7 14 7-14"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h3l3 8 3-8h3l-4.5 12H9.5L5 6zm11 1h2v3h3v2h-3v3h-2v-3h-3V10h3V7z"/></svg>`,
   },
   {
     id: "CRUNCHYROLL",
     nombre: "Crunchyroll",
     precio: 3000,
     color: "#ff5e00",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 17.5A7.5 7.5 0 1119.5 12 7.5 7.5 0 0112 19.5zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8.5A3.5 3.5 0 1115.5 12 3.5 3.5 0 0112 15.5z"/></svg>`,
   },
   {
     id: "PLEX",
     nombre: "Plex TV",
     precio: 3000,
     color: "#ffcc00",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 2 18 12 6 22 10 12"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M11.85 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19zm-3.2 13.9l3.5-4.4-3.5-4.4h2.9l3.5 4.4-3.5 4.4H8.65z"/></svg>`,
   },
   {
     id: "APPLE-TV",
     nombre: "Apple TV",
     precio: 3000,
     color: "#ffffff",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-.96.04-2.13.64-2.82 1.45-.6.7-1.13 1.84-.99 2.94 1.07.08 2.16-.52 2.82-1.33z"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.15 2c-.06 0-1.78.06-3.13 1.54-.7.76-1.18 1.82-1.18 2.92 0 .1.01.21.03.31 1.34-.04 2.87-.76 3.65-1.63.63-.7 1.1-1.72 1.05-2.73-.13-.02-.27-.03-.42-.03zM14.9 6.8c-1.38 0-2.61.85-3.29.85-.68 0-1.75-.76-2.88-.76-1.5 0-2.89.87-3.64 2.18-1.55 2.66-.4 6.6 1.11 8.76.74 1.06 1.6 2.22 2.74 2.18 1.09-.04 1.53-.7 2.86-.7s1.73.7 2.88.68c1.18-.02 1.93-1.07 2.65-2.13.85-1.22 1.2-2.4 1.22-2.46-.03-.01-2.31-.89-2.34-3.53-.03-2.2 1.8-3.25 1.88-3.3-.98-1.42-2.52-1.62-3.1-1.68z"/></svg>`,
   },
   {
     id: "UNIVERSAL",
     nombre: "Universal+",
     precio: 3000,
     color: "#00d2ff",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(45 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-45 12 12)"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zM8 7v6a4 4 0 008 0V7h-2v6a2 2 0 01-4 0V7H8z"/></svg>`,
   },
   {
     id: "YOUTUBE",
     nombre: "YouTube Premium",
     precio: 10000,
     color: "#FF0000",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 12s0 4-1 5.5c-.5 1.5-1.5 2.5-3 3C18 21 12 21 12 21s-6 0-7.5-.5c-1.5-.5-2.5-1.5-3-3C0.5 16 0.5 12 0.5 12s0-4 1-5.5c.5-1.5 1.5-2.5 3-3C6 3 12 3 12 3s6 0 7.5.5c1.5.5 2.5 1.5 3 3 1 1.5 1 5.5 1 5.5zM9.5 8.5v7l6-3.5z"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M21.58 6.19a2.68 2.68 0 00-1.88-1.89C17.96 3.85 12 3.85 12 3.85s-5.96 0-7.7.44a2.68 2.68 0 00-1.88 1.89C2 7.93 2 12 2 12s0 4.07.42 5.81a2.68 2.68 0 001.88 1.89C6.04 20.15 12 20.15 12 20.15s5.96 0 7.7-.44a2.68 2.68 0 001.88-1.89C22 16.07 22 12 22 12s0-4.07-.42-5.81zM10 15.48V8.52L15.93 12 10 15.48z"/></svg>`,
   },
   {
     id: "SPOTIFY",
     nombre: "Spotify Premium",
     precio: 10000,
     color: "#1DB954",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.586 14.42c-.18.3-.56.4-.86.2-2.38-1.45-5.37-1.78-8.89-.98-.34.07-.67-.14-.74-.47-.08-.34.14-.67.47-.74 3.86-.88 7.15-.51 9.82 1.12.3.18.39.56.21.85z"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.42c-.18.3-.56.4-.86.2-2.38-1.45-5.37-1.78-8.89-.98-.34.07-.67-.14-.74-.47-.08-.34.14-.67.47-.74 3.86-.88 7.15-.51 9.82 1.12.3.18.39.56.21.85zm1.22-3.37c-.22.37-.73.49-1.1.27-2.98-1.84-6.8-2.22-10.12-1.22-.4.12-.83-.1-.95-.5-.12-.4.1-.83.5-.95 3.8-1.14 8.08-.71 11.4 1.33.37.23.49.74.27 1.1zm.1-3.5C14.54 7.56 9.4 7.4 5.48 8.6c-.48.15-1-.13-1.15-.62-.15-.48.13-1 .62-1.15 4.5-1.38 10.22-1.18 14.15 1.14.43.25.57.82.32 1.25-.25.43-.82.57-1.25.32z"/></svg>`,
   },
   {
     id: "IPTV",
     nombre: "IPTV Premium",
     precio: 7000,
     color: "#ff37a6",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M8 22h8M12 19v3"/></svg>`,
   },
   {
     id: "METEGOL",
     nombre: "Metegol TV",
     precio: 12000,
     color: "#52c41a",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20M12 12m-4 0a4 4 0 108 0 4 4 0 10-8 0"/></svg>`,
   },
   {
     id: "DEEZER",
     nombre: "Deezer Music",
     precio: 8000,
     color: "#ff2a6d",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 14h3v4H3zm5-4h3v8H8zm5-4h3v12h-3zm5 2h3v10h-3z"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="16" width="3" height="4"/><rect x="8" y="12" width="3" height="8"/><rect x="13" y="8" width="3" height="12"/><rect x="18" y="4" width="3" height="16"/></svg>`,
   },
   {
     id: "MUBI",
     nombre: "MUBI Cine",
     precio: 3000,
     color: "#00f5ff",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>`,
+    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h4l5 7 5-7h4v12h-3v-8.5l-6 8-6-8V18H3V6z"/></svg>`,
   },
 ];
 
@@ -173,8 +176,6 @@ function copiarTextoAlToque(elemento, texto) {
     }, 150);
   });
 }
-
-// Convertimos "5DEJUNIO" a Objeto Date para calcular vencimientos
 function parseFechaCybernet(fechaStr) {
   if (!fechaStr || fechaStr === "N/A") return null;
   let s = String(fechaStr).toUpperCase().replace(/\s+/g, "");
@@ -212,10 +213,9 @@ function parseFechaCybernet(fechaStr) {
   if (month === undefined) return null;
 
   let now = new Date();
-  let year = now.getFullYear(); // Estamos en 2026 por sistema
+  let year = now.getFullYear();
   let d = new Date(year, month, day);
 
-  // Si la fecha calculada es mucho más antigua que hoy, asumimos que es del otro año
   if (d < now && now.getMonth() - month > 6) {
     d.setFullYear(year + 1);
   }
@@ -255,6 +255,7 @@ function verificarTelefonoDistribuidor() {
         window.distriCorreoRegistradoEnSheets = String(distri.correo || "")
           .trim()
           .toLowerCase();
+
         if (
           window.distriCorreoRegistradoEnSheets !== "" &&
           window.distriCorreoRegistradoEnSheets.indexOf("@") !== -1
@@ -267,6 +268,7 @@ function verificarTelefonoDistribuidor() {
             if (document.getElementById("node_" + cbSend))
               document.getElementById("node_" + cbSend).remove();
             delete window[cbSend];
+
             if (resEnvio && resEnvio.status === "success") {
               document.getElementById("stepTelefono").style.display = "none";
               let partes = window.distriCorreoRegistradoEnSheets.split("@");
@@ -334,6 +336,7 @@ function registrarEmailYEnviarCodigo() {
     if (document.getElementById("node_" + cbReg))
       document.getElementById("node_" + cbReg).remove();
     delete window[cbReg];
+
     if (res && res.status === "success") {
       window.distriCorreoRegistradoEnSheets = nuevoEmail;
       document.getElementById("stepCorreoRegistrar").style.display = "none";
@@ -371,6 +374,7 @@ function verificarCodigoDeSeguridadFinal() {
     if (document.getElementById("node_" + cbVerify))
       document.getElementById("node_" + cbVerify).remove();
     delete window[cbVerify];
+
     if (res && res.status === "success" && res.data) {
       sessionStorage.setItem("active_distri_tel", window.distriTelefonoCache);
       sessionStorage.setItem(
@@ -401,8 +405,18 @@ function regresarAlPasoInicial() {
 }
 
 // =========================================================================
-// 💼 INTERFAZ B2B (DASHBOARD) Y ALERTAS
+// 💼 INTERFAZ B2B (DASHBOARD), MÓVIL Y ALERTAS
 // =========================================================================
+
+function abrirMenuMovil() {
+  haptic();
+  document.getElementById("modalMenuMovil").classList.add("open");
+}
+function cerrarMenuMovil() {
+  haptic();
+  document.getElementById("modalMenuMovil").classList.remove("open");
+}
+
 function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   document.getElementById("loginSection").style.display = "none";
   document.getElementById("dashboardSection").style.display = "flex";
@@ -418,16 +432,21 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   actualizarSaldoUI();
   renderTienda();
   cargarStockEnTienda();
-  cargarDatosFinancierosYAlertas(telefono); // 🔥 Carga el Historial y Vencimientos
+  cargarDatosFinancierosYAlertas(telefono);
 }
 
 function actualizarSaldoUI() {
   const f = formatMoneda(window.saldoNumericoActual);
-  document.getElementById("distriBarBalance").innerText = f;
-  document.getElementById("cartTotalSaldo").innerText = f;
+  const balDesktop = document.getElementById("distriBarBalance");
+  if (balDesktop) balDesktop.innerText = f;
+
+  const balMobile = document.getElementById("distriBarBalanceMobile");
+  if (balMobile) balMobile.innerText = f;
+
+  const cartTotalSaldo = document.getElementById("cartTotalSaldo");
+  if (cartTotalSaldo) cartTotalSaldo.innerText = f;
 }
 
-// 🔥 NUEVO: Cargar Historial y Renovaciones
 function cargarDatosFinancierosYAlertas(tel) {
   const cbData = "cb_dash_" + Date.now();
   window[cbData] = function (res) {
@@ -436,12 +455,10 @@ function cargarDatosFinancierosYAlertas(tel) {
     delete window[cbData];
 
     if (res && res.status === "success") {
-      // 1. Llenar Tabla Historial
       const tbody = document.getElementById("tablaHistorialBody");
       let trs = "";
       if (res.historial && res.historial.length > 0) {
         res.historial.forEach((mov) => {
-          // Detectar si es recarga (verde) o descuento (rojo)
           let color =
             mov.monto < 0 || String(mov.monto).indexOf("-") !== -1
               ? "var(--ios-red)"
@@ -460,7 +477,6 @@ function cargarDatosFinancierosYAlertas(tel) {
       }
       tbody.innerHTML = trs;
 
-      // 2. Procesar Renovaciones Próximas
       const divRenov = document.getElementById("listaRenovacionesCards");
       const widgetCont = document.getElementById("widgetRenovaciones");
       let htmlRenov = "";
@@ -481,7 +497,6 @@ function cargarDatosFinancierosYAlertas(tel) {
                 diffDias === 0 ? "var(--ios-red)" : "var(--ios-orange)";
               let txtDias =
                 diffDias === 0 ? "¡Vence HOY!" : `Vence en ${diffDias} días`;
-
               let msgCobro = encodeURIComponent(
                 `¡Hola! Tu cuenta de ${c.plataforma.replace(/-/g, " ")} vence pronto (${c.vencimiento}). ¿Deseas renovarla para no perder el servicio?`,
               );
@@ -533,6 +548,35 @@ function cerrarModalHistorial() {
 // =========================================================================
 // 🛒 E-COMMERCE MAYORISTA
 // =========================================================================
+
+function abrirCarrito() {
+  haptic();
+  document.getElementById("modalCarritoTienda").classList.add("open");
+}
+function cerrarCarrito() {
+  haptic();
+  document.getElementById("modalCarritoTienda").classList.remove("open");
+}
+
+function renderTienda() {
+  const container = document.getElementById("shopCatalogContainer");
+  if (!container) return;
+  let html = "";
+  catálogoProductos.forEach((p) => {
+    html += `
+      <div class="card-ios platform-card-shop" data-name="${p.nombre.toLowerCase()}" style="position:relative; padding:18px 14px 14px 14px; margin:0; display:flex; flex-direction:column; align-items:center; gap:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05); text-align:center;">
+        <div id="stock-badge-${p.id}" style="position:absolute; top:8px; right:8px; background:rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size:0.65rem; padding:4px 8px; border-radius:10px; font-weight:700; color:var(--text-secondary);">
+           <svg class="spin-anim" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
+        </div>
+        <div style="background: ${p.color}15; color: ${p.color}; width: 44px; height: 44px; border-radius: 14px; display:flex; align-items:center; justify-content:center; border: 1px solid ${p.color}25;">${p.logo}</div>
+        <span style="font-size:0.85rem; font-weight:800; color:var(--text-primary); text-overflow:ellipsis; white-space:nowrap; overflow:hidden; width:100%;">${p.nombre}</span>
+        <span style="font-family:monospace; font-size:0.95rem; font-weight:bold; color:var(--ios-green);">${formatMoneda(p.precio)}</span>
+        <button id="btn-add-${p.id}" onclick="agregarAlCarrito('${p.id}')" class="btn-ios btn-primary" style="margin:4px 0 0 0; padding:6px 12px; font-size:0.75rem; border-radius:30px; font-weight:700; width:100%; transition: all 0.3s;">+ Añadir</button>
+      </div>`;
+  });
+  container.innerHTML = html;
+}
+
 function cargarStockEnTienda() {
   const cbStock = "cb_stock_" + Date.now();
   window[cbStock] = function (res) {
@@ -553,25 +597,47 @@ function cargarStockEnTienda() {
         APPLETV: "APPLE-TV",
         UNIVERSAL: "UNIVERSAL",
       };
+
       res.data.forEach((item) => {
         const htmlId = mapeo[item.plat];
         if (htmlId) {
           const badge = document.getElementById(`stock-badge-${htmlId}`);
+          const btnAdd = document.getElementById(`btn-add-${htmlId}`);
+
           if (badge) {
             if (item.libres > 0) {
               badge.innerHTML = `🟢 ${item.libres} Disp.`;
               badge.style.background = "rgba(48, 209, 88, 0.1)";
               badge.style.color = "var(--ios-green)";
               badge.style.borderColor = "rgba(48, 209, 88, 0.2)";
+
+              if (btnAdd) {
+                btnAdd.disabled = false;
+                btnAdd.innerHTML = "+ Añadir";
+                btnAdd.style.background = "var(--ios-blue)";
+                btnAdd.style.color = "white";
+                btnAdd.style.opacity = "1";
+                btnAdd.style.cursor = "pointer";
+              }
             } else {
               badge.innerHTML = `🔴 Agotado`;
               badge.style.background = "rgba(255, 69, 58, 0.1)";
               badge.style.color = "var(--ios-red)";
               badge.style.borderColor = "rgba(255, 69, 58, 0.2)";
+
+              if (btnAdd) {
+                btnAdd.disabled = true;
+                btnAdd.innerHTML = "Sin Stock";
+                btnAdd.style.background = "rgba(255, 255, 255, 0.05)";
+                btnAdd.style.color = "var(--text-secondary)";
+                btnAdd.style.opacity = "0.5";
+                btnAdd.style.cursor = "not-allowed";
+              }
             }
           }
         }
       });
+
       catálogoProductos.forEach((p) => {
         const b = document.getElementById(`stock-badge-${p.id}`);
         if (b && b.innerHTML.includes("spin-anim")) {
@@ -587,25 +653,6 @@ function cargarStockEnTienda() {
   script.id = "node_" + cbStock;
   script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPerfilesLibres&callback=${cbStock}&_ts=${Date.now()}`;
   document.body.appendChild(script);
-}
-
-function renderTienda() {
-  const container = document.getElementById("shopCatalogContainer");
-  if (!container) return;
-  let html = "";
-  catálogoProductos.forEach((p) => {
-    html += `
-      <div class="card-ios platform-card-shop" data-name="${p.nombre.toLowerCase()}" style="position:relative; padding:18px 14px 14px 14px; margin:0; display:flex; flex-direction:column; align-items:center; gap:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05); text-align:center;">
-        <div id="stock-badge-${p.id}" style="position:absolute; top:8px; right:8px; background:rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size:0.65rem; padding:4px 8px; border-radius:10px; font-weight:700; color:var(--text-secondary);">
-           <svg class="spin-anim" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
-        </div>
-        <div style="background: ${p.color}15; color: ${p.color}; width: 44px; height: 44px; border-radius: 14px; display:flex; align-items:center; justify-content:center; border: 1px solid ${p.color}25;">${p.logo}</div>
-        <span style="font-size:0.85rem; font-weight:800; color:var(--text-primary); text-overflow:ellipsis; white-space:nowrap; overflow:hidden; width:100%;">${p.nombre}</span>
-        <span style="font-family:monospace; font-size:0.95rem; font-weight:bold; color:var(--ios-green);">${formatMoneda(p.precio)}</span>
-        <button onclick="agregarAlCarrito('${p.id}')" class="btn-ios btn-primary" style="margin:4px 0 0 0; padding:6px 12px; font-size:0.75rem; border-radius:30px; font-weight:700; width:100%;">+ Añadir</button>
-      </div>`;
-  });
-  container.innerHTML = html;
 }
 
 function filtrarTiendaLocal() {
@@ -635,6 +682,15 @@ function agregarAlCarrito(id) {
     });
   triggerToast(`🛒 ${prod.nombre} añadido.`);
   actualizarCarritoUI();
+
+  // Animación del FAB
+  const fab = document.getElementById("fabCarrito");
+  if (fab) {
+    fab.style.transform = "scale(1.1)";
+    setTimeout(() => {
+      fab.style.transform = "scale(1)";
+    }, 150);
+  }
 }
 
 function cambiarCantidad(id, delta) {
@@ -650,14 +706,17 @@ function cambiarCantidad(id, delta) {
 function actualizarCarritoUI() {
   const container = document.getElementById("cartItemsContainer");
   const countBadge = document.getElementById("cartCountBadge");
+  const fabBadge = document.getElementById("fabCartCountBadge");
   const totalDisplay = document.getElementById("cartTotalCost");
   const btnCheckout = document.getElementById("btnCheckoutShop");
 
   if (window.carrito.length === 0) {
-    container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 20px 0;">Tu carrito está vacío.</div>`;
-    countBadge.innerText = "0";
-    totalDisplay.innerText = "$0";
-    btnCheckout.disabled = true;
+    if (container)
+      container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 20px 0;">Tu carrito está vacío.</div>`;
+    if (countBadge) countBadge.innerText = "0";
+    if (fabBadge) fabBadge.innerText = "0";
+    if (totalDisplay) totalDisplay.innerText = "$0";
+    if (btnCheckout) btnCheckout.disabled = true;
     return;
   }
 
@@ -681,17 +740,22 @@ function actualizarCarritoUI() {
         </div>
       </div>`;
   });
-  container.innerHTML = html;
-  countBadge.innerText = totalItems;
-  totalDisplay.innerText = formatMoneda(totalCost);
-  if (totalCost > window.saldoNumericoActual) {
-    btnCheckout.disabled = true;
-    btnCheckout.style.background = "var(--ios-red)";
-    btnCheckout.innerText = "SALDO INSUFICIENTE";
-  } else {
-    btnCheckout.disabled = false;
-    btnCheckout.style.background = "var(--ios-blue)";
-    btnCheckout.innerText = "CONFIRMAR COMPRA";
+
+  if (container) container.innerHTML = html;
+  if (countBadge) countBadge.innerText = totalItems;
+  if (fabBadge) fabBadge.innerText = totalItems;
+  if (totalDisplay) totalDisplay.innerText = formatMoneda(totalCost);
+
+  if (btnCheckout) {
+    if (totalCost > window.saldoNumericoActual) {
+      btnCheckout.disabled = true;
+      btnCheckout.style.background = "var(--ios-red, #ff453a)";
+      btnCheckout.innerText = "SALDO INSUFICIENTE";
+    } else {
+      btnCheckout.disabled = false;
+      btnCheckout.style.background = "var(--ios-blue, #0a84ff)";
+      btnCheckout.innerText = "CONFIRMAR COMPRA";
+    }
   }
 }
 
@@ -774,6 +838,7 @@ function procesarCompraDistribuidor() {
         btnWhatsapp.parentElement.style.display = "none";
       }
 
+      cerrarCarrito();
       document.getElementById("successCheckoutOverlay").classList.add("open");
 
       window.carrito = [];
@@ -781,12 +846,11 @@ function procesarCompraDistribuidor() {
       window.saldoNumericoActual -= totalCost;
       actualizarSaldoUI();
       cargarStockEnTienda();
-      cargarDatosFinancierosYAlertas(telefonoDistribuidor); // Refresca el historial y vencimientos
+      cargarDatosFinancierosYAlertas(telefonoDistribuidor);
 
       if (res.bloques && res.bloques.length > 0) {
-        document.getElementById("inputCasilleroSearch").value =
-          res.bloques[0].correo;
-        buscarCasilleroDistri();
+        const searchInput = document.getElementById("inputCasilleroSearch");
+        if (searchInput) searchInput.value = res.bloques[0].correo;
       }
     } else {
       alert("❌ Error: " + (res ? res.message : "Fallo de red."));
@@ -816,17 +880,30 @@ function cerrarModalExitoCheckout() {
 }
 
 // =========================================================================
-// 📡 BÓVEDA DE CUENTAS
+// 📡 BÓVEDA DE CUENTAS (Buscador Modal)
 // =========================================================================
+function abrirModalBusquedaCuentas() {
+  haptic();
+  document.getElementById("modalBusquedaCuentas").classList.add("open");
+  document.getElementById("contenedorResultadosCasillero").innerHTML =
+    `<div style="text-align:center; color:var(--text-secondary); font-size:0.88rem; padding: 30px 0;">Ingresa un parámetro y presiona buscar. El sistema filtrará solo tus compras registradas.</div>`;
+}
+
+function cerrarModalBusquedaCuentas() {
+  haptic();
+  document.getElementById("modalBusquedaCuentas").classList.remove("open");
+}
+
 function buscarCasilleroDistri() {
   haptic();
   const inputSearch = document
     .getElementById("inputCasilleroSearch")
     .value.trim()
     .toLowerCase();
-  const tbody = document.getElementById("tablaMisComprasDistriBody");
+  const contenedor = document.getElementById("contenedorResultadosCasillero");
   const btn = document.getElementById("btnBuscarCasillero");
   const telefonoDistribuidor = sessionStorage.getItem("active_distri_tel");
+
   if (inputSearch === "") {
     alert("⚠️ Ingresa un correo o nombre de cliente.");
     return;
@@ -834,7 +911,7 @@ function buscarCasilleroDistri() {
 
   btn.disabled = true;
   btn.innerHTML = `Buscando...`;
-  tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;">Rastreando en la Bóveda...</td></tr>`;
+  contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);">Rastreando en la Bóveda...</div>`;
 
   const cbBusq = "cb_casillero_" + Date.now();
   window[cbBusq] = function (res) {
@@ -843,8 +920,9 @@ function buscarCasilleroDistri() {
     if (document.getElementById("node_" + cbBusq))
       document.getElementById("node_" + cbBusq).remove();
     delete window[cbBusq];
+
     if (res && res.status === "success") {
-      let rowsHtml = "";
+      let htmlCards = "";
       const cuentasMias = res.data.filter((item) => {
         let tFila = String(item.telefono || "").replace(/\D/g, "");
         return (
@@ -852,6 +930,7 @@ function buscarCasilleroDistri() {
           telefonoDistribuidor.indexOf(tFila) !== -1
         );
       });
+
       cuentasMias.forEach((item) => {
         let pinText =
           item.pin && item.pin !== "" && item.pin !== "N/A"
@@ -862,31 +941,32 @@ function buscarCasilleroDistri() {
             ? `Perfil: <b>${item.perfil}</b>${pinText}`
             : "Cuenta Completa";
         let subCliente = item.cliente
-          ? `<br><span style="font-size:0.75rem; color:var(--text-secondary);">Cliente: <b style="color:var(--ios-orange);">${item.cliente}</b></span>`
+          ? `<span style="font-size:0.75rem; color:var(--text-secondary);">Cliente: <b style="color:var(--ios-orange);">${item.cliente}</b></span>`
           : "";
         let dataFicha = encodeURIComponent(JSON.stringify(item));
-        rowsHtml += `
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
-            <td style="padding: 14px 16px; color: var(--ios-green); font-family:monospace; font-weight:800;">${item.vencimiento}</td>
-            <td style="padding: 14px 16px; line-height:1.4;">
-               <div style="color:var(--ios-blue); font-weight:800; text-transform: uppercase;">${item.plataforma.replace(/-/g, " ")}</div>
-               <div style="font-size:0.75rem; color:var(--text-secondary);">${perfilText}</div>${subCliente}
-            </td>
-            <td style="padding: 14px 16px;">
-              <div style="display:flex; flex-direction:column; gap:6px;">
-                <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.correo}')">E: <span style="color:white;">${item.correo}</span></div>
-                <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.clave}')">P: <span style="color:white;">${item.clave}</span></div>
-                <button class="btn-ios btn-secondary w-100" style="padding:8px; font-size:0.75rem;" onclick="copiarFichaCasillero(this, '${dataFicha}')">Copiar Ficha Completa</button>
-              </div>
-            </td>
-          </tr>`;
+
+        htmlCards += `
+          <div class="cuenta-resultado-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="color:var(--ios-blue); font-weight:800; text-transform: uppercase;">${item.plataforma.replace(/-/g, " ")}</div>
+              <div style="color:var(--ios-green); font-family:monospace; font-weight:800; font-size:0.85rem;">${item.vencimiento}</div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+               ${perfilText}<br>${subCliente}
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+              <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.correo}')">E: <span style="color:white;">${item.correo}</span></div>
+              <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.clave}')">P: <span style="color:white;">${item.clave}</span></div>
+              <button class="btn-ios btn-secondary w-100" style="padding:8px; font-size:0.75rem; margin-top:4px;" onclick="copiarFichaCasillero(this, '${dataFicha}')">Copiar Ficha Completa</button>
+            </div>
+          </div>`;
       });
-      tbody.innerHTML =
+      contenedor.innerHTML =
         cuentasMias.length === 0
-          ? `<tr><td colspan="3" style="text-align:center; padding:40px;">No se encontraron cuentas asociadas.</td></tr>`
-          : rowsHtml;
+          ? `<div style="text-align:center; padding:40px; color:var(--text-secondary);">No se encontraron cuentas asociadas.</div>`
+          : htmlCards;
     } else {
-      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color:red;">❌ Error en la red.</td></tr>`;
+      contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Error en la red o base de datos.</div>`;
     }
   };
   const script = document.createElement("script");
@@ -1001,6 +1081,7 @@ function cerrarSesionDistribuidor() {
   sessionStorage.clear();
   window.location.reload();
 }
+
 document.addEventListener("DOMContentLoaded", () => {
   let sessionDistri = sessionStorage.getItem("active_distri_tel");
   if (sessionDistri)
