@@ -5014,9 +5014,20 @@ function toggleDistrisPanel() {
 }
 
 function formatearMonedaDistris(valorStr) {
-  let valorNum = parseFloat(String(valorStr).replace(/[^\d.-]/g, ""));
+  // Limpiamos signos de dólar, espacios y puntos de miles. Si hay coma de centavos, tomamos solo la parte entera.
+  let strLimpio = String(valorStr)
+    .replace(/\$|\s/g, "")
+    .split(",")[0]
+    .replace(/\./g, "");
+  let valorNum = parseInt(strLimpio, 10);
+
   if (isNaN(valorNum)) return "$0";
-  if (valorNum > 0 && valorNum < 1000) valorNum = valorNum * 1000;
+
+  // Regla de autocompletado (si alguien escribió "50" por accidente, se vuelve "50000")
+  if (Math.abs(valorNum) > 0 && Math.abs(valorNum) < 1000) {
+    valorNum = valorNum * 1000;
+  }
+
   return "$" + valorNum.toLocaleString("es-CO");
 }
 
@@ -5067,25 +5078,43 @@ function cargarDistribuidores() {
         return;
       }
 
-      // Ordena de mayor a menor saldo
+      // 🔥 FIX: Nuevo motor de ordenamiento que no se confunde con los millones
       data.sort(function (a, b) {
-        let saldoA = parseFloat(String(a.saldo).replace(/[^\d.-]/g, "")) || 0;
-        let saldoB = parseFloat(String(b.saldo).replace(/[^\d.-]/g, "")) || 0;
-        if (saldoA > 0 && saldoA < 1000) saldoA = saldoA * 1000;
-        if (saldoB > 0 && saldoB < 1000) saldoB = saldoB * 1000;
+        let strA = String(a.saldo)
+          .replace(/\$|\s/g, "")
+          .split(",")[0]
+          .replace(/\./g, "");
+        let strB = String(b.saldo)
+          .replace(/\$|\s/g, "")
+          .split(",")[0]
+          .replace(/\./g, "");
+
+        let saldoA = parseInt(strA, 10) || 0;
+        let saldoB = parseInt(strB, 10) || 0;
+
+        if (Math.abs(saldoA) > 0 && Math.abs(saldoA) < 1000) saldoA *= 1000;
+        if (Math.abs(saldoB) > 0 && Math.abs(saldoB) < 1000) saldoB *= 1000;
+
         return saldoB - saldoA;
       });
 
       let html = "";
       for (let i = 0; i < data.length; i++) {
         let d = data[i];
-        let saldoLimpio =
-          parseFloat(String(d.saldo).replace(/[^\d.-]/g, "")) || 0;
-        if (saldoLimpio > 0 && saldoLimpio < 1000)
-          saldoLimpio = saldoLimpio * 1000;
+
+        // 🔥 FIX: Evaluación de color y lógica con el número limpio
+        let strLimpioItem = String(d.saldo)
+          .replace(/\$|\s/g, "")
+          .split(",")[0]
+          .replace(/\./g, "");
+        let saldoLimpio = parseInt(strLimpioItem, 10) || 0;
+
+        if (Math.abs(saldoLimpio) > 0 && Math.abs(saldoLimpio) < 1000) {
+          saldoLimpio *= 1000;
+        }
 
         let colorSaldo =
-          saldoLimpio > 5000 ? "var(--ios-green)" : "var(--ios-red)";
+          saldoLimpio >= 5000 ? "var(--ios-green)" : "var(--ios-red)";
         let saldoTexto = formatearMonedaDistris(d.saldo);
         let nombreLimpioParaClick = d.nombre.replace(/'/g, "\\'");
 
