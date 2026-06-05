@@ -177,6 +177,10 @@ function toggleVentasPanel() {
     filtrarPlataformasVenta();
     document.getElementById("ventaNombre").focus();
 
+    // 🔥 FIX CRÍTICO: Formatear la memoria de meses al abrir la ventana
+    // Evita que el sistema recuerde si la venta anterior fue de 2 o más meses.
+    window.ultimoMesesSeleccionado = "1";
+
     // LÍNEAS NUEVAS: Identificar al empleado activo
     const optNomina = document.getElementById("optPagoNomina");
     if (optNomina) {
@@ -1281,6 +1285,10 @@ function ejecutarCreacionVentaLocal(e) {
           .getElementById("ventaGeneradaModalOverlay")
           .classList.add("open");
         document.getElementById("formGenerarVenta").reset();
+
+        // 🔥 FIX CRÍTICO: Formatear la memoria justo después de terminar
+        window.ultimoMesesSeleccionado = "1";
+
         cargarResumenProveedores();
       } else {
         alert("❌ Error: " + (res ? res.message : "Fallo al inyectar saldo."));
@@ -1384,7 +1392,7 @@ function ejecutarCreacionVentaLocal(e) {
 
     if (res && res.status === "success") {
       let bloques = res.bloques || [];
-      blocks = bloques.sort((a, b) => {
+      let blocks = bloques.sort((a, b) => {
         if (a.id === "NETFLIX") return -1;
         if (b.id === "NETFLIX") return 1;
         return 0;
@@ -1443,6 +1451,10 @@ function ejecutarCreacionVentaLocal(e) {
         .classList.add("open");
 
       document.getElementById("formGenerarVenta").reset();
+
+      // 🔥 FIX CRÍTICO: Formatear la memoria justo después de terminar la venta
+      window.ultimoMesesSeleccionado = "1";
+
       const checksABorrar = document.getElementsByName("platformCheckVenta");
       for (let c = 0; c < checksABorrar.length; c++) {
         checksABorrar[c].checked = false;
