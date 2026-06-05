@@ -877,7 +877,21 @@ function procesarCompraDistribuidor() {
 
         window.carrito = [];
         document.getElementById("cartClientName").value = "";
-        window.saldoNumericoActual -= totalCost;
+
+        // 🔥 FIX: Tomar el saldo oficial exacto devuelto por Sheets (Base de Datos)
+        if (res.saldoQuedante !== undefined) {
+          window.saldoNumericoActual = parseFloat(res.saldoQuedante);
+        } else {
+          window.saldoNumericoActual -= totalCost; // Respaldo por si falla la red
+        }
+
+        // 🔥 FIX: Actualizar el caché de sesión para que no vuelva al saldo viejo si recarga la página
+        sessionStorage.setItem(
+          "active_distri_saldo",
+          window.saldoNumericoActual,
+        );
+
+        // Disparar la actualización visual en la UI
         actualizarSaldoUI();
         cargarStockEnTienda();
         cargarDatosFinancierosYAlertas(telefonoDistribuidor);
