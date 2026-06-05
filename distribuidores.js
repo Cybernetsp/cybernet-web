@@ -9,9 +9,6 @@ window.distriTelefonoCache = "";
 window.distriCorreoRegistradoEnSheets = "";
 window.fichasCheckoutPendientes = "";
 
-// =========================================================================
-// 🎨 CATÁLOGO DE PRODUCTOS (Se añadió Universal)
-// =========================================================================
 const catálogoProductos = [
   {
     id: "NETFLIX",
@@ -134,7 +131,6 @@ const catálogoProductos = [
   },
 ];
 
-// Plataformas que requieren activación manual
 const PLATAFORMAS_MANUALES = [
   "YOUTUBE",
   "SPOTIFY",
@@ -145,7 +141,7 @@ const PLATAFORMAS_MANUALES = [
 ];
 
 // =========================================================================
-// UTILERÍAS
+// UTILERÍAS GLOBALES
 // =========================================================================
 function haptic() {
   if (navigator.vibrate) navigator.vibrate(15);
@@ -156,18 +152,6 @@ function formatMoneda(v) {
     parseFloat(v || 0).toLocaleString("es-CO", { maximumFractionDigits: 0 })
   );
 }
-
-function copiarTextoAlToque(elemento, texto) {
-  if (!texto) return;
-  navigator.clipboard.writeText(texto).then(() => {
-    triggerToast(`📋 Copiado al portapapeles`);
-    elemento.style.opacity = "0.4";
-    setTimeout(() => {
-      elemento.style.opacity = "1";
-    }, 150);
-  });
-}
-
 function triggerToast(msgHTML) {
   const toast = document.getElementById("appleToast");
   if (!toast) return;
@@ -179,20 +163,67 @@ function triggerToast(msgHTML) {
     toast.style.opacity = "0";
   }, 3000);
 }
+function copiarTextoAlToque(elemento, texto) {
+  if (!texto) return;
+  navigator.clipboard.writeText(texto).then(() => {
+    triggerToast(`📋 Copiado al portapapeles`);
+    elemento.style.opacity = "0.4";
+    setTimeout(() => {
+      elemento.style.opacity = "1";
+    }, 150);
+  });
+}
 
-window.procesarDistribuidoresView = function (res) {
-  if (typeof window.cyberLoginCallback === "function")
-    window.cyberLoginCallback(res);
-  if (typeof window.cyberActionCallback === "function")
-    window.cyberActionCallback(res);
-};
-window.procesarBusquedaCuentasSheets = function (res) {
-  if (typeof window.cyberCasilleroCallback === "function")
-    window.cyberCasilleroCallback(res);
-};
+// Convertimos "5DEJUNIO" a Objeto Date para calcular vencimientos
+function parseFechaCybernet(fechaStr) {
+  if (!fechaStr || fechaStr === "N/A") return null;
+  let s = String(fechaStr).toUpperCase().replace(/\s+/g, "");
+  let m = s.match(/(\d+)(DE)?([A-Z]+)/);
+  if (!m) return null;
+  let day = parseInt(m[1], 10);
+  let mesStr = m[3];
+  const months = {
+    ENE: 0,
+    ENERO: 0,
+    FEB: 1,
+    FEBRERO: 1,
+    MAR: 2,
+    MARZO: 2,
+    ABR: 3,
+    ABRIL: 3,
+    MAY: 4,
+    MAYO: 4,
+    JUN: 5,
+    JUNIO: 5,
+    JUL: 6,
+    JULIO: 6,
+    AGO: 7,
+    AGOSTO: 7,
+    SEP: 8,
+    SEPTIEMBRE: 8,
+    OCT: 9,
+    OCTUBRE: 9,
+    NOV: 10,
+    NOVIEMBRE: 10,
+    DIC: 11,
+    DICIEMBRE: 11,
+  };
+  let month = months[mesStr];
+  if (month === undefined) return null;
+
+  let now = new Date();
+  let year = now.getFullYear(); // Estamos en 2026 por sistema
+  let d = new Date(year, month, day);
+
+  // Si la fecha calculada es mucho más antigua que hoy, asumimos que es del otro año
+  if (d < now && now.getMonth() - month > 6) {
+    d.setFullYear(year + 1);
+  }
+  return d;
+}
 
 // =========================================================================
-// 🔒 LOGIN MULTI-PASOS AUTOMATIZADO
+// 🔒 LOGIN
 // =========================================================================
 function verificarTelefonoDistribuidor() {
   haptic();
@@ -224,7 +255,6 @@ function verificarTelefonoDistribuidor() {
         window.distriCorreoRegistradoEnSheets = String(distri.correo || "")
           .trim()
           .toLowerCase();
-
         if (
           window.distriCorreoRegistradoEnSheets !== "" &&
           window.distriCorreoRegistradoEnSheets.indexOf("@") !== -1
@@ -237,24 +267,20 @@ function verificarTelefonoDistribuidor() {
             if (document.getElementById("node_" + cbSend))
               document.getElementById("node_" + cbSend).remove();
             delete window[cbSend];
-
             if (resEnvio && resEnvio.status === "success") {
               document.getElementById("stepTelefono").style.display = "none";
               let partes = window.distriCorreoRegistradoEnSheets.split("@");
-              let userPart = partes[0];
               let maskedEmail =
-                userPart.substring(0, 2) +
+                partes[0].substring(0, 2) +
                 "******" +
-                userPart.substring(userPart.length - 2) +
+                partes[0].substring(partes[0].length - 2) +
                 "@" +
                 partes[1];
               document.getElementById("txtAvisoTokenDespachado").innerText =
-                `Código de 6 dígitos enviado a tu correo: ${maskedEmail}`;
+                `Código de 6 dígitos enviado a: ${maskedEmail}`;
               document.getElementById("stepTokenVerificar").style.display =
                 "flex";
               document.getElementById("distriLoginTokenInput").focus();
-              document.getElementById("txtLoginInstruccion").innerText =
-                "Paso 2: Código de Acceso.";
               triggerToast("📩 Token enviado.");
             } else {
               alert("❌ Error al despachar el correo.");
@@ -269,9 +295,6 @@ function verificarTelefonoDistribuidor() {
           btn.innerHTML = "Continuar →";
           document.getElementById("stepTelefono").style.display = "none";
           document.getElementById("stepCorreoRegistrar").style.display = "flex";
-          document.getElementById("distriCorreoRegistrarInput").focus();
-          document.getElementById("txtLoginInstruccion").innerText =
-            "Paso 2: Registro de Correo Electrónico.";
         }
       } else {
         btn.disabled = false;
@@ -281,7 +304,7 @@ function verificarTelefonoDistribuidor() {
     } else {
       btn.disabled = false;
       btn.innerHTML = "Continuar →";
-      alert("❌ Error de comunicación con Sheets.");
+      alert("❌ Error de red.");
     }
   };
   const script = document.createElement("script");
@@ -301,7 +324,6 @@ function registrarEmailYEnviarCodigo() {
     alert("⚠️ Correo electrónico inválido.");
     return;
   }
-
   btn.disabled = true;
   btn.innerHTML = `Registrando y enviando...`;
 
@@ -312,19 +334,14 @@ function registrarEmailYEnviarCodigo() {
     if (document.getElementById("node_" + cbReg))
       document.getElementById("node_" + cbReg).remove();
     delete window[cbReg];
-
     if (res && res.status === "success") {
       window.distriCorreoRegistradoEnSheets = nuevoEmail;
       document.getElementById("stepCorreoRegistrar").style.display = "none";
       document.getElementById("txtAvisoTokenDespachado").innerText =
-        `🎉 Correo enlazado.\n🔑 Código enviado a: ${nuevoEmail}`;
+        `🔑 Código enviado a: ${nuevoEmail}`;
       document.getElementById("stepTokenVerificar").style.display = "flex";
-      document.getElementById("distriLoginTokenInput").focus();
-      document.getElementById("txtLoginInstruccion").innerText =
-        "Paso 3: Código de Acceso.";
-      triggerToast("✅ Correo guardado y Token enviado.");
     } else {
-      alert("❌ Error al guardar el correo: " + res.message);
+      alert("❌ Error: " + res.message);
     }
   };
   const script = document.createElement("script");
@@ -344,7 +361,6 @@ function verificarCodigoDeSeguridadFinal() {
     alert("⚠️ El código debe ser de 6 números.");
     return;
   }
-
   btn.disabled = true;
   btn.innerHTML = `Validando...`;
 
@@ -355,18 +371,18 @@ function verificarCodigoDeSeguridadFinal() {
     if (document.getElementById("node_" + cbVerify))
       document.getElementById("node_" + cbVerify).remove();
     delete window[cbVerify];
-
     if (res && res.status === "success" && res.data) {
-      const d = res.data;
       sessionStorage.setItem("active_distri_tel", window.distriTelefonoCache);
-      sessionStorage.setItem("active_distri_name", d.nombre.toUpperCase());
-      sessionStorage.setItem("active_distri_saldo", d.saldo);
-      entrarAlPortalDistribuidor(
-        d.nombre.toUpperCase(),
-        window.distriTelefonoCache,
-        d.saldo,
+      sessionStorage.setItem(
+        "active_distri_name",
+        res.data.nombre.toUpperCase(),
       );
-      triggerToast("🎉 ¡Acceso Autorizado!");
+      sessionStorage.setItem("active_distri_saldo", res.data.saldo);
+      entrarAlPortalDistribuidor(
+        res.data.nombre.toUpperCase(),
+        window.distriTelefonoCache,
+        res.data.saldo,
+      );
     } else {
       alert("❌ Código incorrecto o caducado.");
     }
@@ -381,15 +397,11 @@ function regresarAlPasoInicial() {
   haptic();
   document.getElementById("stepTokenVerificar").style.display = "none";
   document.getElementById("stepCorreoRegistrar").style.display = "none";
-  document.getElementById("distriLoginTokenInput").value = "";
   document.getElementById("stepTelefono").style.display = "flex";
-  document.getElementById("distriLoginTelefono").focus();
-  document.getElementById("txtLoginInstruccion").innerText =
-    "Ingresa tu número de celular registrado para iniciar la verificación.";
 }
 
 // =========================================================================
-// 💼 INTERFAZ DE TIENDA Y DASHBOARD MAYORISTA
+// 💼 INTERFAZ B2B (DASHBOARD) Y ALERTAS
 // =========================================================================
 function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   document.getElementById("loginSection").style.display = "none";
@@ -406,25 +418,129 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   actualizarSaldoUI();
   renderTienda();
   cargarStockEnTienda();
-  document.getElementById("tablaMisComprasDistriBody").innerHTML =
-    `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--text-secondary);">Utiliza el buscador de arriba para encontrar tus cuentas.</td></tr>`;
+  cargarDatosFinancierosYAlertas(telefono); // 🔥 Carga el Historial y Vencimientos
 }
 
 function actualizarSaldoUI() {
-  const formateado = formatMoneda(window.saldoNumericoActual);
-  document.getElementById("distriBarBalance").innerText = formateado;
-  document.getElementById("cartTotalSaldo").innerText = formateado;
+  const f = formatMoneda(window.saldoNumericoActual);
+  document.getElementById("distriBarBalance").innerText = f;
+  document.getElementById("cartTotalSaldo").innerText = f;
 }
 
+// 🔥 NUEVO: Cargar Historial y Renovaciones
+function cargarDatosFinancierosYAlertas(tel) {
+  const cbData = "cb_dash_" + Date.now();
+  window[cbData] = function (res) {
+    if (document.getElementById("node_" + cbData))
+      document.getElementById("node_" + cbData).remove();
+    delete window[cbData];
+
+    if (res && res.status === "success") {
+      // 1. Llenar Tabla Historial
+      const tbody = document.getElementById("tablaHistorialBody");
+      let trs = "";
+      if (res.historial && res.historial.length > 0) {
+        res.historial.forEach((mov) => {
+          // Detectar si es recarga (verde) o descuento (rojo)
+          let color =
+            mov.monto < 0 || String(mov.monto).indexOf("-") !== -1
+              ? "var(--ios-red)"
+              : "var(--text-primary)";
+          trs += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 12px 8px; font-size:0.75rem; color:var(--text-secondary);">${mov.fecha}</td>
+                    <td style="padding: 12px 8px; line-height:1.3;">
+                      <strong style="color:var(--text-primary); font-size:0.85rem;">${mov.concepto}</strong><br>
+                      <span style="color:var(--ios-blue); font-size:0.75rem;">👤 ${mov.cliente}</span>
+                    </td>
+                    <td style="padding: 12px 8px; text-align:right; color:${color}; font-weight:bold; font-family:monospace;">${formatMoneda(mov.monto)}</td>
+                  </tr>`;
+        });
+      } else {
+        trs = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:var(--text-secondary);">No hay movimientos recientes.</td></tr>`;
+      }
+      tbody.innerHTML = trs;
+
+      // 2. Procesar Renovaciones Próximas
+      const divRenov = document.getElementById("listaRenovacionesCards");
+      const widgetCont = document.getElementById("widgetRenovaciones");
+      let htmlRenov = "";
+      let now = new Date();
+      now.setHours(0, 0, 0, 0);
+
+      let countExpiran = 0;
+      if (res.renovaciones && res.renovaciones.length > 0) {
+        res.renovaciones.forEach((c) => {
+          let fObj = parseFechaCybernet(c.vencimiento);
+          if (fObj) {
+            let diffDias = Math.ceil(
+              (fObj.getTime() - now.getTime()) / (1000 * 3600 * 24),
+            );
+            if (diffDias >= 0 && diffDias <= 3) {
+              countExpiran++;
+              let colorDias =
+                diffDias === 0 ? "var(--ios-red)" : "var(--ios-orange)";
+              let txtDias =
+                diffDias === 0 ? "¡Vence HOY!" : `Vence en ${diffDias} días`;
+
+              let msgCobro = encodeURIComponent(
+                `¡Hola! Tu cuenta de ${c.plataforma.replace(/-/g, " ")} vence pronto (${c.vencimiento}). ¿Deseas renovarla para no perder el servicio?`,
+              );
+
+              htmlRenov += `
+                 <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,149,0,0.3); border-radius:16px; padding:12px 16px; min-width:200px; display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-weight:800; color:var(--text-primary); font-size:0.9rem;">📺 ${c.plataforma.replace(/-/g, " ")}</div>
+                    <div style="font-size:0.8rem; color:var(--text-secondary);">👤 ${c.cliente}</div>
+                    <div style="font-size:0.8rem; color:${colorDias}; font-weight:700;">${txtDias}</div>
+                    <button class="btn-ios" onclick="copiarMensajeRenovacion('${msgCobro}')" style="background:rgba(255,149,0,0.15); color:var(--ios-orange); border:none; padding:8px; border-radius:30px; font-size:0.75rem; font-weight:700; margin-top:4px;">
+                      📋 Copiar Mensaje
+                    </button>
+                 </div>`;
+            }
+          }
+        });
+      }
+
+      if (countExpiran > 0) {
+        divRenov.innerHTML = htmlRenov;
+        widgetCont.style.display = "block";
+      } else {
+        widgetCont.style.display = "none";
+      }
+    }
+  };
+  const script = document.createElement("script");
+  script.id = "node_" + cbData;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDashboardDistri&telefono=${encodeURIComponent(tel)}&callback=${cbData}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+}
+
+function copiarMensajeRenovacion(msgEnc) {
+  haptic();
+  navigator.clipboard.writeText(decodeURIComponent(msgEnc)).then(() => {
+    triggerToast("📋 Mensaje de cobro copiado.");
+  });
+}
+
+function abrirModalHistorial() {
+  haptic();
+  document.getElementById("modalEstadoCuenta").classList.add("open");
+}
+function cerrarModalHistorial() {
+  haptic();
+  document.getElementById("modalEstadoCuenta").classList.remove("open");
+}
+
+// =========================================================================
+// 🛒 E-COMMERCE MAYORISTA
+// =========================================================================
 function cargarStockEnTienda() {
   const cbStock = "cb_stock_" + Date.now();
   window[cbStock] = function (res) {
     if (document.getElementById("node_" + cbStock))
       document.getElementById("node_" + cbStock).remove();
     delete window[cbStock];
-
     if (res && res.status === "success") {
-      const mapeoApiHtml = {
+      const mapeo = {
         NETFLIX: "NETFLIX",
         DISNEYPREMIUM: "DISNEY-PREMIUM",
         AMAZON: "AMAZON",
@@ -437,9 +553,8 @@ function cargarStockEnTienda() {
         APPLETV: "APPLE-TV",
         UNIVERSAL: "UNIVERSAL",
       };
-
       res.data.forEach((item) => {
-        const htmlId = mapeoApiHtml[item.plat];
+        const htmlId = mapeo[item.plat];
         if (htmlId) {
           const badge = document.getElementById(`stock-badge-${htmlId}`);
           if (badge) {
@@ -457,14 +572,13 @@ function cargarStockEnTienda() {
           }
         }
       });
-
       catálogoProductos.forEach((p) => {
-        const badge = document.getElementById(`stock-badge-${p.id}`);
-        if (badge && badge.innerHTML.includes("spin-anim")) {
-          badge.innerHTML = `✅ Ilimitado`;
-          badge.style.background = "rgba(10, 132, 255, 0.1)";
-          badge.style.color = "var(--ios-blue)";
-          badge.style.borderColor = "rgba(10, 132, 255, 0.2)";
+        const b = document.getElementById(`stock-badge-${p.id}`);
+        if (b && b.innerHTML.includes("spin-anim")) {
+          b.innerHTML = `✅ Ilimitado`;
+          b.style.background = "rgba(10, 132, 255, 0.1)";
+          b.style.color = "var(--ios-blue)";
+          b.style.borderColor = "rgba(10, 132, 255, 0.2)";
         }
       });
     }
@@ -483,11 +597,9 @@ function renderTienda() {
     html += `
       <div class="card-ios platform-card-shop" data-name="${p.nombre.toLowerCase()}" style="position:relative; padding:18px 14px 14px 14px; margin:0; display:flex; flex-direction:column; align-items:center; gap:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05); text-align:center;">
         <div id="stock-badge-${p.id}" style="position:absolute; top:8px; right:8px; background:rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size:0.65rem; padding:4px 8px; border-radius:10px; font-weight:700; color:var(--text-secondary);">
-           <svg class="spin-anim" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+           <svg class="spin-anim" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
         </div>
-        <div style="background: ${p.color}15; color: ${p.color}; width: 44px; height: 44px; border-radius: 14px; display:flex; align-items:center; justify-content:center; border: 1px solid ${p.color}25;">
-          ${p.logo}
-        </div>
+        <div style="background: ${p.color}15; color: ${p.color}; width: 44px; height: 44px; border-radius: 14px; display:flex; align-items:center; justify-content:center; border: 1px solid ${p.color}25;">${p.logo}</div>
         <span style="font-size:0.85rem; font-weight:800; color:var(--text-primary); text-overflow:ellipsis; white-space:nowrap; overflow:hidden; width:100%;">${p.nombre}</span>
         <span style="font-family:monospace; font-size:0.95rem; font-weight:bold; color:var(--ios-green);">${formatMoneda(p.precio)}</span>
         <button onclick="agregarAlCarrito('${p.id}')" class="btn-ios btn-primary" style="margin:4px 0 0 0; padding:6px 12px; font-size:0.75rem; border-radius:30px; font-weight:700; width:100%;">+ Añadir</button>
@@ -560,22 +672,18 @@ function actualizarCarritoUI() {
       <div class="cart-item-row" style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,0.02); padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.04);">
         <div style="display:flex; flex-direction:column; text-align:left; overflow:hidden; flex-grow:1;">
           <strong style="font-size:0.85rem; color:var(--text-primary); text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">${item.nombre}</strong>
-          <span style="font-size:0.85rem; color:var(--ios-green); font-family:monospace; font-weight:700;">
-            ${formatMoneda(subtotal)} <span style="font-size:0.65rem; color:var(--text-secondary); font-weight:normal;">(${formatMoneda(item.precio)} c/u)</span>
-          </span>
+          <span style="font-size:0.85rem; color:var(--ios-green); font-family:monospace; font-weight:700;">${formatMoneda(subtotal)} <span style="font-size:0.65rem; color:var(--text-secondary); font-weight:normal;">(${formatMoneda(item.precio)} c/u)</span></span>
         </div>
         <div style="display:flex; align-items:center; background:rgba(0,0,0,0.2); border-radius:30px; padding:2px; border:1px solid rgba(255,255,255,0.05);">
-          <button onclick="cambiarCantidad('${item.id}', -1)" style="background:transparent; border:none; color:white; width:22px; height:22px; cursor:pointer; font-weight:bold;">-</button>
+          <button onclick="cambiarCantidad('${item.id}', -1)" style="background:transparent; border:none; color:white; width:22px; height:22px; font-weight:bold;">-</button>
           <span style="font-family:monospace; font-size:0.85rem; font-weight:bold; min-width:18px; text-align:center;">${item.amount}</span>
-          <button onclick="cambiarCantidad('${item.id}', 1)" style="background:transparent; border:none; color:white; width:22px; height:22px; cursor:pointer; font-weight:bold;">+</button>
+          <button onclick="cambiarCantidad('${item.id}', 1)" style="background:transparent; border:none; color:white; width:22px; height:22px; font-weight:bold;">+</button>
         </div>
       </div>`;
   });
-
   container.innerHTML = html;
   countBadge.innerText = totalItems;
   totalDisplay.innerText = formatMoneda(totalCost);
-
   if (totalCost > window.saldoNumericoActual) {
     btnCheckout.disabled = true;
     btnCheckout.style.background = "var(--ios-red)";
@@ -598,7 +706,6 @@ function procesarCompraDistribuidor() {
 
   let fragmentos = window.carrito.map((item) => `${item.amount} ${item.id}`);
   const descripcionLote = fragmentos.join(" + ");
-
   const inputNombreCliente = document
     .getElementById("cartClientName")
     .value.trim();
@@ -608,10 +715,12 @@ function procesarCompraDistribuidor() {
       : sessionStorage.getItem("active_distri_name");
   const telefonoDistribuidor = sessionStorage.getItem("active_distri_tel");
 
-  let confirmacion = confirm(
-    `🛒 ¿Confirmar despacho mayorista?\n\n📦 Pedido: ${descripcionLote}\n👤 Cliente: ${nombreParaSheets}\n💵 Costo: ${formatMoneda(totalCost)}`,
-  );
-  if (!confirmacion) return;
+  if (
+    !confirm(
+      `🛒 ¿Confirmar despacho mayorista?\n\n📦 Pedido: ${descripcionLote}\n👤 Cliente: ${nombreParaSheets}\n💵 Costo: ${formatMoneda(totalCost)}`,
+    )
+  )
+    return;
 
   const btn = document.getElementById("btnCheckoutShop");
   btn.disabled = true;
@@ -632,42 +741,25 @@ function procesarCompraDistribuidor() {
 
       if (res.bloques && res.bloques.length > 0) {
         res.bloques.forEach((bloque) => {
-          textoFicha += `🎬 DETALLES DE ${bloque.id.replace(/-/g, " ").toUpperCase()} ✅\n`;
-          textoFicha += `────────────────────\n`;
-          textoFicha += `📧 Correo: ${bloque.correo}\n`;
-          textoFicha += `🔐 Contraseña: ${bloque.clave}\n`;
-
-          if (
-            bloque.perfil &&
-            bloque.perfil !== "N/A" &&
-            bloque.perfil !== ""
-          ) {
+          textoFicha += `🎬 DETALLES DE ${bloque.id.replace(/-/g, " ").toUpperCase()} ✅\n────────────────────\n📧 Correo: ${bloque.correo}\n🔐 Contraseña: ${bloque.clave}\n`;
+          if (bloque.perfil && bloque.perfil !== "N/A" && bloque.perfil !== "")
             textoFicha += `👤 Perfil: ${bloque.perfil}\n`;
-          }
-          if (bloque.pin && bloque.pin !== "N/A" && bloque.pin !== "") {
+          if (bloque.pin && bloque.pin !== "N/A" && bloque.pin !== "")
             textoFicha += `🔑 Pin del Perfil: ${bloque.pin}\n`;
-          }
-          textoFicha += `📅 Fecha de Vencimiento: ${bloque.venc.toLowerCase()}\n`;
-          textoFicha += `🛒 Fecha de Compra: No registrada\n\n`;
+          textoFicha += `📅 Fecha de Vencimiento: ${bloque.venc.toLowerCase()}\n🛒 Fecha de Compra: Hoy\n\n`;
         });
       } else {
-        textoFicha += `Tus cuentas han sido procesadas correctamente. Puedes ver los accesos en tu casillero.\n\n`;
+        textoFicha += `Tus cuentas han sido procesadas correctamente. Míralas en tu casillero.\n\n`;
       }
-
-      textoFicha += `📢 INFORMACIÓN IMPORTANTE:\n`;
-      textoFicha += `────────────────────\n`;
-      textoFicha += `💎 Disfruta tu servicio.\n`;
-      textoFicha += `✨ ¡Gracias por elegirnos! ✨`;
+      textoFicha += `📢 INFORMACIÓN IMPORTANTE:\n────────────────────\n💎 Disfruta tu servicio.\n✨ ¡Gracias por elegirnos! ✨`;
 
       document.getElementById("cajaTextoFichas").innerText = textoFicha;
       window.fichasCheckoutPendientes = textoFicha;
 
-      // Lógica WhatsApp para plataformas manuales
       const btnWhatsapp = document.getElementById("btnWhatsAppActivacion");
       const requiresManual = window.carrito.some((item) =>
         PLATAFORMAS_MANUALES.includes(item.id),
       );
-
       if (requiresManual) {
         const platList = window.carrito
           .filter((i) => PLATAFORMAS_MANUALES.includes(i.id))
@@ -682,31 +774,26 @@ function procesarCompraDistribuidor() {
         btnWhatsapp.parentElement.style.display = "none";
       }
 
-      document.getElementById("successCheckoutOverlay").style.display = "flex";
+      document.getElementById("successCheckoutOverlay").classList.add("open");
 
       window.carrito = [];
       document.getElementById("cartClientName").value = "";
       window.saldoNumericoActual -= totalCost;
       actualizarSaldoUI();
       cargarStockEnTienda();
+      cargarDatosFinancierosYAlertas(telefonoDistribuidor); // Refresca el historial y vencimientos
 
       if (res.bloques && res.bloques.length > 0) {
         document.getElementById("inputCasilleroSearch").value =
           res.bloques[0].correo;
         buscarCasilleroDistri();
-      } else {
-        document.getElementById("inputCasilleroSearch").value =
-          telefonoDistribuidor;
-        buscarCasilleroDistri();
       }
     } else {
-      alert("❌ Error: " + (res ? res.message : "Fallo de comunicación."));
+      alert("❌ Error: " + (res ? res.message : "Fallo de red."));
     }
   };
-
   const script = document.createElement("script");
   script.id = "node_" + cbCheckout;
-  // 👇 AQUÍ ABAJO OCURRE LA MAGIA, LLAMAMOS AL TÚNEL EXCLUSIVO B2B 👇
   script.src = `${GOOGLE_SCRIPT_URL}?action=registrarVentaDistriB2B&nombre=${encodeURIComponent(nombreParaSheets)}&telefono=${encodeURIComponent(telefonoDistribuidor)}&descripcion=${encodeURIComponent(descripcionLote)}&cantidad=${encodeURIComponent(totalCost)}&callback=${cbCheckout}`;
   document.body.appendChild(script);
 }
@@ -716,21 +803,20 @@ function copiarCuentasCheckout() {
   const btn = document.getElementById("btnCopiarFichasCheckout");
   navigator.clipboard.writeText(window.fichasCheckoutPendientes).then(() => {
     let originalText = btn.innerHTML;
-    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Copiado con éxito!`;
-    triggerToast(`📋 Cuentas copiadas al portapapeles.`);
+    btn.innerHTML = `✅ ¡Copiado con éxito!`;
+    triggerToast(`📋 Cuentas copiadas.`);
     setTimeout(() => {
       btn.innerHTML = originalText;
     }, 2000);
   });
 }
-
 function cerrarModalExitoCheckout() {
   haptic();
-  document.getElementById("successCheckoutOverlay").style.display = "none";
+  document.getElementById("successCheckoutOverlay").classList.remove("open");
 }
 
 // =========================================================================
-// 📡 BÓVEDA DE CUENTAS (BÚSQUEDA DINÁMICA POR NOMBRE O CORREO)
+// 📡 BÓVEDA DE CUENTAS
 // =========================================================================
 function buscarCasilleroDistri() {
   haptic();
@@ -741,15 +827,14 @@ function buscarCasilleroDistri() {
   const tbody = document.getElementById("tablaMisComprasDistriBody");
   const btn = document.getElementById("btnBuscarCasillero");
   const telefonoDistribuidor = sessionStorage.getItem("active_distri_tel");
-
   if (inputSearch === "") {
-    alert("⚠️ Por favor ingresa el correo o el nombre del cliente.");
+    alert("⚠️ Ingresa un correo o nombre de cliente.");
     return;
   }
 
   btn.disabled = true;
-  btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>`;
-  tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--text-secondary);">Rastreando en la Bóveda...</td></tr>`;
+  btn.innerHTML = `Buscando...`;
+  tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px;">Rastreando en la Bóveda...</td></tr>`;
 
   const cbBusq = "cb_casillero_" + Date.now();
   window[cbBusq] = function (res) {
@@ -758,7 +843,6 @@ function buscarCasilleroDistri() {
     if (document.getElementById("node_" + cbBusq))
       document.getElementById("node_" + cbBusq).remove();
     delete window[cbBusq];
-
     if (res && res.status === "success") {
       let rowsHtml = "";
       const cuentasMias = res.data.filter((item) => {
@@ -768,7 +852,6 @@ function buscarCasilleroDistri() {
           telefonoDistribuidor.indexOf(tFila) !== -1
         );
       });
-
       cuentasMias.forEach((item) => {
         let pinText =
           item.pin && item.pin !== "" && item.pin !== "N/A"
@@ -779,46 +862,33 @@ function buscarCasilleroDistri() {
             ? `Perfil: <b>${item.perfil}</b>${pinText}`
             : "Cuenta Completa";
         let subCliente = item.cliente
-          ? `<br><span style="font-size:0.75rem; color:var(--text-secondary);">Asignado a: <b style="color:var(--ios-orange);">${item.cliente}</b></span>`
+          ? `<br><span style="font-size:0.75rem; color:var(--text-secondary);">Cliente: <b style="color:var(--ios-orange);">${item.cliente}</b></span>`
           : "";
         let dataFicha = encodeURIComponent(JSON.stringify(item));
-
         rowsHtml += `
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.01)'" onmouseout="this.style.background='transparent'">
-            <td style="padding: 14px 16px; color: var(--ios-green); font-family:monospace; font-weight:800; font-size:0.9rem;">${item.vencimiento}</td>
-            <td style="padding: 14px 16px; text-align: left; line-height:1.4;">
-               <div style="color:var(--ios-blue); font-weight:800; font-size:0.95rem; text-transform: uppercase;">${item.plataforma.replace(/-/g, " ")}</div>
-               <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">${perfilText}</div>
-               ${subCliente}
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 14px 16px; color: var(--ios-green); font-family:monospace; font-weight:800;">${item.vencimiento}</td>
+            <td style="padding: 14px 16px; line-height:1.4;">
+               <div style="color:var(--ios-blue); font-weight:800; text-transform: uppercase;">${item.plataforma.replace(/-/g, " ")}</div>
+               <div style="font-size:0.75rem; color:var(--text-secondary);">${perfilText}</div>${subCliente}
             </td>
-            <td style="padding: 14px 16px; text-align: left;">
+            <td style="padding: 14px 16px;">
               <div style="display:flex; flex-direction:column; gap:6px;">
-                <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.correo}')">
-                  <span style="color:var(--text-secondary); font-size:0.7rem; font-weight:800;">E:</span>
-                  <span style="color:var(--text-primary); font-weight:700;">${item.correo}</span>
-                </div>
-                <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.clave}')" style="border-color: rgba(255,69,58,0.15);">
-                  <span style="color:var(--ios-red); font-size:0.7rem; font-weight:800;">P:</span>
-                  <span style="color:var(--text-primary); font-weight:700;">${item.clave}</span>
-                </div>
-                <button class="btn-ios btn-secondary w-100" style="margin-top:6px; font-size:0.75rem; padding:8px;" onclick="copiarFichaCasillero(this, '${dataFicha}')">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px; vertical-align:bottom;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  Copiar Ficha Completa
-                </button>
+                <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.correo}')">E: <span style="color:white;">${item.correo}</span></div>
+                <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.clave}')">P: <span style="color:white;">${item.clave}</span></div>
+                <button class="btn-ios btn-secondary w-100" style="padding:8px; font-size:0.75rem;" onclick="copiarFichaCasillero(this, '${dataFicha}')">Copiar Ficha Completa</button>
               </div>
             </td>
           </tr>`;
       });
-
-      if (cuentasMias.length === 0) {
-        rowsHtml = `<tr><td colspan="3" style="text-align:center; padding: 40px; color:var(--text-secondary); font-weight:500;">No se encontraron cuentas asociadas. Verifica el nombre o correo.</td></tr>`;
-      }
-      tbody.innerHTML = rowsHtml;
+      tbody.innerHTML =
+        cuentasMias.length === 0
+          ? `<tr><td colspan="3" style="text-align:center; padding:40px;">No se encontraron cuentas asociadas.</td></tr>`
+          : rowsHtml;
     } else {
-      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--ios-red);">❌ Error en la base de datos central.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color:red;">❌ Error en la red.</td></tr>`;
     }
   };
-
   const script = document.createElement("script");
   script.id = "node_" + cbBusq;
   script.src = `${GOOGLE_SCRIPT_URL}?action=buscarCuentaGlobal&query=${encodeURIComponent(inputSearch)}&callback=${cbBusq}&_ts=${Date.now()}`;
@@ -830,73 +900,51 @@ function copiarFichaCasillero(btn, dataEncoded) {
   const obj = JSON.parse(decodeURIComponent(dataEncoded));
   let nombreCliente =
     obj.cliente && obj.cliente !== "N/A" ? obj.cliente : "Cliente";
-
-  let textoFicha = `🌟 ¡Hola, ${nombreCliente}!\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos: 👇\n\n`;
-  textoFicha += `🎬 DETALLES DE ${obj.plataforma.replace(/-/g, " ").toUpperCase()} ✅\n`;
-  textoFicha += `────────────────────\n`;
-  textoFicha += `📧 Correo: ${obj.correo}\n`;
-  textoFicha += `🔐 Contraseña: ${obj.clave}\n`;
-
-  if (obj.perfil && obj.perfil !== "N/A" && obj.perfil !== "") {
-    textoFicha += `👤 Perfil: ${obj.perfil}\n`;
-  }
-  if (obj.pin && obj.pin !== "N/A" && obj.pin !== "") {
-    textoFicha += `🔑 Pin del Perfil: ${obj.pin}\n`;
-  }
-
-  textoFicha += `📅 Fecha de Vencimiento: ${obj.vencimiento.toLowerCase()}\n`;
-  textoFicha += `🛒 Fecha de Compra: No registrada\n\n`;
-  textoFicha += `📢 INFORMACIÓN IMPORTANTE:\n`;
-  textoFicha += `────────────────────\n`;
-  textoFicha += `💎 Disfruta tu servicio.\n`;
-  textoFicha += `✨ ¡Gracias por elegirnos! ✨`;
-
-  navigator.clipboard.writeText(textoFicha).then(() => {
-    let originalText = btn.innerHTML;
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px; vertical-align:bottom;"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Ficha Copiada!`;
+  let txt = `🌟 ¡Hola, ${nombreCliente}!\n\nTu pedido ha sido procesado. Accesos: 👇\n\n🎬 DETALLES DE ${obj.plataforma.replace(/-/g, " ").toUpperCase()} ✅\n────────────────────\n📧 Correo: ${obj.correo}\n🔐 Contraseña: ${obj.clave}\n`;
+  if (obj.perfil && obj.perfil !== "N/A" && obj.perfil !== "")
+    txt += `👤 Perfil: ${obj.perfil}\n`;
+  if (obj.pin && obj.pin !== "N/A" && obj.pin !== "")
+    txt += `🔑 Pin del Perfil: ${obj.pin}\n`;
+  txt += `📅 Fecha de Vencimiento: ${obj.vencimiento.toLowerCase()}\n\n📢 INFORMACIÓN IMPORTANTE:\n────────────────────\n💎 Disfruta tu servicio.\n✨ ¡Gracias por elegirnos! ✨`;
+  navigator.clipboard.writeText(txt).then(() => {
+    let old = btn.innerHTML;
+    btn.innerHTML = `✅ ¡Copiada!`;
     btn.style.background = "var(--ios-green)";
     btn.style.color = "white";
-    btn.style.borderColor = "transparent";
-    triggerToast(`📋 Ficha copiada lista para enviar a tu cliente.`);
+    triggerToast(`📋 Ficha copiada.`);
     setTimeout(() => {
-      btn.innerHTML = originalText;
+      btn.innerHTML = old;
       btn.style.background = "";
       btn.style.color = "";
-      btn.style.borderColor = "";
     }, 1500);
   });
 }
 
 // =========================================================================
-// 🤖 MODAL DE CÓDIGOS DE ACCESO (INTEGRACIÓN DEL BOT)
+// 🤖 MODAL BOT CÓDIGOS
 // =========================================================================
 let codeData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
-
 function abrirCentroCodigos() {
   haptic();
   codeData.telefono = sessionStorage.getItem("active_distri_tel");
-  document.getElementById("codesCenterOverlay").style.display = "flex";
+  document.getElementById("codesCenterOverlay").classList.add("open");
   changeCodeStep(1);
 }
-
 function cerrarCentroCodigos() {
   haptic();
-  document.getElementById("codesCenterOverlay").style.display = "none";
+  document.getElementById("codesCenterOverlay").classList.remove("open");
 }
-
 function changeCodeStep(n) {
   document
     .querySelectorAll(".code-step")
     .forEach((s) => s.classList.remove("active"));
   document.getElementById("codeStep" + n).classList.add("active");
 }
-
 function setCodigoPlat(p) {
   haptic();
   codeData.plataforma = p;
   changeCodeStep(p === "NETFLIX" ? 2 : 3);
 }
-
 function setCodigoOp(o) {
   haptic();
   codeData.opcion = o;
@@ -910,34 +958,24 @@ async function rastrearCodigo() {
     .value.toLowerCase()
     .trim();
   if (!m.includes("@cybernetsp.com")) {
-    alert(
-      "⚠️ Solo disponible para correos oficiales terminados en @cybernetsp.com",
-    );
+    alert("⚠️ Solo correos terminados en @cybernetsp.com");
     return;
   }
-
   codeData.correo = m;
   changeCodeStep(4);
-
   try {
     const query = new URLSearchParams(codeData);
-    const resp = await fetch(`${BOT_API_URL}?${query.toString()}`);
-    const res = await resp.json();
-
+    const res = await (
+      await fetch(`${BOT_API_URL}?${query.toString()}`)
+    ).json();
     changeCodeStep(5);
     document.getElementById("codeResultBox").style.display = "none";
     document.getElementById("linkResultBox").style.display = "none";
-
     if (res.exito) {
       document.getElementById("codeResultTitle").innerHTML =
-        `<span style="display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> ¡LOCALIZADO!</span>`;
-      document.getElementById("codeResultTitle").style.color =
-        "var(--ios-green)";
+        `<span style="color:var(--ios-green);">¡LOCALIZADO!</span>`;
       document.getElementById("codeResultDesc").innerText =
-        res.msj && res.msj !== "undefined"
-          ? res.msj
-          : "Información recuperada:";
-
+        res.msj || "Información recuperada:";
       if (res.tipo === "codigo") {
         document.getElementById("codeResultBox").style.display = "block";
         document.getElementById("codeVal").innerText = res.valor;
@@ -949,32 +987,26 @@ async function rastrearCodigo() {
       }
     } else {
       document.getElementById("codeResultTitle").innerHTML =
-        `<span style="display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> SIN RESULTADOS</span>`;
-      document.getElementById("codeResultTitle").style.color =
-        "var(--ios-orange)";
+        `<span style="color:var(--ios-orange);">SIN RESULTADOS</span>`;
       document.getElementById("codeResultDesc").innerText =
-        res.msj || "No hay datos recientes en Gmail para este correo.";
+        res.msj || "No hay datos recientes.";
     }
   } catch (err) {
     changeCodeStep(5);
     document.getElementById("codeResultTitle").innerText = "Error";
-    document.getElementById("codeResultTitle").style.color = "var(--ios-red)";
-    document.getElementById("codeResultDesc").innerText =
-      "Error de conexión con el servidor.";
   }
 }
 
-// =========================================================================
 function cerrarSesionDistribuidor() {
   sessionStorage.clear();
   window.location.reload();
 }
-
 document.addEventListener("DOMContentLoaded", () => {
   let sessionDistri = sessionStorage.getItem("active_distri_tel");
-  if (sessionDistri) {
-    let nameD = sessionStorage.getItem("active_distri_name");
-    let saldoD = sessionStorage.getItem("active_distri_saldo");
-    entrarAlPortalDistribuidor(nameD, sessionDistri, saldoD);
-  }
+  if (sessionDistri)
+    entrarAlPortalDistribuidor(
+      sessionStorage.getItem("active_distri_name"),
+      sessionDistri,
+      sessionStorage.getItem("active_distri_saldo"),
+    );
 });
