@@ -433,6 +433,14 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   renderTienda();
   cargarStockEnTienda();
   cargarDatosFinancierosYAlertas(telefono);
+
+  // 🔥 FIX: Inicializador seguro del ciclo de actualización cada 5 minutos
+  if (window.cyberIntervaloSaldoFondo)
+    clearInterval(window.cyberIntervaloSaldoFondo);
+  window.cyberIntervaloSaldoFondo = setInterval(
+    refrescarSaldoDistribuidorFondo,
+    5 * 60 * 1000,
+  );
 }
 
 function actualizarSaldoUI() {
@@ -1131,6 +1139,10 @@ async function rastrearCodigo() {
 }
 
 function cerrarSesionDistribuidor() {
+  // 🔥 FIX: Destruir el bucle de actualización en segundo plano
+  if (window.cyberIntervaloSaldoFondo) {
+    clearInterval(window.cyberIntervaloSaldoFondo);
+  }
   sessionStorage.clear();
   window.location.reload();
 }
@@ -1235,4 +1247,61 @@ function cerrarModalExitoCheckout() {
   haptic();
   desbloquearScroll();
   document.getElementById("successCheckoutOverlay").classList.remove("open");
+}
+// =========================================================================
+// 🔄 AUTOREFRESCO AUTOMÁTICO DE SALDO EN SEGUNDO PLANO (CADA 5 MINUTOS)
+// =========================================================================
+function refrescarSaldoDistribuidorFondo() {
+  const telActivo =
+    sessionStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+  if (!telActivo) return; // Si no hay sesión activa, abortamos para no gastar cuotas de Google
+
+  const cbName = "cb_background_saldo_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success" && res.data) {
+      // Buscamos al distribuidor logueado dentro de la base de datos fresca
+      const distriFresco = res.data.find(
+        (d) =>
+          String(d.telefono || "").replace(/\D/g, "") ===
+          telActivo.replace(/\D/g, ""),
+      );
+
+      if (distriFresco) {
+        // Limpiamos formatos de moneda latinos por si acaso
+        let saldoNum =
+          parseFloat(String(distriFresco.saldo).replace(/[^\d.-]/g, "")) || 0;
+        if (saldoNum > 0 && saldoNum < 1000) saldoNum *= 1000;
+
+        // Sincronizamos las variables y memorias globales al instante
+        window.saldoNumericoActual = saldoNum;
+        sessionStorage.setItem("active_distri_saldo", saldoNum);
+
+        // Actualizamos de inmediato los componentes visuales de la UI
+        actualizarSaldoUI();
+
+        // Actualizamos también la UI del carrito abierto si el distribuidor está viendo el modal
+        if (
+          typeof actualizarCarritoUI === "function" &&
+          document
+            .getElementById("modalCarritoTienda")
+            .classList.contains("open")
+        ) {
+          actualizarCarritoUI();
+        }
+        console.log(
+          "🤖 [Cybernet System] Saldo sincronizado automáticamente: ",
+          saldoNum,
+        );
+      }
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDistribuidores&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
 }
