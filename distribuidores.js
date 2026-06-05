@@ -838,8 +838,10 @@ function procesarCompraDistribuidor() {
         btnWhatsapp.parentElement.style.display = "none";
       }
 
+      // Cerrar el carrito y abrir modal de éxito
       cerrarCarrito();
       document.getElementById("successCheckoutOverlay").classList.add("open");
+      bloquearScroll(); // 🔥 Inyectamos esto para que el fondo siga bloqueado con el modal de éxito
 
       window.carrito = [];
       document.getElementById("cartClientName").value = "";
@@ -1091,3 +1093,95 @@ document.addEventListener("DOMContentLoaded", () => {
       sessionStorage.getItem("active_distri_saldo"),
     );
 });
+// =========================================================================
+// 🔒 CONTROL DE SCROLL PARA MODALES (UX Nativo)
+// =========================================================================
+function bloquearScroll() {
+  document.body.style.overflow = "hidden";
+}
+function desbloquearScroll() {
+  document.body.style.overflow = "";
+}
+
+// =========================================================================
+// 📱 MENÚ MÓVIL
+// =========================================================================
+function abrirMenuMovil() {
+  haptic();
+  bloquearScroll();
+  document.getElementById("modalMenuMovil").classList.add("open");
+}
+function cerrarMenuMovil() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("modalMenuMovil").classList.remove("open");
+}
+
+// =========================================================================
+// 📊 HISTORIAL
+// =========================================================================
+function abrirModalHistorial() {
+  haptic();
+  bloquearScroll();
+  document.getElementById("modalEstadoCuenta").classList.add("open");
+}
+function cerrarModalHistorial() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("modalEstadoCuenta").classList.remove("open");
+}
+
+// =========================================================================
+// 🛒 CARRITO
+// =========================================================================
+function abrirCarrito() {
+  haptic();
+  bloquearScroll();
+  document.getElementById("modalCarritoTienda").classList.add("open");
+}
+function cerrarCarrito() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("modalCarritoTienda").classList.remove("open");
+}
+
+// =========================================================================
+// 📡 BÓVEDA DE CUENTAS
+// =========================================================================
+function abrirModalBusquedaCuentas() {
+  haptic();
+  bloquearScroll();
+  document.getElementById("modalBusquedaCuentas").classList.add("open");
+  document.getElementById("contenedorResultadosCasillero").innerHTML =
+    `<div style="text-align:center; color:var(--text-secondary); font-size:0.88rem; padding: 30px 0;">Ingresa un parámetro y presiona buscar. El sistema filtrará solo tus compras registradas.</div>`;
+}
+function cerrarModalBusquedaCuentas() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("modalBusquedaCuentas").classList.remove("open");
+}
+
+// =========================================================================
+// 🤖 BOT DE CÓDIGOS
+// =========================================================================
+function abrirCentroCodigos() {
+  haptic();
+  bloquearScroll();
+  codeData.telefono = sessionStorage.getItem("active_distri_tel");
+  document.getElementById("codesCenterOverlay").classList.add("open");
+  changeCodeStep(1);
+}
+function cerrarCentroCodigos() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("codesCenterOverlay").classList.remove("open");
+}
+
+// =========================================================================
+// 🎉 CHECKOUT EXITOSO
+// =========================================================================
+function cerrarModalExitoCheckout() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("successCheckoutOverlay").classList.remove("open");
+}
