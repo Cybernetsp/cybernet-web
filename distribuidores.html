@@ -2,21 +2,24 @@
 <html lang="es" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Cybernet - Portal Mayoristas</title>
     <link rel="stylesheet" href="global.css" />
     <style>
+      /* =========================================================================
+       ESTILOS EXCLUSIVOS DEL PORTAL B2B (Diseño Apple / Glassmorphism)
+       ========================================================================= */
+
       .tienda-layout {
         display: grid;
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: 1fr;
         gap: 20px;
         width: 100%;
       }
-      @media (max-width: 900px) {
-        .tienda-layout {
-          grid-template-columns: 1fr;
-        }
-      }
+
       .grid-tienda {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -61,6 +64,7 @@
         border-color: rgba(10, 132, 255, 0.2);
       }
 
+      /* Modales Flotantes Generales */
       .overlay-modal-code {
         display: none;
         position: fixed;
@@ -127,7 +131,6 @@
         cursor: pointer;
       }
 
-      /* Scroll horizontal para renovaciones */
       .renovaciones-container::-webkit-scrollbar {
         height: 6px;
       }
@@ -135,13 +138,98 @@
         background: rgba(255, 149, 0, 0.4);
         border-radius: 10px;
       }
+      .cuenta-resultado-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        text-align: left;
+      }
+
+      /* === CONTROL RESPONSIVO DEL ENCABEZADO Y MENÚ MÓVIL === */
+      .desktop-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .mobile-actions {
+        display: none;
+        gap: 8px;
+        align-items: center;
+      }
+
+      /* Animación del Menú Inferior Apple */
+      @keyframes slideUpSheet {
+        from {
+          transform: translateY(100%);
+        }
+        to {
+          transform: translateY(0);
+        }
+      }
+      .bottom-sheet-ios {
+        width: 100%;
+        max-width: 500px;
+        background: var(--glass-bg, rgba(30, 30, 30, 0.9));
+        border-top: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+        border-radius: 32px 32px 0 0;
+        padding: 24px 24px 40px 24px;
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        animation: slideUpSheet 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .menu-item-ios {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: var(--text-primary, #fff);
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        margin-bottom: 10px;
+        transition: all 0.2s;
+      }
+      .menu-item-ios:active {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(0.98);
+      }
+
+      /* Breakpoint Celulares y Tablets pequeñas */
+      @media (max-width: 850px) {
+        .desktop-actions {
+          display: none !important;
+        }
+        .mobile-actions {
+          display: flex !important;
+        }
+        .header-box {
+          padding: 14px 16px !important;
+          border-radius: 20px !important;
+        }
+        .header-avatar {
+          width: 38px !important;
+          height: 38px !important;
+          font-size: 1rem !important;
+        }
+        .header-name {
+          font-size: 1.05rem !important;
+        }
+      }
     </style>
   </head>
   <body
     style="
       padding: 0;
       margin: 0;
-      background: var(--main-bg);
+      background: var(--main-bg, #000);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -171,8 +259,8 @@
           padding: 40px 24px 32px 24px;
           border-radius: 32px;
           text-align: center;
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
+          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
+          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
           backdrop-filter: blur(20px);
         "
       >
@@ -187,7 +275,7 @@
           <div
             style="
               background: rgba(48, 209, 88, 0.15);
-              color: var(--ios-green);
+              color: var(--ios-green, #30d158);
               padding: 14px;
               border-radius: 50%;
               display: flex;
@@ -215,7 +303,7 @@
             class="card-title"
             style="
               justify-content: center;
-              color: var(--text-primary);
+              color: var(--text-primary, #fff);
               font-size: 1.6rem;
               font-weight: 800;
               letter-spacing: -0.5px;
@@ -227,18 +315,31 @@
           <p
             id="txtLoginInstruccion"
             class="text-secondary"
-            style="font-size: 0.9rem; margin: 0; line-height: 1.4"
+            style="
+              font-size: 0.9rem;
+              margin: 0;
+              line-height: 1.4;
+              color: var(--text-secondary, #aaa);
+            "
           >
             Ingresa tu número de celular registrado para iniciar la
             verificación.
           </p>
         </div>
 
-        <div class="flex-col" style="gap: 20px">
+        <div
+          class="flex-col"
+          style="gap: 20px; display: flex; flex-direction: column"
+        >
           <div
             id="stepTelefono"
             class="flex-col"
-            style="gap: 14px; width: 100%"
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 14px;
+              width: 100%;
+            "
           >
             <input
               type="text"
@@ -267,6 +368,10 @@
                 font-weight: 800;
                 border-radius: 50px;
                 box-shadow: 0 4px 15px rgba(48, 209, 88, 0.25);
+                background: var(--ios-green, #30d158);
+                color: white;
+                border: none;
+                width: 100%;
               "
             >
               Continuar →
@@ -275,7 +380,12 @@
           <div
             id="stepCorreoRegistrar"
             class="flex-col"
-            style="display: none; gap: 14px; width: 100%"
+            style="
+              display: none;
+              flex-direction: column;
+              gap: 14px;
+              width: 100%;
+            "
           >
             <div
               style="
@@ -284,7 +394,7 @@
                 border-radius: 14px;
                 padding: 12px;
                 font-size: 0.85rem;
-                color: var(--ios-orange);
+                color: var(--ios-orange, #ff9f0a);
                 font-weight: 600;
                 line-height: 1.4;
               "
@@ -315,8 +425,10 @@
                 font-size: 1rem;
                 font-weight: 800;
                 border-radius: 50px;
-                background: var(--ios-orange);
+                background: var(--ios-orange, #ff9f0a);
                 border: none;
+                color: white;
+                width: 100%;
               "
             >
               Registrar y Enviar Código
@@ -328,7 +440,12 @@
           <div
             id="stepTokenVerificar"
             class="flex-col"
-            style="display: none; gap: 14px; width: 100%"
+            style="
+              display: none;
+              flex-direction: column;
+              gap: 14px;
+              width: 100%;
+            "
           >
             <div
               style="
@@ -337,7 +454,7 @@
                 border-radius: 14px;
                 padding: 12px;
                 font-size: 0.85rem;
-                color: var(--ios-green);
+                color: var(--ios-green, #30d158);
                 font-weight: 600;
                 line-height: 1.4;
               "
@@ -359,7 +476,7 @@
                 font-weight: 900;
                 font-size: 1.5rem;
                 letter-spacing: 6px;
-                color: var(--ios-green);
+                color: var(--ios-green, #30d158);
               "
             />
             <button
@@ -373,6 +490,10 @@
                 font-weight: 800;
                 border-radius: 50px;
                 box-shadow: 0 4px 15px rgba(48, 209, 88, 0.25);
+                background: var(--ios-green, #30d158);
+                color: white;
+                border: none;
+                width: 100%;
               "
             >
               Verificar e Ingresar
@@ -390,6 +511,7 @@
       class="flex-col"
       style="
         display: none;
+        flex-direction: column;
         width: 100%;
         min-height: 100vh;
         max-width: 1200px;
@@ -401,41 +523,56 @@
       "
     >
       <div
-        class="flex-row-between"
+        class="header-box"
         style="
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
+          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
           padding: 16px 24px;
           border-radius: 24px;
           backdrop-filter: blur(20px);
-          flex-wrap: wrap;
-          gap: 12px;
           width: 100%;
           box-sizing: border-box;
         "
       >
-        <div style="display: flex; align-items: center; gap: 12px">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+          "
+        >
           <div
+            class="header-avatar"
             style="
               background: rgba(10, 132, 255, 0.1);
-              color: var(--ios-blue);
-              padding: 10px;
+              color: var(--ios-blue, #0a84ff);
+              min-width: 44px;
+              height: 44px;
               border-radius: 14px;
               border: 1px solid rgba(10, 132, 255, 0.15);
-              font-weight: bold;
+              display: flex;
+              align-items: center;
+              justify-content: center;
               font-size: 1.2rem;
             "
           >
             💼
           </div>
-          <div style="text-align: left">
+          <div style="text-align: left; overflow: hidden">
             <h2
               id="distriWelcomeName"
+              class="header-name"
               style="
                 margin: 0;
                 font-size: 1.2rem;
                 font-weight: 800;
-                color: var(--text-primary);
+                color: var(--text-primary, #fff);
+                white-space: nowrap;
+                text-overflow: ellipsis;
               "
             >
               Cargando...
@@ -444,23 +581,23 @@
               id="distriWelcomePhone"
               style="
                 font-size: 0.8rem;
-                color: var(--text-secondary);
+                color: var(--text-secondary, #aaa);
                 font-family: monospace;
               "
               >Tel: --</span
             >
           </div>
         </div>
-        <div
-          style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap"
-        >
+
+        <div class="desktop-actions">
           <button
-            onclick="abrirModalHistorial()"
-            class="btn-ios"
+            onclick="abrirModalBusquedaCuentas()"
+            class="btn-ios btn-primary"
             style="
-              background: rgba(255, 255, 255, 0.05);
-              border: 1px solid rgba(255, 255, 255, 0.1);
-              color: var(--text-primary);
+              background: var(--ios-blue, #0a84ff);
+              color: white;
+              border: none;
+              box-shadow: 0 4px 12px rgba(10, 132, 255, 0.2);
               padding: 10px 20px;
               border-radius: 50px;
               font-weight: 700;
@@ -470,12 +607,26 @@
               gap: 6px;
             "
           >
-            📊 Historial
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Buscar Cuentas
           </button>
           <button
             onclick="abrirCentroCodigos()"
             class="btn-ios btn-primary"
             style="
+              background: var(--ios-blue, #0a84ff);
+              color: white;
+              border: none;
               padding: 10px 20px;
               border-radius: 50px;
               font-weight: 700;
@@ -498,6 +649,21 @@
             </svg>
             Códigos
           </button>
+          <button
+            onclick="abrirModalHistorial()"
+            class="btn-ios"
+            style="
+              background: rgba(255, 255, 255, 0.05);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              color: var(--text-primary, #fff);
+              padding: 10px 20px;
+              border-radius: 50px;
+              font-weight: 700;
+              margin: 0;
+            "
+          >
+            📊 Historial
+          </button>
           <div
             style="
               background: rgba(48, 209, 88, 0.1);
@@ -505,7 +671,7 @@
               padding: 8px 16px;
               border-radius: 30px;
               font-weight: 800;
-              color: var(--ios-green);
+              color: var(--ios-green, #30d158);
               font-family: monospace;
             "
             id="distriBarBalance"
@@ -516,9 +682,11 @@
             onclick="cerrarSesionDistribuidor()"
             class="btn-ios btn-secondary"
             style="
+              background: transparent;
+              border: 1px solid var(--ios-red, #ff453a);
               padding: 10px 20px;
               border-radius: 50px;
-              color: var(--ios-red);
+              color: var(--ios-red, #ff453a);
               font-weight: 700;
               margin: 0;
             "
@@ -526,13 +694,66 @@
             Salir ✕
           </button>
         </div>
+
+        <div class="mobile-actions">
+          <div
+            style="
+              background: rgba(48, 209, 88, 0.1);
+              border: 1px solid rgba(48, 209, 88, 0.2);
+              padding: 6px 12px;
+              border-radius: 30px;
+              font-weight: 800;
+              color: var(--ios-green, #30d158);
+              font-family: monospace;
+              font-size: 0.9rem;
+            "
+            id="distriBarBalanceMobile"
+          >
+            $--
+          </div>
+          <button
+            onclick="abrirMenuMovil()"
+            style="
+              background: rgba(255, 255, 255, 0.05);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              color: var(--text-primary, #fff);
+              width: 38px;
+              height: 38px;
+              border-radius: 12px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+            >
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="tienda-layout">
-        <div class="flex-col" style="gap: 16px">
+        <div
+          class="flex-col"
+          style="display: flex; flex-direction: column; gap: 16px"
+        >
           <div
             class="card-ios"
             style="
+              background: var(--glass-bg, rgba(30, 30, 30, 0.8));
+              border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+              border-radius: 24px;
               padding: 20px;
               margin: 0;
               display: flex;
@@ -543,6 +764,9 @@
             <div
               class="flex-row-between"
               style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.05);
                 padding-bottom: 10px;
               "
@@ -552,7 +776,7 @@
                   margin: 0;
                   font-size: 1.1rem;
                   font-weight: 800;
-                  color: var(--text-primary);
+                  color: var(--text-primary, #fff);
                   display: flex;
                   align-items: center;
                   gap: 8px;
@@ -578,157 +802,6 @@
             <div class="grid-tienda" id="shopCatalogContainer"></div>
           </div>
         </div>
-
-        <div class="flex-col" style="gap: 20px">
-          <div
-            class="card-ios"
-            style="
-              padding: 20px;
-              margin: 0;
-              background: linear-gradient(
-                135deg,
-                rgba(255, 255, 255, 0.01) 0%,
-                rgba(0, 0, 0, 0.2) 100%
-              );
-              display: flex;
-              flex-direction: column;
-              gap: 14px;
-              position: sticky;
-              top: 20px;
-            "
-          >
-            <h4
-              style="
-                margin: 0;
-                font-size: 0.95rem;
-                font-weight: 800;
-                color: var(--ios-blue);
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                padding-bottom: 10px;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-              "
-            >
-              🛒 Carrito
-              <span
-                id="cartCountBadge"
-                style="
-                  background: var(--ios-blue);
-                  color: white;
-                  font-size: 0.75rem;
-                  padding: 2px 8px;
-                  border-radius: 10px;
-                  font-weight: 800;
-                  margin-left: auto;
-                "
-                >0</span
-              >
-            </h4>
-            <div
-              id="cartItemsContainer"
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                max-height: 180px;
-                overflow-y: auto;
-                padding-right: 2px;
-              "
-            >
-              <div
-                style="
-                  text-align: center;
-                  color: var(--text-secondary);
-                  font-size: 0.85rem;
-                  padding: 20px 0;
-                "
-              >
-                Tu carrito está vacío.
-              </div>
-            </div>
-            <div class="flex-col" style="gap: 6px; margin-top: 4px">
-              <label
-                class="text-secondary"
-                style="
-                  font-size: 0.72rem;
-                  font-weight: 800;
-                  text-transform: uppercase;
-                  letter-spacing: 0.5px;
-                  padding-left: 2px;
-                "
-                >Nombre de tu Cliente</label
-              >
-              <input
-                type="text"
-                id="cartClientName"
-                class="input-ios"
-                placeholder="Ej: Juan Pérez"
-                style="
-                  border-radius: 14px;
-                  padding: 11px 16px;
-                  margin-bottom: 0;
-                  font-size: 0.9rem;
-                "
-              />
-            </div>
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                border-top: 1px solid rgba(255, 255, 255, 0.05);
-                padding-top: 12px;
-                font-size: 0.85rem;
-              "
-            >
-              <div
-                class="flex-row-between"
-                style="color: var(--text-secondary)"
-              >
-                <span>Saldo Actual:</span
-                ><span
-                  id="cartTotalSaldo"
-                  style="font-family: monospace; font-weight: bold"
-                  >$0</span
-                >
-              </div>
-              <div
-                class="flex-row-between"
-                style="
-                  color: var(--text-primary);
-                  font-size: 1.05rem;
-                  font-weight: 800;
-                  margin-top: 4px;
-                "
-              >
-                <span>TOTAL PEDIDO:</span
-                ><span
-                  id="cartTotalCost"
-                  style="color: var(--ios-blue); font-family: monospace"
-                  >$0</span
-                >
-              </div>
-            </div>
-            <button
-              id="btnCheckoutShop"
-              onclick="procesarCompraDistribuidor()"
-              class="btn-ios btn-primary w-100"
-              style="
-                padding: 14px;
-                font-weight: 800;
-                font-size: 0.95rem;
-                border-radius: 50px;
-                margin-top: 4px;
-              "
-              disabled
-            >
-              CONFIRMAR COMPRA
-            </button>
-          </div>
-        </div>
       </div>
 
       <div
@@ -736,16 +809,17 @@
         id="widgetRenovaciones"
         style="
           display: none;
-          padding: 20px 24px;
-          width: 100%;
-          box-sizing: border-box;
-          margin: 0;
           background: linear-gradient(
             135deg,
             rgba(255, 149, 0, 0.08) 0%,
             rgba(0, 0, 0, 0) 100%
           );
           border: 1px solid rgba(255, 149, 0, 0.2);
+          border-radius: 24px;
+          padding: 20px 24px;
+          width: 100%;
+          box-sizing: border-box;
+          margin: 0;
         "
       >
         <h3
@@ -753,7 +827,7 @@
             margin: 0 0 16px 0;
             font-size: 1.05rem;
             font-weight: 800;
-            color: var(--ios-orange);
+            color: var(--ios-orange, #ff9f0a);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -772,136 +846,371 @@
           "
         ></div>
       </div>
+    </div>
 
+    <button
+      id="fabCarrito"
+      onclick="abrirCarrito()"
+      style="
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--ios-blue, #0a84ff);
+        box-shadow: 0 10px 25px rgba(10, 132, 255, 0.4);
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      "
+    >
+      <svg
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="white"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path
+          d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+        ></path>
+      </svg>
+      <span
+        id="fabCartCountBadge"
+        style="
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          background: var(--ios-red, #ff453a);
+          color: white;
+          font-size: 0.75rem;
+          font-weight: 800;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid var(--main-bg, #000);
+        "
+        >0</span
+      >
+    </button>
+
+    <div
+      class="overlay-modal-code"
+      id="modalCarritoTienda"
+      style="z-index: 15000"
+    >
       <div
-        class="card-ios"
-        style="padding: 24px; width: 100%; box-sizing: border-box; margin: 0"
+        class="modal-ios"
+        style="
+          max-width: 400px;
+          width: 95%;
+          padding: 24px;
+          border-radius: 28px;
+          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
+          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+          backdrop-filter: blur(40px);
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        "
       >
         <div
-          class="flex-row-between"
           style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             padding-bottom: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-            gap: 12px;
           "
         >
           <h3
             style="
               margin: 0;
-              font-size: 1.05rem;
+              font-size: 1.2rem;
+              color: var(--text-primary, #fff);
               font-weight: 800;
-              color: var(--text-primary);
               display: flex;
               align-items: center;
               gap: 8px;
             "
           >
-            📺 Bóveda de Cuentas
-          </h3>
-          <div style="display: flex; gap: 10px; width: 100%; max-width: 450px">
-            <input
-              type="text"
-              id="inputCasilleroSearch"
-              class="input-ios"
-              placeholder="Buscar por correo o cliente..."
+            🛒 Mi Carrito
+            <span
+              id="cartCountBadge"
               style="
-                margin-bottom: 0;
-                flex-grow: 1;
-                border-radius: 12px;
-                padding: 10px 14px;
+                background: var(--ios-blue, #0a84ff);
+                color: white;
+                font-size: 0.75rem;
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-weight: 800;
               "
-            />
-            <button
-              class="btn-ios btn-primary"
-              onclick="buscarCasilleroDistri()"
-              id="btnBuscarCasillero"
-              style="margin: 0; border-radius: 12px; padding: 10px 16px"
+              >0</span
             >
-              Buscar
-            </button>
+          </h3>
+          <button
+            onclick="cerrarCarrito()"
+            style="
+              background: transparent;
+              border: none;
+              color: var(--text-secondary, #aaa);
+              font-size: 1.6rem;
+              cursor: pointer;
+            "
+          >
+            &times;
+          </button>
+        </div>
+        <div
+          id="cartItemsContainer"
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 4px;
+          "
+        >
+          <div
+            style="
+              text-align: center;
+              color: var(--text-secondary, #aaa);
+              font-size: 0.85rem;
+              padding: 20px 0;
+            "
+          >
+            Tu carrito está vacío.
           </div>
         </div>
         <div
+          class="flex-col"
           style="
-            width: 100%;
-            overflow-x: auto;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 4px;
           "
         >
-          <table
+          <label
+            class="text-secondary"
             style="
-              width: 100%;
-              border-collapse: collapse;
+              color: var(--text-secondary, #aaa);
+              font-size: 0.72rem;
+              font-weight: 800;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              padding-left: 2px;
+            "
+            >Nombre de tu Cliente (Opcional)</label
+          >
+          <input
+            type="text"
+            id="cartClientName"
+            class="input-ios"
+            placeholder="Ej: Juan Pérez"
+            style="
+              border-radius: 14px;
+              padding: 11px 16px;
+              margin-bottom: 0;
               font-size: 0.9rem;
-              text-align: left;
-              min-width: 650px;
+            "
+          />
+        </div>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+            font-size: 0.85rem;
+          "
+        >
+          <div
+            class="flex-row-between"
+            style="
+              display: flex;
+              justify-content: space-between;
+              color: var(--text-secondary, #aaa);
             "
           >
-            <thead>
-              <tr
-                style="
-                  background: rgba(255, 255, 255, 0.02);
-                  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                "
-              >
-                <th
-                  style="
-                    padding: 14px 16px;
-                    font-size: 0.75rem;
-                    font-weight: 800;
-                    color: var(--text-secondary);
-                    text-transform: uppercase;
-                    width: 15%;
-                  "
-                >
-                  Vencimiento
-                </th>
-                <th
-                  style="
-                    padding: 14px 16px;
-                    font-size: 0.75rem;
-                    font-weight: 800;
-                    color: var(--text-secondary);
-                    text-transform: uppercase;
-                    width: 35%;
-                  "
-                >
-                  Plataforma / Cliente
-                </th>
-                <th
-                  style="
-                    padding: 14px 16px;
-                    font-size: 0.75rem;
-                    font-weight: 800;
-                    color: var(--text-secondary);
-                    text-transform: uppercase;
-                    width: 50%;
-                  "
-                >
-                  Datos de Acceso
-                </th>
-              </tr>
-            </thead>
-            <tbody id="tablaMisComprasDistriBody">
-              <tr>
-                <td
-                  colspan="3"
-                  style="
-                    text-align: center;
-                    padding: 30px;
-                    color: var(--text-secondary);
-                  "
-                >
-                  Utiliza el buscador para encontrar las cuentas que has
-                  comprado.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <span>Saldo Actual:</span
+            ><span
+              id="cartTotalSaldo"
+              style="font-family: monospace; font-weight: bold"
+              >$0</span
+            >
+          </div>
+          <div
+            class="flex-row-between"
+            style="
+              display: flex;
+              justify-content: space-between;
+              color: var(--text-primary, #fff);
+              font-size: 1.05rem;
+              font-weight: 800;
+              margin-top: 4px;
+            "
+          >
+            <span>TOTAL PEDIDO:</span
+            ><span
+              id="cartTotalCost"
+              style="color: var(--ios-blue, #0a84ff); font-family: monospace"
+              >$0</span
+            >
+          </div>
+        </div>
+        <button
+          id="btnCheckoutShop"
+          onclick="procesarCompraDistribuidor()"
+          class="btn-ios btn-primary w-100"
+          style="
+            background: var(--ios-blue, #0a84ff);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            border-radius: 50px;
+            margin-top: 4px;
+          "
+          disabled
+        >
+          CONFIRMAR COMPRA
+        </button>
+      </div>
+    </div>
+
+    <div class="overlay-modal-code" id="modalBusquedaCuentas">
+      <div
+        class="modal-ios"
+        style="
+          max-width: 550px;
+          width: 95%;
+          padding: 28px;
+          border-radius: 28px;
+          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
+          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+          backdrop-filter: blur(40px);
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 12px;
+          "
+        >
+          <h3
+            style="
+              margin: 0;
+              font-size: 1.2rem;
+              color: var(--text-primary, #fff);
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            🔍 Bóveda Personal de Cuentas
+          </h3>
+          <button
+            onclick="cerrarModalBusquedaCuentas()"
+            style="
+              background: transparent;
+              border: none;
+              color: var(--text-secondary, #aaa);
+              font-size: 1.6rem;
+              cursor: pointer;
+            "
+          >
+            &times;
+          </button>
+        </div>
+        <p
+          style="
+            color: var(--text-secondary, #aaa);
+            font-size: 0.85rem;
+            margin: 0;
+            line-height: 1.4;
+          "
+        >
+          Ingresa el correo electrónico o el nombre del cliente final para
+          extraer las credenciales.
+        </p>
+        <div style="display: flex; gap: 10px; width: 100%">
+          <input
+            type="text"
+            id="inputCasilleroSearch"
+            class="input-ios"
+            placeholder="Ej: ironwave902@cybernetsp.com o Camilo"
+            style="
+              margin-bottom: 0;
+              flex-grow: 1;
+              border-radius: 12px;
+              padding: 12px 16px;
+              font-size: 0.95rem;
+            "
+          />
+          <button
+            class="btn-ios btn-primary"
+            onclick="buscarCasilleroDistri()"
+            id="btnBuscarCasillero"
+            style="
+              background: var(--ios-blue, #0a84ff);
+              color: white;
+              border: none;
+              margin: 0;
+              border-radius: 12px;
+              padding: 12px 20px;
+              font-weight: 800;
+            "
+          >
+            Buscar
+          </button>
+        </div>
+        <div
+          id="contenedorResultadosCasillero"
+          style="
+            max-height: 380px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding-right: 4px;
+            margin-top: 4px;
+          "
+        >
+          <div
+            style="
+              text-align: center;
+              color: var(--text-secondary, #aaa);
+              font-size: 0.88rem;
+              padding: 30px 0;
+            "
+          >
+            Ingresa un parámetro y presiona buscar. El sistema filtrará solo tus
+            compras registradas.
+          </div>
         </div>
       </div>
     </div>
@@ -919,8 +1228,8 @@
           padding: 24px;
           border-radius: 24px;
           text-align: left;
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
+          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
+          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
           backdrop-filter: blur(40px);
         "
       >
@@ -938,7 +1247,7 @@
             style="
               margin: 0;
               font-size: 1.2rem;
-              color: var(--text-primary);
+              color: var(--text-primary, #fff);
               font-weight: 800;
               display: flex;
               align-items: center;
@@ -952,7 +1261,7 @@
             style="
               background: transparent;
               border: none;
-              color: var(--text-secondary);
+              color: var(--text-secondary, #aaa);
               font-size: 1.5rem;
               cursor: pointer;
             "
@@ -972,7 +1281,7 @@
             <thead>
               <tr
                 style="
-                  color: var(--text-secondary);
+                  color: var(--text-secondary, #aaa);
                   text-transform: uppercase;
                   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
                 "
@@ -989,7 +1298,7 @@
                   style="
                     text-align: center;
                     padding: 20px;
-                    color: var(--text-secondary);
+                    color: var(--text-secondary, #aaa);
                   "
                 >
                   Cargando extracto...
@@ -1014,8 +1323,8 @@
           padding: 32px 24px;
           border-radius: 32px;
           text-align: center;
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
+          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
+          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
           backdrop-filter: blur(40px);
         "
       >
@@ -1030,7 +1339,7 @@
           <div
             style="
               background: rgba(48, 209, 88, 0.15);
-              color: var(--ios-green);
+              color: var(--ios-green, #30d158);
               padding: 12px;
               border-radius: 50%;
               display: flex;
@@ -1059,7 +1368,7 @@
             style="
               margin: 0;
               font-size: 1.4rem;
-              color: var(--text-primary);
+              color: var(--text-primary, #fff);
               font-weight: 800;
             "
           >
@@ -1068,7 +1377,11 @@
           <p
             id="successCheckoutDesc"
             class="text-secondary"
-            style="font-size: 0.85rem; margin-top: 6px"
+            style="
+              color: var(--text-secondary, #aaa);
+              font-size: 0.85rem;
+              margin-top: 6px;
+            "
           >
             Copia los accesos para enviárselos a tu cliente.
           </p>
@@ -1084,7 +1397,7 @@
             overflow-y: auto;
             margin-bottom: 20px;
             font-size: 0.85rem;
-            color: var(--text-primary);
+            color: var(--text-primary, #fff);
             white-space: pre-wrap;
             font-family: monospace;
           "
@@ -1095,12 +1408,16 @@
           id="btnCopiarFichasCheckout"
           onclick="copiarCuentasCheckout()"
           style="
+            background: var(--ios-green, #30d158);
+            color: white;
+            border: none;
             padding: 16px;
             font-size: 1rem;
             font-weight: 800;
             border-radius: 50px;
             box-shadow: 0 4px 15px rgba(48, 209, 88, 0.25);
             margin-bottom: 12px;
+            width: 100%;
           "
         >
           <svg
@@ -1141,6 +1458,7 @@
               align-items: center;
               justify-content: center;
               gap: 8px;
+              width: 100%;
             "
           >
             Solicitar Activación por WhatsApp
@@ -1150,10 +1468,14 @@
           class="btn-ios btn-secondary w-100"
           onclick="cerrarModalExitoCheckout()"
           style="
+            background: transparent;
+            color: var(--text-primary, #fff);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 14px;
             font-size: 0.95rem;
             font-weight: 700;
             border-radius: 50px;
+            width: 100%;
           "
         >
           Cerrar Ventana
@@ -1170,8 +1492,8 @@
           padding: 32px 24px;
           border-radius: 32px;
           text-align: center;
-          background: var(--glass-bg);
-          border: 1px solid var(--glass-border);
+          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
+          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
           backdrop-filter: blur(40px);
         "
       >
@@ -1186,7 +1508,7 @@
           <div
             style="
               background: rgba(10, 132, 255, 0.15);
-              color: var(--ios-blue);
+              color: var(--ios-blue, #0a84ff);
               padding: 12px;
               border-radius: 50%;
               display: flex;
@@ -1213,7 +1535,7 @@
             style="
               margin: 0;
               font-size: 1.4rem;
-              color: var(--text-primary);
+              color: var(--text-primary, #fff);
               font-weight: 800;
             "
           >
@@ -1223,7 +1545,7 @@
         <div id="codeStep1" class="code-step active">
           <p
             style="
-              color: var(--text-secondary);
+              color: var(--text-secondary, #aaa);
               font-size: 0.9rem;
               font-weight: 600;
               text-align: left;
@@ -1241,7 +1563,7 @@
           </button>
           <button
             class="btn-code-option"
-            style="color: var(--ios-blue)"
+            style="color: var(--ios-blue, #0a84ff)"
             onclick="setCodigoPlat('DISNEY')"
           >
             Disney Premium
@@ -1251,7 +1573,7 @@
         <div id="codeStep2" class="code-step">
           <p
             style="
-              color: var(--text-secondary);
+              color: var(--text-secondary, #aaa);
               font-size: 0.9rem;
               font-weight: 600;
               text-align: left;
@@ -1276,7 +1598,7 @@
         <div id="codeStep3" class="code-step">
           <p
             style="
-              color: var(--text-secondary);
+              color: var(--text-secondary, #aaa);
               font-size: 0.9rem;
               font-weight: 600;
               text-align: left;
@@ -1303,10 +1625,14 @@
             id="btnRastrearCodigo"
             onclick="rastrearCodigo()"
             style="
+              background: var(--ios-blue, #0a84ff);
+              color: white;
+              border: none;
               padding: 16px;
               font-weight: 800;
               border-radius: 50px;
               margin-top: 14px;
+              width: 100%;
             "
           >
             Rastrear Código
@@ -1328,14 +1654,16 @@
               height="40"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="var(--ios-blue)"
+              stroke="var(--ios-blue, #0a84ff)"
               stroke-width="2.5"
             >
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M12 2v4"></path>
             </svg>
           </div>
-          <p style="color: var(--ios-blue); font-weight: 600; margin: 0">
+          <p
+            style="color: var(--ios-blue, #0a84ff); font-weight: 600; margin: 0"
+          >
             Buscando en la bandeja de entrada...
           </p>
         </div>
@@ -1343,7 +1671,7 @@
           <h2
             id="codeResultTitle"
             style="
-              color: var(--ios-green);
+              color: var(--ios-green, #30d158);
               font-size: 1.4rem;
               margin: 0;
               font-weight: 800;
@@ -1353,7 +1681,11 @@
           </h2>
           <p
             id="codeResultDesc"
-            style="color: var(--text-secondary); font-size: 0.9rem; margin: 0"
+            style="
+              color: var(--text-secondary, #aaa);
+              font-size: 0.9rem;
+              margin: 0;
+            "
           >
             --
           </p>
@@ -1361,7 +1693,7 @@
             id="codeResultBox"
             style="
               background: rgba(255, 69, 58, 0.1);
-              border: 1px dashed var(--ios-red);
+              border: 1px dashed var(--ios-red, #ff453a);
               padding: 30px 20px;
               border-radius: 20px;
               margin: 10px 0;
@@ -1373,7 +1705,7 @@
               style="
                 font-size: 3rem;
                 font-weight: 800;
-                color: var(--text-primary);
+                color: var(--text-primary, #fff);
                 letter-spacing: 8px;
                 font-variant-numeric: tabular-nums;
               "
@@ -1381,7 +1713,7 @@
             <div
               id="codeTimer"
               style="
-                color: var(--ios-red);
+                color: var(--ios-red, #ff453a);
                 font-size: 0.9rem;
                 font-weight: 700;
                 margin-top: 10px;
@@ -1394,30 +1726,36 @@
               href="#"
               target="_blank"
               style="text-decoration: none"
-              ><button
+            >
+              <button
                 class="btn-ios w-100"
                 style="
-                  background: var(--ios-green);
+                  background: var(--ios-green, #30d158);
                   color: white;
                   border: none;
                   padding: 16px;
                   font-weight: 800;
                   border-radius: 50px;
                   font-size: 1rem;
+                  width: 100%;
                 "
               >
                 Abrir Enlace de Aprobación
-              </button></a
-            >
+              </button>
+            </a>
           </div>
           <button
             class="btn-ios btn-secondary w-100"
             onclick="rastrearCodigo()"
             style="
+              background: transparent;
+              color: var(--text-primary, #fff);
+              border: 1px solid rgba(255, 255, 255, 0.2);
               padding: 14px;
               font-weight: 700;
               border-radius: 50px;
               margin-top: 10px;
+              width: 100%;
             "
           >
             Reintentar Búsqueda
@@ -1426,6 +1764,149 @@
             >Hacer nueva consulta</a
           >
         </div>
+      </div>
+    </div>
+
+    <div
+      class="overlay-modal-code"
+      id="modalMenuMovil"
+      style="align-items: flex-end; padding: 0; z-index: 16000"
+    >
+      <div class="bottom-sheet-ios">
+        <div
+          style="
+            width: 40px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 0 auto 24px auto;
+          "
+        ></div>
+
+        <div
+          class="menu-item-ios"
+          onclick="
+            cerrarMenuMovil();
+            abrirModalBusquedaCuentas();
+          "
+        >
+          <div
+            style="
+              background: rgba(10, 132, 255, 0.15);
+              color: var(--ios-blue, #0a84ff);
+              padding: 10px;
+              border-radius: 12px;
+              display: flex;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          Buscar Cuentas
+        </div>
+
+        <div
+          class="menu-item-ios"
+          onclick="
+            cerrarMenuMovil();
+            abrirCentroCodigos();
+          "
+        >
+          <div
+            style="
+              background: rgba(10, 132, 255, 0.15);
+              color: var(--ios-blue, #0a84ff);
+              padding: 10px;
+              border-radius: 12px;
+              display: flex;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          Centro de Códigos
+        </div>
+
+        <div
+          class="menu-item-ios"
+          onclick="
+            cerrarMenuMovil();
+            abrirModalHistorial();
+          "
+        >
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.1);
+              color: var(--text-primary, #fff);
+              padding: 10px;
+              border-radius: 12px;
+              display: flex;
+              font-size: 1.1rem;
+            "
+          >
+            📊
+          </div>
+          Historial Financiero
+        </div>
+
+        <div
+          class="menu-item-ios"
+          onclick="cerrarSesionDistribuidor()"
+          style="
+            border-color: rgba(255, 69, 58, 0.2);
+            color: var(--ios-red, #ff453a);
+            margin-top: 24px;
+          "
+        >
+          <div
+            style="
+              background: rgba(255, 69, 58, 0.1);
+              color: var(--ios-red, #ff453a);
+              padding: 10px;
+              border-radius: 12px;
+              display: flex;
+              font-size: 1.1rem;
+            "
+          >
+            ✕
+          </div>
+          Cerrar Sesión
+        </div>
+
+        <button
+          class="btn-ios w-100"
+          onclick="cerrarMenuMovil()"
+          style="
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary, #fff);
+            border: none;
+            padding: 16px;
+            border-radius: 18px;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 10px;
+          "
+        >
+          Cancelar
+        </button>
       </div>
     </div>
 
@@ -1449,6 +1930,7 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        color: white;
         font-weight: 700;
       "
     ></div>
