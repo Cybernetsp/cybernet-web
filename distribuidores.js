@@ -440,6 +440,35 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
     refrescarSaldoDistribuidorFondo,
     5 * 60 * 1000,
   );
+  function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("dashboardSection").style.display = "flex";
+
+    // 🔥 FIX: Mostrar el carrito solo cuando ya estemos en el dashboard
+    document.getElementById("fabCarrito").style.display = "flex";
+
+    document.getElementById("distriWelcomeName").innerText =
+      `¡Hola, ${nombre}!`;
+    document.getElementById("distriWelcomePhone").innerText =
+      `Distribuidor • Tel: ${telefono}`;
+
+    window.saldoNumericoActual =
+      parseFloat(String(saldo).replace(/[^\d.-]/g, "")) || 0;
+    if (window.saldoNumericoActual > 0 && window.saldoNumericoActual < 1000)
+      window.saldoNumericoActual *= 1000;
+
+    actualizarSaldoUI();
+    renderTienda();
+    cargarStockEnTienda();
+    cargarDatosFinancierosYAlertas(telefono);
+
+    if (window.cyberIntervaloSaldoFondo)
+      clearInterval(window.cyberIntervaloSaldoFondo);
+    window.cyberIntervaloSaldoFondo = setInterval(
+      refrescarSaldoDistribuidorFondo,
+      5 * 60 * 1000,
+    );
+  }
 }
 
 function actualizarSaldoUI() {
