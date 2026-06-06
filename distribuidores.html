@@ -1154,8 +1154,7 @@
             line-height: 1.4;
           "
         >
-          Ingresa el nombre del cliente final para
-          extraer las credenciales.
+          Ingresa el nombre del cliente final para extraer las credenciales.
         </p>
         <div style="display: flex; gap: 10px; width: 100%">
           <input
@@ -1934,6 +1933,121 @@
         font-weight: 700;
       "
     ></div>
+
+    <div
+      class="overlay-modal-code"
+      id="modalRenovacionDistri"
+      style="z-index: 17000"
+    >
+      <div
+        class="modal-ios"
+        onclick="event.stopPropagation()"
+        style="
+          max-width: 500px;
+          width: 95%;
+          height: 75vh;
+          max-height: 750px;
+          display: flex;
+          flex-direction: column;
+          padding: 24px;
+          border-radius: 28px;
+          background: var(--glass-bg, rgba(30, 30, 30, 0.9));
+          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+          backdrop-filter: blur(40px);
+        "
+      >
+        <div
+          style="
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h3
+            style="
+              margin: 0;
+              font-size: 1.15rem;
+              color: var(--text-primary, #fff);
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <div
+              style="
+                background: rgba(10, 132, 255, 0.15);
+                color: var(--ios-blue, #0a84ff);
+                padding: 8px;
+                border-radius: 12px;
+                display: flex;
+              "
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            Renovar Cuenta Netflix
+          </h3>
+          <button
+            onclick="
+              document
+                .getElementById('modalRenovacionDistri')
+                .classList.remove('open')
+            "
+            style="
+              background: transparent;
+              border: none;
+              color: var(--text-secondary, #aaa);
+              font-size: 1.5rem;
+              cursor: pointer;
+            "
+          >
+            ✕
+          </button>
+        </div>
+
+        <input
+          type="text"
+          id="buscadorModalRenoDistri"
+          class="input-ios"
+          placeholder="Buscar por correo, perfil o cliente..."
+          oninput="window.filtrarModalRenovacionB2B()"
+          style="
+            border-radius: 16px;
+            padding: 14px 20px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+          "
+        />
+
+        <div
+          id="listaCuentasModalRenoDistri"
+          style="
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
+          "
+        ></div>
+      </div>
+    </div>
 
     <script src="distribuidores.js"></script>
   </body>
