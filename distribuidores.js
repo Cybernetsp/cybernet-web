@@ -1601,3 +1601,19 @@ function ejecutarPeticionConTimeout(
   script.src = `${urlBase}?${queryParams.toString()}`;
   document.body.appendChild(script);
 }
+// =========================================================================
+// 📱 MENÚ MÓVIL (HAMBURGUESA)
+// =========================================================================
+function abrirMenuMovil() {
+  haptic();
+  bloquearScroll();
+  const modal = document.getElementById("modalMenuMovil");
+  if (modal) modal.classList.add("open");
+}
+
+function cerrarMenuMovil() {
+  haptic();
+  desbloquearScroll();
+  const modal = document.getElementById("modalMenuMovil");
+  if (modal) modal.classList.remove("open");
+}
