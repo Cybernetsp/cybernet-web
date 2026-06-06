@@ -1082,11 +1082,27 @@ function procesarCompraDistribuidor() {
       }
     };
 
-    const script = document.createElement("script");
-    script.id = "node_" + cbCheckout;
-    // 🚀 EL FIX ESTÁ AQUÍ MISMO EN LA URL: &correoReno=${encodeURIComponent(correoRenoGlobal)}
-    script.src = `${GOOGLE_SCRIPT_URL}?action=registrarVentaDistriB2B&nombre=${encodeURIComponent(nombreParaSheets)}&telefono=${encodeURIComponent(telefonoDistribuidor)}&descripcion=${encodeURIComponent(descripcionLote)}&correoReno=${encodeURIComponent(correoRenoGlobal)}&cantidad=${encodeURIComponent(totalCost)}&callback=${cbCheckout}&_ts=${Date.now()}`;
-    document.body.appendChild(script);
+    // 🔥 APLICACIÓN DEL WRAPPER TRANSPARENTE CON TIMEOUT DE 14 SEGUNDOS
+    let mapaParametros = {
+      action: "registrarVentaDistriB2B",
+      nombre: nombreParaSheets,
+      telefono: telefonoDistribuidor,
+      descripcion: descripcionLote,
+      correoReno: correoRenoGlobal,
+      cantidad: totalCost,
+    };
+
+    ejecutarPeticionConTimeout(
+      GOOGLE_SCRIPT_URL,
+      mapaParametros,
+      cbCheckout,
+      14000,
+      () => {
+        // Acción de rescate si se cumple el Timeout: Reactivamos el botón para que no quede trabado
+        btn.disabled = false;
+        btn.innerText = "CONFIRMAR COMPRA";
+      },
+    );
   }, 50);
 }
 
