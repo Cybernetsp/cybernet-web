@@ -149,12 +149,14 @@ const PLATAFORMAS_MANUALES = [
 function haptic() {
   if (navigator.vibrate) navigator.vibrate(15);
 }
+
 function formatMoneda(v) {
   return (
     "$" +
     parseFloat(v || 0).toLocaleString("es-CO", { maximumFractionDigits: 0 })
   );
 }
+
 function triggerToast(msgHTML) {
   const toast = document.getElementById("appleToast");
   if (!toast) return;
@@ -166,6 +168,7 @@ function triggerToast(msgHTML) {
     toast.style.opacity = "0";
   }, 3000);
 }
+
 function copiarTextoAlToque(elemento, texto) {
   if (!texto) return;
   navigator.clipboard.writeText(texto).then(() => {
@@ -176,6 +179,7 @@ function copiarTextoAlToque(elemento, texto) {
     }, 150);
   });
 }
+
 function parseFechaCybernet(fechaStr) {
   if (!fechaStr || fechaStr === "N/A") return null;
   let s = String(fechaStr).toUpperCase().replace(/\s+/g, "");
@@ -223,7 +227,7 @@ function parseFechaCybernet(fechaStr) {
 }
 
 // =========================================================================
-// 🔒 LOGIN
+// 🔒 LOGIN Y SESIÓN
 // =========================================================================
 function verificarTelefonoDistribuidor() {
   haptic();
@@ -406,20 +410,19 @@ function regresarAlPasoInicial() {
 // =========================================================================
 // 💼 INTERFAZ B2B (DASHBOARD), MÓVIL Y ALERTAS
 // =========================================================================
-
-function abrirMenuMovil() {
-  haptic();
-  document.getElementById("modalMenuMovil").classList.add("open");
-}
-function cerrarMenuMovil() {
-  haptic();
-  document.getElementById("modalMenuMovil").classList.remove("open");
-}
-
 function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   document.getElementById("loginSection").style.display = "none";
   document.getElementById("dashboardSection").style.display = "flex";
-  document.getElementById("distriWelcomeName").innerText = `¡Hola, ${nombre}!`;
+
+  // 🔥 FIX BLINDADO: Forzar la aparición del botón flotante por encima de cualquier CSS
+  const btnCarrito = document.getElementById("fabCarrito");
+  if (btnCarrito) {
+    btnCarrito.style.setProperty("display", "flex", "important");
+  }
+
+  let nombreSeguro = nombre ? nombre : "Distribuidor";
+  document.getElementById("distriWelcomeName").innerText =
+    `¡Hola, ${nombreSeguro}!`;
   document.getElementById("distriWelcomePhone").innerText =
     `Distribuidor • Tel: ${telefono}`;
 
@@ -440,35 +443,6 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
     refrescarSaldoDistribuidorFondo,
     5 * 60 * 1000,
   );
-  function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
-    document.getElementById("loginSection").style.display = "none";
-    document.getElementById("dashboardSection").style.display = "flex";
-
-    // 🔥 FIX: Mostrar el carrito solo cuando ya estemos en el dashboard
-    document.getElementById("fabCarrito").style.display = "flex";
-
-    document.getElementById("distriWelcomeName").innerText =
-      `¡Hola, ${nombre}!`;
-    document.getElementById("distriWelcomePhone").innerText =
-      `Distribuidor • Tel: ${telefono}`;
-
-    window.saldoNumericoActual =
-      parseFloat(String(saldo).replace(/[^\d.-]/g, "")) || 0;
-    if (window.saldoNumericoActual > 0 && window.saldoNumericoActual < 1000)
-      window.saldoNumericoActual *= 1000;
-
-    actualizarSaldoUI();
-    renderTienda();
-    cargarStockEnTienda();
-    cargarDatosFinancierosYAlertas(telefono);
-
-    if (window.cyberIntervaloSaldoFondo)
-      clearInterval(window.cyberIntervaloSaldoFondo);
-    window.cyberIntervaloSaldoFondo = setInterval(
-      refrescarSaldoDistribuidorFondo,
-      5 * 60 * 1000,
-    );
-  }
 }
 
 function actualizarSaldoUI() {
@@ -574,23 +548,26 @@ function copiarMensajeRenovacion(msgEnc) {
 
 function abrirModalHistorial() {
   haptic();
+  bloquearScroll();
   document.getElementById("modalEstadoCuenta").classList.add("open");
 }
 function cerrarModalHistorial() {
   haptic();
+  desbloquearScroll();
   document.getElementById("modalEstadoCuenta").classList.remove("open");
 }
 
 // =========================================================================
 // 🛒 E-COMMERCE MAYORISTA
 // =========================================================================
-
 function abrirCarrito() {
   haptic();
+  bloquearScroll();
   document.getElementById("modalCarritoTienda").classList.add("open");
 }
 function cerrarCarrito() {
   haptic();
+  desbloquearScroll();
   document.getElementById("modalCarritoTienda").classList.remove("open");
 }
 
@@ -619,6 +596,7 @@ function cargarStockEnTienda() {
     if (document.getElementById("node_" + cbStock))
       document.getElementById("node_" + cbStock).remove();
     delete window[cbStock];
+
     if (res && res.status === "success") {
       const mapeo = {
         NETFLIX: "NETFLIX",
@@ -740,6 +718,126 @@ function cambiarCantidad(id, delta) {
   actualizarCarritoUI();
 }
 
+// 🔥 LÓGICA DE RENOVACIONES EN EL CARRITO B2B
+window.cuentasActivasB2B = [];
+
+window.cambiarTipoVentaCarrito = function (id, tipo) {
+  let item = window.carrito.find((i) => i.id === id);
+  if (item) {
+    item.tipo = tipo;
+    // Si se arrepiente y vuelve a cambiar a "Nueva", reseteamos la memoria
+    if (tipo === "Nueva") {
+      item.correoReno = "";
+      item.amount = 1;
+      document.getElementById("cartClientName").value = "";
+    }
+    actualizarCarritoUI();
+  }
+};
+
+window.abrirModalRenoB2B = function (idItem) {
+  haptic();
+  const telDistri =
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+  const modal = document.getElementById("modalRenovacionDistri");
+  const container = document.getElementById("listaCuentasModalRenoDistri");
+
+  container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>Buscando tus pantallas de Netflix...</div>`;
+  modal.classList.add("open");
+
+  const cbName = "cb_reno_b2b_" + Date.now();
+  window[cbName] = function (res) {
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+
+    container.innerHTML = "";
+    if (res && res.status === "success" && res.data.length > 0) {
+      // Filtrar solo las que son @cybernetsp.com para evitar basura
+      window.cuentasActivasB2B = res.data.filter((c) =>
+        c.correo.toLowerCase().includes("@cybernetsp.com"),
+      );
+
+      if (window.cuentasActivasB2B.length === 0) {
+        container.innerHTML =
+          "<div style='color:var(--ios-orange); text-align:center; padding: 20px;'>No se detectaron cuentas aptas para renovación.</div>";
+        return;
+      }
+
+      window.cuentasActivasB2B.forEach((cuenta) => {
+        let div = document.createElement("div");
+        div.className = "card-ios item-reno-b2b";
+        div.style =
+          "padding: 15px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px;";
+        div.setAttribute(
+          "data-search",
+          cuenta.correo.toLowerCase() +
+            " " +
+            cuenta.perfil.toLowerCase() +
+            " " +
+            cuenta.cliente.toLowerCase(),
+        );
+        div.innerHTML = `
+                    <div style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px;">${cuenta.correo}</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+                        <span>Perfil: <b style="color: var(--ios-blue);">${cuenta.perfil}</b></span>
+                        <span>Cliente: <b>${cuenta.cliente}</b></span>
+                    </div>
+                `;
+        div.onclick = function () {
+          let itemCarrito = window.carrito.find((i) => i.id === idItem);
+          if (itemCarrito) {
+            itemCarrito.correoReno = `${cuenta.correo} | Perfil: ${cuenta.perfil}`;
+
+            // 🔥 FIX 1: Autocompletar el nombre del cliente
+            let inputNombre = document.getElementById("cartClientName");
+            if (
+              inputNombre &&
+              cuenta.cliente &&
+              cuenta.cliente !== "N/A" &&
+              cuenta.cliente.toLowerCase() !== "cliente"
+            ) {
+              inputNombre.value = cuenta.cliente;
+            }
+
+            // 🔥 FIX 2: Auto-detectar la cantidad de pantallas
+            let cantidadDetectada = cuenta.perfil
+              .split(/[-y,]/i)
+              .filter((p) => p.trim() !== "").length;
+            if (cantidadDetectada > 0) {
+              itemCarrito.amount = cantidadDetectada;
+            }
+
+            actualizarCarritoUI();
+          }
+          modal.classList.remove("open");
+        };
+        container.appendChild(div);
+      });
+    } else {
+      container.innerHTML =
+        "<div style='color:var(--text-secondary); text-align:center; padding: 20px;'>No tienes cuentas activas registradas en el sistema.</div>";
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=buscarRenovacionNetflix&tel=${encodeURIComponent(telDistri)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.filtrarModalRenovacionB2B = function () {
+  const q = document
+    .getElementById("buscadorModalRenoDistri")
+    .value.toLowerCase()
+    .trim();
+  document.querySelectorAll(".item-reno-b2b").forEach((item) => {
+    item.style.display = item.getAttribute("data-search").includes(q)
+      ? "block"
+      : "none";
+  });
+};
+
 function actualizarCarritoUI() {
   const container = document.getElementById("cartItemsContainer");
   const countBadge = document.getElementById("cartCountBadge");
@@ -760,6 +858,7 @@ function actualizarCarritoUI() {
   let html = "",
     totalCost = 0,
     totalItems = 0;
+
   window.carrito.forEach((item) => {
     const subtotal = item.precio * item.amount;
     totalCost += subtotal;
@@ -967,10 +1066,7 @@ function procesarCompraDistribuidor() {
         } else {
           window.saldoNumericoActual -= totalCost;
         }
-        sessionStorage.setItem(
-          "active_distri_saldo",
-          window.saldoNumericoActual,
-        );
+        localStorage.setItem("active_distri_saldo", window.saldoNumericoActual);
 
         actualizarSaldoUI();
         cargarStockEnTienda();
@@ -1008,6 +1104,7 @@ function copiarCuentasCheckout() {
 }
 function cerrarModalExitoCheckout() {
   haptic();
+  desbloquearScroll();
   document.getElementById("successCheckoutOverlay").classList.remove("open");
 }
 
@@ -1016,6 +1113,7 @@ function cerrarModalExitoCheckout() {
 // =========================================================================
 function abrirModalBusquedaCuentas() {
   haptic();
+  bloquearScroll();
   document.getElementById("modalBusquedaCuentas").classList.add("open");
   document.getElementById("contenedorResultadosCasillero").innerHTML =
     `<div style="text-align:center; color:var(--text-secondary); font-size:0.88rem; padding: 30px 0;">Ingresa un parámetro y presiona buscar. El sistema filtrará solo tus compras registradas.</div>`;
@@ -1023,6 +1121,7 @@ function abrirModalBusquedaCuentas() {
 
 function cerrarModalBusquedaCuentas() {
   haptic();
+  desbloquearScroll();
   document.getElementById("modalBusquedaCuentas").classList.remove("open");
 }
 
@@ -1037,8 +1136,7 @@ function buscarCasilleroDistri() {
   const telefonoDistribuidor = localStorage.getItem("active_distri_tel");
 
   if (inputSearch === "") {
-    // 🔥 Reemplazamos alert() por triggerToast() para evitar bugs en móviles
-    triggerToast("⚠️ Ingresa un correo o cliente.");
+    triggerToast("⚠️ Ingresa el nombre del cliente.");
     return;
   }
 
@@ -1139,12 +1237,14 @@ function copiarFichaCasillero(btn, dataEncoded) {
 let codeData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
 function abrirCentroCodigos() {
   haptic();
+  bloquearScroll();
   codeData.telefono = localStorage.getItem("active_distri_tel");
   document.getElementById("codesCenterOverlay").classList.add("open");
   changeCodeStep(1);
 }
 function cerrarCentroCodigos() {
   haptic();
+  desbloquearScroll();
   document.getElementById("codesCenterOverlay").classList.remove("open");
 }
 function changeCodeStep(n) {
@@ -1171,7 +1271,6 @@ async function rastrearCodigo() {
     .value.toLowerCase()
     .trim();
   if (!m.includes("@cybernetsp.com")) {
-    // 🔥 Reemplazamos alert() por triggerToast()
     triggerToast("⚠️ Escribe un correo @cybernetsp.com");
     return;
   }
@@ -1228,9 +1327,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 🔥 FIX: Leer desde localStorage
   let localDistri = localStorage.getItem("active_distri_tel");
   if (localDistri) {
-    // Restauramos la caché global por si el usuario recargó la página
     window.distriTelefonoCache = localDistri;
-
     entrarAlPortalDistribuidor(
       localStorage.getItem("active_distri_name"),
       localDistri,
@@ -1238,6 +1335,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 });
+
 // =========================================================================
 // 🔒 CONTROL DE SCROLL PARA MODALES (UX Nativo)
 // =========================================================================
@@ -1249,94 +1347,12 @@ function desbloquearScroll() {
 }
 
 // =========================================================================
-// 📱 MENÚ MÓVIL
-// =========================================================================
-function abrirMenuMovil() {
-  haptic();
-  bloquearScroll();
-  document.getElementById("modalMenuMovil").classList.add("open");
-}
-function cerrarMenuMovil() {
-  haptic();
-  desbloquearScroll();
-  document.getElementById("modalMenuMovil").classList.remove("open");
-}
-
-// =========================================================================
-// 📊 HISTORIAL
-// =========================================================================
-function abrirModalHistorial() {
-  haptic();
-  bloquearScroll();
-  document.getElementById("modalEstadoCuenta").classList.add("open");
-}
-function cerrarModalHistorial() {
-  haptic();
-  desbloquearScroll();
-  document.getElementById("modalEstadoCuenta").classList.remove("open");
-}
-
-// =========================================================================
-// 🛒 CARRITO
-// =========================================================================
-function abrirCarrito() {
-  haptic();
-  bloquearScroll();
-  document.getElementById("modalCarritoTienda").classList.add("open");
-}
-function cerrarCarrito() {
-  haptic();
-  desbloquearScroll();
-  document.getElementById("modalCarritoTienda").classList.remove("open");
-}
-
-// =========================================================================
-// 📡 BÓVEDA DE CUENTAS
-// =========================================================================
-function abrirModalBusquedaCuentas() {
-  haptic();
-  bloquearScroll();
-  document.getElementById("modalBusquedaCuentas").classList.add("open");
-  document.getElementById("contenedorResultadosCasillero").innerHTML =
-    `<div style="text-align:center; color:var(--text-secondary); font-size:0.88rem; padding: 30px 0;">Ingresa un parámetro y presiona buscar. El sistema filtrará solo tus compras registradas.</div>`;
-}
-function cerrarModalBusquedaCuentas() {
-  haptic();
-  desbloquearScroll();
-  document.getElementById("modalBusquedaCuentas").classList.remove("open");
-}
-
-// =========================================================================
-// 🤖 BOT DE CÓDIGOS
-// =========================================================================
-function abrirCentroCodigos() {
-  haptic();
-  bloquearScroll();
-  codeData.telefono = localStorage.getItem("active_distri_tel");
-  document.getElementById("codesCenterOverlay").classList.add("open");
-  changeCodeStep(1);
-}
-function cerrarCentroCodigos() {
-  haptic();
-  desbloquearScroll();
-  document.getElementById("codesCenterOverlay").classList.remove("open");
-}
-
-// =========================================================================
-// 🎉 CHECKOUT EXITOSO
-// =========================================================================
-function cerrarModalExitoCheckout() {
-  haptic();
-  desbloquearScroll();
-  document.getElementById("successCheckoutOverlay").classList.remove("open");
-}
-// =========================================================================
 // 🔄 AUTOREFRESCO AUTOMÁTICO DE SALDO EN SEGUNDO PLANO (CADA 5 MINUTOS)
 // =========================================================================
 function refrescarSaldoDistribuidorFondo() {
   const telActivo =
     localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
-  if (!telActivo) return; // Si no hay sesión activa, abortamos para no gastar cuotas de Google
+  if (!telActivo) return;
 
   const cbName = "cb_background_saldo_" + Date.now();
   window[cbName] = function (res) {
@@ -1345,7 +1361,6 @@ function refrescarSaldoDistribuidorFondo() {
     delete window[cbName];
 
     if (res && res.status === "success" && res.data) {
-      // Buscamos al distribuidor logueado dentro de la base de datos fresca
       const distriFresco = res.data.find(
         (d) =>
           String(d.telefono || "").replace(/\D/g, "") ===
@@ -1353,19 +1368,15 @@ function refrescarSaldoDistribuidorFondo() {
       );
 
       if (distriFresco) {
-        // Limpiamos formatos de moneda latinos por si acaso
         let saldoNum =
           parseFloat(String(distriFresco.saldo).replace(/[^\d.-]/g, "")) || 0;
         if (saldoNum > 0 && saldoNum < 1000) saldoNum *= 1000;
 
-        // Sincronizamos las variables y memorias globales al instante
         window.saldoNumericoActual = saldoNum;
         localStorage.setItem("active_distri_saldo", saldoNum);
 
-        // Actualizamos de inmediato los componentes visuales de la UI
         actualizarSaldoUI();
 
-        // Actualizamos también la UI del carrito abierto si el distribuidor está viendo el modal
         if (
           typeof actualizarCarritoUI === "function" &&
           document
@@ -1387,124 +1398,3 @@ function refrescarSaldoDistribuidorFondo() {
   script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDistribuidores&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 }
-// 🔥 LÓGICA DE RENOVACIONES EN EL CARRITO B2B
-window.cuentasActivasB2B = [];
-
-window.cambiarTipoVentaCarrito = function (id, tipo) {
-  let item = window.carrito.find((i) => i.id === id);
-  if (item) {
-    item.tipo = tipo;
-
-    // Si se arrepiente y vuelve a cambiar a "Nueva", reseteamos la memoria
-    if (tipo === "Nueva") {
-      item.correoReno = "";
-      item.amount = 1;
-      document.getElementById("cartClientName").value = "";
-    }
-
-    actualizarCarritoUI();
-  }
-};
-
-window.abrirModalRenoB2B = function (idItem) {
-  haptic();
-  const telDistri =
-    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
-  const modal = document.getElementById("modalRenovacionDistri");
-  const container = document.getElementById("listaCuentasModalRenoDistri");
-
-  container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>Buscando tus pantallas de Netflix...</div>`;
-  modal.classList.add("open");
-
-  const cbName = "cb_reno_b2b_" + Date.now();
-  window[cbName] = function (res) {
-    const node = document.getElementById("node_" + cbName);
-    if (node) node.remove();
-    delete window[cbName];
-
-    container.innerHTML = "";
-    if (res && res.status === "success" && res.data.length > 0) {
-      // Filtrar solo las que son @cybernetsp.com para evitar basura
-      window.cuentasActivasB2B = res.data.filter((c) =>
-        c.correo.toLowerCase().includes("@cybernetsp.com"),
-      );
-
-      if (window.cuentasActivasB2B.length === 0) {
-        container.innerHTML =
-          "<div style='color:var(--ios-orange); text-align:center; padding: 20px;'>No se detectaron cuentas aptas para renovación.</div>";
-        return;
-      }
-
-      window.cuentasActivasB2B.forEach((cuenta) => {
-        let div = document.createElement("div");
-        div.className = "card-ios item-reno-b2b";
-        div.style =
-          "padding: 15px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px;";
-        div.setAttribute(
-          "data-search",
-          cuenta.correo.toLowerCase() +
-            " " +
-            cuenta.perfil.toLowerCase() +
-            " " +
-            cuenta.cliente.toLowerCase(),
-        );
-        div.innerHTML = `
-                    <div style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px;">${cuenta.correo}</div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
-                        <span>Perfil: <b style="color: var(--ios-blue);">${cuenta.perfil}</b></span>
-                        <span>Cliente: <b>${cuenta.cliente}</b></span>
-                    </div>
-                `;
-        div.onclick = function () {
-          let itemCarrito = window.carrito.find((i) => i.id === idItem);
-          if (itemCarrito) {
-            itemCarrito.correoReno = `${cuenta.correo} | Perfil: ${cuenta.perfil}`;
-
-            // 🔥 FIX 1: Autocompletar el nombre del cliente
-            let inputNombre = document.getElementById("cartClientName");
-            if (
-              inputNombre &&
-              cuenta.cliente &&
-              cuenta.cliente !== "N/A" &&
-              cuenta.cliente.toLowerCase() !== "cliente"
-            ) {
-              inputNombre.value = cuenta.cliente;
-            }
-
-            // 🔥 FIX 2: Auto-detectar la cantidad de pantallas (Ej: "1-2" o "1 y 2" = 2 pantallas)
-            let cantidadDetectada = cuenta.perfil
-              .split(/[-y,]/i)
-              .filter((p) => p.trim() !== "").length;
-            if (cantidadDetectada > 0) {
-              itemCarrito.amount = cantidadDetectada;
-            }
-
-            actualizarCarritoUI();
-          }
-          modal.classList.remove("open");
-        };
-        container.appendChild(div);
-      });
-    } else {
-      container.innerHTML =
-        "<div style='color:var(--text-secondary); text-align:center; padding: 20px;'>No tienes cuentas activas registradas en el sistema.</div>";
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=buscarRenovacionNetflix&tel=${encodeURIComponent(telDistri)}&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
-};
-
-window.filtrarModalRenovacionB2B = function () {
-  const q = document
-    .getElementById("buscadorModalRenoDistri")
-    .value.toLowerCase()
-    .trim();
-  document.querySelectorAll(".item-reno-b2b").forEach((item) => {
-    item.style.display = item.getAttribute("data-search").includes(q)
-      ? "block"
-      : "none";
-  });
-};
