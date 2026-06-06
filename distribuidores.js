@@ -687,11 +687,12 @@ function agregarAlCarrito(id) {
       nombre: prod.nombre,
       precio: prod.precio,
       amount: 1,
+      tipo: "Nueva", // 🔥 NUEVO: Para saber si es cuenta nueva o reno
+      correoReno: "", // 🔥 NUEVO: Guardará la cuenta seleccionada
     });
   triggerToast(`🛒 ${prod.nombre} añadido.`);
   actualizarCarritoUI();
 
-  // Animación del FAB
   const fab = document.getElementById("fabCarrito");
   if (fab) {
     fab.style.transform = "scale(1.1)";
@@ -735,17 +736,42 @@ function actualizarCarritoUI() {
     const subtotal = item.precio * item.amount;
     totalCost += subtotal;
     totalItems += item.amount;
+
+    // 🔥 LÓGICA EXCLUSIVA PARA MOSTRAR BOTÓN DE RENOVAR EN NETFLIX
+    let opcionesReno = "";
+    if (item.id === "NETFLIX") {
+      let isReno = item.tipo === "Reno";
+      let displayBtn = isReno ? "block" : "none";
+      let btnText = item.correoReno ? item.correoReno : "Seleccionar Cuenta";
+      let btnColor = item.correoReno ? "var(--ios-green)" : "var(--ios-orange)";
+
+      opcionesReno = `
+          <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px; width: 100%; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
+              <select class="input-ios" style="margin: 0; padding: 8px; font-size: 0.8rem; border-radius: 10px; font-weight: 600;" onchange="window.cambiarTipoVentaCarrito('${item.id}', this.value)">
+                  <option value="Nueva" ${!isReno ? "selected" : ""}>Crear Pantalla Nueva</option>
+                  <option value="Reno" ${isReno ? "selected" : ""}>Renovar Pantalla Existente</option>
+              </select>
+              <button class="btn-ios" style="display: ${displayBtn}; background: rgba(0,0,0,0.2); color: ${btnColor}; border: 1px solid ${btnColor}; padding: 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; width: 100%; text-align: center; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" onclick="window.abrirModalRenoB2B('${item.id}')">
+                  ${btnText}
+              </button>
+          </div>
+        `;
+    }
+
     html += `
-      <div class="cart-item-row" style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,0.02); padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.04);">
-        <div style="display:flex; flex-direction:column; text-align:left; overflow:hidden; flex-grow:1;">
-          <strong style="font-size:0.85rem; color:var(--text-primary); text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">${item.nombre}</strong>
-          <span style="font-size:0.85rem; color:var(--ios-green); font-family:monospace; font-weight:700;">${formatMoneda(subtotal)} <span style="font-size:0.65rem; color:var(--text-secondary); font-weight:normal;">(${formatMoneda(item.precio)} c/u)</span></span>
+      <div class="cart-item-row" style="display:flex; flex-direction:column; gap:10px; background:rgba(255,255,255,0.02); padding:12px; border-radius:16px; border:1px solid rgba(255,255,255,0.04);">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="display:flex; flex-direction:column; text-align:left; overflow:hidden; flex-grow:1;">
+              <strong style="font-size:0.9rem; color:var(--text-primary); text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">${item.nombre}</strong>
+              <span style="font-size:0.85rem; color:var(--ios-green); font-family:monospace; font-weight:700;">${formatMoneda(subtotal)} <span style="font-size:0.65rem; color:var(--text-secondary); font-weight:normal;">(${formatMoneda(item.precio)} c/u)</span></span>
+            </div>
+            <div style="display:flex; align-items:center; background:rgba(0,0,0,0.2); border-radius:30px; padding:2px; border:1px solid rgba(255,255,255,0.05);">
+              <button onclick="cambiarCantidad('${item.id}', -1)" style="background:transparent; border:none; color:white; width:26px; height:26px; font-weight:bold; cursor:pointer;">-</button>
+              <span style="font-family:monospace; font-size:0.9rem; font-weight:bold; min-width:20px; text-align:center;">${item.amount}</span>
+              <button onclick="cambiarCantidad('${item.id}', 1)" style="background:transparent; border:none; color:white; width:26px; height:26px; font-weight:bold; cursor:pointer;">+</button>
+            </div>
         </div>
-        <div style="display:flex; align-items:center; background:rgba(0,0,0,0.2); border-radius:30px; padding:2px; border:1px solid rgba(255,255,255,0.05);">
-          <button onclick="cambiarCantidad('${item.id}', -1)" style="background:transparent; border:none; color:white; width:22px; height:22px; font-weight:bold;">-</button>
-          <span style="font-family:monospace; font-size:0.85rem; font-weight:bold; min-width:18px; text-align:center;">${item.amount}</span>
-          <button onclick="cambiarCantidad('${item.id}', 1)" style="background:transparent; border:none; color:white; width:22px; height:22px; font-weight:bold;">+</button>
-        </div>
+        ${opcionesReno}
       </div>`;
   });
 
@@ -776,8 +802,6 @@ function procesarCompraDistribuidor() {
   );
   if (totalCost > window.saldoNumericoActual) return;
 
-  let fragmentos = window.carrito.map((item) => `${item.amount} ${item.id}`);
-  const descripcionLote = fragmentos.join(" + ");
   const inputNombreCliente = document
     .getElementById("cartClientName")
     .value.trim();
@@ -786,6 +810,30 @@ function procesarCompraDistribuidor() {
       ? inputNombreCliente
       : sessionStorage.getItem("active_distri_name");
   const telefonoDistribuidor = sessionStorage.getItem("active_distri_tel");
+
+  // 🔥 LÓGICA DE RENOVACIÓN B2B: Recolecta correos y tipos
+  let hayRenovacion = false;
+  let correoRenoGlobal = "";
+
+  let fragmentos = window.carrito.map((item) => {
+    if (item.tipo === "Reno") {
+      hayRenovacion = true;
+      correoRenoGlobal = item.correoReno;
+    }
+    return `${item.amount} ${item.id}`;
+  });
+
+  let descripcionLote = fragmentos.join(" + ");
+
+  if (hayRenovacion) {
+    descripcionLote = "RENO: " + descripcionLote;
+    if (correoRenoGlobal === "") {
+      triggerToast(
+        "⚠️ Debes hacer clic en 'Seleccionar Cuenta' en tu carrito para proceder con la renovación.",
+      );
+      return;
+    }
+  }
 
   // Desbloqueamos temporalmente el fondo para el móvil
   desbloquearScroll();
@@ -819,7 +867,7 @@ function procesarCompraDistribuidor() {
           inputNombreCliente !== "" ? inputNombreCliente : "Cliente";
         let textoFicha = `🌟 ¡Hola, ${nombreMensaje}!\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos: 👇\n\n`;
 
-        // 🔥 NUEVO: Formateador de Fecha de Compra (ej. 5-jun)
+        // 📅 FIX: Formateador de Fecha de Compra (ej. 5-jun)
         const mesesCortos = [
           "ene",
           "feb",
@@ -848,8 +896,6 @@ function procesarCompraDistribuidor() {
               textoFicha += `👤 Perfil: ${bloque.perfil}\n`;
             if (bloque.pin && bloque.pin !== "N/A" && bloque.pin !== "")
               textoFicha += `🔑 Pin del Perfil: ${bloque.pin}\n`;
-
-            // 🔥 APLICACIÓN DE LA FECHA FORMATEADA
             textoFicha += `📅 Fecha de Vencimiento: ${bloque.venc.toLowerCase()}\n🛒 Fecha de Compra: ${fechaCompraFormateada}\n\n`;
           });
         } else {
@@ -860,7 +906,6 @@ function procesarCompraDistribuidor() {
         document.getElementById("cajaTextoFichas").innerText = textoFicha;
         window.fichasCheckoutPendientes = textoFicha;
 
-        // 🔥 FIX CRÍTICO: Manipulamos directamente el botón sin tocar al "parentElement" (la caja blanca)
         const btnWhatsapp = document.getElementById("btnWhatsAppActivacion");
         const requiresManual = window.carrito.some((item) =>
           PLATAFORMAS_MANUALES.includes(item.id),
@@ -883,14 +928,12 @@ function procesarCompraDistribuidor() {
         document.getElementById("successCheckoutOverlay").classList.add("open");
         bloquearScroll();
 
-        // Limpiamos la memoria del carrito
+        // 🛒 FIX: Limpiar Carrito Visualmente
         window.carrito = [];
         document.getElementById("cartClientName").value = "";
-
-        // 🔥 FIX CRÍTICO: Obliga al modal flotante a borrarse visualmente y quedar limpio
         actualizarCarritoUI();
 
-        // Tu fix de saldo real en vivo que ya aplicamos:
+        // 💰 FIX: Sincronización Real de Saldo
         if (res.saldoQuedante !== undefined) {
           window.saldoNumericoActual = parseFloat(res.saldoQuedante);
         } else {
@@ -903,24 +946,6 @@ function procesarCompraDistribuidor() {
 
         actualizarSaldoUI();
         cargarStockEnTienda();
-        // ... resto del código
-
-        // 🔥 FIX: Tomar el saldo oficial exacto devuelto por Sheets (Base de Datos)
-        if (res.saldoQuedante !== undefined) {
-          window.saldoNumericoActual = parseFloat(res.saldoQuedante);
-        } else {
-          window.saldoNumericoActual -= totalCost; // Respaldo por si falla la red
-        }
-
-        // 🔥 FIX: Actualizar el caché de sesión para que no vuelva al saldo viejo si recarga la página
-        sessionStorage.setItem(
-          "active_distri_saldo",
-          window.saldoNumericoActual,
-        );
-
-        // Disparar la actualización visual en la UI
-        actualizarSaldoUI();
-        cargarStockEnTienda();
         cargarDatosFinancierosYAlertas(telefonoDistribuidor);
 
         if (res.bloques && res.bloques.length > 0) {
@@ -928,14 +953,15 @@ function procesarCompraDistribuidor() {
           if (searchInput) searchInput.value = res.bloques[0].correo;
         }
       } else {
-        desbloquearScroll(); // 🔥 Liberamos la pantalla si el backend reporta error
+        desbloquearScroll();
         triggerToast("❌ Error: " + (res ? res.message : "Fallo de red."));
       }
     };
 
     const script = document.createElement("script");
     script.id = "node_" + cbCheckout;
-    script.src = `${GOOGLE_SCRIPT_URL}?action=registrarVentaDistriB2B&nombre=${encodeURIComponent(nombreParaSheets)}&telefono=${encodeURIComponent(telefonoDistribuidor)}&descripcion=${encodeURIComponent(descripcionLote)}&cantidad=${encodeURIComponent(totalCost)}&callback=${cbCheckout}`;
+    // 🚀 EL FIX ESTÁ AQUÍ MISMO EN LA URL: &correoReno=${encodeURIComponent(correoRenoGlobal)}
+    script.src = `${GOOGLE_SCRIPT_URL}?action=registrarVentaDistriB2B&nombre=${encodeURIComponent(nombreParaSheets)}&telefono=${encodeURIComponent(telefonoDistribuidor)}&descripcion=${encodeURIComponent(descripcionLote)}&correoReno=${encodeURIComponent(correoRenoGlobal)}&cantidad=${encodeURIComponent(totalCost)}&callback=${cbCheckout}&_ts=${Date.now()}`;
     document.body.appendChild(script);
   }, 50);
 }
@@ -1324,3 +1350,124 @@ function refrescarSaldoDistribuidorFondo() {
   script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDistribuidores&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 }
+// 🔥 LÓGICA DE RENOVACIONES EN EL CARRITO B2B
+window.cuentasActivasB2B = [];
+
+window.cambiarTipoVentaCarrito = function (id, tipo) {
+  let item = window.carrito.find((i) => i.id === id);
+  if (item) {
+    item.tipo = tipo;
+
+    // Si se arrepiente y vuelve a cambiar a "Nueva", reseteamos la memoria
+    if (tipo === "Nueva") {
+      item.correoReno = "";
+      item.amount = 1;
+      document.getElementById("cartClientName").value = "";
+    }
+
+    actualizarCarritoUI();
+  }
+};
+
+window.abrirModalRenoB2B = function (idItem) {
+  haptic();
+  const telDistri =
+    sessionStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+  const modal = document.getElementById("modalRenovacionDistri");
+  const container = document.getElementById("listaCuentasModalRenoDistri");
+
+  container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>Buscando tus pantallas de Netflix...</div>`;
+  modal.classList.add("open");
+
+  const cbName = "cb_reno_b2b_" + Date.now();
+  window[cbName] = function (res) {
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+
+    container.innerHTML = "";
+    if (res && res.status === "success" && res.data.length > 0) {
+      // Filtrar solo las que son @cybernetsp.com para evitar basura
+      window.cuentasActivasB2B = res.data.filter((c) =>
+        c.correo.toLowerCase().includes("@cybernetsp.com"),
+      );
+
+      if (window.cuentasActivasB2B.length === 0) {
+        container.innerHTML =
+          "<div style='color:var(--ios-orange); text-align:center; padding: 20px;'>No se detectaron cuentas aptas para renovación.</div>";
+        return;
+      }
+
+      window.cuentasActivasB2B.forEach((cuenta) => {
+        let div = document.createElement("div");
+        div.className = "card-ios item-reno-b2b";
+        div.style =
+          "padding: 15px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px;";
+        div.setAttribute(
+          "data-search",
+          cuenta.correo.toLowerCase() +
+            " " +
+            cuenta.perfil.toLowerCase() +
+            " " +
+            cuenta.cliente.toLowerCase(),
+        );
+        div.innerHTML = `
+                    <div style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px;">${cuenta.correo}</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+                        <span>Perfil: <b style="color: var(--ios-blue);">${cuenta.perfil}</b></span>
+                        <span>Cliente: <b>${cuenta.cliente}</b></span>
+                    </div>
+                `;
+        div.onclick = function () {
+          let itemCarrito = window.carrito.find((i) => i.id === idItem);
+          if (itemCarrito) {
+            itemCarrito.correoReno = `${cuenta.correo} | Perfil: ${cuenta.perfil}`;
+
+            // 🔥 FIX 1: Autocompletar el nombre del cliente
+            let inputNombre = document.getElementById("cartClientName");
+            if (
+              inputNombre &&
+              cuenta.cliente &&
+              cuenta.cliente !== "N/A" &&
+              cuenta.cliente.toLowerCase() !== "cliente"
+            ) {
+              inputNombre.value = cuenta.cliente;
+            }
+
+            // 🔥 FIX 2: Auto-detectar la cantidad de pantallas (Ej: "1-2" o "1 y 2" = 2 pantallas)
+            let cantidadDetectada = cuenta.perfil
+              .split(/[-y,]/i)
+              .filter((p) => p.trim() !== "").length;
+            if (cantidadDetectada > 0) {
+              itemCarrito.amount = cantidadDetectada;
+            }
+
+            actualizarCarritoUI();
+          }
+          modal.classList.remove("open");
+        };
+        container.appendChild(div);
+      });
+    } else {
+      container.innerHTML =
+        "<div style='color:var(--text-secondary); text-align:center; padding: 20px;'>No tienes cuentas activas registradas en el sistema.</div>";
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=buscarRenovacionNetflix&tel=${encodeURIComponent(telDistri)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.filtrarModalRenovacionB2B = function () {
+  const q = document
+    .getElementById("buscadorModalRenoDistri")
+    .value.toLowerCase()
+    .trim();
+  document.querySelectorAll(".item-reno-b2b").forEach((item) => {
+    item.style.display = item.getAttribute("data-search").includes(q)
+      ? "block"
+      : "none";
+  });
+};
