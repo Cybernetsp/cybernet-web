@@ -1,4 +1,4 @@
-const CACHE_NAME = "cyber-distri-v2";
+const CACHE_NAME = "cyber-distri-v3";
 
 // 🔥 FIX: Agregamos "./distris.jpeg" a la lista para que el celular la guarde en memoria
 const assetsToCache = [
