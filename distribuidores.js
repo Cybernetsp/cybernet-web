@@ -227,7 +227,7 @@ function parseFechaCybernet(fechaStr) {
 }
 
 // =========================================================================
-// 🔒 LOGIN Y SESIÓN
+// 🔒 LOGIN Y SESIÓN BLINDADO CONTRA CAÍDAS DE RED
 // =========================================================================
 function verificarTelefonoDistribuidor() {
   haptic();
@@ -246,10 +246,6 @@ function verificarTelefonoDistribuidor() {
 
   const cbName = "cb_tel_" + Date.now();
   window[cbName] = function (res) {
-    if (document.getElementById("node_" + cbName))
-      document.getElementById("node_" + cbName).remove();
-    delete window[cbName];
-
     if (res && res.status === "success") {
       const distri = res.data.find(
         (d) => String(d.telefono || "").replace(/\D/g, "") === inputTel,
@@ -266,13 +262,10 @@ function verificarTelefonoDistribuidor() {
         ) {
           btn.innerHTML = `Enviando código al correo...`;
           const cbSend = "cb_send_" + Date.now();
+
           window[cbSend] = function (resEnvio) {
             btn.disabled = false;
             btn.innerHTML = "Continuar →";
-            if (document.getElementById("node_" + cbSend))
-              document.getElementById("node_" + cbSend).remove();
-            delete window[cbSend];
-
             if (resEnvio && resEnvio.status === "success") {
               document.getElementById("stepTelefono").style.display = "none";
               let partes = window.distriCorreoRegistradoEnSheets.split("@");
@@ -292,10 +285,21 @@ function verificarTelefonoDistribuidor() {
               alert("❌ Error al despachar el correo.");
             }
           };
-          const scriptEnvio = document.createElement("script");
-          scriptEnvio.id = "node_" + cbSend;
-          scriptEnvio.src = `${GOOGLE_SCRIPT_URL}?action=enviarCodigoDistri&correo=${encodeURIComponent(window.distriCorreoRegistradoEnSheets)}&callback=${cbSend}&_ts=${Date.now()}`;
-          document.body.appendChild(scriptEnvio);
+
+          // 🔥 WRAPPER APLICADO
+          ejecutarPeticionConTimeout(
+            GOOGLE_SCRIPT_URL,
+            {
+              action: "enviarCodigoDistri",
+              correo: window.distriCorreoRegistradoEnSheets,
+            },
+            cbSend,
+            14000,
+            () => {
+              btn.disabled = false;
+              btn.innerHTML = "Continuar →";
+            },
+          );
         } else {
           btn.disabled = false;
           btn.innerHTML = "Continuar →";
@@ -313,10 +317,113 @@ function verificarTelefonoDistribuidor() {
       alert("❌ Error de red.");
     }
   };
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDistribuidores&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
+
+  // 🔥 WRAPPER APLICADO
+  ejecutarPeticionConTimeout(
+    GOOGLE_SCRIPT_URL,
+    { action: "obtenerDistribuidores" },
+    cbName,
+    14000,
+    () => {
+      btn.disabled = false;
+      btn.innerHTML = "Continuar →";
+    },
+  );
+}
+
+function registrarEmailYEnviarCodigo() {
+  haptic();
+  const nuevoEmail = document
+    .getElementById("distriCorreoRegistrarInput")
+    .value.trim()
+    .toLowerCase();
+  const btn = document.getElementById("btnRegistrarEmailYEnviar");
+  if (nuevoEmail === "" || nuevoEmail.indexOf("@") === -1) {
+    alert("⚠️ Correo electrónico inválido.");
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = `Registrando y enviando...`;
+
+  const cbReg = "cb_reg_" + Date.now();
+  window[cbReg] = function (res) {
+    btn.disabled = false;
+    btn.innerHTML = "Registrar y Enviar Código";
+    if (res && res.status === "success") {
+      window.distriCorreoRegistradoEnSheets = nuevoEmail;
+      document.getElementById("stepCorreoRegistrar").style.display = "none";
+      document.getElementById("txtAvisoTokenDespachado").innerText =
+        `🔑 Código enviado a: ${nuevoEmail}`;
+      document.getElementById("stepTokenVerificar").style.display = "flex";
+    } else {
+      alert("❌ Error: " + res.message);
+    }
+  };
+
+  // 🔥 WRAPPER APLICADO
+  ejecutarPeticionConTimeout(
+    GOOGLE_SCRIPT_URL,
+    {
+      action: "registrarEmailNuevoDistri",
+      telefono: window.distriTelefonoCache,
+      correo: nuevoEmail,
+    },
+    cbReg,
+    14000,
+    () => {
+      btn.disabled = false;
+      btn.innerHTML = "Registrar y Enviar Código";
+    },
+  );
+}
+
+function verificarCodigoDeSeguridadFinal() {
+  haptic();
+  const tokenInput = document
+    .getElementById("distriLoginTokenInput")
+    .value.replace(/\s+/g, "")
+    .trim();
+  const btn = document.getElementById("btnVerificarCodigoFinal");
+  if (tokenInput.length !== 6) {
+    alert("⚠️ El código debe ser de 6 números.");
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = `Validando...`;
+
+  const cbVerify = "cb_verify_" + Date.now();
+  window[cbVerify] = function (res) {
+    btn.disabled = false;
+    btn.innerHTML = "Verificar e Ingresar";
+    if (res && res.status === "success" && res.data) {
+      localStorage.setItem("active_distri_tel", window.distriTelefonoCache);
+      localStorage.setItem("active_distri_name", res.data.nombre.toUpperCase());
+      localStorage.setItem("active_distri_saldo", res.data.saldo);
+      entrarAlPortalDistribuidor(
+        res.data.nombre.toUpperCase(),
+        window.distriTelefonoCache,
+        res.data.saldo,
+      );
+    } else {
+      alert("❌ Código incorrecto o caducado.");
+    }
+  };
+
+  // 🔥 WRAPPER APLICADO
+  ejecutarPeticionConTimeout(
+    GOOGLE_SCRIPT_URL,
+    {
+      action: "verificarCodigoDistri",
+      correo: window.distriCorreoRegistradoEnSheets,
+      code: tokenInput,
+    },
+    cbVerify,
+    14000,
+    () => {
+      btn.disabled = false;
+      btn.innerHTML = "Verificar e Ingresar";
+    },
+  );
 }
 
 function registrarEmailYEnviarCodigo() {
@@ -1164,9 +1271,6 @@ function buscarCasilleroDistri() {
   window[cbBusq] = function (res) {
     btn.disabled = false;
     btn.innerHTML = "Buscar";
-    if (document.getElementById("node_" + cbBusq))
-      document.getElementById("node_" + cbBusq).remove();
-    delete window[cbBusq];
 
     if (res && res.status === "success") {
       let htmlCards = "";
@@ -1216,10 +1320,19 @@ function buscarCasilleroDistri() {
       contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Error en la red o base de datos.</div>`;
     }
   };
-  const script = document.createElement("script");
-  script.id = "node_" + cbBusq;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=buscarCuentaGlobal&query=${encodeURIComponent(inputSearch)}&callback=${cbBusq}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
+
+  // 🔥 WRAPPER APLICADO
+  ejecutarPeticionConTimeout(
+    GOOGLE_SCRIPT_URL,
+    { action: "buscarCuentaGlobal", query: inputSearch },
+    cbBusq,
+    14000,
+    () => {
+      btn.disabled = false;
+      btn.innerHTML = "Buscar";
+      contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Tiempo de espera agotado. Reintenta.</div>`;
+    },
+  );
 }
 
 function copiarFichaCasillero(btn, dataEncoded) {
@@ -1290,16 +1403,33 @@ async function rastrearCodigo() {
     triggerToast("⚠️ Escribe un correo @cybernetsp.com");
     return;
   }
+
+  const btnTrack = document.getElementById("btnRastrearCodigo");
+  if (btnTrack) {
+    btnTrack.disabled = true;
+    btnTrack.innerText = "Rastreando...";
+  }
+
   codeData.correo = m;
   changeCodeStep(4);
+
+  // 🔥 Escudo Anti-Congelamiento para FETCH (14 segundos)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 14000);
+
   try {
     const query = new URLSearchParams(codeData);
     const res = await (
-      await fetch(`${BOT_API_URL}?${query.toString()}`)
+      await fetch(`${BOT_API_URL}?${query.toString()}`, {
+        signal: controller.signal,
+      })
     ).json();
+    clearTimeout(timeoutId); // Limpiamos el cronómetro de emergencia
+
     changeCodeStep(5);
     document.getElementById("codeResultBox").style.display = "none";
     document.getElementById("linkResultBox").style.display = "none";
+
     if (res.exito) {
       document.getElementById("codeResultTitle").innerHTML =
         `<span style="color:var(--ios-green);">¡LOCALIZADO!</span>`;
@@ -1322,7 +1452,22 @@ async function rastrearCodigo() {
     }
   } catch (err) {
     changeCodeStep(5);
-    document.getElementById("codeResultTitle").innerText = "Error";
+    if (err.name === "AbortError") {
+      document.getElementById("codeResultTitle").innerHTML =
+        `<span style="color:var(--ios-red);">TIEMPO AGOTADO</span>`;
+      document.getElementById("codeResultDesc").innerText =
+        "La conexión falló o tardó demasiado.";
+      triggerToast("⚠️ Conexión inestable.");
+    } else {
+      document.getElementById("codeResultTitle").innerText = "Error";
+      document.getElementById("codeResultDesc").innerText =
+        "Ocurrió un error inesperado.";
+    }
+  } finally {
+    if (btnTrack) {
+      btnTrack.disabled = false;
+      btnTrack.innerText = "Rastrear Código";
+    }
   }
 }
 
@@ -1423,18 +1568,18 @@ function ejecutarPeticionConTimeout(
   callbackName,
   timeoutMs,
   onTimeoutCallback,
+  silencioso = false,
 ) {
-  // 1. Crear el temporizador de emergencia
   let timeoutId = setTimeout(() => {
     if (window[callbackName]) {
-      // Si el callback aún existe, significa que el servidor no ha respondido. Abortamos.
       delete window[callbackName];
-
       const scriptNode = document.getElementById("node_" + callbackName);
       if (scriptNode) scriptNode.remove();
 
-      haptic();
-      triggerToast(`⚠️ Conexión inestable. La operación tardó demasiado.`);
+      if (!silencioso) {
+        haptic();
+        triggerToast(`⚠️ Conexión inestable. La operación tardó demasiado.`);
+      }
 
       if (typeof onTimeoutCallback === "function") {
         onTimeoutCallback();
@@ -1442,10 +1587,9 @@ function ejecutarPeticionConTimeout(
     }
   }, timeoutMs);
 
-  // 2. Interceptar el callback original para limpiar el temporizador si responde a tiempo
   const originalCallback = window[callbackName];
   window[callbackName] = function (res) {
-    clearTimeout(timeoutId); // Cancelamos el temporizador de muerte
+    clearTimeout(timeoutId);
     delete window[callbackName];
 
     const scriptNode = document.getElementById("node_" + callbackName);
@@ -1456,7 +1600,6 @@ function ejecutarPeticionConTimeout(
     }
   };
 
-  // 3. Serializar parámetros e inyectar el script en el DOM
   const queryParams = new URLSearchParams(paramsObj);
   queryParams.append("callback", callbackName);
   queryParams.append("_ts", Date.now());
