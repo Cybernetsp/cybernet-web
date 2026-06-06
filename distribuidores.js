@@ -1398,3 +1398,55 @@ function refrescarSaldoDistribuidorFondo() {
   script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDistribuidores&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 }
+// =========================================================================
+// 🌐 WRAPPER MAESTRO JSONP CON SEGURO DE ANULACIÓN POR TIMEOUT (UX ANTI-CONGELAMIENTO)
+// =========================================================================
+function ejecutarPeticionConTimeout(
+  urlBase,
+  paramsObj,
+  callbackName,
+  timeoutMs,
+  onTimeoutCallback,
+) {
+  // 1. Crear el temporizador de emergencia
+  let timeoutId = setTimeout(() => {
+    if (window[callbackName]) {
+      // Si el callback aún existe, significa que el servidor no ha respondido. Abortamos.
+      delete window[callbackName];
+
+      const scriptNode = document.getElementById("node_" + callbackName);
+      if (scriptNode) scriptNode.remove();
+
+      haptic();
+      triggerToast(`⚠️ Conexión inestable. La operación tardó demasiado.`);
+
+      if (typeof onTimeoutCallback === "function") {
+        onTimeoutCallback();
+      }
+    }
+  }, timeoutMs);
+
+  // 2. Interceptar el callback original para limpiar el temporizador si responde a tiempo
+  const originalCallback = window[callbackName];
+  window[callbackName] = function (res) {
+    clearTimeout(timeoutId); // Cancelamos el temporizador de muerte
+    delete window[callbackName];
+
+    const scriptNode = document.getElementById("node_" + callbackName);
+    if (scriptNode) scriptNode.remove();
+
+    if (typeof originalCallback === "function") {
+      originalCallback(res);
+    }
+  };
+
+  // 3. Serializar parámetros e inyectar el script en el DOM
+  const queryParams = new URLSearchParams(paramsObj);
+  queryParams.append("callback", callbackName);
+  queryParams.append("_ts", Date.now());
+
+  const script = document.createElement("script");
+  script.id = "node_" + callbackName;
+  script.src = `${urlBase}?${queryParams.toString()}`;
+  document.body.appendChild(script);
+}
