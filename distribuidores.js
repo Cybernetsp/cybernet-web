@@ -9,6 +9,18 @@ window.distriTelefonoCache = "";
 window.distriCorreoRegistradoEnSheets = "";
 window.fichasCheckoutPendientes = "";
 
+// 💡 Definición de plataformas que requieren activación manual por WhatsApp
+const PLATAFORMAS_MANUALES = [
+  "YOUTUBE",
+  "SPOTIFY",
+  "IPTV",
+  "METEGOL",
+  "DEEZER",
+  "MUBI",
+  "CANVA",
+  "CAPCUT",
+];
+
 // =========================================================================
 // 🎨 CATÁLOGO DE PRODUCTOS (Imágenes Nativas y Google Proxy Anti-Adblock)
 // =========================================================================
@@ -25,7 +37,6 @@ const catálogoProductos = [
     nombre: "Disney+ Premium",
     precio: 10000,
     color: "#1AE1FF",
-    // 💡 Usamos el servidor nativo de Google para extraer el logo oficial sin bloqueos
     logo: `<img src="https://www.google.com/s2/favicons?domain=disneyplus.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); border-radius: 8px;">`,
   },
   {
@@ -278,7 +289,6 @@ function verificarTelefonoDistribuidor() {
             }
           };
 
-          // 🔥 WRAPPER APLICADO
           ejecutarPeticionConTimeout(
             GOOGLE_SCRIPT_URL,
             {
@@ -310,7 +320,6 @@ function verificarTelefonoDistribuidor() {
     }
   };
 
-  // 🔥 WRAPPER APLICADO
   ejecutarPeticionConTimeout(
     GOOGLE_SCRIPT_URL,
     { action: "obtenerDistribuidores" },
@@ -352,7 +361,6 @@ function registrarEmailYEnviarCodigo() {
     }
   };
 
-  // 🔥 WRAPPER APLICADO
   ejecutarPeticionConTimeout(
     GOOGLE_SCRIPT_URL,
     {
@@ -391,6 +399,7 @@ function verificarCodigoDeSeguridadFinal() {
       localStorage.setItem("active_distri_tel", window.distriTelefonoCache);
       localStorage.setItem("active_distri_name", res.data.nombre.toUpperCase());
       localStorage.setItem("active_distri_saldo", res.data.saldo);
+
       entrarAlPortalDistribuidor(
         res.data.nombre.toUpperCase(),
         window.distriTelefonoCache,
@@ -401,7 +410,6 @@ function verificarCodigoDeSeguridadFinal() {
     }
   };
 
-  // 🔥 WRAPPER APLICADO
   ejecutarPeticionConTimeout(
     GOOGLE_SCRIPT_URL,
     {
@@ -418,87 +426,6 @@ function verificarCodigoDeSeguridadFinal() {
   );
 }
 
-function registrarEmailYEnviarCodigo() {
-  haptic();
-  const nuevoEmail = document
-    .getElementById("distriCorreoRegistrarInput")
-    .value.trim()
-    .toLowerCase();
-  const btn = document.getElementById("btnRegistrarEmailYEnviar");
-  if (nuevoEmail === "" || nuevoEmail.indexOf("@") === -1) {
-    alert("⚠️ Correo electrónico inválido.");
-    return;
-  }
-  btn.disabled = true;
-  btn.innerHTML = `Registrando y enviando...`;
-
-  const cbReg = "cb_reg_" + Date.now();
-  window[cbReg] = function (res) {
-    btn.disabled = false;
-    btn.innerHTML = "Registrar y Enviar Código";
-    if (document.getElementById("node_" + cbReg))
-      document.getElementById("node_" + cbReg).remove();
-    delete window[cbReg];
-
-    if (res && res.status === "success") {
-      window.distriCorreoRegistradoEnSheets = nuevoEmail;
-      document.getElementById("stepCorreoRegistrar").style.display = "none";
-      document.getElementById("txtAvisoTokenDespachado").innerText =
-        `🔑 Código enviado a: ${nuevoEmail}`;
-      document.getElementById("stepTokenVerificar").style.display = "flex";
-    } else {
-      alert("❌ Error: " + res.message);
-    }
-  };
-  const script = document.createElement("script");
-  script.id = "node_" + cbReg;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=registrarEmailNuevoDistri&telefono=${encodeURIComponent(window.distriTelefonoCache)}&correo=${encodeURIComponent(nuevoEmail)}&callback=${cbReg}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
-}
-
-function verificarCodigoDeSeguridadFinal() {
-  haptic();
-  const tokenInput = document
-    .getElementById("distriLoginTokenInput")
-    .value.replace(/\s+/g, "")
-    .trim();
-  const btn = document.getElementById("btnVerificarCodigoFinal");
-  if (tokenInput.length !== 6) {
-    alert("⚠️ El código debe ser de 6 números.");
-    return;
-  }
-  btn.disabled = true;
-  btn.innerHTML = `Validando...`;
-
-  const cbVerify = "cb_verify_" + Date.now();
-  window[cbVerify] = function (res) {
-    btn.disabled = false;
-    btn.innerHTML = "Verificar e Ingresar";
-    if (document.getElementById("node_" + cbVerify))
-      document.getElementById("node_" + cbVerify).remove();
-    delete window[cbVerify];
-
-    if (res && res.status === "success" && res.data) {
-      // 🔥 FIX: Usamos localStorage para que la sesión sea permanente
-      localStorage.setItem("active_distri_tel", window.distriTelefonoCache);
-      localStorage.setItem("active_distri_name", res.data.nombre.toUpperCase());
-      localStorage.setItem("active_distri_saldo", res.data.saldo);
-
-      entrarAlPortalDistribuidor(
-        res.data.nombre.toUpperCase(),
-        window.distriTelefonoCache,
-        res.data.saldo,
-      );
-    } else {
-      alert("❌ Código incorrecto o caducado.");
-    }
-  };
-  const script = document.createElement("script");
-  script.id = "node_" + cbVerify;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=verificarCodigoDistri&correo=${encodeURIComponent(window.distriCorreoRegistradoEnSheets)}&code=${encodeURIComponent(tokenInput)}&callback=${cbVerify}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
-}
-
 function regresarAlPasoInicial() {
   haptic();
   document.getElementById("stepTokenVerificar").style.display = "none";
@@ -513,7 +440,6 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   document.getElementById("loginSection").style.display = "none";
   document.getElementById("dashboardSection").style.display = "flex";
 
-  // 🔥 FIX BLINDADO: Forzar la aparición del botón flotante por encima de cualquier CSS
   const btnCarrito = document.getElementById("fabCarrito");
   if (btnCarrito) {
     btnCarrito.style.setProperty("display", "flex", "important");
@@ -535,7 +461,6 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   cargarStockEnTienda();
   cargarDatosFinancierosYAlertas(telefono);
 
-  // 🔥 FIX: Inicializador seguro del ciclo de actualización cada 5 minutos
   if (window.cyberIntervaloSaldoFondo)
     clearInterval(window.cyberIntervaloSaldoFondo);
   window.cyberIntervaloSaldoFondo = setInterval(
@@ -792,8 +717,8 @@ function agregarAlCarrito(id) {
       nombre: prod.nombre,
       precio: prod.precio,
       amount: 1,
-      tipo: "Nueva", // 🔥 NUEVO: Para saber si es cuenta nueva o reno
-      correoReno: "", // 🔥 NUEVO: Guardará la cuenta seleccionada
+      tipo: "Nueva",
+      correoReno: "",
     });
   triggerToast(`🛒 ${prod.nombre} añadido.`);
   actualizarCarritoUI();
@@ -817,14 +742,12 @@ function cambiarCantidad(id, delta) {
   actualizarCarritoUI();
 }
 
-// 🔥 LÓGICA DE RENOVACIONES EN EL CARRITO B2B
 window.cuentasActivasB2B = [];
 
 window.cambiarTipoVentaCarrito = function (id, tipo) {
   let item = window.carrito.find((i) => i.id === id);
   if (item) {
     item.tipo = tipo;
-    // Si se arrepiente y vuelve a cambiar a "Nueva", reseteamos la memoria
     if (tipo === "Nueva") {
       item.correoReno = "";
       item.amount = 1;
@@ -852,7 +775,6 @@ window.abrirModalRenoB2B = function (idItem) {
 
     container.innerHTML = "";
     if (res && res.status === "success" && res.data.length > 0) {
-      // Filtrar solo las que son @cybernetsp.com para evitar basura
       window.cuentasActivasB2B = res.data.filter((c) =>
         c.correo.toLowerCase().includes("@cybernetsp.com"),
       );
@@ -888,7 +810,6 @@ window.abrirModalRenoB2B = function (idItem) {
           if (itemCarrito) {
             itemCarrito.correoReno = `${cuenta.correo} | Perfil: ${cuenta.perfil}`;
 
-            // 🔥 FIX 1: Autocompletar el nombre del cliente
             let inputNombre = document.getElementById("cartClientName");
             if (
               inputNombre &&
@@ -899,7 +820,6 @@ window.abrirModalRenoB2B = function (idItem) {
               inputNombre.value = cuenta.cliente;
             }
 
-            // 🔥 FIX 2: Auto-detectar la cantidad de pantallas
             let cantidadDetectada = cuenta.perfil
               .split(/[-y,]/i)
               .filter((p) => p.trim() !== "").length;
@@ -963,7 +883,6 @@ function actualizarCarritoUI() {
     totalCost += subtotal;
     totalItems += item.amount;
 
-    // 🔥 LÓGICA EXCLUSIVA PARA MOSTRAR BOTÓN DE RENOVAR EN NETFLIX
     let opcionesReno = "";
     if (item.id === "NETFLIX") {
       let isReno = item.tipo === "Reno";
@@ -1019,14 +938,21 @@ function actualizarCarritoUI() {
   }
 }
 
+// =========================================================================
+// 🛒 PROCESAR COMPRA (CON ESCUDO INTEGRAL DE 1 MINUTO - ANTI-DUPLICADOS)
+// =========================================================================
 function procesarCompraDistribuidor() {
   haptic();
-  if (window.carrito.length === 0) return;
+  if (!window.carrito || window.carrito.length === 0) return;
+
   let totalCost = window.carrito.reduce(
     (sum, item) => sum + item.precio * item.amount,
     0,
   );
   if (totalCost > window.saldoNumericoActual) return;
+
+  const btn = document.getElementById("btnCheckoutShop");
+  if (btn.disabled) return;
 
   const inputNombreCliente = document
     .getElementById("cartClientName")
@@ -1037,7 +963,6 @@ function procesarCompraDistribuidor() {
       : localStorage.getItem("active_distri_name");
   const telefonoDistribuidor = localStorage.getItem("active_distri_tel");
 
-  // 🔥 LÓGICA DE RENOVACIÓN B2B: Recolecta correos y tipos
   let hayRenovacion = false;
   let correoRenoGlobal = "";
 
@@ -1061,7 +986,6 @@ function procesarCompraDistribuidor() {
     }
   }
 
-  // Desbloqueamos temporalmente el fondo para el móvil
   desbloquearScroll();
 
   setTimeout(() => {
@@ -1076,24 +1000,21 @@ function procesarCompraDistribuidor() {
 
     bloquearScroll();
 
-    const btn = document.getElementById("btnCheckoutShop");
+    // 🔒 Apagar el botón inmediatamente para congelar doble-clics
     btn.disabled = true;
-    btn.innerHTML = `Despachando...`;
+    btn.innerHTML = `<span class="spin-anim" style="display:inline-block; margin-right:8px;">⏳</span>Despachando...`;
 
     const cbCheckout = "cb_chk_" + Date.now();
     window[cbCheckout] = function (res) {
       btn.disabled = false;
+      btn.innerHTML = "CONFIRMAR COMPRA";
       actualizarCarritoUI();
-      if (document.getElementById("node_" + cbCheckout))
-        document.getElementById("node_" + cbCheckout).remove();
-      delete window[cbCheckout];
 
       if (res && res.status === "success") {
         let nombreMensaje =
           inputNombreCliente !== "" ? inputNombreCliente : "Cliente";
         let textoFicha = `🌟 ¡Hola, ${nombreMensaje}!\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos: 👇\n\n`;
 
-        // 📅 FIX: Formateador de Fecha de Compra (ej. 5-jun)
         const mesesCortos = [
           "ene",
           "feb",
@@ -1136,6 +1057,7 @@ function procesarCompraDistribuidor() {
         const requiresManual = window.carrito.some((item) =>
           PLATAFORMAS_MANUALES.includes(item.id),
         );
+
         if (requiresManual) {
           const platList = window.carrito
             .filter((i) => PLATAFORMAS_MANUALES.includes(i.id))
@@ -1154,12 +1076,10 @@ function procesarCompraDistribuidor() {
         document.getElementById("successCheckoutOverlay").classList.add("open");
         bloquearScroll();
 
-        // 🛒 FIX: Limpiar Carrito Visualmente
         window.carrito = [];
         document.getElementById("cartClientName").value = "";
         actualizarCarritoUI();
 
-        // 💰 FIX: Sincronización Real de Saldo
         if (res.saldoQuedante !== undefined) {
           window.saldoNumericoActual = parseFloat(res.saldoQuedante);
         } else {
@@ -1181,7 +1101,6 @@ function procesarCompraDistribuidor() {
       }
     };
 
-    // 🔥 APLICACIÓN DEL WRAPPER TRANSPARENTE CON TIMEOUT DE 14 SEGUNDOS
     let mapaParametros = {
       action: "registrarVentaDistriB2B",
       nombre: nombreParaSheets,
@@ -1191,15 +1110,18 @@ function procesarCompraDistribuidor() {
       cantidad: totalCost,
     };
 
+    // 🔥 MODIFICACIÓN SOLICITADA: Escudo de tiempo extendido a 1 minuto exacto (60,000 ms)
     ejecutarPeticionConTimeout(
       GOOGLE_SCRIPT_URL,
       mapaParametros,
       cbCheckout,
-      14000,
+      60000,
       () => {
-        // Acción de rescate si se cumple el Timeout: Reactivamos el botón para que no quede trabado
         btn.disabled = false;
-        btn.innerText = "CONFIRMAR COMPRA";
+        btn.innerHTML = "CONFIRMAR COMPRA";
+        alert(
+          "⚠️ El servidor está demorando más de lo normal. Por favor, revisa tu 'Historial' o el 'Buscador de Cuentas' en un minuto para verificar si la cuenta se alcanzó a emitir.",
+        );
       },
     );
   }, 50);
@@ -1313,7 +1235,6 @@ function buscarCasilleroDistri() {
     }
   };
 
-  // 🔥 WRAPPER APLICADO
   ejecutarPeticionConTimeout(
     GOOGLE_SCRIPT_URL,
     { action: "buscarCuentaGlobal", query: inputSearch },
@@ -1405,7 +1326,6 @@ async function rastrearCodigo() {
   codeData.correo = m;
   changeCodeStep(4);
 
-  // 🔥 Escudo Anti-Congelamiento para FETCH (14 segundos)
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 14000);
 
@@ -1416,7 +1336,7 @@ async function rastrearCodigo() {
         signal: controller.signal,
       })
     ).json();
-    clearTimeout(timeoutId); // Limpiamos el cronómetro de emergencia
+    clearTimeout(timeoutId);
 
     changeCodeStep(5);
     document.getElementById("codeResultBox").style.display = "none";
@@ -1467,17 +1387,15 @@ function cerrarSesionDistribuidor() {
   if (window.cyberIntervaloSaldoFondo) {
     clearInterval(window.cyberIntervaloSaldoFondo);
   }
-  // 🔥 FIX: Destruir la memoria permanente al cerrar sesión
   localStorage.removeItem("active_distri_tel");
   localStorage.removeItem("active_distri_name");
   localStorage.removeItem("active_distri_saldo");
-  sessionStorage.clear(); // Limpiamos por si acaso quedó basura
+  sessionStorage.clear();
 
   window.location.reload();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 🔥 FIX: Leer desde localStorage
   let localDistri = localStorage.getItem("active_distri_tel");
   if (localDistri) {
     window.distriTelefonoCache = localDistri;
@@ -1551,6 +1469,7 @@ function refrescarSaldoDistribuidorFondo() {
   script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDistribuidores&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 }
+
 // =========================================================================
 // 🌐 WRAPPER MAESTRO JSONP CON SEGURO DE ANULACIÓN POR TIMEOUT (UX ANTI-CONGELAMIENTO)
 // =========================================================================
@@ -1601,6 +1520,7 @@ function ejecutarPeticionConTimeout(
   script.src = `${urlBase}?${queryParams.toString()}`;
   document.body.appendChild(script);
 }
+
 // =========================================================================
 // 📱 MENÚ MÓVIL (HAMBURGUESA)
 // =========================================================================
@@ -1617,3 +1537,4 @@ function cerrarMenuMovil() {
   const modal = document.getElementById("modalMenuMovil");
   if (modal) modal.classList.remove("open");
 }
+
