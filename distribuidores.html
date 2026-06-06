@@ -7,6 +7,12 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <title>Cybernet - Portal Mayoristas</title>
+
+    <!-- 🔥 Conexión PWA Exclusiva Distribuidores -->
+    <link rel="manifest" href="manifest-distri.json" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+
     <link rel="stylesheet" href="global.css" />
     <style>
       /* =========================================================================
@@ -522,6 +528,7 @@
         align-self: flex-start;
       "
     >
+      <!-- Header Estático (Sticky) -->
       <div
         class="header-box"
         style="
@@ -594,6 +601,27 @@
         </div>
 
         <div class="desktop-actions">
+          <!-- 🔥 Botón de Instalación PWA (Aparece dinámicamente) -->
+          <button
+            id="btnInstalarAppDesktop"
+            onclick="instalarPWA()"
+            class="btn-ios"
+            style="
+              display: none;
+              background: rgba(255, 149, 0, 0.1);
+              border: 1px solid rgba(255, 149, 0, 0.2);
+              color: var(--ios-orange, #ff9f0a);
+              padding: 10px 20px;
+              border-radius: 50px;
+              font-weight: 700;
+              margin: 0;
+              align-items: center;
+              gap: 6px;
+            "
+          >
+            📲 Instalar App
+          </button>
+
           <button
             onclick="abrirModalBusquedaCuentas()"
             class="btn-ios btn-primary"
@@ -865,7 +893,7 @@
         background: var(--ios-blue, #0a84ff);
         box-shadow: 0 10px 25px rgba(10, 132, 255, 0.4);
         border: none;
-        display: none; /* 🔥 FIX: Oculto por defecto en el login */
+        display: none;
         justify-content: center;
         align-items: center;
         z-index: 10000;
@@ -1786,6 +1814,34 @@
           "
         ></div>
 
+        <!-- 🔥 FIX PWA: Botón Instalar Móvil (Aparece Dinámicamente) -->
+        <div
+          class="menu-item-ios"
+          id="btnInstalarAppMobile"
+          style="
+            display: none;
+            border-color: rgba(255, 149, 0, 0.3);
+            color: var(--ios-orange, #ff9f0a);
+          "
+          onclick="
+            cerrarMenuMovil();
+            instalarPWA();
+          "
+        >
+          <div
+            style="
+              background: rgba(255, 149, 0, 0.15);
+              color: var(--ios-orange, #ff9f0a);
+              padding: 10px;
+              border-radius: 12px;
+              display: flex;
+            "
+          >
+            📲
+          </div>
+          Instalar Aplicación
+        </div>
+
         <div
           class="menu-item-ios"
           onclick="
@@ -2053,6 +2109,69 @@
       </div>
     </div>
 
+    <!-- Carga tu JavaScript Principal -->
     <script src="distribuidores.js"></script>
+
+    <!-- 🔥 FIX PWA: Registro del Service Worker y Lógica del Botón de Instalación -->
+    <script>
+      // 1. Registro del Service Worker
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("sw-distri.js")
+            .then((reg) =>
+              console.log("⚙️ App B2B instalable lista (SW registrado)"),
+            )
+            .catch((err) => console.log("Error al registrar App B2B: ", err));
+        });
+      }
+
+      // 2. Lógica del Botón Inteligente de Instalación
+      let deferredPrompt;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        // Evita que Chrome muestre el aviso automático nativo
+        e.preventDefault();
+        // Guarda el evento para usarlo cuando el usuario toque el botón
+        deferredPrompt = e;
+
+        // Muestra el botón de instalar en móvil y en escritorio
+        const installBtnMobile = document.getElementById(
+          "btnInstalarAppMobile",
+        );
+        if (installBtnMobile) installBtnMobile.style.display = "flex";
+
+        const installBtnDesktop = document.getElementById(
+          "btnInstalarAppDesktop",
+        );
+        if (installBtnDesktop) installBtnDesktop.style.display = "flex";
+      });
+
+      function instalarPWA() {
+        if (typeof haptic === "function") haptic();
+        if (!deferredPrompt) return;
+
+        // Muestra la ventana de instalación del sistema operativo
+        deferredPrompt.prompt();
+
+        // Espera a que el usuario responda
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === "accepted") {
+            console.log("El usuario aceptó la instalación de Cybernet B2B");
+          }
+          deferredPrompt = null;
+
+          // Oculta los botones ya que la app fue instalada o el prompt fue usado
+          const installBtnMobile = document.getElementById(
+            "btnInstalarAppMobile",
+          );
+          if (installBtnMobile) installBtnMobile.style.display = "none";
+
+          const installBtnDesktop = document.getElementById(
+            "btnInstalarAppDesktop",
+          );
+          if (installBtnDesktop) installBtnDesktop.style.display = "none";
+        });
+      }
+    </script>
   </body>
 </html>
