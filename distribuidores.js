@@ -376,12 +376,11 @@ function verificarCodigoDeSeguridadFinal() {
     delete window[cbVerify];
 
     if (res && res.status === "success" && res.data) {
-      sessionStorage.setItem("active_distri_tel", window.distriTelefonoCache);
-      sessionStorage.setItem(
-        "active_distri_name",
-        res.data.nombre.toUpperCase(),
-      );
-      sessionStorage.setItem("active_distri_saldo", res.data.saldo);
+      // 🔥 FIX: Usamos localStorage para que la sesión sea permanente
+      localStorage.setItem("active_distri_tel", window.distriTelefonoCache);
+      localStorage.setItem("active_distri_name", res.data.nombre.toUpperCase());
+      localStorage.setItem("active_distri_saldo", res.data.saldo);
+
       entrarAlPortalDistribuidor(
         res.data.nombre.toUpperCase(),
         window.distriTelefonoCache,
@@ -808,8 +807,8 @@ function procesarCompraDistribuidor() {
   const nombreParaSheets =
     inputNombreCliente !== ""
       ? inputNombreCliente
-      : sessionStorage.getItem("active_distri_name");
-  const telefonoDistribuidor = sessionStorage.getItem("active_distri_tel");
+      : localStorage.getItem("active_distri_name");
+  const telefonoDistribuidor = localStorage.getItem("active_distri_tel");
 
   // 🔥 LÓGICA DE RENOVACIÓN B2B: Recolecta correos y tipos
   let hayRenovacion = false;
@@ -1006,7 +1005,7 @@ function buscarCasilleroDistri() {
     .toLowerCase();
   const contenedor = document.getElementById("contenedorResultadosCasillero");
   const btn = document.getElementById("btnBuscarCasillero");
-  const telefonoDistribuidor = sessionStorage.getItem("active_distri_tel");
+  const telefonoDistribuidor = localStorage.getItem("active_distri_tel");
 
   if (inputSearch === "") {
     // 🔥 Reemplazamos alert() por triggerToast() para evitar bugs en móviles
@@ -1111,7 +1110,7 @@ function copiarFichaCasillero(btn, dataEncoded) {
 let codeData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
 function abrirCentroCodigos() {
   haptic();
-  codeData.telefono = sessionStorage.getItem("active_distri_tel");
+  codeData.telefono = localStorage.getItem("active_distri_tel");
   document.getElementById("codesCenterOverlay").classList.add("open");
   changeCodeStep(1);
 }
@@ -1184,22 +1183,31 @@ async function rastrearCodigo() {
 }
 
 function cerrarSesionDistribuidor() {
-  // 🔥 FIX: Destruir el bucle de actualización en segundo plano
   if (window.cyberIntervaloSaldoFondo) {
     clearInterval(window.cyberIntervaloSaldoFondo);
   }
-  sessionStorage.clear();
+  // 🔥 FIX: Destruir la memoria permanente al cerrar sesión
+  localStorage.removeItem("active_distri_tel");
+  localStorage.removeItem("active_distri_name");
+  localStorage.removeItem("active_distri_saldo");
+  sessionStorage.clear(); // Limpiamos por si acaso quedó basura
+
   window.location.reload();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  let sessionDistri = sessionStorage.getItem("active_distri_tel");
-  if (sessionDistri)
+  // 🔥 FIX: Leer desde localStorage
+  let localDistri = localStorage.getItem("active_distri_tel");
+  if (localDistri) {
+    // Restauramos la caché global por si el usuario recargó la página
+    window.distriTelefonoCache = localDistri;
+
     entrarAlPortalDistribuidor(
-      sessionStorage.getItem("active_distri_name"),
-      sessionDistri,
-      sessionStorage.getItem("active_distri_saldo"),
+      localStorage.getItem("active_distri_name"),
+      localDistri,
+      localStorage.getItem("active_distri_saldo"),
     );
+  }
 });
 // =========================================================================
 // 🔒 CONTROL DE SCROLL PARA MODALES (UX Nativo)
@@ -1275,7 +1283,7 @@ function cerrarModalBusquedaCuentas() {
 function abrirCentroCodigos() {
   haptic();
   bloquearScroll();
-  codeData.telefono = sessionStorage.getItem("active_distri_tel");
+  codeData.telefono = localStorage.getItem("active_distri_tel");
   document.getElementById("codesCenterOverlay").classList.add("open");
   changeCodeStep(1);
 }
@@ -1298,7 +1306,7 @@ function cerrarModalExitoCheckout() {
 // =========================================================================
 function refrescarSaldoDistribuidorFondo() {
   const telActivo =
-    sessionStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
   if (!telActivo) return; // Si no hay sesión activa, abortamos para no gastar cuotas de Google
 
   const cbName = "cb_background_saldo_" + Date.now();
@@ -1323,7 +1331,7 @@ function refrescarSaldoDistribuidorFondo() {
 
         // Sincronizamos las variables y memorias globales al instante
         window.saldoNumericoActual = saldoNum;
-        sessionStorage.setItem("active_distri_saldo", saldoNum);
+        localStorage.setItem("active_distri_saldo", saldoNum);
 
         // Actualizamos de inmediato los componentes visuales de la UI
         actualizarSaldoUI();
@@ -1372,7 +1380,7 @@ window.cambiarTipoVentaCarrito = function (id, tipo) {
 window.abrirModalRenoB2B = function (idItem) {
   haptic();
   const telDistri =
-    sessionStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
   const modal = document.getElementById("modalRenovacionDistri");
   const container = document.getElementById("listaCuentasModalRenoDistri");
 
