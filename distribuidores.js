@@ -10,7 +10,7 @@ window.distriCorreoRegistradoEnSheets = "";
 window.fichasCheckoutPendientes = "";
 
 // =========================================================================
-// 🎨 CATÁLOGO DE PRODUCTOS (Logotipos Originales Vectorizados)
+// 🎨 CATÁLOGO DE PRODUCTOS (Imágenes Nativas y Google Proxy Anti-Adblock)
 // =========================================================================
 const catálogoProductos = [
   {
@@ -18,129 +18,121 @@ const catálogoProductos = [
     nombre: "Netflix Premium",
     precio: 10000,
     color: "#E50914",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6.1 2v20h3.5v-9.7l5.2 9.7h3.1V2h-3.5v9.5l-5.1-9.5H6.1z"/></svg>`,
+    logo: `<img src="https://img.icons8.com/color/512/netflix.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "DISNEY-PREMIUM",
     nombre: "Disney+ Premium",
     precio: 10000,
     color: "#1AE1FF",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.17 12.18c-.8.81-2.07 1.24-3.5 1.24-2.46 0-4.14-1.25-4.14-3.07 0-1.92 1.83-3.05 4.38-3.05 1.05 0 2.05.24 2.82.6l-1 1.94c-.58-.26-1.24-.4-1.8-.4-1.3 0-2.08.5-2.08 1.13 0 .62.77 1.05 2.02 1.05.7 0 1.26-.13 1.7-.35l1.6 1.91zM20 9h-1.5V7.5h-1V9H16v1h1.5v1.5h1V10H20V9z"/></svg>`,
+    // 💡 Usamos el servidor nativo de Google para extraer el logo oficial sin bloqueos
+    logo: `<img src="https://www.google.com/s2/favicons?domain=disneyplus.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); border-radius: 8px;">`,
   },
   {
     id: "AMAZON",
     nombre: "Prime Video",
     precio: 5000,
     color: "#00A8E1",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 14.8c-.86 1.34-2.58 2.68-5.65 2.68-2.67 0-4.66-.75-5.91-1.45L5 15.35c1.4.74 3.73 1.55 6.45 1.55 3.32 0 5.48-1.52 6.2-2.1z"/><path d="M19 13.5c0-.66-.94-.85-1.36-.31l-1.04 1.34c-.16.21.11.47.33.31l1.41-.98c.45-.31.66.19.66.19z"/></svg>`,
+    logo: `<img src="https://img.icons8.com/color/512/amazon-prime-video.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "DISNEY-ESTANDAR",
     nombre: "Disney+ Estándar",
     precio: 4000,
     color: "#0063e5",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.17 12.18c-.8.81-2.07 1.24-3.5 1.24-2.46 0-4.14-1.25-4.14-3.07 0-1.92 1.83-3.05 4.38-3.05 1.05 0 2.05.24 2.82.6l-1 1.94c-.58-.26-1.24-.4-1.8-.4-1.3 0-2.08.5-2.08 1.13 0 .62.77 1.05 2.02 1.05.7 0 1.26-.13 1.7-.35l1.6 1.91zM20 9h-1.5V7.5h-1V9H16v1h1.5v1.5h1V10H20V9z"/></svg>`,
+    logo: `<img src="https://www.google.com/s2/favicons?domain=disneyplus.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); filter: grayscale(1) brightness(0.8); border-radius: 8px;">`,
   },
   {
     id: "HBO-MAX",
     nombre: "Max (HBO)",
     precio: 3000,
     color: "#5856d6",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M2 8v8h2v-5l2 3 2-3v5h2V8H8L6 11 4 8zm10 8l1-8h2l1 8h-1.5l-.3-2h-1.4l-.3 2H12zm1.6-3h1l-.5-3-.5 3zm4.4-5l1.5 3L21 8h1.5l-2.2 4 2.2 4H21l-1.5-3-1.5 3h-1.5l2.2-4L16.5 8z"/></svg>`,
+    logo: `<img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Max_logo.svg" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "PARAMOUNT",
     nombre: "Paramount+",
     precio: 3000,
     color: "#0078ff",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-6 10h12l-6-10zm-3 11l3 4 3-4H9zm10-5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM5 10a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm4-5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm6 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>`,
+    logo: `<img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "VIX",
     nombre: "Vix+",
     precio: 3000,
     color: "#ff9500",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h3l3 8 3-8h3l-4.5 12H9.5L5 6zm11 1h2v3h3v2h-3v3h-2v-3h-3V10h3V7z"/></svg>`,
+    logo: `<img src="https://www.google.com/s2/favicons?domain=vix.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); border-radius: 8px;">`,
   },
   {
     id: "CRUNCHYROLL",
     nombre: "Crunchyroll",
     precio: 3000,
     color: "#ff5e00",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 17.5A7.5 7.5 0 1119.5 12 7.5 7.5 0 0112 19.5zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8.5A3.5 3.5 0 1115.5 12 3.5 3.5 0 0112 15.5z"/></svg>`,
+    logo: `<img src="https://img.icons8.com/color/512/crunchyroll.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "PLEX",
     nombre: "Plex TV",
     precio: 3000,
     color: "#ffcc00",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M11.85 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19zm-3.2 13.9l3.5-4.4-3.5-4.4h2.9l3.5 4.4-3.5 4.4H8.65z"/></svg>`,
+    logo: `<img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Plex_logo_2022.svg" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "APPLE-TV",
     nombre: "Apple TV",
     precio: 3000,
     color: "#ffffff",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.15 2c-.06 0-1.78.06-3.13 1.54-.7.76-1.18 1.82-1.18 2.92 0 .1.01.21.03.31 1.34-.04 2.87-.76 3.65-1.63.63-.7 1.1-1.72 1.05-2.73-.13-.02-.27-.03-.42-.03zM14.9 6.8c-1.38 0-2.61.85-3.29.85-.68 0-1.75-.76-2.88-.76-1.5 0-2.89.87-3.64 2.18-1.55 2.66-.4 6.6 1.11 8.76.74 1.06 1.6 2.22 2.74 2.18 1.09-.04 1.53-.7 2.86-.7s1.73.7 2.88.68c1.18-.02 1.93-1.07 2.65-2.13.85-1.22 1.2-2.4 1.22-2.46-.03-.01-2.31-.89-2.34-3.53-.03-2.2 1.8-3.25 1.88-3.3-.98-1.42-2.52-1.62-3.1-1.68z"/></svg>`,
+    logo: `<img src="https://upload.wikimedia.org/wikipedia/commons/2/28/Apple_TV_Plus_Logo.svg" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85); filter: invert(1);">`,
   },
   {
     id: "UNIVERSAL",
     nombre: "Universal+",
     precio: 3000,
     color: "#00d2ff",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zM8 7v6a4 4 0 008 0V7h-2v6a2 2 0 01-4 0V7H8z"/></svg>`,
+    logo: `<img src="https://www.google.com/s2/favicons?domain=universalplus.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); border-radius: 8px;">`,
   },
   {
     id: "YOUTUBE",
     nombre: "YouTube Premium",
     precio: 10000,
     color: "#FF0000",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M21.58 6.19a2.68 2.68 0 00-1.88-1.89C17.96 3.85 12 3.85 12 3.85s-5.96 0-7.7.44a2.68 2.68 0 00-1.88 1.89C2 7.93 2 12 2 12s0 4.07.42 5.81a2.68 2.68 0 001.88 1.89C6.04 20.15 12 20.15 12 20.15s5.96 0 7.7-.44a2.68 2.68 0 001.88-1.89C22 16.07 22 12 22 12s0-4.07-.42-5.81zM10 15.48V8.52L15.93 12 10 15.48z"/></svg>`,
+    logo: `<img src="https://img.icons8.com/color/512/youtube-play.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "SPOTIFY",
     nombre: "Spotify Premium",
     precio: 10000,
     color: "#1DB954",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.42c-.18.3-.56.4-.86.2-2.38-1.45-5.37-1.78-8.89-.98-.34.07-.67-.14-.74-.47-.08-.34.14-.67.47-.74 3.86-.88 7.15-.51 9.82 1.12.3.18.39.56.21.85zm1.22-3.37c-.22.37-.73.49-1.1.27-2.98-1.84-6.8-2.22-10.12-1.22-.4.12-.83-.1-.95-.5-.12-.4.1-.83.5-.95 3.8-1.14 8.08-.71 11.4 1.33.37.23.49.74.27 1.1zm.1-3.5C14.54 7.56 9.4 7.4 5.48 8.6c-.48.15-1-.13-1.15-.62-.15-.48.13-1 .62-1.15 4.5-1.38 10.22-1.18 14.15 1.14.43.25.57.82.32 1.25-.25.43-.82.57-1.25.32z"/></svg>`,
+    logo: `<img src="https://img.icons8.com/color/512/spotify.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "IPTV",
     nombre: "IPTV Premium",
     precio: 7000,
     color: "#ff37a6",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M8 22h8M12 19v3"/></svg>`,
+    logo: `<img src="https://img.icons8.com/color/512/tv.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "METEGOL",
     nombre: "Metegol TV",
     precio: 12000,
     color: "#52c41a",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20M12 12m-4 0a4 4 0 108 0 4 4 0 10-8 0"/></svg>`,
+    logo: `<img src="https://img.icons8.com/color/512/retro-tv.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "DEEZER",
     nombre: "Deezer Music",
     precio: 8000,
     color: "#ff2a6d",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="16" width="3" height="4"/><rect x="8" y="12" width="3" height="8"/><rect x="13" y="8" width="3" height="12"/><rect x="18" y="4" width="3" height="16"/></svg>`,
+    logo: `<img src="https://img.icons8.com/color/512/deezer.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
   {
     id: "MUBI",
     nombre: "MUBI Cine",
     precio: 3000,
     color: "#00f5ff",
-    logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h4l5 7 5-7h4v12h-3v-8.5l-6 8-6-8V18H3V6z"/></svg>`,
+    logo: `<img src="https://www.google.com/s2/favicons?domain=mubi.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); border-radius: 8px;">`,
   },
-];
-
-const PLATAFORMAS_MANUALES = [
-  "YOUTUBE",
-  "SPOTIFY",
-  "IPTV",
-  "METEGOL",
-  "DEEZER",
-  "MUBI",
 ];
 
 // =========================================================================
