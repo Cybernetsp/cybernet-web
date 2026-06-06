@@ -2,7 +2,7 @@
   "name": "Cybernet Mayoristas",
   "short_name": "Cyber B2B",
   "description": "Portal exclusivo para distribuidores",
-  "start_url": "./distribuidores.html",
+  "start_url": "distribuidores.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
