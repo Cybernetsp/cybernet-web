@@ -1235,11 +1235,12 @@ function buscarCasilleroDistri() {
     }
   };
 
+  // 🔥 FIX: Tiempo de espera extendido a 1 minuto exacto (60000 ms) para búsquedas seguras
   ejecutarPeticionConTimeout(
     GOOGLE_SCRIPT_URL,
     { action: "buscarCuentaGlobal", query: inputSearch },
     cbBusq,
-    14000,
+    60000,
     () => {
       btn.disabled = false;
       btn.innerHTML = "Buscar";
@@ -1537,4 +1538,3 @@ function cerrarMenuMovil() {
   const modal = document.getElementById("modalMenuMovil");
   if (modal) modal.classList.remove("open");
 }
-
