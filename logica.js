@@ -516,7 +516,7 @@ function refrescarCortesEnVivo(btn) {
   }, 1000);
 }
 
-// Generador de clave fácil para TV
+// Generador de clave fácil para TV (Panel de Cortes)
 function generarClaveNetflixTV() {
   const palabras = [
     "luna",
@@ -531,6 +531,101 @@ function generarClaveNetflixTV() {
     "azul",
     "rojo",
     "rey",
+    "fuego",
+    "agua",
+    "aire",
+    "tierra",
+    "nube",
+    "rio",
+    "lago",
+    "flor",
+    "roca",
+    "astro",
+    "cometa",
+    "mundo",
+    "luz",
+    "onda",
+    "pico",
+    "ruta",
+    "sur",
+    "norte",
+    "este",
+    "oeste",
+    "nieve",
+    "hoja",
+    "leon",
+    "tigre",
+    "oso",
+    "zorro",
+    "puma",
+    "gato",
+    "perro",
+    "ave",
+    "pez",
+    "toro",
+    "rana",
+    "mono",
+    "pato",
+    "cisne",
+    "buho",
+    "foca",
+    "mula",
+    "oro",
+    "jade",
+    "rubi",
+    "gris",
+    "rosa",
+    "verde",
+    "blanco",
+    "negro",
+    "plata",
+    "coral",
+    "ambar",
+    "mago",
+    "jefe",
+    "eco",
+    "alfa",
+    "beta",
+    "omega",
+    "cyber",
+    "red",
+    "top",
+    "max",
+    "pro",
+    "vip",
+    "cine",
+    "paz",
+    "amor",
+    "vida",
+    "faro",
+    "cima",
+    "meta",
+    "arte",
+    "mito",
+    "fase",
+    "nota",
+    "zen",
+    "zoom",
+    "play",
+    "game",
+    "run",
+    "fast",
+    "cool",
+    "flash",
+    "jazz",
+    "rock",
+    "pop",
+    "soul",
+    "lord",
+    "lady",
+    "duque",
+    "conde",
+    "ninja",
+    "dragon",
+    "fenix",
+    "titan",
+    "heroe",
+    "dios",
   ];
   const p = palabras[Math.floor(Math.random() * palabras.length)];
   const n = Math.floor(Math.random() * 90) + 10;
@@ -4643,6 +4738,14 @@ function iniciarCreacionCuentaNetflix(btn) {
 
     if (res && res.status === "success" && res.data) {
       const d = res.data;
+
+      // 🔥 CANDADO CORRECTO: Verifica si el sistema se quedó sin Pines de Refácil
+      if (d.pinRecarga && d.pinRecarga.includes("Sin PIN")) {
+        alert(
+          "❌ ERROR: No hay PINES de activación disponibles en la base de datos.\n\nPor favor, recarga el inventario de Pines de Refácil en tu Google Sheets antes de generar una cuenta nueva.",
+        );
+        return; // ⛔ Cortamos la función aquí y NO abrimos la ventana
+      }
 
       // Inyectar datos principales en el modal
       document.getElementById("displayCtaCorreo").innerText = d.correo;
