@@ -39,10 +39,46 @@ window.pendingOldPass = "";
 window.pendingRemember = false;
 window.isForcedChange = false;
 
+// =========================================================================
+// 🎵 MOTOR DE AUDIO VIP Y VIBRACIÓN
+// =========================================================================
+const CyberSonidos = {
+  play: function(tipo) {
+      try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!window.audioCtx) window.audioCtx = new AudioContext();
+          if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+          
+          const osc = window.audioCtx.createOscillator();
+          const gain = window.audioCtx.createGain();
+          
+          osc.connect(gain);
+          gain.connect(window.audioCtx.destination);
+          
+          if (tipo === 'pop') {
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(600, window.audioCtx.currentTime);
+              gain.gain.setValueAtTime(0.03, window.audioCtx.currentTime); // Volumen suave
+              gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.1);
+              osc.start(); osc.stop(window.audioCtx.currentTime + 0.1);
+          } else if (tipo === 'exito') {
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(400, window.audioCtx.currentTime);
+              osc.frequency.exponentialRampToValueAtTime(1000, window.audioCtx.currentTime + 0.2);
+              gain.gain.setValueAtTime(0.1, window.audioCtx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.4);
+              osc.start(); osc.stop(window.audioCtx.currentTime + 0.4);
+          }
+      } catch(e) {}
+  }
+};
+
 function haptic() {
   if (navigator.vibrate) {
     navigator.vibrate(15);
   }
+  // Dispara el sonido sutil en cada botón que tenga haptic()
+  CyberSonidos.play('pop'); 
 }
 
 const listaPlataformasVenta = [
@@ -5834,6 +5870,8 @@ function calcularDescuentoDeuda() {
     formatMoneda(descuento);
 }
 
+
+
 function renderDashboard() {
   if (!globalFinanzasData) return;
   const d = globalFinanzasData[activePeriod];
@@ -6064,7 +6102,45 @@ function renderDashboard() {
     `;
   }
 
-  // Pintamos las tarjetas limpias en el espacio de trabajo
+  // 🔥 NUEVO: INYECCIÓN DE LA GRÁFICA DE CHART.JS 🔥
+  let totalIngresosGrafica = ventasBrutasReales;
+  let totalEgresosGrafica = d.gastos + d.inversiones + d.nomina;
+
+  if (totalIngresosGrafica > 0 || totalEgresosGrafica > 0) {
+    htmlBuffer = `
+      <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+         <canvas id="miGraficaFinanzas" style="max-height: 220px;"></canvas>
+      </div>
+    ` + htmlBuffer;
+    
+    // Esperamos a que el HTML se pinte en la pantalla para dibujar la gráfica
+    setTimeout(() => {
+        const ctxChart = document.getElementById('miGraficaFinanzas');
+        if (ctxChart) {
+            if (window.cyberChartInstancia) window.cyberChartInstancia.destroy();
+            window.cyberChartInstancia = new Chart(ctxChart, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ingresos Brutos', 'Gastos/Pagos'],
+                    datasets: [{
+                        data: [totalIngresosGrafica, totalEgresosGrafica],
+                        backgroundColor: ['rgba(48, 209, 88, 0.8)', 'rgba(255, 69, 58, 0.8)'],
+                        borderColor: ['#30d158', '#ff453a'],
+                        borderWidth: 1,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#e5e5ea', font: { family: 'Calibri', size: 12 } } }
+                    }
+                }
+            });
+        }
+    }, 100);
+  }
   container.innerHTML = htmlBuffer;
   calcularDescuentoDeuda();
 }
@@ -6418,3 +6494,4 @@ document.addEventListener("keydown", function (e) {
     toggleSearchAccountPanel();
   }
 });
+
