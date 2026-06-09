@@ -43,34 +43,45 @@ window.isForcedChange = false;
 // 🎵 MOTOR DE AUDIO VIP Y VIBRACIÓN
 // =========================================================================
 const CyberSonidos = {
-  play: function(tipo) {
-      try {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (!window.audioCtx) window.audioCtx = new AudioContext();
-          if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
-          
-          const osc = window.audioCtx.createOscillator();
-          const gain = window.audioCtx.createGain();
-          
-          osc.connect(gain);
-          gain.connect(window.audioCtx.destination);
-          
-          if (tipo === 'pop') {
-              osc.type = 'sine';
-              osc.frequency.setValueAtTime(600, window.audioCtx.currentTime);
-              gain.gain.setValueAtTime(0.03, window.audioCtx.currentTime); // Volumen suave
-              gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.1);
-              osc.start(); osc.stop(window.audioCtx.currentTime + 0.1);
-          } else if (tipo === 'exito') {
-              osc.type = 'sine';
-              osc.frequency.setValueAtTime(400, window.audioCtx.currentTime);
-              osc.frequency.exponentialRampToValueAtTime(1000, window.audioCtx.currentTime + 0.2);
-              gain.gain.setValueAtTime(0.1, window.audioCtx.currentTime);
-              gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.4);
-              osc.start(); osc.stop(window.audioCtx.currentTime + 0.4);
-          }
-      } catch(e) {}
-  }
+  play: function (tipo) {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!window.audioCtx) window.audioCtx = new AudioContext();
+      if (window.audioCtx.state === "suspended") window.audioCtx.resume();
+
+      const osc = window.audioCtx.createOscillator();
+      const gain = window.audioCtx.createGain();
+
+      osc.connect(gain);
+      gain.connect(window.audioCtx.destination);
+
+      if (tipo === "pop") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(600, window.audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.03, window.audioCtx.currentTime); // Volumen suave
+        gain.gain.exponentialRampToValueAtTime(
+          0.001,
+          window.audioCtx.currentTime + 0.1,
+        );
+        osc.start();
+        osc.stop(window.audioCtx.currentTime + 0.1);
+      } else if (tipo === "exito") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(400, window.audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(
+          1000,
+          window.audioCtx.currentTime + 0.2,
+        );
+        gain.gain.setValueAtTime(0.1, window.audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+          0.001,
+          window.audioCtx.currentTime + 0.4,
+        );
+        osc.start();
+        osc.stop(window.audioCtx.currentTime + 0.4);
+      }
+    } catch (e) {}
+  },
 };
 
 function haptic() {
@@ -78,7 +89,7 @@ function haptic() {
     navigator.vibrate(15);
   }
   // Dispara el sonido sutil en cada botón que tenga haptic()
-  CyberSonidos.play('pop'); 
+  CyberSonidos.play("pop");
 }
 
 const listaPlataformasVenta = [
@@ -5870,8 +5881,6 @@ function calcularDescuentoDeuda() {
     formatMoneda(descuento);
 }
 
-
-
 function renderDashboard() {
   if (!globalFinanzasData) return;
   const d = globalFinanzasData[activePeriod];
@@ -6107,38 +6116,50 @@ function renderDashboard() {
   let totalEgresosGrafica = d.gastos + d.inversiones + d.nomina;
 
   if (totalIngresosGrafica > 0 || totalEgresosGrafica > 0) {
-    htmlBuffer = `
+    htmlBuffer =
+      `
       <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
          <canvas id="miGraficaFinanzas" style="max-height: 220px;"></canvas>
       </div>
     ` + htmlBuffer;
-    
+
     // Esperamos a que el HTML se pinte en la pantalla para dibujar la gráfica
     setTimeout(() => {
-        const ctxChart = document.getElementById('miGraficaFinanzas');
-        if (ctxChart) {
-            if (window.cyberChartInstancia) window.cyberChartInstancia.destroy();
-            window.cyberChartInstancia = new Chart(ctxChart, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Ingresos Brutos', 'Gastos/Pagos'],
-                    datasets: [{
-                        data: [totalIngresosGrafica, totalEgresosGrafica],
-                        backgroundColor: ['rgba(48, 209, 88, 0.8)', 'rgba(255, 69, 58, 0.8)'],
-                        borderColor: ['#30d158', '#ff453a'],
-                        borderWidth: 1,
-                        hoverOffset: 4
-                    }]
+      const ctxChart = document.getElementById("miGraficaFinanzas");
+      if (ctxChart) {
+        if (window.cyberChartInstancia) window.cyberChartInstancia.destroy();
+        window.cyberChartInstancia = new Chart(ctxChart, {
+          type: "doughnut",
+          data: {
+            labels: ["Ingresos Brutos", "Gastos/Pagos"],
+            datasets: [
+              {
+                data: [totalIngresosGrafica, totalEgresosGrafica],
+                backgroundColor: [
+                  "rgba(48, 209, 88, 0.8)",
+                  "rgba(255, 69, 58, 0.8)",
+                ],
+                borderColor: ["#30d158", "#ff453a"],
+                borderWidth: 1,
+                hoverOffset: 4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "right",
+                labels: {
+                  color: "#e5e5ea",
+                  font: { family: "Calibri", size: 12 },
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right', labels: { color: '#e5e5ea', font: { family: 'Calibri', size: 12 } } }
-                    }
-                }
-            });
-        }
+              },
+            },
+          },
+        });
+      }
     }, 100);
   }
   container.innerHTML = htmlBuffer;
@@ -6430,6 +6451,7 @@ document.addEventListener(
         toggleGarantiasPanel: "garantiasOverlay",
         togglePromoPanel: "promoOverlay",
         toggleRecordatoriosPanel: "recordatoriosOverlay",
+        abrirCalculadoraCombos: "comboCalcOverlay", // 🔥 ¡LLAVE REGISTRADA AQUÍ PARA DARLE PERMISO!
       };
 
       let panelAIgnorar = null;
@@ -6441,7 +6463,6 @@ document.addEventListener(
       }
 
       // Cerramos TODAS las ventanas emergentes excepto la que acabamos de tocar
-      // (Protegemos la ventana de Login y la de Cambio de Clave Obligatorio)
       document.querySelectorAll(".overlay-ios").forEach((panel) => {
         if (
           panel.id !== "loginOverlay" &&
@@ -6454,7 +6475,7 @@ document.addEventListener(
     }
   },
   true,
-); // El 'true' hace que el sistema limpie la pantalla ANTES de abrir la nueva ventana
+);
 
 // 2. Atajos de Teclado con protección anti-amontonamiento
 document.addEventListener("keydown", function (e) {
@@ -6494,4 +6515,309 @@ document.addEventListener("keydown", function (e) {
     toggleSearchAccountPanel();
   }
 });
+// =========================================================================
+// 🧮 CEREBRO DEL COTIZADOR AUTOMÁTICO DE COMBOS CYBERNET (CON BUSCADOR)
+// =========================================================================
 
+function abrirCalculadoraCombos() {
+  if (typeof haptic === "function") haptic();
+
+  // Desmarcar todos los checks, vaciar buscador y resetear interfaz
+  document
+    .querySelectorAll(".chk-cotizar-plat")
+    .forEach((cb) => (cb.checked = false));
+  document.getElementById("buscarPlataformaCotizador").value = "";
+  document.getElementById("calcMonths").value = "1";
+  document.getElementById("calcFidelidad").checked = false;
+
+  document.getElementById("calcBasePriceDisplay").value = "$0";
+  document.getElementById("calcSubtotal").innerText = "$0";
+  document.getElementById("calcDiscount").innerText = "-$0";
+  document.getElementById("rowCalcDescFiel").style.display = "none";
+  document.getElementById("calcTotal").innerText = "$0";
+
+  // Sincronizar el filtro para que oculte todo lo que no esté marcado al iniciar
+  filtrarPlataformasCotizador();
+
+  document.getElementById("comboCalcOverlay").classList.add("open");
+
+  // Auto-focus al buscador para agilizar
+  setTimeout(() => {
+    document.getElementById("buscarPlataformaCotizador").focus();
+  }, 120);
+}
+
+function cerrarCalculadoraCombos() {
+  if (typeof haptic === "function") haptic();
+  document.getElementById("comboCalcOverlay").classList.remove("open");
+}
+
+// 🔥 CONTROL MAESTRO: EXCLUSIVIDAD MUTUA DE LOS DOS DISNEY Y AUTO-LIMPIEZA 🔥
+window.controlarDisneyMutuo = function (checkbox) {
+  if (checkbox.checked) {
+    const tipo = checkbox.getAttribute("data-tipo");
+
+    // Exclusión mutua de Disney
+    if (tipo === "disneypre") {
+      const de = document.querySelector(
+        '.chk-cotizar-plat[data-tipo="disneyest"]',
+      );
+      if (de) {
+        de.checked = false;
+      }
+    } else if (tipo === "disneyest") {
+      const dp = document.querySelector(
+        '.chk-cotizar-plat[data-tipo="disneypre"]',
+      );
+      if (dp) {
+        dp.checked = false;
+      }
+    }
+
+    // Limpiar buscador al seleccionar (Igual que en ventas)
+    const buscador = document.getElementById("buscarPlataformaCotizador");
+    if (buscador && buscador.value !== "") {
+      buscador.value = "";
+      buscador.focus();
+
+      // Volvemos a filtrar para que la lista se cierre mágicamente
+      if (typeof filtrarPlataformasCotizador === "function") {
+        filtrarPlataformasCotizador();
+      }
+    }
+  }
+};
+
+// 🔥 BUSCADOR EN TIEMPO REAL COPIADO EXACTAMENTE DE LAS VENTAS 🔥
+window.filtrarPlataformasCotizador = function () {
+  const query = document
+    .getElementById("buscarPlataformaCotizador")
+    .value.toLowerCase()
+    .trim();
+  const filas = document.querySelectorAll(
+    "#contenedorPlataformasCotizador .row-cotizar-plat",
+  );
+
+  filas.forEach((fila) => {
+    const nombrePlat = fila.getAttribute("data-nombre");
+    const checkbox = fila.querySelector('input[type="checkbox"]');
+
+    if (query === "") {
+      // Si la barra está vacía, solo muestra lo que ya esté seleccionado
+      fila.style.display = checkbox.checked ? "block" : "none";
+    } else {
+      // Si está escribiendo, muestra si coincide con el buscador o si está marcado
+      if (nombrePlat.includes(query) || checkbox.checked) {
+        fila.style.display = "block";
+      } else {
+        fila.style.display = "none";
+      }
+    }
+  });
+};
+
+window.calcularPreciosSistemaCotizador = function () {
+  let tieneNetflix = false;
+  let tieneDisneyPremium = false;
+  let cantidadEstandar = 0;
+  let sumatoriaHerramientas = 0;
+  let tieneAmazon = false;
+
+  // 1. Escaneo profundo de plataformas seleccionadas
+  document.querySelectorAll(".chk-cotizar-plat").forEach((cb) => {
+    if (cb.checked) {
+      const tipo = cb.getAttribute("data-tipo");
+      if (tipo === "netflix") tieneNetflix = true;
+      else if (tipo === "disneypre") tieneDisneyPremium = true;
+      else if (tipo === "estandar" || tipo === "disneyest") {
+        cantidadEstandar++;
+        if (cb.value === "Amazon Prime") tieneAmazon = true;
+      } else if (tipo === "herramienta") {
+        sumatoriaHerramientas +=
+          parseFloat(cb.getAttribute("data-precio")) || 0;
+      }
+    }
+  });
+
+  let precioBaseUnMes = 0;
+
+  // 2. REGLAS AUTOMATIZADAS CYBERNET (+ $3.000 por pantalla extra)
+  if (tieneNetflix) {
+    if (tieneDisneyPremium) {
+      // 💎 COMBOS PREMIUM CON NETFLIX
+      if (cantidadEstandar === 0)
+        precioBaseUnMes = 25000; // Combo 4
+      else if (cantidadEstandar === 1)
+        precioBaseUnMes = 29000; // Combo 5
+      else if (cantidadEstandar === 2)
+        precioBaseUnMes = 32000; // Combo 6
+      else if (cantidadEstandar >= 3)
+        precioBaseUnMes = 35000 + (cantidadEstandar - 3) * 3000; // Combo 7 + Adicionales
+    } else {
+      // 🍿 COMBOS CLÁSICOS CON NETFLIX
+      if (cantidadEstandar === 0)
+        precioBaseUnMes = 14500; // Combo 0
+      else if (cantidadEstandar === 1)
+        precioBaseUnMes = 20000; // Combo 1
+      else if (cantidadEstandar === 2)
+        precioBaseUnMes = 24000; // Combo 2
+      else if (cantidadEstandar >= 3)
+        precioBaseUnMes = 27000 + (cantidadEstandar - 3) * 3000; // Combo 3 + Adicionales
+    }
+  } else {
+    // 🚫 COMBOS STREAMING SIN NETFLIX
+    if (tieneDisneyPremium) {
+      // 💎 COMBOS PREMIUM (Con Disney Premium - Sin Netflix)
+      if (cantidadEstandar === 0) precioBaseUnMes = 15000;
+      else if (cantidadEstandar === 1)
+        precioBaseUnMes = 20000; // Combo 4
+      else if (cantidadEstandar === 2)
+        precioBaseUnMes = 22000; // Combo 5
+      else if (cantidadEstandar === 3)
+        precioBaseUnMes = 24000; // Combo 6
+      else if (cantidadEstandar >= 4)
+        precioBaseUnMes = 24000 + (cantidadEstandar - 3) * 3000; // Mega VIP + Adicionales
+    } else {
+      // 🍿 COMBOS ECONÓMICOS (Sin Netflix - Sin Disney Premium)
+      if (cantidadEstandar === 0) {
+        precioBaseUnMes = 0;
+      } else if (cantidadEstandar === 1) {
+        precioBaseUnMes = tieneAmazon ? 10500 : 8500;
+      } else if (cantidadEstandar === 2) {
+        precioBaseUnMes = 13000; // Combo 1
+      } else if (cantidadEstandar === 3) {
+        precioBaseUnMes = 16000; // Combo 2
+      } else if (cantidadEstandar === 4) {
+        precioBaseUnMes = 18000; // Combo 3
+      } else if (cantidadEstandar >= 5) {
+        precioBaseUnMes = 18000 + (cantidadEstandar - 4) * 3000; // Paquete Familiar + Adicionales
+      }
+    }
+  }
+
+  // 3. Sumar herramientas independientes fijas (Canva, Spotify, etc.)
+  precioBaseUnMes += sumatoriaHerramientas;
+
+  // 4. Captura de meses y cálculo de descuentos quincenales/mensuales
+  const monthSelect = document.getElementById("calcMonths");
+  const meses = parseFloat(monthSelect.value) || 1;
+  const porcDesc =
+    parseFloat(
+      monthSelect.options[monthSelect.selectedIndex].getAttribute("data-desc"),
+    ) || 0;
+
+  // Operaciones contables base
+  const subtotal = precioBaseUnMes * meses;
+  const montoDescuento = subtotal * (porcDesc / 100);
+
+  // 5. CALCULAR DESCUENTO POR CLIENTE FIEL EN CASCADA
+  const esClienteFiel = document.getElementById("calcFidelidad").checked;
+  let descuentoFielTotal =
+    esClienteFiel && precioBaseUnMes > 0 ? 1000 * meses : 0;
+
+  // Control visual de la fila de fidelidad
+  if (descuentoFielTotal > 0) {
+    document.getElementById("rowCalcDescFiel").style.display = "flex";
+    document.getElementById("calcDiscountFiel").innerText =
+      "-$" + descuentoFielTotal.toLocaleString("es-CO");
+  } else {
+    document.getElementById("rowCalcDescFiel").style.display = "none";
+  }
+
+  let totalA_Cobrar = subtotal - montoDescuento - descuentoFielTotal;
+  if (totalA_Cobrar < 0) totalA_Cobrar = 0; // Blindaje contra valores negativos
+
+  // 6. Imprimir en los visores contables
+  document.getElementById("calcBasePriceDisplay").value =
+    "$" + precioBaseUnMes.toLocaleString("es-CO");
+  document.getElementById("calcSubtotal").innerText =
+    "$" + subtotal.toLocaleString("es-CO");
+  document.getElementById("calcDiscount").innerText =
+    "-$" + montoDescuento.toLocaleString("es-CO");
+  document.getElementById("calcTotal").innerText =
+    "$" + totalA_Cobrar.toLocaleString("es-CO");
+};
+
+function copiarCotizacionCombo(btn) {
+  if (typeof haptic === "function") haptic();
+
+  let plataformasSeleccionadas = [];
+  document.querySelectorAll(".chk-cotizar-plat").forEach((cb) => {
+    if (cb.checked) plataformasSeleccionadas.push(cb.value.toUpperCase());
+  });
+
+  if (plataformasSeleccionadas.length === 0) {
+    alert("Selecciona al menos una plataforma para armar el mensaje.");
+    return;
+  }
+
+  const meses = document.getElementById("calcMonths").value;
+  const porcDesc = document
+    .getElementById("calcMonths")
+    .options[
+      document.getElementById("calcMonths").selectedIndex
+    ].getAttribute("data-desc");
+  const esClienteFiel = document.getElementById("calcFidelidad").checked;
+
+  const subtotalText = document.getElementById("calcSubtotal").innerText;
+  const discountText = document.getElementById("calcDiscount").innerText;
+  const totalText = document.getElementById("calcTotal").innerText;
+
+  let listaPlatFormateada = plataformasSeleccionadas
+    .map((p) => `   • 📺 *${p}*`)
+    .join("\n");
+
+  // Cuerpo base del mensaje para WhatsApp
+  let mensajeVIP =
+    `💻 *¡TU COMBO STREAMING CYBERNET ESTÁ LISTO!* 🚀📺\n\n` +
+    `🔥 *Servicios Incluidos:*\n${listaPlatFormateada}\n\n` +
+    `🗓️ *Vigencia contratada:* ${meses} Mes(es) Garantizados\n`;
+
+  // Si tiene meses o fidelidad activa, desglosamos las pildoras de regalos
+  if (parseInt(meses) > 1 || esClienteFiel) {
+    mensajeVIP += `\n💵 Valor Comercial: ${subtotalText}\n`;
+
+    if (parseInt(meses) > 1) {
+      mensajeVIP += `🎁 *Descuento Especial (${porcDesc}%):* ${discountText}\n`;
+    }
+
+    // Inyectar texto persuasivo de Cliente Fiel
+    if (esClienteFiel) {
+      let descFielAcumulado = 1000 * parseInt(meses);
+      mensajeVIP += `✨ *Descuento Cliente Fiel:* -$${descFielAcumulado.toLocaleString("es-CO")} _(¡Por tu lealtad con la casa!)_\n`;
+    }
+
+    mensajeVIP +=
+      `───────────────────────\n` +
+      `💰 *TOTAL NETO A PAGAR: ${totalText}* 🔥✨\n`;
+  } else {
+    mensajeVIP +=
+      `───────────────────────\n` + `💰 *TOTAL A PAGAR: ${totalText}* 🔥🍿\n`;
+  }
+
+  if (plataformasSeleccionadas.includes("NETFLIX")) {
+    mensajeVIP += `\n🤖 *¡BENEFICIO AUTOMÁTICO!* Tu cuenta de Netflix incluye acceso a nuestra web para retirar códigos 24/7 al instante y sin filas en el chat. 🔓`;
+  }
+
+  mensajeVIP += `\n\n¿Te agrada la oferta para enviarte los medios de pago y activarte de inmediato? ⚡🍿`;
+
+  // Copiar al portapapeles
+  navigator.clipboard.writeText(mensajeVIP).then(() => {
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Ficha Copiada!`;
+    btn.style.background = "var(--ios-green)";
+
+    if (typeof CyberSonidos !== "undefined") CyberSonidos.play("exito");
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg><span>Cotización copiada con éxito</span></div>`,
+      );
+    }
+
+    setTimeout(() => {
+      btn.innerHTML = originalHTML;
+      btn.style.background = "";
+      cerrarCalculadoraCombos();
+    }, 1500);
+  });
+}
