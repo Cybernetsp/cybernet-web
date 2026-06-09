@@ -383,6 +383,50 @@
 
       <button
         class="ios-tab-btn"
+        onclick="abrirCalculadoraCombos()"
+        style="
+          border: none;
+          background: transparent;
+          padding: 0;
+          margin: 2px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 6px;
+          width: 68px;
+          cursor: pointer;
+        "
+      >
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#ff9f0a"
+          stroke-width="2.2"
+          style="filter: drop-shadow(0 2px 6px rgba(255, 159, 10, 0.4))"
+        >
+          <polygon
+            points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"
+            fill="#ff9f0a"
+            fill-opacity="0.15"
+          ></polygon>
+        </svg>
+        <span
+          style="
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: #ff9f0a;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+          "
+          >Precios</span
+        >
+      </button>
+
+      <button
+        class="ios-tab-btn"
         onclick="toggleCambioPanel()"
         style="
           border: none;
@@ -7098,9 +7142,898 @@
         </div>
       </div>
     </div>
+
+    <div class="overlay-ios" id="comboCalcOverlay">
+      <div
+        class="modal-ios"
+        style="max-width: 360px; padding: 24px; border-radius: 28px"
+      >
+        <div class="modal-header" style="margin-bottom: 16px">
+          <h3
+            class="modal-title"
+            style="
+              color: var(--ios-orange);
+              font-size: 1.15rem;
+              font-weight: 800;
+              letter-spacing: -0.3px;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polygon
+                points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"
+              ></polygon>
+            </svg>
+            Cotizador Inteligente
+          </h3>
+          <button class="btn-close-circle" onclick="cerrarCalculadoraCombos()">
+            ✕
+          </button>
+        </div>
+
+        <div
+          class="modal-body"
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 65vh;
+            overflow-y: auto;
+            padding-right: 4px;
+          "
+        >
+          <div>
+            <input
+              type="text"
+              id="buscarPlataformaCotizador"
+              class="input-ios"
+              placeholder="🔍 Buscar plataforma para cotizar..."
+              oninput="filtrarPlataformasCotizador()"
+              style="margin-bottom: 0; border-radius: 12px; padding: 12px 16px"
+            />
+          </div>
+
+          <div>
+            <div
+              id="contenedorPlataformasCotizador"
+              style="
+                background: rgba(0, 0, 0, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 16px;
+                display: flex;
+                flex-direction: column;
+                max-height: 180px;
+                overflow-y: auto;
+              "
+            >
+              <div
+                class="row-cotizar-plat"
+                data-nombre="netflix premium"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span
+                    style="font-size: 0.9rem; font-weight: 600; color: #e50914"
+                    >Netflix Premium</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="NETFLIX"
+                    data-tipo="netflix"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="disney+ premium"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span
+                    style="font-size: 0.9rem; font-weight: 600; color: #00bfff"
+                    >Disney+ Premium</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="DISNEY-PREMIUM"
+                    data-tipo="disneypre"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="amazon prime video"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span style="font-size: 0.9rem; color: var(--text-primary)"
+                    >Amazon Prime</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Amazon Prime"
+                    data-tipo="estandar"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="disney estandar"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span style="font-size: 0.9rem; color: var(--text-primary)"
+                    >Disney Estándar</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Disney Estándar"
+                    data-tipo="disneyest"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="max hbo max hbo"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span style="font-size: 0.9rem; color: var(--text-primary)"
+                    >Max (HBO)</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Max"
+                    data-tipo="estandar"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="paramount+"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span style="font-size: 0.9rem; color: var(--text-primary)"
+                    >Paramount+</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Paramount+"
+                    data-tipo="estandar"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="vix vix+"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span style="font-size: 0.9rem; color: var(--text-primary)"
+                    >Vix</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Vix"
+                    data-tipo="estandar"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="plex"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span style="font-size: 0.9rem; color: var(--text-primary)"
+                    >Plex</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Plex"
+                    data-tipo="estandar"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="crunchyroll anime"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span style="font-size: 0.9rem; color: var(--text-primary)"
+                    >Crunchyroll</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Crunchyroll"
+                    data-tipo="estandar"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="apple tv apple"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span style="font-size: 0.9rem; color: var(--text-primary)"
+                    >Apple TV</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Apple TV"
+                    data-tipo="estandar"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="universal+ universal"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span style="font-size: 0.9rem; color: var(--text-primary)"
+                    >Universal+</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Universal+"
+                    data-tipo="estandar"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+
+              <div
+                class="row-cotizar-plat"
+                data-nombre="canva pro diseno"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span
+                    style="font-size: 0.9rem; font-weight: 600; color: #30d158"
+                    >Canva Pro ($20k)</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Canva Pro"
+                    data-tipo="herramienta"
+                    data-precio="20000"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+              <div
+                class="row-cotizar-plat"
+                data-nombre="metegol futbol"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span
+                    style="font-size: 0.9rem; font-weight: 600; color: #30d158"
+                    >Metegol ($15k)</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Metegol"
+                    data-tipo="herramienta"
+                    data-precio="15000"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+              <div
+                class="row-cotizar-plat"
+                data-nombre="spotify musica"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span
+                    style="font-size: 0.9rem; font-weight: 600; color: #30d158"
+                    >Spotify ($14k)</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Spotify"
+                    data-tipo="herramienta"
+                    data-precio="14000"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+              <div
+                class="row-cotizar-plat"
+                data-nombre="youtube premium"
+                style="
+                  display: none;
+                  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span
+                    style="font-size: 0.9rem; font-weight: 600; color: #30d158"
+                    >YouTube Premium ($14k)</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="YouTube Premium"
+                    data-tipo="herramienta"
+                    data-precio="14000"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+              <div
+                class="row-cotizar-plat"
+                data-nombre="deezer musica"
+                style="display: none"
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  <span
+                    style="font-size: 0.9rem; font-weight: 600; color: #30d158"
+                    >Deezer ($12k)</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="chk-cotizar-plat"
+                    value="Deezer"
+                    data-tipo="herramienta"
+                    data-precio="12000"
+                    onchange="
+                      controlarDisneyMutuo(this);
+                      calcularPreciosSistemaCotizador();
+                    "
+                    style="
+                      accent-color: var(--ios-blue);
+                      width: 18px;
+                      height: 18px;
+                    "
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center">
+            <div style="flex: 1.2">
+              <label
+                style="
+                  font-size: 0.7rem;
+                  color: var(--text-secondary);
+                  font-weight: 800;
+                  text-transform: uppercase;
+                "
+                >TIEMPO</label
+              >
+              <select
+                id="calcMonths"
+                class="input-ios"
+                onchange="calcularPreciosSistemaCotizador()"
+                style="
+                  font-weight: bold;
+                  color: var(--ios-orange);
+                  margin-bottom: 0;
+                  width: 100%;
+                "
+              >
+                <option value="1" data-desc="0">1 Mes</option>
+                <option value="2" data-desc="15">2 Meses</option>
+                <option value="3" data-desc="20">3 Meses</option>
+                <option value="4" data-desc="25">4 Meses</option>
+                <option value="5" data-desc="30">5 Meses</option>
+              </select>
+            </div>
+            <div style="flex: 0.8; text-align: right">
+              <label
+                style="
+                  font-size: 0.7rem;
+                  color: var(--text-secondary);
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 6px;
+                "
+                >Base 1M</label
+              >
+              <input
+                type="text"
+                id="calcBasePriceDisplay"
+                style="
+                  width: 100%;
+                  background: transparent;
+                  border: none;
+                  color: var(--ios-blue);
+                  font-size: 1.1rem;
+                  font-weight: 800;
+                  font-family: monospace;
+                  text-align: right;
+                  padding: 4px 0;
+                "
+                value="$0"
+                disabled
+              />
+            </div>
+          </div>
+
+          <div
+            style="
+              background: rgba(191, 90, 242, 0.04);
+              border: 1px dashed rgba(191, 90, 242, 0.25);
+              padding: 10px 12px;
+              border-radius: 14px;
+            "
+          >
+            <label
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                cursor: pointer;
+                user-select: none;
+                width: 100%;
+              "
+            >
+              <span
+                style="font-size: 0.85rem; font-weight: bold; color: #bf5af2"
+                >💎 Cliente Fiel</span
+              >
+              <input
+                type="checkbox"
+                id="calcFidelidad"
+                onchange="calcularPreciosSistemaCotizador()"
+                style="accent-color: #bf5af2; width: 16px; height: 16px"
+              />
+            </label>
+          </div>
+
+          <div
+            style="
+              background: rgba(0, 0, 0, 0.2);
+              padding: 12px;
+              border-radius: 16px;
+              border: 1px dashed rgba(255, 255, 255, 0.1);
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            "
+          >
+            <div
+              class="flex-row-between"
+              style="font-size: 0.8rem; color: var(--text-secondary)"
+            >
+              <span>Subtotal normal:</span>
+              <span id="calcSubtotal" style="font-family: monospace">$0</span>
+            </div>
+            <div
+              class="flex-row-between"
+              style="font-size: 0.8rem; color: var(--ios-orange)"
+            >
+              <span>Descuento Combo:</span>
+              <span
+                id="calcDiscount"
+                style="font-family: monospace; font-weight: bold"
+                >-$0</span
+              >
+            </div>
+            <div
+              class="flex-row-between"
+              id="rowCalcDescFiel"
+              style="display: none; font-size: 0.8rem; color: #bf5af2"
+            >
+              <span>Descuento Fidelidad:</span>
+              <span
+                id="calcDiscountFiel"
+                style="font-family: monospace; font-weight: bold"
+                >-$0</span
+              >
+            </div>
+            <div
+              style="
+                border-top: 1px dashed rgba(255, 255, 255, 0.08);
+                margin: 4px 0 2px 0;
+              "
+            ></div>
+            <div
+              class="flex-row-between"
+              style="
+                font-size: 1.05rem;
+                color: var(--ios-green);
+                font-weight: 900;
+              "
+            >
+              <span>TOTAL COMBOS:</span>
+              <span id="calcTotal" style="font-family: monospace">$0</span>
+            </div>
+          </div>
+
+          <button
+            class="btn-ios btn-success w-100"
+            style="
+              padding: 14px;
+              font-weight: 800;
+              font-size: 0.95rem;
+              border-radius: 50px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 8px;
+              margin-bottom: 0;
+            "
+            onclick="copiarCotizacionCombo(this)"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path
+                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+              ></path>
+            </svg>
+            Copiar Mensaje Comercial
+          </button>
+        </div>
+      </div>
+    </div>
     <!-- Motor de Gráficas Profesionales -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <script src="logica.js"></script>
   </body>
 </html>
