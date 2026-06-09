@@ -932,7 +932,8 @@ function filtrarPlataformasVenta() {
 }
 
 function comprobarDesbloqueoVentaPill(checkbox, id) {
-  haptic();
+  if (typeof haptic === "function") haptic();
+
   const elPantallas = document.getElementById(`pantallas_${id}`);
   const elMeses = document.getElementById(`meses_${id}`);
   const elBono = document.getElementById(`bono_${id}`);
@@ -941,15 +942,16 @@ function comprobarDesbloqueoVentaPill(checkbox, id) {
   const badge = document.getElementById(`badge_status_${id}`);
 
   if (checkbox.checked) {
+    // Activar los campos internos de esta plataforma
     if (elPantallas) elPantallas.disabled = false;
     if (elMeses) {
       elMeses.disabled = false;
-      // 🔥 Copia automáticamente los meses que seleccionaste en la primera plataforma
       elMeses.value = window.ultimoMesesSeleccionado || "1";
     }
     if (elBono) elBono.disabled = false;
     if (elTipo) elTipo.disabled = false;
 
+    // Estilos visuales de "seleccionado"
     if (card) {
       card.style.background = "rgba(255, 255, 255, 0.06)";
       card.style.borderColor = "rgba(10, 132, 255, 0.35)";
@@ -958,7 +960,16 @@ function comprobarDesbloqueoVentaPill(checkbox, id) {
       badge.style.background = "var(--ios-blue)";
       badge.style.boxShadow = "0 0 8px var(--ios-blue)";
     }
+
+    // 🔥 NUEVA LÓGICA DE LIMPIEZA AUTOMÁTICA 🔥
+    // Borramos solo la barra de búsqueda de plataformas y devolvemos el cursor ahí
+    const buscadorPlat = document.getElementById("buscarPlataformaVenta");
+    if (buscadorPlat && buscadorPlat.value !== "") {
+      buscadorPlat.value = "";
+      buscadorPlat.focus(); // Deja el teclado listo para escribir la siguiente
+    }
   } else {
+    // Si la desmarcamos, apagamos los controles
     if (elPantallas) {
       elPantallas.disabled = true;
       elPantallas.value = "1";
@@ -976,6 +987,7 @@ function comprobarDesbloqueoVentaPill(checkbox, id) {
       elTipo.value = "Nueva";
     }
 
+    // Quitamos los estilos de "seleccionado"
     if (card) {
       card.style.background = "var(--glass-bg)";
       card.style.borderColor = "var(--glass-border)";
@@ -985,12 +997,13 @@ function comprobarDesbloqueoVentaPill(checkbox, id) {
       badge.style.boxShadow = "none";
     }
 
+    // Ocultar campo de renovación si estaba abierto
     const wrapperReno = document.getElementById(`wrapper_correo_reno_${id}`);
     if (wrapperReno) wrapperReno.style.display = "none";
-
-    const query = document.getElementById("buscarPlataformaVenta").value.trim();
-    if (query === "") card.style.display = "none";
   }
+
+  // Refrescar la lista visual de plataformas al final (oculta las no marcadas si el buscador está vacío)
+  filtrarPlataformasVenta();
 }
 
 function ajustarInterfazPorMetodoPago() {
@@ -2463,6 +2476,34 @@ function esMismaQuincena(fechaStr) {
   }
 }
 
+// =========================================================================
+// 🎛️ FUNCIONES DE CONTROL DE CALENDARIO (Añadir en cualquier parte)
+// =========================================================================
+window.filtroMesHoras = new Date().getMonth();
+window.filtroAnioHoras = new Date().getFullYear();
+window.filtroQuincenaHoras = new Date().getDate() <= 15 ? 1 : 2;
+
+window.cambiarMesHoras = function (mesIndex) {
+  if (typeof haptic === "function") haptic();
+  window.filtroMesHoras = parseInt(mesIndex, 10);
+  let query = document.getElementById("searchShiftsInput")
+    ? document.getElementById("searchShiftsInput").value.toLowerCase()
+    : "";
+  renderizarHorasEnPantalla(query);
+};
+
+window.cambiarQuincenaHoras = function (quincena) {
+  if (typeof haptic === "function") haptic();
+  window.filtroQuincenaHoras = quincena;
+  let query = document.getElementById("searchShiftsInput")
+    ? document.getElementById("searchShiftsInput").value.toLowerCase()
+    : "";
+  renderizarHorasEnPantalla(query);
+};
+
+// =========================================================================
+// 📅 RENDERIZADOR DE CALENDARIO Y TURNOS (Reemplazar la anterior)
+// =========================================================================
 function renderizarHorasEnPantalla(filtroBusqueda = "") {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -2480,18 +2521,17 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     ANGELICA: "3015156037",
   };
 
-  // 📅 Matemáticas de la Quincena Actual
-  const hoy = new Date();
-  const dMes = hoy.getMonth();
-  const dAnio = hoy.getFullYear();
-  const esPrimeraQuincena = hoy.getDate() <= 15;
+  // 📅 VARIABLES DE TIEMPO CONTROLADAS POR LOS BOTONES
+  const dMes = window.filtroMesHoras;
+  const dAnio = window.filtroAnioHoras;
+  const esPrimeraQuincena = window.filtroQuincenaHoras === 1;
 
   const inicioDia = esPrimeraQuincena ? 1 : 16;
   const finDia = esPrimeraQuincena
     ? 15
     : new Date(dAnio, dMes + 1, 0).getDate();
 
-  const mesesAbrev = [
+  const mesesNombres = [
     "Enero",
     "Febrero",
     "Marzo",
@@ -2505,9 +2545,28 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     "Noviembre",
     "Diciembre",
   ];
+  const mesesAbrev = [
+    "Ene",
+    "Feb",
+    "Mar",
+    "Abr",
+    "May",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dic",
+  ];
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-  // 🗃️ Agrupador de datos: datosAgrupados[VENDEDOR][DIA] = info
+  // 🚫 LEER TURNOS TACHADOS VISUALMENTE DESDE LA MEMORIA DEL NAVEGADOR
+  let tachadosMemoria = JSON.parse(
+    localStorage.getItem("cyber_turnos_tachados") || "{}",
+  );
+
+  // 🗃️ Agrupador de datos
   let datosAgrupados = {};
   let vendedoresSet = new Set();
 
@@ -2515,7 +2574,7 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     let item = window.currentHorasStock[index];
     let d = parseDate(item.fecha);
 
-    // Filtros de fecha (solo procesar la quincena en curso)
+    // 🔥 AHORA COMPARA CON EL MES Y AÑO ELEGIDOS EN EL MENÚ
     if (
       !d ||
       isNaN(d.getTime()) ||
@@ -2533,10 +2592,8 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
       .trim();
     if (vendedorReal === "PABLO") vendedorReal = "MANUP";
 
-    // Filtros de usuario (si no es administrador, solo ve lo suyo)
     if (!isCamilo && vendedorReal !== userFinal) continue;
 
-    // Filtro de caja de búsqueda
     if (
       filtroBusqueda !== "" &&
       !vendedorReal.includes(filtroBusqueda.toUpperCase()) &&
@@ -2557,7 +2614,6 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
       };
     }
 
-    // Calcular Segundos
     let timeParts = String(item.tiempo || "").split(":");
     let totalSec = 0;
     let esTiempoValido = false;
@@ -2576,7 +2632,6 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
       }
     }
 
-    // Calcular Pago Fijo de ese turno
     let pagoStr = String(item.pagoTurno || "0");
     let strLimpioPago = pagoStr
       .replace(/\$|\s/g, "")
@@ -2595,6 +2650,33 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
 
   let vendedoresArray = Array.from(vendedoresSet).sort();
 
+  // 🎛️ GENERADOR DE MENÚ DE CONTROLES DE FECHA
+  let opcionesMes = "";
+  mesesNombres.forEach((m, idx) => {
+    let selected = idx === dMes ? "selected" : "";
+    opcionesMes += `<option value="${idx}" ${selected}>${m} ${dAnio}</option>`;
+  });
+
+  let btnQ1Style = esPrimeraQuincena
+    ? "background: var(--ios-blue); color: white; border: 1px solid var(--ios-blue);"
+    : "background: rgba(10, 132, 255, 0.1); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.3);";
+
+  let btnQ2Style = !esPrimeraQuincena
+    ? "background: var(--ios-blue); color: white; border: 1px solid var(--ios-blue);"
+    : "background: rgba(10, 132, 255, 0.1); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.3);";
+
+  let htmlControles = `
+    <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center;">
+      <select class="input-ios" style="margin: 0; flex: 1; min-width: 140px; padding: 12px 16px; border-radius: 14px; font-weight: 800; font-size: 0.95rem; color: var(--ios-blue);" onchange="cambiarMesHoras(this.value)">
+        ${opcionesMes}
+      </select>
+      <div style="display: flex; gap: 8px; flex: 2; min-width: 220px;">
+        <button class="btn-ios" style="flex: 1; padding: 12px; border-radius: 14px; font-size: 0.85rem; font-weight: 800; transition: all 0.2s; ${btnQ1Style}" onclick="cambiarQuincenaHoras(1)">Quincena 1 (1 - 15)</button>
+        <button class="btn-ios" style="flex: 1; padding: 12px; border-radius: 14px; font-size: 0.85rem; font-weight: 800; transition: all 0.2s; ${btnQ2Style}" onclick="cambiarQuincenaHoras(2)">Quincena 2 (16 - Fin)</button>
+      </div>
+    </div>
+  `;
+
   // Validaciones de pantalla vacía
   if (vendedoresArray.length === 0 && filtroBusqueda === "") {
     if (!isCamilo && userFinal !== "") {
@@ -2602,22 +2684,25 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
       datosAgrupados[userFinal] = {};
     } else {
       container.innerHTML =
-        '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">No hay turnos registrados en esta quincena.</div>';
+        htmlControles +
+        '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">No hay turnos registrados en este periodo.</div>';
       return;
     }
   } else if (vendedoresArray.length === 0) {
     container.innerHTML =
+      htmlControles +
       '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">No hay turnos que coincidan con la búsqueda.</div>';
     return;
   }
 
-  // Título Dinámico
   let tituloPanel = isCamilo
-    ? `Calendario Global (${inicioDia} al ${finDia} de ${mesesAbrev[dMes]})`
-    : `Tu Calendario Actual (${inicioDia} al ${finDia} de ${mesesAbrev[dMes]})`;
+    ? `Reporte Global (${inicioDia} al ${finDia} de ${mesesAbrev[dMes]})`
+    : `Mi Reporte (${inicioDia} al ${finDia} de ${mesesAbrev[dMes]})`;
   if (filtroBusqueda !== "") tituloPanel = "Resultados de Búsqueda";
 
-  let html = `<h4 style="text-align:center; color:var(--ios-blue); font-size:1.15rem; margin-bottom:15px; font-weight: 800; letter-spacing: -0.3px;">${tituloPanel}</h4>`;
+  let html =
+    htmlControles +
+    `<h4 style="text-align:center; color:var(--text-primary); font-size:1.05rem; margin-bottom:15px; font-weight: 800; letter-spacing: -0.3px;">${tituloPanel}</h4>`;
 
   // 🏗️ CONSTRUCCIÓN DEL LAYOUT TIPO CALENDARIO POR VENDEDOR
   for (let v = 0; v < vendedoresArray.length; v++) {
@@ -2627,11 +2712,9 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     let totalPagoVendedor = 0;
     let filasVendedorGlobal = [];
 
-    // Obtener el día de la semana del primer día de la quincena (0 = Dom, 1 = Lun...)
     let primerDiaFecha = new Date(dAnio, dMes, inicioDia);
     let offsetDias = primerDiaFecha.getDay();
 
-    // Cabecera de los días de la semana
     let celdasHtml = diasSemana
       .map(
         (d) =>
@@ -2639,23 +2722,28 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
       )
       .join("");
 
-    // Rellenar espacios en blanco al inicio del calendario
     for (let o = 0; o < offsetDias; o++) {
       celdasHtml += `<div style="background: transparent;"></div>`;
     }
 
-    // Generar los cuadros de cada día
     for (let dia = inicioDia; dia <= finDia; dia++) {
       let worked = dataVendedor ? dataVendedor[dia] : null;
       let timeStr = "";
       let btnAcciones = "";
       let hasWorked = false;
 
-      // Si hay horas en ese día, las suma y activa el cuadro
+      // 🚫 Lógica para verificar si está tachado
+      let llaveTachado = `${vendedor}_${dia}_${dMes}_${dAnio}`;
+      let estaTachado = tachadosMemoria[llaveTachado] === true;
+
       if (worked && worked.totalSeconds > 0) {
         hasWorked = true;
-        totalSegundosVendedor += worked.totalSeconds;
-        totalPagoVendedor += worked.totalPago; // 💰 Sumamos el pago de este día al total
+
+        // 💰 SÓLO SUMAR SI NO ESTÁ TACHADO
+        if (!estaTachado) {
+          totalSegundosVendedor += worked.totalSeconds;
+          totalPagoVendedor += worked.totalPago;
+        }
 
         let h = Math.floor(worked.totalSeconds / 3600);
         let m = Math.floor((worked.totalSeconds % 3600) / 60);
@@ -2664,7 +2752,8 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
 
         let filasStrInd = worked.filasAsociadas.join(",");
         filasVendedorGlobal.push(...worked.filasAsociadas);
-        let puedeEditar = isCamilo || vendedor === userFinal;
+
+        let puedeEditar = isCamilo;
 
         if (puedeEditar) {
           btnAcciones += `
@@ -2674,32 +2763,57 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
         }
 
         if (isCamilo) {
+          // Botón TACHAR VISUAL
+          let colorTachar = estaTachado
+            ? "var(--ios-green)"
+            : "var(--ios-orange)";
+          let iconTachar = estaTachado
+            ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+            : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M2 12h20M12 2v20"></path><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>`;
+
+          btnAcciones += `
+            <button style="background: rgba(255, 159, 10, 0.15); border: none; color: ${colorTachar}; cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s;" onclick="toggleTacharTurno('${llaveTachado}')" title="${estaTachado ? "Restaurar Pago" : "Tachar y Restar"}">
+              ${iconTachar}
+            </button>`;
+
+          // Botón Borrar Físicamente
           let targetInd = `${vendedor} el ${dia} de ${mesesAbrev[dMes]}`;
           btnAcciones += `
-            <button style="background: rgba(255, 69, 58, 0.15); border: none; color: var(--ios-red); cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s;" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Borrar este día">
+            <button style="background: rgba(255, 69, 58, 0.15); border: none; color: var(--ios-red); cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s;" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Borrar este día de la base de datos">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
             </button>`;
         }
       }
 
-      // Estilos condicionales de la celda
       let bgCell = hasWorked ? "rgba(48, 209, 88, 0.08)" : "rgba(0,0,0,0.2)";
       let borderCell = hasWorked
         ? "1px solid rgba(48, 209, 88, 0.3)"
         : "1px solid rgba(255,255,255,0.05)";
+      let opacityCell = "1";
+
+      if (estaTachado) {
+        bgCell = "rgba(255, 159, 10, 0.08)";
+        borderCell = "1px solid rgba(255, 159, 10, 0.3)";
+        opacityCell = "0.5";
+      }
+
       let numColor = hasWorked
         ? "var(--text-primary)"
         : "var(--text-secondary)";
+      let decoracionTexto = estaTachado
+        ? "text-decoration: line-through; opacity: 0.6;"
+        : "";
 
       let contenidoCentral = hasWorked
         ? `
-        <div style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: var(--ios-green); margin-top: 6px;">${timeStr}</div>
+        <div style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: var(--ios-green); margin-top: 6px; ${decoracionTexto}">${timeStr}</div>
+        <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-primary); margin-top: 2px; ${decoracionTexto}">$${Math.round(worked.totalPago).toLocaleString("es-CO")}</div>
         <div style="display: flex; gap: 4px; justify-content: center; width: 100%; margin-top: 6px;">${btnAcciones}</div>
       `
         : ``;
 
       celdasHtml += `
-        <div style="position: relative; background: ${bgCell}; border: ${borderCell}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70px;">
+        <div style="position: relative; background: ${bgCell}; border: ${borderCell}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70px; opacity: ${opacityCell}; transition: all 0.3s ease;">
             <span style="position: absolute; top: 4px; left: 6px; font-size: 0.75rem; font-weight: 800; color: ${numColor};">${dia}</span>
             ${contenidoCentral}
         </div>
@@ -2711,7 +2825,7 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     let totalFmt =
       String(tH).padStart(2, "0") + "h " + String(tM).padStart(2, "0") + "m";
     let pagoTotalFmt =
-      "$" + Math.round(totalPagoVendedor).toLocaleString("es-CO"); // Formato de moneda
+      "$" + Math.round(totalPagoVendedor).toLocaleString("es-CO");
 
     let btnLiquidarTodo = "";
     if (isCamilo && filasVendedorGlobal.length > 0) {
@@ -2719,17 +2833,14 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
         <div style="margin-top:20px;">
           <button class="btn-ios btn-success w-100" style="display:flex; justify-content:center; align-items:center; gap:8px; border-radius: 16px; padding: 14px; font-weight: 800;" onclick="ejecutarLiquidacion('${vendedor}', '${filasVendedorGlobal.join(",")}')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path></svg>
-            LIQUIDAR CALENDARIO DE ${vendedor}
+            LIQUIDAR PERIODO EN PANTALLA DE ${vendedor}
           </button>
         </div>`;
     }
 
-    // Identificar Nequi del empleado
     let nequiNum = numerosNequi[vendedor];
-    let nequiHtml = "";
-
-    if (nequiNum) {
-      nequiHtml = `
+    let nequiHtml = nequiNum
+      ? `
         <div style="display:flex; align-items:center; gap:6px; margin-top: 4px;">
            <span style="background:rgba(224, 0, 150, 0.15); color:#ff37a6; padding:2px 6px; border-radius:6px; font-size:0.65rem; font-weight:800; border: 1px solid rgba(224, 0, 150, 0.3);">NEQUI</span>
            <span style="color:var(--text-primary); font-size:0.85rem; font-family:monospace; font-weight:bold; letter-spacing: 0.5px;">${nequiNum}</span>
@@ -2737,16 +2848,11 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
            </button>
         </div>
-      `;
-    } else {
-      nequiHtml = `<span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px;">Sin Nequi Registrado</span>`;
-    }
+      `
+      : `<span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px;">Sin Nequi Registrado</span>`;
 
-    // Ensamble de la tarjeta maestra del vendedor
     html += `
       <div class="card-ios" style="padding: 24px; margin-bottom: 24px; border-radius: 28px; border: 1px solid rgba(255,255,255,0.08);">
-        
-        <!-- Encabezado del Usuario -->
         <div class="flex-row-between" style="padding-bottom: 16px; border-bottom: 1px dashed rgba(255,255,255,0.15); margin-bottom: 16px;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <div style="background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); width: 42px; height: 42px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 800; font-size: 1.2rem; border: 1px solid rgba(10, 132, 255, 0.2);">
@@ -2761,11 +2867,10 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
             <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">Total Horas</span><br>
             <span style="font-weight: 800; color: var(--ios-blue); font-size: 1.3rem;">${totalFmt}</span><br>
             <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; margin-top: 6px; display: inline-block;">Total a Pagar</span><br>
-            <span style="font-weight: 800; color: var(--ios-green); font-size: 1.25rem;">${pagoTotalFmt}</span>
+            <span style="font-weight: 800; color: var(--ios-green); font-size: 1.25rem; transition: all 0.3s ease;">${pagoTotalFmt}</span>
           </div>
         </div>
         
-        <!-- Cuadrícula del Calendario -->
         <div style="width: 100%; overflow-x: auto; padding-bottom: 8px;">
             <div style="min-width: 420px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
                 ${celdasHtml}
@@ -2779,6 +2884,36 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
 
   container.innerHTML = html;
 }
+// =========================================================================
+// 🚫 FUNCIÓN VISUAL: TACHAR TURNO Y RESTARLO DEL TOTAL (MEMORIA LOCAL)
+// =========================================================================
+window.toggleTacharTurno = function (llave) {
+  if (typeof haptic === "function") haptic();
+
+  // Leer el historial de tachados del navegador
+  let tachadosMemoria = JSON.parse(
+    localStorage.getItem("cyber_turnos_tachados") || "{}",
+  );
+
+  // Alternar estado
+  if (tachadosMemoria[llave]) {
+    delete tachadosMemoria[llave]; // Restaurar
+  } else {
+    tachadosMemoria[llave] = true; // Tachar
+  }
+
+  // Guardar cambios
+  localStorage.setItem(
+    "cyber_turnos_tachados",
+    JSON.stringify(tachadosMemoria),
+  );
+
+  // Refrescar la pantalla inmediatamente (manteniendo la búsqueda si hay una)
+  let query = document.getElementById("searchShiftsInput")
+    ? document.getElementById("searchShiftsInput").value.toLowerCase()
+    : "";
+  renderizarHorasEnPantalla(query);
+};
 window.ejecutarLiquidacion = function (nombreObjetivo, filasStr) {
   if (!filasStr) return;
   let count = filasStr.split(",").length;
@@ -4259,16 +4394,23 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // =========================================================================
-// 📊 LÓGICA FRONTEND: REGISTRO DE VENTAS (LIBRE) Y BUSCADOR AVANZADO
+// 📊 LÓGICA FRONTEND: REGISTRO DE VENTAS Y BUSCADOR AVANZADO (CON MESES)
 // =========================================================================
 
 function abrirModalRegistroVentas() {
   if (typeof haptic === "function") haptic();
 
   document.getElementById("modalRegistroVentas").classList.add("open");
-  document.getElementById("buscadorRegistroVentas").value = ""; // Limpiar buscador
-  const tbody = document.getElementById("tablaRegistroVentasBody");
+  document.getElementById("buscadorRegistroVentas").value = "";
 
+  // 📅 Auto-seleccionar el mes actual al abrir la ventana
+  const mesSelect = document.getElementById("mesRegistroVentas");
+  if (mesSelect) {
+    let mesActual = String(new Date().getMonth() + 1).padStart(2, "0");
+    mesSelect.value = mesActual;
+  }
+
+  const tbody = document.getElementById("tablaRegistroVentasBody");
   tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: var(--text-secondary);">Cargando registros de ventas... <svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:bottom; margin-left:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg></td></tr>`;
 
   const cbName = "cb_ventas_" + Date.now();
@@ -4299,18 +4441,19 @@ function abrirModalRegistroVentas() {
         let banco = row[5] || "";
         let tipo = row[6] || "";
 
+        // Insertamos atributos data-fecha ocultos para facilitar el filtro por mes
         rowsHtml += `
-                          <tr class="fila-registro-venta" style="border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.02)'" onmouseout="this.style.background='transparent'">
-                              <td class="col-fecha" style="padding: 10px 8px; color: var(--text-secondary);">${fecha}</td>
-                              <td style="padding: 10px 8px; color: var(--text-secondary);">${hora}</td>
-                              <td class="col-nombre" style="padding: 10px 8px; color: var(--text-primary);">${nombre}</td>
-                              <td class="col-numero" style="padding: 10px 8px; color: var(--text-primary);">${numero}</td>
-                              <td style="padding: 10px 8px; color: var(--ios-blue);">${desc}</td>
-                              <td style="padding: 10px 8px; color: var(--ios-green);">${valor}</td>
-                              <td style="padding: 10px 8px; color: var(--text-primary);">${banco}</td>
-                              <td style="padding: 10px 8px; color: var(--text-secondary);">${tipo}</td>
-                          </tr>
-                      `;
+            <tr class="fila-registro-venta" data-fecha-pura="${fecha}" style="border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.02)'" onmouseout="this.style.background='transparent'">
+                <td class="col-fecha" style="padding: 10px 8px; color: var(--text-secondary);">${fecha}</td>
+                <td style="padding: 10px 8px; color: var(--text-secondary);">${hora}</td>
+                <td class="col-nombre" style="padding: 10px 8px; color: var(--text-primary); font-weight: 600;">${nombre}</td>
+                <td class="col-numero" style="padding: 10px 8px; color: var(--text-primary); font-family: monospace;">${numero}</td>
+                <td style="padding: 10px 8px; color: var(--ios-blue); font-weight: 600;">${desc}</td>
+                <td style="padding: 10px 8px; color: var(--ios-green); font-family: monospace; font-weight: 800;">${valor}</td>
+                <td style="padding: 10px 8px; color: var(--text-primary);">${banco}</td>
+                <td style="padding: 10px 8px; color: var(--text-secondary); font-size: 0.8rem;">${tipo}</td>
+            </tr>
+        `;
       });
 
       if (res.data.length === 0) {
@@ -4318,6 +4461,9 @@ function abrirModalRegistroVentas() {
       }
 
       tbody.innerHTML = rowsHtml;
+
+      // 🔥 Inmediatamente después de pintar la tabla, aplicamos el filtro del mes actual
+      filtrarRegistroVentas();
     } else {
       tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color:var(--ios-red);">❌ Error: ${res ? res.message : "Fallo de conexión."}</td></tr>`;
     }
@@ -4329,29 +4475,62 @@ function abrirModalRegistroVentas() {
   document.body.appendChild(script);
 }
 
-// 🔥 FUNCIÓN DEL BUSCADOR EN TIEMPO REAL (POR NOMBRE, NÚMERO O FECHA) 🔥
+// 🔥 FUNCIÓN DEL BUSCADOR EN TIEMPO REAL (POR MES, NOMBRE, NÚMERO O FECHA) 🔥
 function filtrarRegistroVentas() {
   const query = document
     .getElementById("buscadorRegistroVentas")
     .value.toLowerCase()
     .trim();
+  const mesFiltro = document.getElementById("mesRegistroVentas").value; // ej: "06", "TODOS"
   const filas = document.querySelectorAll(".fila-registro-venta");
+  const tbody = document.getElementById("tablaRegistroVentasBody");
+
+  let filasMostradas = 0;
 
   filas.forEach((fila) => {
-    const fecha = fila.querySelector(".col-fecha").innerText.toLowerCase();
+    // Obtenemos la fecha limpia del atributo oculto que creamos (ej: 09/06/2026)
+    const fechaLimpia = fila.getAttribute("data-fecha-pura") || "";
     const nombre = fila.querySelector(".col-nombre").innerText.toLowerCase();
     const numero = fila.querySelector(".col-numero").innerText.toLowerCase();
 
-    if (
+    // Extraemos el mes de la fecha (posición 1 del split por "/")
+    let mesFila = "";
+    let partesFecha = fechaLimpia.split("/");
+    if (partesFecha.length >= 2) {
+      mesFila = partesFecha[1]; // "06"
+    }
+
+    // 1. Verificamos si coincide con el mes (o si está en "TODOS")
+    let coincideMes = mesFiltro === "TODOS" || mesFila === mesFiltro;
+
+    // 2. Verificamos si coincide con el texto escrito
+    let coincideTexto =
+      query === "" ||
       nombre.includes(query) ||
       numero.includes(query) ||
-      fecha.includes(query)
-    ) {
+      fechaLimpia.includes(query);
+
+    // Mostrar solo si cumple AMBAS condiciones
+    if (coincideMes && coincideTexto) {
       fila.style.display = "";
+      filasMostradas++;
     } else {
       fila.style.display = "none";
     }
   });
+
+  // Mensaje amigable si el mes está vacío
+  let mensajeVacio = document.getElementById("msgVacioRegistros");
+  if (filasMostradas === 0) {
+    if (!mensajeVacio) {
+      mensajeVacio = document.createElement("tr");
+      mensajeVacio.id = "msgVacioRegistros";
+      mensajeVacio.innerHTML = `<td colspan="8" style="text-align:center; padding: 40px; color: var(--text-secondary);">No se encontraron ventas para el filtro seleccionado.</td>`;
+      tbody.appendChild(mensajeVacio);
+    }
+  } else {
+    if (mensajeVacio) mensajeVacio.remove();
+  }
 }
 // =========================================================================
 // 🔥 LÓGICA FRONTEND: CREACIÓN AUTOMATIZADA DE CUENTAS NETFLIX 🔥
