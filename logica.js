@@ -774,12 +774,36 @@ function abrirPanelCortesNet() {
   document.body.appendChild(script);
 }
 
-// Sistema de Toast Nativo (Reemplazo moderno de notificaciones)
-function triggerToast(msgHTML) {
-  const toast = document.getElementById("appleToast");
-  toast.innerHTML = msgHTML;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 3000);
+// =========================================================================
+// 🚀 UPGRADE: ISLA DINÁMICA INTELIGENTE (Efecto Apple Morphic)
+// =========================================================================
+function triggerToast(mensajeHtml) {
+  const isla = document.getElementById("appleToast");
+  if (!isla) return;
+
+  // 1. Limpiar estados anteriores de golpe
+  isla.classList.remove("island-active");
+  isla.innerHTML = "";
+
+  // 2. Pequeño delay para permitir el reinicio físico y brote elástico
+  setTimeout(() => {
+    // Envolvemos el texto en el contenedor de animación suave
+    isla.innerHTML = `<div class="island-content-fade">${mensajeHtml}</div>`;
+    isla.classList.add("island-active");
+
+    // Sonido pop sutil si el motor de audio está activo
+    if (typeof CyberSonidos !== "undefined") CyberSonidos.play("pop");
+  }, 40);
+
+  // 3. Temporizador de Auto-Cierre (Regresa a su estado compacto y se desvanece)
+  clearTimeout(window.islandTimer);
+  window.islandTimer = setTimeout(() => {
+    isla.classList.remove("island-active");
+    // Esperamos a que termine de encogerse para limpiar el texto por dentro
+    setTimeout(() => {
+      isla.innerHTML = "";
+    }, 400);
+  }, 3500);
 }
 
 function copiarTextoRapido(btn, texto) {
