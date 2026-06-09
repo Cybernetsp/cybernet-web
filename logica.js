@@ -3576,6 +3576,7 @@ function actualizarPerfilesLibres(manual = false) {
 
         // DUPLICAR PARA QUE EL CARRUSEL SEA INFINITO (SEAMLESS LOOP)
         container.innerHTML = htmlPildoras + htmlPildoras;
+        verificarStockCritico(res.data);
       }
     }
 
@@ -5689,3 +5690,110 @@ function renderGrid(filtro = "") {
     gridContainer.appendChild(card);
   });
 }
+// =========================================================================
+// 🚨 MÓDULO INTELIGENTE: ALERTA DE INVENTARIO BAJO (CADA 10 MINUTOS)
+// =========================================================================
+let ultimoAvisoStock = 0;
+
+function verificarStockCritico(data) {
+  let ahora = Date.now();
+
+  // ⏳ Inteligencia: Solo evaluar si han pasado 10 minutos (600,000 ms) desde la última vez que salió el aviso
+  if (ahora - ultimoAvisoStock < 600000) return;
+
+  // 🎯 Umbrales y acciones personalizadas por plataforma
+  const umbrales = {
+    NETFLIX: { limite: 2, accion: "Cortar o crear" },
+    AMAZON: { limite: 5, accion: "Comprar" },
+    HBOMAX: { limite: 5, accion: "Comprar" },
+    DISNEYPREMIUM: { limite: 1, accion: "Crear" },
+    DISNEYESTANDAR: { limite: 1, accion: "Comprar" },
+    CRUNCHYROLL: { limite: 1, accion: "Comprar" },
+    PLEX: { limite: 1, accion: "Comprar" },
+    APPLETV: { limite: 1, accion: "Comprar" },
+  };
+
+  let alertas = [];
+
+  // Analiza la data recibida del servidor
+  data.forEach((item) => {
+    let config = umbrales[item.plat];
+    if (config && item.libres <= config.limite) {
+      alertas.push(
+        `<div style="margin-bottom: 4px; color: var(--text-secondary);">• <b>${item.plat}</b>: Quedan ${item.libres} 👉 <span style="color: var(--text-primary); font-weight: 800;">${config.accion}</span></div>`,
+      );
+    }
+  });
+
+  // Si hay escasez en alguna, disparamos el aviso visual y reiniciamos el reloj de 10 min
+  if (alertas.length > 0) {
+    ultimoAvisoStock = ahora;
+    mostrarNotificacionStock(alertas.join(""));
+  }
+}
+
+function mostrarNotificacionStock(contenido) {
+  let toastViejo = document.getElementById("stockAlertToast");
+
+  // Si existe un aviso viejo, lo destruimos
+  if (toastViejo) {
+    toastViejo.remove();
+  }
+
+  // Creamos el aviso. NOTA: Le quitamos el "pointer-events: none" para poder darle clic a la X
+  let toast = document.createElement("div");
+  toast.id = "stockAlertToast";
+  toast.style.cssText =
+    "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); opacity: 0; background: var(--sheet-modal-bg, rgba(30, 30, 30, 0.95)); border: 1px solid rgba(255, 159, 10, 0.3); color: var(--text-primary, white); padding: 32px 24px; border-radius: 32px; z-index: 99999; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); font-size: 0.9rem; width: 90%; max-width: 400px; text-align: center;";
+
+  toast.innerHTML = `
+        <button onclick="cerrarNotificacionStock()" style="position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.1); border: none; color: var(--text-secondary, #aaa); width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">
+            &times;
+        </button>
+
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; padding-top: 10px;">
+            <div style="background: rgba(255, 159, 10, 0.15); color: var(--ios-orange, #ff9f0a); padding: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(255, 159, 10, 0.2);">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <h3 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px;">Inventario Crítico</h3>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 4px 0 0 0;">Acción sugerida para evitar escasez:</p>
+        </div>
+
+        <div style="line-height: 1.6; text-align: left; background: rgba(0,0,0,0.2); padding: 16px 20px; border-radius: 20px; border: 1px dashed rgba(255,255,255,0.1);">
+            ${contenido}
+        </div>
+
+        <button onclick="cerrarNotificacionStock()" class="btn-ios btn-secondary w-100" style="margin-top: 20px; padding: 14px; border-radius: 50px; font-weight: 700; width: 100%;">
+            Entendido
+        </button>
+    `;
+
+  document.body.appendChild(toast);
+
+  // Animación de entrada (Pop-In)
+  setTimeout(() => {
+    toast.style.transform = "translate(-50%, -50%) scale(1)";
+    toast.style.opacity = "1";
+  }, 50);
+
+  // ⛔ Se eliminó el setTimeout que la cerraba automáticamente
+}
+
+// Función encargada de cerrar la alerta con la animación inversa
+window.cerrarNotificacionStock = function () {
+  let toast = document.getElementById("stockAlertToast");
+  if (toast) {
+    // Animación de salida
+    toast.style.transform = "translate(-50%, -50%) scale(0.8)";
+    toast.style.opacity = "0";
+
+    // Destruir el HTML después de que termine la animación
+    setTimeout(() => {
+      toast.remove();
+    }, 400);
+  }
+};
