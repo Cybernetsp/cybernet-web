@@ -2471,6 +2471,15 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
   let userFinal = userActivo ? userActivo.toUpperCase() : "";
   const isCamilo = userFinal === "CAMILO";
 
+  // 🏦 DICCIONARIO DE CUENTAS NEQUI DEL STAFF
+  const numerosNequi = {
+    KATHERINE: "3126117630",
+    MANUEL: "3205386975",
+    PABLO: "3153991383",
+    MANUP: "3153991383",
+    ANGELICA: "3015156037",
+  };
+
   // 📅 Matemáticas de la Quincena Actual
   const hoy = new Date();
   const dMes = hoy.getMonth();
@@ -2569,7 +2578,11 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
 
     // Calcular Pago Fijo de ese turno
     let pagoStr = String(item.pagoTurno || "0");
-    let pagoNum = parseFloat(pagoStr.replace(/[^0-9.-]/g, "")) || 0;
+    let strLimpioPago = pagoStr
+      .replace(/\$|\s/g, "")
+      .split(",")[0]
+      .replace(/\./g, "");
+    let pagoNum = parseInt(strLimpioPago, 10) || 0;
 
     if (esTiempoValido) {
       datosAgrupados[vendedorReal][dDia].totalSeconds += totalSec;
@@ -2635,7 +2648,6 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     for (let dia = inicioDia; dia <= finDia; dia++) {
       let worked = dataVendedor ? dataVendedor[dia] : null;
       let timeStr = "";
-      let pagoDisplay = "";
       let btnAcciones = "";
       let hasWorked = false;
 
@@ -2643,14 +2655,12 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
       if (worked && worked.totalSeconds > 0) {
         hasWorked = true;
         totalSegundosVendedor += worked.totalSeconds;
-        totalPagoVendedor += worked.totalPago;
+        totalPagoVendedor += worked.totalPago; // 💰 Sumamos el pago de este día al total
 
         let h = Math.floor(worked.totalSeconds / 3600);
         let m = Math.floor((worked.totalSeconds % 3600) / 60);
         timeStr =
           String(h).padStart(2, "0") + "h " + String(m).padStart(2, "0") + "m";
-        pagoDisplay =
-          "$" + Math.round(worked.totalPago).toLocaleString("es-CO");
 
         let filasStrInd = worked.filasAsociadas.join(",");
         filasVendedorGlobal.push(...worked.filasAsociadas);
@@ -2684,13 +2694,12 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
       let contenidoCentral = hasWorked
         ? `
         <div style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: var(--ios-green); margin-top: 6px;">${timeStr}</div>
-        <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${pagoDisplay}</div>
         <div style="display: flex; gap: 4px; justify-content: center; width: 100%; margin-top: 6px;">${btnAcciones}</div>
       `
         : ``;
 
       celdasHtml += `
-        <div style="position: relative; background: ${bgCell}; border: ${borderCell}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 75px;">
+        <div style="position: relative; background: ${bgCell}; border: ${borderCell}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70px;">
             <span style="position: absolute; top: 4px; left: 6px; font-size: 0.75rem; font-weight: 800; color: ${numColor};">${dia}</span>
             ${contenidoCentral}
         </div>
@@ -2701,6 +2710,8 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     let tM = Math.floor((totalSegundosVendedor % 3600) / 60);
     let totalFmt =
       String(tH).padStart(2, "0") + "h " + String(tM).padStart(2, "0") + "m";
+    let pagoTotalFmt =
+      "$" + Math.round(totalPagoVendedor).toLocaleString("es-CO"); // Formato de moneda
 
     let btnLiquidarTodo = "";
     if (isCamilo && filasVendedorGlobal.length > 0) {
@@ -2711,6 +2722,24 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
             LIQUIDAR CALENDARIO DE ${vendedor}
           </button>
         </div>`;
+    }
+
+    // Identificar Nequi del empleado
+    let nequiNum = numerosNequi[vendedor];
+    let nequiHtml = "";
+
+    if (nequiNum) {
+      nequiHtml = `
+        <div style="display:flex; align-items:center; gap:6px; margin-top: 4px;">
+           <span style="background:rgba(224, 0, 150, 0.15); color:#ff37a6; padding:2px 6px; border-radius:6px; font-size:0.65rem; font-weight:800; border: 1px solid rgba(224, 0, 150, 0.3);">NEQUI</span>
+           <span style="color:var(--text-primary); font-size:0.85rem; font-family:monospace; font-weight:bold; letter-spacing: 0.5px;">${nequiNum}</span>
+           <button style="background:rgba(10, 132, 255, 0.15); border:none; border-radius:6px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; color:var(--ios-blue); cursor:pointer; transition:all 0.2s;" onclick="copiarTextoRapido(this, '${nequiNum}')" title="Copiar Nequi">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+           </button>
+        </div>
+      `;
+    } else {
+      nequiHtml = `<span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px;">Sin Nequi Registrado</span>`;
     }
 
     // Ensamble de la tarjeta maestra del vendedor
@@ -2725,12 +2754,14 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
             </div>
             <div style="display: flex; flex-direction: column;">
                 <span style="font-weight: 800; font-size: 1.15rem; color: var(--text-primary); text-transform: uppercase;">${vendedor}</span>
-                <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Pago Acumulado: <b style="color:var(--ios-green);">$${Math.round(totalPagoVendedor).toLocaleString("es-CO")}</b></span>
+                ${nequiHtml}
             </div>
           </div>
           <div style="text-align: right;">
             <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">Total Horas</span><br>
-            <span style="font-weight: 800; color: var(--ios-blue); font-size: 1.3rem;">${totalFmt}</span>
+            <span style="font-weight: 800; color: var(--ios-blue); font-size: 1.3rem;">${totalFmt}</span><br>
+            <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; margin-top: 6px; display: inline-block;">Total a Pagar</span><br>
+            <span style="font-weight: 800; color: var(--ios-green); font-size: 1.25rem;">${pagoTotalFmt}</span>
           </div>
         </div>
         
