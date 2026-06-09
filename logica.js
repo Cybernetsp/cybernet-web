@@ -5591,28 +5591,118 @@ function renderDashboard() {
     ringGastos.style.strokeDashoffset = strokeDashoffsetGastos;
   }
 
-  // 💥 AQUÍ SE RESTAURA EL DISEÑO APPLE LIST PARA LAS TRANSACCIONES
+  // 💥 SECCIÓN CORREGIDA: Solo tarjetas de información, sin tablas ni rayas.
   const container = document.getElementById("listaDesgloseGastos");
   if (itemsTemp.length === 0) {
     container.innerHTML =
-      '<div class="empty-log-msg">No hay movimientos.</div>';
+      '<div class="empty-log-msg" style="padding: 20px;">No hay movimientos registrados en este periodo.</div>';
     calcularDescuentoDeuda();
     return;
   }
 
-  let htmlBuffer = "";
+  // 1. Agrupar dinámicamente los movimientos por su Categoría
+  let categoriasAgrupadas = {};
+  let totalGastadoEnPeriodo = 0;
+  let totalIngresadoEnPeriodo = 0;
+
   itemsTemp.forEach((item) => {
-    const priceColor =
-      item.tipo === "INGRESO" ? "var(--ios-green)" : "var(--ios-red)";
-    htmlBuffer += `
-            <div class="apple-list-row">
-                <span class="td-cell td-date">${item.fecha}</span>
-                <span class="td-cell td-price" style="color: ${priceColor} !important;">${formatMoneda(item.monto)}</span>
-                <span class="td-cell td-desc" title="${item.detalle}">${item.detalle}</span>
-                <span class="td-cell td-cat">${item.categoria}</span>
-            </div>
-        `;
+    let cat = item.categoria || "OTROS";
+    if (!categoriasAgrupadas[cat]) {
+      categoriasAgrupadas[cat] = {
+        gastosPuros: 0,
+        ingresosPuros: 0,
+      };
+    }
+    let montoNum = parseFloat(item.monto) || 0;
+    if (item.tipo === "INGRESO") {
+      categoriasAgrupadas[cat].ingresosPuros += montoNum;
+      totalIngresadoEnPeriodo += montoNum;
+    } else {
+      categoriasAgrupadas[cat].gastosPuros += montoNum;
+      totalGastadoEnPeriodo += montoNum;
+    }
   });
+
+  let htmlBuffer = "";
+
+  // 2. CONSTRUIR BLOQUE DE RESUMEN DE GASTOS (Tarjetas rojas)
+  if (totalGastadoEnPeriodo > 0) {
+    htmlBuffer += `
+      <div style="margin-bottom: 24px;">
+        <h4 style="margin: 0 0 16px 0; color: var(--ios-red); font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          <div style="background: rgba(255, 69, 58, 0.15); padding: 6px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          </div>
+          Gastos del Periodo Seleccionado
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;">
+    `;
+
+    // Extraer y ordenar las categorías de mayor a menor gasto
+    let catArrayGastos = Object.keys(categoriasAgrupadas).filter(
+      (c) => categoriasAgrupadas[c].gastosPuros > 0,
+    );
+    catArrayGastos.sort(
+      (a, b) =>
+        categoriasAgrupadas[b].gastosPuros - categoriasAgrupadas[a].gastosPuros,
+    );
+
+    catArrayGastos.forEach((cat) => {
+      let gastosCat = categoriasAgrupadas[cat].gastosPuros;
+      htmlBuffer += `
+        <div style="background: rgba(255, 69, 58, 0.05); border: 1px solid rgba(255, 69, 58, 0.2); padding: 12px; border-radius: 16px; display: flex; flex-direction: column; justify-content: center;">
+          <span style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
+          <span style="color: var(--ios-red); font-weight: 800; font-size: 1.1rem; font-family: monospace;">${formatMoneda(gastosCat)}</span>
+        </div>
+      `;
+    });
+
+    htmlBuffer += `
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. CONSTRUIR BLOQUE DE RESUMEN DE INGRESOS EXTRAS (Tarjetas verdes, si los hay)
+  if (totalIngresadoEnPeriodo > 0) {
+    htmlBuffer += `
+      <div style="margin-bottom: 8px;">
+        <h4 style="margin: 0 0 16px 0; color: var(--ios-green); font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          <div style="background: rgba(48, 209, 88, 0.15); padding: 6px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          </div>
+          Ingresos Extras del Periodo
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;">
+    `;
+
+    // Extraer y ordenar las categorías de mayor a menor ingreso
+    let catArrayIngresos = Object.keys(categoriasAgrupadas).filter(
+      (c) => categoriasAgrupadas[c].ingresosPuros > 0,
+    );
+    catArrayIngresos.sort(
+      (a, b) =>
+        categoriasAgrupadas[b].ingresosPuros -
+        categoriasAgrupadas[a].ingresosPuros,
+    );
+
+    catArrayIngresos.forEach((cat) => {
+      let ingresosCat = categoriasAgrupadas[cat].ingresosPuros;
+      htmlBuffer += `
+        <div style="background: rgba(48, 209, 88, 0.05); border: 1px solid rgba(48, 209, 88, 0.2); padding: 12px; border-radius: 16px; display: flex; flex-direction: column; justify-content: center;">
+          <span style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
+          <span style="color: var(--ios-green); font-weight: 800; font-size: 1.1rem; font-family: monospace;">${formatMoneda(ingresosCat)}</span>
+        </div>
+      `;
+    });
+
+    htmlBuffer += `
+        </div>
+      </div>
+    `;
+  }
+
+  // Pintamos las tarjetas limpias en el espacio de trabajo
   container.innerHTML = htmlBuffer;
   calcularDescuentoDeuda();
 }
