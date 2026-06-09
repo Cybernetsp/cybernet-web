@@ -2469,242 +2469,283 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
 
   const userActivo = sessionStorage.getItem("active_staff");
   let userFinal = userActivo ? userActivo.toUpperCase() : "";
+  const isCamilo = userFinal === "CAMILO";
 
-  let misHoras = [];
+  // 📅 Matemáticas de la Quincena Actual
+  const hoy = new Date();
+  const dMes = hoy.getMonth();
+  const dAnio = hoy.getFullYear();
+  const esPrimeraQuincena = hoy.getDate() <= 15;
+
+  const inicioDia = esPrimeraQuincena ? 1 : 16;
+  const finDia = esPrimeraQuincena
+    ? 15
+    : new Date(dAnio, dMes + 1, 0).getDate();
+
+  const mesesAbrev = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+  const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+  // 🗃️ Agrupador de datos: datosAgrupados[VENDEDOR][DIA] = info
+  let datosAgrupados = {};
+  let vendedoresSet = new Set();
+
   for (let index = 0; index < window.currentHorasStock.length; index++) {
     let item = window.currentHorasStock[index];
-
-    let coincideFiltro = false;
-    if (filtroBusqueda === "") {
-      coincideFiltro = true;
-    } else if (
-      item.vendedor.toLowerCase().includes(filtroBusqueda) ||
-      item.fecha.toLowerCase().includes(filtroBusqueda)
-    ) {
-      coincideFiltro = true;
-    }
-
-    if (userFinal === "CAMILO") {
-      if (esMismaQuincena(item.fecha) && coincideFiltro) {
-        misHoras.push(item);
-      }
-    } else {
-      if (
-        item.vendedor.toUpperCase().includes(userFinal) &&
-        esMismaQuincena(item.fecha) &&
-        coincideFiltro
-      ) {
-        misHoras.push(item);
-      }
-    }
-  }
-
-  if (misHoras.length === 0) {
-    container.innerHTML =
-      '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>No hay turnos que coincidan con la búsqueda actual.</div>';
-    return;
-  }
-
-  let resumenDiario = {};
-
-  for (let i = 0; i < misHoras.length; i++) {
-    let item = misHoras[i];
     let d = parseDate(item.fecha);
 
-    let dayNum = String(d.getDate()).padStart(2, "0");
-    let monthNum = String(d.getMonth() + 1).padStart(2, "0");
-    let dateKey = dayNum + "/" + monthNum;
-    let dayOfWeek = d.getDay();
+    // Filtros de fecha (solo procesar la quincena en curso)
+    if (
+      !d ||
+      isNaN(d.getTime()) ||
+      d.getMonth() !== dMes ||
+      d.getFullYear() !== dAnio
+    )
+      continue;
+    let dDia = d.getDate();
+    if (esPrimeraQuincena && dDia > 15) continue;
+    if (!esPrimeraQuincena && dDia <= 15) continue;
 
     let vendedorReal = item.vendedor
       .toUpperCase()
-      .replace(" (INGRESO MANUAL)", "");
-    let groupKey = dateKey + "_" + vendedorReal;
+      .replace(" (INGRESO MANUAL)", "")
+      .trim();
+    if (vendedorReal === "PABLO") vendedorReal = "MANUP";
 
-    if (!resumenDiario[groupKey]) {
-      resumenDiario[groupKey] = {
-        dateObj: d,
-        dayOfWeek: dayOfWeek,
+    // Filtros de usuario (si no es administrador, solo ve lo suyo)
+    if (!isCamilo && vendedorReal !== userFinal) continue;
+
+    // Filtro de caja de búsqueda
+    if (
+      filtroBusqueda !== "" &&
+      !vendedorReal.includes(filtroBusqueda.toUpperCase()) &&
+      !item.fecha.toLowerCase().includes(filtroBusqueda)
+    ) {
+      continue;
+    }
+
+    vendedoresSet.add(vendedorReal);
+
+    if (!datosAgrupados[vendedorReal]) datosAgrupados[vendedorReal] = {};
+    if (!datosAgrupados[vendedorReal][dDia]) {
+      datosAgrupados[vendedorReal][dDia] = {
         totalSeconds: 0,
-        vendedor: vendedorReal,
-        fechaText: dateKey,
-        fechaExactaOrigen: item.fecha,
+        totalPago: 0,
         filasAsociadas: [],
+        fechaExactaOrigen: item.fecha,
       };
     }
 
+    // Calcular Segundos
     let timeParts = String(item.tiempo || "").split(":");
     let totalSec = 0;
     let esTiempoValido = false;
 
-    if (timeParts.length === 3) {
+    if (timeParts.length >= 2) {
       totalSec =
         (parseInt(timeParts[0], 10) || 0) * 3600 +
         (parseInt(timeParts[1], 10) || 0) * 60 +
-        (parseInt(timeParts[2], 10) || 0);
-      esTiempoValido = true;
-    } else if (timeParts.length === 2) {
-      totalSec =
-        (parseInt(timeParts[0], 10) || 0) * 3600 +
-        (parseInt(timeParts[1], 10) || 0) * 60;
+        (timeParts[2] ? parseInt(timeParts[2], 10) || 0 : 0);
       esTiempoValido = true;
     } else {
-      let numeroPuro = parseFloat(String(item.tiempo || "").replace(",", "."));
-      if (!isNaN(numeroPuro) && numeroPuro > 0) {
-        totalSec = Math.floor(numeroPuro * 3600);
+      let numPuro = parseFloat(String(item.tiempo || "").replace(",", "."));
+      if (!isNaN(numPuro) && numPuro > 0) {
+        totalSec = Math.floor(numPuro * 3600);
         esTiempoValido = true;
       }
     }
 
+    // Calcular Pago Fijo de ese turno
+    let pagoStr = String(item.pagoTurno || "0");
+    let pagoNum = parseFloat(pagoStr.replace(/[^0-9.-]/g, "")) || 0;
+
     if (esTiempoValido) {
-      resumenDiario[groupKey].totalSeconds += totalSec;
+      datosAgrupados[vendedorReal][dDia].totalSeconds += totalSec;
+      datosAgrupados[vendedorReal][dDia].totalPago += pagoNum;
       if (item.filaIndex) {
-        resumenDiario[groupKey].filasAsociadas.push(item.filaIndex);
+        datosAgrupados[vendedorReal][dDia].filasAsociadas.push(item.filaIndex);
       }
     }
   }
 
-  let keysArray = Object.keys(resumenDiario);
-  let diasArray = [];
+  let vendedoresArray = Array.from(vendedoresSet).sort();
 
-  for (let k = 0; k < keysArray.length; k++) {
-    let kStr = keysArray[k];
-    let r = resumenDiario[kStr];
-
-    let h = Math.floor(r.totalSeconds / 3600);
-    let m = Math.floor((r.totalSeconds % 3600) / 60);
-    let s = r.totalSeconds % 60;
-
-    let hStr = String(h).padStart(2, "0");
-    let mStr = String(m).padStart(2, "0");
-    let sStr = String(s).padStart(2, "0");
-    let fmtTime = hStr + ":" + mStr + ":" + sStr;
-
-    let arrayDiasSemana = [
-      "Domingo",
-      "Lunes",
-      "Martes",
-      "Miércoles",
-      "Jueves",
-      "Viernes",
-      "Sábado",
-    ];
-
-    diasArray.push({
-      groupKey: kStr,
-      fechaText: r.fechaText,
-      fechaExactaOrigen: r.fechaExactaOrigen,
-      vendedor: r.vendedor,
-      dateObj: r.dateObj,
-      diaNombre: arrayDiasSemana[r.dayOfWeek],
-      hoursFmt: fmtTime,
-      filasAsociadas: r.filasAsociadas,
-    });
-  }
-
-  diasArray.sort(function (a, b) {
-    if (a.dateObj.getTime() !== b.dateObj.getTime()) {
-      return a.dateObj - b.dateObj;
+  // Validaciones de pantalla vacía
+  if (vendedoresArray.length === 0 && filtroBusqueda === "") {
+    if (!isCamilo && userFinal !== "") {
+      vendedoresArray.push(userFinal);
+      datosAgrupados[userFinal] = {};
     } else {
-      return a.vendedor.localeCompare(b.vendedor);
+      container.innerHTML =
+        '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">No hay turnos registrados en esta quincena.</div>';
+      return;
     }
-  });
-
-  let totalSecs = 0;
-  for (let p = 0; p < diasArray.length; p++) {
-    totalSecs += resumenDiario[diasArray[p].groupKey].totalSeconds;
+  } else if (vendedoresArray.length === 0) {
+    container.innerHTML =
+      '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">No hay turnos que coincidan con la búsqueda.</div>';
+    return;
   }
 
-  let tH = Math.floor(totalSecs / 3600);
-  let tM = Math.floor((totalSecs % 3600) / 60);
-  let tFmt =
-    String(tH).padStart(2, "0") + "h " + String(tM).padStart(2, "0") + "m";
-
-  let tituloPanel =
-    userFinal === "CAMILO" ? "Quincena Global" : "Tu Quincena Actual";
+  // Título Dinámico
+  let tituloPanel = isCamilo
+    ? `Calendario Global (${inicioDia} al ${finDia} de ${mesesAbrev[dMes]})`
+    : `Tu Calendario Actual (${inicioDia} al ${finDia} de ${mesesAbrev[dMes]})`;
   if (filtroBusqueda !== "") tituloPanel = "Resultados de Búsqueda";
 
-  let html = `
-              <div class="card-ios" style="padding:15px 10px;">
-                  <h4 style="text-align:center; color:var(--ios-blue); font-size:1.1rem; margin-bottom:15px;">${tituloPanel}</h4>
-                  <table style="width: 100%; border-collapse: collapse;">
-                      <thead>
-                          <tr>
-                              <th style="padding: 12px 10px; text-align: left; border-bottom: 0.5px solid rgba(255,255,255,0.1); font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Día</th>
-                              <th style="padding: 12px 10px; text-align: right; border-bottom: 0.5px solid rgba(255,255,255,0.1); font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Horas</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-            `;
+  let html = `<h4 style="text-align:center; color:var(--ios-blue); font-size:1.15rem; margin-bottom:15px; font-weight: 800; letter-spacing: -0.3px;">${tituloPanel}</h4>`;
 
-  let btnLiquidarHTML = "";
-  let filasArrayGlobal = [];
+  // 🏗️ CONSTRUCCIÓN DEL LAYOUT TIPO CALENDARIO POR VENDEDOR
+  for (let v = 0; v < vendedoresArray.length; v++) {
+    let vendedor = vendedoresArray[v];
+    let dataVendedor = datosAgrupados[vendedor];
+    let totalSegundosVendedor = 0;
+    let totalPagoVendedor = 0;
+    let filasVendedorGlobal = [];
 
-  for (let f = 0; f < diasArray.length; f++) {
-    let dInfo = diasArray[f];
-    let vendedorLabel =
-      userFinal === "CAMILO"
-        ? `<br><span style="color:var(--ios-blue); font-size:0.75rem; font-weight:bold;">${dInfo.vendedor}</span>`
-        : "";
+    // Obtener el día de la semana del primer día de la quincena (0 = Dom, 1 = Lun...)
+    let primerDiaFecha = new Date(dAnio, dMes, inicioDia);
+    let offsetDias = primerDiaFecha.getDay();
 
-    let puedeEditar = userFinal === "CAMILO" || dInfo.vendedor === userFinal;
-    let btnEditarIndividual = "";
-    let btnLiquidarIndividual = "";
+    // Cabecera de los días de la semana
+    let celdasHtml = diasSemana
+      .map(
+        (d) =>
+          `<div style="text-align: center; font-size: 0.7rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; padding-bottom: 8px;">${d}</div>`,
+      )
+      .join("");
 
-    if (dInfo.filasAsociadas && dInfo.filasAsociadas.length > 0) {
-      let filasStrInd = dInfo.filasAsociadas.join(",");
-      if (puedeEditar) {
-        btnEditarIndividual = `
-                        <button style="background: transparent; border: none; color: var(--ios-blue); cursor: pointer; padding: 5px; border-radius: 8px; vertical-align: middle; margin-left: 8px;" onclick="abrirEdicionHoras('${dInfo.vendedor}', '${dInfo.fechaText}', '${dInfo.fechaExactaOrigen}', '${dInfo.hoursFmt}', '${filasStrInd}')" title="Editar tiempo">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        </button>`;
-      }
-      if (userFinal === "CAMILO") {
-        let targetInd = dInfo.vendedor + " el " + dInfo.fechaText;
-        btnLiquidarIndividual = `<span style="cursor:pointer; font-size:1.1rem; margin-left:4px; vertical-align:middle; color:var(--ios-green);" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Liquidar y Borrar este día"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path></svg></span>`;
-      }
+    // Rellenar espacios en blanco al inicio del calendario
+    for (let o = 0; o < offsetDias; o++) {
+      celdasHtml += `<div style="background: transparent;"></div>`;
     }
 
+    // Generar los cuadros de cada día
+    for (let dia = inicioDia; dia <= finDia; dia++) {
+      let worked = dataVendedor ? dataVendedor[dia] : null;
+      let timeStr = "";
+      let pagoDisplay = "";
+      let btnAcciones = "";
+      let hasWorked = false;
+
+      // Si hay horas en ese día, las suma y activa el cuadro
+      if (worked && worked.totalSeconds > 0) {
+        hasWorked = true;
+        totalSegundosVendedor += worked.totalSeconds;
+        totalPagoVendedor += worked.totalPago;
+
+        let h = Math.floor(worked.totalSeconds / 3600);
+        let m = Math.floor((worked.totalSeconds % 3600) / 60);
+        timeStr =
+          String(h).padStart(2, "0") + "h " + String(m).padStart(2, "0") + "m";
+        pagoDisplay =
+          "$" + Math.round(worked.totalPago).toLocaleString("es-CO");
+
+        let filasStrInd = worked.filasAsociadas.join(",");
+        filasVendedorGlobal.push(...worked.filasAsociadas);
+        let puedeEditar = isCamilo || vendedor === userFinal;
+
+        if (puedeEditar) {
+          btnAcciones += `
+            <button style="background: rgba(10, 132, 255, 0.15); border: none; color: var(--ios-blue); cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s;" onclick="abrirEdicionHoras('${vendedor}', '${dia} de ${mesesAbrev[dMes]}', '${worked.fechaExactaOrigen}', '${timeStr}', '${filasStrInd}')" title="Editar tiempo">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </button>`;
+        }
+
+        if (isCamilo) {
+          let targetInd = `${vendedor} el ${dia} de ${mesesAbrev[dMes]}`;
+          btnAcciones += `
+            <button style="background: rgba(255, 69, 58, 0.15); border: none; color: var(--ios-red); cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s;" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Borrar este día">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+            </button>`;
+        }
+      }
+
+      // Estilos condicionales de la celda
+      let bgCell = hasWorked ? "rgba(48, 209, 88, 0.08)" : "rgba(0,0,0,0.2)";
+      let borderCell = hasWorked
+        ? "1px solid rgba(48, 209, 88, 0.3)"
+        : "1px solid rgba(255,255,255,0.05)";
+      let numColor = hasWorked
+        ? "var(--text-primary)"
+        : "var(--text-secondary)";
+
+      let contenidoCentral = hasWorked
+        ? `
+        <div style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: var(--ios-green); margin-top: 6px;">${timeStr}</div>
+        <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${pagoDisplay}</div>
+        <div style="display: flex; gap: 4px; justify-content: center; width: 100%; margin-top: 6px;">${btnAcciones}</div>
+      `
+        : ``;
+
+      celdasHtml += `
+        <div style="position: relative; background: ${bgCell}; border: ${borderCell}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 75px;">
+            <span style="position: absolute; top: 4px; left: 6px; font-size: 0.75rem; font-weight: 800; color: ${numColor};">${dia}</span>
+            ${contenidoCentral}
+        </div>
+      `;
+    }
+
+    let tH = Math.floor(totalSegundosVendedor / 3600);
+    let tM = Math.floor((totalSegundosVendedor % 3600) / 60);
+    let totalFmt =
+      String(tH).padStart(2, "0") + "h " + String(tM).padStart(2, "0") + "m";
+
+    let btnLiquidarTodo = "";
+    if (isCamilo && filasVendedorGlobal.length > 0) {
+      btnLiquidarTodo = `
+        <div style="margin-top:20px;">
+          <button class="btn-ios btn-success w-100" style="display:flex; justify-content:center; align-items:center; gap:8px; border-radius: 16px; padding: 14px; font-weight: 800;" onclick="ejecutarLiquidacion('${vendedor}', '${filasVendedorGlobal.join(",")}')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path></svg>
+            LIQUIDAR CALENDARIO DE ${vendedor}
+          </button>
+        </div>`;
+    }
+
+    // Ensamble de la tarjeta maestra del vendedor
     html += `
-                          <tr>
-                              <td style="padding: 12px 10px; text-align: left; border-bottom: 0.5px solid rgba(255,255,255,0.1); font-size: 0.95rem; color: var(--text-primary);"><strong>${dInfo.diaNombre}</strong>${vendedorLabel}<br><span style="font-size:0.7rem; color:var(--text-secondary);">${dInfo.fechaText}</span></td>
-                              <td style="padding: 12px 10px; text-align: right; border-bottom: 0.5px solid rgba(255,255,255,0.1); font-size: 0.95rem; color: var(--text-primary); color:var(--ios-green); font-family:monospace; font-weight:bold;">
-                                  ${dInfo.hoursFmt} 
-                                  ${btnEditarIndividual} 
-                                  ${btnLiquidarIndividual}
-                              </td>
-                          </tr>
-                `;
+      <div class="card-ios" style="padding: 24px; margin-bottom: 24px; border-radius: 28px; border: 1px solid rgba(255,255,255,0.08);">
+        
+        <!-- Encabezado del Usuario -->
+        <div class="flex-row-between" style="padding-bottom: 16px; border-bottom: 1px dashed rgba(255,255,255,0.15); margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); width: 42px; height: 42px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 800; font-size: 1.2rem; border: 1px solid rgba(10, 132, 255, 0.2);">
+              ${vendedor.charAt(0)}
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 800; font-size: 1.15rem; color: var(--text-primary); text-transform: uppercase;">${vendedor}</span>
+                <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Pago Acumulado: <b style="color:var(--ios-green);">$${Math.round(totalPagoVendedor).toLocaleString("es-CO")}</b></span>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">Total Horas</span><br>
+            <span style="font-weight: 800; color: var(--ios-blue); font-size: 1.3rem;">${totalFmt}</span>
+          </div>
+        </div>
+        
+        <!-- Cuadrícula del Calendario -->
+        <div style="width: 100%; overflow-x: auto; padding-bottom: 8px;">
+            <div style="min-width: 420px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
+                ${celdasHtml}
+            </div>
+        </div>
+        
+        ${btnLiquidarTodo}
+      </div>
+    `;
   }
 
-  if (userFinal === "CAMILO") {
-    let targetName =
-      filtroBusqueda !== "" ? filtroBusqueda.toUpperCase() : "TODOS (GLOBAL)";
-    for (let i = 0; i < misHoras.length; i++) {
-      if (misHoras[i].filaIndex) filasArrayGlobal.push(misHoras[i].filaIndex);
-    }
-    let filasStr = filasArrayGlobal.join(",");
-    if (filasArrayGlobal.length > 0) {
-      btnLiquidarHTML = `
-                    <div style="margin-top:20px; text-align:center;">
-                        <button class="btn-ios btn-danger w-100" style="display:flex; justify-content:center; align-items:center; gap:8px;" onclick="ejecutarLiquidacion('${targetName}', '${filasStr}')">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path></svg>
-                            LIQUIDAR PAGO (${targetName})
-                        </button>
-                    </div>`;
-    }
-  }
-
-  html += `
-                      </tbody>
-                  </table>
-                  <div style="margin-top:15px; padding:15px 10px 0 10px; border-top:1px solid rgba(255,255,255,0.15); display:flex; justify-content:space-between; align-items:center;">
-                      <span style="font-size:0.8rem; color:var(--text-secondary);">Total Horas:</span>
-                      <span style="font-weight:bold; color:var(--text-primary); font-size:1.1rem;">${tFmt}</span>
-                  </div>
-                  ${btnLiquidarHTML}
-              </div>
-            `;
   container.innerHTML = html;
 }
 window.ejecutarLiquidacion = function (nombreObjetivo, filasStr) {
@@ -5696,6 +5737,9 @@ function renderGrid(filtro = "") {
 let ultimoAvisoStock = 0;
 
 function verificarStockCritico(data) {
+  // 🔒 SEGURO: Si no hay nadie logueado (estamos en el login), no hacemos nada y cortamos la función.
+  if (!sessionStorage.getItem("active_staff")) return;
+
   let ahora = Date.now();
 
   // ⏳ Inteligencia: Solo evaluar si han pasado 10 minutos (600,000 ms) desde la última vez que salió el aviso
