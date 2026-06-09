@@ -2199,8 +2199,6 @@
                 id="contenedorPlataformasVenta"
                 style="
                   grid-template-columns: 1fr;
-                  max-height: 240px;
-                  overflow-y: auto;
                   background: rgba(0, 0, 0, 0.2);
                   border-radius: 18px;
                   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -4719,15 +4717,41 @@
           </button>
         </div>
 
-        <div style="margin-bottom: 20px">
-          <input
-            type="text"
-            id="buscadorRegistroVentas"
-            class="input-ios"
-            style="margin-bottom: 0"
-            placeholder="Buscar por Nombre, Celular o Fecha (ej: 28/05)..."
-            oninput="filtrarRegistroVentas()"
-          />
+        <div
+          style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap"
+        >
+          <div style="flex: 1; min-width: 140px">
+            <select
+              id="mesRegistroVentas"
+              class="input-ios"
+              style="margin-bottom: 0; font-weight: 800; color: var(--ios-blue)"
+              onchange="filtrarRegistroVentas()"
+            >
+              <option value="TODOS">Todos los meses</option>
+              <option value="01">Enero</option>
+              <option value="02">Febrero</option>
+              <option value="03">Marzo</option>
+              <option value="04">Abril</option>
+              <option value="05">Mayo</option>
+              <option value="06">Junio</option>
+              <option value="07">Julio</option>
+              <option value="08">Agosto</option>
+              <option value="09">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+          <div style="flex: 2; min-width: 200px">
+            <input
+              type="text"
+              id="buscadorRegistroVentas"
+              class="input-ios"
+              style="margin-bottom: 0; width: 100%"
+              placeholder="Buscar cliente, número o día..."
+              oninput="filtrarRegistroVentas()"
+            />
+          </div>
         </div>
 
         <!-- Contenedor premium para la tabla -->
