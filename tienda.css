@@ -1,0 +1,844 @@
+/* =========================================================================
+   CYBERNET DESIGN SYSTEM - TIENDA PREMIUM (MODO OSCURO EXCLUSIVO)
+   ========================================================================= */
+
+:root {
+  --ios-blue: #0a84ff;
+  --ios-green: #32d74b;
+  --ios-red: #ff453a;
+  --ios-purple: #bf5af2;
+  --ios-orange: #ff9f0a;
+
+  --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
+  --success-gradient: linear-gradient(135deg, #32d74b 0%, #248a3d 100%);
+  --danger-gradient: linear-gradient(135deg, #ff453a 0%, #d70015 100%);
+
+  --transition-fluid:
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
+  --transition-spring:
+    transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease;
+
+  color-scheme: dark;
+  --page-bg: #000000;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(235, 235, 245, 0.6);
+
+  --glass-bg: rgba(30, 30, 35, 0.45);
+  --glass-border: 0.5px solid rgba(255, 255, 255, 0.15);
+  --glass-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  --card-bg: rgba(44, 44, 46, 0.6);
+  --input-bg: rgba(0, 0, 0, 0.3);
+  --sheet-bg: rgba(28, 28, 30, 0.95);
+  --sheet-modal-bg: rgba(28, 28, 30, 0.85);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display",
+    "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--page-bg);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.bg-orb-1 {
+  position: fixed;
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(
+    circle,
+    rgba(10, 132, 255, 0.12) 0%,
+    transparent 70%
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+.bg-orb-2 {
+  position: fixed;
+  bottom: -10%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(
+    circle,
+    rgba(191, 90, 242, 0.08) 0%,
+    transparent 70%
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 📱 HEADER SUPERIOR */
+.global-header {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 1200px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 50px;
+  padding: 10px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 98;
+  will-change: transform;
+}
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+}
+.btn-header-codigos {
+  text-decoration: none;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  border-radius: 20px;
+  font-weight: 800;
+  color: var(--ios-blue) !important;
+  background: rgba(10, 132, 255, 0.1) !important;
+  border: 0.5px solid rgba(10, 132, 255, 0.2) !important;
+}
+
+/* 🛒 BOTÓN FLOTANTE CARRITO DERECHO */
+.cart-trigger-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--ios-blue);
+  color: white;
+  border: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 25px rgba(10, 132, 255, 0.4);
+  z-index: 99;
+  transition: var(--transition-fluid);
+  will-change: transform;
+}
+.cart-trigger-btn:active {
+  transform: scale(0.9);
+}
+.cart-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--ios-red);
+  color: white;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  border: 2px solid #000;
+}
+
+/* =========================================
+   🤖 CHATBOT ASISTENTE FLOTANTE (IZQUIERDA)
+   ========================================= */
+.chat-fab-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ai-gradient);
+  color: white;
+  border: none;
+  box-shadow: 0 8px 20px rgba(10, 132, 255, 0.4);
+  cursor: pointer;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  transition: var(--transition-spring);
+}
+.chat-fab-btn:active {
+  transform: scale(0.9);
+}
+
+.chat-tooltip-ios {
+  position: fixed;
+  bottom: 88px;
+  left: 20px;
+  background: rgba(28, 28, 30, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: var(--glass-border);
+  padding: 10px 14px;
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--glass-shadow);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 98;
+  animation: floatTooltip 3s ease-in-out infinite;
+}
+.chat-tooltip-ios .close-tooltip {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--text-secondary);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@keyframes floatTooltip {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.chat-window-ios {
+  position: fixed;
+  bottom: 88px;
+  left: 20px;
+  width: 340px;
+  height: 480px;
+  max-height: 70vh;
+  max-width: calc(100vw - 40px);
+  background: var(--sheet-modal-bg);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: var(--glass-border);
+  border-radius: 24px;
+  box-shadow: var(--glass-shadow);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95) translateY(10px);
+  transform-origin: bottom left;
+  transition: var(--transition-fluid);
+}
+.chat-window-ios.open {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1) translateY(0);
+}
+.chat-header-store {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bot-avatar-icon {
+  width: 30px;
+  height: 30px;
+  background: var(--ai-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.chat-body-store {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chat-bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+.chat-bubble.bot {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+.chat-bubble.user {
+  align-self: flex-end;
+  background: var(--ios-blue);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-options-store {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.01);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.chat-option-btn-store {
+  background: rgba(10, 132, 255, 0.08);
+  color: var(--ios-blue);
+  border: 1px solid rgba(10, 132, 255, 0.2);
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-spring);
+  text-align: left;
+}
+.chat-option-btn-store:active {
+  transform: scale(0.98);
+  background: rgba(10, 132, 255, 0.15);
+}
+
+/* 🛍 WORKSPACE */
+.main-workspace {
+  width: 100%;
+  max-width: 1200px;
+  padding: 85px 12px 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.store-section-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.section-title-ios h2 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.section-title-ios p {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.grid-cards-store {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+.product-card {
+  background: var(--card-bg);
+  border: var(--glass-border);
+  border-radius: 24px;
+  padding: 16px 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+}
+.icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  padding: 10px;
+}
+.icon-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.product-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+.product-card p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  flex-grow: 1;
+  line-height: 1.2;
+}
+
+/* 💊 BOTONES ESTILO APP STORE */
+.btn-ios {
+  padding: 11px 16px;
+  border-radius: 50px !important;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--transition-fluid);
+  will-change: transform;
+}
+.btn-ios:active {
+  transform: scale(0.94);
+}
+
+.btn-add-store {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  color: var(--ios-blue) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.btn-add-store:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+.btn-added {
+  background: rgba(255, 69, 58, 0.15) !important;
+  border: 1px solid rgba(255, 69, 58, 0.2) !important;
+  color: var(--ios-red) !important;
+}
+.btn-added:hover {
+  background: rgba(255, 69, 58, 0.25) !important;
+}
+
+.btn-primary {
+  background: var(--ai-gradient);
+  color: white;
+}
+.btn-success {
+  background: var(--success-gradient);
+  color: white;
+  box-shadow: 0 4px 15px rgba(50, 215, 75, 0.3);
+}
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: var(--glass-border);
+  color: var(--text-primary);
+}
+
+.badge-ios {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.badge-danger {
+  color: var(--ios-red);
+  background: rgba(255, 69, 58, 0.1);
+  border-color: rgba(255, 69, 58, 0.2);
+  border: var(--glass-border);
+}
+
+/* =========================================================================
+   🛠️ CORRECCIÓN DE CAPAS CRITICAL E STRUCTURAL Z-INDEX (SOLUCIÓN DISFUMINADO ACCIDENTAL)
+   ========================================================================= */
+
+/* 1. Telas translúcidas base de fondo */
+.overlay-ios {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+  z-index: 1000; /* Nivel base de desenfoque */
+}
+#promoOverlay {
+  z-index: 1020 !important;
+} /* Sube un nivel cuando entra la oferta relámpago */
+.overlay-ios.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 2. El Carrito: Sube por encima de la capa base y se mantiene nítido */
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: var(--sheet-bg);
+  border-radius: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1005 !important; /* Más alto que overlay-ios (1000) */
+  transition: right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cart-drawer.active {
+  right: 0;
+}
+.cart-unified-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 85px;
+  -webkit-overflow-scrolling: touch;
+}
+.cart-unified-scroll-area::-webkit-scrollbar {
+  display: none;
+}
+.cart-items-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+.empty-cart-msg {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-top: 40px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.cart-sticky-action-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 14px 16px 24px 16px;
+  background: linear-gradient(to top, var(--sheet-bg) 80%, transparent 100%);
+  flex-shrink: 0;
+  z-index: 10;
+}
+.btn-pagar-footer {
+  font-size: 1rem;
+  padding: 15px;
+  box-shadow: 0 4px 15px rgba(10, 132, 255, 0.35);
+  width: 100%;
+}
+
+.input-ios-container {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  border-radius: 18px;
+  border: var(--glass-border);
+}
+.input-ios {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  outline: none;
+}
+select.select-vigencia-store {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.05);
+  font-weight: 700;
+}
+select.select-vigencia-store option {
+  background-color: #1c1c1e !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  padding: 12px;
+}
+
+.checkbox-ios-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding-top: 6px;
+}
+.toggle-ios {
+  appearance: none;
+  width: 46px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  border: var(--glass-border);
+  transition: background 0.2s ease;
+}
+.toggle-ios::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+.toggle-ios:checked {
+  background: var(--ios-green);
+}
+.toggle-ios:checked::after {
+  transform: translateX(22px);
+}
+
+.cart-item-row {
+  background: rgba(255, 255, 255, 0.02);
+  border: var(--glass-border);
+  border-radius: 16px;
+  padding: 14px;
+}
+.apple-list-container {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  overflow: hidden;
+  border: var(--glass-border);
+  width: 100%;
+}
+.apple-list-row {
+  display: flex;
+  width: 100%;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  align-items: center;
+}
+.td-cell {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.td-price {
+  font-weight: 700;
+  font-family: monospace;
+  font-size: 0.95rem;
+  text-align: right;
+}
+.total-row-store {
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.01);
+  border-bottom: none;
+}
+
+/* 3. Las Ventanas Modales de pago: Flotan al nivel más alto por encima de todo */
+.modal-ios-container {
+  position: fixed;
+  top: auto;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  z-index: 1015 !important; /* Más alto que el Carrito (1005) */
+  transition: bottom 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+.modal-ios-container.active {
+  bottom: 0;
+}
+.modal-ios {
+  width: 100%;
+  background: #1e1e24;
+  border-top: var(--glass-border);
+  border-radius: 28px 28px 0 0;
+  padding: 20px 16px 24px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+  max-height: 88dvh;
+  display: flex;
+  flex-direction: column;
+}
+.payment-scrollable-body {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  padding: 4px 2px;
+}
+.payment-modal-footer {
+  flex-shrink: 0;
+  width: 100%;
+}
+.btn-realizar-pago-confirm {
+  padding: 15px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.sheet-header,
+.payment-modal-header {
+  width: 100%;
+  margin-bottom: 14px;
+}
+.btn-close-circle {
+  background: rgba(255, 255, 255, 0.05);
+  border: var(--glass-border);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 4. Ofertas relámpago: Nivel supremo de bloqueo de pantalla */
+#promoModalContainer {
+  z-index: 1030 !important;
+}
+
+/* =========================================
+   🎁 OFERTAS RELÁMPAGO CRISTAL
+   ========================================= */
+.modal-promo-flash {
+  background: rgba(24, 24, 28, 0.95) !important;
+  backdrop-filter: blur(30px) !important;
+  -webkit-backdrop-filter: blur(30px) !important;
+  border: 1px solid rgba(255, 159, 10, 0.25) !important;
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, 0.8),
+    0 0 35px rgba(255, 159, 10, 0.15) !important;
+  border-radius: 28px !important;
+}
+.progress-bar-container-flash {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.progress-bar-fill-flash {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--ios-orange),
+    var(--ios-red)
+  ) !important;
+  transition: width 1s linear;
+}
+
+.btn-promo-flash {
+  background: linear-gradient(
+    135deg,
+    var(--ios-orange) 0%,
+    #ff453a 100%
+  ) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 0.98rem !important;
+  padding: 14px 20px !important;
+  border-radius: 50px !important;
+  box-shadow: 0 6px 18px rgba(255, 69, 58, 0.25) !important;
+  border: none !important;
+  transition: var(--transition-fluid) !important;
+}
+
+@media (min-width: 480px) {
+  .grid-cards-store {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+  .cart-drawer {
+    max-width: 400px;
+    right: -420px;
+    border-left: var(--glass-border);
+  }
+  .cart-drawer.active {
+    right: 0;
+  }
+  .modal-ios-container {
+    top: 50%;
+    bottom: auto;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 95%;
+    max-width: 420px;
+    transition:
+      transform 0.25s,
+      opacity 0.25s;
+    opacity: 0;
+    visibility: hidden;
+  }
+  .modal-ios-container.active {
+    transform: translate(-50%, -50%) scale(1);
+    bottom: auto;
+    opacity: 1;
+    visibility: visible;
+  }
+  .modal-ios {
+    border-radius: 32px;
+    border: var(--glass-border);
+    max-height: 85vh;
+  }
+}
