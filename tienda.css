@@ -842,3 +842,11 @@ select.select-vigencia-store option {
     max-height: 85vh;
   }
 }
+/* Esto hace que el botón se apague y no deje dar clic */
+.btn-producto.agotado {
+    background-color: #3a3a3c !important; /* Gris oscuro estilo iPhone */
+    color: #8e8e93 !important;            /* Letras grises opacas */
+    cursor: not-allowed;                  /* Muestra el símbolo de bloqueado */
+    border: 1px solid #48484a;
+    pointer-events: none;                 /* Bloquea cualquier clic por completo */
+}
