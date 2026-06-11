@@ -138,19 +138,19 @@ const listaPlataformasVenta = [
   {
     id: "PLEX",
     nombre: "PLEX",
-    permitePantallas: false,
+    permitePantallas: true,
     permiteRenovacion: false,
   },
   {
     id: "PARAMOUNT",
     nombre: "PARAMOUNT",
-    permitePantallas: false,
+    permitePantallas: true,
     permiteRenovacion: false,
   },
   {
     id: "APPLE-TV",
     nombre: "APPLE TV",
-    permitePantallas: false,
+    permitePantallas: true,
     permiteRenovacion: false,
   },
   {
@@ -211,6 +211,18 @@ const listaPlataformasVenta = [
     id: "MUBI",
     nombre: "MUBI",
     permitePantallas: false,
+    permiteRenovacion: false,
+  },
+  {
+    id: "FLUJO",
+    nombre: "FLUJO TV",
+    permitePantallas: true,
+    permiteRenovacion: false,
+  },
+  {
+    id: "EMBY",
+    nombre: "EMBY",
+    permitePantallas: true,
     permiteRenovacion: false,
   },
 ];
