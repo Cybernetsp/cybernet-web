@@ -19,7 +19,7 @@ const PLATAFORMAS_INFO = {
   disney_std: { name: "Disney Estándar", type: "regular", price: 8500 },
   amazon: { name: "Amazon Prime", type: "regular", price: 10500 },
   max: { name: "HBO Max", type: "regular", price: 8500 },
-  paramount: { name: "Paramount+", type: "regular", price: 8500 },
+  paramount: { name: "Paramount+", type: "regular", price: 10000 }, // PRECIO ACTUALIZADO
   vix: { name: "Vix+", type: "regular", price: 8500 },
   plex: { name: "Plex TV", type: "regular", price: 8500 },
   crunchy: { name: "Crunchyroll", type: "regular", price: 8500 },
@@ -76,7 +76,7 @@ const PROMOS_RELAMPAGO = [
     meses: 1,
     precio: 9900,
     texto:
-      "🔥 <strong>HBO Max + Paramount+</strong> por solo <strong>$9.900</strong> (Normal: $13k) 🚀<br><br>¡Doble plataforma al precio de una, solo por 30 segundos!",
+      "🔥 <strong>HBO Max + Paramount+</strong> por solo <strong>$9.900</strong> (Normal: $16.500) 🚀<br><br>¡Doble plataforma al precio de una, solo por 30 segundos!",
     msjWhatsapp: "Dúo HBO Max + Paramount a $9.900",
   },
   {
@@ -99,6 +99,7 @@ const PROMOS_RELAMPAGO = [
   },
 ];
 
+// Tabla de precios oficiales de Netflix
 const PRECIOS_NETFLIX = { 1: 14500, 2: 26000, 3: 36000, 4: 46000, 5: 55000 };
 
 function triggerToast(msgText) {
@@ -167,11 +168,16 @@ function ajustarPantallas(id, delta) {
   actualizarCarrito();
 }
 
-// 🧠 SIMULADOR MATEMÁTICO DE VALORES COMBO
+// 🧠 SIMULADOR MATEMÁTICO DE VALORES COMBO (CON LÓGICA ESPECIAL PARA PARAMOUNT)
 function simularPrecioCart(tempCart, meses) {
   const itemNetflix = tempCart.find((i) => i.type === "netflix");
   const itemDisneyPrem = tempCart.find((i) => i.type === "disney_prem");
-  const regularPlats = tempCart.filter((i) => i.type === "regular");
+  const itemParamount = tempCart.find((i) => i.id === "paramount");
+
+  // Excluimos a paramount del conteo genérico de combos para tratarlo de forma aislada
+  const regularPlats = tempCart.filter(
+    (i) => i.type === "regular" && i.id !== "paramount",
+  );
   const addonPlats = tempCart.filter((i) => i.type === "addon");
   const regularCount = regularPlats.length;
 
@@ -243,6 +249,21 @@ function simularPrecioCart(tempCart, meses) {
     }
   }
 
+  // ⚡ REGLA PARAMOUNT: 10k solo, o +8k si va en combo adicional
+  if (itemParamount) {
+    if (precioBase === 0) {
+      precioBase = 10000;
+      nombreC = "Solo Paramount+";
+    } else {
+      precioBase += 8000;
+      if (nombreC !== "") {
+        nombreC += " + Paramount";
+      } else {
+        nombreC = "Combo + Paramount";
+      }
+    }
+  }
+
   let streamingPuroBase = precioBase * meses;
   let recargoMeses = tempCart
     .filter((i) => i.type !== "addon")
@@ -254,6 +275,7 @@ function simularPrecioCart(tempCart, meses) {
             sum + (PRECIOS_NETFLIX[item.pantallas] - PRECIOS_NETFLIX[1]) * meses
           );
         if (item.id === "disney_prem") return sum + extra * 7000 * meses;
+        if (item.id === "paramount") return sum + extra * 8000 * meses; // Pantalla extra de Paramount
         return sum + extra * 4000 * meses;
       }
       return sum;
