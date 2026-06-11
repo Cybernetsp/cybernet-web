@@ -19,12 +19,15 @@ const PLATAFORMAS_INFO = {
   disney_std: { name: "Disney Estándar", type: "regular", price: 8500 },
   amazon: { name: "Amazon Prime", type: "regular", price: 10500 },
   max: { name: "HBO Max", type: "regular", price: 8500 },
-  paramount: { name: "Paramount+", type: "regular", price: 10000 }, // PRECIO ACTUALIZADO
+  paramount: { name: "Paramount+", type: "regular", price: 10000 },
   vix: { name: "Vix+", type: "regular", price: 8500 },
   plex: { name: "Plex TV", type: "regular", price: 8500 },
   crunchy: { name: "Crunchyroll", type: "regular", price: 8500 },
   apple: { name: "Apple TV+", type: "regular", price: 8500 },
   universal: { name: "Universal+", type: "regular", price: 8500 },
+  iptv: { name: "IPTV Smarters", type: "regular", price: 10000 }, // ADICIONADO
+  flujo: { name: "Flujo TV", type: "regular", price: 12000 }, // ADICIONADO
+  emby: { name: "Emby", type: "regular", price: 12000 }, // ADICIONADO
   canva: { name: "Canva Pro", type: "addon", price: 20000 },
   spotify: { name: "Spotify Premium", type: "addon", price: 14000 },
   yt: { name: "YouTube Premium", type: "addon", price: 14000 },
@@ -71,6 +74,15 @@ const PROMOS_RELAMPAGO = [
     msjWhatsapp: "Disney+ Premium (1 Mes) a $13.000",
   },
   {
+    id: "p5",
+    items: ["max", "paramount"],
+    meses: 1,
+    precio: 9900,
+    texto:
+      "🔥 <strong>HBO Max + Paramount+</strong> por solo <strong>$9.900</strong> (Normal: $16.500) 🚀<br><br>¡Doble plataforma al precio de una, solo por 30 segundos!",
+    msjWhatsapp: "Dúo HBO Max + Paramount a $9.900",
+  },
+  {
     id: "p6",
     items: ["amazon"],
     meses: 1,
@@ -90,7 +102,6 @@ const PROMOS_RELAMPAGO = [
   },
 ];
 
-// Tabla de precios oficiales de Netflix
 const PRECIOS_NETFLIX = { 1: 14500, 2: 26000, 3: 36000, 4: 46000, 5: 55000 };
 
 function triggerToast(msgText) {
@@ -159,15 +170,21 @@ function ajustarPantallas(id, delta) {
   actualizarCarrito();
 }
 
-// 🧠 SIMULADOR MATEMÁTICO DE VALORES COMBO (CON LÓGICA ESPECIAL PARA PARAMOUNT)
+// 🧠 SIMULADOR MATEMÁTICO DE VALORES COMBO (CON EXCLUSIÓN INTELIGENTE DE PREMIUMS)
 function simularPrecioCart(tempCart, meses) {
   const itemNetflix = tempCart.find((i) => i.type === "netflix");
   const itemDisneyPrem = tempCart.find((i) => i.type === "disney_prem");
-  const itemParamount = tempCart.find((i) => i.id === "paramount");
 
-  // Excluimos a paramount del conteo genérico de combos para tratarlo de forma aislada
+  // Extracción de plataformas con lógicas de descuento aisladas de $2.000 fijos
+  const itemParamount = tempCart.find((i) => i.id === "paramount");
+  const itemIptv = tempCart.find((i) => i.id === "iptv");
+  const itemFlujo = tempCart.find((i) => i.id === "flujo");
+  const itemEmby = tempCart.find((i) => i.id === "emby");
+
+  // Filtramos las especiales para que no interfieran en los cálculos del combo base de básicas
+  const lasEspecialesIds = ["paramount", "iptv", "flujo", "emby"];
   const regularPlats = tempCart.filter(
-    (i) => i.type === "regular" && i.id !== "paramount",
+    (i) => i.type === "regular" && !lasEspecialesIds.includes(i.id),
   );
   const addonPlats = tempCart.filter((i) => i.type === "addon");
   const regularCount = regularPlats.length;
@@ -240,20 +257,25 @@ function simularPrecioCart(tempCart, meses) {
     }
   }
 
-  // ⚡ REGLA PARAMOUNT: 10k solo, o +8k si va en combo adicional
-  if (itemParamount) {
+  // ⚡ INYECTOR DE LA NUEVA MATEMÁTICA EN CADENA: Rebaja fijos $2.000 si hay combo o entre ellas
+  let colaEspeciales = [];
+  if (itemParamount)
+    colaEspeciales.push({ name: "Paramount", full: 10000, combo: 8000 });
+  if (itemIptv) colaEspeciales.push({ name: "IPTV", full: 10000, combo: 8000 });
+  if (itemFlujo)
+    colaEspeciales.push({ name: "Flujo TV", full: 12000, combo: 10000 });
+  if (itemEmby)
+    colaEspeciales.push({ name: "Emby", full: 12000, combo: 10000 });
+
+  colaEspeciales.forEach((esp) => {
     if (precioBase === 0) {
-      precioBase = 10000;
-      nombreC = "Solo Paramount+";
+      precioBase = esp.full;
+      nombreC = "Solo " + esp.name;
     } else {
-      precioBase += 8000;
-      if (nombreC !== "") {
-        nombreC += " + Paramount";
-      } else {
-        nombreC = "Combo + Paramount";
-      }
+      precioBase += esp.combo;
+      nombreC += " + " + esp.name;
     }
-  }
+  });
 
   let streamingPuroBase = precioBase * meses;
   let recargoMeses = tempCart
@@ -266,7 +288,10 @@ function simularPrecioCart(tempCart, meses) {
             sum + (PRECIOS_NETFLIX[item.pantallas] - PRECIOS_NETFLIX[1]) * meses
           );
         if (item.id === "disney_prem") return sum + extra * 7000 * meses;
-        if (item.id === "paramount") return sum + extra * 8000 * meses; // Pantalla extra de Paramount
+        if (item.id === "paramount" || item.id === "iptv")
+          return sum + extra * 8000 * meses;
+        if (item.id === "flujo" || item.id === "emby")
+          return sum + extra * 10000 * meses;
         return sum + extra * 4000 * meses;
       }
       return sum;
@@ -546,7 +571,7 @@ function copiarLlave() {
     if (btn) {
       btn.innerText = "¡Copiado!";
       btn.style.color = "var(--ios-green)";
-      triggerToast("Llave Bre-B copiada al portapapeles");
+      triggerToast("Llave Bre-B copiada");
       setTimeout(() => {
         btn.innerText = "📋 Copiar";
         btn.style.color = "var(--text-primary)";
@@ -598,7 +623,7 @@ function copyLlaveTutorial() {
     if (btn) {
       btn.innerText = "¡Copiado!";
       btn.style.color = "var(--ios-green)";
-      triggerToast("Llave Bre-B copiada al portapapeles");
+      triggerToast("Llave Bre-B copiada");
       setTimeout(() => {
         btn.innerText = "📋 Copiar";
         btn.style.color = "var(--text-primary)";
