@@ -842,26 +842,6 @@ select.select-vigencia-store option {
     max-height: 85vh;
   }
 }
-/* ==========================================================
-   ✨ ESTILO PREMIUM PARA PRODUCTOS AGOTADOS (MODO OSCURO)
-   ========================================================== */
-
-/* 1. El botón de Agotado en forma de píldora idéntica a "Añadir" */
-.btn-anadir.agotado {
-    background-color: rgba(255, 255, 255, 0.05) !important; /* Fondo oscuro translúcido */
-    color: #636366 !important;            /* Gris atenuado iOS */
-    border: none !important;              /* Eliminamos el borde feo viejo */
-    outline: none !important;
-    padding: 12px 24px;                   /* Ajusta para que mida lo mismo que tu botón Añadir */
-    border-radius: 24px;                  /* Forma de píldora perfecta */
-    font-size: 15px;
-    font-weight: 600;
-    cursor: not-allowed;                  /* Cursor de bloqueo */
-    width: 100%;                          /* Para que ocupe el mismo ancho */
-    max-width: 220px;
-    text-align: center;
-    box-shadow: none !important;
-    transition: all 0.2s ease;
 }
 
 /* 2. Opcional: Apagar un poco la tarjeta completa para que el cliente 
