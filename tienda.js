@@ -71,15 +71,6 @@ const PROMOS_RELAMPAGO = [
     msjWhatsapp: "Disney+ Premium (1 Mes) a $13.000",
   },
   {
-    id: "p5",
-    items: ["max", "paramount"],
-    meses: 1,
-    precio: 9900,
-    texto:
-      "🔥 <strong>HBO Max + Paramount+</strong> por solo <strong>$9.900</strong> (Normal: $16.500) 🚀<br><br>¡Doble plataforma al precio de una, solo por 30 segundos!",
-    msjWhatsapp: "Dúo HBO Max + Paramount a $9.900",
-  },
-  {
     id: "p6",
     items: ["amazon"],
     meses: 1,
