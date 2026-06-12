@@ -2722,7 +2722,7 @@ function renderizarListaGarantiasDefinitiva(data) {
   container.innerHTML = html;
 }
 
-// 🏆 COPIADOR DE EVIDENCIAS PROFESIONAL: BYPASSA EL CORS DE GOOGLE DRIVE Y COPIA DIRECTO PARA WHATSAPP
+// 🏆 COPIADOR MULTIMEDIA PRO: EVADE EL CORS CON EL MOTOR DE GOOGLE Y ELIMINA ERRORES DE RED
 window.copiarImagenPortapapeles = async function (imgId, btn) {
   if (typeof haptic === "function") haptic();
   const imgElement = document.getElementById(imgId);
@@ -2732,58 +2732,93 @@ window.copiarImagenPortapapeles = async function (imgId, btn) {
   btn.innerHTML = "Copiando...";
   btn.disabled = true;
 
+  const esEntornoLocal = window.location.protocol === "file:";
+
+  // =========================================================================
+  // 🚀 MODO AUTOMÁTICO: MOTOR DE EXTRACCIÓN BINARIA ULTRA-RÁPIDO
+  // =========================================================================
   try {
-    // 💡 TRUCO MAESTRO: Escribimos un objeto RichText (HTML) en el portapapeles.
-    // Esto evita que JavaScript intente leer los píxeles de Google Drive, esquivando el error CORS.
-    if (navigator.clipboard && window.ClipboardItem) {
-      const htmlBlob = new Blob([`<img src="${imgElement.src}">`], { type: "text/html" });
-      const textBlob = new Blob([imgElement.src], { type: "text/plain" });
-      
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          "text/html": htmlBlob,
-          "text/plain": textBlob
-        })
-      ]);
-      
-      mostrarExitoCopiadoDefinitivo(btn, originalHtml);
-      return;
-    }
-    
-    // 🔄 Plan de respaldo síncrono por interceptor de eventos (Para navegadores antiguos)
-    const escucharCopiadoNativo = (e) => {
-      e.clipboardData.setData('text/html', `<img src="${imgElement.src}">`);
-      e.clipboardData.setData('text/plain', imgElement.src);
-      e.preventDefault();
-    };
-    document.addEventListener('copy', escucharCopiadoNativo);
-    const exitoSincrono = document.execCommand('copy');
-    document.removeEventListener('copy', escucharCopiadoNativo);
+    // Usamos el Proxy Gadget oficial de Google, optimizado para cachear y liberar CORS de imágenes
+    const googleProxyUrl = `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=${encodeURIComponent(imgElement.src)}`;
 
-    if (exitoSincrono) {
-      mostrarExitoCopiadoDefinitivo(btn, originalHtml);
-    } else {
-      throw new Error("Portapapeles no soportado");
-    }
+    const response = await fetch(googleProxyUrl);
+    if (!response.ok) throw new Error("Proxy no disponible");
+    const imagenBlob = await response.blob();
 
-  } catch (err) {
-    console.error("Fallo crítico de copiado:", err);
-    // Si el navegador bloquea todo, se congela de forma segura sin romper el diseño
-    btn.innerHTML = "¡Usa Clic Der.!";
-    btn.style.background = "var(--ios-orange)";
+    // Renderizamos los píxeles limpios en memoria para WhatsApp
+    const pngBlob = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((b) => resolve(b), "image/png");
+      };
+      img.onerror = () => reject(new Error("Error gráficos"));
+      img.src = URL.createObjectURL(imagenBlob);
+    });
+
+    // Inyectamos el archivo nativo en la memoria de la PC
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": pngBlob }),
+    ]);
+
+    // Copiado Exitoso de una vez
+    btn.innerHTML = "¡Copiada!";
+    btn.style.background = "var(--ios-green)";
     btn.style.color = "white";
+    btn.style.borderColor = "transparent";
 
     if (typeof triggerToast === "function") {
-      triggerToast(`<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>Dale Clic Derecho a la foto ➔ Copiar imagen</span></div>`);
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Foto copiada! Ya puedes pegarla en WhatsApp (Ctrl + V)</span></div>`,
+      );
     }
 
     setTimeout(() => {
       btn.innerHTML = originalHtml;
       btn.style.background = "";
       btn.style.color = "";
+      btn.style.borderColor = "";
       btn.disabled = false;
-    }, 2500);
+    }, 1500);
+    return;
+  } catch (err) {
+    console.log("Desviando bloqueo de red local hacia el asistente visual...");
   }
+
+  // =========================================================================
+  // 🚨 PLAN DE ASISTENCIA (ANTI-CONGELAMIENTO PARA MODO LOCAL FILE://)
+  // =========================================================================
+  // Si estás abriendo el archivo desde tus carpetas sin servidor web, el navegador
+  // bloqueará la extracción. Activamos el foco naranja sin romper la pantalla.
+
+  btn.innerHTML = "¡Usa Clic Der.!";
+  btn.style.background = "var(--ios-orange)";
+  btn.style.color = "white";
+
+  // Alumbrar la foto para que el operador sepa cuál es sin equivocarse
+  imgElement.style.transition = "all 0.3s ease";
+  imgElement.style.transform = "scale(1.04)";
+  imgElement.style.outline = "3px solid var(--ios-orange)";
+
+  if (typeof triggerToast === "function") {
+    triggerToast(
+      `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>Al estar en local: Clic derecho a la foto ➔ 'Copiar imagen'</span></div>`,
+    );
+  }
+
+  setTimeout(() => {
+    imgElement.style.transform = "";
+    imgElement.style.outline = "none";
+    btn.innerHTML = originalHtml;
+    btn.style.background = "";
+    btn.style.color = "";
+    btn.disabled = false;
+  }, 3000);
 };
 
 // Función auxiliar estética para pintar el éxito estilo iOS
@@ -2794,7 +2829,9 @@ function mostrarExitoCopiadoDefinitivo(btn, originalHtml) {
   btn.style.borderColor = "transparent";
 
   if (typeof triggerToast === "function") {
-    triggerToast(`<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Foto copiada! Ya puedes pegarla en WhatsApp (Ctrl + V)</span></div>`);
+    triggerToast(
+      `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Foto copiada! Ya puedes pegarla en WhatsApp (Ctrl + V)</span></div>`,
+    );
   }
 
   setTimeout(() => {
