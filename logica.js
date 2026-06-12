@@ -2454,26 +2454,39 @@ function procesarImagenGarantia(fileSource) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      // 🎯 EL PUNTO DE EQUILIBRIO PERFECTO (SWEET SPOT)
-      // Configurado a 200px de ancho y 0.35 de calidad.
-      // Genera un texto Base64 de aprox 4,000 caracteres que viaja seguro
-      // por debajo del límite de 8KB de tu doGet actual sin congelar la pantalla,
-      // pero manteniendo las letras y códigos del error 100% legibles.
-      const MAX_WIDTH = 200;
+      // 🎯 NUEVA CONFIGURACIÓN ÓPTICA PARA SCREENSHOTS DE TEXTO
+      // Subimos el ancho a 350px para dar nitidez a las letras de las celdas
+      const MAX_WIDTH = 350;
       const scaleSize = MAX_WIDTH / img.width;
       canvas.width = MAX_WIDTH;
       canvas.height = img.height * scaleSize;
+
+      // 🚫 APAGAMOS EL SUAVIZADO: Evita que el navegador empañe o difumine los bordes de las letras
+      ctx.imageSmoothingEnabled = false;
+      ctx.mozImageSmoothingEnabled = false;
+      ctx.webkitImageSmoothingEnabled = false;
+
+      // 🎭 FILTRO DE PROCESAMIENTO DIGITAL: Convierte a blanco y negro y aumenta contraste.
+      // Al no tener que procesar color, el JPEG comprime el texto de forma ultra eficiente,
+      // logrando que una imagen de 350px pese menos que la anterior de 200px.
+      ctx.filter = "grayscale(100%) contrast(140%)";
+      
+      // Dibujamos la imagen con los filtros aplicados
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
+      // Extraemos el Base64 con una calidad equilibrada de 0.35
       window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.35);
 
+      // Actualizamos la vista previa en el panel
       document.getElementById("dropzoneText").style.display = "none";
       const preview = document.getElementById("previewGarantia");
       preview.src = window.imagenGarantiaActualBase64;
-      preview.style.display = "block";
+      
+      // 💎 Ajuste CSS para que el navegador no suavice la miniatura al estirarla
+      preview.style.cssText = "display: block; max-height: 120px; max-width: 100%; border-radius: 8px; margin: 0 auto; object-fit: contain; box-shadow: var(--glass-shadow); image-rendering: pixelated; image-rendering: crisp-edges;";
+      
       document.getElementById("btnQuitarFoto").style.display = "block";
-      document.getElementById("dropzoneGarantia").style.borderColor =
-        "var(--ios-blue)";
+      document.getElementById("dropzoneGarantia").style.borderColor = "var(--ios-blue)";
     };
     img.src = e.target.result;
   };
