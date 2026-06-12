@@ -843,34 +843,21 @@ select.select-vigencia-store option {
   }
 }
 /* ==========================================================
-   ✨ BOTÓN DE AGOTADO PREMIUM ESTILO iOS (MODO OSCURO)
+   ✨ AJUSTE PREMIUM PARA BOTONES AGOTADOS DE TU TIENDA
    ========================================================== */
 
-/* Transforma el recuadro feo en la píldora elegante */
-.btn-producto.agotado {
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.06
-  ) !important; /* Fondo translúcido suave */
-  color: #636366 !important; /* Gris atenuado de Apple */
-  border: none !important; /* ¡Adiós al borde gris feo! */
-  outline: none !important;
-  padding: 12px 24px; /* Le da la altura y forma del de Vix+ */
-  border-radius: 30px; /* Píldora perfecta */
-  font-size: 15px;
-  font-weight: 600;
-  cursor: not-allowed; /* Cursor de bloqueo */
-  width: 100%; /* Se estira al ancho de la tarjeta */
-  box-shadow: none !important;
-  margin-top: 15px; /* Separa el botón del texto descriptivo */
-  transition: all 0.2s ease;
+/* Apaga el botón azul original y lo vuelve gris traslúcido */
+.btn-ios.btn-add-store.agotado {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #636366 !important;
+    border: none !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    pointer-events: none; /* Bloquea cualquier intento de clic */
 }
 
-/* OPCIONAL: Apaga un 40% la tarjeta completa para que visualmente 
-   se note el stock agotado desde lejos */
+/* Opacidad elegante para la tarjeta completa */
 .card-ios.product-card.tarjeta-agotada {
-  opacity: 0.6;
-  filter: grayscale(15%);
+    opacity: 0.55;
+    filter: grayscale(10%);
 }
