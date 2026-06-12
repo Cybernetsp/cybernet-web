@@ -952,3 +952,69 @@ window.onload = () => {
   actualizarCarrito();
   iniciarSistemaPromos();
 };
+// =========================================================================
+// 🛰️ RECEPTOR: SINCRONIZADOR DE STOCK AUTOMÁTICO (ESCUCHA A CAMILO)
+// =========================================================================
+
+function verificarStockDesdeMemoria() {
+  // Leemos lo que Camilo guardó en la memoria
+  const agotados = JSON.parse(
+    localStorage.getItem("cyber_items_agotados") || "[]",
+  );
+
+  // Lista de todos los botones de la tienda
+  const idsPlataformas = [
+    "btn_netflix",
+    "btn_disney_prem",
+    "btn_disney_std",
+    "btn_amazon",
+    "btn_max",
+    "btn_paramount",
+    "btn_vix",
+    "btn_plex",
+    "btn_crunchy",
+    "apple",
+    "btn_universal",
+    "btn_iptv",
+    "btn_flujo",
+    "btn_emby",
+    "btn_canva",
+    "btn_spotify",
+    "btn_yt",
+    "btn_deezer",
+    "btn_metegol",
+  ];
+
+  idsPlataformas.forEach((id) => {
+    const boton = document.getElementById(id);
+    if (!boton) return; // Si no encuentra el botón, sigue con el siguiente
+
+    // Buscamos la tarjeta contenedora (.card-ios)
+    const tarjeta = boton.closest(".card-ios");
+
+    if (agotados.includes(id)) {
+      // ❌ Camilo lo marcó como AGOTADO
+      if (tarjeta) tarjeta.classList.add("tarjeta-agotada");
+      boton.classList.add("agotado");
+      boton.disabled = true;
+      boton.innerText = "Agotado";
+    } else {
+      // 🟢 Camilo lo dejó DISPONIBLE
+      if (tarjeta) tarjeta.classList.remove("tarjeta-agotada");
+      boton.classList.remove("agotado");
+      boton.disabled = false;
+      boton.innerText = "Añadir";
+    }
+  });
+}
+
+// 1. Ejecutar automáticamente apenas el cliente entra a la tienda
+document.addEventListener("DOMContentLoaded", verificarStockDesdeMemoria);
+
+// 2. MAGIA PURA: Escuchar cambios en vivo.
+// Si tú apagas el switch, al cliente se le bloquea la tienda en tiempo real.
+window.addEventListener("storage", function (e) {
+  if (e.key === "cyber_items_agotados") {
+    verificarStockDesdeMemoria();
+  }
+});
