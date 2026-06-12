@@ -2456,7 +2456,7 @@ function procesarImagenGarantia(fileSource) {
 
       // 🎯 REVOLUCIÓN ÓPTICA V2 (MÁS ESPACIO PARA LAS LETRAS)
       // Subimos el ancho a 700px para que las letras no se fusionen en un manchón.
-      const MAX_WIDTH = 700;
+      const MAX_WIDTH = 1400;
       const scaleSize = MAX_WIDTH / img.width;
       canvas.width = MAX_WIDTH;
       canvas.height = img.height * scaleSize;
