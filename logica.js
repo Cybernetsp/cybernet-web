@@ -4084,35 +4084,7 @@ function inicializarWorkspace() {
   cargarHorasDesdeSheets();
 }
 
-// 🚀 UNIFICADO: MOTOR DE INICIALIZACIÓN INTELIGENTE (ANTI-BUCLES LOCAL Y WEB)
-window.addEventListener("DOMContentLoaded", () => {
-  let savedTheme = localStorage.getItem("cyber_theme") || "dark";
-  document.documentElement.setAttribute("data-theme", savedTheme);
 
-  let sessionStaff = sessionStorage.getItem("active_staff");
-  let localStaff = localStorage.getItem("cyber_saved_staff");
-  let user = sessionStaff || localStaff;
-
-  const path = window.location.pathname.toLowerCase();
-  // Detecta de forma flexible si la URL contiene la palabra "login" en local o web
-  const esPaginaLogin = path.includes("login");
-
-  if (!user) {
-    if (!esPaginaLogin) {
-      // Si corre local en PC usa .html, si corre en la web usa ruta limpia
-      window.location.href = window.location.pathname.includes(".html") ? "login.html" : "login";
-      return;
-    }
-  } else {
-    if (esPaginaLogin) {
-      // Si ya está logueado, lo manda al panel administrador de forma limpia
-      window.location.href = window.location.pathname.includes(".html") ? "admin.html" : "admin";
-      return;
-    }
-    // Si todo está correcto y está en el panel, enciende Cybernet
-    entrarAlSistema(user);
-  }
-});
 
 function cerrarSesionStaff() {
   haptic();
