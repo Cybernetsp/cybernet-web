@@ -2454,15 +2454,18 @@ function procesarImagenGarantia(fileSource) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      // 🚨 COMPRESIÓN EXTREMA PARA ALINEAR CON DOGET (URL CORTA)
-      // Reducimos a 85px de ancho y 0.15 de calidad para que el texto pese menos de 1KB
-      const MAX_WIDTH = 85;
+      // 🎯 EL PUNTO DE EQUILIBRIO PERFECTO (SWEET SPOT)
+      // Configurado a 200px de ancho y 0.35 de calidad.
+      // Genera un texto Base64 de aprox 4,000 caracteres que viaja seguro
+      // por debajo del límite de 8KB de tu doGet actual sin congelar la pantalla,
+      // pero manteniendo las letras y códigos del error 100% legibles.
+      const MAX_WIDTH = 200;
       const scaleSize = MAX_WIDTH / img.width;
       canvas.width = MAX_WIDTH;
       canvas.height = img.height * scaleSize;
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.15);
+      window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.35);
 
       document.getElementById("dropzoneText").style.display = "none";
       const preview = document.getElementById("previewGarantia");
