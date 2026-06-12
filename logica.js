@@ -2434,119 +2434,6 @@ function verificarTipoProblema() {
   }
 }
 
-// 🔥 VARIABLE GLOBAL PARA LA IMAGEN 🔥
-window.imagenGarantiaActualBase64 = "";
-
-// 🔄 FUNCIÓN ACTUALIZADA: PROCESAR IMAGEN DESDE INPUT, DRAG&DROP O PORTAPAPELES (PASTE)
-function procesarImagenGarantia(fileSource) {
-  let file = null;
-  if (fileSource instanceof File) {
-    file = fileSource;
-  } else if (fileSource && fileSource.files && fileSource.files[0]) {
-    file = fileSource.files[0];
-  }
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const img = new Image();
-    img.onload = function () {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-
-      // 🎯 RESOLUCIÓN CALIBRADA PARA LETRAS ASENTADAS
-      // 480px le da el espacio físico perfecto a las fuentes para que no se encimen
-      const MAX_WIDTH = 480;
-      const scaleSize = MAX_WIDTH / img.width;
-      canvas.width = MAX_WIDTH;
-      canvas.height = img.height * scaleSize;
-
-      // Desactivamos el suavizado nativo para mantener los bordes de los textos firmes
-      ctx.imageSmoothingEnabled = false;
-      ctx.mozImageSmoothingEnabled = false;
-      ctx.webkitImageSmoothingEnabled = false;
-
-      // Dibujamos la captura original en el lienzo
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      // 🧪 ALGORITMO BINARIO ULTRA-LIGERO (PROTEGE EL ENLACE DOGET)
-      // Extraemos el mapa de píxeles para remover los grises intermedios que empañan la foto
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imgData.data;
-      
-      for (let i = 0; i < data.length; i += 4) {
-        // Calculamos el brillo real del píxel (Fórmula de Luminancia)
-        const brillo = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-        
-        // Umbral inteligente: Si es claro se vuelve blanco puro, si es oscuro (letras) negro puro
-        const colorBinario = brillo > 135 ? 255 : 0;
-        
-        data[i] = colorBinario;     // R
-        data[i + 1] = colorBinario; // G
-        data[i + 2] = colorBinario; // B
-      }
-      
-      // Planchamos los píxeles ultra-contrastados de vuelta en el canvas
-      ctx.putImageData(imgData, 0, 0);
-
-      // Exportamos a Base64. Al ser binario, la URL queda minúscula (pesa menos de 3KB)
-      window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.3);
-
-      // Actualizamos la vista previa en la interfaz
-      document.getElementById("dropzoneText").style.display = "none";
-      const preview = document.getElementById("previewGarantia");
-      preview.src = window.imagenGarantiaActualBase64;
-      
-      preview.style.cssText = "display: block; max-height: 120px; max-width: 100%; border-radius: 8px; margin: 0 auto; object-fit: contain; box-shadow: var(--glass-shadow); image-rendering: pixelated;";
-      
-      document.getElementById("btnQuitarFoto").style.display = "block";
-      document.getElementById("dropzoneGarantia").style.borderColor = "var(--ios-blue)";
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-// 🔥 NUEVO ESCUCHADOR GLOBAL: INTERCEPTAR CTRL+V Y PEGAR CAPTURAS AL INSTANTE
-window.addEventListener("paste", function (e) {
-  // Validamos si la ventana de garantías está abierta (revisando si existe la zona de soltar)
-  const dropzone = document.getElementById("dropzoneGarantia");
-  if (!dropzone) return;
-
-  // Extraemos los elementos que están en el portapapeles del computador o celular
-  const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-
-  for (let i = 0; i < items.length; i++) {
-    // Si el elemento interceptado es una imagen (un screenshot del portapapeles)
-    if (items[i].type.indexOf("image") !== -1) {
-      const file = items[i].getAsFile();
-      if (file) {
-        procesarImagenGarantia(file);
-
-        // Evitamos que se intente pegar texto basura o código binario roto
-        // dentro del input de correo o clave si el trabajador estaba escribiendo ahí.
-        e.preventDefault();
-        break;
-      }
-    }
-  }
-});
-
-function quitarImagenGarantia(e) {
-  if (e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-  window.imagenGarantiaActualBase64 = "";
-  // 📝 Línea de reset de input removida con éxito para el flujo sin clics
-  document.getElementById("dropzoneText").style.display = "flex";
-  document.getElementById("previewGarantia").style.display = "none";
-  document.getElementById("previewGarantia").src = "";
-  document.getElementById("btnQuitarFoto").style.display = "none";
-  document.getElementById("dropzoneGarantia").style.borderColor =
-    "var(--text-secondary)";
-}
-
 function ejecutarReporte(e) {
   e.preventDefault();
   if (typeof haptic === "function") haptic();
@@ -2562,30 +2449,15 @@ function ejecutarReporte(e) {
     descripcion = document.getElementById("repDesc").value.trim();
   }
 
+  // Activamos el estado de carga simple
   btnSubmit.disabled = true;
   btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Enviando...`;
-
-  // ⏱️ TIMEOUT CALIBRADO A 35 SEGUNDOS
-  // Como usamos doGet, Google Sheets requiere entre 15 y 25 segundos para escanear las filas,
-  // pintar las celdas afectadas en rojo y asentar el registro definitivo.
-  const timeoutAuxilio = setTimeout(() => {
-    if (btnSubmit.disabled) {
-      btnSubmit.disabled = false;
-      btnSubmit.innerText = "Enviar a Garantía";
-      if (typeof triggerToast === "function") {
-        triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg><span>La conexión tardó de más. Intenta reenviar ahora.</span></div>`,
-        );
-      }
-    }
-  }, 35000);
 
   const oldScript = document.getElementById("cyber_reporte_node");
   if (oldScript) oldScript.remove();
 
+  // Receptor de respuesta rápida de Google Sheets
   window.procesarReporteSheets = function (res) {
-    clearTimeout(timeoutAuxilio); // Detiene el reloj de emergencia ya que Google respondió con éxito
-
     const scriptNode = document.getElementById("cyber_reporte_node");
     if (scriptNode) scriptNode.remove();
 
@@ -2599,9 +2471,8 @@ function ejecutarReporte(e) {
         );
       }
       document.getElementById("formReportar").reset();
-      quitarImagenGarantia();
       verificarTipoProblema();
-      cargarGarantias();
+      cargarGarantias(); // Refresca tu lista de tickets abajo
       if (typeof actualizarBadgeGarantias === "function")
         actualizarBadgeGarantias();
     } else {
@@ -2609,9 +2480,10 @@ function ejecutarReporte(e) {
     }
   };
 
+  // Inyección limpia mediante JSONP (doGet) SIN PARÁMETRO DE IMAGEN
   const scriptElement = document.createElement("script");
   scriptElement.id = "cyber_reporte_node";
-  let queryParams = `?action=reportarGarantia&plataforma=${encodeURIComponent(plataforma)}&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}&descripcion=${encodeURIComponent(descripcion)}&imagen=${encodeURIComponent(window.imagenGarantiaActualBase64)}&callback=procesarReporteSheets&_ts=${Date.now()}`;
+  let queryParams = `?action=reportarGarantia&plataforma=${encodeURIComponent(plataforma)}&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}&descripcion=${encodeURIComponent(descripcion)}&callback=procesarReporteSheets&_ts=${Date.now()}`;
   scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
   document.body.appendChild(scriptElement);
 }
@@ -2752,98 +2624,6 @@ function renderizarListaGarantiasDefinitiva(data) {
   });
   container.innerHTML = html;
 }
-
-// 🏆 COPIADOR MAESTRO INTERCEPTOR V4: DETECTA BASE64 LOCAL Y TIENE LIBERACIÓN FORZADA
-window.copiarImagenPortapapeles = async function (imgId, btn) {
-  if (typeof haptic === "function") haptic();
-  const imgElement = document.getElementById(imgId);
-  if (!imgElement || !imgElement.src) return;
-
-  const originalHtml = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = "Copiando...";
-
-  // ⏱️ LIBERACIÓN FORZADA (ANTI-CONGELAMIENTO): Si el portapapeles o la red se traban,
-  // el botón se destraba obligatoriamente a los 4 segundos pase lo que pase.
-  const destrabarBotonSeguro = setTimeout(() => {
-    if (btn.disabled && btn.innerHTML === "Copiando...") {
-      btn.innerHTML = originalHtml;
-      btn.disabled = false;
-    }
-  }, 4000);
-
-  const srcActual = imgElement.src;
-
-  try {
-    let pngBlob;
-
-    // 💡 DETECTOR INTELIGENTE: Si la imagen ya es Base64 (data:image), procesamos en local sin tocar internet
-    if (srcActual.startsWith("data:image")) {
-      const response = await fetch(srcActual);
-      pngBlob = await response.blob();
-    } else {
-      // Si la foto viene de la nube (Google Drive), pasa por el proxy limpio
-      const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(srcActual)}&output=png`;
-      const response = await fetch(proxyUrl);
-      if (!response.ok) throw new Error("El proxy de imágenes no respondió");
-      pngBlob = await response.blob();
-    }
-
-    // Inyectamos el archivo nativo de imagen (PNG) directamente en el portapapeles
-    await navigator.clipboard.write([
-      new ClipboardItem({ "image/png": pngBlob }),
-    ]);
-
-    clearTimeout(destrabarBotonSeguro); // Apagamos el destrabador seguro ya que fue exitoso
-
-    // Interfaz de éxito en verde
-    btn.innerHTML = "¡Copiada!";
-    btn.style.background = "var(--ios-green)";
-    btn.style.color = "white";
-    btn.style.borderColor = "transparent";
-
-    if (typeof triggerToast === "function") {
-      triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Foto copiada! Ya puedes pegarla en WhatsApp (Ctrl + V)</span></div>`,
-      );
-    }
-
-    setTimeout(() => {
-      btn.innerHTML = originalHtml;
-      btn.style.background = "";
-      btn.style.color = "";
-      btn.style.borderColor = "";
-      btn.disabled = false;
-    }, 1500);
-  } catch (err) {
-    console.error("Fallo en el copiado multimedia:", err);
-    clearTimeout(destrabarBotonSeguro); // Apagamos el destrabador seguro
-
-    // Si el navegador bloquea la inyección directa, activamos el asistente visual en naranja
-    btn.innerHTML = "¡Usa Clic Der.!";
-    btn.style.background = "var(--ios-orange)";
-    btn.style.color = "white";
-
-    imgElement.style.transition = "all 0.3s ease";
-    imgElement.style.transform = "scale(1.04)";
-    imgElement.style.outline = "3px solid var(--ios-orange)";
-
-    if (typeof triggerToast === "function") {
-      triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>Por restricciones del navegador: Clic derecho a la foto ➔ 'Copiar imagen'</span></div>`,
-      );
-    }
-
-    setTimeout(() => {
-      imgElement.style.transform = "";
-      imgElement.style.outline = "none";
-      btn.innerHTML = originalHtml;
-      btn.style.background = "";
-      btn.style.color = "";
-      btn.disabled = false;
-    }, 3000);
-  }
-};
 
 // Función auxiliar estética para pintar el éxito estilo iOS
 function mostrarExitoCopiadoDefinitivo(btn, originalHtml) {
