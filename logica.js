@@ -2440,16 +2440,11 @@ window.imagenGarantiaActualBase64 = "";
 // 🔄 FUNCIÓN ACTUALIZADA: PROCESAR IMAGEN DESDE INPUT, DRAG&DROP O PORTAPAPELES (PASTE)
 function procesarImagenGarantia(fileSource) {
   let file = null;
-
-  // Caso A: Si el archivo viene directamente del portapapeles (Pegar / Ctrl+V)
   if (fileSource instanceof File) {
     file = fileSource;
-  }
-  // Caso B: Si el archivo viene del input file convencional (Seleccionar o Arrastrar)
-  else if (fileSource && fileSource.files && fileSource.files[0]) {
+  } else if (fileSource && fileSource.files && fileSource.files[0]) {
     file = fileSource.files[0];
   }
-
   if (!file) return;
 
   const reader = new FileReader();
@@ -2459,14 +2454,15 @@ function procesarImagenGarantia(fileSource) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      // Mantenemos la compresión ultra optimizada V2 para tu Google Drive
-      const MAX_WIDTH = 150;
+      // 🚨 COMPRESIÓN EXTREMA PARA ALINEAR CON DOGET (URL CORTA)
+      // Reducimos a 85px de ancho y 0.15 de calidad para que el texto pese menos de 1KB
+      const MAX_WIDTH = 85;
       const scaleSize = MAX_WIDTH / img.width;
       canvas.width = MAX_WIDTH;
       canvas.height = img.height * scaleSize;
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.4);
+      window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.15);
 
       document.getElementById("dropzoneText").style.display = "none";
       const preview = document.getElementById("previewGarantia");
@@ -2539,22 +2535,24 @@ function ejecutarReporte(e) {
   btnSubmit.disabled = true;
   btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Enviando...`;
 
-  // ⏱️ BOTÓN DE AUXILIO: Si en 6 segundos Google no responde, destraba la pantalla
+  // Seguro de desbloqueo rápido por si la red fluctúa
   const timeoutAuxilio = setTimeout(() => {
     if (btnSubmit.disabled) {
       btnSubmit.disabled = false;
       btnSubmit.innerText = "Enviar a Garantía";
-      alert(
-        "⚠️ La foto sigue siendo muy pesada para el límite de Google Sheets o tu Apps Script no está programado para recibir imágenes. Intenta enviar el reporte con otra captura o sin ella.",
-      );
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg><span>La conexión tardó de más. Intenta reenviar.</span></div>`,
+        );
+      }
     }
-  }, 6000);
+  }, 12000);
 
   const oldScript = document.getElementById("cyber_reporte_node");
   if (oldScript) oldScript.remove();
 
   window.procesarReporteSheets = function (res) {
-    clearTimeout(timeoutAuxilio); // Desactivar botón de auxilio si todo sale bien
+    clearTimeout(timeoutAuxilio);
 
     const scriptNode = document.getElementById("cyber_reporte_node");
     if (scriptNode) scriptNode.remove();
@@ -2579,6 +2577,7 @@ function ejecutarReporte(e) {
     }
   };
 
+  // Canal original compatible con el doGet de tu code.gs actual
   const scriptElement = document.createElement("script");
   scriptElement.id = "cyber_reporte_node";
   let queryParams = `?action=reportarGarantia&plataforma=${encodeURIComponent(plataforma)}&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}&descripcion=${encodeURIComponent(descripcion)}&imagen=${encodeURIComponent(window.imagenGarantiaActualBase64)}&callback=procesarReporteSheets&_ts=${Date.now()}`;
@@ -2723,169 +2722,134 @@ function renderizarListaGarantiasDefinitiva(data) {
   container.innerHTML = html;
 }
 
-// 🔥 COPIADOR ASÍNCRONO REMODELADO CON REDIRECCIÓN DE ENLACE MAESTRO ORIGINAL 🔥
+// 🏆 MOTOR MAESTRO: COPIA LA IMAGEN REAL PARA WHATSAPP (COMPATIBLE CON LOCALHOST Y PRODUCTION WEB)
 window.copiarImagenPortapapeles = async function (imgId, btn) {
   if (typeof haptic === "function") haptic();
   const imgElement = document.getElementById(imgId);
   if (!imgElement || !imgElement.src) return;
 
   const originalHtml = btn.innerHTML;
-  btn.innerHTML = "Procesando...";
+  btn.innerHTML = "Copiando...";
   btn.disabled = true;
 
-  try {
-    const response = await fetch(imgElement.src);
-    const blob = await response.blob();
-
-    let pngBlob = blob;
-    if (blob.type !== "image/png") {
-      pngBlob = await new Promise((resolve, reject) => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          canvas.toBlob((b) => resolve(b), "image/png");
-        };
-        img.onerror = () => reject(new Error("Bloqueo de entorno local"));
-        img.src = imgElement.src;
-      });
-    }
-
-    await navigator.clipboard.write([
-      new ClipboardItem({ "image/png": pngBlob }),
-    ]);
-
-    btn.innerHTML = "¡Copiada!";
-    btn.style.background = "var(--ios-green)";
-    btn.style.color = "white";
-
-    setTimeout(() => {
-      btn.innerHTML = originalHtml;
-      btn.style.background = "";
-      btn.style.color = "";
-      btn.disabled = false;
-    }, 1500);
-  } catch (err) {
-    // 🚨 PLAN DE AUXILIO EN LOCAL SEGURO: Abre la pestaña original de Drive en alta definición
-    btn.innerHTML = "¡Ver Foto!";
+  // 🚨 DETECTOR DE ENTORNO EN BRUTO (file://)
+  // Si sigues abriendo el archivo con doble clic desde tus carpetas, Chrome bloqueará los píxeles.
+  // Activamos una advertencia inteligente en tu Toast para recordarte cómo probarlo correctamente.
+  if (window.location.protocol === "file:") {
+    btn.innerHTML = "¡Usa Clic Der.!";
     btn.style.background = "var(--ios-orange)";
     btn.style.color = "white";
 
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>Estás en modo archivo (file://). Para copiar automático usa un servidor local o dale Clic Derecho ➔ Copiar imagen.</span></div>`,
+      );
+    }
+
     setTimeout(() => {
       btn.innerHTML = originalHtml;
       btn.style.background = "";
       btn.style.color = "";
       btn.disabled = false;
-    }, 2000);
-
-    // Extraemos la URL original en alta resolución guardada en el atributo data-original
-    let urlOriginal =
-      imgElement.getAttribute("data-original") || imgElement.src;
-
-    if (urlOriginal.startsWith("http") || urlOriginal.includes("data:image")) {
-      const linkNube = document.createElement("a");
-      linkNube.href = urlOriginal;
-      linkNube.target = "_blank";
-      document.body.appendChild(linkNube);
-      linkNube.click();
-      linkNube.remove();
-    }
+    }, 3500);
+    return;
   }
-};
 
-// 🔥 COPIADOR ASÍNCRONO AUTOMÁTICO BLINDADO CONTRA PROTOCOLOS LOCALES (FILE://)
-window.copiarImagenPortapapeles = async function (imgId, btn) {
-  if (typeof haptic === "function") haptic();
-  const imgElement = document.getElementById(imgId);
-  if (!imgElement || !imgElement.src) return;
-
-  const originalHtml = btn.innerHTML;
-  btn.innerHTML = "Procesando...";
-  btn.disabled = true;
-
+  // =========================================================================
+  // 🚀 ECOSISTEMA UNIFICADO (FUNCIONA EN LOCALHOST Y EN TU WEB HTTPS)
+  // =========================================================================
   try {
-    // Si es la imagen simulada por defecto, saltamos directo al plan de auxilio para evitar errores de CORS local
-    if (imgElement.src.includes("image/svg+xml")) {
-      throw new Error("Modo Simulación");
-    }
+    // Creamos una imagen fantasma en memoria y le otorgamos permisos anónimos
+    // Esto nos permite leer los píxeles de Google Drive sin bloqueos de seguridad
+    const imgProcesador = new Image();
+    imgProcesador.crossOrigin = "anonymous";
+    imgProcesador.src = imgElement.src;
 
-    // Intento de copiado directo (Esto correrá perfecto cuando subas la web a HTTPS)
-    const response = await fetch(imgElement.src);
-    const blob = await response.blob();
-
-    let pngBlob = blob;
-    if (blob.type !== "image/png") {
-      pngBlob = await new Promise((resolve, reject) => {
+    imgProcesador.onload = async function () {
+      try {
+        // Dibujamos la evidencia en un canvas invisible para extraer su mapa de bits puro
         const canvas = document.createElement("canvas");
+        canvas.width = imgProcesador.width;
+        canvas.height = imgProcesador.height;
         const ctx = canvas.getContext("2d");
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          canvas.toBlob((b) => resolve(b), "image/png");
-        };
-        img.onerror = () => reject(new Error("Bloqueo de seguridad local"));
-        img.src = imgElement.src;
-      });
-    }
+        ctx.drawImage(imgProcesador, 0, 0);
 
-    await navigator.clipboard.write([
-      new ClipboardItem({ "image/png": pngBlob }),
-    ]);
+        canvas.toBlob(async (blob) => {
+          if (!blob) throw new Error("Fallo al procesar el archivo gráfico");
 
-    btn.innerHTML = "¡Copiada!";
-    btn.style.background = "var(--ios-green)";
-    btn.style.color = "white";
+          // Inyectamos el archivo nativo de imagen (PNG) directamente en la memoria de la PC
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob }),
+          ]);
 
-    setTimeout(() => {
-      btn.innerHTML = originalHtml;
-      btn.style.background = "";
-      btn.style.color = "";
-      btn.disabled = false;
-    }, 1500);
-  } catch (err) {
-    // 🚨 PLAN DE AUXILIO SILENCIOSO (ADIÓS ALERTS MOLESTOS) 🚨
-    // Al estar en un entorno local, el navegador no permite inyectar la foto al portapapeles.
-    // Descargamos la evidencia en un segundo para que el trabajador solo la arrastre a WhatsApp.
-    btn.innerHTML = "¡Ver Foto!";
-    btn.style.background = "var(--ios-orange)";
-    btn.style.color = "white";
+          // Animación de Éxito Rotundo
+          btn.innerHTML = "¡Copiada!";
+          btn.style.background = "var(--ios-green)";
+          btn.style.color = "white";
+          btn.style.borderColor = "transparent";
 
-    setTimeout(() => {
-      btn.innerHTML = originalHtml;
-      btn.style.background = "";
-      btn.style.color = "";
-      btn.disabled = false;
-    }, 2000);
+          if (typeof triggerToast === "function") {
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Foto copiada! Ya puedes pegarla en WhatsApp (Ctrl + V)</span></div>`,
+            );
+          }
 
-    // Si la imagen es un enlace real de Drive o un Base64 real de un cliente, la descarga de una vez
-    if (
-      imgElement.src.startsWith("http") ||
-      imgElement.src.includes("data:image/jpeg")
-    ) {
-      const linkDescarga = document.createElement("a");
-      linkDescarga.href = imgElement.src;
-      linkDescarga.target = "_blank";
-      linkDescarga.download = `evidencia_${Date.now()}.jpg`;
-      document.body.appendChild(linkDescarga);
-      linkDescarga.click();
-      linkDescarga.remove();
-    } else {
-      // Si sigue siendo la foto de simulación gris, muestra una notificación sutil en pantalla
-      if (typeof triggerToast === "function") {
-        triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>[Simulación] Foto procesada en local</span></div>`,
-        );
+          setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.style.background = "";
+            btn.style.color = "";
+            btn.style.borderColor = "";
+            btn.disabled = false;
+          }, 1500);
+        }, "image/png");
+      } catch (errInner) {
+        console.error(errInner);
+        restaurarBotonError(btn, originalHtml);
       }
-    }
+    };
+
+    imgProcesador.onerror = function () {
+      restaurarBotonError(btn, originalHtml);
+    };
+  } catch (e) {
+    console.error(e);
+    restaurarBotonError(btn, originalHtml);
   }
 };
+
+function restaurarBotonError(btn, originalHtml) {
+  btn.innerHTML = "Error ✕";
+  btn.style.background = "var(--ios-red)";
+  btn.style.color = "white";
+  setTimeout(() => {
+    btn.innerHTML = originalHtml;
+    btn.style.background = "";
+    btn.style.color = "";
+    btn.disabled = false;
+  }, 1500);
+}
+
+// Función auxiliar para pintar el éxito visual del botón
+function finalizarCopiadoExitoso(btn, originalHtml) {
+  btn.innerHTML = "¡Copiada!";
+  btn.style.background = "var(--ios-green)";
+  btn.style.color = "white";
+  btn.style.borderColor = "transparent";
+
+  if (typeof triggerToast === "function") {
+    triggerToast(
+      `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Foto copiada! Presiona Ctrl + V en WhatsApp</span></div>`,
+    );
+  }
+
+  setTimeout(() => {
+    btn.innerHTML = originalHtml;
+    btn.style.background = "";
+    btn.style.color = "";
+    btn.style.borderColor = "";
+    btn.disabled = false;
+  }, 1500);
+}
 
 function cargarGarantias() {
   if (isFetchingGarantias) return;
