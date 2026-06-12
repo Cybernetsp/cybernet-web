@@ -1635,17 +1635,33 @@ function ejecutarCreacionVentaLocal(e) {
 
       let cuerpo = "";
       bloques.forEach((b) => {
-        let etiquetaUser = b.id === "IPTV" ? "Usuario" : "Correo";
-        let etiquetaPerfil = b.id === "IPTV" ? "URL" : "Perfil";
+        // 👤 Calibración dinámica de Usuario vs Correo
+        let etiquetaUser =
+          b.id === "IPTV" || b.id === "EMBY" ? "Usuario" : "Correo";
+
+        // 🌐 Calibración dinámica de URL vs Servidor vs Perfil
+        let etiquetaPerfil =
+          b.id === "IPTV" ? "URL" : b.id === "EMBY" ? "Servidor" : "Perfil";
+
         let mesesComprados = memoriaMeses[b.id] || "1";
         let textoMeses = mesesComprados > 1 ? ` (${mesesComprados} Meses)` : "";
 
+        // Construimos la cabecera, usuario y clave
         cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n────────────────────\n👤 *${etiquetaUser}:* ${b.correo}\n🔐 *Contraseña:* ${b.clave}\n`;
+
+        // Inyectamos el Servidor / Perfil / URL si aplica
         if (
           b.id === "IPTV" ||
           (b.perfil && b.perfil !== "" && b.perfil !== "N/A")
-        )
+        ) {
           cuerpo += `🌐 *${etiquetaPerfil}:* ${b.perfil}\n`;
+        }
+
+        // 🔌 CASO EXCLUSIVO EMBY: Inyección del campo Puerto requerido
+        if (b.id === "EMBY") {
+          cuerpo += `🔌 *Puerto:* Dejar vacío\n`;
+        }
+
         if (b.pin && b.pin !== "") cuerpo += `📍 *Pin:* ${b.pin}\n`;
         cuerpo += `📅 *Vence:* ${b.venc}\n`;
 
