@@ -3589,20 +3589,41 @@ function renderizarCodigosEnPantalla() {
     let colColor = item.colorText || "var(--ios-blue)";
 
     htmlCards += `
-                    <div class="card-ios mb-1" style="padding: 15px; gap: 8px;">
-                        <div class="flex-row-between" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px;">
-                            <span style="color:${colColor}; font-weight:700; font-size:0.85rem; text-transform: uppercase;">${item.plataforma}</span>
-                            <span style="font-size:0.75rem; color:var(--text-secondary); font-family: monospace; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${item.hora}</span>
-                        </div>
-                        <div style="font-size:0.85rem; color:var(--text-secondary);">Cliente: <span style="color:var(--text-primary); font-weight:600;">${item.correo}</span></div>
-                        <div style="font-size:0.85rem; color:var(--text-secondary);">Acción: <span style="color:var(--text-primary); font-weight:600;">${item.accion}</span></div>
-                        <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:6px;">Código / Enlace: <span style="color:var(--ios-blue); font-weight:700; word-break: break-all;">${item.codigoLink}</span></div>
-                        <button class="btn-ios btn-secondary w-100" style="display:flex; justify-content:center; align-items:center; gap:8px;" onclick="copiarMensajeRapidoGmail(this, ${i})">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                          COPIAR MENSAJE
-                        </button>
-                    </div>
-                  `;
+        <div class="card-ios mb-1" style="padding: 16px; background: rgba(255, 255, 255, 0.015); border: 1px solid var(--glass-border); border-radius: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--glass-shadow);">
+            
+            <!-- 🌟 CABECERA: Plataforma + Punto de Estado Neon y Hora -->
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: ${colColor}; box-shadow: 0 0 10px ${colColor};"></span>
+                    <span style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; text-transform: uppercase;">${item.plataforma}</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-secondary); font-family: monospace; font-weight: 600; opacity: 0.8;">${item.hora}</span>
+            </div>
+
+            <!-- 📊 CUERPO: Información organizada sin textos amontonados -->
+            <div style="display: flex; flex-direction: column; gap: 8px; padding: 2px 0;">
+                <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600; letter-spacing: 0.3px;">Cliente:</span>
+                    <span style="font-size: 0.88rem; color: var(--text-primary); font-weight: 600; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.correo}">${item.correo}</span>
+                </div>
+                <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600; letter-spacing: 0.3px;">Acción:</span>
+                    <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500; opacity: 0.95; line-height: 1.3;">${item.accion}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                    <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600; letter-spacing: 0.3px;">Código / Enlace:</span>
+                    <span style="font-size: 1.15rem; color: ${colColor}; font-weight: 800; font-family: monospace; background: rgba(255, 255, 255, 0.03); padding: 3px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); letter-spacing: 0.5px; word-break: break-all; text-shadow: 0 0 10px rgba(255,255,255,0.05);">${item.codigoLink}</span>
+                </div>
+            </div>
+
+            <!-- 🔘 BOTÓN: Copiado Premium e Integrado -->
+            <button class="btn-ios btn-secondary w-100" style="display: flex; justify-content: center; align-items: center; gap: 8px; padding: 12px; font-weight: 700; font-size: 0.85rem; border-radius: 12px; margin: 0; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border); transition: all 0.2s;" onclick="copiarMensajeRapidoGmail(this, ${i})">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                COPIAR MENSAJE
+            </button>
+
+        </div>
+    `;
   }
   container.innerHTML = htmlCards;
   filtrarCodigosInternos();
