@@ -1,75 +1,53 @@
 /* =========================================================================
-   CYBERNET DESIGN SYSTEM - MINIMALIST Slate & ZINC (ULTRA FLUID)
-   Rediseño Completo: Optimizado para Rendimiento Máximo (60fps) y Sin Neón
+   🚀 CYBERNET DESIGN SYSTEM V2 - ULTRA MINIMALIST ENTERPRISE (ZINC & SLATE)
+   Optimizado para Rendimiento Máximo, Sin Filtros de Desenfoque ni Neones.
    ========================================================================= */
 
-/* --- 1. VARIABLES GLOBALES MINIMALISTAS --- */
+/* --- 1. CONFIGURACIÓN DE VARIABLES Y TEMAS --- */
 :root {
-  /* Colores Corporativos Apagados (Estilo Shadcn / Apple Premium) */
   --ios-blue: #3b82f6;
   --ios-green: #10b981;
   --ios-red: #ef4444;
   --ios-purple: #8b5cf6;
   --ios-orange: #f59e0b;
-
-  --ai-gradient: linear-gradient(135deg, #27272a 0%, #18181b 100%);
-  --success-gradient: #10b981;
-  --danger-gradient: #ef4444;
-
-  /* Transición de Composición de GPU Limpia (Evita Layout Thrashing) */
   --transition-fluid:
-    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease,
-    border-color 0.2s ease;
+    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease,
+    border-color 0.15s ease;
 }
 
-/* MODO OSCURO PREMIUM (Charcoal Dark) */
+/* 🌑 ENTORNO OSCURO DIGITAL (CHARCOAL ZINC) */
 [data-theme="dark"] {
   color-scheme: dark;
-  --page-bg: #09090b; /* Fondo Zinc Puro */
-  --text-primary: #f4f4f5; /* Tiza Claro */
-  --text-secondary: #a1a1aa; /* Gris Neutro Muted */
-
-  /* Capas de color sólidas sin blur costoso para la GPU */
-  --glass-bg: #18181b;
-  --glass-border: 1px solid #27272a;
-  --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-
-  --card-bg: #141416;
-  --input-bg: #09090b;
-  --input-focus: #18181b;
-
-  --sheet-bg: #141416;
-  --sheet-modal-bg: #18181b;
+  --page-bg: #09090b; /* Fondo Oscuro Absoluto (Zinc 950) */
+  --card-bg: #09090b; /* Tarjetas fusionadas con el lienzo */
+  --glass-bg: #09090b; /* Cabeceras y barras planas */
+  --sheet-bg: #09090b;
+  --sheet-modal-bg: #18181b; /* Modales ligeramente elevados (Zinc 900) */
+  --text-primary: #fafafa; /* Tiza Puro */
+  --text-secondary: #a1a1aa; /* Gris Muted */
+  --glass-border: 1px solid #27272a; /* Bordes micro-afilados */
+  --input-bg: #18181b;
+  --input-focus: #27272a;
   --scrollbar-thumb: #27272a;
 }
 
-/* MODO CLARO PREMIUM (Daylight Studio) */
+/* ☀️ ENTORNO CLARO DIGITAL (DAYLIGHT STUDIO) */
 [data-theme="light"] {
   color-scheme: light;
-  --ios-blue: #2563eb;
-  --ios-green: #059669;
-  --ios-red: #dc2626;
-  --ios-purple: #7c3aed;
-  --ios-orange: #d97706;
-
   --page-bg: #f4f4f5;
-  --text-primary: #18181b;
-  --text-secondary: #71717a;
-
-  --glass-bg: #ffffff;
-  --glass-border: 1px solid #e4e4e7;
-  --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-
   --card-bg: #ffffff;
-  --input-bg: #f4f4f5;
-  --input-focus: #e4e4e7;
-
+  --glass-bg: #ffffff;
   --sheet-bg: #ffffff;
   --sheet-modal-bg: #ffffff;
+  --text-primary: #18181b;
+  --text-secondary: #71717a;
+  --glass-border: 1px solid #e4e4e7;
+  --input-bg: #f4f4f5;
+  --input-focus: #e4e4e7;
   --scrollbar-thumb: #d4d4d8;
 }
 
-/* --- 2. RESET & BASE --- */
+/* --- 2. MAQUETACIÓN BASE --- */
 * {
   margin: 0;
   padding: 0;
@@ -78,12 +56,13 @@
     -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+  box-shadow: none !important; /* 🔥 ANTI-NEÓN: Destruye resplandores en todo el DOM */
+  text-shadow: none !important;
+  filter: none !important;
 }
 
 body {
   background-color: var(--page-bg);
-  /* Se remueven gradientes radiales fijos para liberar memoria gráfica */
-  background-image: none;
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
@@ -92,10 +71,10 @@ body {
   overflow-x: hidden;
 }
 
-/* Scrollbar Sutil */
+/* Barra de desplazamiento invisible/minimalista */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -105,35 +84,35 @@ body {
   border-radius: 10px;
 }
 
-/* --- 3. LAYOUT & CONTENEDORES --- */
+/* --- 3. ESTRUCTURAS DE PANTALLA FIJAS (FLAT LAYOUT) --- */
 .global-header {
   position: fixed;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 32px);
-  max-width: 1200px;
-  background: var(--glass-bg);
-  /* Eliminado backdrop-filter pesado para fluidez total en móviles e iOS */
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  border-radius: 16px;
-  padding: 12px 24px;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  background: var(--glass-bg) !important;
+  border-bottom: var(--glass-border) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 14px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 15px;
   z-index: 1000;
-  will-change: transform;
 }
 
 .main-workspace {
   width: 100%;
   max-width: 1240px;
-  padding: 100px 20px 180px; /* Le damos 180px para que las tarjetas pasen por encima del menú */
+  padding-top: 90px !important; /* Ajuste milimétrico por el nuevo Header plano */
+  padding-bottom: 100px !important; /* Espacio para que el Dock inferior no tape nada */
+  padding-left: 20px;
+  padding-right: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -147,27 +126,24 @@ body {
   width: 100%;
 }
 
-/* --- 4. TARJETAS (CARDS PLANAS) --- */
+/* --- 4. COMPONENTES: TARJETAS (CARDS PLANAS) --- */
 .card-ios {
-  background: var(--card-bg);
-  border: var(--glass-border);
-  border-radius: 16px;
+  background: var(--card-bg) !important;
+  border: var(--glass-border) !important;
+  border-radius: 12px !important; /* Formas rectificadas serias corporativas */
   padding: 24px;
-  box-shadow: var(--glass-shadow);
   display: flex;
   flex-direction: column;
   gap: 14px;
   transition: var(--transition-fluid);
 }
 .card-ios:hover {
-  transform: translateY(-2px);
-  border-color: var(--text-secondary);
-  box-shadow: var(--glass-shadow);
+  border-color: var(--text-secondary) !important;
 }
 
 .card-title {
   color: var(--text-primary);
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: -0.3px;
   display: flex;
@@ -175,25 +151,21 @@ body {
   gap: 10px;
 }
 
-/* --- 5. FORMULARIOS E INPUTS --- */
+/* --- 5. COMPONENTES: CONTROLES Y FORMULARIOS --- */
 .input-ios {
   width: 100%;
   padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
-  background: var(--input-bg);
+  border-radius: 8px !important;
+  border: var(--glass-border) !important;
+  background: var(--input-bg) !important;
   color: var(--text-primary);
   font-size: 0.95rem;
   outline: none;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: border-color 0.15s ease;
 }
-
 .input-ios:focus {
-  background: var(--input-focus);
-  border-color: var(--ios-blue);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  background: var(--input-focus) !important;
+  border-color: var(--ios-blue) !important;
 }
 .input-ios::placeholder {
   color: var(--text-secondary);
@@ -201,24 +173,19 @@ body {
 
 select.input-ios {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  background-size: 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  background-size: 14px !important;
   cursor: pointer;
 }
-select.input-ios option {
-  background-color: var(--sheet-modal-bg) !important;
-  color: var(--text-primary) !important;
-}
 
-/* --- 6. BOTONES MINIMALISTAS --- */
+/* --- 6. COMPONENTES: BOTONES SÓLIDOS MINIMALISTAS --- */
 .btn-ios {
   padding: 12px 20px;
-  border-radius: 12px;
+  border-radius: 8px !important;
   font-size: 0.9rem;
   font-weight: 600;
-  letter-spacing: 0.1px;
   cursor: pointer;
   border: none;
   display: inline-flex;
@@ -226,42 +193,33 @@ select.input-ios option {
   justify-content: center;
   gap: 8px;
   transition: var(--transition-fluid);
-  will-change: transform;
 }
 .btn-ios:active {
-  transform: scale(0.97);
-}
-.btn-ios:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
+  transform: scale(0.98);
 }
 
 .btn-primary {
-  background: var(--text-primary);
-  color: var(--page-bg);
-}
-.btn-primary:hover {
-  opacity: 0.9;
+  background: var(--text-primary) !important;
+  color: var(--page-bg) !important;
 }
 .btn-success {
-  background: var(--ios-green);
-  color: white;
+  background: var(--ios-green) !important;
+  color: #ffffff !important;
 }
 .btn-danger {
-  background: var(--ios-red);
-  color: white;
+  background: var(--ios-red) !important;
+  color: #ffffff !important;
 }
 .btn-secondary {
-  background: var(--input-bg);
-  border: var(--glass-border);
-  color: var(--text-primary);
+  background: var(--input-bg) !important;
+  border: var(--glass-border) !important;
+  color: var(--text-primary) !important;
 }
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: var(--text-secondary);
+  border-color: var(--text-secondary) !important;
 }
 
+/* Badges / Píldoras de Estado Plano */
 .badge-ios {
   display: inline-flex;
   align-items: center;
@@ -269,13 +227,13 @@ select.input-ios option {
   background: var(--input-bg);
   border: var(--glass-border);
   padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  border-radius: 6px !important;
+  font-size: 0.78rem;
   font-weight: 600;
 }
 .badge-blue {
   color: var(--ios-blue);
-  border-color: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 132, 255, 0.2);
 }
 .badge-green {
   color: var(--ios-green);
@@ -286,14 +244,14 @@ select.input-ios option {
   border-color: rgba(239, 68, 68, 0.2);
 }
 
-/* --- 7. OVERLAYS Y MODALES --- */
+/* --- 7. MODALES, FILTROS Y CAPAS EMERGENTES --- */
 .overlay-ios {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   z-index: 2000;
   display: none;
   justify-content: center;
@@ -301,37 +259,16 @@ select.input-ios option {
 }
 .overlay-ios.open {
   display: flex;
-  animation: fadeIn 0.15s ease-out forwards;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 .modal-ios {
   width: 90%;
   max-width: 420px;
-  background: var(--sheet-modal-bg);
-  border: var(--glass-border);
-  border-radius: 20px;
+  background: var(--sheet-modal-bg) !important;
+  border: var(--glass-border) !important;
+  border-radius: 12px !important;
   padding: 32px 24px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   text-align: center;
-  animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes popIn {
-  from {
-    transform: scale(0.96);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 
 .sheet-ios {
@@ -339,26 +276,13 @@ select.input-ios option {
   width: 95%;
   max-width: 800px;
   height: 85vh;
-  max-height: 850px;
   margin: auto;
-  background: var(--sheet-bg);
-  border-radius: 24px;
-  border: var(--glass-border);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  background: var(--sheet-bg) !important;
+  border-radius: 12px !important;
+  border: var(--glass-border) !important;
   padding: 24px;
   display: flex;
   flex-direction: column;
-  animation: floatUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes floatUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
 }
 
 .sheet-header {
@@ -376,12 +300,10 @@ select.input-ios option {
   height: 34px;
   border-radius: 50%;
   color: var(--text-secondary);
-  font-size: 1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition-fluid);
 }
 .btn-close-circle:hover {
   background: var(--ios-red);
@@ -389,130 +311,65 @@ select.input-ios option {
   border-color: var(--ios-red);
 }
 
-/* --- 8. UTILIDADES --- */
-.flex-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.flex-row-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-.flex-col {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.text-center {
-  text-align: center;
-}
-.mt-1 {
-  margin-top: 10px;
-}
-.mb-1 {
-  margin-bottom: 12px;
-}
-.w-100 {
-  width: 100%;
-}
-.flex-row-mobile-col {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-}
-
-/* --- 9. CONFIGURACIÓN DOCK INFERIOR (FLOATING DOCK) --- */
-.header-search-container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  min-width: 300px;
-  overflow: hidden;
-}
-.ticker-wrapper {
-  flex: 1;
-  overflow: hidden;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-}
-.ticker-track {
-  display: flex;
-  gap: 12px;
-  width: max-content;
-  animation: tickerScroll 30s linear infinite;
-}
-@keyframes tickerScroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
+/* --- 8. BARRA DE HERRAMIENTAS INFERIOR (DOCK ENTERPRISE) --- */
 .ios-bottom-bar {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 32px);
-  max-width: 950px;
-  background: var(--glass-bg);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  border-radius: 20px;
+  bottom: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  background: var(--glass-bg) !important;
+  border-top: var(--glass-border) !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-radius: 0 !important;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px 12px;
+  padding: 12px 20px !important;
   z-index: 1000;
-  gap: 6px;
+  gap: 16px !important;
   flex-wrap: wrap;
-  will-change: transform;
 }
 
 .ios-tab-btn {
   background: transparent;
   border: none;
-  color: var(--text-secondary);
+  color: var(--text-secondary) !important;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
   padding: 6px 10px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 0.65rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   cursor: pointer;
-  flex-shrink: 0;
   min-width: 60px;
-  transition: var(--transition-fluid);
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
 }
-.ios-tab-btn svg {
-  width: 22px;
-  height: 22px;
-  stroke-width: 2;
-  margin-bottom: 2px;
+.ios-tab-btn span {
+  color: inherit !important;
 }
-/* Se eliminaron resplandores chillones */
-.ios-tab-btn:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.04);
+.ios-tab-btn svg,
+.ios-tab-btn svg * {
+  stroke: currentColor !important;
+  fill: transparent !important;
 }
 
-/* --- 10. FINANZAS Y GRIDS (ESTILO PANEL MINIMALISTA) --- */
+.ios-tab-btn:hover {
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* --- 9. INDICADORES CONTABLES Y PROXIES FINANCIEROS --- */
 .filter-wrapper-ios {
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   width: 100%;
@@ -520,19 +377,18 @@ select.input-ios option {
 }
 .filter-group-center {
   display: flex;
-  flex-direction: row;
   align-items: center;
   gap: 10px;
   justify-content: center;
   flex: 1;
 }
 .pod-selector {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   background: var(--input-bg);
   padding: 6px 12px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: var(--glass-border);
 }
 
@@ -561,24 +417,17 @@ select.input-ios option {
   width: 100%;
 }
 
-.balance-hero-section {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
 .main-price-lbl {
-  font-size: 3rem;
+  font-size: 2.8rem;
   font-weight: 700;
   letter-spacing: -1.5px;
   line-height: 1;
-  display: block;
   margin: 10px 0;
 }
 .status-pill-container {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
 }
 .status-dot {
   width: 8px;
@@ -594,8 +443,8 @@ select.input-ios option {
 }
 .apple-ring-svg {
   transform: rotate(-90deg);
-  width: 110px;
-  height: 110px;
+  width: 100px;
+  height: 100px;
   flex-shrink: 0;
 }
 .ring-bg {
@@ -637,27 +486,22 @@ select.input-ios option {
 .bar-track {
   width: 100%;
   height: 6px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
   overflow: hidden;
 }
-.bar-fill {
-  height: 100%;
-  width: 0%;
-  border-radius: 6px;
-}
 
-/* Modificado bordes limpios sin decorados chillones */
+/* Bordes Superiores Corporativos Planos */
 .distribution-hub-panel {
-  border-top: 2px solid var(--ios-blue);
-  border-radius: 16px;
+  border-top: 3px solid var(--ios-blue) !important;
+  border-radius: 12px !important;
 }
 .debt-hub-panel {
-  border-top: 2px solid var(--ios-orange);
-  border-radius: 16px;
+  border-top: 3px solid var(--ios-orange) !important;
+  border-radius: 12px !important;
 }
 
-/* --- 11. TABLAS Y LISTADOS CONTABLES --- */
+/* --- 10. ESTRUCTURAS DE TABLAS --- */
 .distris-table {
   width: 100%;
   border-collapse: separate;
@@ -668,7 +512,6 @@ select.input-ios option {
   padding: 12px 14px;
   text-align: left;
   border-bottom: 1px solid var(--glass-border);
-  vertical-align: middle;
 }
 .distris-table th {
   font-size: 0.75rem;
@@ -676,60 +519,93 @@ select.input-ios option {
   position: sticky;
   top: 0;
   background: var(--sheet-bg);
-  z-index: 10;
   font-weight: 700;
   text-transform: uppercase;
 }
+
 .saldo-verde {
   color: var(--ios-green);
-  font-weight: 600;
+  font-weight: 700;
   font-family: monospace;
 }
 .saldo-rojo {
   color: var(--ios-red);
-  font-weight: 600;
+  font-weight: 700;
   font-family: monospace;
 }
-
 .empty-log-msg {
   text-align: center;
   padding: 36px;
   color: var(--text-secondary);
   font-size: 0.9rem;
-  font-weight: 500;
   width: 100%;
 }
 
-/* --- 12. NOTIFICACIÓN TOAST ULTRA-FLUIDA (GPU DRIVEN) --- */
-.apple-notification-toast {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%) scale(0.95);
-  background: var(--sheet-modal-bg);
-  border: var(--glass-border);
-  color: var(--text-primary);
-  padding: 12px 24px;
-  border-radius: 14px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  opacity: 0;
-  visibility: hidden;
-  z-index: 10000;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  /* Propiedades composicionadas que evitan el reflujo del navegador */
-  transition:
-    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.2s ease,
-    visibility 0.2s;
+/* --- 11. ADICIONALES Y UTILS --- */
+.flex-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.apple-notification-toast.island-active {
-  transform: translateX(-50%) scale(1);
-  opacity: 1;
-  visibility: visible;
+.flex-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.text-center {
+  text-align: center;
+}
+.mt-1 {
+  margin-top: 10px;
+}
+.mb-1 {
+  margin-bottom: 12px;
+}
+.w-100 {
+  width: 100%;
+}
+.flex-row-mobile-col {
+  display: flex;
+  gap: 10px;
+  width: 100%;
 }
 
-/* --- 13. ADICIONALES (CONTACT CARDS & TOGGLES) --- */
+.header-search-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 300px;
+  overflow: hidden;
+}
+.ticker-wrapper {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+.ticker-track {
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  animation: tickerScroll 30s linear infinite;
+}
+@keyframes tickerScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 .blocks-container {
   display: flex;
   flex-wrap: wrap;
@@ -739,7 +615,7 @@ select.input-ios option {
 .contact-card {
   background: rgba(0, 0, 0, 0.1);
   border: var(--glass-border);
-  border-radius: 14px;
+  border-radius: 8px;
   padding: 12px 16px;
   display: flex;
   justify-content: space-between;
@@ -767,17 +643,13 @@ select.input-ios option {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: var(--transition-fluid);
-}
-.btn-icon:hover {
-  background: rgba(255, 255, 255, 0.04);
 }
 .btn-icon.success {
   background: var(--ios-green) !important;
   color: white !important;
 }
 
-/* --- 14. MEDIA QUERIES --- */
+/* --- 12. RESPONSIVE DESIGN (MEDIA QUERIES) --- */
 @media (max-width: 900px) {
   .filter-wrapper-ios {
     flex-direction: column;
@@ -804,194 +676,15 @@ select.input-ios option {
 @media (max-width: 768px) {
   .global-header {
     padding: 10px 16px;
-    border-radius: 12px;
-    width: calc(100% - 20px);
-  }
-  .main-workspace {
-    padding-top: 120px;
   }
   .sheet-ios {
     max-width: 100%;
     width: 100%;
-    border-radius: 20px 20px 0 0;
+    border-radius: 12px 12px 0 0 !important;
     height: 90vh;
-  }
-  .ios-bottom-bar {
-    width: calc(100% - 16px);
-    bottom: 10px;
-    border-radius: 16px;
-    padding: 6px;
   }
   .ios-tab-btn {
     min-width: 50px;
     font-size: 0.6rem;
   }
-}
-/* =========================================================================
-   🚫 ANTI-NEÓN: APAGAR TODOS LOS BRILLOS FORZADOS DESDE JS/HTML
-   ========================================================================= */
-
-/* 1. Apaga el resplandor de los íconos del menú inferior y gráficas */
-.ios-tab-btn svg,
-.apple-ring-svg {
-  filter: none !important;
-}
-
-/* 2. Apaga el brillo temporal al copiar una tarjeta y mantiene la sombra natural */
-.card-ios {
-  box-shadow: var(--glass-shadow) !important;
-}
-
-/* 3. Apaga los brillos de color en TODOS los botones */
-.btn-ios,
-button {
-  box-shadow: none !important;
-}
-
-/* 4. Apaga el LED verde de conexión y los indicadores de las plataformas */
-#ledConexion,
-.status-dot,
-[id^="badge_status_"] {
-  box-shadow: none !important;
-}
-
-/* 5. Apaga el resplandor de las barras en el apartado de Finanzas */
-.bar-fill {
-  box-shadow: none !important;
-}
-
-/* 6. Apaga el punto rojo neón inyectado en el panel de Cortes Netflix */
-.card-ios div[style*="box-shadow"] {
-  box-shadow: none !important;
-}
-
-/* 7. Protege y mantiene las sombras correctas de los paneles principales */
-.modal-ios,
-.sheet-ios,
-.ios-bottom-bar,
-.global-header {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
-}
-/* =========================================================================
-   🎨 DOCK MINIMALISTA (MENÚ INFERIOR UNIFICADO Y SIN COLORES)
-   ========================================================================= */
-
-/* 1. Forzar color base neutro (gris) a todos los botones del menú */
-.ios-bottom-bar > button,
-.ios-bottom-bar > div {
-  color: var(--text-secondary) !important;
-  transition: color 0.2s ease !important;
-}
-
-/* 2. Forzar que los textos (span) hereden el color neutro */
-.ios-bottom-bar > button span,
-.ios-bottom-bar > div span {
-  color: inherit !important;
-}
-
-/* 3. Forzar que TODOS los trazos de los iconos (SVGs) hereden el color neutro */
-.ios-bottom-bar svg,
-.ios-bottom-bar svg * {
-  stroke: currentColor !important;
-}
-
-/* 4. Excepción: si algún icono usa relleno (fill) en lugar de trazo, lo apagamos también */
-.ios-bottom-bar svg polygon,
-.ios-bottom-bar svg rect {
-  fill: transparent !important;
-}
-
-/* 5. Efecto Hover: Se iluminan en blanco brillante al pasar el cursor */
-.ios-bottom-bar > button:hover,
-.ios-bottom-bar > div:hover {
-  color: var(--text-primary) !important;
-}
-/* =========================================================================
-   🚀 CYBERNET V2 - REDISEÑO ULTRA MINIMALISTA (ENTERPRISE)
-   ========================================================================= */
-
-/* 1. PALETA DE COLORES PLANA Y ELEGANTE */
-[data-theme="dark"] {
-  --page-bg: #09090b !important; /* Fondo oscuro absoluto (Zing 950) */
-  --card-bg: #09090b !important; /* Tarjetas fusionadas con el fondo */
-  --glass-bg: #09090b !important; /* Paneles sin transparencias */
-  --sheet-bg: #09090b !important;
-  --sheet-modal-bg: #18181b !important; /* Modales ligeramente más claros */
-
-  --glass-border: 1px solid #27272a !important; /* Bordes sutiles y elegantes */
-  --glass-shadow: none !important; /* Eliminamos las sombras 3D */
-
-  --text-primary: #fafafa !important;
-  --text-secondary: #a1a1aa !important;
-
-  --input-bg: #18181b !important;
-}
-
-/* 2. RECTIFICAR FORMAS (Adiós a las burbujas y píldoras) */
-.card-ios,
-.sheet-ios,
-.modal-ios,
-.global-header,
-.ios-bottom-bar {
-  border-radius: 12px !important;
-  border: var(--glass-border) !important;
-  box-shadow: none !important;
-}
-
-/* 3. BOTONES E INPUTS MÁS SERIOS */
-.btn-ios,
-.input-ios,
-.badge-ios,
-select.input-ios {
-  border-radius: 8px !important; /* Bordes ligeramente curvos, no redondos */
-  box-shadow: none !important;
-}
-
-/* 4. AJUSTAR EL MENÚ INFERIOR (DOCK) PARA QUE PAREZCA UNA BARRA DE HERRAMIENTAS */
-.ios-bottom-bar {
-  bottom: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  border-radius: 0 !important;
-  border-left: none !important;
-  border-right: none !important;
-  border-bottom: none !important;
-  padding: 12px 20px !important;
-  background: #09090b !important;
-  border-top: 1px solid #27272a !important;
-  gap: 16px !important;
-}
-
-/* 5. AJUSTAR EL HEADER PARA QUE SEA PLANO Y COMPLETO */
-.global-header {
-  top: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  border-radius: 0 !important;
-  border-left: none !important;
-  border-right: none !important;
-  border-top: none !important;
-  border-bottom: 1px solid #27272a !important;
-  background: #09090b !important;
-}
-
-/* 6. CORRECCIÓN DE MÁRGENES POR EL NUEVO HEADER Y FOOTER */
-.main-workspace {
-  padding-top: 90px !important;
-  padding-bottom: 100px !important;
-}
-
-/* 7. BOTONES PRINCIPALES (Reemplazar gradientes por sólidos) */
-.btn-primary {
-  background: #fafafa !important;
-  color: #09090b !important;
-  font-weight: 600 !important;
-}
-.btn-success {
-  background: #10b981 !important;
-  color: #ffffff !important;
-}
-.btn-danger {
-  background: #ef4444 !important;
-  color: #ffffff !important;
 }
