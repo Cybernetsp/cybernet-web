@@ -2454,38 +2454,53 @@ function procesarImagenGarantia(fileSource) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      // 🎯 REVOLUCIÓN ÓPTICA V2 (MÁS ESPACIO PARA LAS LETRAS)
-      // Subimos el ancho a 700px para que las letras no se fusionen en un manchón.
-      const MAX_WIDTH = 1000;
+      // 🎯 RESOLUCIÓN CALIBRADA PARA LETRAS ASENTADAS
+      // 480px le da el espacio físico perfecto a las fuentes para que no se encimen
+      const MAX_WIDTH = 480;
       const scaleSize = MAX_WIDTH / img.width;
       canvas.width = MAX_WIDTH;
       canvas.height = img.height * scaleSize;
 
-      // Apagamos filtros de suavizado que empañan el texto
+      // Desactivamos el suavizado nativo para mantener los bordes de los textos firmes
       ctx.imageSmoothingEnabled = false;
       ctx.mozImageSmoothingEnabled = false;
       ctx.webkitImageSmoothingEnabled = false;
 
-      // Filtro agresivo de escala de grises y alto contraste para limpiar el ruido del fondo
-      ctx.filter = "grayscale(100%) contrast(150%)";
+      // Dibujamos la captura original en el lienzo
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      // 🔥 CLAVE: Calidad ultra-baja (0.12). Como es blanco y negro, no genera ruido visual,
-      // pero el texto se mantiene delgado, nítido y súper ligero para la URL.
-      window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.12);
+      // 🧪 ALGORITMO BINARIO ULTRA-LIGERO (PROTEGE EL ENLACE DOGET)
+      // Extraemos el mapa de píxeles para remover los grises intermedios que empañan la foto
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imgData.data;
+      
+      for (let i = 0; i < data.length; i += 4) {
+        // Calculamos el brillo real del píxel (Fórmula de Luminancia)
+        const brillo = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+        
+        // Umbral inteligente: Si es claro se vuelve blanco puro, si es oscuro (letras) negro puro
+        const colorBinario = brillo > 135 ? 255 : 0;
+        
+        data[i] = colorBinario;     // R
+        data[i + 1] = colorBinario; // G
+        data[i + 2] = colorBinario; // B
+      }
+      
+      // Planchamos los píxeles ultra-contrastados de vuelta en el canvas
+      ctx.putImageData(imgData, 0, 0);
 
-      // Actualizamos la vista previa en el panel
+      // Exportamos a Base64. Al ser binario, la URL queda minúscula (pesa menos de 3KB)
+      window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.3);
+
+      // Actualizamos la vista previa en la interfaz
       document.getElementById("dropzoneText").style.display = "none";
       const preview = document.getElementById("previewGarantia");
       preview.src = window.imagenGarantiaActualBase64;
-
-      // Renderizado limpio de píxeles para la miniatura
-      preview.style.cssText =
-        "display: block; max-height: 120px; max-width: 100%; border-radius: 8px; margin: 0 auto; object-fit: contain; box-shadow: var(--glass-shadow); image-rendering: pixelated; image-rendering: crisp-edges;";
-
+      
+      preview.style.cssText = "display: block; max-height: 120px; max-width: 100%; border-radius: 8px; margin: 0 auto; object-fit: contain; box-shadow: var(--glass-shadow); image-rendering: pixelated;";
+      
       document.getElementById("btnQuitarFoto").style.display = "block";
-      document.getElementById("dropzoneGarantia").style.borderColor =
-        "var(--ios-blue)";
+      document.getElementById("dropzoneGarantia").style.borderColor = "var(--ios-blue)";
     };
     img.src = e.target.result;
   };
