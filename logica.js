@@ -2538,24 +2538,26 @@ function ejecutarReporte(e) {
   btnSubmit.disabled = true;
   btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Enviando...`;
 
-  // Seguro de desbloqueo rápido por si la red fluctúa
+  // ⏱️ TIMEOUT CALIBRADO A 35 SEGUNDOS
+  // Como usamos doGet, Google Sheets requiere entre 15 y 25 segundos para escanear las filas,
+  // pintar las celdas afectadas en rojo y asentar el registro definitivo.
   const timeoutAuxilio = setTimeout(() => {
     if (btnSubmit.disabled) {
       btnSubmit.disabled = false;
       btnSubmit.innerText = "Enviar a Garantía";
       if (typeof triggerToast === "function") {
         triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg><span>La conexión tardó de más. Intenta reenviar.</span></div>`,
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg><span>La conexión tardó de más. Intenta reenviar ahora.</span></div>`,
         );
       }
     }
-  }, 12000);
+  }, 35000);
 
   const oldScript = document.getElementById("cyber_reporte_node");
   if (oldScript) oldScript.remove();
 
   window.procesarReporteSheets = function (res) {
-    clearTimeout(timeoutAuxilio);
+    clearTimeout(timeoutAuxilio); // Detiene el reloj de emergencia ya que Google respondió con éxito
 
     const scriptNode = document.getElementById("cyber_reporte_node");
     if (scriptNode) scriptNode.remove();
@@ -2580,7 +2582,6 @@ function ejecutarReporte(e) {
     }
   };
 
-  // Canal original compatible con el doGet de tu code.gs actual
   const scriptElement = document.createElement("script");
   scriptElement.id = "cyber_reporte_node";
   let queryParams = `?action=reportarGarantia&plataforma=${encodeURIComponent(plataforma)}&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}&descripcion=${encodeURIComponent(descripcion)}&imagen=${encodeURIComponent(window.imagenGarantiaActualBase64)}&callback=procesarReporteSheets&_ts=${Date.now()}`;
