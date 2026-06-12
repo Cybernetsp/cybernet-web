@@ -6857,3 +6857,101 @@ function copiarCotizacionCombo(btn) {
     }, 1500);
   });
 }
+// =========================================================================
+// 🎛️ PANEL DE CONTROL DE INVENTARIO (ADMIN CAMILO)
+// =========================================================================
+const productosTiendaMaster = [
+  { id: "btn_netflix", nombre: "Netflix" },
+  { id: "btn_disney_prem", nombre: "Disney+ Premium" },
+  { id: "btn_disney_std", nombre: "Disney Std" },
+  { id: "btn_amazon", nombre: "Amazon Prime" },
+  { id: "btn_max", nombre: "HBO Max" },
+  { id: "btn_paramount", nombre: "Paramount+" },
+  { id: "btn_vix", nombre: "Vix+" },
+  { id: "btn_plex", nombre: "Plex TV" },
+  { id: "btn_crunchy", nombre: "Crunchyroll" },
+  { id: "apple", nombre: "Apple TV+" },
+  { id: "btn_universal", nombre: "Universal+" },
+  { id: "btn_iptv", nombre: "IPTV Smarters" },
+  { id: "btn_flujo", nombre: "Flujo TV" },
+  { id: "btn_emby", nombre: "Emby" },
+  { id: "btn_canva", nombre: "Canva Pro" },
+  { id: "btn_spotify", nombre: "Spotify" },
+  { id: "btn_yt", nombre: "YouTube" },
+  { id: "btn_deezer", nombre: "Deezer" },
+  { id: "btn_metegol", nombre: "Metegol" },
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+  window.inyectarEstilosSwitchAdmin();
+  if (document.getElementById("panelSwitchesStock")) {
+    setTimeout(window.renderizarPanelCamilo, 500);
+  }
+});
+
+window.toggleInventarioPanel = function () {
+  const modal = document.getElementById("inventarioOverlay");
+  if (!modal) {
+    console.error("El modal de inventario no existe en el HTML.");
+    return;
+  }
+
+  if (modal.style.display === "flex") {
+    modal.style.display = "none";
+  } else {
+    modal.style.display = "flex";
+    window.renderizarPanelCamilo(); // Refresca los switches al abrir
+  }
+};
+
+window.renderizarPanelCamilo = function () {
+  const contenedor = document.getElementById("panelSwitchesStock");
+  if (!contenedor) return;
+  contenedor.innerHTML = "";
+
+  const agotados = JSON.parse(
+    localStorage.getItem("cyber_items_agotados") || "[]",
+  );
+
+  productosTiendaMaster.forEach((p) => {
+    const estaAgotado = agotados.includes(p.id);
+    const row = document.createElement("div");
+    row.style.cssText =
+      "display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 0.95rem; font-weight: 600; background: rgba(0,0,0,0.15); border-radius: 12px; margin-bottom: 6px;";
+    row.innerHTML = `
+      <span>${p.nombre}</span>
+      <label class="switch-camilo">
+        <input type="checkbox" ${estaAgotado ? "checked" : ""} onchange="window.cambiarStockDesdeAdmin('${p.id}')">
+        <span class="slider-camilo"></span>
+      </label>
+    `;
+    contenedor.appendChild(row);
+  });
+};
+
+window.cambiarStockDesdeAdmin = function (id) {
+  let agotados = JSON.parse(
+    localStorage.getItem("cyber_items_agotados") || "[]",
+  );
+  if (agotados.includes(id)) {
+    agotados = agotados.filter((item) => item !== id); // Recupera stock
+  } else {
+    agotados.push(id); // Se agotó
+  }
+  localStorage.setItem("cyber_items_agotados", JSON.stringify(agotados));
+};
+
+window.inyectarEstilosSwitchAdmin = function () {
+  if (document.getElementById("css-switch-camilo")) return;
+  const estilo = document.createElement("style");
+  estilo.id = "css-switch-camilo";
+  estilo.innerHTML = `
+    .switch-camilo { position: relative; display: inline-block; width: 48px; height: 26px; }
+    .switch-camilo input { opacity: 0; width: 0; height: 0; }
+    .slider-camilo { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #30d158; transition: .3s; border-radius: 30px; }
+    .slider-camilo:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    input:checked + .slider-camilo { background-color: #ff453a; }
+    input:checked + .slider-camilo:before { transform: translateX(22px); }
+  `;
+  document.head.appendChild(estilo);
+};
