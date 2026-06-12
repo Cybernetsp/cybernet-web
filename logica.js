@@ -2722,51 +2722,66 @@ function renderizarListaGarantiasDefinitiva(data) {
   container.innerHTML = html;
 }
 
-// 🏆 COPIADOR MULTIMEDIA PRO: EVADE EL CORS CON EL MOTOR DE GOOGLE Y ELIMINA ERRORES DE RED
+// 🏆 COPIADOR DE EVIDENCIAS MAESTRO V3: ELIMINA BUG DE MENSAJES Y EVADE EL CORS EN LA WEB
 window.copiarImagenPortapapeles = async function (imgId, btn) {
   if (typeof haptic === "function") haptic();
   const imgElement = document.getElementById(imgId);
   if (!imgElement || !imgElement.src) return;
 
   const originalHtml = btn.innerHTML;
-  btn.innerHTML = "Copiando...";
   btn.disabled = true;
+  btn.innerHTML = "Copiando...";
 
   const esEntornoLocal = window.location.protocol === "file:";
 
   // =========================================================================
-  // 🚀 MODO AUTOMÁTICO: MOTOR DE EXTRACCIÓN BINARIA ULTRA-RÁPIDO
+  // 🚨 CASO 1: ESTÁS EJECUTANDO LOCAL DESDE CARPETAS (file://)
+  // =========================================================================
+  if (esEntornoLocal) {
+    btn.innerHTML = "¡Usa Clic Der.!";
+    btn.style.background = "var(--ios-orange)";
+    btn.style.color = "white";
+
+    imgElement.style.transition = "all 0.3s ease";
+    imgElement.style.transform = "scale(1.04)";
+    imgElement.style.outline = "3px solid var(--ios-orange)";
+
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>Al estar en local: Clic derecho a la foto ➔ 'Copiar imagen'</span></div>`,
+      );
+    }
+
+    setTimeout(() => {
+      imgElement.style.transform = "";
+      imgElement.style.outline = "none";
+      btn.innerHTML = originalHtml;
+      btn.style.background = "";
+      btn.style.color = "";
+      btn.disabled = false;
+    }, 3000);
+    return; // ⛔ Detiene la ejecución aquí para que no siga al código de la web
+  }
+
+  // =========================================================================
+  // 🚀 CASO 2: ESTÁS EN LA WEB REAL (https://www.cybernetsp.com/)
   // =========================================================================
   try {
-    // Usamos el Proxy Gadget oficial de Google, optimizado para cachear y liberar CORS de imágenes
-    const googleProxyUrl = `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=${encodeURIComponent(imgElement.src)}`;
+    // Usamos un proxy CDN dedicado a imágenes que formatea a PNG directamente en la nube.
+    // Esto destruye el bloqueo CORS de Google Drive y nos da el archivo binario limpio para WhatsApp.
+    const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(imgElement.src)}&output=png`;
 
-    const response = await fetch(googleProxyUrl);
-    if (!response.ok) throw new Error("Proxy no disponible");
-    const imagenBlob = await response.blob();
+    const response = await fetch(proxyUrl);
+    if (!response.ok) throw new Error("El proxy de imágenes no respondió");
 
-    // Renderizamos los píxeles limpios en memoria para WhatsApp
-    const pngBlob = await new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob((b) => resolve(b), "image/png");
-      };
-      img.onerror = () => reject(new Error("Error gráficos"));
-      img.src = URL.createObjectURL(imagenBlob);
-    });
+    const pngBlob = await response.blob();
 
-    // Inyectamos el archivo nativo en la memoria de la PC
+    // Escribimos el archivo físico de la imagen directamente en el portapapeles
     await navigator.clipboard.write([
       new ClipboardItem({ "image/png": pngBlob }),
     ]);
 
-    // Copiado Exitoso de una vez
+    // Éxito total e impecable en producción
     btn.innerHTML = "¡Copiada!";
     btn.style.background = "var(--ios-green)";
     btn.style.color = "white";
@@ -2785,40 +2800,33 @@ window.copiarImagenPortapapeles = async function (imgId, btn) {
       btn.style.borderColor = "";
       btn.disabled = false;
     }, 1500);
-    return;
   } catch (err) {
-    console.log("Desviando bloqueo de red local hacia el asistente visual...");
+    console.error("Error en el copiado web asíncrono:", err);
+
+    // Si el navegador del usuario tiene bloqueos de privacidad estrictos para el portapapeles
+    btn.innerHTML = "¡Usa Clic Der.!";
+    btn.style.background = "var(--ios-orange)";
+    btn.style.color = "white";
+
+    imgElement.style.transition = "all 0.3s ease";
+    imgElement.style.transform = "scale(1.04)";
+    imgElement.style.outline = "3px solid var(--ios-orange)";
+
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>Por seguridad del navegador: Clic derecho a la foto ➔ 'Copiar imagen'</span></div>`,
+      );
+    }
+
+    setTimeout(() => {
+      imgElement.style.transform = "";
+      imgElement.style.outline = "none";
+      btn.innerHTML = originalHtml;
+      btn.style.background = "";
+      btn.style.color = "";
+      btn.disabled = false;
+    }, 3000);
   }
-
-  // =========================================================================
-  // 🚨 PLAN DE ASISTENCIA (ANTI-CONGELAMIENTO PARA MODO LOCAL FILE://)
-  // =========================================================================
-  // Si estás abriendo el archivo desde tus carpetas sin servidor web, el navegador
-  // bloqueará la extracción. Activamos el foco naranja sin romper la pantalla.
-
-  btn.innerHTML = "¡Usa Clic Der.!";
-  btn.style.background = "var(--ios-orange)";
-  btn.style.color = "white";
-
-  // Alumbrar la foto para que el operador sepa cuál es sin equivocarse
-  imgElement.style.transition = "all 0.3s ease";
-  imgElement.style.transform = "scale(1.04)";
-  imgElement.style.outline = "3px solid var(--ios-orange)";
-
-  if (typeof triggerToast === "function") {
-    triggerToast(
-      `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>Al estar en local: Clic derecho a la foto ➔ 'Copiar imagen'</span></div>`,
-    );
-  }
-
-  setTimeout(() => {
-    imgElement.style.transform = "";
-    imgElement.style.outline = "none";
-    btn.innerHTML = originalHtml;
-    btn.style.background = "";
-    btn.style.color = "";
-    btn.disabled = false;
-  }, 3000);
 };
 
 // Función auxiliar estética para pintar el éxito estilo iOS
