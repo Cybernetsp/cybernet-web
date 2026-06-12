@@ -1,70 +1,72 @@
 /* =========================================================================
-   CYBERNET DESIGN SYSTEM - LIQUID AURORA / MacOS SEQUOIA
-   Rediseño 360°: OPTIMIZADO PARA ALTO RENDIMIENTO (60fps)
+   CYBERNET DESIGN SYSTEM - MINIMALIST Slate & ZINC (ULTRA FLUID)
+   Rediseño Completo: Optimizado para Rendimiento Máximo (60fps) y Sin Neón
    ========================================================================= */
 
-/* --- 1. VARIABLES GLOBALES --- */
+/* --- 1. VARIABLES GLOBALES MINIMALISTAS --- */
 :root {
-  /* Acentos Vibrantes Fluídos */
-  --ios-blue: #0a84ff;
-  --ios-green: #32d74b;
-  --ios-red: #ff453a;
-  --ios-purple: #bf5af2;
-  --ios-orange: #ff9f0a;
+  /* Colores Corporativos Apagados (Estilo Shadcn / Apple Premium) */
+  --ios-blue: #3b82f6;
+  --ios-green: #10b981;
+  --ios-red: #ef4444;
+  --ios-purple: #8b5cf6;
+  --ios-orange: #f59e0b;
 
-  --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
-  --success-gradient: linear-gradient(135deg, #32d74b 0%, #248a3d 100%);
-  --danger-gradient: linear-gradient(135deg, #ff453a 0%, #d70015 100%);
+  --ai-gradient: linear-gradient(135deg, #27272a 0%, #18181b 100%);
+  --success-gradient: #10b981;
+  --danger-gradient: #ef4444;
 
+  /* Transición de Composición de GPU Limpia (Evita Layout Thrashing) */
   --transition-fluid:
-    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease,
+    border-color 0.2s ease;
 }
 
-/* MODO OSCURO (Midnight Aurora) */
+/* MODO OSCURO PREMIUM (Charcoal Dark) */
 [data-theme="dark"] {
   color-scheme: dark;
-  --page-bg: #09090e;
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.6);
+  --page-bg: #09090b; /* Fondo Zinc Puro */
+  --text-primary: #f4f4f5; /* Tiza Claro */
+  --text-secondary: #a1a1aa; /* Gris Neutro Muted */
 
-  /* Fondos optimizados para no quemar la GPU */
-  --glass-bg: rgba(20, 20, 25, 0.9); /* Más opaco para necesitar menos blur */
-  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  /* Capas de color sólidas sin blur costoso para la GPU */
+  --glass-bg: #18181b;
+  --glass-border: 1px solid #27272a;
+  --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 
-  --card-bg: rgba(22, 22, 28, 0.95); /* Color casi sólido, SIN BLUR */
-  --input-bg: rgba(0, 0, 0, 0.5);
-  --input-focus: rgba(10, 132, 255, 0.2);
+  --card-bg: #141416;
+  --input-bg: #09090b;
+  --input-focus: #18181b;
 
-  --sheet-bg: rgba(25, 25, 30, 0.98);
-  --sheet-modal-bg: #1e1e24;
-  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --sheet-bg: #141416;
+  --sheet-modal-bg: #18181b;
+  --scrollbar-thumb: #27272a;
 }
 
-/* MODO CLARO (Daylight Aurora) */
+/* MODO CLARO PREMIUM (Daylight Studio) */
 [data-theme="light"] {
   color-scheme: light;
-  --ios-blue: #007aff;
-  --ios-green: #28cd41;
-  --ios-red: #ff3b30;
-  --ios-purple: #af52de;
-  --ios-orange: #ff9500;
+  --ios-blue: #2563eb;
+  --ios-green: #059669;
+  --ios-red: #dc2626;
+  --ios-purple: #7c3aed;
+  --ios-orange: #d97706;
 
-  --page-bg: #f2f2f7;
-  --text-primary: #1c1c1e;
-  --text-secondary: rgba(60, 60, 67, 0.6);
+  --page-bg: #f4f4f5;
+  --text-primary: #18181b;
+  --text-secondary: #71717a;
 
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: 1px solid rgba(0, 0, 0, 0.08);
-  --glass-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  --glass-bg: #ffffff;
+  --glass-border: 1px solid #e4e4e7;
+  --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
   --card-bg: #ffffff;
-  --input-bg: rgba(0, 0, 0, 0.03);
-  --input-focus: rgba(0, 122, 255, 0.1);
+  --input-bg: #f4f4f5;
+  --input-focus: #e4e4e7;
 
   --sheet-bg: #ffffff;
   --sheet-modal-bg: #ffffff;
-  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #d4d4d8;
 }
 
 /* --- 2. RESET & BASE --- */
@@ -73,25 +75,15 @@
   padding: 0;
   box-sizing: border-box;
   font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display",
-    "Segoe UI", Roboto, sans-serif;
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 body {
   background-color: var(--page-bg);
-  /* 🌊 FONDO LIQUID AURORA (Optimizado: Sin fixed, sin quemar memoria) 🌊 */
-  background-image:
-    radial-gradient(
-      circle at 0% 0%,
-      rgba(10, 132, 255, 0.12) 0%,
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 100% 100%,
-      rgba(191, 90, 242, 0.1) 0%,
-      transparent 40%
-    );
+  /* Se remueven gradientes radiales fijos para liberar memoria gráfica */
+  background-image: none;
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
@@ -100,6 +92,7 @@ body {
   overflow-x: hidden;
 }
 
+/* Scrollbar Sutil */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -121,89 +114,86 @@ body {
   width: calc(100% - 32px);
   max-width: 1200px;
   background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px); /* Blur muy ligero */
+  /* Eliminado backdrop-filter pesado para fluidez total en móviles e iOS */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: var(--glass-border);
   box-shadow: var(--glass-shadow);
-  border-radius: 50px;
-  padding: 10px 24px;
+  border-radius: 16px;
+  padding: 12px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 15px;
   z-index: 1000;
-  /* Fuerza usar GPU para el header */
   will-change: transform;
 }
 
 .main-workspace {
   width: 100%;
   max-width: 1240px;
-  padding: 110px 20px 280px;
+  padding: 100px 20px 180px; /* Le damos 180px para que las tarjetas pasen por encima del menú */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 30px;
+  gap: 24px;
 }
 
 .grid-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  gap: 20px;
   width: 100%;
 }
 
-/* --- 4. TARJETAS (CARDS) --- */
+/* --- 4. TARJETAS (CARDS PLANAS) --- */
 .card-ios {
-  background: var(--card-bg); /* Sólido, rinde 100x mejor */
+  background: var(--card-bg);
   border: var(--glass-border);
-  border-radius: 32px;
-  padding: 28px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--glass-shadow);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   transition: var(--transition-fluid);
 }
 .card-ios:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
+  border-color: var(--text-secondary);
   box-shadow: var(--glass-shadow);
-  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .card-title {
   color: var(--text-primary);
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 1.15rem;
+  font-weight: 600;
   letter-spacing: -0.3px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* --- 5. FORMULARIOS & INPUTS --- */
+/* --- 5. FORMULARIOS E INPUTS --- */
 .input-ios {
   width: 100%;
-  padding: 14px 20px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
   background: var(--input-bg);
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 0.95rem;
   outline: none;
   transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-[data-theme="light"] .input-ios {
-  border-color: rgba(0, 0, 0, 0.05);
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .input-ios:focus {
   background: var(--input-focus);
   border-color: var(--ios-blue);
-  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 .input-ios::placeholder {
   color: var(--text-secondary);
@@ -211,24 +201,24 @@ body {
 
 select.input-ios {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 18px center;
-  background-size: 16px;
+  background-position: right 14px center;
+  background-size: 14px;
   cursor: pointer;
 }
 select.input-ios option {
-  background-color: #1e1e24 !important;
-  color: #ffffff !important;
+  background-color: var(--sheet-modal-bg) !important;
+  color: var(--text-primary) !important;
 }
 
-/* --- 6. BOTONES (PILL SHAPE) --- */
+/* --- 6. BOTONES MINIMALISTAS --- */
 .btn-ios {
-  padding: 14px 24px;
-  border-radius: 50px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.3px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.1px;
   cursor: pointer;
   border: none;
   display: inline-flex;
@@ -239,60 +229,61 @@ select.input-ios option {
   will-change: transform;
 }
 .btn-ios:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 .btn-ios:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
 }
 
 .btn-primary {
-  background: var(--ai-gradient);
-  color: white;
+  background: var(--text-primary);
+  color: var(--page-bg);
+}
+.btn-primary:hover {
+  opacity: 0.9;
 }
 .btn-success {
-  background: var(--success-gradient);
+  background: var(--ios-green);
   color: white;
 }
 .btn-danger {
-  background: var(--danger-gradient);
+  background: var(--ios-red);
   color: white;
 }
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--input-bg);
   border: var(--glass-border);
   color: var(--text-primary);
 }
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--text-secondary);
 }
 
 .badge-ios {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--input-bg);
   border: var(--glass-border);
-  padding: 8px 16px;
-  border-radius: 30px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 .badge-blue {
   color: var(--ios-blue);
-  background: rgba(10, 132, 255, 0.1);
-  border-color: rgba(10, 132, 255, 0.2);
+  border-color: rgba(59, 130, 246, 0.2);
 }
 .badge-green {
   color: var(--ios-green);
-  background: rgba(50, 215, 75, 0.1);
-  border-color: rgba(50, 215, 75, 0.2);
+  border-color: rgba(16, 185, 129, 0.2);
 }
 .badge-danger {
   color: var(--ios-red);
-  background: rgba(255, 69, 58, 0.1);
-  border-color: rgba(255, 69, 58, 0.2);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 /* --- 7. OVERLAYS Y MODALES --- */
@@ -302,7 +293,7 @@ select.input-ios option {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Oscurecimiento sólido, SIN BLUR */
+  background: rgba(0, 0, 0, 0.6);
   z-index: 2000;
   display: none;
   justify-content: center;
@@ -310,7 +301,7 @@ select.input-ios option {
 }
 .overlay-ios.open {
   display: flex;
-  animation: fadeIn 0.2s ease forwards;
+  animation: fadeIn 0.15s ease-out forwards;
 }
 @keyframes fadeIn {
   from {
@@ -323,22 +314,22 @@ select.input-ios option {
 
 .modal-ios {
   width: 90%;
-  max-width: 440px;
+  max-width: 420px;
   background: var(--sheet-modal-bg);
   border: var(--glass-border);
-  border-radius: 32px;
-  padding: 35px 25px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  border-radius: 20px;
+  padding: 32px 24px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   text-align: center;
-  animation: popIn 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes popIn {
   from {
-    transform: scale(0.9) translateY(10px);
+    transform: scale(0.96);
     opacity: 0;
   }
   to {
-    transform: scale(1) translateY(0);
+    transform: scale(1);
     opacity: 1;
   }
 }
@@ -351,17 +342,17 @@ select.input-ios option {
   max-height: 850px;
   margin: auto;
   background: var(--sheet-bg);
-  border-radius: 40px;
+  border-radius: 24px;
   border: var(--glass-border);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-  padding: 30px 20px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  animation: floatUp 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: floatUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes floatUp {
   from {
-    transform: translateY(50px);
+    transform: translateY(20px);
     opacity: 0;
   }
   to {
@@ -370,26 +361,22 @@ select.input-ios option {
   }
 }
 
-.sheet-ios::before {
-  display: none;
-}
-
 .sheet-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--glass-border);
 }
 .btn-close-circle {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--input-bg);
   border: var(--glass-border);
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   color: var(--text-secondary);
-  font-size: 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -426,7 +413,7 @@ select.input-ios option {
   margin-top: 10px;
 }
 .mb-1 {
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 .w-100 {
   width: 100%;
@@ -437,7 +424,7 @@ select.input-ios option {
   width: 100%;
 }
 
-/* --- 9. BARRA INFERIOR (FLOATING DOCK ENVOLVENTE) --- */
+/* --- 9. CONFIGURACIÓN DOCK INFERIOR (FLOATING DOCK) --- */
 .header-search-container {
   flex: 1;
   display: flex;
@@ -455,12 +442,9 @@ select.input-ios option {
 }
 .ticker-track {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   width: max-content;
-  animation: tickerScroll 25s linear infinite;
-}
-.ticker-track:hover {
-  animation-play-state: paused;
+  animation: tickerScroll 30s linear infinite;
 }
 @keyframes tickerScroll {
   0% {
@@ -471,7 +455,6 @@ select.input-ios option {
   }
 }
 
-/* DOCK FLOTANTE CON WRAP (Optimizado para no causar lag) */
 .ios-bottom-bar {
   position: fixed;
   bottom: 20px;
@@ -480,22 +463,19 @@ select.input-ios option {
   width: calc(100% - 32px);
   max-width: 950px;
   background: var(--glass-bg);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: var(--glass-border);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  border-radius: 40px;
+  box-shadow: var(--glass-shadow);
+  border-radius: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px 14px;
+  padding: 8px 12px;
   z-index: 1000;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
   will-change: transform;
-}
-.ios-bottom-bar::-webkit-scrollbar {
-  display: none;
 }
 
 .ios-tab-btn {
@@ -506,59 +486,30 @@ select.input-ios option {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 8px 12px;
-  border-radius: 20px;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: 10px;
   font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.3px;
+  font-weight: 600;
   text-transform: uppercase;
   cursor: pointer;
   flex-shrink: 0;
-  min-width: 65px;
-  transition:
-    transform 0.2s,
-    background 0.2s;
+  min-width: 60px;
+  transition: var(--transition-fluid);
 }
 .ios-tab-btn svg {
-  width: 24px;
-  height: 24px;
-  stroke-width: 2.2;
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
   margin-bottom: 2px;
 }
+/* Se eliminaron resplandores chillones */
 .ios-tab-btn:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.08);
-}
-.ios-tab-btn:active {
-  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-/* --- 10. BLOQUES EXTRA Y MODALES --- */
-#header-container .card-ios {
-  max-width: 320px !important;
-  padding: 24px !important;
-  align-items: center;
-}
-#header-container img {
-  max-width: 160px !important;
-  border-radius: 24px !important;
-}
-#ventaGeneradaModalOverlay .modal-ios {
-  max-width: 480px;
-  padding: 35px 25px;
-}
-#ventaGeneradaModalOverlay .btn-ios {
-  margin-top: 12px !important;
-  width: 100%;
-  display: block;
-}
-#btnCopiarSaldoRevendedor {
-  background: linear-gradient(135deg, #ff9500 0%, #ff5e00 100%) !important;
-  color: white !important;
-}
-
-/* --- 11. FINANZAS Y GRIDS --- */
+/* --- 10. FINANZAS Y GRIDS (ESTILO PANEL MINIMALISTA) --- */
 .filter-wrapper-ios {
   display: flex;
   flex-direction: row;
@@ -571,7 +522,7 @@ select.input-ios option {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
   flex: 1;
 }
@@ -579,34 +530,34 @@ select.input-ios option {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 8px 16px;
-  border-radius: 50px;
+  background: var(--input-bg);
+  padding: 6px 12px;
+  border-radius: 10px;
   border: var(--glass-border);
 }
 
 .executive-panoramic-hub {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
-  gap: 24px;
+  gap: 20px;
   width: 100%;
 }
 .bento-horizontal-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
   width: 100%;
 }
 .dist-grid-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
   width: 100%;
 }
 .workspace-action-grid {
   display: grid;
   grid-template-columns: 1fr 1.3fr;
-  gap: 24px;
+  gap: 20px;
   width: 100%;
 }
 
@@ -614,57 +565,54 @@ select.input-ios option {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-left: 10px;
 }
 .main-price-lbl {
-  font-size: 3.5rem;
-  font-weight: 800;
-  letter-spacing: -2px;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -1.5px;
   line-height: 1;
   display: block;
-  margin: 12px 0;
+  margin: 10px 0;
 }
 .status-pill-container {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 .status-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--ios-green);
-  box-shadow: 0 0 10px var(--ios-green);
 }
 
 .chart-layout-box {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 24px;
 }
 .apple-ring-svg {
   transform: rotate(-90deg);
-  width: 130px;
-  height: 130px;
+  width: 110px;
+  height: 110px;
   flex-shrink: 0;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
 }
 .ring-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.05);
-  stroke-width: 12;
+  stroke: rgba(255, 255, 255, 0.03);
+  stroke-width: 10;
 }
 .ring-fill-ingresos {
   fill: none;
   stroke: var(--ios-blue);
-  stroke-width: 12;
+  stroke-width: 10;
   stroke-linecap: round;
 }
 .ring-fill-gastos {
   fill: none;
   stroke: var(--ios-red);
-  stroke-width: 12;
+  stroke-width: 10;
   stroke-linecap: round;
 }
 
@@ -672,158 +620,168 @@ select.input-ios option {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 .bar-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 .bar-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 600;
   color: var(--text-secondary);
-  text-transform: uppercase;
 }
 .bar-track {
   width: 100%;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
   overflow: hidden;
 }
 .bar-fill {
   height: 100%;
   width: 0%;
-  border-radius: 10px;
-  background: currentColor;
+  border-radius: 6px;
 }
 
+/* Modificado bordes limpios sin decorados chillones */
 .distribution-hub-panel {
-  border-top: 3px solid var(--ios-blue);
+  border-top: 2px solid var(--ios-blue);
+  border-radius: 16px;
 }
 .debt-hub-panel {
-  border-top: 3px solid var(--ios-orange);
+  border-top: 2px solid var(--ios-orange);
+  border-radius: 16px;
 }
 
-.apple-list-container {
-  display: flex;
-  flex-direction: column;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 20px;
-  overflow: hidden;
-  border: var(--glass-border);
+/* --- 11. TABLAS Y LISTADOS CONTABLES --- */
+.distris-table {
   width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
-.apple-table-header-row {
-  display: flex;
-  width: 100%;
-  padding: 14px 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: var(--glass-border);
-  flex-shrink: 0;
-}
-.th-cell {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-#listaDesgloseGastos {
-  max-height: 350px;
-  overflow-y: auto;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.apple-list-row {
-  display: flex;
-  width: 100%;
-  padding: 14px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  align-items: center;
-  transition: background 0.2s;
-}
-.apple-list-row:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-.td-cell {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.td-date {
-  width: 18%;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-}
-.td-price {
-  width: 22%;
-  font-weight: 800;
-  font-family: monospace;
-  font-size: 1.05rem;
-}
-.td-desc {
-  width: 38%;
-  padding-right: 10px;
+.distris-table th,
+.distris-table td {
+  padding: 12px 14px;
   text-align: left;
+  border-bottom: 1px solid var(--glass-border);
+  vertical-align: middle;
 }
-.td-cat {
-  width: 22%;
-  text-align: right;
+.distris-table th {
+  font-size: 0.75rem;
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  position: sticky;
+  top: 0;
+  background: var(--sheet-bg);
+  z-index: 10;
   font-weight: 700;
   text-transform: uppercase;
+}
+.saldo-verde {
+  color: var(--ios-green);
+  font-weight: 600;
+  font-family: monospace;
+}
+.saldo-rojo {
+  color: var(--ios-red);
+  font-weight: 600;
+  font-family: monospace;
 }
 
 .empty-log-msg {
   text-align: center;
-  padding: 45px;
+  padding: 36px;
   color: var(--text-secondary);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 500;
   width: 100%;
 }
 
-/* --- 12. NOTIFICACIÓN TOAST (PILL) --- */
+/* --- 12. NOTIFICACIÓN TOAST ULTRA-FLUIDA (GPU DRIVEN) --- */
 .apple-notification-toast {
   position: fixed;
-  top: 30px;
+  top: 20px;
   left: 50%;
-  transform: translateX(-50%) scale(0.8);
+  transform: translateX(-50%) scale(0.95);
   background: var(--sheet-modal-bg);
   border: var(--glass-border);
   color: var(--text-primary);
-  padding: 14px 28px;
-  border-radius: 50px;
-  font-size: 0.95rem;
-  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
   opacity: 0;
-  transition:
-    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-    opacity 0.3s;
+  visibility: hidden;
   z-index: 10000;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  /* Propiedades composicionadas que evitan el reflujo del navegador */
+  transition:
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s ease,
+    visibility 0.2s;
 }
-.apple-notification-toast.show {
+.apple-notification-toast.island-active {
   transform: translateX(-50%) scale(1);
   opacity: 1;
+  visibility: visible;
 }
 
-/* --- 13. MEDIA QUERIES --- */
+/* --- 13. ADICIONALES (CONTACT CARDS & TOGGLES) --- */
+.blocks-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+.contact-card {
+  background: rgba(0, 0, 0, 0.1);
+  border: var(--glass-border);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.phone-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: monospace;
+}
+.crossed-out {
+  text-decoration: line-through;
+  opacity: 0.35;
+}
+
+.btn-icon {
+  background: var(--input-bg);
+  border: var(--glass-border);
+  color: var(--text-primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--transition-fluid);
+}
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.btn-icon.success {
+  background: var(--ios-green) !important;
+  color: white !important;
+}
+
+/* --- 14. MEDIA QUERIES --- */
 @media (max-width: 900px) {
   .filter-wrapper-ios {
     flex-direction: column;
     align-items: stretch;
-    text-align: center;
   }
   .filter-group-center {
     flex-direction: column;
@@ -832,13 +790,6 @@ select.input-ios option {
   .pod-selector {
     width: 100%;
     justify-content: space-between;
-  }
-  .pod-selector select {
-    flex: 1;
-    text-align: right;
-  }
-  .revendedor-grid {
-    grid-template-columns: 1fr;
   }
   .flex-row-mobile-col {
     flex-direction: column;
@@ -852,305 +803,195 @@ select.input-ios option {
 }
 @media (max-width: 768px) {
   .global-header {
-    padding: 12px 16px;
-    border-radius: 30px;
+    padding: 10px 16px;
+    border-radius: 12px;
     width: calc(100% - 20px);
   }
   .main-workspace {
-    padding-top: 130px;
-    padding-bottom: 260px;
+    padding-top: 120px;
   }
   .sheet-ios {
     max-width: 100%;
     width: 100%;
-    border-radius: 30px 30px 0 0;
-    margin: 0;
-    height: 92vh;
+    border-radius: 20px 20px 0 0;
+    height: 90vh;
   }
   .ios-bottom-bar {
     width: calc(100% - 16px);
     bottom: 10px;
-    border-radius: 30px;
-    padding: 10px;
-    gap: 6px;
+    border-radius: 16px;
+    padding: 6px;
   }
   .ios-tab-btn {
-    padding: 8px;
-    min-width: 55px;
+    min-width: 50px;
     font-size: 0.6rem;
   }
 }
+/* =========================================================================
+   🚫 ANTI-NEÓN: APAGAR TODOS LOS BRILLOS FORZADOS DESDE JS/HTML
+   ========================================================================= */
 
-/* --- 14. HERRAMIENTAS ADICIONALES --- */
-.blocks-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  width: 100%;
-}
-.btn-block {
-  flex: 1;
-  min-width: 140px;
-  background: rgba(48, 209, 88, 0.1);
-  border: 1px solid rgba(48, 209, 88, 0.2);
-  color: var(--ios-green);
-  padding: 14px;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.2s;
-}
-.btn-block:hover {
-  background: rgba(48, 209, 88, 0.15);
-}
-.btn-block.active {
-  background: var(--ios-green);
-  color: black;
-  border-color: var(--ios-green);
+/* 1. Apaga el resplandor de los íconos del menú inferior y gráficas */
+.ios-tab-btn svg,
+.apple-ring-svg {
+  filter: none !important;
 }
 
-.contact-card {
-  background: rgba(0, 0, 0, 0.2);
-  border: var(--glass-border);
-  border-radius: 20px;
-  padding: 14px 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.contact-left,
-.contact-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.index-badge {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
-  width: 32px;
-  height: 32px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-.phone-text {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--ios-blue);
-  font-family: monospace;
-}
-.crossed-out {
-  text-decoration: line-through;
-  opacity: 0.3;
-  filter: grayscale(1);
+/* 2. Apaga el brillo temporal al copiar una tarjeta y mantiene la sombra natural */
+.card-ios {
+  box-shadow: var(--glass-shadow) !important;
 }
 
-.btn-icon {
-  background: rgba(255, 255, 255, 0.1);
-  border: var(--glass-border);
-  color: var(--text-primary);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-icon:hover {
-  background: rgba(10, 132, 255, 0.2);
-  color: var(--ios-blue);
-}
-.btn-icon.success {
-  background: var(--ios-green) !important;
-  color: black !important;
-  border-color: var(--ios-green) !important;
+/* 3. Apaga los brillos de color en TODOS los botones */
+.btn-ios,
+button {
+  box-shadow: none !important;
 }
 
-.checkbox-container {
-  height: 260px;
-  overflow-y: auto;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 20px;
-  border: var(--glass-border);
-}
-.checkbox-container input[type="number"] {
-  width: 65px;
-  padding: 10px;
-  border-radius: 50px;
-  border: var(--glass-border);
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  text-align: center;
-  outline: none;
-  font-weight: 800;
-  font-size: 1rem;
+/* 4. Apaga el LED verde de conexión y los indicadores de las plataformas */
+#ledConexion,
+.status-dot,
+[id^="badge_status_"] {
+  box-shadow: none !important;
 }
 
-.distris-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-.distris-table th,
-.distris-table td {
-  padding: 14px 16px;
-  text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  vertical-align: middle;
-}
-.distris-table th {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  position: sticky;
-  top: 0;
-  background: var(--sheet-bg);
-  z-index: 10;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.saldo-verde {
-  color: var(--ios-green);
-  font-weight: 800;
-  font-family: monospace;
-  font-size: 1.1rem;
-}
-.saldo-rojo {
-  color: var(--ios-red);
-  font-weight: 800;
-  font-family: monospace;
-  font-size: 1.1rem;
-}
-.trash-icon-btn,
-.copy-icon-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-}
-.copy-icon-btn {
-  font-size: 1rem;
-  padding: 8px 12px;
-  margin-left: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50px;
-  transition: background 0.2s;
-}
-.copy-icon-btn:hover {
-  background: rgba(10, 132, 255, 0.2);
-  color: var(--ios-blue);
+/* 5. Apaga el resplandor de las barras en el apartado de Finanzas */
+.bar-fill {
+  box-shadow: none !important;
 }
 
-.recordatorios-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 25px;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 100px 20px 50px;
-}
-.reminder-row-box {
-  background: rgba(0, 0, 0, 0.2);
-  border: var(--glass-border);
-  border-radius: 20px;
-  padding: 14px 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.reminder-row-box.tachado {
-  opacity: 0.4;
-  border-color: var(--ios-green);
-  background: rgba(50, 215, 75, 0.05);
-}
-.reminder-row-box.tachado .reminder-link-text {
-  text-decoration: line-through;
-  color: var(--text-secondary);
-}
-.reminder-row-box.tachado .reminder-number {
-  background: var(--ios-green);
-  color: black;
-}
-.reminder-number {
-  font-size: 0.95rem;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.1);
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.reminder-link-text {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--ios-blue);
-  font-family: monospace;
+/* 6. Apaga el punto rojo neón inyectado en el panel de Cortes Netflix */
+.card-ios div[style*="box-shadow"] {
+  box-shadow: none !important;
 }
 
-.toggle-ios {
-  appearance: none;
-  width: 50px;
-  height: 28px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 50px;
-  position: relative;
-  cursor: pointer;
-  outline: none;
-  border: var(--glass-border);
-  transition: background 0.2s ease;
+/* 7. Protege y mantiene las sombras correctas de los paneles principales */
+.modal-ios,
+.sheet-ios,
+.ios-bottom-bar,
+.global-header {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
 }
-.toggle-ios::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 22px;
-  height: 22px;
-  background: #ffffff;
-  border-radius: 50%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease;
-}
-.toggle-ios:checked {
-  background: var(--ios-green);
-}
-.toggle-ios:checked::after {
-  transform: translateX(22px);
+/* =========================================================================
+   🎨 DOCK MINIMALISTA (MENÚ INFERIOR UNIFICADO Y SIN COLORES)
+   ========================================================================= */
+
+/* 1. Forzar color base neutro (gris) a todos los botones del menú */
+.ios-bottom-bar > button,
+.ios-bottom-bar > div {
+  color: var(--text-secondary) !important;
+  transition: color 0.2s ease !important;
 }
 
-.skeleton {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: transparent !important;
-  animation: pulse 1.5s infinite;
+/* 2. Forzar que los textos (span) hereden el color neutro */
+.ios-bottom-bar > button span,
+.ios-bottom-bar > div span {
+  color: inherit !important;
 }
-@keyframes pulse {
-  0% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.7;
-  }
-  100% {
-    opacity: 0.4;
-  }
+
+/* 3. Forzar que TODOS los trazos de los iconos (SVGs) hereden el color neutro */
+.ios-bottom-bar svg,
+.ios-bottom-bar svg * {
+  stroke: currentColor !important;
 }
-.revendedor-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  width: 100%;
+
+/* 4. Excepción: si algún icono usa relleno (fill) en lugar de trazo, lo apagamos también */
+.ios-bottom-bar svg polygon,
+.ios-bottom-bar svg rect {
+  fill: transparent !important;
+}
+
+/* 5. Efecto Hover: Se iluminan en blanco brillante al pasar el cursor */
+.ios-bottom-bar > button:hover,
+.ios-bottom-bar > div:hover {
+  color: var(--text-primary) !important;
+}
+/* =========================================================================
+   🚀 CYBERNET V2 - REDISEÑO ULTRA MINIMALISTA (ENTERPRISE)
+   ========================================================================= */
+
+/* 1. PALETA DE COLORES PLANA Y ELEGANTE */
+[data-theme="dark"] {
+  --page-bg: #09090b !important; /* Fondo oscuro absoluto (Zing 950) */
+  --card-bg: #09090b !important; /* Tarjetas fusionadas con el fondo */
+  --glass-bg: #09090b !important; /* Paneles sin transparencias */
+  --sheet-bg: #09090b !important;
+  --sheet-modal-bg: #18181b !important; /* Modales ligeramente más claros */
+
+  --glass-border: 1px solid #27272a !important; /* Bordes sutiles y elegantes */
+  --glass-shadow: none !important; /* Eliminamos las sombras 3D */
+
+  --text-primary: #fafafa !important;
+  --text-secondary: #a1a1aa !important;
+
+  --input-bg: #18181b !important;
+}
+
+/* 2. RECTIFICAR FORMAS (Adiós a las burbujas y píldoras) */
+.card-ios,
+.sheet-ios,
+.modal-ios,
+.global-header,
+.ios-bottom-bar {
+  border-radius: 12px !important;
+  border: var(--glass-border) !important;
+  box-shadow: none !important;
+}
+
+/* 3. BOTONES E INPUTS MÁS SERIOS */
+.btn-ios,
+.input-ios,
+.badge-ios,
+select.input-ios {
+  border-radius: 8px !important; /* Bordes ligeramente curvos, no redondos */
+  box-shadow: none !important;
+}
+
+/* 4. AJUSTAR EL MENÚ INFERIOR (DOCK) PARA QUE PAREZCA UNA BARRA DE HERRAMIENTAS */
+.ios-bottom-bar {
+  bottom: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  padding: 12px 20px !important;
+  background: #09090b !important;
+  border-top: 1px solid #27272a !important;
+  gap: 16px !important;
+}
+
+/* 5. AJUSTAR EL HEADER PARA QUE SEA PLANO Y COMPLETO */
+.global-header {
+  top: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom: 1px solid #27272a !important;
+  background: #09090b !important;
+}
+
+/* 6. CORRECCIÓN DE MÁRGENES POR EL NUEVO HEADER Y FOOTER */
+.main-workspace {
+  padding-top: 90px !important;
+  padding-bottom: 100px !important;
+}
+
+/* 7. BOTONES PRINCIPALES (Reemplazar gradientes por sólidos) */
+.btn-primary {
+  background: #fafafa !important;
+  color: #09090b !important;
+  font-weight: 600 !important;
+}
+.btn-success {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+.btn-danger {
+  background: #ef4444 !important;
+  color: #ffffff !important;
 }
