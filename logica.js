@@ -2151,9 +2151,6 @@ function copiarCuentaCompleta(btn, index) {
     });
 }
 
-// =========================================================================
-// MÓDULO DE TURNOS: APERTURA Y GESTIÓN DE EDICIONES
-// =========================================================================
 function toggleShiftsPanel() {
   haptic();
   const overlay = document.getElementById("shiftsOverlay");
@@ -2176,12 +2173,15 @@ function toggleShiftsPanel() {
 
     document.getElementById("inputFechaShift").valueAsDate = new Date();
 
-    if (window.currentHorasStock && window.currentHorasStock.length > 0) {
-      renderizarHorasEnPantalla("");
-      cargarHorasDesdeSheets();
-    } else {
-      forzarRefrescoDeHoras();
-    }
+    // 🔥 MODIFICACIÓN: Sincroniza los pagos antes de pintar el calendario
+    sincronizarTachadosConNube(() => {
+      if (window.currentHorasStock && window.currentHorasStock.length > 0) {
+        renderizarHorasEnPantalla("");
+        cargarHorasDesdeSheets();
+      } else {
+        forzarRefrescoDeHoras();
+      }
+    });
   }
 }
 
@@ -2350,7 +2350,11 @@ function forzarRefrescoDeHoras() {
   haptic();
   document.getElementById("shiftsScrollArea").innerHTML =
     '<div style="text-align:center; padding:30px; color:var(--ios-blue); font-size:0.9rem;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg><br>Sincronizando Base de Horas...</div>';
-  cargarHorasDesdeSheets();
+
+  // 🔥 MODIFICACIÓN: Actualiza tanto las horas como las tachaduras al refrescar
+  sincronizarTachadosConNube(() => {
+    cargarHorasDesdeSheets();
+  });
 }
 
 function cargarHorasDesdeSheets() {
@@ -2951,7 +2955,7 @@ window.cambiarQuincenaHoras = function (quincena) {
 };
 
 // =========================================================================
-// 📅 RENDERIZADOR DE CALENDARIO Y TURNOS (Reemplazar la anterior)
+// 📅 RENDERIZADOR DE CALENDARIO Y TURNOS (VERSION ULTRA CON TOTAL NÓMINA GLOBAL)
 // =========================================================================
 function renderizarHorasEnPantalla(filtroBusqueda = "") {
   const container = document.getElementById("shiftsScrollArea");
@@ -3023,7 +3027,6 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     let item = window.currentHorasStock[index];
     let d = parseDate(item.fecha);
 
-    // 🔥 AHORA COMPARA CON EL MES Y AÑO ELEGIDOS EN EL MENÚ
     if (
       !d ||
       isNaN(d.getTime()) ||
@@ -3126,7 +3129,6 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
       </div>
     `;
 
-  // Validaciones de pantalla vacía
   if (vendedoresArray.length === 0 && filtroBusqueda === "") {
     if (!isCamilo && userFinal !== "") {
       vendedoresArray.push(userFinal);
@@ -3152,6 +3154,9 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
   let html =
     htmlControles +
     `<h4 style="text-align:center; color:var(--text-primary); font-size:1.05rem; margin-bottom:15px; font-weight: 800; letter-spacing: -0.3px;">${tituloPanel}</h4>`;
+
+  // 💰 ACUMULADOR DE NÓMINA TOTAL GLOBAL
+  let totalNominaGlobal = 0;
 
   // 🏗️ CONSTRUCCIÓN DEL LAYOUT TIPO CALENDARIO POR VENDEDOR
   for (let v = 0; v < vendedoresArray.length; v++) {
@@ -3181,14 +3186,12 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
       let btnAcciones = "";
       let hasWorked = false;
 
-      // 🚫 Lógica para verificar si está tachado
       let llaveTachado = `${vendedor}_${dia}_${dMes}_${dAnio}`;
       let estaTachado = tachadosMemoria[llaveTachado] === true;
 
       if (worked && worked.totalSeconds > 0) {
         hasWorked = true;
 
-        // 💰 SÓLO SUMAR SI NO ESTÁ TACHADO
         if (!estaTachado) {
           totalSegundosVendedor += worked.totalSeconds;
           totalPagoVendedor += worked.totalPago;
@@ -3212,7 +3215,6 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
         }
 
         if (isCamilo) {
-          // Botón TACHAR VISUAL
           let colorTachar = estaTachado
             ? "var(--ios-green)"
             : "var(--ios-orange)";
@@ -3225,7 +3227,6 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
                 ${iconTachar}
               </button>`;
 
-          // Botón Borrar Físicamente
           let targetInd = `${vendedor} el ${dia} de ${mesesAbrev[dMes]}`;
           btnAcciones += `
               <button style="background: rgba(255, 69, 58, 0.15); border: none; color: var(--ios-red); cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s;" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Borrar este día de la base de datos">
@@ -3268,6 +3269,9 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
           </div>
         `;
     }
+
+    // ➕ AGREGAMOS EL DINERO REAL DE ESTE VENDEDOR AL TOTAL GLOBAL
+    totalNominaGlobal += totalPagoVendedor;
 
     let tH = Math.floor(totalSegundosVendedor / 3600);
     let tM = Math.floor((totalSegundosVendedor % 3600) / 60);
@@ -3332,36 +3336,76 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
   }
 
   container.innerHTML = html;
+
+  // =========================================================================
+  // 👑 FILTRO DE SEGURIDAD MÁSTER: INYECCIÓN DE TOTAL QUINCENA PARA CAMILO
+  // =========================================================================
+  if (isCamilo) {
+    // Buscamos el botón "+ Agregar" dentro del modal de turnos
+    const btnAgregar = [...document.querySelectorAll("button")].find((b) =>
+      b.textContent.includes("Agregar"),
+    );
+
+    if (btnAgregar) {
+      // Limpiamos selectores viejos para evitar duplicados al cambiar de periodo
+      const indicadorViejo = document.getElementById("indicadorTotalQuincena");
+      if (indicadorViejo) indicadorViejo.remove();
+
+      // Creamos la píldora financiera con los estilos iOS nativos de tu plataforma
+      const badgeTotal = document.createElement("span");
+      badgeTotal.id = "indicadorTotalQuincena";
+      badgeTotal.style.cssText = `
+        background: rgba(10, 132, 255, 0.12);
+        color: var(--ios-blue);
+        padding: 8px 14px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.85rem;
+        margin-right: 12px;
+        border: 1px solid rgba(10, 132, 255, 0.25);
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
+      `;
+
+      const totalFormateado =
+        "$" + Math.round(totalNominaGlobal).toLocaleString("es-CO");
+      badgeTotal.innerHTML = `📊 Total Quincena: <strong style="margin-left: 6px; color: #ffffff;">${totalFormateado}</strong>`;
+
+      // Colocamos el indicador exactamente al lado izquierdo del botón "+ Agregar"
+      btnAgregar.parentNode.insertBefore(badgeTotal, btnAgregar);
+    }
+  }
 }
-// =========================================================================
-// 🚫 FUNCIÓN VISUAL: TACHAR TURNO Y RESTARLO DEL TOTAL (MEMORIA LOCAL)
-// =========================================================================
+// 🚫 REVOLUCIÓN CLOUD: Tacha el turno visualmente y asienta el pago en la base de datos global
 window.toggleTacharTurno = function (llave) {
   if (typeof haptic === "function") haptic();
 
-  // Leer el historial de tachados del navegador
-  let tachadosMemoria = JSON.parse(
-    localStorage.getItem("cyber_turnos_tachados") || "{}",
-  );
+  // Cambiamos el texto del acumulador temporalmente para indicar carga en red
+  const btnTachar = event?.currentTarget;
+  if (btnTachar) btnTachar.style.opacity = "0.4";
 
-  // Alternar estado
-  if (tachadosMemoria[llave]) {
-    delete tachadosMemoria[llave]; // Restaurar
-  } else {
-    tachadosMemoria[llave] = true; // Tachar
-  }
+  const cbName = "cb_tachar_" + Date.now();
+  window[cbName] = function (res) {
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
 
-  // Guardar cambios
-  localStorage.setItem(
-    "cyber_turnos_tachados",
-    JSON.stringify(tachadosMemoria),
-  );
+    if (res && res.status === "success") {
+      // Guardamos la respuesta global actualizada en el caché local para renderizado instantáneo
+      localStorage.setItem("cyber_turnos_tachados", JSON.stringify(res.data));
 
-  // Refrescar la pantalla inmediatamente (manteniendo la búsqueda si hay una)
-  let query = document.getElementById("searchShiftsInput")
-    ? document.getElementById("searchShiftsInput").value.toLowerCase()
-    : "";
-  renderizarHorasEnPantalla(query);
+      let query = document.getElementById("searchShiftsInput")
+        ? document.getElementById("searchShiftsInput").value.toLowerCase()
+        : "";
+      renderizarHorasEnPantalla(query);
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=toggleTacharBackend&llave=${encodeURIComponent(llave)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
 };
 window.ejecutarLiquidacion = function (nombreObjetivo, filasStr) {
   if (!filasStr) return;
@@ -6993,3 +7037,22 @@ window.inyectarEstilosSwitchAdmin = function () {
     `;
   document.head.appendChild(estilo);
 };
+// ⚡ MOTOR DE SINCRONIZACIÓN DE PAGOS: Descarga los turnos liquidados desde Google Cloud
+function sincronizarTachadosConNube(callback) {
+  const cbName = "cb_get_tachar_" + Date.now();
+  window[cbName] = function (res) {
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      localStorage.setItem("cyber_turnos_tachados", JSON.stringify(res.data));
+    }
+    if (callback) callback();
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerTachadosBackend&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+}
