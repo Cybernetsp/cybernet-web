@@ -4178,12 +4178,6 @@ window.addEventListener("DOMContentLoaded", () => {
   let localStaff = localStorage.getItem("cyber_saved_staff");
   let user = sessionStaff || localStaff;
 
-  // Si no está logueado y no está en la página de login, redirigir
-  if (!user && !window.location.pathname.includes("login.html")) {
-    window.location.href = "login.html";
-    return;
-  }
-
   if (user) {
     // Si está en la página de login pero ya está autenticado, mandarlo al admin
     if (window.location.pathname.includes("login.html")) {
