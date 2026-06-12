@@ -2726,7 +2726,7 @@ function renderizarListaGarantiasDefinitiva(data) {
   container.innerHTML = html;
 }
 
-// 🏆 COPIADOR DE EVIDENCIAS MAESTRO V3: ELIMINA BUG DE MENSAJES Y EVADE EL CORS EN LA WEB
+// 🏆 COPIADOR MAESTRO INTERCEPTOR V4: DETECTA BASE64 LOCAL Y TIENE LIBERACIÓN FORZADA
 window.copiarImagenPortapapeles = async function (imgId, btn) {
   if (typeof haptic === "function") haptic();
   const imgElement = document.getElementById(imgId);
@@ -2736,56 +2736,40 @@ window.copiarImagenPortapapeles = async function (imgId, btn) {
   btn.disabled = true;
   btn.innerHTML = "Copiando...";
 
-  const esEntornoLocal = window.location.protocol === "file:";
+  // ⏱️ LIBERACIÓN FORZADA (ANTI-CONGELAMIENTO): Si el portapapeles o la red se traban,
+  // el botón se destraba obligatoriamente a los 4 segundos pase lo que pase.
+  const destrabarBotonSeguro = setTimeout(() => {
+    if (btn.disabled && btn.innerHTML === "Copiando...") {
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+    }
+  }, 4000);
 
-  // =========================================================================
-  // 🚨 CASO 1: ESTÁS EJECUTANDO LOCAL DESDE CARPETAS (file://)
-  // =========================================================================
-  if (esEntornoLocal) {
-    btn.innerHTML = "¡Usa Clic Der.!";
-    btn.style.background = "var(--ios-orange)";
-    btn.style.color = "white";
+  const srcActual = imgElement.src;
 
-    imgElement.style.transition = "all 0.3s ease";
-    imgElement.style.transform = "scale(1.04)";
-    imgElement.style.outline = "3px solid var(--ios-orange)";
+  try {
+    let pngBlob;
 
-    if (typeof triggerToast === "function") {
-      triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>Al estar en local: Clic derecho a la foto ➔ 'Copiar imagen'</span></div>`,
-      );
+    // 💡 DETECTOR INTELIGENTE: Si la imagen ya es Base64 (data:image), procesamos en local sin tocar internet
+    if (srcActual.startsWith("data:image")) {
+      const response = await fetch(srcActual);
+      pngBlob = await response.blob();
+    } else {
+      // Si la foto viene de la nube (Google Drive), pasa por el proxy limpio
+      const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(srcActual)}&output=png`;
+      const response = await fetch(proxyUrl);
+      if (!response.ok) throw new Error("El proxy de imágenes no respondió");
+      pngBlob = await response.blob();
     }
 
-    setTimeout(() => {
-      imgElement.style.transform = "";
-      imgElement.style.outline = "none";
-      btn.innerHTML = originalHtml;
-      btn.style.background = "";
-      btn.style.color = "";
-      btn.disabled = false;
-    }, 3000);
-    return; // ⛔ Detiene la ejecución aquí para que no siga al código de la web
-  }
-
-  // =========================================================================
-  // 🚀 CASO 2: ESTÁS EN LA WEB REAL (https://www.cybernetsp.com/)
-  // =========================================================================
-  try {
-    // Usamos un proxy CDN dedicado a imágenes que formatea a PNG directamente en la nube.
-    // Esto destruye el bloqueo CORS de Google Drive y nos da el archivo binario limpio para WhatsApp.
-    const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(imgElement.src)}&output=png`;
-
-    const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error("El proxy de imágenes no respondió");
-
-    const pngBlob = await response.blob();
-
-    // Escribimos el archivo físico de la imagen directamente en el portapapeles
+    // Inyectamos el archivo nativo de imagen (PNG) directamente en el portapapeles
     await navigator.clipboard.write([
       new ClipboardItem({ "image/png": pngBlob }),
     ]);
 
-    // Éxito total e impecable en producción
+    clearTimeout(destrabarBotonSeguro); // Apagamos el destrabador seguro ya que fue exitoso
+
+    // Interfaz de éxito en verde
     btn.innerHTML = "¡Copiada!";
     btn.style.background = "var(--ios-green)";
     btn.style.color = "white";
@@ -2805,9 +2789,10 @@ window.copiarImagenPortapapeles = async function (imgId, btn) {
       btn.disabled = false;
     }, 1500);
   } catch (err) {
-    console.error("Error en el copiado web asíncrono:", err);
+    console.error("Fallo en el copiado multimedia:", err);
+    clearTimeout(destrabarBotonSeguro); // Apagamos el destrabador seguro
 
-    // Si el navegador del usuario tiene bloqueos de privacidad estrictos para el portapapeles
+    // Si el navegador bloquea la inyección directa, activamos el asistente visual en naranja
     btn.innerHTML = "¡Usa Clic Der.!";
     btn.style.background = "var(--ios-orange)";
     btn.style.color = "white";
@@ -2818,7 +2803,7 @@ window.copiarImagenPortapapeles = async function (imgId, btn) {
 
     if (typeof triggerToast === "function") {
       triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>Por seguridad del navegador: Clic derecho a la foto ➔ 'Copiar imagen'</span></div>`,
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>Por restricciones del navegador: Clic derecho a la foto ➔ 'Copiar imagen'</span></div>`,
       );
     }
 
