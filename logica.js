@@ -722,57 +722,60 @@ function abrirPanelCortesNet() {
 
         let div = document.createElement("div");
         div.className = "card-ios";
-        div.style.padding = "18px";
-        div.style.display = "flex";
-        div.style.flexDirection = "column";
-        div.style.gap = "12px";
+        // Estilo base minimalista
+        div.style =
+          "padding: 16px; display: flex; flex-direction: column; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);";
 
         div.innerHTML = `
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #E50914; box-shadow: 0 0 10px #E50914;"></div>
-                                    <span style="font-size: 0.75rem; font-weight: 800; color: #E50914; text-transform: uppercase; letter-spacing: 0.5px;">Corte Requerido</span>
-                                </div>
-                                <div style="background: rgba(255, 159, 10, 0.15); color: var(--ios-orange); padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(255, 159, 10, 0.3);">
-                                    PERFILES: ${perfilesTexto}
-                                </div>
-                            </div>
+          <!-- Cabecera: Alerta, Correo y Perfiles -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+              <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden;">
+                  <span style="font-size: 0.65rem; color: var(--ios-red); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">
+                      <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--ios-red);"></span> CORTE REQUERIDO
+                  </span>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 1rem; color: var(--text-primary); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cuenta.correo}</span>
+                      <button style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 6px; padding: 4px 6px; color: var(--text-secondary); cursor: pointer; transition: 0.2s;" onclick="copiarTextoRapido(this, '${cuenta.correo}')" title="Copiar Correo">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      </button>
+                  </div>
+              </div>
+              <div style="background: rgba(255, 159, 10, 0.1); color: var(--ios-orange); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; border: 1px solid rgba(255, 159, 10, 0.2); white-space: nowrap;">
+    Perfiles Vencidos: ${perfilesTexto}
+</div>
+          </div>
 
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 14px;">
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Correo de la Cuenta</span>
-                                    <span style="font-size: 0.95rem; color: var(--text-primary); font-weight: 700;">${cuenta.correo}</span>
-                                </div>
-                                <button style="background: rgba(10, 132, 255, 0.15); border: none; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: var(--ios-blue); cursor: pointer; transition: all 0.2s ease; flex-shrink: 0;" onclick="copiarTextoRapido(this, '${cuenta.correo}')" title="Copiar Correo">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                </button>
-                            </div>
+          <!-- Contraseñas: Antigua vs Nueva (Agrupadas horizontalmente) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--input-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border);">
+              <!-- Clave Vieja -->
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                  <span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Clave Vencida</span>
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                      <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 600; font-family: monospace; text-decoration: line-through; opacity: 0.7;">${cuenta.claveActual}</span>
+                      <button style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 2px;" onclick="copiarTextoRapido(this, '${cuenta.claveActual}')">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      </button>
+                  </div>
+              </div>
 
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 69, 58, 0.05); border: 1px solid rgba(255, 69, 58, 0.15); padding: 10px 14px; border-radius: 14px;">
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span style="font-size: 0.65rem; color: var(--ios-red); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Clave Actual (Vencida)</span>
-                                    <span style="font-size: 1.1rem; color: var(--ios-red); font-weight: bold; font-family: monospace; letter-spacing: 1px;">${cuenta.claveActual}</span>
-                                </div>
-                                <button style="background: rgba(255, 69, 58, 0.15); border: none; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: var(--ios-red); cursor: pointer; transition: all 0.2s ease; flex-shrink: 0;" onclick="copiarTextoRapido(this, '${cuenta.claveActual}')" title="Copiar Clave">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                </button>
-                            </div>
+              <!-- Nueva Clave -->
+              <div style="display: flex; flex-direction: column; gap: 2px; border-left: 1px solid var(--glass-border); padding-left: 10px;">
+                  <span style="font-size: 0.65rem; color: var(--ios-green); font-weight: 700; text-transform: uppercase;">Nueva Clave</span>
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                      <input type="text" id="nueva_clave_${index}" style="background: transparent; border: none; color: var(--ios-green); font-size: 0.95rem; font-weight: 700; font-family: monospace; width: 100%; outline: none; padding: 0;" value="${claveNuevaSugerida}">
+                      <button style="background: var(--ios-green); border: none; border-radius: 6px; padding: 4px 6px; color: #fff; cursor: pointer;" onclick="copiarInputRapido(this, 'nueva_clave_${index}')">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      </button>
+                  </div>
+              </div>
+          </div>
 
-                            <div style="display: flex; flex-direction: column; gap: 6px;">
-                                <span style="font-size: 0.7rem; color: var(--ios-green); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding-left: 4px;">Generar Nueva Clave</span>
-                                <div style="display: flex; gap: 8px; align-items: stretch;">
-                                    <input type="text" class="input-ios" id="nueva_clave_${index}" style="margin-bottom: 0; flex: 1; font-family: monospace; font-size: 1.1rem; font-weight: 800; color: var(--ios-green); background: rgba(48, 209, 88, 0.06); border-color: rgba(48, 209, 88, 0.3);" value="${claveNuevaSugerida}">
-                                    <button style="background: var(--ios-green); border: none; border-radius: 12px; color: #fff; cursor: pointer; padding: 0 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(48, 209, 88, 0.3);" onclick="copiarInputRapido(this, 'nueva_clave_${index}')" title="Copiar Nueva Clave">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <button class="btn-ios" style="margin-top: 4px; width: 100%; background: rgba(10, 132, 255, 0.1); border: 1px solid var(--ios-blue); color: var(--ios-blue); font-weight: 700; padding: 14px; border-radius: 14px; transition: all 0.3s ease;" onclick="procesarCorteReal(this, '${cuenta.correo}', '${perfilesOcultosSeguros}', 'nueva_clave_${index}')">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: bottom;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                                Procesar Corte y Subir a Hoy
-                            </button>
-                        `;
+          <!-- Botón de acción minimalista -->
+          <button class="btn-ios btn-secondary w-100" style="padding: 10px; font-size: 0.85rem; border: 1px solid rgba(59, 130, 246, 0.3); color: var(--ios-blue); background: rgba(59, 130, 246, 0.05);" onclick="procesarCorteReal(this, '${cuenta.correo}', '${perfilesOcultosSeguros}', 'nueva_clave_${index}')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              Procesar Corte y Subir a Hoy
+          </button>
+        `;
         contenedor.appendChild(div);
       });
     } else {
@@ -2396,9 +2399,96 @@ function verificarTipoProblema() {
   }
 }
 
+// 🔥 VARIABLE GLOBAL PARA LA IMAGEN 🔥
+window.imagenGarantiaActualBase64 = "";
+
+// 🔄 FUNCIÓN ACTUALIZADA: PROCESAR IMAGEN DESDE INPUT, DRAG&DROP O PORTAPAPELES (PASTE)
+function procesarImagenGarantia(fileSource) {
+  let file = null;
+
+  // Caso A: Si el archivo viene directamente del portapapeles (Pegar / Ctrl+V)
+  if (fileSource instanceof File) {
+    file = fileSource;
+  }
+  // Caso B: Si el archivo viene del input file convencional (Seleccionar o Arrastrar)
+  else if (fileSource && fileSource.files && fileSource.files[0]) {
+    file = fileSource.files[0];
+  }
+
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const img = new Image();
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Mantenemos la compresión ultra optimizada V2 para tu Google Drive
+      const MAX_WIDTH = 150;
+      const scaleSize = MAX_WIDTH / img.width;
+      canvas.width = MAX_WIDTH;
+      canvas.height = img.height * scaleSize;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.4);
+
+      document.getElementById("dropzoneText").style.display = "none";
+      const preview = document.getElementById("previewGarantia");
+      preview.src = window.imagenGarantiaActualBase64;
+      preview.style.display = "block";
+      document.getElementById("btnQuitarFoto").style.display = "block";
+      document.getElementById("dropzoneGarantia").style.borderColor =
+        "var(--ios-blue)";
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// 🔥 NUEVO ESCUCHADOR GLOBAL: INTERCEPTAR CTRL+V Y PEGAR CAPTURAS AL INSTANTE
+window.addEventListener("paste", function (e) {
+  // Validamos si la ventana de garantías está abierta (revisando si existe la zona de soltar)
+  const dropzone = document.getElementById("dropzoneGarantia");
+  if (!dropzone) return;
+
+  // Extraemos los elementos que están en el portapapeles del computador o celular
+  const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+
+  for (let i = 0; i < items.length; i++) {
+    // Si el elemento interceptado es una imagen (un screenshot del portapapeles)
+    if (items[i].type.indexOf("image") !== -1) {
+      const file = items[i].getAsFile();
+      if (file) {
+        procesarImagenGarantia(file);
+
+        // Evitamos que se intente pegar texto basura o código binario roto
+        // dentro del input de correo o clave si el trabajador estaba escribiendo ahí.
+        e.preventDefault();
+        break;
+      }
+    }
+  }
+});
+
+function quitarImagenGarantia(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  window.imagenGarantiaActualBase64 = "";
+  // 📝 Línea de reset de input removida con éxito para el flujo sin clics
+  document.getElementById("dropzoneText").style.display = "flex";
+  document.getElementById("previewGarantia").style.display = "none";
+  document.getElementById("previewGarantia").src = "";
+  document.getElementById("btnQuitarFoto").style.display = "none";
+  document.getElementById("dropzoneGarantia").style.borderColor =
+    "var(--text-secondary)";
+}
+
 function ejecutarReporte(e) {
   e.preventDefault();
-  haptic();
+  if (typeof haptic === "function") haptic();
 
   const btnSubmit = document.getElementById("btnSubmitReporte");
   const plataforma = document.getElementById("repPlataforma").value;
@@ -2412,12 +2502,25 @@ function ejecutarReporte(e) {
   }
 
   btnSubmit.disabled = true;
-  btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Enviando...`;
+  btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Enviando...`;
+
+  // ⏱️ BOTÓN DE AUXILIO: Si en 6 segundos Google no responde, destraba la pantalla
+  const timeoutAuxilio = setTimeout(() => {
+    if (btnSubmit.disabled) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerText = "Enviar a Garantía";
+      alert(
+        "⚠️ La foto sigue siendo muy pesada para el límite de Google Sheets o tu Apps Script no está programado para recibir imágenes. Intenta enviar el reporte con otra captura o sin ella.",
+      );
+    }
+  }, 6000);
 
   const oldScript = document.getElementById("cyber_reporte_node");
   if (oldScript) oldScript.remove();
 
   window.procesarReporteSheets = function (res) {
+    clearTimeout(timeoutAuxilio); // Desactivar botón de auxilio si todo sale bien
+
     const scriptNode = document.getElementById("cyber_reporte_node");
     if (scriptNode) scriptNode.remove();
 
@@ -2425,10 +2528,13 @@ function ejecutarReporte(e) {
     btnSubmit.innerText = "Enviar a Garantía";
 
     if (res && res.status === "success") {
-      triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Reporte ingresado correctamente.</span></div>`,
-      );
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg> <span>Reporte enviado con éxito.</span></div>`,
+        );
+      }
       document.getElementById("formReportar").reset();
+      quitarImagenGarantia();
       verificarTipoProblema();
       cargarGarantias();
       if (typeof actualizarBadgeGarantias === "function")
@@ -2440,10 +2546,311 @@ function ejecutarReporte(e) {
 
   const scriptElement = document.createElement("script");
   scriptElement.id = "cyber_reporte_node";
-  let queryParams = `?action=reportarGarantia&plataforma=${encodeURIComponent(plataforma)}&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}&descripcion=${encodeURIComponent(descripcion)}&callback=procesarReporteSheets&_ts=${Date.now()}`;
+  let queryParams = `?action=reportarGarantia&plataforma=${encodeURIComponent(plataforma)}&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}&descripcion=${encodeURIComponent(descripcion)}&imagen=${encodeURIComponent(window.imagenGarantiaActualBase64)}&callback=procesarReporteSheets&_ts=${Date.now()}`;
   scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
   document.body.appendChild(scriptElement);
 }
+
+function cargarGarantias() {
+  if (isFetchingGarantias) return;
+  isFetchingGarantias = true;
+  const container = document.getElementById("listaGarantias");
+  container.innerHTML =
+    '<div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;"><svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 6px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg><br>Sincronizando tickets...</div>';
+
+  if (document.getElementById("cyber_getgarantias_node"))
+    document.getElementById("cyber_getgarantias_node").remove();
+
+  window.procesarListaGarantiasSheets = function (res) {
+    isFetchingGarantias = false;
+    if (document.getElementById("cyber_getgarantias_node"))
+      document.getElementById("cyber_getgarantias_node").remove();
+    if (res && res.status === "success") {
+      renderizarListaGarantiasDefinitiva(res.data);
+    } else {
+      container.innerHTML =
+        '<div style="text-align:center; padding:20px; color:var(--ios-red); font-weight:600; font-size:0.85rem;">❌ Error al sincronizar.</div>';
+    }
+  };
+
+  const scriptElement = document.createElement("script");
+  scriptElement.id = "cyber_getgarantias_node";
+  scriptElement.src = `${GOOGLE_SCRIPT_URL}?action=obtenerGarantias&callback=procesarListaGarantiasSheets&_ts=${Date.now()}`;
+  document.body.appendChild(scriptElement);
+}
+
+function renderizarListaGarantiasDefinitiva(data) {
+  const container = document.getElementById("listaGarantias");
+
+  if (!data || data.length === 0) {
+    container.innerHTML =
+      '<div style="text-align:center; padding:30px; color:var(--ios-green); font-weight:600; font-size:0.9rem;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><br>¡Excelente! No hay tickets pendientes.</div>';
+    return;
+  }
+
+  let html = "";
+  data.forEach((item, index) => {
+    const textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${item.plataforma}\n📧 *Correo:* ${item.correo}\n🔑 *Clave:* ${item.clave}\n👤 *Proveedor:* ${item.proveedor}\n💬 *Motivo:* ${item.desc}`;
+    const safeReporte = encodeURIComponent(textoReporte);
+
+    let imagenHtml = "";
+    let btnCopiarFoto = "";
+
+    // 📸 DETECTOR INTELIGENTE DE EVIDENCIAS DRIVE V2
+    if (item.imagen && String(item.imagen).trim().length > 10) {
+      let imgId = `img_garantia_${index}`;
+      let srcLimpio = String(item.imagen).trim();
+      let urlOriginalParaAbrir = srcLimpio;
+
+      // Si es un enlace de Google Drive, extraemos el ID usando un doble escáner seguro
+      if (srcLimpio.includes("drive.google.com")) {
+        let idMatch =
+          srcLimpio.match(/file\/d\/([a-zA-Z0-9_-]+)/) ||
+          srcLimpio.match(/id=([a-zA-Z0-9_-]+)/);
+        if (idMatch && idMatch[1]) {
+          let fileId = idMatch[1];
+          // 🚀 CAMBIO CLAVE: Usamos el canal 'thumbnail' que es 100% compatible con archivos locales file://
+          srcLimpio = `https://drive.google.com/thumbnail?sz=w400&id=${fileId}`;
+        }
+      } else if (
+        !srcLimpio.includes("data:image") &&
+        !srcLimpio.includes("http")
+      ) {
+        srcLimpio = `data:image/jpeg;base64,${srcLimpio}`;
+      }
+
+      imagenHtml = `
+        <div style="margin-top: 8px; text-align: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; border: 1px solid var(--glass-border);">
+            <span style="display:block; font-size: 0.65rem; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase;">Evidencia Adjunta (Clic para ampliar)</span>
+            <a href="${urlOriginalParaAbrir}" target="_blank" style="text-decoration: none; display: inline-block; max-width: 100%;">
+                <img id="${imgId}" src="${srcLimpio}" data-original="${urlOriginalParaAbrir}" style="max-height: 130px; max-width: 100%; border-radius: 6px; box-shadow: var(--glass-shadow); object-fit: contain; cursor: pointer;" title="Clic para abrir en alta resolución">
+            </a>
+        </div>
+      `;
+
+      btnCopiarFoto = `
+        <button class="btn-ios btn-secondary" style="flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="copiarImagenPortapapeles('${imgId}', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> Foto
+        </button>
+      `;
+    }
+
+    html += `
+        <div class="card-ios" style="padding: 16px; display: flex; flex-direction: column; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--ios-red);"></div>
+                    <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">${item.plataforma}</span>
+                </div>
+                <div style="font-size: 0.65rem; color: var(--text-secondary); text-align: right; text-transform: uppercase; font-weight: 600;">
+                    ${item.fecha}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--input-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border);">
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Correo</span>
+                    <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.correo}">${item.correo}</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; border-left: 1px solid var(--glass-border); padding-left: 10px;">
+                    <span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Clave</span>
+                    <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.clave}">${item.clave}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px; padding: 0 2px;">
+                <div style="font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                    <span>Proveedor: <b style="color: var(--ios-orange);">${item.proveedor || "Desconocido"}</b></span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-primary); background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--glass-border);">
+                    <span style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 2px;">Falla reportada</span>
+                    ${item.desc}
+                </div>
+            </div>
+            
+            ${imagenHtml}
+
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+                <button class="btn-ios btn-secondary" style="flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="copiarTextoRapido(this, decodeURIComponent('${safeReporte}'))">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Texto
+                </button>
+                ${btnCopiarFoto}
+                <button class="btn-ios" style="flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(245, 158, 11, 0.1); color: var(--ios-orange); border: 1px solid rgba(245, 158, 11, 0.2); font-weight: 600;" onclick="solicitarCuentaTemporal(this, '${item.plataforma}', '${item.correo}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Temp
+                </button>
+                <button class="btn-ios btn-success" style="flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="abrirModalResolverGarantia('${item.filaIndex}', '${item.correo}', '${item.plataforma}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Resolver
+                </button>
+            </div>
+        </div>`;
+  });
+  container.innerHTML = html;
+}
+
+// 🔥 COPIADOR ASÍNCRONO REMODELADO CON REDIRECCIÓN DE ENLACE MAESTRO ORIGINAL 🔥
+window.copiarImagenPortapapeles = async function (imgId, btn) {
+  if (typeof haptic === "function") haptic();
+  const imgElement = document.getElementById(imgId);
+  if (!imgElement || !imgElement.src) return;
+
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = "Procesando...";
+  btn.disabled = true;
+
+  try {
+    const response = await fetch(imgElement.src);
+    const blob = await response.blob();
+
+    let pngBlob = blob;
+    if (blob.type !== "image/png") {
+      pngBlob = await new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob((b) => resolve(b), "image/png");
+        };
+        img.onerror = () => reject(new Error("Bloqueo de entorno local"));
+        img.src = imgElement.src;
+      });
+    }
+
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": pngBlob }),
+    ]);
+
+    btn.innerHTML = "¡Copiada!";
+    btn.style.background = "var(--ios-green)";
+    btn.style.color = "white";
+
+    setTimeout(() => {
+      btn.innerHTML = originalHtml;
+      btn.style.background = "";
+      btn.style.color = "";
+      btn.disabled = false;
+    }, 1500);
+  } catch (err) {
+    // 🚨 PLAN DE AUXILIO EN LOCAL SEGURO: Abre la pestaña original de Drive en alta definición
+    btn.innerHTML = "¡Ver Foto!";
+    btn.style.background = "var(--ios-orange)";
+    btn.style.color = "white";
+
+    setTimeout(() => {
+      btn.innerHTML = originalHtml;
+      btn.style.background = "";
+      btn.style.color = "";
+      btn.disabled = false;
+    }, 2000);
+
+    // Extraemos la URL original en alta resolución guardada en el atributo data-original
+    let urlOriginal =
+      imgElement.getAttribute("data-original") || imgElement.src;
+
+    if (urlOriginal.startsWith("http") || urlOriginal.includes("data:image")) {
+      const linkNube = document.createElement("a");
+      linkNube.href = urlOriginal;
+      linkNube.target = "_blank";
+      document.body.appendChild(linkNube);
+      linkNube.click();
+      linkNube.remove();
+    }
+  }
+};
+
+// 🔥 COPIADOR ASÍNCRONO AUTOMÁTICO BLINDADO CONTRA PROTOCOLOS LOCALES (FILE://)
+window.copiarImagenPortapapeles = async function (imgId, btn) {
+  if (typeof haptic === "function") haptic();
+  const imgElement = document.getElementById(imgId);
+  if (!imgElement || !imgElement.src) return;
+
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = "Procesando...";
+  btn.disabled = true;
+
+  try {
+    // Si es la imagen simulada por defecto, saltamos directo al plan de auxilio para evitar errores de CORS local
+    if (imgElement.src.includes("image/svg+xml")) {
+      throw new Error("Modo Simulación");
+    }
+
+    // Intento de copiado directo (Esto correrá perfecto cuando subas la web a HTTPS)
+    const response = await fetch(imgElement.src);
+    const blob = await response.blob();
+
+    let pngBlob = blob;
+    if (blob.type !== "image/png") {
+      pngBlob = await new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob((b) => resolve(b), "image/png");
+        };
+        img.onerror = () => reject(new Error("Bloqueo de seguridad local"));
+        img.src = imgElement.src;
+      });
+    }
+
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": pngBlob }),
+    ]);
+
+    btn.innerHTML = "¡Copiada!";
+    btn.style.background = "var(--ios-green)";
+    btn.style.color = "white";
+
+    setTimeout(() => {
+      btn.innerHTML = originalHtml;
+      btn.style.background = "";
+      btn.style.color = "";
+      btn.disabled = false;
+    }, 1500);
+  } catch (err) {
+    // 🚨 PLAN DE AUXILIO SILENCIOSO (ADIÓS ALERTS MOLESTOS) 🚨
+    // Al estar en un entorno local, el navegador no permite inyectar la foto al portapapeles.
+    // Descargamos la evidencia en un segundo para que el trabajador solo la arrastre a WhatsApp.
+    btn.innerHTML = "¡Ver Foto!";
+    btn.style.background = "var(--ios-orange)";
+    btn.style.color = "white";
+
+    setTimeout(() => {
+      btn.innerHTML = originalHtml;
+      btn.style.background = "";
+      btn.style.color = "";
+      btn.disabled = false;
+    }, 2000);
+
+    // Si la imagen es un enlace real de Drive o un Base64 real de un cliente, la descarga de una vez
+    if (
+      imgElement.src.startsWith("http") ||
+      imgElement.src.includes("data:image/jpeg")
+    ) {
+      const linkDescarga = document.createElement("a");
+      linkDescarga.href = imgElement.src;
+      linkDescarga.target = "_blank";
+      linkDescarga.download = `evidencia_${Date.now()}.jpg`;
+      document.body.appendChild(linkDescarga);
+      linkDescarga.click();
+      linkDescarga.remove();
+    } else {
+      // Si sigue siendo la foto de simulación gris, muestra una notificación sutil en pantalla
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg><span>[Simulación] Foto procesada en local</span></div>`,
+        );
+      }
+    }
+  }
+};
 
 function cargarGarantias() {
   if (isFetchingGarantias) return;
@@ -2472,51 +2879,6 @@ function cargarGarantias() {
   let queryParams = `?action=obtenerGarantias&callback=procesarListaGarantiasSheets&_ts=${Date.now()}`;
   scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
   document.body.appendChild(scriptElement);
-}
-
-function renderizarListaGarantiasDefinitiva(data) {
-  const container = document.getElementById("listaGarantias");
-
-  if (!data || data.length === 0) {
-    container.innerHTML =
-      '<div style="text-align:center; padding:30px; color:var(--ios-green); font-weight:600; font-size:0.9rem;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><br>¡Excelente! No hay tickets pendientes.</div>';
-    return;
-  }
-
-  let html = "";
-  data.forEach((item) => {
-    const textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${item.plataforma}\n📧 *Correo:* ${item.correo}\n🔑 *Clave:* ${item.clave}\n👤 *Proveedor:* ${item.proveedor}\n📅 *Fecha de Compra:* ${item.fechaCompra || "No Registrada"}\n💬 *Motivo:* ${item.desc}`;
-    const safeReporte = encodeURIComponent(textoReporte);
-    html += `
-                <div class="card-ios" style="padding: 12px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); display: flex; flex-direction: column; gap: 6px; margin-bottom:0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(255,255,255,0.06); padding-bottom: 4px;">
-                        <span style="color:var(--ios-blue); font-weight:800; font-size:0.9rem;">${item.plataforma}</span>
-                        <div style="font-size: 0.68rem; color: var(--text-secondary); text-align: right; line-height: 1.2;">Reporte: <b>${item.fecha}</b></div>
-                    </div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);">
-                        <div>📧 Correo: <span style="color:var(--text-primary); user-select:all;">${item.correo}</span></div>
-                        <div>🔐 Clave: <span style="color:var(--text-primary); user-select:all;">${item.clave}</span></div>
-                        <div>👤 Proveedor: <span style="color:var(--ios-orange); font-weight:600;">${item.proveedor || "Desconocido"}</span></div>
-                    </div>
-                    <div style="font-size: 0.78rem; background: rgba(0, 0, 0, 0.15); padding: 6px 10px; border-radius: 8px;">💬 ${item.desc}</div>
-                    
-                    <div style="display: flex; gap: 6px; margin-top: 4px;">
-                        <button class="btn-ios btn-secondary" style="flex:1; padding: 6px; font-size:0.75rem; margin-bottom:0; display:flex; align-items:center; justify-content:center; gap:4px; border-radius:8px;" onclick="copiarTextoRapido(this, decodeURIComponent('${safeReporte}'))">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar
-                        </button>
-                        
-                        <!-- 🔥 NUEVO BOTÓN TEMPORAL 🔥 -->
-                        <button class="btn-ios" style="flex:1; padding: 6px; font-size:0.75rem; margin-bottom:0; display:flex; align-items:center; justify-content:center; gap:4px; background: rgba(255, 149, 0, 0.15); color: var(--ios-orange); border: 1px solid rgba(255, 149, 0, 0.3); border-radius:8px; font-weight:700;" onclick="solicitarCuentaTemporal(this, '${item.plataforma}', '${item.correo}')">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Temporal
-                        </button>
-
-                        <button class="btn-ios btn-success" style="flex:1; padding: 6px; font-size:0.75rem; margin-bottom:0; display:flex; align-items:center; justify-content:center; gap:4px; border-radius:8px;" onclick="abrirModalResolverGarantia('${item.filaIndex}', '${item.correo}', '${item.plataforma}')">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Resolver
-                        </button>
-                    </div>
-                </div>`;
-  });
-  container.innerHTML = html;
 }
 
 // =========================================================================
@@ -3600,43 +3962,57 @@ function ejecutarNotificacionDeCorreo(
     });
 }
 
+// =========================================================================
+// 🔐 MÓDULO DE ACCESO (LOGIN & WORKSPACE) - VERSIÓN LIMPIA
+// =========================================================================
+
 function validateStaffAccess(e) {
   if (e) e.preventDefault();
-  haptic();
+  if (typeof haptic === "function") haptic();
+
   const userElement = document.getElementById("staffUser");
   const passElement = document.getElementById("staffPass");
   const remElement = document.getElementById("rememberMe");
-  const userInput = userElement.value.toUpperCase().trim();
-  const passInput = passElement.value.trim();
-  const rememberMe = remElement.checked;
+
+  const userInput = userElement ? userElement.value.toUpperCase().trim() : "";
+  const passInput = passElement ? passElement.value.trim() : "";
+  const rememberMe = remElement ? remElement.checked : false;
   const errorToast = document.getElementById("error-login-toast");
   const submitBtn = document.querySelector('#loginForm button[type="submit"]');
 
   if (!userInput || !passInput) return;
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Verificando...`;
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Verificando...`;
+  }
 
   const oldScript = document.getElementById("cyber_login_node");
   if (oldScript) oldScript.remove();
 
   window.procesarLoginSheets = function (res) {
-    submitBtn.disabled = false;
-    submitBtn.innerText = "Verificar Identidad";
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Verificar Identidad";
+    }
     const scriptNode = document.getElementById("cyber_login_node");
     if (scriptNode) scriptNode.remove();
 
     if (res && res.status === "success") {
-      errorToast.style.display = "none";
-      userElement.blur();
-      passElement.blur();
-      entrarAlSistema(userInput, rememberMe);
+      if (errorToast) errorToast.style.display = "none";
+
+      sessionStorage.setItem("active_staff", userInput);
+      if (rememberMe) localStorage.setItem("cyber_saved_staff", userInput);
+
+      window.location.href = "admin.html"; // Redirige al admin real
     } else {
       let errMsg = "Credenciales incorrectas en la base de datos.";
       if (res && res.message) errMsg = res.message;
 
-      errorToast.innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>${errMsg}</span></div>`;
-      errorToast.style.display = "block";
-      passElement.value = "";
+      if (errorToast) {
+        errorToast.innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>${errMsg}</span></div>`;
+        errorToast.style.display = "block";
+      }
+      if (passElement) passElement.value = "";
     }
   };
 
@@ -3653,25 +4029,29 @@ function validateStaffAccess(e) {
   document.body.appendChild(scriptElement);
 }
 
-function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
-  if (!isAutoLogin && userInput.toUpperCase().trim() !== "CAMILO") {
+function entrarAlSistema(userInput) {
+  if (userInput.toUpperCase().trim() !== "CAMILO") {
     ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
   }
-  document.getElementById("loginOverlay").classList.remove("open");
-  document.getElementById("mainWorkspace").style.display = "flex";
-  document.getElementById("globalHeader").style.display = "flex";
-  document.getElementById("controlPanel").style.display = "flex";
+
+  // Encendemos la interfaz en admin.html
+  const workspace = document.getElementById("mainWorkspace");
+  if (workspace) workspace.style.display = "flex";
+
+  const globalHeader = document.getElementById("globalHeader");
+  if (globalHeader) globalHeader.style.display = "flex";
+
+  const controlPanel = document.getElementById("controlPanel");
+  if (controlPanel) controlPanel.style.display = "flex";
+
   let sessionNameEl = document.getElementById("staffSessionName");
   if (sessionNameEl) sessionNameEl.innerText = userInput;
-  sessionStorage.setItem("active_staff", userInput);
-  if (rememberMe) localStorage.setItem("cyber_saved_staff", userInput);
 
   const currentOperator = userInput.toUpperCase().trim();
   const shiftTimer = document.getElementById("shiftTimer");
   const cajaBtn = document.getElementById("btnCajaFinanzas");
   const btnRegistro = document.getElementById("btnRegistroVentas");
 
-  // El botón de Registros lo ven TODOS
   if (btnRegistro)
     btnRegistro.style.setProperty("display", "flex", "important");
 
@@ -3692,15 +4072,46 @@ function entrarAlSistema(userInput, rememberMe, isAutoLogin = false) {
       );
     if (cajaBtn) cajaBtn.style.setProperty("display", "none", "important");
   }
+
+  // 🔥 ESTO ES LO QUE CARGA LAS TARJETAS DESDE SHEETS 🔥
   inicializarWorkspace();
 }
 
 function inicializarWorkspace() {
-  cargarPlantillasDesdeSheets(); // 👈 Descarga los mensajes en vivo al entrar
+  cargarPlantillasDesdeSheets(); // 👈 Llama a Google Sheets por los mensajes
   startShiftTimer();
   iniciarControlInactividad();
   cargarHorasDesdeSheets();
 }
+
+// 🔥 INICIALIZADOR: Revisa si hay sesión y decide qué mostrar 🔥
+window.addEventListener("DOMContentLoaded", () => {
+  let savedTheme = localStorage.getItem("cyber_theme") || "dark";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+
+  let sessionStaff = sessionStorage.getItem("active_staff");
+  let localStaff = localStorage.getItem("cyber_saved_staff");
+  let user = sessionStaff || localStaff;
+
+  // Si NO hay usuario y NO estamos en el login -> Expulsarlo al login
+  if (!user && !window.location.pathname.includes("login.html")) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  if (user) {
+    sessionStorage.setItem("active_staff", user);
+
+    // Si ya está logueado pero intenta abrir el login.html -> Mandarlo al admin
+    if (window.location.pathname.includes("login.html")) {
+      window.location.href = "admin.html";
+      return;
+    }
+
+    // Si ya estamos en admin.html, encendemos el sistema
+    entrarAlSistema(user);
+  }
+});
 
 function cerrarSesionStaff() {
   haptic();
@@ -3749,42 +4160,28 @@ function cerrarSesionStaff() {
   }
 }
 
+// Reemplaza el fragmento de inicialización por este:
 window.addEventListener("DOMContentLoaded", () => {
-  let savedTheme = localStorage.getItem("cyber_theme");
-  if (!savedTheme) {
-    savedTheme = "dark";
-  }
-  actualizarBadgeGarantias();
-  setInterval(actualizarBadgeGarantias, 60000);
-
+  let savedTheme = localStorage.getItem("cyber_theme") || "dark";
   document.documentElement.setAttribute("data-theme", savedTheme);
-  updateThemeIcon(savedTheme);
-
-  let cacheTurno = JSON.parse(
-    sessionStorage.getItem("cyber_history_cargas") || "[]",
-  );
-  cacheTurno.forEach((item) => {
-    renderizarTarjetaHistorial(
-      item.plataforma,
-      item.proveedor,
-      item.correo,
-      item.clave,
-    );
-  });
 
   let sessionStaff = sessionStorage.getItem("active_staff");
   let localStaff = localStorage.getItem("cyber_saved_staff");
+  let user = sessionStaff || localStaff;
 
-  if (sessionStaff || localStaff) {
-    let user = sessionStaff;
-    if (!user) {
-      user = localStaff;
+  // Si no está logueado y no está en la página de login, redirigir
+  if (!user && !window.location.pathname.includes("login.html")) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  if (user) {
+    // Si está en la página de login pero ya está autenticado, mandarlo al admin
+    if (window.location.pathname.includes("login.html")) {
+      window.location.href = "admin.html";
+      return;
     }
-
-    sessionStorage.setItem("active_staff", user);
     entrarAlSistema(user, false, true);
-  } else {
-    document.getElementById("loginOverlay").classList.add("open");
   }
 });
 
@@ -3794,186 +4191,26 @@ const qrPrincipal = {
   texto: `Te comparto nuestra llave para el pago de tu servicio desde cualquier entidad bancaria:\n\n📌 *Llave:* 0090878219\n👤 *Verificar nombre:* REF CYBERNET\n\n⚠️ *Nota:* Esta llave es exclusiva para pagos mediante Bre-B desde cualquier banco.\n\n*Pasos para activar tu servicio:* 1️⃣ Realiza la transferencia.\n2️⃣ Envía el comprobante de pago por este medio.\n3️⃣ ¡Recibe tu acceso y empieza a disfrutar! 🚀🎬`,
 };
 
-const elementosGrid = [
-  {
-    titulo: "ADS",
-    texto: `¡Hola! 👋 ¡Bienvenido a Cybernet! 🎬\n\nAprovecha nuestra *SUPER PROMO* de hoy:\n\n🔥 *2 PLATAFORMAS POR SOLO $9.900:*\n_(Disney+ estandar, Hbo Max, Paramount+, Vix+, Crunchyroll o Plex)._\n\n🥳 *AMAZON PRIME VIDEO:* por hoy a tan solo $ 9.900\n\n🎁 *OFERTA DE BIENVENIDA:*\n📺 *NETFLIX PREMIUM:* Solo por hoy a $12.500.\n\n¿Cuál te activo ahora mismo?`,
-  },
-  {
-    titulo: "NEQUI",
-    texto: `💳 *_Realiza tu pago rápido, fácil y seguro_* ⚡\n\n📲 *_Métodos disponibles y confiables:_*\n\n💜 *_Nequi o Daviplata:_* 3015156037\n\n📸 Envía la captura del comprobante y tu servicio quedará activo al instante 🚀`,
-  },
-  {
-    titulo: "COMBOS",
-    texto: `💻 ¡Arma tu combo streaming a tu medida con *_NETFLIX PREMIUM!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n\n0️⃣ Netflix solo → 💰 *_$14.500_* 😔 _(Opción Tradicional)_\n\n1️⃣ Netflix + 1 plataforma → 💰 *_$20.000_* _¡TOP VENTAS!_ 🔥🏆\n2️⃣ Netflix + 2 plataformas → 💰 *_$24.000_* _AHORRO TOTAL_ 🚀✨\n3️⃣ Netflix + 3 plataformas → 💰 *_$27.000_* _VIP GOLD_ 👑💎\n\n4️⃣ Netflix + Disney Premium → 💰 *_$25.000_* 💠 _(Dúo Premium)_\n5️⃣ Netflix + Disney Premium + 1 plataforma → 💰 *_$29.000_* ⭐ _(Combo Pro)_\n6️⃣ Netflix + Disney Premium + 2 plataformas → 💰 *_$32.000_* 🎬 _(Cine Total)_\n7️⃣ Netflix + Disney Premium + 3 plataformas → 💰 *_$35.000_* 👑 _(EL REY DEL STREAMING)_\n\n*Netflix* cuenta con una página de códigos disponible las 24 horas, los 7 días de la semana.`,
-  },
-  {
-    titulo: "COMBOS SIN NETFLIX",
-    texto: `💻 ¡Arma tu combo streaming a tu medida con *_Sin Netflix!_* 🎉📺\n\n🔥 *_Plataformas disponibles para escoger:_*\nAmazon Prime Video - Disney Estándar – Hbo Max – Paramount – Vix – Plex – Crunchyroll - Apple TV\n \n1️⃣ 2 Plataformas = 💰 *_$13.000_* 😱 \n2️⃣ 3 Plataformas = 💰 *_$16.000_* 😱 \n3️⃣ 4 Plataformas = 💰 *_$18.000_* 😱 \n\n4️⃣ Disney Premium + 1 plataforma =  💰 *_$20.000_* 😱\n5️⃣ Disney Premium + 2 plataformas =  💰 *_$22.000_* 😱\n6️⃣ Disney Premium + 3 plataformas =  💰 *_$24.000_* 😱`,
-  },
-  {
-    titulo: "INDIVIDUALES",
-    texto: `💻✨ *Plataformas Individuales – Cybernet* 🚀🎬  \n📍 *Netflix Colombia:* 1️⃣ 1 Pantalla → *$14.500* 🎥 *Otras plataformas disponibles:* ✨ Disney+ Premium → *$15.000* 🍿 Prime Video → *$10.500* 🎭 Disney Estándar → *$8.500* 🎬 Max → *$8.500* 📺 Apple TV → *$8.500* 🎞️ Paramount+ → *$8.500* 🎞️ MUBI → *$8.500* 🎮 Plex → *$8.500* 🌸 Crunchyroll → *$8.500* 📡 Vix → *$8.500*\n⚽ Metegol → *$15.000* 🎨 Canva Pro (1 mes) → *$20.000*\n🎶 Spotify (1 mes) → *$14.000* 🎶 YouTube Premium (1 mes) → *$14.000*\n🎶 Deezer (1 mes) → *$12.000* 🎬 *Diferencias Disney+* 💙  \n👉 Estándar →  📺 Con anuncios, sin ESPN\n👉 Premium →  🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil\n\n💜 *En Cybernet no hay trucos,* solo entretenimiento real y herramientas para tu día a día 🍿✨`,
-  },
-  {
-    titulo: "GRACIAS",
-    texto: `¡De nada! Es un verdadero gusto atenderte. 😊🙌\n\nSolo paso a recordarte que, ante cualquier duda ❓ o inconveniente ⚠️ que presentes con tu servicio, ¡no dudes en escribirme de inmediato! 📲⚡ Estoy aquí para darte una solución rápida 🛠️ y que sigas disfrutando de toda tu programación favorita sin interrupciones. 📺🍿🎬`,
-  },
-  {
-    titulo: "DIFERENCIAS DISNEY",
-    texto: `🎬 *_Diferencias de Disney+_* 💙✨\n👉 *_Estándar_*\n- 📺 Incluye anuncios\n- 🚫 No tiene ESPN\n\n👉 *_Premium_*\n- 🚫 Sin anuncios\n- 🏆 ESPN incluido\n- 🔒 Bloqueo de perfil disponible\n\n📲 Tú decides cómo disfrutar tu Disney+ favorito 🍿🌟`,
-  },
-  {
-    titulo: "SIGNIFICADO NETFLIX PREMIUM",
-    texto: `🍿 *NETFLIX PREMIUM* 🎬\n\n💎 *Máxima Calidad:* Resolución 4K Ultra HD + HDR.\n🎧 *Audio Espacial:* Sound omnipresente tipo cine.\n📥 *Descargas:* Mira tus series favoritas sin internet.\n🚫 *Sin Anuncios:* Disfruta todo el catálogo sin cortes.\n\n¡La experiencia completa de Netflix en tus manos! ✨🚀`,
-  },
-  {
-    titulo: "COOKIES",
-    texto: `📲 *Instrucciones para acceder a la cuenta Netflix* 🎬✨\n1️⃣ Ingresa este enlace en el navegador de tu preferencia 👉 https://netflix.com/clearcookies\n2️⃣ Cuando cargue la página, escribe el correo en el campo Email ✉️\n3️⃣ Luego pulsa en *Comenzar* ▶️\n4️⃣ Después ingresa la contraseña de la cuenta 🔑\n5️⃣ Finalmente, dale en *Iniciar sesión* ✅ … ¡y listo! 🍿📺`,
-  },
-  {
-    titulo: "PROBLEMAS",
-    texto: `🔄📺 *¿Tu Smart TV no carga bien o falla?* 😅  \n¡No te preocupes! Aquí tienes dos formas rápidas de solucionarlo 💪✨\n\n⚙️ *Opción 1: Reinicio rápido* 1️⃣ Desconéctala por 1 minuto 🔌  \n2️⃣ Con el TV apagado, presiona Power 5 seg 🔘  \n(Si no tiene botón, déjala desconectada 3 min)  \n3️⃣ Conéctala y enciéndela ✨  \n4️⃣ Intenta acceder a tu cuenta 📲  \n✅ Soluciona problemas de carga o inicio 🛠️\n\n🌐 *Opción 2: Reinicio de red* 1️⃣ Apaga tu Smart TV 📴  \n2️⃣ Desconecta módem y router por 30 seg ⏱️  \n3️⃣ Conecta el modem y espera 💡  \n4️⃣ Luego el router and espera 🔁  \n5️⃣ Enciende el TV y prueba 🌟  \n✅ Mejora conexión y evita errores de red 📶\n\n💜 *Si el problema persiste, escríbeme y te guío paso a paso* 🚀🎬`,
-  },
-  {
-    titulo: "PAG PARA CODIGOS",
-    texto: `🎬 *¡TUTORIAL RÁPIDO: Cómo usar nuestro Centro de Códigos!* 🚀\n\nHola!!!! te enseño a usar nuestra nueva herramienta para que obtengas tus códigos al instante y sin esperas.\n\n🌐 _*LINK OFICIAL:*_ www.cybernetsp.com\n\n_*PASOS PARA TU SOLICITUD:_*\n\n1️⃣ _*Ingresa tu número:*_ Al entrar, la página te pedirá el celular con el que realizaste la compra (por ejemplo, este número desde el que me escribes). Dale a "Continuar".\n\n2️⃣ _*Elige tu Plataforma:*_ Selecciona Netflix 🔴 o Disney Premium 🔵.\n\n3️⃣ Si eliges _*NETFLIX*_, tienes 3 opciones:\n\n🔑 Código de Inicio de Sesión: Para entrar por primera vez.\n\n✈️ Código 'Estoy de Viaje': Para saltar el bloqueo de hogar.\n\n📧 Enlace de Inicio (Aprobación): Para aprobar el acceso vía link.\n\n4️⃣ *_Busca tu cuenta:_*\nIngresa el correo de la cuenta (debe terminar en @cybernetsp.com).\nDale clic en "Buscar en el sistema".\n\n✅ ¡Y LISTO! En segundos el sistema te entrega el código o el link de acceso en pantalla. ⚡\n\n_*PARA DISNEY PREMIUM*_: Es aún más directo. Eliges Disney, pones el correo terminado en @cybernetsp.com y ¡listo! Tienes tu código de inmediato.\n\nCualquier duda, el botón de Soporte está integrado en la web. ¡A sacarle el máximo provecho! 🔥🎬`,
-  },
-  {
-    titulo: "INSTALAR PAG",
-    texto: `🌐 *Cómo instalar Cybernet en tu celular (como una App)*\n\nSi quieres acceder rápidamente a tus servicios de Cybernet sin tener que abrir el navegador cada vez, sigue estos sencillos pasos:\n\n🤖 *Para usuarios de Android (Google Chrome)*\nAbre el navegador Chrome and entra a: www.cybernetsp.com\n\n1️⃣ Toca los tres puntos verticales (⋮) en la esquina superior derecha.\n2️⃣ Selecciona la opción: *"Instalar aplicación"* o *"Agregar a la pantalla principal".*\n*IMPORTANTE:* Cuando te pida el nombre, escribe *"Cybernet Códigos"*.\n3️⃣ Confirma tocando en "Instalar" o "Agregar".\n\n🍎 *Para usuarios de iPhone (Safari)*\nAbre el navegador Safari and entra a: www.cybernetsp.com\n\n1️⃣ Toca el icono de Compartir (el cuadrado con una flecha hacia arriba) en la parte inferior.\n2️⃣ Desliza hacia arriba y selecciona: *"Agregar al inicio".*\n*IMPORTANTE:* Verás un cuadro de texto para el nombre; bórralo y escribe *"Cybernet Códigos"*.\n3️⃣ Presiona *"Agregar"* en la esquina superior derecha.\n\n✨ *¿Por qué instalarla así?*\n*Ahorro de espacio:* No ocupa memoria extra en tu teléfono como una app tradicional.\n*Comodidad:* Entras directamente con un toque desde tu pantalla de inicio.\n\n*Tip:* Coloca el icono en tu pantalla principal para que siempre tengas tus códigos a la mano cuando los necesites.`,
-  },
-  {
-    titulo: "PRECIO NETFLIX",
-    texto: `🎬✨ *NETFLIX PREMIUM* 💙🍿  \n📺 Disfruta tus series y pelis favoritas 🔥  \n\n1️⃣ 👉 1 Pantalla 💻 → 💵 $14.500  \n2️⃣ 👉 2 Pantallas 📱💻 → 💵 $26.000  \n3️⃣ 👉 3 Pantallas 📱💻📺 → 💵 $36.000  \n4️⃣ 👉 4 Pantallas 📱💻📺🖥️ → 💵 $46.000  \n5️⃣ 👉 5 Pantallas 📱💻📺🖥️📲 → 💵 $55.000  \n\n🚀 Sin cortes, sin límites, ¡solo diversión! 🎉`,
-  },
-  {
-    titulo: "PRECIO DISNEY",
-    texto: `🎬 *Disney+ disponible* 💙  \n👉 *Estándar* → $8.500  \n📺 Con anuncios, sin ESPN\n\n👉 *Premium* → $15.000  \n🚫 Sin anuncios · 🏆 ESPN incluido · 🔒 Bloqueo de perfil\n\n📲 *Tú eliges cómo disfrutar tu Disney+ favorito* 🍿✨`,
-  },
-  {
-    titulo: "IPTV",
-    texto: `📺✨ Servicio IPTV – Cybernet\n\nEl servicio de IPTV te ofrece más de 5.000 canales de TV en vivo, incluyendo contenido deportivo como ESPN, WIN Sports y mucho más 🏆🎬\n\nPara disfrutarlo sin interrupciones, asegúrate de contar con mínimo 10 Mb de internet estables 🌐⚡\n\n📌 Pasos para configurar tu IPTV, amig@:\n1️⃣ Play List Name: ingresa el Any Name que te proporcionamos.\n2️⃣ Usuario: escribe el usuario que recibiste.\n3️⃣ Clave/Contraseña: introduce la contraseña asignada.\n4️⃣ URL: copia y pega la URL exactamente como te la enviamos.\n5️⃣ Confirmar: presiona Enter para acceder.\n6️⃣ ¡Listo! Disfruta de TV en vivo, películas y series al instante 📡🍿\n\n📱 Instalación según tu dispositivo:\n📲 Android\nDescarga la app IPTV Smarters Pro desde este enlace:\n👉 Descargar aquí\n\n🍎 iOS (iPhone / iPad)\n👉 Descargar aquí\n\n💻 PC (Windows)\n👉 Descargar aquí\n\n📺 Smart TV\nTe recomendamos instalar IPTV Smarters Pro para una mejor experiencia visual y estabilidad 👌\n\n💜 Gracias por elegir Cybernet, amig@.\nTu acceso directo al entretenimiento sin límites 🚀📡✨`,
-  },
-  {
-    titulo: "ANUNCIO",
-    texto: `💬 *¡Tranquil@, amig@!* 😎  \nEse mensaje es solo una notificación temporal 📲  \nNo hay nada de qué preocuparse 😉\n\n✅ Toca *ACEPTAR* o *AHORA NO* y listo  \n🚀 Tu cuenta seguirá funcionando sin interrupciones 🎬\n\n💜 *Relájate y disfruta* En Cybernet todo fluye sin estrés ni complicaciones 🙌🍿`,
-  },
-  {
-    titulo: "DISTRIBUIDORES",
-    texto: `💼✨ *¡Precios nuevos para distribuidores!* 🚀 Aumenta tus ganancias y lleva tu negocio al siguiente nivel 💰\n\n📢 *Info clave:* 1️⃣ Recarga mínima: *$50.000* 💵  \n2️⃣ El saldo se descuenta por cada venta 📲  \n3️⃣ Identifica cada cuenta con el nombre del cliente 📋\n\n🌟 *Planes de 1 pantalla:* 🎬 Netflix – $10.000  \n🎭 Max – $3.000  \n📺 Apple TV – $3.000  \n🏰 Disney+ Premium – $10.000  \n🎥 Disney+ Estándar – $4.000  \n🍿 Prime Video Original – $5.000  \n🌸 Crunchyroll – $3.000  \n🎮 Plex – $3.000  \n🎞️ Paramount+ – $3.000  \n🎞️ MUBI – $3.000  \n⚽ Metegol – $12.000  \n📡 Vix – $3.000  \n📺 IPTV – $7.000  \n📺 YouTube (1 mes) – $10.000  \n🎶 Spotify (1 mes) – $14.000 \n🎶 YouTube Premium (1 mes) – $14.000\n🎶 Spotify (1 mes Distris) – $10.000\n🎶 Deezer (1 mes) – $8.000\n\n📌 *Aclaraciones:* 🏆 Disney+ Premium incluye Star+ y ESPN  \n👀 Disney+ Estándar incluye Star+, sin ESPN\n\n🔥💸 *Aprovecha estos precios preferenciales y multiplica tus ingresos* 📲 Ajusta tus valores de venta y obtén excelentes beneficios 🚀`,
-  },
-  {
-    titulo: "FOTO DEL PROBLEMA",
-    texto: `💬 *Amig@*, para ayudarte rápido solo necesito esto 👇\n\n📸 *Una foto o captura del error* (para ver qué aparece en tu pantalla)  \n📧 *El correo que usas en tu cuenta* (así la identifico fácil)\n\n👉 *¿No puedes enviar imagen?* No pasa nada: descríbeme con tus palabras lo que ves en pantalla 📝\n\n🔧 Con eso ya puedo revisar el problema y darte una solución rápida 🚀🙌  \n🎬 ¡Estoy aquí para que todo funcione sin complicaciones!`,
-  },
-  {
-    titulo: "TV NETFLIX",
-    texto: `📺 *¿Necesitas actualizar Netflix en tu TV?* 😄  \nSigue estos pasos sencillos para que todo funcione perfecto 👇\n\n1️⃣ En tu televisor selecciona *Usar teléfono* 2️⃣ Envíame el *código de 8 dígitos* 📝 (escrito, no en captura)  \n3️⃣ Mantén la pantalla encendida mientras activamos tu acceso 🔓\n\n⚠️ *Importante:* solo un dispositivo a la vez para evitar bloqueos o desconexiones 🚫\n\n✅ ¡Y listo! Tu cuenta quedará activa en segundos 🍿🚀`,
-  },
-  {
-    titulo: "ESTOY DE VIAJE NETFLIX",
-    texto: `🔓 *Acceso a Netflix en tu TV* 🎬📺\n\nEl mensaje que ves es parte de la nueva verificación de Netflix. No es un error de tu cuenta, solo sigue estos pasos para activarla:\n\n1️⃣ Selecciona: *ESTA ES MI CUENTA*\n2️⃣ Pulsa en: *ESTOY DE VIAJE*\n3️⃣ Gestión: Después de eso envíame el correo o la cuenta\n4️⃣ Finaliza: Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n💡 *Tip: ¡Hazlo tú mismo 24/7!* Si prefieres no esperar, usa nuestro bot disponible a cualquier hora:\n\n👉 www.cybernetsp.com _(Selecciona la opción: Estoy de viaje. Solo disponible para correos @cybernetsp.com)_`,
-  },
-  {
-    titulo: "ACTUALIZAR HOGAR NETFLIX",
-    texto: `🏠 *Actualizar Hogar Netflix* 🎬📺\n\nSi te aparece el mensaje de *"Este televisor no forma parte de tu hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *ACTUALIZAR HOGAR.*\n3️⃣ Despues de eso *ME ENVIAS CORREO.* 4️⃣ Dale a *ENVIAR* y avísame de inmediato para actualizarlo.\n\n🍿 ¡Listo! Once actualizado, podrás seguir disfrutando en tu TV sin bloqueos.`,
-  },
-  {
-    titulo: "FUERA DE CASA DISNEY",
-    texto: `🔓 *Acceso a Disney+ en tu TV* 🎬✨\n\nSi te aparece el mensaje de verificación en tu televisor, no te preocupes. Sigue estos pasos rápidos para entrar:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *ESTOY FUERA DE CASA.*\n3️⃣ Despues de eso ME ENVÍAS LA CUENTA.\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n💡 *Nota:* Ten el televisor encendido en la pantalla del código, ya que estos accesos expiran rápido.\n\n💙 ¡Listo! Once ingresado, podrás seguir disfrutando de todo el contenido.`,
-  },
-  {
-    titulo: "CAMBIO DE HOGAR DISNEY",
-    texto: `🏠 *Cambiar de Hogar Disney+* 🎬✨\n\nSi te aparece el mensaje de *"Este televisor no forma parte del hogar"*, no te preocupes. Sigue estos pasos para sincronizarlo de inmediato:\n\n1️⃣ Selecciona *ESTA ES MI CUENTA.*\n2️⃣ Pulsa en *CAMBIAR DE HOGAR.*\n3️⃣ Despues de eso *ME ENVÍAS LA CUENTA.*\n4️⃣ Dale a *ENVIAR CÓDIGO* y avísame de inmediato para entregártelo.\n\n💡 *Nota:* Mantente en esa pantalla para que el código no expire y puedas ingresarlo apenas te lo envíe.\n\n💙 ¡Listo! Una vez cambiado el hogar, podrás seguir disfrutando de todo el contenido sin bloqueos.`,
-  },
-  {
-    titulo: "SINCRONIZAR DISNEY",
-    texto: `✨ Activa Disney+ en tu TV fácilmente 📺\n\nElige uno de los dos métodos para iniciar sesión:\n\n▶️ *MÉTODO 1:* Por código _(El más recomendado)_ 💻📱\n1️⃣ En tu televisor abre la aplicación de Disney+ y dale clic a "Iniciar sesión".\n👀 Te aparecerá un código de 8 dígitos en la pantalla.\n2️⃣ Desde tu celular o computador entra al navegador (Chrome o Safari) e ingresa a:\n🌐 www.disneyplus.com/es-419/begin\n3️⃣ Escribe el código del TV en la página, dale a "Continuar" e inicia sesión con el correo y contraseña que te entregamos 📧.\n\n▶️ *MÉTODO 2:* Por Red Wi-Fi _(Sincronización automática)_ 📶\n1️⃣ Asegúrate de que tu celular y tu televisor estén conectados exactamente a la misma red Wi-Fi de la casa.\n2️⃣ Abre la aplicación de Disney+ en tu celular e inicia sesión con los datos que te entregamos.\n3️⃣ Abre la aplicación de Disney+ en tu televisor y dale a "Iniciar sesión".\n4️⃣ Te saldrá un aviso automático en la pantalla de tu celular preguntando si deseas permitir el acceso. Dale a "Permitir" o "Iniciar sesión" ¡y listo!\n\n✅ En segundos tu televisor se actualizará solo y podrás disfrutar de todas tus películas y series favoritas 🍿🎬`,
-  },
-  {
-    titulo: "SINCRONIZAR AMAZON",
-    texto: `✨ *Sincroniza Amazon Prime Video en tu TV* 📺\n\n1️⃣ Desde tu celular o computador entra a:  \n🌐 www.primevideo.com/region/eu/ontv/code/ref=atv_set_rd_reg\n\n2️⃣ Ingresa los datos de la cuenta que te proporcionamos 📧  \n3️⃣ En tu TV, abre la app de Prime Video y selecciona *Identificarse* 4️⃣ Verás un código en pantalla → escríbelo en la página y pulsa *Continuar*\n\n✅ ¡Listo! Tu TV quedará sincronizado y podrás disfrutar tus series y pelis favoritas 🍿🎬`,
-  },
-  {
-    titulo: "CAMBIO DE CLAVE NETFLIX",
-    texto: `🔒✨ *Notificación de seguridad – Netflix* Hola 👋 amig@, tu contraseña de Netflix fue actualizada por motivos de seguridad 🔐.  \n\n📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  \ny confírmame por este medio ✅  \n\n💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`,
-  },
-  {
-    titulo: "CAMBIO DE CLAVE DISNEY+",
-    texto: `🔒✨ *Notificación de seguridad – Disney Premium* Hola 👋 amig@, tu contraseña de Disney Premium fue actualizada por motivos de seguridad 🔐.  \n\n📲 Por favor revisa que puedas ingresar sin problema desde tus dispositivos 💻📱📺  \ny confírmame por este medio ✅  \n\n💡 Esto pendiente para ayudarte con cualquier duda o ajuste adicional 🚀🙌`,
-  },
-  {
-    titulo: "CEL PC NETFLIX",
-    texto: `🎬✨ *Accede a tu cuenta de Netflix en segundos 📺*\n\n1️⃣ Abre: La app o página de Netflix.\n2️⃣ Selecciona: La opción *Usar código de inicio* 💻\n3️⃣ Ingresa: El correo de tu cuenta 📧\n4️⃣ Confirma: Haz clic en *Enviar código* 🔐\n5️⃣ Gestión: Reenvíame el correo que solicita el código.\n6️⃣ Finaliza: Avísame apenas tu dispositivo te pida el código para entregártelo.\n\n💡 *Tip: ¡Hazlo tú mismo 24/7!*\nSi prefieres no esperar, usa nuestro bot disponible a cualquier hora:\n👉 www.cybernetsp.com _(Selecciona la opción: Código de inicio sesión. Solo disponible para correos @cybernetsp.com)_`,
-  },
-  {
-    titulo: "CAMBIAR PLAN",
-    texto: `📺 *Mensaje en pantalla:* _"Hay demasiadas personas usando la cuenta en este momento"_\n\n😎 ¡No te preocupes! La solución es muy sencilla 👇\n\n1️⃣ Haz clic en *Cambiar* 2️⃣ Luego selecciona *Cambiar o Confirmar* 3️⃣ 🎉 ¡Listo! Todo vuelve a la normalidad y puedes seguir disfrutando sin problema 🍿\n\n👉 Si este aviso vuelve a aparecer, repite los mismos pasos sin necesidad de escribirme 🚀`,
-  },
-  {
-    titulo: "SOPORTE",
-    texto: `🧰 *Tu cuenta está en revisión técnica* 🧩⚙️  \n\n⏳ Por favor espera entre *10 a 15 minutos* y luego vuelve a ingresar para confirmar que todo quedó funcionando 📺✨  \n\n🙌 ¡Tranquil@! En pocos minutos todo estará listo  \npara que sigas disfrutando sin interrupciones 🍿🚀`,
-  },
-  {
-    titulo: "REEMPLAZOS",
-    texto: `📢 *Importante sobre tu cuenta de Netflix*\nHola 👋 Solo para aclararte: con los nuevos métodos de activación, el sistema de Netflix no conserva el historial anterior ni los perfiles personalizados. Esto es completamente normal y parte del proceso técnico que usamos para garantizar acceso estable.\n✅ ¿Por qué se hace así?\nEste método evita que Netflix active la función de “actualizar hogar”, que puede bloquear el acceso o limitar el uso en differentes dispositivos. Al usar activaciones temporales o por código, protegemos tu acceso continuo sin interrupciones.\n🎬 Aunque el historial se reinicia, puedes seguir disfrutando tus series películas favoritas sin problemas. Si necesitas ayuda para volver a encontrar lo que estaba viendo, con gusto te ayudo`,
-  },
-  {
-    titulo: "ENLACE INICIO DE SESION",
-    texto: `✨ *¡Activa tu pantalla en segundos!* 🎬\n\nPara vincular tu dispositivo, sigue estos pasos:\n\n1️⃣ En tu TV: Selecciona la opción *“Enviar enlace de inicio de sesión”*\n2️⃣ Confirma: Pulsa en el botón *“Enviar”* que aparece en pantalla\n3️⃣ Gestión: Reenvíame el correo que recibas con la solicitud del código\n4️⃣ Finaliza: Avísame en cuanto tu dispositivo te pida la aprobación\n\n🚀 *¡Ahorra tiempo!* Hazlo tú mismo 24/7 Si no quieres esperar, puedes obtener tu código al instante en nuestra web:\n\n👉 www.cybernetsp.com _(Selecciona la opción: Solicitud de inicio. Solo disponible para correos @cybernetsp.com)_`,
-  },
-  {
-    titulo: "GARANTIA",
-    texto: `✨ *¡Hola!* 😊  \nTe entrego la *garantía de tu cuenta* 🙌  \n\n📺 Por favor ingresa y cuéntame qué tal te fue 💬  \n💪 Estoy pendiente por si necesitas apoyo o alguna revisión adicional ✨  \n\n🍿 ¡Disfruta tu servicio sin preocupaciones!`,
-  },
-  {
-    titulo: "VERIFICACION",
-    texto: `¡Recibido! ✅ Procedemos a verificar tu pago en el sistema.\n\nPor favor, confírmame el nombre del titular de la cuenta desde la cual realizaste la transferencia. 📝\n\nEn un momento validamos y te hacemos la entrega activa de tu servicio. ¡Gracias por elegirnos! 🚀`,
-  },
-  {
-    titulo: "INICIO DE SESION",
-    texto: `🔒✨ *Actualización de Netflix*\n\nAl ingresar al sistema se solicitará un código. Seleccione *Obtener ayuda* y luego *Usar contraseña* para introducir la clave de su cuenta.`,
-  },
-];
-
-const gridContainer = document.getElementById("grid-container");
-const headerContainer = document.getElementById("header-container");
-
-headerContainer.innerHTML = `
-          <div class="card-ios w-100" style="max-width: 440px;">
-            <h2 class="card-title text-center" style="justify-content:center;">${qrPrincipal.titulo}</h2>
-            <img src="${qrPrincipal.imagenUrl}" alt="QR" style="max-width:210px; width:100%; border-radius:16px; border:var(--glass-border); box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto;" onerror="this.style.display='none'; this.nextElementSibling.innerText='Error cargando la llave QR. Revisa la conexión.'; this.nextElementSibling.style.color='var(--ios-red)';">
-            <span class="text-secondary text-center" style="font-size:0.75rem; margin-top:-8px; font-weight:500;">(Mantén presionado o clic derecho para copiar imagen)</span>
-            <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">COPIAR TEXTO</button>
-          </div>
-        `;
-
-function renderGrid(filtro = "") {
-  gridContainer.innerHTML = "";
-  let filtrados = [];
-
-  for (let index = 0; index < elementosGrid.length; index++) {
-    let item = elementosGrid[index];
-    if (item.titulo.toLowerCase().includes(filtro.toLowerCase())) {
-      filtrados.push(item);
-    }
+// 🔥 BLINDAJE: Solo ejecutamos esto si estamos en admin.html (donde existe el headerContainer)
+document.addEventListener("DOMContentLoaded", () => {
+  const headerContainer = document.getElementById("header-container");
+  if (headerContainer) {
+    headerContainer.innerHTML = `
+      <div class="card-ios w-100" style="max-width: 440px;">
+        <h2 class="card-title text-center" style="justify-content:center;">${qrPrincipal.titulo}</h2>
+        <img src="${qrPrincipal.imagenUrl}" alt="QR" style="max-width:210px; width:100%; border-radius:16px; border:var(--glass-border); box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto;" onerror="this.style.display='none'; this.nextElementSibling.innerText='Error cargando la llave QR. Revisa la conexión.'; this.nextElementSibling.style.color='var(--ios-red)';">
+        <span class="text-secondary text-center" style="font-size:0.75rem; margin-top:-8px; font-weight:500;">(Mantén presionado o clic derecho para copiar imagen)</span>
+        <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">COPIAR TEXTO</button>
+      </div>
+    `;
   }
 
-  for (let f = 0; f < filtrados.length; f++) {
-    let currentItem = filtrados[f];
-    const card = document.createElement("div");
-    card.className = "card-ios";
-    card.innerHTML = `
-                  <h2 class="card-title" style="justify-content:center;">${currentItem.titulo}</h2>
-                  <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${currentItem.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">COPIAR TEXTO</button>
-                `;
-    gridContainer.appendChild(card);
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.addEventListener("input", function (e) {
+      renderGrid(e.target.value);
+    });
   }
-}
-
-document.getElementById("searchInput").addEventListener("input", function (e) {
-  renderGrid(e.target.value);
 });
 
 const clipboard = new ClipboardJS(".copy-text-btn");
@@ -6147,57 +6384,6 @@ function renderDashboard() {
     `;
   }
 
-  // 🔥 NUEVO: INYECCIÓN DE LA GRÁFICA DE CHART.JS 🔥
-  let totalIngresosGrafica = ventasBrutasReales;
-  let totalEgresosGrafica = d.gastos + d.inversiones + d.nomina;
-
-  if (totalIngresosGrafica > 0 || totalEgresosGrafica > 0) {
-    htmlBuffer =
-      `
-      <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
-         <canvas id="miGraficaFinanzas" style="max-height: 220px;"></canvas>
-      </div>
-    ` + htmlBuffer;
-
-    // Esperamos a que el HTML se pinte en la pantalla para dibujar la gráfica
-    setTimeout(() => {
-      const ctxChart = document.getElementById("miGraficaFinanzas");
-      if (ctxChart) {
-        if (window.cyberChartInstancia) window.cyberChartInstancia.destroy();
-        window.cyberChartInstancia = new Chart(ctxChart, {
-          type: "doughnut",
-          data: {
-            labels: ["Ingresos Brutos", "Gastos/Pagos"],
-            datasets: [
-              {
-                data: [totalIngresosGrafica, totalEgresosGrafica],
-                backgroundColor: [
-                  "rgba(48, 209, 88, 0.8)",
-                  "rgba(255, 69, 58, 0.8)",
-                ],
-                borderColor: ["#30d158", "#ff453a"],
-                borderWidth: 1,
-                hoverOffset: 4,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: "right",
-                labels: {
-                  color: "#e5e5ea",
-                  font: { family: "Calibri", size: 12 },
-                },
-              },
-            },
-          },
-        });
-      }
-    }, 100);
-  }
   container.innerHTML = htmlBuffer;
   calcularDescuentoDeuda();
 }
@@ -6327,8 +6513,9 @@ function renderGrid(filtro = "") {
   gridContainer.innerHTML = "";
 
   // Filtramos las tarjetas según lo que escribas en el buscador superior
-  let filtrados = window.currentGridStock.filter((item) =>
-    item.titulo.toLowerCase().includes(filtro.toLowerCase()),
+  let filtrados = window.currentGridStock.filter(
+    (item) =>
+      item.titulo && item.titulo.toLowerCase().includes(filtro.toLowerCase()),
   );
 
   if (filtrados.length === 0) {
@@ -6340,28 +6527,28 @@ function renderGrid(filtro = "") {
   filtrados.forEach((currentItem) => {
     const card = document.createElement("div");
     card.className = "card-ios";
+
+    // 🔥 Validación por si algún texto de Google Sheets viene vacío o nulo
+    let textoSeguro = currentItem.texto
+      ? String(currentItem.texto).replace(/"/g, "&quot;").replace(/'/g, "&#39;")
+      : "";
+    let tituloSeguro = currentItem.titulo || "Sin título";
+
     card.innerHTML = `
-      <h2 class="card-title" style="justify-content:center;">${currentItem.titulo}</h2>
-      <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${currentItem.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">COPIAR TEXTO</button>
+      <h2 class="card-title" style="justify-content:center;">${tituloSeguro}</h2>
+      <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${textoSeguro}">COPIAR TEXTO</button>
     `;
     gridContainer.appendChild(card);
   });
 }
-// =========================================================================
-// 🚨 MÓDULO INTELIGENTE: ALERTA DE INVENTARIO BAJO (CADA 10 MINUTOS)
-// =========================================================================
 let ultimoAvisoStock = 0;
 
 function verificarStockCritico(data) {
-  // 🔒 SEGURO: Si no hay nadie logueado (estamos en el login), no hacemos nada y cortamos la función.
   if (!sessionStorage.getItem("active_staff")) return;
 
   let ahora = Date.now();
-
-  // ⏳ Inteligencia: Solo evaluar si han pasado 10 minutos (600,000 ms) desde la última vez que salió el aviso
   if (ahora - ultimoAvisoStock < 600000) return;
 
-  // 🎯 Umbrales y acciones personalizadas por plataforma
   const umbrales = {
     NETFLIX: { limite: 2, accion: "Cortar o crear" },
     AMAZON: { limite: 5, accion: "Comprar" },
@@ -6373,24 +6560,78 @@ function verificarStockCritico(data) {
     APPLETV: { limite: 1, accion: "Comprar" },
   };
 
-  let alertas = [];
+  let itemsCriticos = [];
 
-  // Analiza la data recibida del servidor
   data.forEach((item) => {
     let config = umbrales[item.plat];
     if (config && item.libres <= config.limite) {
-      alertas.push(
-        `<div style="margin-bottom: 4px; color: var(--text-secondary);">• <b>${item.plat}</b>: Quedan ${item.libres} 👉 <span style="color: var(--text-primary); font-weight: 800;">${config.accion}</span></div>`,
-      );
+      itemsCriticos.push({
+        plat: item.plat,
+        cant: item.libres,
+        accion: config.accion,
+      });
     }
   });
 
-  // Si hay escasez en alguna, disparamos el aviso visual y reiniciamos el reloj de 10 min
-  if (alertas.length > 0) {
+  if (itemsCriticos.length > 0) {
     ultimoAvisoStock = ahora;
-    mostrarNotificacionStock(alertas.join(""));
+    mostrarAlertaInventarioToast(itemsCriticos);
   }
 }
+
+function mostrarAlertaInventarioToast(listaPlataformas) {
+  const toastCenter = document.getElementById("cyber-toast-center");
+  if (!toastCenter) return;
+
+  const toastId = `toast_stock_${Date.now()}`;
+  const toastDiv = document.createElement("div");
+  toastDiv.id = toastId;
+  toastDiv.className = "cyber-notification";
+
+  let listadoHtml = "";
+  listaPlataformas.forEach((item) => {
+    listadoHtml += `
+      <li style="margin-bottom: 5px; list-style: none; display: flex; justify-content: space-between; gap: 10px;">
+        <span>• <b>${item.plat}</b> (Quedan ${item.cant})</span>
+        <span style="color: var(--ios-orange); font-weight: 700;">👉 ${item.accion}</span>
+      </li>`;
+  });
+
+  toastDiv.innerHTML = `
+    <div class="cyber-notif-header">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-orange)" stroke-width="2.5">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      <span style="font-weight: 800; font-size: 0.88rem; color: #ffffff;">Inventario Crítico</span>
+      <button class="cyber-notif-close" onclick="closeNotificationById('${toastId}')">&times;</button>
+    </div>
+    <div class="cyber-notif-body">
+      <div style="font-size: 0.78rem; margin-bottom: 8px; color: #e1e1e6;">Acción sugerida para evitar escasez:</div>
+      <ul style="padding: 0; margin: 0;">${listadoHtml}</ul>
+    </div>
+  `;
+
+  toastCenter.appendChild(toastDiv);
+
+  setTimeout(() => {
+    toastDiv.classList.add("show");
+    if (typeof haptic === "function") haptic();
+  }, 20);
+}
+
+window.closeNotificationById = function (id) {
+  const toast = document.getElementById(id);
+  if (toast) {
+    toast.classList.remove("show");
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 400);
+  }
+};
 
 function mostrarNotificacionStock(contenido) {
   let toastViejo = document.getElementById("stockAlertToast");
