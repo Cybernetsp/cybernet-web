@@ -1049,6 +1049,61 @@
 
       <button
         class="ios-tab-btn"
+        onclick="toggleInventarioPanel()"
+        style="
+          border: none;
+          background: transparent;
+          padding: 0;
+          margin: 2px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 6px;
+          width: 68px;
+          cursor: pointer;
+        "
+      >
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          style="filter: drop-shadow(0 2px 6px rgba(10, 132, 255, 0.4))"
+        >
+          <path
+            d="M20 16V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12"
+            stroke="#0a84ff"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
+          <rect
+            x="2"
+            y="16"
+            width="20"
+            height="6"
+            rx="2"
+            stroke="#0a84ff"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></rect>
+        </svg>
+        <span
+          style="
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: #ebebf5;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+          "
+          >Stock</span
+        >
+      </button>
+
+      <button
+        class="ios-tab-btn"
         onclick="cerrarSesionStaff()"
         style="
           border: none;
@@ -8183,8 +8238,105 @@
         </div>
       </div>
     </div>
-    <!-- Motor de Gráficas Profesionales -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <div
+      class="overlay-ios"
+      id="inventarioOverlay"
+      style="z-index: 10500; display: none"
+    >
+      <div
+        class="sheet-ios"
+        onclick="event.stopPropagation()"
+        style="
+          max-width: 600px;
+          height: 85vh;
+          max-height: 850px;
+          display: flex;
+          flex-direction: column;
+          padding: 30px 24px;
+          border-radius: 32px;
+        "
+      >
+        <div
+          class="sheet-header"
+          style="
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+            align-items: center;
+          "
+        >
+          <h3
+            class="card-title"
+            style="
+              color: var(--ios-blue);
+              font-size: 1.15rem;
+              font-weight: 800;
+              letter-spacing: -0.3px;
+              gap: 8px;
+              margin: 0;
+            "
+          >
+            <div
+              style="
+                background: rgba(10, 132, 255, 0.15);
+                color: var(--ios-blue);
+                padding: 8px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(10, 132, 255, 0.1);
+              "
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 16V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12"></path>
+                <rect x="2" y="16" width="20" height="6" rx="2"></rect>
+              </svg>
+            </div>
+            Control de Stock
+          </h3>
+          <button
+            class="btn-close-circle"
+            style="margin: 0"
+            onclick="toggleInventarioPanel()"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div
+          style="
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            margin-bottom: 20px;
+            text-align: center;
+          "
+        >
+          <span style="font-size: 0.85rem; color: var(--text-secondary)"
+            >Apaga el switch de la plataforma agotada. La tienda de los clientes
+            se bloqueará sola.</span
+          >
+        </div>
+
+        <div
+          id="panelSwitchesStock"
+          class="flex-col"
+          style="overflow-y: auto; flex-grow: 1; gap: 4px; padding-right: 5px"
+        ></div>
+      </div>
+    </div>
 
     <script src="logica.js"></script>
   </body>
