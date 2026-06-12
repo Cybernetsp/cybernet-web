@@ -4084,7 +4084,7 @@ function inicializarWorkspace() {
   cargarHorasDesdeSheets();
 }
 
-// 🔥 INICIALIZADOR: Revisa si hay sesión y decide qué mostrar 🔥
+// 🚀 UNIFICADO: MOTOR DE INICIALIZACIÓN INTELIGENTE EN LA NUBE (ANTI-BUCLES)
 window.addEventListener("DOMContentLoaded", () => {
   let savedTheme = localStorage.getItem("cyber_theme") || "dark";
   document.documentElement.setAttribute("data-theme", savedTheme);
@@ -4093,22 +4093,23 @@ window.addEventListener("DOMContentLoaded", () => {
   let localStaff = localStorage.getItem("cyber_saved_staff");
   let user = sessionStaff || localStaff;
 
-  // Si NO hay usuario y NO estamos en el login -> Expulsarlo al login
-  if (!user && !window.location.pathname.includes("login.html")) {
-    window.location.href = "login.html";
-    return;
-  }
+  const path = window.location.pathname.toLowerCase();
+  // Detecta de forma flexible si la URL contiene la palabra "login"
+  const esPaginaLogin = path.includes("login");
 
-  if (user) {
-    sessionStorage.setItem("active_staff", user);
-
-    // Si ya está logueado pero intenta abrir el login.html -> Mandarlo al admin
-    if (window.location.pathname.includes("login.html")) {
-      window.location.href = "admin.html";
+  if (!user) {
+    if (!esPaginaLogin) {
+      // Si corre local en PC usa .html, si corre en la web usa ruta limpia
+      window.location.href = path.includes(".html") ? "login.html" : "login";
       return;
     }
-
-    // Si ya estamos en admin.html, encendemos el sistema
+  } else {
+    if (esPaginaLogin) {
+      // Si ya inició sesión y entra al login, lo manda al panel administrador
+      window.location.href = path.includes(".html") ? "admin.html" : "admin";
+      return;
+    }
+    // Si todo está correcto y está en el panel, enciende Cybernet
     entrarAlSistema(user);
   }
 });
