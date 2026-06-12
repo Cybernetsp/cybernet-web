@@ -2454,39 +2454,38 @@ function procesarImagenGarantia(fileSource) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      // 🎯 NUEVA CONFIGURACIÓN ÓPTICA PARA SCREENSHOTS DE TEXTO
-      // Subimos el ancho a 350px para dar nitidez a las letras de las celdas
-      const MAX_WIDTH = 350;
+      // 🎯 REVOLUCIÓN ÓPTICA V2 (MÁS ESPACIO PARA LAS LETRAS)
+      // Subimos el ancho a 700px para que las letras no se fusionen en un manchón.
+      const MAX_WIDTH = 700;
       const scaleSize = MAX_WIDTH / img.width;
       canvas.width = MAX_WIDTH;
       canvas.height = img.height * scaleSize;
 
-      // 🚫 APAGAMOS EL SUAVIZADO: Evita que el navegador empañe o difumine los bordes de las letras
+      // Apagamos filtros de suavizado que empañan el texto
       ctx.imageSmoothingEnabled = false;
       ctx.mozImageSmoothingEnabled = false;
       ctx.webkitImageSmoothingEnabled = false;
 
-      // 🎭 FILTRO DE PROCESAMIENTO DIGITAL: Convierte a blanco y negro y aumenta contraste.
-      // Al no tener que procesar color, el JPEG comprime el texto de forma ultra eficiente,
-      // logrando que una imagen de 350px pese menos que la anterior de 200px.
-      ctx.filter = "grayscale(100%) contrast(140%)";
-      
-      // Dibujamos la imagen con los filtros aplicados
+      // Filtro agresivo de escala de grises y alto contraste para limpiar el ruido del fondo
+      ctx.filter = "grayscale(100%) contrast(150%)";
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      // Extraemos el Base64 con una calidad equilibrada de 0.35
-      window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.35);
+      // 🔥 CLAVE: Calidad ultra-baja (0.12). Como es blanco y negro, no genera ruido visual,
+      // pero el texto se mantiene delgado, nítido y súper ligero para la URL.
+      window.imagenGarantiaActualBase64 = canvas.toDataURL("image/jpeg", 0.12);
 
       // Actualizamos la vista previa en el panel
       document.getElementById("dropzoneText").style.display = "none";
       const preview = document.getElementById("previewGarantia");
       preview.src = window.imagenGarantiaActualBase64;
-      
-      // 💎 Ajuste CSS para que el navegador no suavice la miniatura al estirarla
-      preview.style.cssText = "display: block; max-height: 120px; max-width: 100%; border-radius: 8px; margin: 0 auto; object-fit: contain; box-shadow: var(--glass-shadow); image-rendering: pixelated; image-rendering: crisp-edges;";
-      
+
+      // Renderizado limpio de píxeles para la miniatura
+      preview.style.cssText =
+        "display: block; max-height: 120px; max-width: 100%; border-radius: 8px; margin: 0 auto; object-fit: contain; box-shadow: var(--glass-shadow); image-rendering: pixelated; image-rendering: crisp-edges;";
+
       document.getElementById("btnQuitarFoto").style.display = "block";
-      document.getElementById("dropzoneGarantia").style.borderColor = "var(--ios-blue)";
+      document.getElementById("dropzoneGarantia").style.borderColor =
+        "var(--ios-blue)";
     };
     img.src = e.target.result;
   };
