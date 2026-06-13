@@ -2168,7 +2168,7 @@ function copiarCuentaCompleta(btn, index) {
 }
 
 function toggleShiftsPanel() {
-  haptic();
+  if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("shiftsOverlay");
   overlay.classList.toggle("open");
 
@@ -2178,17 +2178,21 @@ function toggleShiftsPanel() {
 
     const userActivo = sessionStorage.getItem("active_staff") || "";
     const inpVendedor = document.getElementById("inputVendedorShift");
-    const btnAde = document.getElementById("btnAdelantoCamilo"); // 👈 Captura el botón
+    const btnAde = document.getElementById("btnAdelantoCamilo");
+    const btnNom = document.getElementById("btnNominaCamilo"); // 👈 Captura el nuevo botón
 
     if (userActivo.toUpperCase() === "CAMILO") {
       inpVendedor.disabled = false;
       inpVendedor.value = "";
       if (btnAde)
-        btnAde.style.setProperty("display", "inline-flex", "important"); // 🔥 Muestra a Camilo
+        btnAde.style.setProperty("display", "inline-flex", "important");
+      if (btnNom)
+        btnNom.style.setProperty("display", "inline-flex", "important"); // 🔥 Muestra a Camilo
     } else {
       inpVendedor.disabled = true;
       inpVendedor.value = userActivo.toUpperCase();
-      if (btnAde) btnAde.style.setProperty("display", "none", "important"); // 🔒 Esconde a empleados
+      if (btnAde) btnAde.style.setProperty("display", "none", "important");
+      if (btnNom) btnNom.style.setProperty("display", "none", "important"); // 🔒 Esconde a empleados
     }
 
     sincronizarTachadosConNube(() => {
@@ -4373,17 +4377,12 @@ function refrescarTotalNominaEnVivo(btn) {
   document.body.appendChild(script);
 }
 
+// =========================================================================
+// LÓGICA: VENTANA "TOTAL NÓMINA" (VERSIÓN TABLA MINIMALISTA SIN BOTÓN DE PAGO)
+// =========================================================================
 function renderizarTotalNomina(listaNomina, detalles) {
-  const userActivo = (sessionStorage.getItem("active_staff") || "")
-    .toUpperCase()
-    .trim();
+  const userActivo = (sessionStorage.getItem("active_staff") || "").toUpperCase().trim();
   const isCamilo = userActivo === "CAMILO";
-
-  if (isCamilo) {
-    document.getElementById("formDescuentoCamilo").style.display = "flex";
-  } else {
-    document.getElementById("formDescuentoCamilo").style.display = "none";
-  }
 
   if (!listaNomina || listaNomina.length === 0) {
     document.getElementById("nominaContentArea").innerHTML =
@@ -4396,91 +4395,102 @@ function renderizarTotalNomina(listaNomina, detalles) {
     KATHERINE: "3126117630",
     MANUEL: "3205386975",
     PABLO: "3153991383",
-    MANUP: "3153991383", // Por si está registrado como MANUP
+    MANUP: "3153991383",
     ANGELICA: "3015156037",
   };
 
-  let html = "";
+  // 1. ABRIMOS EL CONTENEDOR DE LA TABLA (MÁXIMO MINIMALISMO)
+  let html = `
+    <div style="background: var(--card-bg); border: var(--glass-border); border-radius: 12px; overflow: hidden; width: 100%;">
+      <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; min-width: 400px;">
+          <thead>
+            <tr style="background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+              <th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Operador</th>
+              <th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Balance</th>
+              <th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Neto</th>
+            </tr>
+          </thead>
+          <tbody>
+  `;
+
+  let empleadosMostrados = 0;
+
+  // 2. LLENAMOS LAS FILAS SIN COLUMNA DE ACCIÓN
   listaNomina.forEach((empData) => {
-    // Si no es Camilo, ocultar a los demás
+    // Filtro de seguridad: Si no es Camilo, solo ve su propia fila
     if (!isCamilo && empData.empleado !== userActivo) return;
+    empleadosMostrados++;
 
     let ganado = parseFloat(empData.ganado) || 0;
     let desc = parseFloat(empData.descontado) || 0;
     let neto = parseFloat(empData.neto) || 0;
     let colorNeto = neto >= 0 ? "var(--ios-blue)" : "var(--ios-red)";
 
-    // 💳 HTML DEL NÚMERO NEQUI (Se muestra si existe en el diccionario)
+    // 💳 Botón de Nequi Compacto
     let nequiNum = numerosNequi[empData.empleado];
     let nequiHtml = "";
     if (nequiNum) {
       nequiHtml = `
-                      <div style="display:flex; align-items:center; gap:6px;">
-                        <span style="background:rgba(224, 0, 150, 0.15); color:#ff37a6; padding:2px 6px; border-radius:6px; font-size:0.65rem; font-weight:800; border: 1px solid rgba(224, 0, 150, 0.3);">NEQUI</span>
-                        <span style="color:var(--text-primary); font-size:0.8rem; font-family:monospace; font-weight:bold; letter-spacing: 0.5px;">${nequiNum}</span>
-                        <button style="background:rgba(10, 132, 255, 0.15); border:none; border-radius:6px; width:26px; height:26px; display:flex; align-items:center; justify-content:center; color:var(--ios-blue); cursor:pointer; transition:all 0.2s;" onclick="copiarTextoRapido(this, '${nequiNum}')" title="Copiar Nequi">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </button>
-                      </div>
-                  `;
-    }
-
-    // 🔥 BOTÓN EXCLUSIVO PARA CAMILO
-    let btnPagar = "";
-    if (isCamilo && neto > 0) {
-      btnPagar = `
-                      <button class="btn-ios btn-success w-100" style="margin-top:10px; font-weight:800; font-size:0.85rem; padding:10px; display:flex; justify-content:center; align-items:center; gap:6px;" onclick="pagarNominaEmpleado('${empData.empleado}', ${neto})">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line></svg>
-                        PAGAR NÓMINA
-                      </button>
-                  `;
+        <div style="display:inline-flex; align-items:center; gap:4px; margin-top: 4px; background:rgba(224, 0, 150, 0.1); padding:2px 6px; border-radius:6px; border: 1px solid rgba(224, 0, 150, 0.2);">
+          <span style="color:#ff37a6; font-size:0.6rem; font-weight:800;">NEQUI</span>
+          <span style="color:var(--text-primary); font-size:0.75rem; font-family:monospace; font-weight:bold;">${nequiNum}</span>
+          <button style="background:transparent; border:none; padding:0; color:var(--text-secondary); cursor:pointer;" onclick="copiarTextoRapido(this, '${nequiNum}')" title="Copiar Nequi">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </button>
+        </div>
+      `;
     }
 
     html += `
-                <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-left:3px solid var(--ios-blue); border-radius:10px; padding:10px 12px; margin-bottom:8px;">
-                    
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
-                        <h4 style="margin:0; font-size:0.9rem; color:var(--text-primary); text-transform:uppercase;">${empData.empleado}</h4>
-                        ${nequiHtml}
-                    </div>
-
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:2px;">
-                      <span style="color:var(--text-secondary);">Horas Trabajadas:</span>
-                      <span style="color:var(--ios-green); font-weight:700;">$${Math.round(ganado).toLocaleString("es-CO")}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:2px;">
-                      <span style="color:var(--text-secondary);">Cuentas Consumidas:</span>
-                      <span style="color:var(--ios-red); font-weight:700;">-$${Math.round(desc).toLocaleString("es-CO")}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-top:6px; border-top:1px solid rgba(255,255,255,0.06); padding-top:6px;">
-                      <span style="color:var(--text-primary); font-weight:800;">NETO A PAGAR:</span>
-                      <span style="color:${colorNeto}; font-weight:800; font-size:1.1rem;">$${Math.round(neto).toLocaleString("es-CO")}</span>
-                    </div>
-                    ${btnPagar}
-                </div>
-              `;
+      <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.03); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+        <td style="padding: 16px;">
+          <div style="font-weight: 800; color: var(--text-primary); font-size: 0.95rem; text-transform: uppercase;">${empData.empleado}</div>
+          ${nequiHtml}
+        </td>
+        <td style="padding: 16px; font-family: monospace;">
+          <div style="color: var(--ios-green); font-weight: 700; font-size: 0.85rem;">+$${Math.round(ganado).toLocaleString("es-CO")}</div>
+          <div style="color: var(--ios-red); font-weight: 700; font-size: 0.85rem;">-$${Math.round(desc).toLocaleString("es-CO")}</div>
+        </td>
+        <td style="padding: 16px; color: ${colorNeto}; font-weight: 800; font-size: 1.15rem; font-family: monospace;">
+          $${Math.round(neto).toLocaleString("es-CO")}
+        </td>
+      </tr>
+    `;
   });
 
-  if (html === "") {
-    html = "<div class='empty-log-msg'>No se encontraron tus registros.</div>";
+  html += `
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  if (empleadosMostrados === 0) {
+    html = "<div class='empty-log-msg'>No se encontraron tus registros de nómina.</div>";
   }
 
-  let detallesFiltrados = (detalles || []).filter(
-    (d) => isCamilo || d.empleado === userActivo,
-  );
+  // 3. DETALLE DE LOS DESCUENTOS ABAJO
+  let detallesFiltrados = (detalles || []).filter(d => isCamilo || d.empleado === userActivo);
+  
   if (detallesFiltrados.length > 0) {
-    html += `<h4 style="margin:12px 0 6px 0; color:var(--ios-orange); font-size:0.8rem;">Detalle de Descuentos</h4>`;
+    html += `
+      <div style="margin-top: 20px;">
+        <h4 style="color: var(--ios-orange); font-size: 0.85rem; margin-bottom: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Historial de Descuentos</h4>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+    `;
     detallesFiltrados.forEach((d) => {
       html += `
-                      <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:6px 10px; border-radius:8px; margin-bottom:4px; font-size:0.7rem; display:flex; justify-content:space-between; align-items:center;">
-                        <div style="display:flex; flex-direction:column;">
-                            <strong style="color:var(--text-primary);">${isCamilo ? d.empleado : d.detalle.split("-")[0].trim()}</strong>
-                            <span style="color:var(--text-secondary); font-size:0.65rem;">${d.fecha} | ${d.detalle.includes("-") ? d.detalle.split("-")[1].trim() : ""}</span>
-                        </div>
-                        <strong style="color:var(--ios-red); font-size:0.85rem;">-$${Math.round(d.monto).toLocaleString("es-CO")}</strong>
-                      </div>
-                  `;
+        <div style="background: rgba(255, 159, 10, 0.05); border: 1px solid rgba(255, 159, 10, 0.15); padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; flex-direction: column;">
+            <strong style="color: var(--text-primary); font-size: 0.85rem;">${isCamilo ? d.empleado : d.detalle.split("-")[0].trim()}</strong>
+            <span style="color: var(--text-secondary); font-size: 0.7rem;">${d.fecha} | ${d.detalle.includes("-") ? d.detalle.split("-")[1].trim() : ""}</span>
+          </div>
+          <strong style="color: var(--ios-red); font-size: 0.95rem; font-family: monospace;">-$${Math.round(d.monto).toLocaleString("es-CO")}</strong>
+        </div>
+      `;
     });
+    html += `</div></div>`;
   }
 
   document.getElementById("nominaContentArea").innerHTML = html;
