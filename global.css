@@ -462,7 +462,7 @@ body {
 
 select.input-ios {
   appearance: none;
-  background-image: url(fondo.jpg) !important;
+  background-image: url("fondo.jpg") !important;
   background-repeat: no-repeat !important;
   background-position: right 12px center !important;
   background-size: 14px !important;
