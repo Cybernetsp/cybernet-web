@@ -688,3 +688,100 @@ select.input-ios {
     font-size: 0.6rem;
   }
 }
+/* =========================================================================
+   📱 INTERFAZ RESPONSIVE: METAMORFOSIS DE DOCK A BOTÓN FLOTANTE SEGURO
+   ========================================================================= */
+
+/* Ocultar el disparador por defecto en computadoras de escritorio */
+.mobile-menu-trigger {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* 🛑 SOLUCIÓN CRÍTICA: Esconde absolutamente TODOS los botones originales 
+     para que no se filtren al lado de la palabra MENÚ */
+  .ios-bottom-bar > *:not(.mobile-menu-trigger) {
+    display: none !important;
+  }
+
+  /* 1. El botón flotante inicial (Colapsado / Cerrado) */
+  .ios-bottom-bar {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: auto !important;
+    min-width: 130px !important;
+    height: 46px !important;
+    background: #18181b !important; /* Zinc 900 Enterprise */
+    border: 1px solid #27272a !important;
+    border-radius: 30px !important; /* Forma ovalada limpia */
+    padding: 0 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important; /* Animación elástica */
+    cursor: pointer;
+    z-index: 9999 !important;
+  }
+
+  /* Estilos del texto interno del botón */
+  .mobile-menu-trigger {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    color: #fafafa !important;
+    font-size: 0.82rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* =========================================================================
+     🚀 ESTADO EXPANDIDO: MUTA EL BOTÓN EN LA REJILLA AL TOCARLO
+     ========================================================================= */
+  .ios-bottom-bar.mobile-expanded {
+    bottom: 20px !important;
+    width: calc(100% - 32px) !important;
+    max-width: 360px !important;
+    height: auto !important;
+    min-height: 180px !important;
+    border-radius: 14px !important;
+    padding: 16px !important;
+    background: #09090b !important; /* Zinc 950 Absoluto */
+    display: grid !important;
+    grid-template-columns: repeat(
+      3,
+      1fr
+    ) !important; /* Rejilla de 3 columnas perfectas */
+    gap: 10px !important;
+  }
+
+  /* Esconde la palabra "MENÚ" cuando el panel ya se abrió */
+  .ios-bottom-bar.mobile-expanded .mobile-menu-trigger {
+    display: none !important;
+  }
+
+  /* Hace brotar de forma ordenada todos los botones del sistema dentro de la rejilla */
+  .ios-bottom-bar.mobile-expanded > *:not(.mobile-menu-trigger) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #18181b !important; /* Sub-tarjeta Zinc 900 */
+    border: 1px solid #27272a !important;
+    border-radius: 8px !important;
+    padding: 8px 4px !important;
+    height: 64px !important;
+    min-width: 0 !important;
+  }
+
+  /* Feedback táctil al oprimir los íconos de la rejilla */
+  .ios-bottom-bar.mobile-expanded > *:not(.mobile-menu-trigger):active {
+    background: #27272a !important;
+    border-color: var(--text-secondary) !important;
+  }
+}
