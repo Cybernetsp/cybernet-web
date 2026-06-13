@@ -2178,18 +2178,19 @@ function toggleShiftsPanel() {
 
     const userActivo = sessionStorage.getItem("active_staff") || "";
     const inpVendedor = document.getElementById("inputVendedorShift");
+    const btnAde = document.getElementById("btnAdelantoCamilo"); // 👈 Captura el botón
 
     if (userActivo.toUpperCase() === "CAMILO") {
       inpVendedor.disabled = false;
       inpVendedor.value = "";
+      if (btnAde)
+        btnAde.style.setProperty("display", "inline-flex", "important"); // 🔥 Muestra a Camilo
     } else {
       inpVendedor.disabled = true;
       inpVendedor.value = userActivo.toUpperCase();
+      if (btnAde) btnAde.style.setProperty("display", "none", "important"); // 🔒 Esconde a empleados
     }
 
-    document.getElementById("inputFechaShift").valueAsDate = new Date();
-
-    // 🔥 MODIFICACIÓN: Sincroniza los pagos antes de pintar el calendario
     sincronizarTachadosConNube(() => {
       if (window.currentHorasStock && window.currentHorasStock.length > 0) {
         renderizarHorasEnPantalla("");
@@ -7093,3 +7094,109 @@ function sincronizarTachadosConNube(callback) {
   script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerTachadosBackend&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 }
+// =========================================================================
+// 📱 CONTROLADOR INTEGRADO: DOCK COLAPSABLE INTELIGENTE PARA CELULARES
+// =========================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const bottomBar = document.querySelector(".ios-bottom-bar");
+  if (!bottomBar) return;
+
+  // 1. Creamos el botón disparador minimalista para el celular
+  const menuTrigger = document.createElement("div");
+  menuTrigger.className = "mobile-menu-trigger";
+  menuTrigger.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    <span>Menú</span>
+  `;
+
+  // 2. Lo inyectamos al inicio de tu barra de herramientas
+  bottomBar.insertBefore(menuTrigger, bottomBar.firstChild);
+
+  // 3. Evento Toggle: Expande o encoge el menú en bloque
+  menuTrigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    haptic();
+    bottomBar.classList.toggle("mobile-expanded");
+  });
+
+  // 4. Auto-Cierre: Si toca cualquier opción del menú, este se encoge al instante
+  bottomBar.querySelectorAll(".ios-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      bottomBar.classList.remove("mobile-expanded");
+    });
+  });
+
+  // 5. Cierre Externo: Si toca fuera del menú, también se cierra de forma segura
+  document.addEventListener("click", () => {
+    bottomBar.classList.remove("mobile-expanded");
+  });
+});
+// ⚡ MOTOR DE ADELANTOS EXCLUSIVO DESDE PANEL TURNOS (CONEXIÓN DIRECTA BACKEND)
+window.toggleModalAdelanto = function (abrir) {
+  if (typeof haptic === "function") haptic();
+  const modal = document.getElementById("adelantoShiftOverlay");
+  if (!modal) return;
+  if (abrir) {
+    document.getElementById("formAdelantoShift").reset();
+    modal.classList.add("open");
+    setTimeout(() => document.getElementById("adeMonto").focus(), 150);
+  } else {
+    modal.classList.remove("open");
+  }
+};
+
+window.ejecutarAdelantoDesdeShift = function (e) {
+  e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const empleado = document.getElementById("adeEmpleado").value;
+  const montoRaw = document.getElementById("adeMonto").value;
+  const monto = parseFloat(montoRaw.replace(/[^0-9]/g, ""));
+
+  if (!empleado || isNaN(monto) || monto <= 0) {
+    alert("⚠️ Por favor ingresa un monto válido.");
+    return;
+  }
+
+  const btn = document.getElementById("btnSubmitAdeShift");
+  const originalText = btn.innerHTML;
+  btn.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> Aplicando...`;
+  btn.disabled = true;
+
+  const scriptNode = document.createElement("script");
+  const callbackName = "cbAdeShift_" + Date.now();
+
+  window[callbackName] = function (res) {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    delete window[callbackName];
+    scriptNode.remove();
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Adelanto de $${monto.toLocaleString("es-CO")} aplicado a ${empleado}!</span></div>`,
+        );
+      }
+      window.toggleModalAdelanto(false);
+      if (typeof forzarRefrescoDeHoras === "function") forzarRefrescoDeHoras(); // Refresca los turnos de fondo
+    } else {
+      alert("❌ ERROR:\n\n" + (res ? res.message : "Desconocido"));
+    }
+  };
+
+  scriptNode.id = "script_ade_shift";
+  scriptNode.src =
+    GOOGLE_SCRIPT_URL +
+    "?action=agregarDescuentoNomina&empleado=" +
+    encodeURIComponent(empleado) +
+    "&monto=" +
+    encodeURIComponent(monto) +
+    "&concepto=" +
+    encodeURIComponent("ADELANTO - Panel Turnos") +
+    "&callback=" +
+    callbackName +
+    "&_ts=" +
+    Date.now();
+  document.body.appendChild(scriptNode);
+};
