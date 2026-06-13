@@ -2877,22 +2877,88 @@ function ejecutarResolverGarantia(e) {
   document.body.appendChild(scriptElement);
 }
 
-const observadorModalesScroll = new MutationObserver(() => {
-  const algunModalAbierto = document.querySelector(".overlay-ios.open");
-  if (algunModalAbierto) {
+// =========================================================================
+// 📐 CYBERNET OS: MOTOR DE COLISIÓN INTELIGENTE PARA EL DOCK MAC
+// =========================================================================
+
+function verificarColisionDock() {
+  // Buscamos la ventana interna visible que esté abierta (.sheet-ios o .modal-ios)
+  const ventanaActiva = document.querySelector(
+    ".overlay-ios.open .sheet-ios, .overlay-ios.open .modal-ios",
+  );
+  const dockWrapper = document.querySelector(".macos-dock-wrapper");
+
+  if (!dockWrapper) return;
+
+  if (ventanaActiva) {
+    // Bloqueamos el scroll del fondo por estética de sistema operativo
     document.body.style.overflow = "hidden";
+
+    // Capturamos las coordenadas y tamaños exactos en la pantalla
+    const rectVentana = ventanaActiva.getBoundingClientRect();
+    const rectDock = dockWrapper.getBoundingClientRect();
+
+    // 🎯 Radar de Intersección Matemática (Caja de colisiones 2D)
+    const seTocanONseTapan =
+      rectVentana.left < rectDock.right &&
+      rectVentana.right > rectDock.left &&
+      rectVentana.top < rectDock.bottom &&
+      rectVentana.bottom > rectDock.top;
+
+    if (seTocanONseTapan) {
+      // 🔥 CASO 1: La ventana se estiró y tapó el Dock -> Se oculta con un leve deslizamiento
+      dockWrapper.style.setProperty("opacity", "0", "important");
+      dockWrapper.style.setProperty("pointer-events", "none", "important");
+      dockWrapper.style.setProperty(
+        "transform",
+        "translateY(20px)",
+        "important",
+      );
+      dockWrapper.style.setProperty(
+        "transition",
+        "all 0.2s ease-out",
+        "important",
+      );
+    } else {
+      // ✨ CASO 2: Hay ventana abierta pero NO toca el Dock -> Se queda activo y visible
+      dockWrapper.style.setProperty("opacity", "1", "important");
+      dockWrapper.style.setProperty("pointer-events", "auto", "important");
+      dockWrapper.style.setProperty("transform", "translateY(0)", "important");
+      dockWrapper.style.setProperty(
+        "transition",
+        "all 0.2s ease-out",
+        "important",
+      );
+    }
   } else {
+    // 🏠 CASO 3: Escritorio limpio (Ninguna ventana abierta) -> Dock activo al 100%
     document.body.style.overflow = "";
+    dockWrapper.style.setProperty("opacity", "1", "important");
+    dockWrapper.style.setProperty("pointer-events", "auto", "important");
+    dockWrapper.style.setProperty("transform", "translateY(0)", "important");
+    dockWrapper.style.setProperty(
+      "transition",
+      "all 0.2s ease-out",
+      "important",
+    );
   }
+}
+
+// 👁️ Vigilante en segundo plano (MutationObserver) para capturar aperturas
+const observadorModalesScroll = new MutationObserver(() => {
+  verificarColisionDock();
 });
 
+// Inicializador automático del radar
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".overlay-ios").forEach((modal) => {
-    observadorModalesScroll.observe(modal, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
+  observadorModalesScroll.observe(document.body, {
+    attributes: true,
+    subtree: true,
+    attributeFilter: ["class"],
   });
+
+  // Si el usuario cambia el tamaño del navegador o gira la pantalla, recalculamos
+  window.addEventListener("resize", verificarColisionDock);
 });
 
 function parseDate(fechaStr) {
@@ -3973,21 +4039,16 @@ function entrarAlSistema(userInput) {
   if (btnRegistro)
     btnRegistro.style.setProperty("display", "flex", "important");
 
+  // 🍎 PROTECCIÓN DE CONTROLES: OCULTAR SOLO EL TEXTO DEL TIMER, NO EL CONTENEDOR PADRE
   if (currentOperator === "CAMILO") {
-    if (shiftTimer && shiftTimer.parentElement)
-      shiftTimer.parentElement.style.setProperty(
-        "display",
-        "none",
-        "important",
-      );
+    if (shiftTimer) {
+      shiftTimer.style.setProperty("display", "none", "important"); // 🫵 Apaga SOLO el reloj, no el panel
+    }
     if (cajaBtn) cajaBtn.style.setProperty("display", "flex", "important");
   } else {
-    if (shiftTimer && shiftTimer.parentElement)
-      shiftTimer.parentElement.style.setProperty(
-        "display",
-        "inline-flex",
-        "important",
-      );
+    if (shiftTimer) {
+      shiftTimer.style.setProperty("display", "inline-flex", "important"); // Enciende el reloj para empleados
+    }
     if (cajaBtn) cajaBtn.style.setProperty("display", "none", "important");
   }
 
@@ -4077,13 +4138,24 @@ const qrPrincipal = {
 // 🔥 BLINDAJE: Solo ejecutamos esto si estamos en admin.html (donde existe el headerContainer)
 document.addEventListener("DOMContentLoaded", () => {
   const headerContainer = document.getElementById("header-container");
-  if (headerContainer) {
+  if (headerContainer && typeof qrPrincipal !== "undefined") {
     headerContainer.innerHTML = `
-        <div class="card-ios w-100" style="max-width: 440px;">
-          <h2 class="card-title text-center" style="justify-content:center;">${qrPrincipal.titulo}</h2>
-          <img src="${qrPrincipal.imagenUrl}" alt="QR" style="max-width:210px; width:100%; border-radius:16px; border:var(--glass-border); box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto;" onerror="this.style.display='none'; this.nextElementSibling.innerText='Error cargando la llave QR. Revisa la conexión.'; this.nextElementSibling.style.color='var(--ios-red)';">
-          <span class="text-secondary text-center" style="font-size:0.75rem; margin-top:-8px; font-weight:500;">(Mantén presionado o clic derecho para copiar imagen)</span>
-          <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">COPIAR TEXTO</button>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%;">
+          <span style="font-size: 0.9rem; color: rgba(255,255,255,0.8); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">
+            💳 ${qrPrincipal.titulo}
+          </span>
+          
+          <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <img src="${qrPrincipal.imagenUrl}" alt="QR" style="width: 160px; height: 160px; border-radius: 12px; padding: 6px; background: white; object-fit: contain;">
+          </div>
+          
+          <span style="font-size: 0.75rem; color: var(--text-secondary); text-align: center; margin-top: -4px;">
+            (Mantén presionado para copiar imagen)
+          </span>
+
+          <button class="btn-ios btn-secondary copy-text-btn w-100" style="padding: 14px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.2);" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">
+            Copiar Datos de Pago
+          </button>
         </div>
       `;
   }
@@ -4118,63 +4190,6 @@ clipboard.on("success", function (e) {
     card.style.boxShadow = "var(--glass-shadow)";
   }, 1500);
 });
-
-function actualizarPerfilesLibres(manual = false) {
-  if (manual) haptic();
-
-  const container = document.getElementById("contenedorPlataformasLibres");
-
-  const callbackName = "cb_libres_" + Date.now();
-  window[callbackName] = function (res) {
-    if (res && res.status === "success" && container) {
-      let htmlPildoras = "";
-
-      if (res.data.length === 0) {
-        htmlPildoras =
-          '<span class="badge-ios badge-danger">Sin inventario</span>';
-        container.innerHTML = htmlPildoras;
-      } else {
-        res.data.forEach((item) => {
-          let colorBg, colorTxt, borderCol;
-
-          if (item.libres > 2) {
-            colorBg = "rgba(10, 132, 255, 0.15)";
-            colorTxt = "#64d2ff";
-            borderCol = "rgba(10, 132, 255, 0.3)";
-          } else if (item.libres === 2) {
-            colorBg = "rgba(255, 149, 0, 0.15)";
-            colorTxt = "#ff9f0a";
-            borderCol = "rgba(255, 149, 0, 0.4)";
-          } else {
-            colorBg = "rgba(255, 69, 58, 0.15)";
-            colorTxt = "#ff453a";
-            borderCol = "rgba(255, 69, 58, 0.4)";
-          }
-
-          htmlPildoras += `
-                              <div style="background: ${colorBg}; color: ${colorTxt}; padding: 4px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: 1px solid ${borderCol}; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-                                  <span style="text-transform: uppercase; letter-spacing: 0.5px;">${item.plat}</span>
-                                  <span style="font-size: 0.95rem; color: #ffffff;">${item.libres}</span>
-                              </div>
-                          `;
-        });
-
-        // DUPLICAR PARA QUE EL CARRUSEL SEA INFINITO (SEAMLESS LOOP)
-        container.innerHTML = htmlPildoras + htmlPildoras;
-        verificarStockCritico(res.data);
-      }
-    }
-
-    delete window[callbackName];
-    const scriptNode = document.getElementById("node_" + callbackName);
-    if (scriptNode) scriptNode.remove();
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + callbackName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPerfilesLibres&callback=${callbackName}`;
-  document.body.appendChild(script);
-}
 
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
@@ -4378,10 +4393,12 @@ function refrescarTotalNominaEnVivo(btn) {
 }
 
 // =========================================================================
-// LÓGICA: VENTANA "TOTAL NÓMINA" (VERSIÓN TABLA MINIMALISTA SIN BOTÓN DE PAGO)
+// LÓGICA: VENTANA "TOTAL NÓMINA" (VERSIÓN TABLA MINIMALISTA ENTERPRISE)
 // =========================================================================
 function renderizarTotalNomina(listaNomina, detalles) {
-  const userActivo = (sessionStorage.getItem("active_staff") || "").toUpperCase().trim();
+  const userActivo = (sessionStorage.getItem("active_staff") || "")
+    .toUpperCase()
+    .trim();
   const isCamilo = userActivo === "CAMILO";
 
   if (!listaNomina || listaNomina.length === 0) {
@@ -4399,16 +4416,17 @@ function renderizarTotalNomina(listaNomina, detalles) {
     ANGELICA: "3015156037",
   };
 
-  // 1. ABRIMOS EL CONTENEDOR DE LA TABLA (MÁXIMO MINIMALISMO)
+  // 1. ABRIMOS EL CONTENEDOR DE LA TABLA
   let html = `
     <div style="background: var(--card-bg); border: var(--glass-border); border-radius: 12px; overflow: hidden; width: 100%;">
       <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; min-width: 400px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; min-width: 500px;">
           <thead>
             <tr style="background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
               <th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Operador</th>
               <th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Balance</th>
               <th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Neto</th>
+              ${isCamilo ? `<th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: right;">Acción</th>` : ""}
             </tr>
           </thead>
           <tbody>
@@ -4416,7 +4434,7 @@ function renderizarTotalNomina(listaNomina, detalles) {
 
   let empleadosMostrados = 0;
 
-  // 2. LLENAMOS LAS FILAS SIN COLUMNA DE ACCIÓN
+  // 2. LLENAMOS LAS FILAS DE LA TABLA
   listaNomina.forEach((empData) => {
     // Filtro de seguridad: Si no es Camilo, solo ve su propia fila
     if (!isCamilo && empData.empleado !== userActivo) return;
@@ -4442,6 +4460,17 @@ function renderizarTotalNomina(listaNomina, detalles) {
       `;
     }
 
+    // 🔥 Botón de Pago (Solo Camilo)
+    let btnPagar = "";
+    if (isCamilo && neto > 0) {
+      btnPagar = `
+        <button class="btn-ios btn-success" style="padding: 8px 12px; font-size: 0.75rem; border-radius: 8px; margin: 0; display: inline-flex; align-items: center; gap: 6px;" onclick="pagarNominaEmpleado('${empData.empleado}', ${neto})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line></svg>
+          Pagar
+        </button>
+      `;
+    }
+
     html += `
       <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.03); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
         <td style="padding: 16px;">
@@ -4455,6 +4484,7 @@ function renderizarTotalNomina(listaNomina, detalles) {
         <td style="padding: 16px; color: ${colorNeto}; font-weight: 800; font-size: 1.15rem; font-family: monospace;">
           $${Math.round(neto).toLocaleString("es-CO")}
         </td>
+        ${isCamilo ? `<td style="padding: 16px; text-align: right;">${btnPagar}</td>` : ""}
       </tr>
     `;
   });
@@ -4467,12 +4497,15 @@ function renderizarTotalNomina(listaNomina, detalles) {
   `;
 
   if (empleadosMostrados === 0) {
-    html = "<div class='empty-log-msg'>No se encontraron tus registros de nómina.</div>";
+    html =
+      "<div class='empty-log-msg'>No se encontraron tus registros de nómina.</div>";
   }
 
-  // 3. DETALLE DE LOS DESCUENTOS ABAJO
-  let detallesFiltrados = (detalles || []).filter(d => isCamilo || d.empleado === userActivo);
-  
+  // 3. AGREGAMOS EL DETALLE DE LOS DESCUENTOS (POR DEBAJO DE LA TABLA)
+  let detallesFiltrados = (detalles || []).filter(
+    (d) => isCamilo || d.empleado === userActivo,
+  );
+
   if (detallesFiltrados.length > 0) {
     html += `
       <div style="margin-top: 20px;">
@@ -7034,25 +7067,103 @@ window.toggleInventarioPanel = function () {
   }
 };
 
+// =========================================================================
+// 🎛️ CYBERNET OS: INVENTARIO UNIFICADO INTELIGENTE (CUENTAS EN VIVO + INTERRUPTOR)
+// =========================================================================
+
+// Almacén global para guardar el conteo que viene de Google Sheets
+window.cachedLibresData = [];
+
+function actualizarPerfilesLibres(manual = false) {
+  if (manual) haptic();
+
+  const callbackName = "cb_libres_" + Date.now();
+  window[callbackName] = function (res) {
+    if (res && res.status === "success") {
+      // 1. Guardamos el conteo fresco de Sheets en la memoria global
+      window.cachedLibresData = res.data;
+
+      // 2. Le ordenamos a la lista de switches que se redibuje para mostrar los nuevos números
+      if (typeof window.renderizarPanelCamilo === "function") {
+        window.renderizarPanelCamilo();
+      }
+
+      // Mantiene tu detector de alertas en segundo plano
+      verificarStockCritico(res.data);
+    }
+
+    delete window[callbackName];
+    const scriptNode = document.getElementById("node_" + callbackName);
+    if (scriptNode) scriptNode.remove();
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + callbackName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPerfilesLibres&callback=${callbackName}`;
+  document.body.appendChild(script);
+}
+
+// Helper inteligente para emparejar el array local con las columnas de Google Sheets
+function obtenerConteoLibreDinamico(idProducto) {
+  if (!window.cachedLibresData || window.cachedLibresData.length === 0)
+    return "-";
+
+  // Normalizamos el ID (ej: btn_disney_prem -> DISNEYPREMIUM)
+  let key = idProducto.replace("btn_", "").replace(/_/g, "").toUpperCase();
+  if (key === "MAX") key = "HBOMAX";
+  if (key === "DISNEYSTD") key = "DISNEYESTANDAR";
+  if (key === "YT") key = "YOUTUBE";
+  if (key === "CRUNCHY") key = "CRUNCHYROLL";
+
+  let encontrado = window.cachedLibresData.find((item) => {
+    let platNorm = item.plat.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    return platNorm === key || platNorm.includes(key) || key.includes(platNorm);
+  });
+
+  return encontrado ? encontrado.libres : "0";
+}
+
 window.renderizarPanelCamilo = function () {
   const contenedor = document.getElementById("panelSwitchesStock");
   if (!contenedor) return;
   contenedor.innerHTML = "";
 
+  const userActivo = (sessionStorage.getItem("active_staff") || "")
+    .toUpperCase()
+    .trim();
+  const esCamilo = userActivo === "CAMILO";
   const agotados = JSON.parse(
     localStorage.getItem("cyber_items_agotados") || "[]",
   );
 
   productosTiendaMaster.forEach((p) => {
     const estaAgotado = agotados.includes(p.id);
+
+    // Extraemos la cantidad disponible sin formatos raros ni colores
+    const cantLibres = obtenerConteoLibreDinamico(p.id);
+
     const row = document.createElement("div");
     row.style.cssText =
       "display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 0.95rem; font-weight: 600; background: rgba(0,0,0,0.15); border-radius: 12px; margin-bottom: 6px;";
+
+    // Filtro estricto de seguridad para el switch
+    const inputDisabled = esCamilo
+      ? ""
+      : "disabled style='cursor: not-allowed;'";
+    const labelAction = esCamilo
+      ? ""
+      : `onclick="alert('🔒 ACCESO RESTRINGIDO\\n\\nTu usuario solo tiene permisos de consulta. Solo el administrador Camilo puede alterar el estado de venta de las plataformas.')"`;
+
     row.innerHTML = `
-        <span>${p.nombre}</span>
-        <label class="switch-camilo">
-          <input type="checkbox" ${estaAgotado ? "checked" : ""} onchange="window.cambiarStockDesdeAdmin('${p.id}')">
-          <span class="slider-camilo"></span>
+        <!-- Nombre de plataforma + stock en frente limpio y gris tipo Mac -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>${p.nombre}</span>
+          <span style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; font-family: monospace;">(${cantLibres} libres)</span>
+        </div>
+        
+        <label class="switch-camilo" ${labelAction}>
+          <input type="checkbox" ${estaAgotado ? "checked" : ""} ${inputDisabled} onchange="window.cambiarStockDesdeAdmin('${p.id}')">
+          <span class="slider-camilo" style="${!esCamilo ? "opacity: 0.5; filter: grayscale(1);" : ""}"></span>
         </label>
       `;
     contenedor.appendChild(row);
@@ -7209,4 +7320,369 @@ window.ejecutarAdelantoDesdeShift = function (e) {
     "&_ts=" +
     Date.now();
   document.body.appendChild(scriptNode);
+};
+// =========================================================================
+// 🔍 CYBERNET OS: MOTOR SPOTLIGHT RECALIBRADO (BÚSQUEDA EXCLUSIVA POR NOMBRE)
+// =========================================================================
+window.filtrarTarjetasMac = function () {
+  const input = document.getElementById("macSearchCards");
+  const container = document.getElementById("grid-container");
+  const emptyState = document.getElementById("macEmptyState");
+
+  if (!input || !container) return;
+
+  // Limpiamos el texto del buscador (minúsculas y sin espacios locos)
+  const filtro = input.value.toLowerCase().trim();
+  const tarjetas = container.getElementsByClassName("card-ios");
+  let encontradas = 0;
+
+  // 🏠 CASO 1: El buscador está vacío -> Se muestran TODAS las tarjetas de una
+  if (filtro === "") {
+    if (emptyState)
+      emptyState.style.setProperty("display", "none", "important");
+    for (let i = 0; i < tarjetas.length; i++) {
+      tarjetas[i].style.setProperty("display", "flex", "important");
+    }
+    return;
+  }
+
+  // 🎯 CASO 2: El usuario escribe -> Filtro estricto por palabras iniciales del título
+  for (let i = 0; i < tarjetas.length; i++) {
+    const tarjeta = tarjetas[i];
+
+    // Extraemos únicamente la primera línea de texto de la tarjeta (que siempre es el TÍTULO)
+    const lineas = tarjeta.innerText.toLowerCase().split("\n");
+    const titulo = lineas[0] ? lineas[0].trim() : "";
+
+    // Separamos el título en palabras independientes
+    const palabras = titulo.split(/\s+/);
+
+    // Comprobamos si ALGUNAS de las palabras del título EMPIEZA con las letras del buscador
+    const coincideConNombre = palabras.some((palabra) =>
+      palabra.startsWith(filtro),
+    );
+
+    if (coincideConNombre) {
+      tarjeta.style.setProperty("display", "flex", "important");
+      encontradas++;
+    } else {
+      tarjeta.style.setProperty("display", "none", "important");
+    }
+  }
+
+  // ⚠️ CASO 3: Control de pantalla vacía si escribe algo que no existe
+  if (emptyState) {
+    if (encontradas === 0) {
+      const textoMensaje = emptyState.querySelector("span");
+      if (textoMensaje)
+        textoMensaje.innerText = `No se encontraron plantillas con el nombre "${input.value}".`;
+      emptyState.style.setProperty("display", "flex", "important");
+    } else {
+      emptyState.style.setProperty("display", "none", "important");
+    }
+  }
+};
+
+// Aseguramos que al cargar la página por primera vez se muestren todas las tarjetas
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    if (typeof window.filtrarTarjetasMac === "function") {
+      window.filtrarTarjetasMac();
+    }
+  }, 100);
+});
+
+// 🛡️ Observador: Oculta las tarjetas automáticamente apenas Sheets las inyecte en la página
+document.addEventListener("DOMContentLoaded", () => {
+  const grid = document.getElementById("grid-container");
+  if (grid) {
+    const observer = new MutationObserver(() => {
+      const input = document.getElementById("macSearchCards");
+      if (input && input.value.trim() === "") {
+        filtrarTarjetasMac(); // Ejecuta el filtro para esconderlas
+      }
+    });
+    observer.observe(grid, { childList: true });
+  }
+});
+// =========================================================================
+// 🔒 SEGURIDAD: BOTÓN DE INVENTARIO SUPERIOR SOLO PARA CAMILO
+// =========================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const userActivo = (sessionStorage.getItem("active_staff") || "")
+    .toUpperCase()
+    .trim();
+  const btnInvMenu = document.getElementById("menuBtnInventario");
+
+  if (btnInvMenu) {
+    if (userActivo === "CAMILO") {
+      btnInvMenu.style.display = "inline-block"; // Lo enciende
+    } else {
+      btnInvMenu.style.display = "none"; // Lo apaga
+    }
+  }
+  // 🔥 FORZAR INYECTOR DE SESIÓN MAC EN PANTALLA
+  const sesionGuardada = sessionStorage.getItem("active_staff") || "CAMILO";
+  const txtNombreBarra = document.getElementById("staffSessionName");
+  if (txtNombreBarra) {
+    txtNombreBarra.innerText = sesionGuardada.toUpperCase().trim();
+  }
+});
+// =========================================================================
+// 🗂️ CYBERNET OS: CERRADOR DE VENTANAS INFALIBLE (MODO ESCRITORIO LIMPIO)
+// =========================================================================
+document.addEventListener(
+  "click",
+  (e) => {
+    // 1. Detectamos si tocaste un botón de arriba o un icono de abajo
+    const tocasteMenu = e.target.closest(".mac-menu-item");
+    const tocasteDock = e.target.closest(".mac-dock-icon");
+
+    if (tocasteMenu || tocasteDock) {
+      // 2. Lista exacta de tus ventanas
+      const ventanasPrincipales = [
+        "codesOverlay",
+        "shiftsOverlay",
+        "inventarioOverlay",
+        "promoOverlay",
+        "recordatoriosOverlay",
+        "distrisOverlay",
+        "finanzasOverlay",
+        "ventasOverlay",
+        "cargarOverlay",
+        "garantiasOverlay",
+        "netflixManagerOverlay",
+      ];
+
+      // 3. ¡ZAS! Cerramos absolutamente todo a la fuerza
+      ventanasPrincipales.forEach((id) => {
+        const ventana = document.getElementById(id);
+        if (ventana) {
+          // Quitamos la clase de los paneles modernos
+          ventana.classList.remove("open");
+          // Por si alguna ventana vieja usa el estilo display en lugar de clases
+          if (
+            ventana.style.display === "flex" ||
+            ventana.style.display === "block"
+          ) {
+            ventana.style.display = "none";
+          }
+        }
+      });
+    }
+  },
+  true,
+);
+// =========================================================================
+// 🍎 CYBERNET OS: MOTOR DE ALERTA DE STOCK DE MAC INTEGRADO (V2 COMPLETO)
+// =========================================================================
+window.timerElapsedNotif = null;
+window.cachedLibresData = [];
+
+function actualizarPerfilesLibres(manual = false) {
+  if (manual) haptic();
+
+  const callbackName = "cb_libres_" + Date.now();
+
+  window[callbackName] = function (res) {
+    if (res && res.status === "success") {
+      // 1. Respaldamos los números de stock en la memoria global
+      window.cachedLibresData = res.data;
+
+      // 2. Redibujamos de inmediato el panel de inventario para inyectar los datos inline
+      if (typeof window.renderizarPanelCamilo === "function") {
+        window.renderizarPanelCamilo();
+      }
+
+      // 3. Analizamos si hay stock crítico para arrojar la notificación de Mac
+      verificarStockCritico(res.data);
+    }
+
+    delete window[callbackName];
+    const scriptNode = document.getElementById("node_" + callbackName);
+    if (scriptNode) scriptNode.remove();
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + callbackName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPerfilesLibres&callback=${callbackName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+}
+
+// Extractor dinámico de perfiles libres para el listado unificado
+function obtenerConteoLibreDinamico(idProducto) {
+  if (!window.cachedLibresData || window.cachedLibresData.length === 0)
+    return "-";
+
+  let key = idProducto.replace("btn_", "").replace(/_/g, "").toUpperCase();
+  if (key === "MAX") key = "HBOMAX";
+  if (key === "DISNEYSTD") key = "DISNEYESTANDAR";
+  if (key === "YT") key = "YOUTUBE";
+  if (key === "CRUNCHY") key = "CRUNCHYROLL";
+  if (key === "APPLE") key = "APPLETV";
+
+  let encontrado = window.cachedLibresData.find((item) => {
+    let platNorm = item.plat.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    return platNorm === key || platNorm.includes(key) || key.includes(platNorm);
+  });
+
+  return encontrado ? encontrado.libres : "0";
+}
+
+// Generador unificado de la lista de stock e interruptores con control de rol
+window.renderizarPanelCamilo = function () {
+  const contenedor = document.getElementById("panelSwitchesStock");
+  if (!contenedor) return;
+  contenedor.innerHTML = "";
+
+  const userActivo = (sessionStorage.getItem("active_staff") || "")
+    .toUpperCase()
+    .trim();
+  const esCamilo = userActivo === "CAMILO";
+  const agotados = JSON.parse(
+    localStorage.getItem("cyber_items_agotados") || "[]",
+  );
+
+  productosTiendaMaster.forEach((p) => {
+    const estaAgotado = agotados.includes(p.id);
+    const cantLibres = obtenerConteoLibreDinamico(p.id);
+
+    const row = document.createElement("div");
+    row.style.cssText =
+      "display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 0.95rem; font-weight: 600; background: rgba(0,0,0,0.15); border-radius: 12px; margin-bottom: 6px;";
+
+    // Si no es Camilo, el input se deshabilita físicamente en el DOM
+    const inputDisabled = esCamilo
+      ? ""
+      : "disabled style='cursor: not-allowed;'";
+    const labelAction = esCamilo
+      ? ""
+      : `onclick="alert('🔒 ACCESO RESTRINGIDO\\n\\nTu usuario operativo solo tiene autorización de consulta.\\n\\nSolo el administrador Camilo puede alterar el estado de venta de las plataformas.')"`;
+
+    row.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>${p.nombre}</span>
+          <span style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; font-family: monospace;">(${cantLibres} libres)</span>
+        </div>
+        <label class="switch-camilo" ${labelAction}>
+          <input type="checkbox" ${estaAgotado ? "checked" : ""} ${inputDisabled} onchange="window.cambiarStockDesdeAdmin('${p.id}')">
+          <span class="slider-camilo" style="${!esCamilo ? "opacity: 0.5; filter: grayscale(1);" : ""}"></span>
+        </label>
+      `;
+    contenedor.appendChild(row);
+  });
+};
+
+function verificarStockCritico(data) {
+  let sessionStaff = sessionStorage.getItem("active_staff");
+  let localStaff = localStorage.getItem("cyber_saved_staff");
+  if (!sessionStaff && !localStaff) return;
+
+  const umbrales = {
+    NETFLIX: 2,
+    AMAZON: 5,
+    HBOMAX: 5,
+    DISNEYPREMIUM: 1,
+    DISNEYESTANDAR: 1,
+    CRUNCHYROLL: 1,
+    PLEX: 1,
+    APPLETV: 1,
+  };
+  let bajas = [];
+
+  data.forEach((item) => {
+    let keyNorm = item.plat.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    let limite = umbrales[keyNorm] || 1;
+    let libresNum = parseInt(item.libres, 10);
+
+    if (!isNaN(libresNum) && libresNum <= limite) {
+      let nombreLimpio = item.plat.replace(/-/g, " ");
+      bajas.push(`${nombreLimpio} (${libresNum})`);
+    }
+  });
+
+  if (bajas.length > 0) {
+    lanzarBannerMacosStock(bajas.join(", "));
+  }
+}
+
+function lanzarBannerMacosStock(listaPlataformas) {
+  const banner = document.getElementById("macNotificationBanner");
+  const texto = document.getElementById("macNotifText");
+  const visorTiempo = document.getElementById("macNotifTime");
+
+  if (!banner || !texto || !visorTiempo) return;
+
+  clearInterval(window.timerElapsedNotif);
+
+  banner.style.transform = "translateX(120%)";
+  banner.style.opacity = "0";
+
+  setTimeout(() => {
+    texto.innerHTML = `Plataformas bajas o agotadas:<br><b style="color:#ffffff;">${listaPlataformas}</b>`;
+    visorTiempo.innerText = "Ahora";
+
+    banner.style.transform = "translateX(0)";
+    banner.style.opacity = "1";
+
+    if (typeof haptic === "function") haptic();
+
+    let minutosTranscurridos = 0;
+    window.timerElapsedNotif = setInterval(() => {
+      minutosTranscurridos++;
+      visorTiempo.innerText = `Hace ${minutosTranscurridos} min`;
+    }, 60000);
+  }, 250);
+}
+
+window.cerrarBannerNotificacionManualmente = function () {
+  const banner = document.getElementById("macNotificationBanner");
+  if (banner) {
+    banner.style.transform = "translateX(120%)";
+    banner.style.opacity = "0";
+    clearInterval(window.timerElapsedNotif);
+  }
+};
+
+// =========================================================================
+// ⏱️ RELOJ AUTOMÁTICO DE SEGUIMIENTO (CADA 10 MINUTOS)
+// =========================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    if (typeof actualizarPerfilesLibres === "function") {
+      actualizarPerfilesLibres(false);
+    }
+  }, 2000);
+
+  if (window.intervaloLibresAuto) clearInterval(window.intervaloLibresAuto);
+  window.intervaloLibresAuto = setInterval(() => {
+    if (typeof actualizarPerfilesLibres === "function") {
+      actualizarPerfilesLibres(false);
+    }
+  }, 600000);
+});
+// =========================================================================
+// 🔒 SEGURIDAD: CONTROLADOR DEL BOTÓN DE INVENTARIO SUPERIOR
+// =========================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const btnInvMenu = document.getElementById("menuBtnInventario");
+  if (btnInvMenu) {
+    btnInvMenu.style.display = "inline-block"; // Habilitado para todo el personal de Cybernet
+  }
+
+  // Mantener el inyector forzado de sesión que ya tenías abajo
+  const sesionGuardada = sessionStorage.getItem("active_staff") || "CAMILO";
+  const txtNombreBarra = document.getElementById("staffSessionName");
+  if (txtNombreBarra) {
+    txtNombreBarra.innerText = sesionGuardada.toUpperCase().trim();
+  }
+});
+// Función para fulminar el banner de notificación manualmente
+window.cerrarBannerNotificacionManualmente = function () {
+  const banner = document.getElementById("macNotificationBanner");
+  if (banner) {
+    banner.style.transform = "translateX(120%)";
+    banner.style.opacity = "0";
+    clearInterval(window.timerElapsedNotif); // Detiene el segundero interno
+  }
 };
