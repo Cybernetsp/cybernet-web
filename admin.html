@@ -235,1007 +235,376 @@
   <body>
     <div id="cyber-toast-center" class="cyber-notification-center"></div>
     <div id="appleToast" class="apple-notification-toast"></div>
-
-    <header class="global-header" id="globalHeader">
-      <div class="flex-row" id="staffStatusBar">
-        <div
-          class="badge-ios badge-blue"
-          style="display: flex; align-items: center; gap: 8px"
+    <!-- 🍎 1. BARRA DE MENÚ SUPERIOR (TOP MENU BAR) -->
+    <header
+      class="macos-top-bar"
+      id="globalHeader"
+      style="
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+      "
+    >
+      <!-- Lado Izquierdo (Menu macOS Completo) -->
+      <div
+        class="mac-menu-left"
+        style="display: flex; align-items: center; gap: 14px"
+      >
+        <span class="mac-menu-item" style="font-weight: 800; color: #ffffff"
+          >Cybernet</span
         >
-          <!-- 🔴/🟢 PUNTO LED INTELIGENTE -->
-          <div
-            id="ledConexion"
-            style="
-              width: 8px;
-              height: 8px;
-              border-radius: 50%;
-              background: #30d158;
-              box-shadow: 0 0 8px #30d158;
-              transition: all 0.4s ease;
-            "
-          ></div>
-          <span id="staffSessionName">USER</span>
-        </div>
-        <div class="badge-ios badge-green">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          <span id="shiftTimer">00:00:00</span>
-        </div>
-      </div>
+        <span
+          class="mac-menu-item"
+          style="color: #ffffff"
+          onclick="toggleCodesPanel()"
+          >Códigos</span
+        >
+        <span
+          class="mac-menu-item"
+          id="menuBtnInventario"
+          style="display: none; color: #ffffff"
+          onclick="toggleInventarioPanel()"
+          >Inventario</span
+        >
+        <span
+          class="mac-menu-item"
+          style="color: #ffffff"
+          onclick="toggleShiftsPanel()"
+          >Personal</span
+        >
+        <span
+          class="mac-menu-item"
+          style="color: #ffffff"
+          onclick="togglePromoPanel()"
+          >Promo</span
+        >
+        <span
+          class="mac-menu-item"
+          style="color: #ffffff"
+          onclick="toggleRecordatoriosPanel()"
+          >Recordar</span
+        >
 
-      <div class="header-search-container">
-        <input
-          type="text"
-          id="searchInput"
-          class="input-ios"
-          style="margin-bottom: 0; max-width: 250px"
-          placeholder="Buscar respuesta..."
-        />
-
-        <div class="ticker-wrapper">
-          <div id="contenedorPlataformasLibres" class="ticker-track"></div>
-        </div>
+        <span
+          class="mac-menu-item"
+          style="color: #ffffff"
+          onclick="toggleDistrisPanel()"
+          >Distris</span
+        >
       </div>
     </header>
 
-    <nav class="ios-bottom-bar" id="controlPanel">
-      <button
-        class="ios-tab-btn"
-        onclick="toggleFinanzasPanel()"
-        id="btnCajaFinanzas"
-        style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(48, 209, 88, 0.4))"
-        >
-          <rect
-            x="2"
-            y="4"
-            width="20"
-            height="16"
-            rx="2"
-            ry="2"
-            stroke="#30d158"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></rect>
-          <line
-            x1="12"
-            y1="1"
-            x2="12"
-            y2="23"
-            stroke="#30d158"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></line>
-          <path
-            d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"
-            stroke="#30d158"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ebebf5;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Caja</span
-        >
-      </button>
-
+    <div
+      id="macControlCenterRight"
+      style="
+        position: fixed !important;
+        top: 0 !important;
+        right: 16px !important;
+        height: 28px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+        z-index: 2000001 !important;
+        color: #ffffff !important;
+        pointer-events: auto !important;
+      "
+    >
       <div
-        id="btnRegistroVentas"
-        onclick="abrirModalRegistroVentas()"
+        class="ticker-wrapper"
         style="
-          display: none;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          cursor: pointer;
-          padding: 0;
-          margin: 2px;
-          gap: 6px;
-          width: 68px;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(10, 132, 255, 0.4))"
-        >
-          <line
-            x1="18"
-            y1="20"
-            x2="18"
-            y2="10"
-            stroke="#0a84ff"
-            stroke-width="2.5"
-            stroke-linecap="round"
-          ></line>
-          <line
-            x1="12"
-            y1="20"
-            x2="12"
-            y2="4"
-            stroke="#0a84ff"
-            stroke-width="2.5"
-            stroke-linecap="round"
-          ></line>
-          <line
-            x1="6"
-            y1="20"
-            x2="6"
-            y2="14"
-            stroke="#0a84ff"
-            stroke-width="2.5"
-            stroke-linecap="round"
-          ></line>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #0a84ff;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Registros</span
-        >
-      </div>
-
-      <button
-        class="ios-tab-btn"
-        onclick="toggleNetflixManagerPanel()"
-        style="
+          max-width: 150px;
           border: none;
           background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(229, 9, 20, 0.4))"
-        >
-          <rect
-            x="2"
-            y="7"
-            width="20"
-            height="15"
-            rx="2"
-            ry="2"
-            stroke="#e50914"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></rect>
-          <polyline
-            points="17 2 12 7 7 2"
-            stroke="#e50914"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></polyline>
-          <line
-            x1="12"
-            y1="12"
-            x2="12"
-            y2="17"
-            stroke="#e50914"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></line>
-          <line
-            x1="9.5"
-            y1="14.5"
-            x2="14.5"
-            y2="14.5"
-            stroke="#e50914"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></line>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #e50914;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >+Netflix</span
-        >
-      </button>
-
-      <button
-        class="ios-tab-btn"
-        onclick="toggleCodesPanel()"
-        style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(191, 90, 242, 0.4))"
-        >
-          <path
-            d="M22 12h-6l-2 3h-4l-2-3H2"
-            stroke="#bf5af2"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-          <path
-            d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
-            stroke="#bf5af2"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ebebf5;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Códigos</span
-        >
-      </button>
-
-      <button
-        class="ios-tab-btn"
-        onclick="toggleVentasPanel()"
-        style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(50, 173, 230, 0.4))"
-        >
-          <line
-            x1="12"
-            y1="1"
-            x2="12"
-            y2="23"
-            stroke="#32ADE6"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></line>
-          <path
-            d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
-            stroke="#32ADE6"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ebebf5;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Ventas</span
-        >
-      </button>
-
-      <button
-        class="ios-tab-btn"
-        onclick="abrirCalculadoraCombos()"
-        style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#ff9f0a"
-          stroke-width="2.2"
-          style="filter: drop-shadow(0 2px 6px rgba(255, 159, 10, 0.4))"
-        >
-          <polygon
-            points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"
-            fill="#ff9f0a"
-            fill-opacity="0.15"
-          ></polygon>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ff9f0a;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Precios</span
-        >
-      </button>
-
-      <button
-        class="ios-tab-btn"
-        onclick="toggleCambioPanel()"
-        style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(255, 159, 10, 0.4))"
-        >
-          <polyline
-            points="17 1 21 5 17 9"
-            stroke="#ff9f0a"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></polyline>
-          <path
-            d="M3 11V9a4 4 0 0 1 4-4h14"
-            stroke="#ff9f0a"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-          <polyline
-            points="7 23 3 19 7 15"
-            stroke="#ff9f0a"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></polyline>
-          <path
-            d="M21 13v2a4 4 0 0 1-4 4H3"
-            stroke="#ff9f0a"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ff9f0a;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Cambio</span
-        >
-      </button>
-
-      <button
-        class="ios-tab-btn"
-        onclick="toggleCargarPanel()"
-        style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(52, 199, 89, 0.4))"
-        >
-          <path
-            d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
-            stroke="#34c759"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-          <polyline
-            points="17 8 12 3 7 8"
-            stroke="#34c759"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></polyline>
-          <line
-            x1="12"
-            y1="3"
-            x2="12"
-            y2="15"
-            stroke="#34c759"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></line>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #34c759;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Cargar</span
-        >
-      </button>
-
-      <button
-        class="ios-tab-btn"
-        onclick="toggleShiftsPanel()"
-        style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(255, 214, 10, 0.4))"
-        >
-          <circle
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="#FFD60A"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></circle>
-          <polyline
-            points="12 6 12 12 16 14"
-            stroke="#FFD60A"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></polyline>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ebebf5;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Turnos</span
-        >
-      </button>
-
-      <button
-        class="ios-tab-btn"
-        onclick="toggleSearchAccountPanel()"
-        style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(255, 55, 95, 0.4))"
-        >
-          <rect
-            x="2"
-            y="7"
-            width="20"
-            height="15"
-            rx="2"
-            ry="2"
-            stroke="#FF375F"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></rect>
-          <polyline
-            points="17 2 12 7 7 2"
-            stroke="#FF375F"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></polyline>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ebebf5;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Cuentas</span
-        >
-      </button>
-
-      <button
-        class="ios-tab-btn"
-        onclick="toggleDistrisPanel()"
-        style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(100, 210, 255, 0.4))"
-        >
-          <path
-            d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
-            stroke="#64D2FF"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-          <circle
-            cx="9"
-            cy="7"
-            r="4"
-            stroke="#64D2FF"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></circle>
-          <path
-            d="M23 21v-2a4 4 0 0 0-3-3.87"
-            stroke="#64D2FF"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-          <path
-            d="M16 3.13a4 4 0 0 1 0 7.75"
-            stroke="#64D2FF"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ebebf5;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Distris</span
-        >
-      </button>
-
-      <button
-        class="ios-tab-btn"
-        onclick="toggleGarantiasPanel()"
-        style="
-          position: relative;
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
+          overflow: hidden;
         "
       >
         <div
-          id="badgeGarantiasCount"
-          style="
-            display: none;
-            position: absolute;
-            top: -6px;
-            right: 10px;
-            background: #ff453a;
-            color: white;
-            font-size: 0.65rem;
-            font-weight: bold;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-          "
-        >
-          0
-        </div>
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(255, 69, 58, 0.4))"
-        >
-          <path
-            d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-            stroke="#ff453a"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-          <polyline
-            points="9 12 11 14 15 10"
-            stroke="#ff453a"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></polyline>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ebebf5;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Garantía</span
-        >
-      </button>
+          id="contenedorPlataformasLibres"
+          class="ticker-track"
+          style="color: #a1a1aa; font-size: 0.75rem"
+        ></div>
+      </div>
 
-      <button
-        class="ios-tab-btn"
-        onclick="togglePromoPanel()"
+      <div
+        id="ledConexion"
         style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #30d158;
+          box-shadow: 0 0 8px #30d158;
+          flex-shrink: 0;
         "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(94, 92, 230, 0.4))"
-        >
-          <polygon
-            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-            stroke="#5e5ce6"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></polygon>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ebebf5;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Promo</span
-        >
-      </button>
+      ></div>
 
-      <button
-        class="ios-tab-btn"
-        onclick="toggleRecordatoriosPanel()"
+      <span
+        id="staffSessionName"
+        style="font-weight: 700; color: #ffffff !important; font-size: 0.82rem"
+        >USER</span
+      >
+      <span
+        id="shiftTimer"
         style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
+          font-family: monospace;
+          font-weight: 600;
+          color: #30d158 !important;
+          font-size: 0.82rem;
         "
+        >00:00:00</span
       >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(255, 204, 0, 0.4))"
-        >
-          <path
-            d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-            stroke="#ffcc00"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-          <path
-            d="M13.73 21a2 2 0 0 1-3.46 0"
-            stroke="#ffcc00"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ebebf5;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Recordar</span
-        >
-      </button>
 
-      <button
-        class="ios-tab-btn"
-        onclick="toggleInventarioPanel()"
-        style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
-          cursor: pointer;
-        "
-      >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(10, 132, 255, 0.4))"
-        >
-          <path
-            d="M20 16V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12"
-            stroke="#0a84ff"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></path>
-          <rect
-            x="2"
-            y="16"
-            width="20"
-            height="6"
-            rx="2"
-            stroke="#0a84ff"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></rect>
-        </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #ebebf5;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Stock</span
-        >
-      </button>
-
-      <button
-        class="ios-tab-btn"
+      <div
+        class="mac-menu-item"
         onclick="cerrarSesionStaff()"
         style="
-          border: none;
-          background: transparent;
-          padding: 0;
-          margin: 2px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 6px;
-          width: 68px;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          color: #ff453a !important;
           cursor: pointer;
+          padding: 2px 4px;
+          border-radius: 4px;
+        "
+        title="Cerrar Sesión"
+      >
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+          <line x1="12" y1="2" x2="12" y2="12"></line>
+        </svg>
+      </div>
+    </div>
+
+    <div
+      id="macNotificationBanner"
+      style="
+        position: fixed;
+        top: 40px;
+        right: 16px;
+        width: 320px;
+        background: rgba(30, 30, 35, 0.65);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        box-shadow:
+          0 20px 40px rgba(0, 0, 0, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        padding: 14px 16px;
+        color: white;
+        display: flex;
+        gap: 12px;
+        z-index: 999999;
+        transform: translateX(120%);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: auto;
+      "
+    >
+      <div
+        style="
+          width: 40px;
+          height: 40px;
+          background: linear-gradient(135deg, #ff453a, #b32b22);
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         "
       >
         <svg
-          width="28"
-          height="28"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
-          style="filter: drop-shadow(0 2px 6px rgba(215, 0, 21, 0.4))"
+          stroke="currentColor"
+          stroke-width="2.5"
         >
           <path
-            d="M9 21H5a2 2 0 0 1-2 2V5a2 2-2h4"
-            stroke="#d70015"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
           ></path>
-          <polyline
-            points="16 17 21 12 16 7"
-            stroke="#d70015"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></polyline>
-          <line
-            x1="21"
-            y1="12"
-            x2="9"
-            y2="12"
-            stroke="#d70015"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></line>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
         </svg>
-        <span
-          style="
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: #d70015;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-          "
-          >Salir</span
-        >
-      </button>
-    </nav>
-
-    <main class="main-workspace" id="mainWorkspace">
+      </div>
       <div
-        id="header-container"
-        class="flex-row-between w-100 mb-1"
-        style="justify-content: center"
-      ></div>
-      <div id="grid-container" class="grid-cards"></div>
+        style="
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          justify-content: center;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <span
+            style="font-size: 0.85rem; font-weight: 700; letter-spacing: -0.2px"
+            >Cybernet</span
+          >
+          <div style="display: flex; align-items: center; gap: 8px">
+            <span
+              id="macNotifTime"
+              style="font-size: 0.7rem; color: rgba(235, 235, 245, 0.6)"
+              >Ahora</span
+            >
+            <span
+              onclick="cerrarBannerNotificacionManualmente()"
+              style="
+                cursor: pointer;
+                color: rgba(235, 235, 245, 0.4);
+                font-size: 0.8rem;
+                font-weight: bold;
+                padding: 2px 4px;
+                transition: color 0.2s;
+              "
+              onmouseover="this.style.color = '#ff453a'"
+              onmouseout="this.style.color = 'rgba(235, 235, 245, 0.4)'"
+              >✕</span
+            >
+          </div>
+        </div>
+        <span style="font-size: 0.85rem; font-weight: 600; color: #ff453a"
+          >¡Alerta de Inventario!</span
+        >
+        <span
+          id="macNotifText"
+          style="
+            font-size: 0.8rem;
+            color: rgba(235, 235, 245, 0.8);
+            line-height: 1.3;
+          "
+          >Plataformas bajas detectadas.</span
+        >
+      </div>
+    </div>
+
+    <!-- 🚀 2. DOCK INFERIOR MAGNÉTICO -->
+    <div class="macos-dock-wrapper">
+      <nav class="macos-dock" id="controlPanel">
+        <!-- 💰 APLICACIÓN: FINANZAS (BLOQUEADA POR ID DE ADMINISTRADOR) -->
+        <div
+          class="mac-dock-icon"
+          id="btnCajaFinanzas"
+          onclick="toggleFinanzasPanel()"
+          style="display: none !important"
+        >
+          <div
+            class="mac-icon-bg"
+            style="background: linear-gradient(135deg, #30d158, #248a3d)"
+          >
+            💰
+          </div>
+          <span class="mac-tooltip">Finanzas</span>
+        </div>
+
+        <div class="mac-dock-icon" onclick="toggleVentasPanel()">
+          <div
+            class="mac-icon-bg"
+            style="background: linear-gradient(135deg, #32ade6, #1b739e)"
+          >
+            🛒
+          </div>
+          <span class="mac-tooltip">Vender</span>
+        </div>
+        <div class="mac-dock-icon" onclick="abrirCalculadoraCombos()">
+          <div
+            class="mac-icon-bg"
+            style="background: linear-gradient(135deg, #ff9f0a, #cc7b00)"
+          >
+            🔢
+          </div>
+          <span class="mac-tooltip">Cotizador</span>
+        </div>
+        <div class="mac-dock-icon" onclick="toggleGarantiasPanel()">
+          <div
+            class="mac-icon-bg"
+            style="background: linear-gradient(135deg, #ff453a, #b32b22)"
+          >
+            🚨
+          </div>
+          <span class="mac-tooltip">Garantías</span>
+        </div>
+        <!-- 🍿 ACCESO DIRECTO: TALLER +NETFLIX -->
+        <div class="mac-dock-icon" onclick="toggleNetflixManagerPanel()">
+          <div
+            class="mac-icon-bg"
+            style="background: linear-gradient(135deg, #e50914, #9b050c)"
+          >
+            🍿
+          </div>
+          <span class="mac-tooltip">+Netflix</span>
+        </div>
+      </nav>
+    </div>
+    <main class="main-workspace mac-desktop-workspace" id="mainWorkspace">
+      <div class="mac-split-container">
+        <div class="mac-left-panel">
+          <div id="header-container" class="mac-qr-wrapper"></div>
+        </div>
+
+        <div class="mac-right-panel">
+          <div class="mac-search-wrapper">
+            <svg
+              class="mac-search-icon"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              id="macSearchCards"
+              class="mac-search-input"
+              placeholder="Buscar plantilla (Ej: Ads, Partidos, Saludo)..."
+              oninput="filtrarTarjetasMac()"
+              autocomplete="off"
+            />
+          </div>
+
+          <div id="grid-container" class="mac-filtered-cards"></div>
+
+          <div id="macEmptyState" class="mac-empty-state">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+            <span
+              >Usa el buscador superior para extraer la plantilla que
+              necesitas.</span
+            >
+          </div>
+        </div>
+      </div>
     </main>
 
     <div class="overlay-ios" id="passwordOverlay">
@@ -1717,32 +1086,6 @@
               margin: 0;
             "
           >
-            <div
-              style="
-                background: rgba(10, 132, 255, 0.15);
-                color: var(--ios-blue);
-                padding: 8px;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 1px solid rgba(10, 132, 255, 0.1);
-              "
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <polyline points="16 18 22 12 16 6"></polyline>
-                <polyline points="8 6 2 12 8 18"></polyline>
-              </svg>
-            </div>
             Bandeja de Códigos
           </h3>
 
@@ -1841,32 +1184,6 @@
               margin: 0;
             "
           >
-            <div
-              style="
-                background: rgba(10, 132, 255, 0.15);
-                color: var(--ios-blue);
-                padding: 8px;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 1px solid rgba(10, 132, 255, 0.1);
-              "
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-            </div>
             Registro de Turnos
           </h3>
 
@@ -2805,35 +2122,6 @@
               margin: 0;
             "
           >
-            <div
-              style="
-                background: rgba(255, 69, 58, 0.15);
-                color: var(--ios-red);
-                padding: 8px;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 1px solid rgba(255, 69, 58, 0.1);
-              "
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-                ></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-            </div>
             Centro de Garantías
           </h3>
           <button
@@ -5917,7 +5205,7 @@
                 stroke="#0A84FF"
               />
             </svg>
-            Saldos de Distribuidores
+            Saldo de Distribuidores
           </h3>
           <button
             class="btn-close-circle"
@@ -7871,6 +7159,7 @@
       </div>
     </div>
 
+    <!-- 🍏 VENTANA DE INVENTARIO MACOS REFELEJADO V2 -->
     <div
       class="overlay-ios"
       id="inventarioOverlay"
@@ -7880,9 +7169,9 @@
         class="sheet-ios"
         onclick="event.stopPropagation()"
         style="
-          max-width: 600px;
-          height: 85vh;
-          max-height: 850px;
+          max-width: 500px;
+          height: 80vh;
+          max-height: 750px;
           display: flex;
           flex-direction: column;
           padding: 30px 24px;
@@ -7901,7 +7190,7 @@
           <h3
             class="card-title"
             style="
-              color: var(--ios-blue);
+              color: var(--mac-blue);
               font-size: 1.15rem;
               font-weight: 800;
               letter-spacing: -0.3px;
@@ -7909,33 +7198,7 @@
               margin: 0;
             "
           >
-            <div
-              style="
-                background: rgba(10, 132, 255, 0.15);
-                color: var(--ios-blue);
-                padding: 8px;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 1px solid rgba(10, 132, 255, 0.1);
-              "
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M20 16V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12"></path>
-                <rect x="2" y="16" width="20" height="6" rx="2"></rect>
-              </svg>
-            </div>
-            Control de Stock
+            Control de Stock e Inventario
           </h3>
           <button
             class="btn-close-circle"
@@ -7949,19 +7212,20 @@
         <div
           style="
             background: rgba(0, 0, 0, 0.2);
-            padding: 16px;
-            border-radius: 16px;
-            border: 1px dashed rgba(255, 255, 255, 0.15);
-            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px dashed rgba(255, 255, 255, 0.05);
+            margin-bottom: 16px;
             text-align: center;
           "
         >
-          <span style="font-size: 0.85rem; color: var(--text-secondary)"
-            >Apaga el switch de la plataforma agotada. La tienda de los clientes
-            se bloqueará sola.</span
-          >
+          <span style="font-size: 0.82rem; color: var(--text-secondary)">
+            Consulta el inventario disponible en vivo. Solo el administrador
+            Camilo puede apagar o encender las plataformas de la tienda.
+          </span>
         </div>
 
+        <!-- Rejilla unificada donde vivirá todo junto -->
         <div
           id="panelSwitchesStock"
           class="flex-col"
