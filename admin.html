@@ -1902,7 +1902,24 @@
               "
               onclick="toggleModalAdelanto(true)"
             >
-              💸 Adelanto
+              Adelanto
+            </button>
+
+            <button
+              class="btn-ios"
+              id="btnNominaCamilo"
+              style="
+                display: none !important;
+                padding: 8px 16px;
+                font-size: 0.85rem;
+                border-radius: 50px;
+                font-weight: 600;
+                background: var(--ios-blue);
+                color: white;
+              "
+              onclick="abrirTotalNomina()"
+            >
+              Nómina
             </button>
 
             <button
@@ -4499,109 +4516,6 @@
               ><br />
               Calculando totales de nómina...
             </div>
-          </div>
-
-          <div
-            id="formDescuentoCamilo"
-            class="card-ios"
-            style="
-              display: none;
-              padding: 24px;
-              margin-top: 10px;
-              margin-bottom: 0;
-            "
-          >
-            <h4
-              style="
-                color: var(--ios-orange);
-                margin: 0 0 16px 0;
-                font-size: 1.05rem;
-                font-weight: 800;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                padding-bottom: 12px;
-              "
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
-                ></path>
-              </svg>
-              Registrar Movimiento
-            </h4>
-            <form
-              class="flex-col"
-              style="gap: 12px"
-              onsubmit="ejecutarDescuentoNominaManual(event)"
-            >
-              <select
-                id="descNomEmpleado"
-                class="input-ios"
-                style="margin: 0"
-                required
-              >
-                <option value="" disabled selected>
-                  Selecciona empleado...
-                </option>
-                <option value="MANUEL">MANUEL</option>
-                <option value="MANUP">MANUP</option>
-                <option value="ANGELICA">ANGELICA</option>
-                <option value="KATHERINE">KATHERINE</option>
-              </select>
-
-              <select
-                id="descNomTipo"
-                class="input-ios"
-                style="margin: 0"
-                required
-              >
-                <option value="ADELANTO">Adelanto de Sueldo (Resta)</option>
-                <option value="DESCUENTO">Descuento / Multa (Resta)</option>
-                <option value="BONO">Bono / Premio (Suma)</option>
-              </select>
-
-              <input
-                type="text"
-                id="descNomMonto"
-                class="input-ios"
-                style="margin: 0"
-                placeholder="Monto (Ej: $50.000)"
-                oninput="formatearMontoEnVivoCOP(this)"
-                required
-              />
-              <input
-                type="text"
-                id="descNomConcepto"
-                class="input-ios"
-                style="margin: 0"
-                placeholder="Motivo (Ej: Préstamo almuerzo)"
-                required
-              />
-              <button
-                type="submit"
-                id="btnSubmitDescNom"
-                class="btn-ios btn-danger w-100"
-                style="
-                  margin-top: 8px;
-                  padding: 16px;
-                  font-size: 1rem;
-                  border-radius: 50px;
-                "
-              >
-                Aplicar a la Nómina
-              </button>
-            </form>
           </div>
         </div>
       </div>
