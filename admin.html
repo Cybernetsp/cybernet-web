@@ -3187,6 +3187,9 @@
         ></div>
       </div>
     </div>
+    <!-- =========================================================================
+         🍿 VENTANA MAESTRA: TALLER NETFLIX (DISEÑO FIX SIMÉTRICO)
+         ========================================================================= -->
     <div class="overlay-ios" id="netflixManagerOverlay">
       <div
         class="sheet-ios"
@@ -3198,18 +3201,83 @@
           display: flex;
           flex-direction: column;
           padding: 24px;
+          position: relative; /* 🔒 Mantiene el botón X perfectamente anclado */
         "
       >
-        <div class="mac-dock-icon" onclick="toggleNetflixManagerPanel()">
-          <div
-            class="mac-icon-bg"
-            style="background: linear-gradient(135deg, #ff3b30, #b1060f)"
+        <!-- 1. Cabecera Mac Firme y Permanente (Nunca se oculta) -->
+        <div
+          class="sheet-header"
+          style="
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+          "
+        >
+          <h3
+            class="card-title"
+            style="
+              color: #e50914;
+              font-size: 1.15rem;
+              font-weight: 800;
+              letter-spacing: -0.3px;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              margin: 0;
+            "
           >
-            🍿
-          </div>
-          <span class="mac-tooltip">Netflix</span>
+            <div
+              style="
+                background: rgba(229, 9, 20, 0.15);
+                color: #e50914;
+                padding: 8px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(229, 9, 20, 0.1);
+              "
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+                <polyline points="17 2 12 7 7 2"></polyline>
+                <line x1="12" y1="12" x2="12" y2="17"></line>
+                <line x1="9.5" y1="14.5" x2="14.5" y2="14.5"></line>
+              </svg>
+            </div>
+            Taller Netflix
+          </h3>
+
+          <!-- ✕ Botón de Cierre Blindado Absoluto: Siempre visible en la esquina superior derecha -->
+          <button
+            class="btn-close-circle"
+            style="
+              position: absolute !important;
+              top: 24px !important;
+              right: 24px !important;
+              z-index: 1000 !important;
+              margin: 0;
+            "
+            onclick="toggleNetflixManagerPanel()"
+          >
+            ✕
+          </button>
         </div>
 
+        <!-- 2. Menú Principal de la Aplicación -->
         <div
           id="netflixMenuPrincipal"
           class="flex-col"
@@ -3229,6 +3297,7 @@
               gap: 16px;
               color: var(--text-primary);
               transition: all 0.2s ease;
+              width: 100%;
             "
             onclick="iniciarCreacionCuentaNetflix(this)"
           >
@@ -3293,6 +3362,7 @@
               gap: 16px;
               color: var(--text-primary);
               transition: all 0.2s ease;
+              width: 100%;
             "
             onclick="abrirPanelCortesNet()"
           >
@@ -3348,39 +3418,40 @@
           </button>
         </div>
 
+        <!-- 3. Sub-Panel de Cortes Internos (El de tu captura) -->
         <div
           id="netflixPanelCortes"
           class="flex-col"
           style="display: none; padding: 0; overflow: hidden; flex-grow: 1"
         >
+          <!-- Barra de navegación interna alineada y limpia -->
           <div
             style="
               position: sticky;
               top: 0;
-              background: var(--sheet-bg);
+              background: #1c1c1e;
               padding-bottom: 16px;
               border-bottom: 1px solid rgba(255, 255, 255, 0.05);
               z-index: 10;
               display: flex;
               gap: 12px;
               margin-bottom: 16px;
+              width: 100%;
             "
           >
             <button
               type="button"
               class="btn-ios btn-secondary"
               style="
-                font-size: 0.85rem;
-                border: 1px solid rgba(255, 255, 255, 0.05);
-                background: rgba(255, 255, 255, 0.05);
                 flex: 1;
                 padding: 10px 16px;
-                border-radius: 50px;
-                margin-bottom: 0;
+                border-radius: 12px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
+                font-weight: 700;
+                font-size: 0.85rem;
               "
               onclick="volverMenuNetflix()"
             >
@@ -3403,18 +3474,18 @@
               type="button"
               class="btn-ios btn-secondary"
               style="
-                font-size: 0.85rem;
-                border: 1px solid rgba(10, 132, 255, 0.2);
-                color: var(--ios-blue);
-                background: rgba(10, 132, 255, 0.15);
                 flex: 1;
                 padding: 10px 16px;
-                border-radius: 50px;
-                margin-bottom: 0;
+                border-radius: 12px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
+                font-weight: 700;
+                font-size: 0.85rem;
+                border: 1px solid rgba(10, 132, 255, 0.2);
+                color: var(--ios-blue);
+                background: rgba(10, 132, 255, 0.15);
               "
               onclick="refrescarCortesEnVivo(this)"
             >
@@ -3435,15 +3506,16 @@
             </button>
           </div>
 
+          <!-- Listado scrolleable de tarjetas de cuentas para cortar -->
           <div
             id="listaCuentasCorte"
             class="flex-col"
             style="
               gap: 16px;
-              padding: 0 5px;
+              padding: 0 4px;
               overflow-y: auto;
               flex-grow: 1;
-              padding-bottom: 30px;
+              padding-bottom: 20px;
             "
           ></div>
         </div>
