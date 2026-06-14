@@ -1006,11 +1006,16 @@ function copiarBloqueNumerosCorte(btn) {
   });
 }
 
-function toggleNetflixManagerPanel() {
-  haptic();
+// =========================================================================
+// 🍿 CONTROLADOR DEL TALLER NETFLIX (BLINDADO GLOBAL CONTRA AISLAMIENTOS)
+// =========================================================================
+window.toggleNetflixManagerPanel = window.toggleNetflixPanel = function () {
+  if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("netflixManagerOverlay");
-  overlay.classList.toggle("open");
-}
+  if (overlay) {
+    overlay.classList.toggle("open");
+  }
+};
 
 function renderizarPlataformasVenta() {
   const contenedor = document.getElementById("contenedorPlataformasVenta");
