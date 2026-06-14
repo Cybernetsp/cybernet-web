@@ -75,57 +75,91 @@ window.pendingRemember = false;
 window.isForcedChange = false;
 
 // =========================================================================
-// 🎵 MOTOR DE AUDIO VIP Y VIBRACIÓN
+// 🔊 MOTOR ACÚSTICO APPLE VIP V2 (AUTOMATIZACIÓN TOTAL DE CLICS Y ALERTAS)
 // =========================================================================
-const CyberSonidos = {
+window.CyberSonidos = {
   play: function (tipo) {
     try {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       if (!window.audioCtx) window.audioCtx = new AudioContext();
       if (window.audioCtx.state === "suspended") window.audioCtx.resume();
 
-      const osc = window.audioCtx.createOscillator();
-      const gain = window.audioCtx.createGain();
+      const now = window.audioCtx.currentTime;
 
-      osc.connect(gain);
-      gain.connect(window.audioCtx.destination);
+      // 📱 1. SONIDO: CLICK NATIVO DE KEYBOARD/BOTÓN IPHONE ("TOCK")
+      if (tipo === "pop" || tipo === "click") {
+        const osc = window.audioCtx.createOscillator();
+        const gain = window.audioCtx.createGain();
 
-      if (tipo === "pop") {
         osc.type = "sine";
-        osc.frequency.setValueAtTime(600, window.audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.03, window.audioCtx.currentTime); // Volumen suave
-        gain.gain.exponentialRampToValueAtTime(
-          0.001,
-          window.audioCtx.currentTime + 0.1,
-        );
-        osc.start();
-        osc.stop(window.audioCtx.currentTime + 0.1);
-      } else if (tipo === "exito") {
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(400, window.audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(
-          1000,
-          window.audioCtx.currentTime + 0.2,
-        );
-        gain.gain.setValueAtTime(0.1, window.audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(
-          0.001,
-          window.audioCtx.currentTime + 0.4,
-        );
-        osc.start();
-        osc.stop(window.audioCtx.currentTime + 0.4);
+        osc.frequency.setValueAtTime(850, now); // Frecuencia seca de madera/tock
+
+        gain.gain.setValueAtTime(0.06, now); // Volumen calibrado cómodo
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02); // Caída ultra rápida (20ms) para el golpe seco
+
+        osc.connect(gain);
+        gain.connect(window.audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.03);
       }
-    } catch (e) {}
+
+      // 🔔 2. SONIDO: NOTIFICACIÓN PREMIUM DE IOS ("CHIME / NOTE")
+      else if (tipo === "exito" || tipo === "notif") {
+        // Función interna para crear armónicos puros de campana
+        const crearNotaChime = (frecuencia, inicio, duracion) => {
+          const oscNode = window.audioCtx.createOscillator();
+          const gainNode = window.audioCtx.createGain();
+
+          oscNode.type = "sine";
+          oscNode.frequency.setValueAtTime(frecuencia, inicio);
+
+          gainNode.gain.setValueAtTime(0.12, inicio);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, inicio + duracion);
+
+          oscNode.connect(gainNode);
+          gainNode.connect(window.audioCtx.destination);
+          oscNode.start(inicio);
+          oscNode.stop(inicio + duracion);
+        };
+
+        // Recreación del icónico tono doble de Apple Pay / Notificación
+        crearNotaChime(1050, now, 0.12); // Primer pulso agudo corto
+        crearNotaChime(1320, now + 0.06, 0.25); // Segundo pulso resonante elegante
+      }
+    } catch (e) {
+      console.log(
+        "AudioContext bloqueado por seguridad del navegador hasta el primer clic.",
+      );
+    }
   },
 };
 
-function haptic() {
+// Función de vibración háptica compacta de Cybernet
+window.haptic = function () {
   if (navigator.vibrate) {
-    navigator.vibrate(15);
+    navigator.vibrate(10); // Vibración sutil de pantalla táctil
   }
-  // Dispara el sonido sutil en cada botón que tenga haptic()
-  CyberSonidos.play("pop");
-}
+  window.CyberSonidos.play("click");
+};
+
+// =========================================================================
+// 🎯 RADAR DE CAPTURA GLOBAL: ASIGNA AUDIO A CUALQUIER ELEMENTO INTERACTIVO
+// =========================================================================
+document.addEventListener(
+  "click",
+  (e) => {
+    // Filtro inteligente para capturar clics en botones, menús, dock, checkboxes, etc.
+    const elementoInteractivo = e.target.closest(
+      "button, .mac-menu-item, .mac-dock-icon, .btn-ios, .btn-close-circle, .mobile-menu-trigger, input[type='submit'], input[type='checkbox'], select",
+    );
+
+    if (elementoInteractivo) {
+      window.CyberSonidos.play("click");
+      if (navigator.vibrate) navigator.vibrate(10);
+    }
+  },
+  true,
+); // Usamos 'true' para interceptar el evento antes de que lo detenga otro script
 
 const listaPlataformasVenta = [
   {
