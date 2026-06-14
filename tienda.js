@@ -19,7 +19,7 @@ const PLATAFORMAS_INFO = {
   disney_std: { name: "Disney Estándar", type: "regular", price: 8500 },
   amazon: { name: "Amazon Prime", type: "regular", price: 10500 },
   max: { name: "HBO Max", type: "regular", price: 8500 },
-  paramount: { name: "Paramount+", type: "regular", price: 10000 },
+  paramount: { name: "Paramount+", type: "regular", price: 15000 },
   vix: { name: "Vix+", type: "regular", price: 8500 },
   plex: { name: "Plex TV", type: "regular", price: 8500 },
   crunchy: { name: "Crunchyroll", type: "regular", price: 8500 },
@@ -72,15 +72,6 @@ const PROMOS_RELAMPAGO = [
     texto:
       "✨ <strong>Disney+ Premium (1 Mes)</strong> por solo <strong>$13.000</strong> (Normal: $15.000) 💠<br><br>¡Acceso Completo con ESPN y Sin Anuncios a precio de locura!",
     msjWhatsapp: "Disney+ Premium (1 Mes) a $13.000",
-  },
-  {
-    id: "p5",
-    items: ["max", "paramount"],
-    meses: 1,
-    precio: 9900,
-    texto:
-      "🔥 <strong>HBO Max + Paramount+</strong> por solo <strong>$9.900</strong> (Normal: $16.500) 🚀<br><br>¡Doble plataforma al precio de una, solo por 30 segundos!",
-    msjWhatsapp: "Dúo HBO Max + Paramount a $9.900",
   },
   {
     id: "p6",
@@ -260,7 +251,7 @@ function simularPrecioCart(tempCart, meses) {
   // ⚡ INYECTOR DE LA NUEVA MATEMÁTICA EN CADENA: Rebaja fijos $2.000 si hay combo o entre ellas
   let colaEspeciales = [];
   if (itemParamount)
-    colaEspeciales.push({ name: "Paramount", full: 10000, combo: 8000 });
+    colaEspeciales.push({ name: "Paramount", full: 15000, combo: 10000 });
   if (itemIptv) colaEspeciales.push({ name: "IPTV", full: 10000, combo: 8000 });
   if (itemFlujo)
     colaEspeciales.push({ name: "Flujo TV", full: 12000, combo: 10000 });
