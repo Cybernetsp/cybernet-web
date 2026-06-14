@@ -283,19 +283,19 @@ function toggleVentasPanel() {
     }
   }
 }
-// =========================================================================
-// 📥 MÓDULO INTEGRADO: CARGA EN LOTE Y GESTIÓN DE PROVEEDORES
-// =========================================================================
-function toggleCargarPanel() {
-  haptic();
-  const overlay = document.getElementById("cargarOverlay");
-  overlay.classList.toggle("open");
+window.toggleCargarPanel = function () {
+  const panel = document.getElementById("cargarOverlay");
+  if (!panel) return;
 
-  // Cada vez que se abra, sincroniza el estatus de salud de los proveedores
-  if (overlay.classList.contains("open")) {
-    cargarResumenProveedores();
+  if (panel.classList.contains("open")) {
+    panel.classList.remove("open");
+  } else {
+    if (typeof cerrarTodasLasAppsActivas === "function") {
+      cerrarTodasLasAppsActivas(); // 🔥 Evita que se monte encima de Finanzas, Distris, etc.
+    }
+    panel.classList.add("open");
   }
-}
+};
 
 function comprobarProveedorDinamico() {
   const selectProv = document.getElementById("loadProveedor").value;
@@ -2878,75 +2878,56 @@ function ejecutarResolverGarantia(e) {
 }
 
 // =========================================================================
-// 📐 CYBERNET OS: MOTOR DE COLISIÓN INTELIGENTE PARA EL DOCK MAC
+// 📐 CYBERNET OS: GESTOR ESTRICTO DE VISIBILIDAD DEL DOCK (OCULTADO TOTAL)
 // =========================================================================
-
-function verificarColisionDock() {
-  // Buscamos la ventana interna visible que esté abierta (.sheet-ios o .modal-ios)
-  const ventanaActiva = document.querySelector(
-    ".overlay-ios.open .sheet-ios, .overlay-ios.open .modal-ios",
-  );
+function actualizarVisibilidadDock() {
+  // Buscamos si existe CUALQUIER ventana operativa abierta en la pantalla
+  const algunModalAbierto = document.querySelector(".overlay-ios.open");
   const dockWrapper = document.querySelector(".macos-dock-wrapper");
 
   if (!dockWrapper) return;
 
-  if (ventanaActiva) {
-    // Bloqueamos el scroll del fondo por estética de sistema operativo
+  if (algunModalAbierto) {
+    // 🔒 CASO: Hay una ventana abierta -> Se esconde por completo al instante hacia abajo
     document.body.style.overflow = "hidden";
-
-    // Capturamos las coordenadas y tamaños exactos en la pantalla
-    const rectVentana = ventanaActiva.getBoundingClientRect();
-    const rectDock = dockWrapper.getBoundingClientRect();
-
-    // 🎯 Radar de Intersección Matemática (Caja de colisiones 2D)
-    const seTocanONseTapan =
-      rectVentana.left < rectDock.right &&
-      rectVentana.right > rectDock.left &&
-      rectVentana.top < rectDock.bottom &&
-      rectVentana.bottom > rectDock.top;
-
-    if (seTocanONseTapan) {
-      // 🔥 CASO 1: La ventana se estiró y tapó el Dock -> Se oculta con un leve deslizamiento
-      dockWrapper.style.setProperty("opacity", "0", "important");
-      dockWrapper.style.setProperty("pointer-events", "none", "important");
-      dockWrapper.style.setProperty(
-        "transform",
-        "translateY(20px)",
-        "important",
-      );
-      dockWrapper.style.setProperty(
-        "transition",
-        "all 0.2s ease-out",
-        "important",
-      );
-    } else {
-      // ✨ CASO 2: Hay ventana abierta pero NO toca el Dock -> Se queda activo y visible
-      dockWrapper.style.setProperty("opacity", "1", "important");
-      dockWrapper.style.setProperty("pointer-events", "auto", "important");
-      dockWrapper.style.setProperty("transform", "translateY(0)", "important");
-      dockWrapper.style.setProperty(
-        "transition",
-        "all 0.2s ease-out",
-        "important",
-      );
-    }
+    dockWrapper.style.setProperty("opacity", "0", "important");
+    dockWrapper.style.setProperty("pointer-events", "none", "important");
+    dockWrapper.style.setProperty("transform", "translateY(30px)", "important");
+    dockWrapper.style.setProperty(
+      "transition",
+      "all 0.18s ease-out",
+      "important",
+    );
   } else {
-    // 🏠 CASO 3: Escritorio limpio (Ninguna ventana abierta) -> Dock activo al 100%
+    // 🏠 CASO: Escritorio limpio -> El Dock regresa flotando a su posición original
     document.body.style.overflow = "";
     dockWrapper.style.setProperty("opacity", "1", "important");
     dockWrapper.style.setProperty("pointer-events", "auto", "important");
     dockWrapper.style.setProperty("transform", "translateY(0)", "important");
     dockWrapper.style.setProperty(
       "transition",
-      "all 0.2s ease-out",
+      "all 0.18s ease-out",
       "important",
     );
   }
 }
 
-// 👁️ Vigilante en segundo plano (MutationObserver) para capturar aperturas
-const observadorModalesScroll = new MutationObserver(() => {
-  verificarColisionDock();
+// Vigilante automático (MutationObserver) para detectar aperturas y cierres en el DOM
+if (window.observadorModalesScroll) window.observadorModalesScroll.disconnect();
+window.observadorModalesScroll = new MutationObserver(() => {
+  actualizarVisibilidadDock();
+});
+
+// Inicializador del ecosistema al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+  window.observadorModalesScroll.observe(document.body, {
+    attributes: true,
+    subtree: true,
+    attributeFilter: ["class"],
+  });
+
+  // Ejecución preventiva inicial
+  actualizarVisibilidadDock();
 });
 
 // Inicializador automático del radar
