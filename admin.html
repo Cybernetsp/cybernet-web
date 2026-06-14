@@ -531,24 +531,37 @@
           </div>
           <span class="mac-tooltip">Cotizador</span>
         </div>
+        <!-- 🚨 APLICACIÓN: GARANTÍAS -->
         <div class="mac-dock-icon" onclick="toggleGarantiasPanel()">
           <div
             class="mac-icon-bg"
-            style="background: linear-gradient(135deg, #ff453a, #b32b22)"
+            style="background: linear-gradient(135deg, #ff453a, #ba1a1a)"
           >
             🚨
           </div>
           <span class="mac-tooltip">Garantías</span>
         </div>
-        <!-- 🍿 ACCESO DIRECTO: TALLER +NETFLIX -->
-        <div class="mac-dock-icon" onclick="toggleNetflixManagerPanel()">
+
+        <!-- 🍿 APLICACIÓN: TALLER NETFLIX -->
+        <div class="mac-dock-icon" onclick="toggleNetflixPanel()">
           <div
             class="mac-icon-bg"
-            style="background: linear-gradient(135deg, #e50914, #9b050c)"
+            style="background: linear-gradient(135deg, #ff3b30, #b1060f)"
           >
             🍿
           </div>
-          <span class="mac-tooltip">+Netflix</span>
+          <span class="mac-tooltip">Netflix</span>
+        </div>
+
+        <!-- 📥 APLICACIÓN: CARGAR CUENTAS -->
+        <div class="mac-dock-icon" onclick="toggleCargarPanel()">
+          <div
+            class="mac-icon-bg"
+            style="background: linear-gradient(135deg, #5e5ce6, #3634a3)"
+          >
+            📥
+          </div>
+          <span class="mac-tooltip">Cargar</span>
         </div>
       </nav>
     </div>
@@ -1826,33 +1839,6 @@
               margin: 0;
             "
           >
-            <div
-              style="
-                background: rgba(50, 215, 75, 0.15);
-                color: var(--ios-green);
-                padding: 8px;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 1px solid rgba(50, 215, 75, 0.1);
-              "
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-            </div>
             Cargar Cuentas
           </h3>
           <button
