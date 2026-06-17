@@ -280,7 +280,7 @@ function simularPrecioCart(tempCart, meses) {
           );
         if (item.id === "disney_prem") return sum + extra * 7000 * meses;
         if (item.id === "paramount" || item.id === "iptv")
-          return sum + extra * 8000 * meses;
+          return sum + extra * 18000 * meses;
         if (item.id === "flujo" || item.id === "emby")
           return sum + extra * 10000 * meses;
         return sum + extra * 4000 * meses;
