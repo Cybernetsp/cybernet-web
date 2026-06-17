@@ -19,7 +19,7 @@ const PLATAFORMAS_INFO = {
   disney_std: { name: "Disney Estándar", type: "regular", price: 8500 },
   amazon: { name: "Amazon Prime", type: "regular", price: 10500 },
   max: { name: "HBO Max", type: "regular", price: 8500 },
-  paramount: { name: "Paramount+", type: "regular", price: 15000 },
+  paramount: { name: "Paramount+", type: "regular", price: 20000 },
   vix: { name: "Vix+", type: "regular", price: 8500 },
   plex: { name: "Plex TV", type: "regular", price: 8500 },
   crunchy: { name: "Crunchyroll", type: "regular", price: 8500 },
@@ -251,7 +251,7 @@ function simularPrecioCart(tempCart, meses) {
   // ⚡ INYECTOR DE LA NUEVA MATEMÁTICA EN CADENA: Rebaja fijos $2.000 si hay combo o entre ellas
   let colaEspeciales = [];
   if (itemParamount)
-    colaEspeciales.push({ name: "Paramount", full: 15000, combo: 10000 });
+    colaEspeciales.push({ name: "Paramount", full: 20000, combo: 18000 });
   if (itemIptv) colaEspeciales.push({ name: "IPTV", full: 10000, combo: 8000 });
   if (itemFlujo)
     colaEspeciales.push({ name: "Flujo TV", full: 12000, combo: 10000 });
