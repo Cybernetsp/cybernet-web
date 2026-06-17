@@ -6885,7 +6885,7 @@ window.calcularPreciosSistemaCotizador = function () {
       // Caso B: Está acompañando un combo. Lo extraemos del pool plano estándar
       // para que sume $10.000 limpios y no interfiera con los descuentos de las otras
       cantidadEstandar--;
-      abonoParamountCombo = 10000;
+      abonoParamountCombo = 18000;
     }
   }
 
@@ -6893,7 +6893,7 @@ window.calcularPreciosSistemaCotizador = function () {
 
   // Interceptamos si está solo, de lo contrario ejecuta tu árbol de decisiones original intacto
   if (esParamountIndividualSolo) {
-    precioBaseUnMes = 15000; // 🔥 Standalone forzado a 15k
+    precioBaseUnMes = 20000; // 🔥 Standalone forzado a 15k
   } else {
     // 2. REGLAS AUTOMATIZADAS CYBERNET CORREGIDAS
     if (tieneNetflix) {
