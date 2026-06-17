@@ -169,6 +169,12 @@ const listaPlataformasVenta = [
     permiteRenovacion: true,
   },
   {
+    id: "DIRECTV-GO",
+    nombre: "DIRECTV GO",
+    permitePantallas: true,
+    permiteRenovacion: false,
+  },
+  {
     id: "AMAZON",
     nombre: "AMAZON",
     permitePantallas: true,
@@ -7088,6 +7094,7 @@ const productosTiendaMaster = [
   { id: "btn_universal", nombre: "Universal+" },
   { id: "btn_iptv", nombre: "IPTV Smarters" },
   { id: "btn_flujo", nombre: "Flujo TV" },
+  { id: "btn_directv", nombre: "Directv Go" },
   { id: "btn_emby", nombre: "Emby" },
   { id: "btn_canva", nombre: "Canva Pro" },
   { id: "btn_spotify", nombre: "Spotify" },
@@ -7571,6 +7578,7 @@ function obtenerConteoLibreDinamico(idProducto) {
   if (key === "YT") key = "YOUTUBE";
   if (key === "CRUNCHY") key = "CRUNCHYROLL";
   if (key === "APPLE") key = "APPLETV";
+  if (key === "DIRECTV") key = "DIRECTVGO";
 
   let encontrado = window.cachedLibresData.find((item) => {
     let platNorm = item.plat.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
