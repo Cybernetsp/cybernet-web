@@ -63,7 +63,7 @@ const catálogoProductos = [
   {
     id: "PARAMOUNT",
     nombre: "Paramount+",
-    precio: 10000,
+    precio: 18000,
     color: "#0078ff",
     logo: `<img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
