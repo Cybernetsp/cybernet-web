@@ -766,104 +766,6 @@ function generarClaveNetflixTV() {
   return p + n + "@@";
 }
 
-function abrirPanelCortesNet() {
-  haptic();
-  document.getElementById("netflixMenuPrincipal").style.display = "none";
-  document.getElementById("netflixPanelCortes").style.display = "flex";
-
-  const contenedor = document.getElementById("listaCuentasCorte");
-  contenedor.innerHTML =
-    '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.9rem;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg><br>Buscando perfiles vencidos en Sheets...</div>';
-
-  const cbName = "cb_cortes_" + Date.now();
-  window[cbName] = function (res) {
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
-
-    contenedor.innerHTML = "";
-
-    if (res && res.status === "success") {
-      if (res.data.length === 0) {
-        contenedor.innerHTML =
-          '<div style="text-align:center; padding:30px; color:var(--ios-green); font-weight:bold;">¡Todo limpio! No hay perfiles vencidos.</div>';
-        return;
-      }
-
-      res.data.forEach((cuenta, index) => {
-        let claveNuevaSugerida = generarClaveNetflixTV();
-        let perfilesTexto = cuenta.perfilesVencidos.join(", ");
-        let perfilesOcultosSeguros = cuenta.perfilesVencidos.join("|||");
-
-        let div = document.createElement("div");
-        div.className = "card-ios";
-        // Estilo base minimalista
-        div.style =
-          "padding: 16px; display: flex; flex-direction: column; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);";
-
-        div.innerHTML = `
-            <!-- Cabecera: Alerta, Correo y Perfiles -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
-                <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden;">
-                    <span style="font-size: 0.65rem; color: var(--ios-red); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--ios-red);"></span> CORTE REQUERIDO
-                    </span>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 1rem; color: var(--text-primary); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cuenta.correo}</span>
-                        <button style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 6px; padding: 4px 6px; color: var(--text-secondary); cursor: pointer; transition: 0.2s;" onclick="copiarTextoRapido(this, '${cuenta.correo}')" title="Copiar Correo">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </button>
-                    </div>
-                </div>
-                <div style="background: rgba(255, 159, 10, 0.1); color: var(--ios-orange); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; border: 1px solid rgba(255, 159, 10, 0.2); white-space: nowrap;">
-      Perfiles Vencidos: ${perfilesTexto}
-  </div>
-            </div>
-
-            <!-- Contraseñas: Antigua vs Nueva (Agrupadas horizontalmente) -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--input-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border);">
-                <!-- Clave Vieja -->
-                <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Clave Vencida</span>
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
-                        <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 600; font-family: monospace; text-decoration: line-through; opacity: 0.7;">${cuenta.claveActual}</span>
-                        <button style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 2px;" onclick="copiarTextoRapido(this, '${cuenta.claveActual}')">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Nueva Clave -->
-                <div style="display: flex; flex-direction: column; gap: 2px; border-left: 1px solid var(--glass-border); padding-left: 10px;">
-                    <span style="font-size: 0.65rem; color: var(--ios-green); font-weight: 700; text-transform: uppercase;">Nueva Clave</span>
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
-                        <input type="text" id="nueva_clave_${index}" style="background: transparent; border: none; color: var(--ios-green); font-size: 0.95rem; font-weight: 700; font-family: monospace; width: 100%; outline: none; padding: 0;" value="${claveNuevaSugerida}">
-                        <button style="background: var(--ios-green); border: none; border-radius: 6px; padding: 4px 6px; color: #fff; cursor: pointer;" onclick="copiarInputRapido(this, 'nueva_clave_${index}')">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Botón de acción minimalista -->
-            <button class="btn-ios btn-secondary w-100" style="padding: 10px; font-size: 0.85rem; border: 1px solid rgba(59, 130, 246, 0.3); color: var(--ios-blue); background: rgba(59, 130, 246, 0.05);" onclick="procesarCorteReal(this, '${cuenta.correo}', '${perfilesOcultosSeguros}', 'nueva_clave_${index}')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                Procesar Corte y Subir a Hoy
-            </button>
-          `;
-        contenedor.appendChild(div);
-      });
-    } else {
-      contenedor.innerHTML = `<div style="color:var(--ios-red); text-align:center;">Error: ${res ? res.message : "Fallo de conexión"}</div>`;
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerCortesNetflix&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
-}
-
 // =========================================================================
 // 🚀 UPGRADE: ISLA DINÁMICA INTELIGENTE (Efecto Apple Morphic)
 // =========================================================================
@@ -943,42 +845,6 @@ function copiarInputRapido(btn, idInput) {
 
 window.clientesSalvadosCorte = [];
 
-function procesarCorteReal(btn, correo, perfilesCortados, idInputNuevaClave) {
-  haptic();
-  const nuevaClave = document.getElementById(idInputNuevaClave).value;
-
-  btn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Operando en Sheets...`;
-  btn.disabled = true;
-  btn.style.opacity = "0.7";
-
-  const cbName = "cb_proc_corte_" + Date.now();
-  window[cbName] = function (res) {
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
-
-    if (res && res.status === "success") {
-      btn.innerHTML = "¡Completado!";
-      btn.style.background = "var(--ios-green)";
-      btn.style.color = "white";
-      btn.closest(".card-ios").style.opacity = "0.4";
-      btn.closest(".card-ios").style.pointerEvents = "none";
-
-      mostrarResultadoCortes(res.clientes);
-    } else {
-      alert("Error: " + res.message);
-      btn.innerHTML = "Reintentar";
-      btn.disabled = false;
-      btn.style.opacity = "1";
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=procesarCorteNetflix&correo=${encodeURIComponent(correo)}&nuevaClave=${encodeURIComponent(nuevaClave)}&perfilesCortados=${encodeURIComponent(perfilesCortados)}&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
-}
-
 function mostrarResultadoCortes(clientes) {
   window.clientesSalvadosCorte = clientes;
   const contenedor = document.getElementById("listaClientesSalvados");
@@ -1047,14 +913,179 @@ function copiarBloqueNumerosCorte(btn) {
 }
 
 // =========================================================================
-// 🍿 CONTROLADOR DEL TALLER NETFLIX (BLINDADO GLOBAL CONTRA AISLAMIENTOS)
+// 🍿 CONTROLADOR DEL TALLER NETFLIX (DISEÑO PREMIUM & AUTO-BORRADO EN VIVO)
 // =========================================================================
 window.toggleNetflixManagerPanel = window.toggleNetflixPanel = function () {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("netflixManagerOverlay");
   if (overlay) {
     overlay.classList.toggle("open");
+
+    // 🔄 AUTO-REFRESCO: Si se abre el panel y la pestaña de cortes estaba activa, busca cambios en vivo
+    if (overlay.classList.contains("open")) {
+      const panelCortes = document.getElementById("netflixPanelCortes");
+      if (panelCortes && panelCortes.style.display === "flex") {
+        window.abrirPanelCortesNet();
+      }
+    }
   }
+};
+
+window.abrirPanelCortesNet = function () {
+  if (typeof haptic === "function") haptic();
+  document.getElementById("netflixMenuPrincipal").style.display = "none";
+  document.getElementById("netflixPanelCortes").style.display = "flex";
+
+  const contenedor = document.getElementById("listaCuentasCorte");
+
+  // Cargador de diseño corporativo Netflix Red
+  contenedor.innerHTML = `
+    <div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:0.95rem;">
+      <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e50914" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line></svg>
+      <br><span style="color:#e50914; font-weight:700; letter-spacing:0.3px;">Escaneando perfiles vencidos en Sheets...</span>
+    </div>`;
+
+  const cbName = "cb_cortes_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    contenedor.innerHTML = "";
+
+    if (res && res.status === "success") {
+      if (res.data.length === 0) {
+        contenedor.innerHTML =
+          '<div style="text-align:center; padding:40px; color:var(--ios-green); font-weight:bold; font-size:1rem;">🎉 ¡Todo limpio! No quedan perfiles vencidos.</div>';
+        return;
+      }
+
+      res.data.forEach((cuenta, index) => {
+        let claveNuevaSugerida = generarClaveNetflixTV();
+        let perfilesTexto = cuenta.perfilesVencidos.join(", ");
+        let perfilesOcultosSeguros = cuenta.perfilesVencidos.join("|||");
+
+        let div = document.createElement("div");
+        div.className = "card-ios account-cut-card";
+
+        // Estética Bento con bordes sutiles de alerta de corte
+        div.style.cssText =
+          "padding: 18px; display: flex; flex-direction: column; gap: 14px; background: rgba(229, 9, 20, 0.01); border: 1px solid rgba(229, 9, 20, 0.15); border-radius: 20px; margin-bottom: 12px; transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);";
+
+        div.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; width: 100%;">
+            <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex-grow: 1;">
+              <span style="font-size: 0.68rem; color: #e50914; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #e50914; box-shadow: 0 0 8px #e50914;"></span> CORTE REQUERIDO
+              </span>
+              <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                <span style="font-size: 1.05rem; color: var(--text-primary); font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; font-family: monospace;">${cuenta.correo}</span>
+                <button style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 5px 8px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center;" onclick="copiarTextoRapido(this, '${cuenta.correo}')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
+            </div>
+            <div style="background: rgba(255, 69, 58, 0.12); color: #ff453a; padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1px solid rgba(255, 69, 58, 0.2); white-space: nowrap;">
+              Perfiles: ${perfilesTexto}
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(0,0,0,0.15); padding: 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.03);">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Clave Vencida</span>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 600; font-family: monospace; text-decoration: line-through; opacity: 0.5;">${cuenta.claveActual}</span>
+                <button style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 2px;" onclick="copiarTextoRapido(this, '${cuenta.claveActual}')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px; border-left: 1px solid rgba(255,255,255,0.06); padding-left: 12px;">
+              <span style="font-size: 0.65rem; color: var(--ios-green); font-weight: 800; text-transform: uppercase;">Nueva Clave</span>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                <input type="text" id="nueva_clave_${index}" style="background: transparent; border: none; color: var(--ios-green); font-size: 0.9rem; font-weight: 800; font-family: monospace; width: 100%; outline: none; padding: 0;" value="${claveNuevaSugerida}">
+                <button style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.2); border-radius: 6px; padding: 3px 6px; color: var(--ios-green); cursor: pointer;" onclick="copiarInputRapido(this, 'nueva_clave_${index}')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-ios" style="background: #e50914; color: white; padding: 12px; font-size: 0.88rem; font-weight: 800; border-radius: 12px; width: 100%; margin: 0; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(229, 9, 20, 0.2);" onclick="window.procesarCorteReal(this, '${cuenta.correo}', '${perfilesOcultosSeguros}', 'nueva_clave_${index}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Procesar Corte y Subir a Hoy
+          </button>
+        `;
+        contenedor.appendChild(div);
+      });
+    } else {
+      contenedor.innerHTML = `<div style="color:var(--ios-red); text-align:center; padding:20px; font-weight:700;">Error: ${res ? res.message : "Fallo de conexión"}</div>`;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerCortesNetflix&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.procesarCorteReal = function (
+  btn,
+  correo,
+  perfilesCortados,
+  idInputNuevaClave,
+) {
+  if (typeof haptic === "function") haptic();
+  const nuevaClave = document.getElementById(idInputNuevaClave).value;
+
+  btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Operando...`;
+  btn.disabled = true;
+
+  const cbName = "cb_proc_corte_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      btn.innerHTML = "¡Completado!";
+      btn.style.background = "var(--ios-green)";
+      btn.style.color = "white";
+
+      // ⚡ EXTINCIÓN DOM: Animación elástica reduciendo tamaño y borrado completo
+      const tarjetaCard = btn.closest(".account-cut-card, .card-ios");
+      if (tarjetaCard) {
+        tarjetaCard.style.transform = "scale(0.9) translateY(-15px)";
+        tarjetaCard.style.opacity = "0";
+
+        setTimeout(() => {
+          tarjetaCard.remove();
+
+          // Verificación de bandeja vacía en caliente
+          const contenedor = document.getElementById("listaCuentasCorte");
+          if (
+            contenedor &&
+            contenedor.querySelectorAll(".account-cut-card, .card-ios")
+              .length === 0
+          ) {
+            contenedor.innerHTML =
+              '<div style="text-align:center; padding:40px; color:var(--ios-green); font-weight:bold; font-size:1rem;">🎉 ¡Todo limpio! No quedan perfiles vencidos.</div>';
+          }
+        }, 350);
+      }
+
+      mostrarResultadoCortes(res.clientes);
+    } else {
+      alert("Error: " + res.message);
+      btn.innerHTML = "Reintentar";
+      btn.disabled = false;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=procesarCorteNetflix&correo=${encodeURIComponent(correo)}&nuevaClave=${encodeURIComponent(nuevaClave)}&perfilesCortados=${encodeURIComponent(perfilesCortados)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
 };
 
 function renderizarPlataformasVenta() {
@@ -2749,35 +2780,6 @@ function finalizarCopiadoExitoso(btn, originalHtml) {
     btn.style.borderColor = "";
     btn.disabled = false;
   }, 1500);
-}
-
-function cargarGarantias() {
-  if (isFetchingGarantias) return;
-  isFetchingGarantias = true;
-  const container = document.getElementById("listaGarantias");
-  container.innerHTML =
-    '<div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;"><svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 6px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg><br>Sincronizando tickets...</div>';
-
-  if (document.getElementById("cyber_getgarantias_node"))
-    document.getElementById("cyber_getgarantias_node").remove();
-
-  window.procesarListaGarantiasSheets = function (res) {
-    isFetchingGarantias = false;
-    if (document.getElementById("cyber_getgarantias_node"))
-      document.getElementById("cyber_getgarantias_node").remove();
-    if (res && res.status === "success") {
-      renderizarListaGarantiasDefinitiva(res.data);
-    } else {
-      container.innerHTML =
-        '<div style="text-align:center; padding:20px; color:var(--ios-red); font-weight:600; font-size:0.85rem;">❌ Error al sincronizar base de datos.</div>';
-    }
-  };
-
-  const scriptElement = document.createElement("script");
-  scriptElement.id = "cyber_getgarantias_node";
-  let queryParams = `?action=obtenerGarantias&callback=procesarListaGarantiasSheets&_ts=${Date.now()}`;
-  scriptElement.src = GOOGLE_SCRIPT_URL + queryParams;
-  document.body.appendChild(scriptElement);
 }
 
 // =========================================================================
@@ -4820,180 +4822,41 @@ function ejecutarCambioCuenta(e) {
   script.src = `${GOOGLE_SCRIPT_URL}?action=cambiarCuenta&telCliente=${encodeURIComponent(telCliente)}&nombreCliente=${encodeURIComponent(nombreCliente)}&cambiosJSON=${encodeURIComponent(JSON.stringify(cambiosArray))}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 }
-// =========================================================================
-// 📊 LÓGICA FRONTEND: REGISTRO DE VENTAS (SEGURIDAD Y RENDERIZADO)
-// =========================================================================
 
-// ⚠️ IMPORTANTE: Aquí debes leer tu variable global que almacena la sesión actual.
-// Modifica esto si tu login usa localStorage, por ejemplo: localStorage.getItem("usuarioActual")
-const usuarioSesionActual = "camilo";
-
-// 🔒 CANDADO 1: Mostrar el botón SOLO si la sesión es de "camilo"
-document.addEventListener("DOMContentLoaded", function () {
-  if (usuarioSesionActual.trim().toLowerCase() === "camilo") {
-    const btnRegistro = document.getElementById("btnRegistroVentas");
-    if (btnRegistro) btnRegistro.style.display = "flex"; // <-- Cambiado a "flex" para mantener el diseño
-  }
-});
-
-// =========================================================================
-// 📊 LÓGICA FRONTEND: REGISTRO DE VENTAS Y BUSCADOR AVANZADO (CON MESES)
-// =========================================================================
-
-function abrirModalRegistroVentas() {
-  if (typeof haptic === "function") haptic();
-
-  document.getElementById("modalRegistroVentas").classList.add("open");
-  document.getElementById("buscadorRegistroVentas").value = "";
-
-  // 📅 Auto-seleccionar el mes actual al abrir la ventana
-  const mesSelect = document.getElementById("mesRegistroVentas");
-  if (mesSelect) {
-    let mesActual = String(new Date().getMonth() + 1).padStart(2, "0");
-    mesSelect.value = mesActual;
-  }
-
-  const tbody = document.getElementById("tablaRegistroVentasBody");
-  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: var(--text-secondary);">Cargando registros de ventas... <svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:bottom; margin-left:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg></td></tr>`;
-
-  const cbName = "cb_ventas_" + Date.now();
-  window[cbName] = function (res) {
-    const node = document.getElementById("node_" + cbName);
-    if (node) node.remove();
-    delete window[cbName];
-
-    if (res && res.status === "success") {
-      let rowsHtml = "";
-      res.data.reverse(); // Ventas nuevas arriba
-
-      res.data.forEach((row) => {
-        let fechaHoraStr = row[0] || "";
-        let fecha = fechaHoraStr;
-        let hora = "";
-
-        let partes = fechaHoraStr.split(" ");
-        if (partes.length >= 2) {
-          fecha = partes[0];
-          hora = partes.slice(1).join(" ");
-        }
-
-        let nombre = row[1] || "";
-        let numero = row[2] || "";
-        let desc = row[3] || "";
-        let valor = row[4] || "";
-        let banco = row[5] || "";
-        let tipo = row[6] || "";
-
-        // Insertamos atributos data-fecha ocultos para facilitar el filtro por mes
-        rowsHtml += `
-              <tr class="fila-registro-venta" data-fecha-pura="${fecha}" style="border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.02)'" onmouseout="this.style.background='transparent'">
-                  <td class="col-fecha" style="padding: 10px 8px; color: var(--text-secondary);">${fecha}</td>
-                  <td style="padding: 10px 8px; color: var(--text-secondary);">${hora}</td>
-                  <td class="col-nombre" style="padding: 10px 8px; color: var(--text-primary); font-weight: 600;">${nombre}</td>
-                  <td class="col-numero" style="padding: 10px 8px; color: var(--text-primary); font-family: monospace;">${numero}</td>
-                  <td style="padding: 10px 8px; color: var(--ios-blue); font-weight: 600;">${desc}</td>
-                  <td style="padding: 10px 8px; color: var(--ios-green); font-family: monospace; font-weight: 800;">${valor}</td>
-                  <td style="padding: 10px 8px; color: var(--text-primary);">${banco}</td>
-                  <td style="padding: 10px 8px; color: var(--text-secondary); font-size: 0.8rem;">${tipo}</td>
-              </tr>
-          `;
-      });
-
-      if (res.data.length === 0) {
-        rowsHtml = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: var(--text-secondary);">No hay ventas registradas en la base de datos.</td></tr>`;
-      }
-
-      tbody.innerHTML = rowsHtml;
-
-      // 🔥 Inmediatamente después de pintar la tabla, aplicamos el filtro del mes actual
-      filtrarRegistroVentas();
-    } else {
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color:var(--ios-red);">❌ Error: ${res ? res.message : "Fallo de conexión."}</td></tr>`;
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerRegistroVentas&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
-}
-
-// 🔥 FUNCIÓN DEL BUSCADOR EN TIEMPO REAL (POR MES, NOMBRE, NÚMERO O FECHA) 🔥
-function filtrarRegistroVentas() {
-  const query = document
-    .getElementById("buscadorRegistroVentas")
-    .value.toLowerCase()
-    .trim();
-  const mesFiltro = document.getElementById("mesRegistroVentas").value; // ej: "06", "TODOS"
-  const filas = document.querySelectorAll(".fila-registro-venta");
-  const tbody = document.getElementById("tablaRegistroVentasBody");
-
-  let filasMostradas = 0;
-
-  filas.forEach((fila) => {
-    // Obtenemos la fecha limpia del atributo oculto que creamos (ej: 09/06/2026)
-    const fechaLimpia = fila.getAttribute("data-fecha-pura") || "";
-    const nombre = fila.querySelector(".col-nombre").innerText.toLowerCase();
-    const numero = fila.querySelector(".col-numero").innerText.toLowerCase();
-
-    // Extraemos el mes de la fecha (posición 1 del split por "/")
-    let mesFila = "";
-    let partesFecha = fechaLimpia.split("/");
-    if (partesFecha.length >= 2) {
-      mesFila = partesFecha[1]; // "06"
-    }
-
-    // 1. Verificamos si coincide con el mes (o si está en "TODOS")
-    let coincideMes = mesFiltro === "TODOS" || mesFila === mesFiltro;
-
-    // 2. Verificamos si coincide con el texto escrito
-    let coincideTexto =
-      query === "" ||
-      nombre.includes(query) ||
-      numero.includes(query) ||
-      fechaLimpia.includes(query);
-
-    // Mostrar solo si cumple AMBAS condiciones
-    if (coincideMes && coincideTexto) {
-      fila.style.display = "";
-      filasMostradas++;
-    } else {
-      fila.style.display = "none";
-    }
-  });
-
-  // Mensaje amigable si el mes está vacío
-  let mensajeVacio = document.getElementById("msgVacioRegistros");
-  if (filasMostradas === 0) {
-    if (!mensajeVacio) {
-      mensajeVacio = document.createElement("tr");
-      mensajeVacio.id = "msgVacioRegistros";
-      mensajeVacio.innerHTML = `<td colspan="8" style="text-align:center; padding: 40px; color: var(--text-secondary);">No se encontraron ventas para el filtro seleccionado.</td>`;
-      tbody.appendChild(mensajeVacio);
-    }
-  } else {
-    if (mensajeVacio) mensajeVacio.remove();
-  }
-}
-// =========================================================================
-// 🔥 LÓGICA FRONTEND: CREACIÓN AUTOMATIZADA DE CUENTAS NETFLIX 🔥
-// =========================================================================
+// Variable máster de control para el loop del radar de verificación
+window.verificationLinkInterval = null;
 
 function iniciarCreacionCuentaNetflix(btn) {
-  // 🛠️ FILTRO DE SEGURIDAD PREVIO: Pregunta antes de gastar recursos
   let preConfirmacion = confirm(
     "❓ ¿Estás seguro de que deseas CREAR UNA CUENTA NUEVA de Netflix en este momento?\n\n(Esto procesará un PIN de Refácil e iniciará la creación del correo)",
   );
 
-  // Si el usuario presiona "Cancelar", la función se corta aquí y no hace nada
   if (!preConfirmacion) return;
 
-  // Si presionó "Aceptar", continúa con el flujo normal:
   if (typeof haptic === "function") haptic();
 
   const contenidoOriginal = btn.innerHTML;
   btn.style.pointerEvents = "none";
-  btn.innerHTML = `<div style="text-align:center; width:100%; padding: 14px;"><svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" style="margin-right:8px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> <span style="color:var(--ios-blue); font-weight:bold;">Generando credenciales...</span></div>`;
+  btn.innerHTML = `<div style="text-align:center; width:100%; padding: 14px;"><svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" style="margin-right:8px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="color:var(--ios-blue); font-weight:bold;">Generando credenciales...</span></div>`;
+
+  // 🔒 RESET DE RADAR E INVENTARIO: Forzamos a que el botón verde nazca escondido
+  document
+    .getElementById("radarVerificacionContenedor")
+    .style.setProperty("display", "flex", "important");
+  document
+    .getElementById("radarVerificacionSpinner")
+    .style.setProperty("display", "flex", "important");
+  document.getElementById("radarVerificacionSpinner").innerHTML =
+    `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Sincronizando con Gmail... Esperando correo de Netflix`;
+  document
+    .getElementById("btnLinkVerificarGmail")
+    .style.setProperty("display", "none", "important");
+  document
+    .getElementById("btnGuardarMaestroNetflix")
+    .style.setProperty("display", "none", "important"); // Anclado invisible
+
+  if (window.verificationLinkInterval)
+    clearInterval(window.verificationLinkInterval);
 
   const cbName = "cb_gen_cta_" + Date.now();
   window[cbName] = function (res) {
@@ -5007,66 +4870,57 @@ function iniciarCreacionCuentaNetflix(btn) {
     if (res && res.status === "success" && res.data) {
       const d = res.data;
 
-      // 🔥 CANDADO CORRECTO: Verifica si el sistema se quedó sin Pines de Refácil
       if (d.pinRecarga && d.pinRecarga.includes("Sin PIN")) {
         alert(
-          "❌ ERROR: No hay PINES de activación disponibles en la base de datos.\n\nPor favor, recarga el inventario de Pines de Refácil en tu Google Sheets antes de generar una cuenta nueva.",
+          "❌ ERROR: No hay PINES de activación disponibles en la base de datos.",
         );
-        return; // ⛔ Cortamos la función aquí y NO abrimos la ventana
+        return;
       }
 
-      // Inyectar datos principales en el modal
+      // Inyectar datos planos en la pantalla
       document.getElementById("displayCtaCorreo").innerText = d.correo;
       document.getElementById("displayCtaClave").innerText = d.clave;
       document.getElementById("displayCtaPinRecarga").innerText = d.pinRecarga;
 
-      // Construir las pildoras de los 5 pines de perfil
+      // Inyectar los 5 Pines de Perfil
       let htmlPerfiles = "";
       for (let p = 1; p <= 5; p++) {
         htmlPerfiles += `
-                  <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:5px 8px; border-radius:6px;">
-                    <span style="color:var(--text-secondary); font-size:0.75rem;">Perfil ${p}: <b style="color:#ffffff;">${d.pinesPerfiles[p]}</b></span>
-                    <span style="color:var(--ios-blue); font-size:0.7rem; cursor:pointer; font-weight:bold;" onclick="copiarTextoAisladoDirecto(this, '${d.pinesPerfiles[p]}')">Copiar</span>
-                  </div>`;
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.02);">
+            <span style="color:var(--text-secondary); font-size:0.75rem; font-weight:600;">Perfil ${p}: <b style="color:#ffffff; font-family:monospace; font-size:0.85rem; margin-left:4px;">${d.pinesPerfiles[p]}</b></span>
+            <span style="color:var(--ios-blue); font-size:0.75rem; cursor:pointer; font-weight:800;" onclick="window.copiarTextoAisladoDirecto(this, '${d.pinesPerfiles[p]}')">Copiar</span>
+          </div>`;
       }
       document.getElementById("displayCtaPinesPerfiles").innerHTML =
         htmlPerfiles;
 
-      // Condicional de guardado: Al darle al botón verde, salta el aviso obligatorio de verificación
+      // 📡 EL RADAR INICIA AUTOMÁTICAMENTE AQUÍ (Como querías al principio)
+      window.lanzarRadarEspiaVerificacionGmail(d.correo);
+
+      // Configuramos la inyección para cuando le den clic al botón verde (cuando aparezca)
       const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
       btnGuardar.onclick = function () {
-        let advertencia =
-          "⚠️ ¡RECORDATORIO OBLIGATORIO DE SEGURIDAD! ⚠️\n\n" +
-          "Debes ingresar al correo para verificar la cuenta y asegurar el acceso antes de guardarla.\n\n" +
-          "¿Ya verificaste el correo de la cuenta correctamente y deseas continuar con el guardado maestro?";
-
-        if (confirm(advertencia)) {
-          document
-            .getElementById("cuentaGeneradaModalOverlay")
-            .classList.remove("open");
-          guardarCuentaConfirmadaNetflix(btn, contenidoOriginal, d);
-        }
+        window.cerrarModalCreacionNetflixTotalmente();
+        guardarCuentaConfirmadaNetflix(
+          btnGuardar,
+          "Guardar en Inventario Maestro",
+          d,
+        );
       };
 
-      // Desplegar el modal en pantalla
-      document
-        .getElementById("cuentaGeneradaModalOverlay")
-        .classList.add("open");
+      const modal =
+        document.getElementById("cuentaGeneratedModalOverlay") ||
+        document.getElementById("cuentaGeneradaModalOverlay");
+      if (modal) modal.classList.add("open");
     } else {
       alert(
-        "❌ Error del Servidor: " +
-          (res ? res.message : "Fallo desconocido al crear los datos."),
+        "❌ Error del Servidor: " + (res ? res.message : "Fallo desconocido."),
       );
     }
   };
 
-  // Detector de creador para la columna L de PINESMES
   const empleadoActivo =
-    typeof usuarioGlobal !== "undefined"
-      ? usuarioGlobal
-      : typeof userLogueado !== "undefined"
-        ? userLogueado
-        : "Admin/Camilo";
+    sessionStorage.getItem("active_staff") || "Admin/Camilo";
 
   const script = document.createElement("script");
   script.id = "node_" + cbName;
@@ -5074,15 +4928,62 @@ function iniciarCreacionCuentaNetflix(btn) {
   document.body.appendChild(script);
 }
 
+window.lanzarRadarEspiaVerificacionGmail = function (correoTarget) {
+  window.verificationLinkInterval = setInterval(function () {
+    const cbRadarName = "cb_radar_verify_" + Date.now();
+
+    window[cbRadarName] = function (res) {
+      const node = document.getElementById("node_" + cbRadarName);
+      if (node) node.remove();
+      delete window[cbRadarName];
+
+      if (res && res.status === "success" && res.link) {
+        clearInterval(window.verificationLinkInterval); // Apaga el bucle de búsqueda
+
+        if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+
+        document
+          .getElementById("radarVerificacionSpinner")
+          .style.setProperty("display", "none", "important");
+
+        const btnLink = document.getElementById("btnLinkVerificarGmail");
+        btnLink.href = res.link;
+        btnLink.style.setProperty("display", "inline-flex", "important");
+
+        // 🎯 CANDADO MAESTRO INVERTIDO: Al darle clic al botón rojo, brota el botón verde de Sheets
+        btnLink.onclick = function () {
+          if (typeof haptic === "function") haptic();
+          // Revela el botón de guardado maestro en la interfaz
+          document
+            .getElementById("btnGuardarMaestroNetflix")
+            .style.setProperty("display", "block", "important");
+        };
+
+        const contenedor = document.getElementById(
+          "radarVerificacionContenedor",
+        );
+        contenedor.style.background = "rgba(48, 209, 88, 0.06)";
+        contenedor.style.borderColor = "rgba(48, 209, 88, 0.35)";
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_" + cbRadarName;
+    script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerLinkVerificacion&correo=${encodeURIComponent(correoTarget)}&callback=${cbRadarName}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+  }, 4000); // Rastreando la bandeja cada 4 segundos
+};
 function guardarCuentaConfirmadaNetflix(btn, contenidoOriginal, datosCuenta) {
-  if (typeof haptic === "function") haptic();
+  btn.disabled = true;
   btn.style.pointerEvents = "none";
-  btn.innerHTML = `<div style="text-align:center; width:100%; padding: 14px;"><svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="2.5" style="margin-right:8px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="color:var(--ios-green); font-weight:bold;">Guardando en Sheets...</span></div>`;
+  btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Guardando en Sheets...`;
 
   const cbName = "cb_save_cta_" + Date.now();
   window[cbName] = function (res) {
+    btn.disabled = false;
     btn.style.pointerEvents = "auto";
-    btn.innerHTML = contenidoOriginal;
+    btn.innerHTML = "¡Guardado con Éxito!";
+    btn.style.background = "var(--ios-green)";
 
     const scriptNode = document.getElementById("node_" + cbName);
     if (scriptNode) scriptNode.remove();
@@ -5091,13 +4992,22 @@ function guardarCuentaConfirmadaNetflix(btn, contenidoOriginal, datosCuenta) {
     if (res && res.status === "success") {
       if (typeof triggerToast === "function") {
         triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Cuenta inyectada al maestro.</span></div>`,
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg> <span>Cuenta inyectada al maestro.</span></div>`,
         );
-      } else {
-        alert("✅ Cuenta inyectada al maestro exitosamente.");
+      }
+
+      // Cambiamos el texto de espera del radar para avisar que el Excel ya guardó todo normal
+      const spinnerTexto = document.getElementById("radarVerificacionSpinner");
+      if (spinnerTexto && spinnerTexto.style.display !== "none") {
+        spinnerTexto.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> ¡Sheets Guardado! Dale al botón apenas aparezca el link`;
       }
     } else {
-      alert("❌ Error al guardar: " + (res ? res.message : "Fallo en Sheets."));
+      alert(
+        "❌ Error al guardar en Sheets: " +
+          (res ? res.message : "Fallo de comunicación."),
+      );
+      btn.innerHTML = contenidoOriginal;
+      btn.style.background = "";
     }
   };
 
@@ -5112,6 +5022,28 @@ function guardarCuentaConfirmadaNetflix(btn, contenidoOriginal, datosCuenta) {
   script.src = GOOGLE_SCRIPT_URL + urlParams;
   document.body.appendChild(script);
 }
+
+window.cerrarModalCreacionNetflixTotalmente = function () {
+  if (typeof haptic === "function") haptic();
+  if (window.verificationLinkInterval)
+    clearInterval(window.verificationLinkInterval);
+
+  const modal =
+    document.getElementById("cuentaGeneratedModalOverlay") ||
+    document.getElementById("cuentaGeneradaModalOverlay");
+  if (modal) modal.classList.remove("open");
+};
+
+window.cerrarModalCreacionNetflixTotalmente = function () {
+  if (typeof haptic === "function") haptic();
+  if (window.verificationLinkInterval)
+    clearInterval(window.verificationLinkInterval);
+
+  const modal =
+    document.getElementById("cuentaGeneratedModalOverlay") ||
+    document.getElementById("cuentaGeneradaModalOverlay");
+  if (modal) modal.classList.remove("open");
+};
 
 function copiarDatoCuentaNueva(btn, idElemento) {
   if (typeof haptic === "function") haptic();
@@ -6647,24 +6579,22 @@ window.cerrarNotificacionStock = function () {
   }
 };
 // =========================================================================
-// ⌨️ CONTROL MAESTRO DE NAVEGACIÓN Y ATAJOS (ANTI-AMONTONAMIENTO)
+// ⌨️ CONTROL MAESTRO DE NAVEGACIÓN Y ATAJOS (ANTI-AMONTONAMIENTO RECALIBRADO)
 // =========================================================================
 
-// 1. Evitar que se amontonen las ventanas al tocar los botones del menú inferior
+// 1. Evitar que se amontonen las ventanas principales (Solo aplica a lanzadores oficiales)
 document.addEventListener(
   "click",
   function (e) {
-    let btnMenu = e.target.closest(
-      "#controlPanel button, #controlPanel div[onclick]",
-    );
+    // 🔒 BLINDAJE ESTRICTO: Solo se activa si el clic viene del Dock (.mac-dock-icon) o de la Barra Superior (.mac-menu-item)
+    let launcher = e.target.closest(".mac-dock-icon, .mac-menu-item");
 
-    if (btnMenu) {
-      let onclickCode = btnMenu.getAttribute("onclick") || "";
+    if (launcher) {
+      let onclickCode = launcher.getAttribute("onclick") || "";
 
-      // Mapeo para saber qué ventana se intenta abrir según el botón
+      // Mapeo maestro de botones y sus respectivos contenedores (Overlays)
       let mapaPaneles = {
         toggleFinanzasPanel: "finanzasOverlay",
-        abrirModalRegistroVentas: "modalRegistroVentas",
         toggleNetflixManagerPanel: "netflixManagerOverlay",
         toggleCodesPanel: "codesOverlay",
         toggleVentasPanel: "ventasOverlay",
@@ -6676,7 +6606,8 @@ document.addEventListener(
         toggleGarantiasPanel: "garantiasOverlay",
         togglePromoPanel: "promoOverlay",
         toggleRecordatoriosPanel: "recordatoriosOverlay",
-        abrirCalculadoraCombos: "comboCalcOverlay", // 🔥 ¡LLAVE REGISTRADA AQUÍ PARA DARLE PERMISO!
+        abrirCalculadoraCombos: "comboCalcOverlay",
+        abrirTotalNomina: "nominaOverlay",
       };
 
       let panelAIgnorar = null;
@@ -6687,57 +6618,68 @@ document.addEventListener(
         }
       }
 
-      // Cerramos TODAS las ventanas emergentes excepto la que acabamos de tocar
-      document.querySelectorAll(".overlay-ios").forEach((panel) => {
-        if (
-          panel.id !== "loginOverlay" &&
-          panel.id !== "passwordOverlay" &&
-          panel.id !== panelAIgnorar
-        ) {
-          panel.classList.remove("open");
-        }
-      });
+      // 🛡️ CONDICIONAL DE SEGURIDAD: Solo limpia la pantalla si de verdad vas a abrir una app principal
+      if (panelAIgnorar) {
+        document.querySelectorAll(".overlay-ios").forEach((panel) => {
+          if (
+            panel.id !== "loginOverlay" &&
+            panel.id !== "passwordOverlay" &&
+            panel.id !== panelAIgnorar
+          ) {
+            panel.classList.remove("open");
+            if (
+              panel.style.display === "flex" ||
+              panel.style.display === "block"
+            ) {
+              panel.style.setProperty("display", "none", "important");
+            }
+          }
+        });
+      }
     }
   },
-  true,
+  true, // Mantiene la prioridad de intercepción solo sobre el menú y el dock
 );
 
 // 2. Atajos de Teclado con protección anti-amontonamiento
 document.addEventListener("keydown", function (e) {
-  // Función rápida para limpiar la pantalla completa
   const limpiarPantalla = () => {
     document.querySelectorAll(".overlay-ios").forEach((panel) => {
       if (panel.id !== "loginOverlay" && panel.id !== "passwordOverlay") {
         panel.classList.remove("open");
+        if (panel.style.display === "flex" || panel.style.display === "block") {
+          panel.style.setProperty("display", "none", "important");
+        }
       }
     });
   };
 
-  // 🛑 Tecla ESC: Cierra todo inmediatamente
+  // 🛑 Tecla ESC: Limpieza total
   if (e.key === "Escape") {
     if (typeof haptic === "function") haptic();
     limpiarPantalla();
   }
 
-  // 🛒 Alt + V: Limpia y abre Ventas
+  // 🛒 Alt + V: Abrir Ventas
   if (e.altKey && (e.key === "v" || e.key === "V")) {
     e.preventDefault();
     limpiarPantalla();
-    toggleVentasPanel();
+    if (typeof toggleVentasPanel === "function") toggleVentasPanel();
   }
 
-  // 🔑 Alt + C: Limpia y abre Códigos
+  // 🔑 Alt + C: Abrir Códigos
   if (e.altKey && (e.key === "c" || e.key === "C")) {
     e.preventDefault();
     limpiarPantalla();
-    toggleCodesPanel();
+    if (typeof toggleCodesPanel === "function") toggleCodesPanel();
   }
 
-  // 🔍 Alt + B: Limpia y abre Bóveda de Cuentas
+  // 🔍 Alt + B: Bóveda de Cuentas
   if (e.altKey && (e.key === "b" || e.key === "B")) {
     e.preventDefault();
     limpiarPantalla();
-    toggleSearchAccountPanel();
+    if (typeof toggleSearchAccountPanel === "function")
+      toggleSearchAccountPanel();
   }
 });
 // =========================================================================
@@ -6885,7 +6827,7 @@ window.calcularPreciosSistemaCotizador = function () {
       // Caso B: Está acompañando un combo. Lo extraemos del pool plano estándar
       // para que sume $10.000 limpios y no interfiera con los descuentos de las otras
       cantidadEstandar--;
-      abonoParamountCombo = 18000;
+      abonoParamountCombo = 10000;
     }
   }
 
@@ -6893,7 +6835,7 @@ window.calcularPreciosSistemaCotizador = function () {
 
   // Interceptamos si está solo, de lo contrario ejecuta tu árbol de decisiones original intacto
   if (esParamountIndividualSolo) {
-    precioBaseUnMes = 20000; // 🔥 Standalone forzado a 15k
+    precioBaseUnMes = 15000; // 🔥 Standalone forzado a 15k
   } else {
     // 2. REGLAS AUTOMATIZADAS CYBERNET CORREGIDAS
     if (tieneNetflix) {
@@ -7532,27 +7474,24 @@ document.addEventListener(
   true,
 );
 // =========================================================================
-// 🍎 CYBERNET OS: MOTOR DE ALERTA DE STOCK DE MAC INTEGRADO (V2 COMPLETO)
+// 🍎 CYBERNET OS: MOTOR DE ALERTA DE STOCK DE MAC INTEGRADO (V2 UNIFICADO)
 // =========================================================================
 window.timerElapsedNotif = null;
 window.cachedLibresData = [];
 
-function actualizarPerfilesLibres(manual = false) {
-  if (manual) haptic();
+window.actualizarPerfilesLibres = function (manual = false) {
+  if (manual && typeof haptic === "function") haptic();
 
   const callbackName = "cb_libres_" + Date.now();
 
   window[callbackName] = function (res) {
     if (res && res.status === "success") {
-      // 1. Respaldamos los números de stock en la memoria global
       window.cachedLibresData = res.data;
 
-      // 2. Redibujamos de inmediato el panel de inventario para inyectar los datos inline
       if (typeof window.renderizarPanelCamilo === "function") {
         window.renderizarPanelCamilo();
       }
 
-      // 3. Analizamos si hay stock crítico para arrojar la notificación de Mac
       verificarStockCritico(res.data);
     }
 
@@ -7565,10 +7504,9 @@ function actualizarPerfilesLibres(manual = false) {
   script.id = "node_" + callbackName;
   script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPerfilesLibres&callback=${callbackName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
-}
+};
 
-// Extractor dinámico de perfiles libres para el listado unificado
-function obtenerConteoLibreDinamico(idProducto) {
+window.obtenerConteoLibreDinamico = function (idProducto) {
   if (!window.cachedLibresData || window.cachedLibresData.length === 0)
     return "-";
 
@@ -7586,9 +7524,8 @@ function obtenerConteoLibreDinamico(idProducto) {
   });
 
   return encontrado ? encontrado.libres : "0";
-}
+};
 
-// Generador unificado de la lista de stock e interruptores con control de rol
 window.renderizarPanelCamilo = function () {
   const contenedor = document.getElementById("panelSwitchesStock");
   if (!contenedor) return;
@@ -7604,19 +7541,18 @@ window.renderizarPanelCamilo = function () {
 
   productosTiendaMaster.forEach((p) => {
     const estaAgotado = agotados.includes(p.id);
-    const cantLibres = obtenerConteoLibreDinamico(p.id);
+    const cantLibres = window.obtenerConteoLibreDinamico(p.id);
 
     const row = document.createElement("div");
     row.style.cssText =
       "display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 0.95rem; font-weight: 600; background: rgba(0,0,0,0.15); border-radius: 12px; margin-bottom: 6px;";
 
-    // Si no es Camilo, el input se deshabilita físicamente en el DOM
     const inputDisabled = esCamilo
       ? ""
       : "disabled style='cursor: not-allowed;'";
     const labelAction = esCamilo
       ? ""
-      : `onclick="alert('🔒 ACCESO RESTRINGIDO\\n\\nTu usuario operativo solo tiene autorización de consulta.\\n\\nSolo el administrador Camilo puede alterar el estado de venta de las plataformas.')"`;
+      : `onclick="alert('🔒 ACCESO RESTRINGIDO\\n\\nSolo el administrador Camilo puede alterar el estado de venta de las plataformas.')"`;
 
     row.innerHTML = `
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -7673,14 +7609,12 @@ function lanzarBannerMacosStock(listaPlataformas) {
   if (!banner || !texto || !visorTiempo) return;
 
   clearInterval(window.timerElapsedNotif);
-
   banner.style.transform = "translateX(120%)";
   banner.style.opacity = "0";
 
   setTimeout(() => {
     texto.innerHTML = `Plataformas bajas o agotadas:<br><b style="color:#ffffff;">${listaPlataformas}</b>`;
     visorTiempo.innerText = "Ahora";
-
     banner.style.transform = "translateX(0)";
     banner.style.opacity = "1";
 
@@ -7704,21 +7638,22 @@ window.cerrarBannerNotificacionManualmente = function () {
 };
 
 // =========================================================================
-// ⏱️ RELOJ AUTOMÁTICO DE SEGUIMIENTO (CADA 10 MINUTOS)
+// ⏱️ RELOJ AUTOMÁTICO DE SEGUIMIENTO INTERNO (CALIBRADO A 5 MINUTOS)
 // =========================================================================
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
-    if (typeof actualizarPerfilesLibres === "function") {
-      actualizarPerfilesLibres(false);
-    }
+    window.actualizarPerfilesLibres(false);
   }, 2000);
 
   if (window.intervaloLibresAuto) clearInterval(window.intervaloLibresAuto);
-  window.intervaloLibresAuto = setInterval(() => {
-    if (typeof actualizarPerfilesLibres === "function") {
-      actualizarPerfilesLibres(false);
-    }
-  }, 600000);
+
+  // 🔄 SINCRONIZACIÓN PERFECTA: Dispara el radar contable cada 5 minutos exactos
+  window.intervaloLibresAuto = setInterval(
+    () => {
+      window.actualizarPerfilesLibres(false);
+    },
+    5 * 60 * 1000,
+  ); // ⏱️ 300.000 ms
 });
 // =========================================================================
 // 🔒 SEGURIDAD: CONTROLADOR DEL BOTÓN DE INVENTARIO SUPERIOR
