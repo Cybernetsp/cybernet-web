@@ -654,7 +654,7 @@ function confirmarPagoAlternativo() {
 }
 
 function copiarNequi() {
-  const numeroNequi = "3015156037";
+  const numeroNequi = "3215938767";
   navigator.clipboard.writeText(numeroNequi).then(() => {
     const btn = document.getElementById("btnCopiarNequi");
     if (btn) {
