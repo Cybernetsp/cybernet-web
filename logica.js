@@ -6586,13 +6586,13 @@ window.cerrarNotificacionStock = function () {
 document.addEventListener(
   "click",
   function (e) {
-    // 🔒 BLINDAJE ESTRICTO: Solo se activa si el clic viene del Dock (.mac-dock-icon) o de la Barra Superior (.mac-menu-item)
+    // 🔒 BLINDAJE ESTRICTO: Solo se activa si el clic viene del Dock o de la Barra Superior
     let launcher = e.target.closest(".mac-dock-icon, .mac-menu-item");
 
     if (launcher) {
       let onclickCode = launcher.getAttribute("onclick") || "";
 
-      // Mapeo maestro de botones y sus respectivos contenedores (Overlays)
+      // 🎯 SINCRO PERFECTA: Mapeo maestro de botones y sus contenedores reales (Overlays)
       let mapaPaneles = {
         toggleFinanzasPanel: "finanzasOverlay",
         toggleNetflixManagerPanel: "netflixManagerOverlay",
@@ -6608,6 +6608,9 @@ document.addEventListener(
         toggleRecordatoriosPanel: "recordatoriosOverlay",
         abrirCalculadoraCombos: "comboCalcOverlay",
         abrirTotalNomina: "nominaOverlay",
+        toggleAnaCodesPanel: "anaCodesOverlay", // 🟣 Conectado
+        toggleYopmailPanel: "yopmailOverlay", // 🟡 Conectado
+        toggleChayoPanel: "chayoOverlay", // 🔴 Conectado
       };
 
       let panelAIgnorar = null;
@@ -6618,7 +6621,7 @@ document.addEventListener(
         }
       }
 
-      // 🛡️ CONDICIONAL DE SEGURIDAD: Solo limpia la pantalla si de verdad vas a abrir una app principal
+      // 🛡️ CONDICIONAL DE SEGURIDAD: Cierra cualquier otra app abierta al cambiar de módulo
       if (panelAIgnorar) {
         document.querySelectorAll(".overlay-ios").forEach((panel) => {
           if (
@@ -6638,7 +6641,7 @@ document.addEventListener(
       }
     }
   },
-  true, // Mantiene la prioridad de intercepción solo sobre el menú y el dock
+  true,
 );
 
 // 2. Atajos de Teclado con protección anti-amontonamiento
@@ -7429,23 +7432,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 // =========================================================================
-// 🗂️ CYBERNET OS: CERRADOR DE VENTANAS INFALIBLE (MODO ESCRITORIO LIMPIO)
+// 🗂️ CYBERNET OS: CERRADOR DE VENTAS INFALIBLE (MODO ESCRITORIO LIMPIO)
 // =========================================================================
 document.addEventListener(
   "click",
   (e) => {
-    // 1. Detectamos si tocaste un botón de arriba o un icono de abajo
     const tocasteMenu = e.target.closest(".mac-menu-item");
     const tocasteDock = e.target.closest(".mac-dock-icon");
 
     if (tocasteMenu || tocasteDock) {
-      // 2. Lista exacta de tus ventanas
+      // 📋 CORREGIDO: IDs exactos de los contenedores HTML de las 3 bóvedas nuevas
       const ventanasPrincipales = [
         "codesOverlay",
         "shiftsOverlay",
         "inventarioOverlay",
         "promoOverlay",
         "recordatoriosOverlay",
+        "anaCodesOverlay", // 🌟 Corregido de función a ID
+        "chayoOverlay", // 🌟 Corregido de función a ID
+        "yopmailOverlay", // 🌟 Corregido de función a ID
         "distrisOverlay",
         "finanzasOverlay",
         "ventasOverlay",
@@ -7454,13 +7459,10 @@ document.addEventListener(
         "netflixManagerOverlay",
       ];
 
-      // 3. ¡ZAS! Cerramos absolutamente todo a la fuerza
       ventanasPrincipales.forEach((id) => {
         const ventana = document.getElementById(id);
         if (ventana) {
-          // Quitamos la clase de los paneles modernos
           ventana.classList.remove("open");
-          // Por si alguna ventana vieja usa el estilo display en lugar de clases
           if (
             ventana.style.display === "flex" ||
             ventana.style.display === "block"
@@ -7679,4 +7681,321 @@ window.cerrarBannerNotificacionManualmente = function () {
     banner.style.opacity = "0";
     clearInterval(window.timerElapsedNotif); // Detiene el segundero interno
   }
+};
+// =========================================================================
+// 📥 MOTOR DE BÚSQUEDA DE CORREOS INTEGRADO (TKDJGZ)
+// =========================================================================
+
+window.ejecutarBusquedaCorreoInterno = function () {
+  if (typeof haptic === "function") haptic();
+
+  // 1. Capturamos lo que escribiste
+  let inputVisual = document.getElementById("inputBuscadorCorreos");
+  let correoBuscar = inputVisual.value.trim();
+
+  // 2. Si lo dejó vacío, avisamos
+  if (correoBuscar === "") {
+    alert("⚠️ Por favor ingresa el nombre del correo que deseas buscar.");
+    inputVisual.focus();
+    return;
+  }
+
+  // Limpiamos por si el empleado escribió por error "@tkdjgz.com"
+  correoBuscar = correoBuscar.split("@")[0];
+
+  // 3. Le inyectamos el correo al formulario fantasma
+  document.getElementById("inputRecipientFantasma").value = correoBuscar;
+
+  // 4. Ponemos la pantalla a "cargar" visualmente
+  let iframe = document.getElementById("iframeCorreosResultado");
+  iframe.style.opacity = "0.5";
+
+  if (typeof triggerToast === "function") {
+    triggerToast(`✨ Buscando bandeja de ${correoBuscar}...`);
+  }
+
+  // 5. Disparamos el envío directo a la página de ellos
+  document.getElementById("formFantasmaCorreos").submit();
+
+  // 6. Restauramos la opacidad cuando cargue
+  setTimeout(() => {
+    iframe.style.opacity = "1";
+    if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+  }, 1000);
+};
+
+// =========================================================================
+// 🟣 MOTOR AVANZADO: EXTRACCIÓN NATIVA CÓDIGOS ANA (TKDJGZ)
+// =========================================================================
+
+window.correosExtraidosNativos = [];
+
+window.toggleAnaCodesPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("anaCodesOverlay");
+  if (overlay) {
+    overlay.classList.toggle("open");
+
+    if (overlay.classList.contains("open")) {
+      // Devolver a la pantalla de espera
+      document.getElementById("contenedorNativoCorreos").innerHTML = `
+        <div style="margin: auto; color: var(--text-secondary); text-align: center;">
+           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--ios-purple)" stroke-width="2" style="margin-bottom: 15px; opacity: 0.7;">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="11" y1="8" x2="11" y2="14"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+           </svg>
+           <br><span style="font-weight: 600;">Los correos aparecerán aquí</span>
+        </div>`;
+      document.getElementById("inputBuscadorCorreos").value = "";
+      setTimeout(() => {
+        document.getElementById("inputBuscadorCorreos").focus();
+      }, 150);
+    }
+  }
+};
+
+// =========================================================================
+// 🟣 MOTOR AVANZADO: EXTRACCIÓN NATIVA VÍA GOOGLE APPS SCRIPT
+// =========================================================================
+
+window.ejecutarBusquedaCorreoInterno = function () {
+  if (typeof haptic === "function") haptic();
+
+  let inputVisual = document.getElementById("inputBuscadorCorreos");
+  let correoBuscar = inputVisual.value.trim().split("@")[0];
+
+  if (correoBuscar === "") {
+    alert("⚠️ Por favor ingresa el nombre del correo que deseas buscar.");
+    inputVisual.focus();
+    return;
+  }
+
+  let contenedor = document.getElementById("contenedorNativoCorreos");
+
+  contenedor.innerHTML = `
+    <div style="margin: auto; color: var(--ios-purple); text-align: center;">
+       <svg class="spin-anim" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="2" x2="12" y2="6"></line>
+          <line x1="12" y1="18" x2="12" y2="22"></line>
+          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+          <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+       </svg>
+       <br><br><span style="font-weight: 600;">Usando el servidor de Google para extraer correos...</span>
+    </div>`;
+
+  const cbName = "cb_correos_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      let html = res.html;
+      let parser = new DOMParser();
+      let doc = parser.parseFromString(html, "text/html");
+
+      let table = doc.getElementById("emailTable");
+      if (!table) {
+        contenedor.innerHTML = `<div style="margin: auto; color: var(--ios-red); font-weight: bold;">No hay correos recientes en esta bandeja.</div>`;
+        return;
+      }
+
+      // Extraer JS info del cuerpo del correo
+      let match =
+        html.match(/var\s+emailBody\s*=\s*(\[.*?\])\[index\]\.body;/s) ||
+        html.match(/var\s+emailsData\s*=\s*(\[.*?\]);/s);
+      if (match && match[1]) {
+        try {
+          window.correosExtraidosNativos = JSON.parse(match[1]);
+        } catch (e) {
+          window.correosExtraidosNativos = [];
+        }
+      }
+
+      let filas = table.querySelectorAll("tr");
+      if (filas.length <= 1) {
+        contenedor.innerHTML = `<div style="margin: auto; color: var(--ios-green); font-weight: bold;">La bandeja está limpia.</div>`;
+        return;
+      }
+
+      // Generar la tabla en modo oscuro VIP
+      let htmlTabla = `<table style="width: 100%; border-collapse: collapse; text-align: left;">`;
+      filas.forEach((row, i) => {
+        if (i === 0) {
+          htmlTabla += `<tr style="border-bottom: 1px solid rgba(191, 90, 242, 0.3); color: var(--ios-purple);">`;
+          row
+            .querySelectorAll("th")
+            .forEach(
+              (th) =>
+                (htmlTabla += `<th style="padding: 16px; font-weight: 800; text-transform: uppercase; font-size: 0.85rem;">${th.innerText}</th>`),
+            );
+          htmlTabla += `</tr>`;
+        } else {
+          let cols = row.querySelectorAll("td");
+          if (cols.length >= 2) {
+            htmlTabla += `
+                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(191, 90, 242, 0.1)'" onmouseout="this.style.background='transparent'" onclick="abrirLectorCorreo(${i - 1})">
+                    <td style="padding: 16px; color: var(--text-primary); font-weight: 600; font-size: 0.95rem;">${cols[0].innerText}</td>
+                    <td style="padding: 16px; color: var(--text-secondary); font-size: 0.85rem; font-family: monospace;">${cols[1].innerText}</td>
+                 </tr>`;
+          }
+        }
+      });
+      htmlTabla += `</table>`;
+
+      if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+      contenedor.innerHTML = htmlTabla;
+    } else {
+      contenedor.innerHTML = `<div style="margin: auto; color: var(--ios-red); font-weight: bold;">Error: ${res ? res.message : "Fallo de conexión"}</div>`;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  // Llamamos a TU Google Script para que él haga el trabajo sucio
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerCorreosTK&correo=${encodeURIComponent(correoBuscar)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.abrirLectorCorreo = function (index) {
+  if (typeof haptic === "function") haptic();
+  let data = window.correosExtraidosNativos[index];
+  if (data && data.body) {
+    document.getElementById("cuerpoLectorCorreo").innerHTML = data.body;
+    document.getElementById("modalLectorCorreo").style.display = "flex";
+  } else {
+    alert("No se pudo cargar el cuerpo de este correo.");
+  }
+};
+
+window.cerrarLectorCorreo = function () {
+  if (typeof haptic === "function") haptic();
+  document.getElementById("modalLectorCorreo").style.display = "none";
+  document.getElementById("cuerpoLectorCorreo").innerHTML = "";
+};
+
+// =========================================================================
+// 🟡 MOTOR: ACCESO DIRECTO Y PRESSETS FIJOS YOPMAIL
+// =========================================================================
+
+window.toggleYopmailPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("yopmailOverlay");
+  if (overlay) {
+    overlay.classList.toggle("open");
+
+    if (overlay.classList.contains("open")) {
+      document.getElementById("inputYopmailCorreos").value = "";
+      setTimeout(() => {
+        document.getElementById("inputYopmailCorreos").focus();
+      }, 150);
+    }
+  }
+};
+
+window.abrirVentanaYopmail = function () {
+  if (typeof haptic === "function") haptic();
+
+  let inputVisual = document.getElementById("inputYopmailCorreos");
+  let correoBuscar = inputVisual.value.trim().split("@")[0];
+
+  if (correoBuscar === "") {
+    alert("⚠️ Por favor ingresa el nombre del correo.");
+    inputVisual.focus();
+    return;
+  }
+
+  window.buscarYopmailDirecto(correoBuscar);
+};
+
+window.buscarYopmailDirecto = function (correo) {
+  if (typeof haptic === "function") haptic();
+
+  // Limpia cualquier dominio sobrante por si acaso
+  let correoLimpio = correo.trim().split("@")[0];
+
+  // Ocultamos el buscador de tu panel de Cybernet
+  const overlay = document.getElementById("yopmailOverlay");
+  if (overlay) overlay.classList.remove("open");
+
+  if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+  if (typeof triggerToast === "function") {
+    triggerToast(`✨ Abriendo buzón de Yopmail: ${correoLimpio}...`);
+  }
+
+  // Despliega la mini-ventana externa tipo aplicación
+  let urlYopmail = `https://yopmail.com/?login=${encodeURIComponent(correoLimpio)}`;
+  let opcionesVentana =
+    "width=850,height=650,left=250,top=100,menubar=no,toolbar=no,location=no,status=no,scrollbars=yes,resizable=yes";
+
+  window.open(urlYopmail, "YopmailBandeja", opcionesVentana);
+};
+
+// =========================================================================
+// 🔴 MOTOR: PANEL MAXI-PANORÁMICO CHAYO (CON EFECTO CORTINA PROTEGIDO)
+// =========================================================================
+
+window.toggleChayoPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("chayoOverlay");
+  const iframe = document.getElementById("iframeChayo");
+  const barra = document.getElementById("barraCredencialesChayo");
+
+  if (overlay) {
+    overlay.classList.toggle("open");
+
+    if (overlay.classList.contains("open")) {
+      // 🔄 Reseteo de cortina intermedia al abrir la app
+      if (barra) {
+        barra.style.maxHeight = "80px";
+        barra.style.padding = "12px 20px";
+        barra.style.borderBottomWidth = "1px";
+        barra.style.opacity = "1";
+      }
+
+      if (iframe.src.includes("about:blank")) {
+        iframe.src = "https://chayonet.github.io/tienda/";
+      }
+    }
+  }
+};
+
+window.copiarCredencialChayo = function (texto, btn, tipo) {
+  if (typeof haptic === "function") haptic();
+
+  navigator.clipboard.writeText(texto).then(() => {
+    let originalText = btn.innerText;
+
+    btn.innerText = "¡Copiado!";
+    btn.style.background = "rgba(50, 215, 75, 0.15)";
+    btn.style.color = "var(--ios-green)";
+    btn.style.borderColor = "rgba(50, 215, 75, 0.3)";
+
+    if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+
+    setTimeout(() => {
+      btn.innerText = originalText;
+      btn.style.background = "rgba(255,55,95,0.1)";
+      btn.style.color = "#ff375f";
+      btn.style.borderColor = "rgba(255,55,95,0.3)";
+    }, 1500);
+
+    // ⚡ Desaparece únicamente el llavero intermedio a los 5 segundos de copiar la clave
+    if (tipo === "clave") {
+      setTimeout(() => {
+        const barra = document.getElementById("barraCredencialesChayo");
+        if (barra && barra.style.maxHeight !== "0px") {
+          barra.style.maxHeight = "0px";
+          barra.style.padding = "0px 20px";
+          barra.style.borderBottomWidth = "0px";
+          barra.style.opacity = "0";
+          if (typeof triggerToast === "function") {
+            triggerToast("🔓 Acceso completado. Maximizando visualización.");
+          }
+        }
+      }, 5000);
+    }
+  });
 };
