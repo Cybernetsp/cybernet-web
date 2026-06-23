@@ -34,7 +34,7 @@
   }
 })();
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec";
+  "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
 
 let timerInterval = null;
 let autoRefreshCodesInterval = null;
@@ -4339,7 +4339,7 @@ function ejecutarAutoPulsoTiempo() {
   sessionStorage.setItem("cyber_last_sync_time", ahora);
 
   fetch(
-    "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec",
+    "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec",
     {
       method: "POST",
       mode: "no-cors",
@@ -4384,7 +4384,7 @@ function ejecutarCierreSesionDefinitivo() {
     const activeUser = sessionStorage.getItem("active_staff") || "Vendedor";
 
     fetch(
-      "https://script.google.com/macros/s/AKfycbzWdHzqlwlAWcCuXngcurIIrZVCHl5QEhRUkHTL90dhNqfm1iXnvSvDli5G_r6zlmHY/exec",
+      "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec",
       {
         method: "POST",
         mode: "no-cors",
