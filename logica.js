@@ -954,21 +954,45 @@ window.abrirPanelCortesNet = function () {
     contenedor.innerHTML = "";
 
     if (res && res.status === "success") {
-      if (res.data.length === 0) {
+      // 🛡️ NUEVO FILTRO INTELIGENTE: Memoria temporal y anti-errores
+      let cortadosLocales = JSON.parse(
+        sessionStorage.getItem("cyber_cortes_recientes") || "[]",
+      );
+
+      let cuentasValidas = res.data.filter((cuenta) => {
+        // 1. Si el correo está vacío, no existe o dice #ERROR! lo bloquea
+        if (!cuenta.correo || cuenta.correo.includes("#ERROR")) return false;
+        // 2. Si Sheets envió la fecha o el vencimiento vacíos, los bloquea
+        if (cuenta.fecha !== undefined && cuenta.fecha.trim() === "")
+          return false;
+        if (
+          cuenta.vencimiento !== undefined &&
+          cuenta.vencimiento.trim() === ""
+        )
+          return false;
+        // 3. Si no hay perfiles para cortar, lo bloquea
+        if (!cuenta.perfilesVencidos || cuenta.perfilesVencidos.length === 0)
+          return false;
+        // 4. Si la acabamos de cortar en esta misma sesión, la bloquea
+        if (cortadosLocales.includes(cuenta.correo)) return false;
+
+        return true;
+      });
+
+      // Validamos si después de filtrar quedaron cuentas
+      if (cuentasValidas.length === 0) {
         contenedor.innerHTML =
           '<div style="text-align:center; padding:40px; color:var(--ios-green); font-weight:bold; font-size:1rem;">🎉 ¡Todo limpio! No quedan perfiles vencidos.</div>';
         return;
       }
 
-      res.data.forEach((cuenta, index) => {
+      cuentasValidas.forEach((cuenta, index) => {
         let claveNuevaSugerida = generarClaveNetflixTV();
         let perfilesTexto = cuenta.perfilesVencidos.join(", ");
         let perfilesOcultosSeguros = cuenta.perfilesVencidos.join("|||");
 
         let div = document.createElement("div");
         div.className = "card-ios account-cut-card";
-
-        // Estética Bento con bordes sutiles de alerta de corte
         div.style.cssText =
           "padding: 18px; display: flex; flex-direction: column; gap: 14px; background: rgba(229, 9, 20, 0.01); border: 1px solid rgba(229, 9, 20, 0.15); border-radius: 20px; margin-bottom: 12px; transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);";
 
@@ -980,7 +1004,7 @@ window.abrirPanelCortesNet = function () {
               </span>
               <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
                 <span style="font-size: 1.05rem; color: var(--text-primary); font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; font-family: monospace;">${cuenta.correo}</span>
-                <button style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 5px 8px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center;" onclick="copiarTextoRapido(this, '${cuenta.correo}')">
+                <button style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 5px 8px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center;" onclick="window.copiarCorreoNetflixCorte(this, '${cuenta.correo}')">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
               </div>
@@ -1048,6 +1072,16 @@ window.procesarCorteReal = function (
     delete window[cbName];
 
     if (res && res.status === "success") {
+      // 👇 MEMORIA: Guarda el correo para bloquearlo y que no vuelva a salir si refrescas
+      let cortadosLocales = JSON.parse(
+        sessionStorage.getItem("cyber_cortes_recientes") || "[]",
+      );
+      cortadosLocales.push(correo);
+      sessionStorage.setItem(
+        "cyber_cortes_recientes",
+        JSON.stringify(cortadosLocales),
+      );
+
       btn.innerHTML = "¡Completado!";
       btn.style.background = "var(--ios-green)";
       btn.style.color = "white";
@@ -4938,6 +4972,19 @@ window.lanzarRadarEspiaVerificacionGmail = function (correoTarget) {
       delete window[cbRadarName];
 
       if (res && res.status === "success" && res.link) {
+        // 👇 BLINDAJE EXTRA: Validar si la respuesta de Google Sheets nos devolvió
+        // explícitamente el correo al que pertenece el link (si tu backend lo envía).
+        // Si tu backend no envía "res.correoOriginal", igual lo dejará pasar, pero si lo envía, será estricto.
+        if (
+          res.correoOriginal &&
+          res.correoOriginal.toLowerCase() !== correoTarget.toLowerCase()
+        ) {
+          console.log(
+            "Se detectó un link, pero es de otro correo. Ignorando...",
+          );
+          return; // Ignora este link y sigue buscando en el próximo ciclo
+        }
+
         clearInterval(window.verificationLinkInterval); // Apaga el bucle de búsqueda
 
         if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
@@ -4950,10 +4997,9 @@ window.lanzarRadarEspiaVerificacionGmail = function (correoTarget) {
         btnLink.href = res.link;
         btnLink.style.setProperty("display", "inline-flex", "important");
 
-        // 🎯 CANDADO MAESTRO INVERTIDO: Al darle clic al botón rojo, brota el botón verde de Sheets
+        // 🎯 CANDADO MAESTRO INVERTIDO
         btnLink.onclick = function () {
           if (typeof haptic === "function") haptic();
-          // Revela el botón de guardado maestro en la interfaz
           document
             .getElementById("btnGuardarMaestroNetflix")
             .style.setProperty("display", "block", "important");
@@ -4969,6 +5015,7 @@ window.lanzarRadarEspiaVerificacionGmail = function (correoTarget) {
 
     const script = document.createElement("script");
     script.id = "node_" + cbRadarName;
+    // Mandamos el correo al backend para que busque ese en específico
     script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerLinkVerificacion&correo=${encodeURIComponent(correoTarget)}&callback=${cbRadarName}&_ts=${Date.now()}`;
     document.body.appendChild(script);
   }, 4000); // Rastreando la bandeja cada 4 segundos
@@ -5048,19 +5095,22 @@ window.cerrarModalCreacionNetflixTotalmente = function () {
 function copiarDatoCuentaNueva(btn, idElemento) {
   if (typeof haptic === "function") haptic();
   let texto = document.getElementById(idElemento).innerText;
+
   navigator.clipboard.writeText(texto).then(function () {
     let originalText = btn.innerHTML;
     btn.innerHTML = "¡Listo!";
     btn.style.background = "var(--ios-green)";
     btn.style.color = "#ffffff";
+
     setTimeout(function () {
       btn.innerHTML = originalText;
       btn.style.background = "";
       btn.style.color = "";
     }, 1000);
+
+    // Se eliminó la parte que abría la URL, ahora solo copia el texto.
   });
 }
-
 function copiarTextoAisladoDirecto(elemento, texto) {
   if (typeof haptic === "function") haptic();
   navigator.clipboard.writeText(texto).then(function () {
@@ -7457,6 +7507,7 @@ document.addEventListener(
         "cargarOverlay",
         "garantiasOverlay",
         "netflixManagerOverlay",
+        "libroOverlay",
       ];
 
       ventanasPrincipales.forEach((id) => {
@@ -7998,4 +8049,38 @@ window.copiarCredencialChayo = function (texto, btn, tipo) {
       }, 5000);
     }
   });
+};
+// =========================================================================
+// NUEVA FUNCIÓN: COPIAR CORREO EN PANEL DE CORTES (SIN ABRIR URL)
+// =========================================================================
+window.copiarCorreoNetflixCorte = function (btn, correo) {
+  if (typeof haptic === "function") haptic();
+
+  navigator.clipboard.writeText(correo).then(function () {
+    let oldBg = btn.style.background;
+    let oldColor = btn.style.color;
+
+    btn.style.background = "var(--ios-green)";
+    btn.style.color = "#ffffff";
+
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Correo copiado</span></div>`,
+      );
+    }
+
+    setTimeout(function () {
+      btn.style.background = oldBg;
+      btn.style.color = oldColor;
+    }, 1500);
+
+    // Se eliminó la línea que abría Netflix automáticamente
+  });
+};
+window.toggleLibroPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("libroOverlay");
+  if (overlay) {
+    overlay.classList.toggle("open");
+  }
 };
