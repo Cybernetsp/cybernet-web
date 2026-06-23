@@ -63,7 +63,7 @@ const catálogoProductos = [
   {
     id: "PARAMOUNT",
     nombre: "Paramount+",
-    precio: 18000,
+    precio: 3000,
     color: "#0078ff",
     logo: `<img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
   },
@@ -434,7 +434,7 @@ function regresarAlPasoInicial() {
 }
 
 // =========================================================================
-// 💼 INTERFAZ B2B (DASHBOARD), MÓVIL Y RE-SINCRONIZACIÓN TOTAL CADA 5 MIN
+// 💼 INTERFAZ B2B (DASHBOARD), MÓVIL Y ALERTAS
 // =========================================================================
 function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   document.getElementById("loginSection").style.display = "none";
@@ -446,37 +446,29 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   }
 
   let nombreSeguro = nombre ? nombre : "Distribuidor";
-  document.getElementById("distriWelcomeName").innerText = `¡Hola, ${nombreSeguro}!`;
-  document.getElementById("distriWelcomePhone").innerText = `Distribuidor • Tel: ${telefono}`;
+  document.getElementById("distriWelcomeName").innerText =
+    `¡Hola, ${nombreSeguro}!`;
+  document.getElementById("distriWelcomePhone").innerText =
+    `Distribuidor • Tel: ${telefono}`;
 
-  window.saldoNumericoActual = parseFloat(String(saldo).replace(/[^\d.-]/g, "")) || 0;
-  if (window.saldoNumericoActual > 0 && window.saldoNumericoActual < 1000) {
+  window.saldoNumericoActual =
+    parseFloat(String(saldo).replace(/[^\d.-]/g, "")) || 0;
+  if (window.saldoNumericoActual > 0 && window.saldoNumericoActual < 1000)
     window.saldoNumericoActual *= 1000;
-  }
 
-  // Carga inicial al entrar al sistema
   actualizarSaldoUI();
   renderTienda();
   cargarStockEnTienda();
   cargarDatosFinancierosYAlertas(telefono);
 
-  // 🔄 LOOP MAESTRO RECALIBRADO: Ejecuta una actualización total en cascada cada 5 minutos
-  if (window.cyberIntervaloSaldoFondo) clearInterval(window.cyberIntervaloSaldoFondo);
-  
-  window.cyberIntervaloSaldoFondo = setInterval(function() {
-    // 1. Llama a la base por el saldo nuevo
-    refrescarSaldoDistribuidorFondo();
-    
-    // 2. Trae los nuevos números de stock en vivo de las 18 plataformas
-    if (typeof cargarStockEnTienda === "function") cargarStockEnTienda();
-    
-    // 3. Re-calcula si hay alertas de renovación de clientes expirando
-    if (typeof cargarDatosFinancierosYAlertas === "function") {
-      const telActivo = localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
-      cargarDatosFinancierosYAlertas(telActivo);
-    }
-  }, 5 * 60 * 1000); // ⏱️ 5 Minutos exactos
+  if (window.cyberIntervaloSaldoFondo)
+    clearInterval(window.cyberIntervaloSaldoFondo);
+  window.cyberIntervaloSaldoFondo = setInterval(
+    refrescarSaldoDistribuidorFondo,
+    5 * 60 * 1000,
+  );
 }
+
 function actualizarSaldoUI() {
   const f = formatMoneda(window.saldoNumericoActual);
   const balDesktop = document.getElementById("distriBarBalance");
