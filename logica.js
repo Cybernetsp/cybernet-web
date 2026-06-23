@@ -6660,7 +6660,8 @@ document.addEventListener(
         abrirTotalNomina: "nominaOverlay",
         toggleAnaCodesPanel: "anaCodesOverlay", // 🟣 Conectado
         toggleYopmailPanel: "yopmailOverlay", // 🟡 Conectado
-        toggleChayoPanel: "chayoOverlay", // 🔴 Conectado
+        toggleChayoPanel: "chayoOverlay",
+        toggleGmailPanel: "gmailOverlay" // 🔴 Conectado
       };
 
       let panelAIgnorar = null;
@@ -7508,6 +7509,7 @@ document.addEventListener(
         "garantiasOverlay",
         "netflixManagerOverlay",
         "libroOverlay",
+        "gmailOverlay",
       ];
 
       ventanasPrincipales.forEach((id) => {
@@ -8083,4 +8085,155 @@ window.toggleLibroPanel = function () {
   if (overlay) {
     overlay.classList.toggle("open");
   }
+};
+// =========================================================================
+// 🔴 MOTOR: LECTOR DE CORREOS GLOBAL (ÚLTIMAS 2 HORAS)
+// =========================================================================
+
+window.toggleGmailPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("gmailOverlay");
+  
+  if (overlay) {
+    // 👇 ESTE ES EL TRUCO: Destruye cualquier bloqueo invisible
+    overlay.style.setProperty("display", "", "important"); 
+    
+    overlay.classList.toggle("open");
+    if (overlay.classList.contains("open")) {
+      cargarCorreosRecientesGmail();
+    }
+  } else {
+    alert("⚠️ Error: No se encontró la ventana de Gmail en el HTML. Asegúrate de haber pegado el código en admin.html");
+  }
+};
+
+// =========================================================================
+// 🔴 MOTOR: LECTOR DE CORREOS GLOBAL (VERSIÓN TABLA ESTILO GMAIL)
+// =========================================================================
+
+window.correosGlobalesData = []; // Memoria para guardar los correos completos
+
+window.toggleGmailPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("gmailOverlay");
+  if (overlay) {
+    overlay.classList.toggle("open");
+    if (overlay.classList.contains("open")) {
+      cargarCorreosRecientesGmail();
+    }
+  }
+};
+
+window.cargarCorreosRecientesGmail = function () {
+  const container = document.getElementById("gmailScrollArea");
+  if (!container) return;
+
+  // Limpiamos el buscador al refrescar
+  const buscador = document.getElementById("buscadorGmailGlobal");
+  if (buscador) buscador.value = "";
+
+  container.innerHTML = `
+    <div style="text-align:center; padding:60px 20px; color:var(--text-secondary); font-size:0.95rem;">
+      <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+      <br><span style="color:#ea4335; font-weight:700;">Sincronizando bandeja de la última hora...</span>
+      </div>`;
+
+  const cbName = "cb_gmail_global_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      if (res.data.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:60px 20px; color:var(--ios-green); font-weight:bold; font-size:1rem;">📭 No hay correos nuevos en la última hora.</div>';
+        return;
+      }
+
+      window.correosGlobalesData = res.data;
+
+      let htmlTabla = `<table style="width: 100%; border-collapse: collapse; text-align: left;">`;
+      
+      res.data.forEach((mail, i) => {
+        let remitenteLimpio = mail.remitente.replace(/<.*?>/g, '').trim();
+        if(remitenteLimpio === "") remitenteLimpio = mail.remitente;
+        
+        let destinatarioLimpio = mail.destinatario.replace(/<.*?>/g, '').trim();
+        if(destinatarioLimpio === "") destinatarioLimpio = mail.destinatario;
+
+        htmlTabla += `
+          <tr class="fila-correo-global" style="border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s;" 
+              onmouseover="this.style.background='rgba(234, 67, 53, 0.1)'" 
+              onmouseout="this.style.background='transparent'" 
+              onclick="window.abrirLectorCorreoGlobal(${i})">
+             
+             <td style="padding: 16px 12px; width: 35%; vertical-align: middle;">
+                <div style="color: var(--text-primary); font-weight: 800; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">${remitenteLimpio}</div>
+                <div style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">
+                  Para: <span style="color: var(--ios-blue); font-family: monospace; font-weight: 600;">${destinatarioLimpio}</span>
+                </div>
+             </td>
+             
+             <td style="padding: 16px 12px; width: 50%; vertical-align: middle;">
+                <div style="display: flex; flex-direction: column; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 380px;">
+                  <span style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem;">${mail.asunto}</span>
+                  <span style="color: var(--text-secondary); font-size: 0.85rem;">${mail.fragmento}</span>
+                </div>
+             </td>
+             
+             <td style="padding: 16px 12px; width: 15%; text-align: right; vertical-align: middle;">
+                <div style="color: var(--text-secondary); font-size: 0.8rem; font-family: monospace; font-weight: bold;">${mail.fecha}</div>
+             </td>
+          </tr>`;
+      });
+
+      htmlTabla += `</table>`;
+      container.innerHTML = htmlTabla;
+      if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+
+    } else {
+      container.innerHTML = `<div style="color:var(--ios-red); text-align:center; padding:40px; font-weight:700;">Error: ${res ? res.message : "Fallo de conexión"}</div>`;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerCorreosRecientesGlobal&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+// 👇 NUEVO: FUNCIÓN PARA EL BUSCADOR 👇
+window.filtrarCorreosGlobales = function() {
+  const query = document.getElementById("buscadorGmailGlobal").value.toLowerCase().trim();
+  const filas = document.querySelectorAll(".fila-correo-global");
+  
+  filas.forEach(fila => {
+    // Busca en todo el texto de la fila (remitente, destinatario y asunto)
+    if (fila.innerText.toLowerCase().includes(query)) {
+      fila.style.display = "";
+    } else {
+      fila.style.display = "none";
+    }
+  });
+};
+
+// Abre el sub-modal blanco con el contenido HTML real del correo
+window.abrirLectorCorreoGlobal = function (index) {
+  if (typeof haptic === "function") haptic();
+  let data = window.correosGlobalesData[index];
+
+  if (data && data.cuerpoHtml) {
+    document.getElementById("cuerpoLectorCorreoGlobal").innerHTML =
+      data.cuerpoHtml;
+    document.getElementById("modalLectorCorreoGlobal").style.display = "flex";
+  } else {
+    alert("No se pudo extraer el cuerpo de este correo.");
+  }
+};
+
+// Cierra el sub-modal blanco
+window.cerrarLectorCorreoGlobal = function () {
+  if (typeof haptic === "function") haptic();
+  document.getElementById("modalLectorCorreoGlobal").style.display = "none";
+  document.getElementById("cuerpoLectorCorreoGlobal").innerHTML = "";
 };
