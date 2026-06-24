@@ -3104,23 +3104,17 @@ window.cambiarQuincenaHoras = function (quincena) {
 };
 
 // =========================================================================
-// 📅 RENDERIZADOR DE CALENDARIO Y TURNOS (VERSIÓN DASHBOARD FLUIDO V2)
+// 📅 RENDERIZADOR DE CALENDARIO Y TURNOS (VERSION ULTRA CON TOTAL NÓMINA GLOBAL)
 // =========================================================================
 function renderizarHorasEnPantalla(filtroBusqueda = "") {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
 
-  // 🔥 FIX ESTRUCTURAL: Convertimos el contenedor en un Flexbox real sin doble scroll
-  container.style.overflow = "hidden";
-  container.style.display = "flex";
-  container.style.flexDirection = "column";
-  container.style.padding = "0"; // Quitamos paddings que rompen la estética
-
   const userActivo = sessionStorage.getItem("active_staff");
   let userFinal = userActivo ? userActivo.toUpperCase() : "";
   const isCamilo = userFinal === "CAMILO";
 
-  // 🏦 DICCIONARIO DE CUENTAS NEQUI
+  // 🏦 DICCIONARIO DE CUENTAS NEQUI DEL STAFF
   const numerosNequi = {
     KATHERINE: "3126117630",
     MANUEL: "3205386975",
@@ -3129,20 +3123,15 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     ANGELICA: "3015156037",
   };
 
-  // 📅 CONTROL DE QUINCENAS (Eliminamos la opción 'Todo')
+  // 📅 VARIABLES DE TIEMPO CONTROLADAS POR LOS BOTONES
   const dMes = window.filtroMesHoras;
   const dAnio = window.filtroAnioHoras;
+  const esPrimeraQuincena = window.filtroQuincenaHoras === 1;
 
-  // Si estaba en '0' (Todo), lo forzamos a '1' (Q1)
-  let modoQuincena = window.filtroQuincenaHoras || 1;
-  if (modoQuincena === 0) {
-    modoQuincena = 1;
-    window.filtroQuincenaHoras = 1;
-  }
-
-  const inicioDia = modoQuincena === 2 ? 16 : 1;
-  const finDia =
-    modoQuincena === 1 ? 15 : new Date(dAnio, dMes + 1, 0).getDate();
+  const inicioDia = esPrimeraQuincena ? 1 : 16;
+  const finDia = esPrimeraQuincena
+    ? 15
+    : new Date(dAnio, dMes + 1, 0).getDate();
 
   const mesesNombres = [
     "Enero",
@@ -3172,21 +3161,21 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     "Nov",
     "Dic",
   ];
-  const diasSemanaLetras = ["D", "L", "M", "M", "J", "V", "S"];
+  const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
+  // 🚫 LEER TURNOS TACHADOS VISUALMENTE DESDE LA MEMORIA DEL NAVEGADOR
   let tachadosMemoria = JSON.parse(
     localStorage.getItem("cyber_turnos_tachados") || "{}",
   );
+
+  // 🗃️ Agrupador de datos
   let datosAgrupados = {};
   let vendedoresSet = new Set();
 
-  let totalNominaGlobal = 0;
-  let totalSegundosGlobal = 0;
-
-  // 1️⃣ Recopilar asesores activos en el mes
   for (let index = 0; index < window.currentHorasStock.length; index++) {
     let item = window.currentHorasStock[index];
     let d = parseDate(item.fecha);
+
     if (
       !d ||
       isNaN(d.getTime()) ||
@@ -3194,6 +3183,9 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
       d.getFullYear() !== dAnio
     )
       continue;
+    let dDia = d.getDate();
+    if (esPrimeraQuincena && dDia > 15) continue;
+    if (!esPrimeraQuincena && dDia <= 15) continue;
 
     let vendedorReal = item.vendedor
       .toUpperCase()
@@ -3202,50 +3194,18 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     if (vendedorReal === "PABLO") vendedorReal = "MANUP";
 
     if (!isCamilo && vendedorReal !== userFinal) continue;
+
     if (
       filtroBusqueda !== "" &&
       !vendedorReal.includes(filtroBusqueda.toUpperCase()) &&
       !item.fecha.toLowerCase().includes(filtroBusqueda)
-    )
+    ) {
       continue;
+    }
 
     vendedoresSet.add(vendedorReal);
+
     if (!datosAgrupados[vendedorReal]) datosAgrupados[vendedorReal] = {};
-  }
-
-  let vendedoresArray = Array.from(vendedoresSet).sort();
-
-  // 2️⃣ Cargar las horas de la quincena seleccionada
-  for (let index = 0; index < window.currentHorasStock.length; index++) {
-    let item = window.currentHorasStock[index];
-    let d = parseDate(item.fecha);
-
-    if (
-      !d ||
-      isNaN(d.getTime()) ||
-      d.getMonth() !== dMes ||
-      d.getFullYear() !== dAnio
-    )
-      continue;
-
-    let dDia = d.getDate();
-    if (modoQuincena === 1 && dDia > 15) continue;
-    if (modoQuincena === 2 && dDia <= 15) continue;
-
-    let vendedorReal = item.vendedor
-      .toUpperCase()
-      .replace(" (INGRESO MANUAL)", "")
-      .trim();
-    if (vendedorReal === "PABLO") vendedorReal = "MANUP";
-
-    if (!isCamilo && vendedorReal !== userFinal) continue;
-    if (
-      filtroBusqueda !== "" &&
-      !vendedorReal.includes(filtroBusqueda.toUpperCase()) &&
-      !item.fecha.toLowerCase().includes(filtroBusqueda)
-    )
-      continue;
-
     if (!datosAgrupados[vendedorReal][dDia]) {
       datosAgrupados[vendedorReal][dDia] = {
         totalSeconds: 0,
@@ -3274,215 +3234,294 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     }
 
     let pagoStr = String(item.pagoTurno || "0");
-    let pagoNum =
-      parseInt(
-        pagoStr.replace(/\$|\s/g, "").split(",")[0].replace(/\./g, ""),
-        10,
-      ) || 0;
-    let llaveTachado = `${vendedorReal}_${dDia}_${dMes}_${dAnio}`;
-    let estaTachado = tachadosMemoria[llaveTachado] === true;
+    let strLimpioPago = pagoStr
+      .replace(/\$|\s/g, "")
+      .split(",")[0]
+      .replace(/\./g, "");
+    let pagoNum = parseInt(strLimpioPago, 10) || 0;
 
     if (esTiempoValido) {
       datosAgrupados[vendedorReal][dDia].totalSeconds += totalSec;
       datosAgrupados[vendedorReal][dDia].totalPago += pagoNum;
-      if (item.filaIndex)
+      if (item.filaIndex) {
         datosAgrupados[vendedorReal][dDia].filasAsociadas.push(item.filaIndex);
-
-      if (!estaTachado) {
-        totalNominaGlobal += pagoNum;
-        totalSegundosGlobal += totalSec;
       }
     }
   }
 
-  // 🎛️ CONTROLES SUPERIORES FIJOS
+  let vendedoresArray = Array.from(vendedoresSet).sort();
+
+  // 🎛️ GENERADOR DE MENÚ DE CONTROLES DE FECHA
   let opcionesMes = "";
   mesesNombres.forEach((m, idx) => {
     let selected = idx === dMes ? "selected" : "";
-    opcionesMes += `<option value="${idx}" ${selected}>${m} de ${dAnio}</option>`;
+    opcionesMes += `<option value="${idx}" ${selected}>${m} ${dAnio}</option>`;
   });
 
-  const btnStyleActive =
-    "background: var(--ios-blue); color: white; border: 1px solid var(--ios-blue);";
-  const btnStyleInactive =
-    "background: transparent; color: var(--text-secondary); border: 1px solid var(--glass-border);";
+  let btnQ1Style = esPrimeraQuincena
+    ? "background: var(--ios-blue); color: white; border: 1px solid var(--ios-blue);"
+    : "background: rgba(10, 132, 255, 0.1); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.3);";
 
-  let gH = Math.floor(totalSegundosGlobal / 3600);
-  let gM = Math.floor((totalSegundosGlobal % 3600) / 60);
+  let btnQ2Style = !esPrimeraQuincena
+    ? "background: var(--ios-blue); color: white; border: 1px solid var(--ios-blue);"
+    : "background: rgba(10, 132, 255, 0.1); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.3);";
 
   let htmlControles = `
-    <div style="flex-shrink: 0; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin: 16px 20px; background: rgba(0,0,0,0.2); padding: 12px 16px; border-radius: 14px; border: 1px solid var(--glass-border);">
-      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <select class="input-ios" style="margin: 0; min-width: 140px; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.9rem;" onchange="cambiarMesHoras(this.value)">
+      <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center;">
+        <select class="input-ios" style="margin: 0; flex: 1; min-width: 140px; padding: 12px 16px; border-radius: 14px; font-weight: 800; font-size: 0.95rem; color: var(--ios-blue);" onchange="cambiarMesHoras(this.value)">
           ${opcionesMes}
         </select>
-        <button class="btn-ios btn-secondary" style="padding: 6px 12px; border-radius: 8px; font-size: 0.8rem;" onclick="forzarRefrescoDeHoras()">↻</button>
+        <div style="display: flex; gap: 8px; flex: 2; min-width: 220px;">
+          <button class="btn-ios" style="flex: 1; padding: 12px; border-radius: 14px; font-size: 0.85rem; font-weight: 800; transition: all 0.2s; ${btnQ1Style}" onclick="cambiarQuincenaHoras(1)">Quincena 1 (1 - 15)</button>
+          <button class="btn-ios" style="flex: 1; padding: 12px; border-radius: 14px; font-size: 0.85rem; font-weight: 800; transition: all 0.2s; ${btnQ2Style}" onclick="cambiarQuincenaHoras(2)">Quincena 2 (16 - Fin)</button>
+        </div>
       </div>
+    `;
 
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <span class="badge-ios" style="background: rgba(255,255,255,0.05); color: var(--text-primary); border-color: rgba(255,255,255,0.1);"><b style="color: var(--text-secondary);">Asesores:</b> ${vendedoresArray.length}</span>
-        <span class="badge-ios" style="background: rgba(255,255,255,0.05); color: var(--text-primary); border-color: rgba(255,255,255,0.1);"><b style="color: var(--text-secondary);">Horas:</b> ${gH}h ${gM}m</span>
-        ${isCamilo ? `<span class="badge-ios" style="background: rgba(48,209,88,0.15); color: var(--ios-green); border-color: rgba(48,209,88,0.3);"><b style="color: var(--text-primary);">Total:</b> $${totalNominaGlobal.toLocaleString("es-CO")}</span>` : ""}
-      </div>
-
-      <div style="display: flex; background: rgba(0,0,0,0.4); border-radius: 8px; border: 1px solid var(--glass-border); overflow: hidden;">
-        <button style="padding: 6px 14px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; border-right: 1px solid var(--glass-border); ${modoQuincena === 1 ? btnStyleActive : btnStyleInactive}" onclick="cambiarQuincenaHoras(1)">Q1 (1-15)</button>
-        <button style="padding: 6px 14px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; ${modoQuincena === 2 ? btnStyleActive : btnStyleInactive}" onclick="cambiarQuincenaHoras(2)">Q2 (16-fin)</button>
-      </div>
-    </div>
-  `;
-
-  if (vendedoresArray.length === 0) {
+  if (vendedoresArray.length === 0 && filtroBusqueda === "") {
+    if (!isCamilo && userFinal !== "") {
+      vendedoresArray.push(userFinal);
+      datosAgrupados[userFinal] = {};
+    } else {
+      container.innerHTML =
+        htmlControles +
+        '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">No hay turnos registrados en este periodo.</div>';
+      return;
+    }
+  } else if (vendedoresArray.length === 0) {
     container.innerHTML =
       htmlControles +
-      '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600;">No hay turnos registrados en esta quincena.</div>';
+      '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600; line-height:1.4;">No hay turnos que coincidan con la búsqueda.</div>';
     return;
   }
 
-  // 🏗️ CONSTRUCCIÓN DE LA TABLA MATRIZ
-  let theadDias = "";
-  for (let d = inicioDia; d <= finDia; d++) {
-    let fechaReal = new Date(dAnio, dMes, d);
-    let letraDia = diasSemanaLetras[fechaReal.getDay()];
-    let isFinde = fechaReal.getDay() === 0 || fechaReal.getDay() === 6;
-    let colorDia = isFinde ? "var(--ios-red)" : "var(--text-secondary)";
+  let tituloPanel = isCamilo
+    ? `Reporte Global (${inicioDia} al ${finDia} de ${mesesAbrev[dMes]})`
+    : `Mi Reporte (${inicioDia} al ${finDia} de ${mesesAbrev[dMes]})`;
+  if (filtroBusqueda !== "") tituloPanel = "Resultados de Búsqueda";
 
-    theadDias += `
-      <th style="position: sticky; top: 0; z-index: 15; background: #1c1c1e; padding: 12px 6px; min-width: 65px; border-bottom: 1px solid var(--glass-border); border-right: 1px solid rgba(255,255,255,0.03); text-align: center;">
-        <div style="font-size: 0.95rem; color: var(--text-primary); font-weight: 800;">${d}</div>
-        <div style="font-size: 0.7rem; color: ${colorDia}; font-weight: 600;">${letraDia}</div>
-      </th>
-    `;
-  }
+  let html =
+    htmlControles +
+    `<h4 style="text-align:center; color:var(--text-primary); font-size:1.05rem; margin-bottom:15px; font-weight: 800; letter-spacing: -0.3px;">${tituloPanel}</h4>`;
 
-  let tbodyHTML = "";
+  // 💰 ACUMULADOR DE NÓMINA TOTAL GLOBAL
+  let totalNominaGlobal = 0;
+
+  // 🏗️ CONSTRUCCIÓN DEL LAYOUT TIPO CALENDARIO POR VENDEDOR
   for (let v = 0; v < vendedoresArray.length; v++) {
     let vendedor = vendedoresArray[v];
     let dataVendedor = datosAgrupados[vendedor];
     let totalSegundosVendedor = 0;
     let totalPagoVendedor = 0;
     let filasVendedorGlobal = [];
-    let nequiNum = numerosNequi[vendedor] || "Sin Nequi";
 
-    let celdasDias = "";
+    let primerDiaFecha = new Date(dAnio, dMes, inicioDia);
+    let offsetDias = primerDiaFecha.getDay();
+
+    let celdasHtml = diasSemana
+      .map(
+        (d) =>
+          `<div style="text-align: center; font-size: 0.7rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; padding-bottom: 8px;">${d}</div>`,
+      )
+      .join("");
+
+    for (let o = 0; o < offsetDias; o++) {
+      celdasHtml += `<div style="background: transparent;"></div>`;
+    }
+
     for (let dia = inicioDia; dia <= finDia; dia++) {
       let worked = dataVendedor ? dataVendedor[dia] : null;
-      let contenidoCelda = `<span style="color: rgba(255,255,255,0.05); font-size: 1.2rem;">·</span>`;
+      let timeStr = "";
+      let btnAcciones = "";
+      let hasWorked = false;
+
       let llaveTachado = `${vendedor}_${dia}_${dMes}_${dAnio}`;
       let estaTachado = tachadosMemoria[llaveTachado] === true;
 
       if (worked && worked.totalSeconds > 0) {
+        hasWorked = true;
+
         if (!estaTachado) {
           totalSegundosVendedor += worked.totalSeconds;
           totalPagoVendedor += worked.totalPago;
         }
 
-        let horasDec = (worked.totalSeconds / 3600).toFixed(1);
-        if (horasDec.endsWith(".0"))
-          horasDec = horasDec.substring(0, horasDec.length - 2);
+        let h = Math.floor(worked.totalSeconds / 3600);
+        let m = Math.floor((worked.totalSeconds % 3600) / 60);
+        timeStr =
+          String(h).padStart(2, "0") + "h " + String(m).padStart(2, "0") + "m";
 
         let filasStrInd = worked.filasAsociadas.join(",");
         filasVendedorGlobal.push(...worked.filasAsociadas);
 
-        let textDecor = estaTachado
-          ? "text-decoration: line-through; opacity: 0.4;"
-          : "";
-        let colorHora = estaTachado
-          ? "var(--text-secondary)"
-          : "var(--ios-orange)";
+        let puedeEditar = isCamilo;
 
-        let btnAcciones = isCamilo
-          ? `
-          <div style="display: flex; justify-content: center; gap: 8px; margin-top: 6px;">
-            <span onclick="abrirEdicionHoras('${vendedor}', '${dia} de ${mesesAbrev[dMes]}', '${worked.fechaExactaOrigen}', '${horasDec}:00', '${filasStrInd}')" style="cursor:pointer; color:var(--ios-blue); font-size:0.8rem;" title="Editar">✏️</span>
-            <span onclick="toggleTacharTurno('${llaveTachado}')" style="cursor:pointer; color:${estaTachado ? "var(--ios-green)" : "var(--ios-orange)"}; font-size:0.8rem;" title="Tachar Pago">✔</span>
-            <span onclick="ejecutarLiquidacion('${vendedor} el ${dia}', '${filasStrInd}')" style="cursor:pointer; color:var(--ios-red); font-size:0.8rem;" title="Borrar Fila">🗑️</span>
-          </div>
-        `
-          : "";
+        if (puedeEditar) {
+          btnAcciones += `
+              <button style="background: rgba(10, 132, 255, 0.15); border: none; color: var(--ios-blue); cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s;" onclick="abrirEdicionHoras('${vendedor}', '${dia} de ${mesesAbrev[dMes]}', '${worked.fechaExactaOrigen}', '${timeStr}', '${filasStrInd}')" title="Editar tiempo">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>`;
+        }
 
-        contenidoCelda = `
-          <div style="${textDecor} display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <div style="font-weight: 800; color: ${colorHora}; font-size: 0.9rem;">${horasDec}h</div>
-            <div style="font-size: 0.68rem; color: var(--text-secondary); margin-top: 2px;">$${Math.round(worked.totalPago).toLocaleString("es-CO")}</div>
-          </div>
-          ${btnAcciones}
-        `;
+        if (isCamilo) {
+          let colorTachar = estaTachado
+            ? "var(--ios-green)"
+            : "var(--ios-orange)";
+          let iconTachar = estaTachado
+            ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+            : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M2 12h20M12 2v20"></path><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>`;
+
+          btnAcciones += `
+              <button style="background: rgba(255, 159, 10, 0.15); border: none; color: ${colorTachar}; cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s;" onclick="toggleTacharTurno('${llaveTachado}')" title="${estaTachado ? "Restaurar Pago" : "Tachar y Restar"}">
+                ${iconTachar}
+              </button>`;
+
+          let targetInd = `${vendedor} el ${dia} de ${mesesAbrev[dMes]}`;
+          btnAcciones += `
+              <button style="background: rgba(255, 69, 58, 0.15); border: none; color: var(--ios-red); cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 1; transition: all 0.2s;" onclick="ejecutarLiquidacion('${targetInd}', '${filasStrInd}')" title="Borrar este día de la base de datos">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+              </button>`;
+        }
       }
 
-      let bgCelda =
-        worked && worked.totalSeconds > 0
-          ? estaTachado
-            ? "rgba(255,159,10,0.05)"
-            : "rgba(48,209,88,0.03)"
-          : "transparent";
-      celdasDias += `<td style="padding: 10px 4px; text-align: center; border-bottom: 1px solid var(--glass-border); border-right: 1px solid rgba(255,255,255,0.03); background: ${bgCelda}; vertical-align: middle;">${contenidoCelda}</td>`;
+      let bgCell = hasWorked ? "rgba(48, 209, 88, 0.08)" : "rgba(0,0,0,0.2)";
+      let borderCell = hasWorked
+        ? "1px solid rgba(48, 209, 88, 0.3)"
+        : "1px solid rgba(255,255,255,0.05)";
+      let opacityCell = "1";
+
+      if (estaTachado) {
+        bgCell = "rgba(255, 159, 10, 0.08)";
+        borderCell = "1px solid rgba(255, 159, 10, 0.3)";
+        opacityCell = "0.5";
+      }
+
+      let numColor = hasWorked
+        ? "var(--text-primary)"
+        : "var(--text-secondary)";
+      let decoracionTexto = estaTachado
+        ? "text-decoration: line-through; opacity: 0.6;"
+        : "";
+
+      let contenidoCentral = hasWorked
+        ? `
+          <div style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: var(--ios-green); margin-top: 6px; ${decoracionTexto}">${timeStr}</div>
+          <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-primary); margin-top: 2px; ${decoracionTexto}">$${Math.round(worked.totalPago).toLocaleString("es-CO")}</div>
+          <div style="display: flex; gap: 4px; justify-content: center; width: 100%; margin-top: 6px;">${btnAcciones}</div>
+        `
+        : ``;
+
+      celdasHtml += `
+          <div style="position: relative; background: ${bgCell}; border: ${borderCell}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70px; opacity: ${opacityCell}; transition: all 0.3s ease;">
+              <span style="position: absolute; top: 4px; left: 6px; font-size: 0.75rem; font-weight: 800; color: ${numColor};">${dia}</span>
+              ${contenidoCentral}
+          </div>
+        `;
     }
+
+    // ➕ AGREGAMOS EL DINERO REAL DE ESTE VENDEDOR AL TOTAL GLOBAL
+    totalNominaGlobal += totalPagoVendedor;
 
     let tH = Math.floor(totalSegundosVendedor / 3600);
     let tM = Math.floor((totalSegundosVendedor % 3600) / 60);
+    let totalFmt =
+      String(tH).padStart(2, "0") + "h " + String(tM).padStart(2, "0") + "m";
+    let pagoTotalFmt =
+      "$" + Math.round(totalPagoVendedor).toLocaleString("es-CO");
 
-    let liquidarBtn =
-      isCamilo && filasVendedorGlobal.length > 0
-        ? `<br><button class="btn-ios btn-danger" style="padding: 4px 8px; font-size: 0.65rem; border-radius: 6px; margin-top: 8px; font-weight: bold;" onclick="ejecutarLiquidacion('${vendedor}', '${filasVendedorGlobal.join(",")}')">Liquidar Fila</button>`
-        : "";
+    let btnLiquidarTodo = "";
+    if (isCamilo && filasVendedorGlobal.length > 0) {
+      btnLiquidarTodo = `
+          <div style="margin-top:20px;">
+            <button class="btn-ios btn-success w-100" style="display:flex; justify-content:center; align-items:center; gap:8px; border-radius: 16px; padding: 14px; font-weight: 800;" onclick="ejecutarLiquidacion('${vendedor}', '${filasVendedorGlobal.join(",")}')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path></svg>
+              LIQUIDAR PERIODO EN PANTALLA DE ${vendedor}
+            </button>
+          </div>`;
+    }
 
-    tbodyHTML += `
-      <tr style="transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-        <td style="position: sticky; left: 0; background: var(--card-bg); z-index: 10; padding: 14px 16px; border-bottom: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border); box-shadow: 2px 0 5px rgba(0,0,0,0.2);">
-          <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary); text-transform: uppercase;">${vendedor}</div>
-          <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
-            <span style="background: rgba(224, 0, 150, 0.15); color: #ff37a6; padding: 2px 4px; border-radius: 4px; font-weight: bold; border: 1px solid rgba(224, 0, 150, 0.2);">NEQUI</span>
-            <span style="font-family: monospace;">${nequiNum}</span>
+    let nequiNum = numerosNequi[vendedor];
+    let nequiHtml = nequiNum
+      ? `
+          <div style="display:flex; align-items:center; gap:6px; margin-top: 4px;">
+            <span style="background:rgba(224, 0, 150, 0.15); color:#ff37a6; padding:2px 6px; border-radius:6px; font-size:0.65rem; font-weight:800; border: 1px solid rgba(224, 0, 150, 0.3);">NEQUI</span>
+            <span style="color:var(--text-primary); font-size:0.85rem; font-family:monospace; font-weight:bold; letter-spacing: 0.5px;">${nequiNum}</span>
+            <button style="background:rgba(10, 132, 255, 0.15); border:none; border-radius:6px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; color:var(--ios-blue); cursor:pointer; transition:all 0.2s;" onclick="copiarTextoRapido(this, '${nequiNum}')" title="Copiar Nequi">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
           </div>
-        </td>
-        
-        ${celdasDias}
+        `
+      : `<span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px;">Sin Nequi Registrado</span>`;
 
-        <td style="position: sticky; right: 0; background: var(--card-bg); z-index: 10; padding: 14px 16px; border-bottom: 1px solid var(--glass-border); border-left: 1px solid var(--glass-border); text-align: center; vertical-align: middle; box-shadow: -2px 0 5px rgba(0,0,0,0.2);">
-          <div style="font-weight: 900; font-size: 1.1rem; color: var(--text-primary); font-family: monospace;">$${Math.round(totalPagoVendedor).toLocaleString("es-CO")}</div>
-          <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px;">${tH}h ${tM}m con.</div>
-          ${liquidarBtn}
-        </td>
-      </tr>
-    `;
+    html += `
+        <div class="card-ios" style="padding: 24px; margin-bottom: 24px; border-radius: 28px; border: 1px solid rgba(255,255,255,0.08);">
+          <div class="flex-row-between" style="padding-bottom: 16px; border-bottom: 1px dashed rgba(255,255,255,0.15); margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); width: 42px; height: 42px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 800; font-size: 1.2rem; border: 1px solid rgba(10, 132, 255, 0.2);">
+                ${vendedor.charAt(0)}
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                  <span style="font-weight: 800; font-size: 1.15rem; color: var(--text-primary); text-transform: uppercase;">${vendedor}</span>
+                  ${nequiHtml}
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">Total Horas</span><br>
+              <span style="font-weight: 800; color: var(--ios-blue); font-size: 1.3rem;">${totalFmt}</span><br>
+              <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; margin-top: 6px; display: inline-block;">Total a Pagar</span><br>
+              <span style="font-weight: 800; color: var(--ios-green); font-size: 1.25rem; transition: all 0.3s ease;">${pagoTotalFmt}</span>
+            </div>
+          </div>
+          
+          <div style="width: 100%; overflow-x: auto; padding-bottom: 8px;">
+              <div style="min-width: 420px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
+                  ${celdasHtml}
+              </div>
+          </div>
+          
+          ${btnLiquidarTodo}
+        </div>
+      `;
   }
 
-  // 📦 CONTENEDOR FLUIDO TOTAL
-  let htmlTabla = `
-    <div style="flex-grow: 1; overflow: auto; border-top: 1px solid var(--glass-border); background: var(--card-bg);">
-      <table style="width: 100%; border-collapse: separate; border-spacing: 0; white-space: nowrap;">
-        <thead>
-          <tr>
-            <th style="position: sticky; top: 0; left: 0; background: #1c1c1e; z-index: 20; padding: 16px; text-align: left; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; border-bottom: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border); box-shadow: 2px 0 5px rgba(0,0,0,0.2);">Asesor</th>
-            ${theadDias}
-            <th style="position: sticky; top: 0; right: 0; background: #1c1c1e; z-index: 20; padding: 16px; text-align: center; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; border-bottom: 1px solid var(--glass-border); border-left: 1px solid var(--glass-border); box-shadow: -2px 0 5px rgba(0,0,0,0.2);">Pago</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tbodyHTML}
-        </tbody>
-      </table>
-    </div>
-  `;
+  container.innerHTML = html;
 
-  container.innerHTML = htmlControles + htmlTabla;
-
-  // Actualiza el indicador global en el botón "Agregar" si es Camilo
+  // =========================================================================
+  // 👑 FILTRO DE SEGURIDAD MÁSTER: INYECCIÓN DE TOTAL QUINCENA PARA CAMILO
+  // =========================================================================
   if (isCamilo) {
+    // Buscamos el botón "+ Agregar" dentro del modal de turnos
     const btnAgregar = [...document.querySelectorAll("button")].find((b) =>
       b.textContent.includes("Agregar"),
     );
+
     if (btnAgregar) {
+      // Limpiamos selectores viejos para evitar duplicados al cambiar de periodo
       const indicadorViejo = document.getElementById("indicadorTotalQuincena");
       if (indicadorViejo) indicadorViejo.remove();
 
+      // Creamos la píldora financiera con los estilos iOS nativos de tu plataforma
       const badgeTotal = document.createElement("span");
       badgeTotal.id = "indicadorTotalQuincena";
       badgeTotal.style.cssText = `
-        background: rgba(10, 132, 255, 0.12); color: var(--ios-blue); padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; margin-right: 12px; border: 1px solid rgba(10, 132, 255, 0.25); display: inline-flex; align-items: center; vertical-align: middle;
+        background: rgba(10, 132, 255, 0.12);
+        color: var(--ios-blue);
+        padding: 8px 14px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.85rem;
+        margin-right: 12px;
+        border: 1px solid rgba(10, 132, 255, 0.25);
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
       `;
-      badgeTotal.innerHTML = `📊 Total: <strong style="margin-left: 6px; color: #ffffff;">$${Math.round(totalNominaGlobal).toLocaleString("es-CO")}</strong>`;
+
+      const totalFormateado =
+        "$" + Math.round(totalNominaGlobal).toLocaleString("es-CO");
+      badgeTotal.innerHTML = `📊 Total Quincena: <strong style="margin-left: 6px; color: #ffffff;">${totalFormateado}</strong>`;
+
+      // Colocamos el indicador exactamente al lado izquierdo del botón "+ Agregar"
       btnAgregar.parentNode.insertBefore(badgeTotal, btnAgregar);
     }
   }
@@ -6639,8 +6678,7 @@ document.addEventListener(
         toggleAnaCodesPanel: "anaCodesOverlay", // 🟣 Conectado
         toggleYopmailPanel: "yopmailOverlay", // 🟡 Conectado
         toggleChayoPanel: "chayoOverlay",
-        toggleGmailPanel: "gmailOverlay",
-        togglePreciosPanel: "preciosOverlay", // 🔴 Conectado
+        toggleGmailPanel: "gmailOverlay", // 🔴 Conectado
       };
 
       let panelAIgnorar = null;
@@ -8220,146 +8258,4 @@ window.cerrarLectorCorreoGlobal = function () {
   if (typeof haptic === "function") haptic();
   document.getElementById("modalLectorCorreoGlobal").style.display = "none";
   document.getElementById("cuerpoLectorCorreoGlobal").innerHTML = "";
-};
-
-// =========================================================================
-// 💸 MOTOR: GESTIÓN DE PRECIOS PARA DISTRIBUIDORES
-// =========================================================================
-
-window.togglePreciosPanel = function () {
-  if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("preciosOverlay");
-
-  if (!overlay) {
-    alert("⚠️ Error: No se encontró la ventana de Precios.");
-    return;
-  }
-
-  const estaCerrada = !overlay.classList.contains("open");
-
-  if (estaCerrada) {
-    overlay.classList.add("open");
-    overlay.style.setProperty("display", "flex", "important");
-    window.cargarPreciosDesdeSheets();
-  } else {
-    overlay.classList.remove("open");
-    overlay.style.setProperty("display", "none", "important");
-  }
-};
-
-window.cargarPreciosDesdeSheets = function () {
-  const container = document.getElementById("preciosScrollArea");
-  if (!container) return;
-
-  container.innerHTML = `
-    <div style="text-align:center; padding:60px 20px; color:var(--text-secondary); font-size:0.95rem;">
-      <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-      <br><span style="color:var(--ios-green); font-weight:700;">Obteniendo lista de precios actual...</span>
-    </div>`;
-
-  const cbName = "cb_get_precios_" + Date.now();
-  window[cbName] = function (res) {
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
-
-    if (res && res.status === "success") {
-      window.renderizarListaPrecios(res.data);
-    } else {
-      container.innerHTML = `<div style="color:var(--ios-red); text-align:center; padding:40px; font-weight:700;">Error: ${res ? res.message : "Fallo de conexión"}</div>`;
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPrecios&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
-};
-
-window.renderizarListaPrecios = function (precios) {
-  const container = document.getElementById("preciosScrollArea");
-  const footer = document.getElementById("preciosFooter");
-
-  // 🔥 SEGURIDAD: Solo Camilo puede editar
-  const userActivo = (sessionStorage.getItem("active_staff") || "")
-    .toUpperCase()
-    .trim();
-  const isCamilo = userActivo === "CAMILO";
-
-  if (precios.length === 0) {
-    container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); padding: 30px;">No hay productos registrados en la base de datos.</div>`;
-    return;
-  }
-
-  let html = "";
-  precios.forEach((p) => {
-    let disabledAttr = isCamilo ? "" : "readonly";
-    let opacityStyle = isCamilo ? "1" : "0.5";
-    let inputBg = isCamilo ? "rgba(0,0,0,0.3)" : "transparent";
-
-    html += `
-      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05);">
-        <div style="font-weight: 800; color: var(--text-primary); font-size: 0.95rem; text-transform: uppercase;">${p.nombre}</div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span style="color: var(--ios-green); font-weight: 900;">$</span>
-          <input type="number" class="input-ios precio-input-edit" data-cod="${p.codigo}" value="${p.precio}" ${disabledAttr} 
-                 style="margin: 0; padding: 8px 12px; width: 110px; text-align: right; border-radius: 10px; font-weight: 900; font-family: monospace; font-size: 1.05rem; opacity: ${opacityStyle}; background: ${inputBg}; border: 1px solid rgba(255,255,255,0.1);">
-        </div>
-      </div>
-    `;
-  });
-
-  container.innerHTML = html;
-
-  if (isCamilo) {
-    footer.style.display = "block";
-  } else {
-    footer.style.display = "none";
-  }
-};
-
-window.guardarNuevosPrecios = function () {
-  if (typeof haptic === "function") haptic();
-
-  const btn = document.getElementById("btnGuardarPrecios");
-  btn.disabled = true;
-  btn.innerHTML = "⏳ Guardando...";
-
-  const inputs = document.querySelectorAll(".precio-input-edit");
-  let nuevosPrecios = {};
-
-  inputs.forEach((inp) => {
-    let codigo = inp.getAttribute("data-cod");
-    let valor = parseFloat(inp.value) || 0;
-    nuevosPrecios[codigo] = valor;
-  });
-
-  const cbName = "cb_set_precios_" + Date.now();
-  window[cbName] = function (res) {
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
-
-    btn.disabled = false;
-    btn.innerHTML = "💾 Guardar Cambios";
-
-    if (res && res.status === "success") {
-      btn.innerHTML = "✅ ¡Actualizado!";
-      btn.style.background = "var(--ios-green)";
-      setTimeout(() => {
-        btn.innerHTML = "💾 Guardar Cambios";
-        btn.style.background = "";
-      }, 2000);
-    } else {
-      alert(
-        "❌ Error al guardar: " + (res ? res.message : "Fallo de conexión"),
-      );
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  // Enviamos el objeto JSON por GET codificado en la URL
-  script.src = `${GOOGLE_SCRIPT_URL}?action=actualizarPreciosMatriz&precios=${encodeURIComponent(JSON.stringify(nuevosPrecios))}&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
 };
