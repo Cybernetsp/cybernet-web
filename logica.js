@@ -3020,7 +3020,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Si el usuario cambia el tamaño del navegador o gira la pantalla, recalculamos
-  window.addEventListener("resize", verificarColisionDock);
+  window.addEventListener("resize", actualizarVisibilidadDock); // 👈 Nombre corregido
 });
 
 function parseDate(fechaStr) {
@@ -4230,27 +4230,37 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-const clipboard = new ClipboardJS(".copy-text-btn");
+// Envolvemos el Clipboard para que espere a que la página cargue por completo
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof ClipboardJS !== "undefined") {
+    const clipboard = new ClipboardJS(".copy-text-btn");
 
-clipboard.on("success", function (e) {
-  haptic();
-  const btn = e.trigger;
-  const card = btn.closest(".card-ios");
-  const originalText = btn.textContent;
+    clipboard.on("success", function (e) {
+      if (typeof haptic === "function") haptic();
+      const btn = e.trigger;
+      const card = btn.closest(".card-ios");
+      const originalText = btn.textContent;
 
-  btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡COPIADO!`;
-  btn.classList.remove("btn-secondary");
-  btn.classList.add("btn-danger");
-  card.style.borderColor = "var(--ios-red)";
-  card.style.boxShadow = "0 0 20px rgba(255, 69, 58, 0.25)";
+      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡COPIADO!`;
+      btn.classList.remove("btn-secondary");
+      btn.classList.add("btn-danger");
 
-  setTimeout(function () {
-    btn.textContent = originalText;
-    btn.classList.remove("btn-danger");
-    btn.classList.add("btn-secondary");
-    card.style.borderColor = "var(--glass-border)";
-    card.style.boxShadow = "var(--glass-shadow)";
-  }, 1500);
+      if (card) {
+        card.style.borderColor = "var(--ios-red)";
+        card.style.boxShadow = "0 0 20px rgba(255, 69, 58, 0.25)";
+      }
+
+      setTimeout(function () {
+        btn.textContent = originalText;
+        btn.classList.remove("btn-danger");
+        btn.classList.add("btn-secondary");
+        if (card) {
+          card.style.borderColor = "var(--glass-border)";
+          card.style.boxShadow = "var(--glass-shadow)";
+        }
+      }, 1500);
+    });
+  }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -4478,23 +4488,23 @@ function renderizarTotalNomina(listaNomina, detalles) {
     ANGELICA: "3015156037",
   };
 
-  // 1. ABRIMOS EL CONTENEDOR DE LA TABLA
+  // 1. ABRIMOS EL CONTENEDOR DE LA TABLA (Sin la columna Acción)
   let html = `
     <div style="background: var(--card-bg); border: var(--glass-border); border-radius: 12px; overflow: hidden; width: 100%;">
       <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; min-width: 500px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; min-width: 450px;">
           <thead>
             <tr style="background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
               <th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Operador</th>
               <th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Balance</th>
               <th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Neto</th>
-              ${isCamilo ? `<th style="padding: 14px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: right;">Acción</th>` : ""}
             </tr>
           </thead>
           <tbody>
   `;
 
   let empleadosMostrados = 0;
+  let sumatoriaTotalNeto = 0; // 🔥 NUEVO: Acumulador del Total a Pagar
 
   // 2. LLENAMOS LAS FILAS DE LA TABLA
   listaNomina.forEach((empData) => {
@@ -4505,7 +4515,12 @@ function renderizarTotalNomina(listaNomina, detalles) {
     let ganado = parseFloat(empData.ganado) || 0;
     let desc = parseFloat(empData.descontado) || 0;
     let neto = parseFloat(empData.neto) || 0;
-    let colorNeto = neto >= 0 ? "var(--ios-blue)" : "var(--ios-red)";
+    let colorNeto = neto >= 0 ? "var(--text-primary)" : "var(--ios-red)";
+
+    // Sumamos al total global de la quincena (solo valores positivos)
+    if (neto > 0) {
+      sumatoriaTotalNeto += neto;
+    }
 
     // 💳 Botón de Nequi Compacto
     let nequiNum = numerosNequi[empData.empleado];
@@ -4522,17 +4537,6 @@ function renderizarTotalNomina(listaNomina, detalles) {
       `;
     }
 
-    // 🔥 Botón de Pago (Solo Camilo)
-    let btnPagar = "";
-    if (isCamilo && neto > 0) {
-      btnPagar = `
-        <button class="btn-ios btn-success" style="padding: 8px 12px; font-size: 0.75rem; border-radius: 8px; margin: 0; display: inline-flex; align-items: center; gap: 6px;" onclick="pagarNominaEmpleado('${empData.empleado}', ${neto})">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="1" x2="12" y2="23"></line></svg>
-          Pagar
-        </button>
-      `;
-    }
-
     html += `
       <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.03); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
         <td style="padding: 16px;">
@@ -4546,10 +4550,23 @@ function renderizarTotalNomina(listaNomina, detalles) {
         <td style="padding: 16px; color: ${colorNeto}; font-weight: 800; font-size: 1.15rem; font-family: monospace;">
           $${Math.round(neto).toLocaleString("es-CO")}
         </td>
-        ${isCamilo ? `<td style="padding: 16px; text-align: right;">${btnPagar}</td>` : ""}
       </tr>
     `;
   });
+
+  // 🔥 NUEVO: Fila final con la SUMA TOTAL de todo lo que se debe pagar
+  if (isCamilo && empleadosMostrados > 0) {
+    html += `
+      <tr style="background: rgba(0, 0, 0, 0.2); border-top: 2px solid rgba(255, 255, 255, 0.1);">
+        <td colspan="2" style="padding: 16px; text-align: right; color: var(--text-secondary); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+          Total Nómina a Pagar:
+        </td>
+        <td style="padding: 16px; color: var(--ios-green); font-weight: 900; font-size: 1.3rem; font-family: monospace;">
+          $${Math.round(sumatoriaTotalNeto).toLocaleString("es-CO")}
+        </td>
+      </tr>
+    `;
+  }
 
   html += `
           </tbody>
@@ -4563,7 +4580,7 @@ function renderizarTotalNomina(listaNomina, detalles) {
       "<div class='empty-log-msg'>No se encontraron tus registros de nómina.</div>";
   }
 
-  // 3. AGREGAMOS EL DETALLE DE LOS DESCUENTOS (POR DEBAJO DE LA TABLA)
+  // 3. AGREGAMOS EL DETALLE DE LOS DESCUENTOS
   let detallesFiltrados = (detalles || []).filter(
     (d) => isCamilo || d.empleado === userActivo,
   );
@@ -6661,7 +6678,7 @@ document.addEventListener(
         toggleAnaCodesPanel: "anaCodesOverlay", // 🟣 Conectado
         toggleYopmailPanel: "yopmailOverlay", // 🟡 Conectado
         toggleChayoPanel: "chayoOverlay",
-        toggleGmailPanel: "gmailOverlay" // 🔴 Conectado
+        toggleGmailPanel: "gmailOverlay", // 🔴 Conectado
       };
 
       let panelAIgnorar = null;
@@ -8093,17 +8110,19 @@ window.toggleLibroPanel = function () {
 window.toggleGmailPanel = function () {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("gmailOverlay");
-  
+
   if (overlay) {
     // 👇 ESTE ES EL TRUCO: Destruye cualquier bloqueo invisible
-    overlay.style.setProperty("display", "", "important"); 
-    
+    overlay.style.setProperty("display", "", "important");
+
     overlay.classList.toggle("open");
     if (overlay.classList.contains("open")) {
       cargarCorreosRecientesGmail();
     }
   } else {
-    alert("⚠️ Error: No se encontró la ventana de Gmail en el HTML. Asegúrate de haber pegado el código en admin.html");
+    alert(
+      "⚠️ Error: No se encontró la ventana de Gmail en el HTML. Asegúrate de haber pegado el código en admin.html",
+    );
   }
 };
 
@@ -8146,20 +8165,21 @@ window.cargarCorreosRecientesGmail = function () {
 
     if (res && res.status === "success") {
       if (res.data.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:60px 20px; color:var(--ios-green); font-weight:bold; font-size:1rem;">📭 No hay correos nuevos en la última hora.</div>';
+        container.innerHTML =
+          '<div style="text-align:center; padding:60px 20px; color:var(--ios-green); font-weight:bold; font-size:1rem;">📭 No hay correos nuevos en la última hora.</div>';
         return;
       }
 
       window.correosGlobalesData = res.data;
 
       let htmlTabla = `<table style="width: 100%; border-collapse: collapse; text-align: left;">`;
-      
+
       res.data.forEach((mail, i) => {
-        let remitenteLimpio = mail.remitente.replace(/<.*?>/g, '').trim();
-        if(remitenteLimpio === "") remitenteLimpio = mail.remitente;
-        
-        let destinatarioLimpio = mail.destinatario.replace(/<.*?>/g, '').trim();
-        if(destinatarioLimpio === "") destinatarioLimpio = mail.destinatario;
+        let remitenteLimpio = mail.remitente.replace(/<.*?>/g, "").trim();
+        if (remitenteLimpio === "") remitenteLimpio = mail.remitente;
+
+        let destinatarioLimpio = mail.destinatario.replace(/<.*?>/g, "").trim();
+        if (destinatarioLimpio === "") destinatarioLimpio = mail.destinatario;
 
         htmlTabla += `
           <tr class="fila-correo-global" style="border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s;" 
@@ -8190,7 +8210,6 @@ window.cargarCorreosRecientesGmail = function () {
       htmlTabla += `</table>`;
       container.innerHTML = htmlTabla;
       if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
-
     } else {
       container.innerHTML = `<div style="color:var(--ios-red); text-align:center; padding:40px; font-weight:700;">Error: ${res ? res.message : "Fallo de conexión"}</div>`;
     }
@@ -8203,11 +8222,14 @@ window.cargarCorreosRecientesGmail = function () {
 };
 
 // 👇 NUEVO: FUNCIÓN PARA EL BUSCADOR 👇
-window.filtrarCorreosGlobales = function() {
-  const query = document.getElementById("buscadorGmailGlobal").value.toLowerCase().trim();
+window.filtrarCorreosGlobales = function () {
+  const query = document
+    .getElementById("buscadorGmailGlobal")
+    .value.toLowerCase()
+    .trim();
   const filas = document.querySelectorAll(".fila-correo-global");
-  
-  filas.forEach(fila => {
+
+  filas.forEach((fila) => {
     // Busca en todo el texto de la fila (remitente, destinatario y asunto)
     if (fila.innerText.toLowerCase().includes(query)) {
       fila.style.display = "";
