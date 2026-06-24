@@ -453,12 +453,25 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
 
   window.saldoNumericoActual =
     parseFloat(String(saldo).replace(/[^\d.-]/g, "")) || 0;
-  if (window.saldoNumericoActual > 0 && window.saldoNumericoActual < 1000)
+  if (window.saldoNumericoActual > 0 && window.saldoNumericoActual < 1000) {
     window.saldoNumericoActual *= 1000;
+  }
 
   actualizarSaldoUI();
-  renderTienda();
-  cargarStockEnTienda();
+
+  // 🔥 Muestra un estado de carga mientras trae los precios de Sheets
+  const shopContainer = document.getElementById("shopCatalogContainer");
+  if (shopContainer) {
+    shopContainer.innerHTML = `
+      <div style="text-align:center; padding:40px; width:100%; color:var(--text-secondary); grid-column: 1 / -1;">
+        <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" style="margin-bottom:12px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
+        <br>Cargando precios en vivo...
+      </div>`;
+  }
+
+  // Llamamos a la nueva función que trae los precios en vivo y luego renderiza
+  cargarPreciosEnTienda();
+
   cargarDatosFinancierosYAlertas(telefono);
 
   if (window.cyberIntervaloSaldoFondo)
@@ -467,6 +480,38 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
     refrescarSaldoDistribuidorFondo,
     5 * 60 * 1000,
   );
+}
+
+// =========================================================================
+// 🔥 NUEVA FUNCIÓN: OBTENER PRECIOS EN VIVO DESDE SHEETS
+// =========================================================================
+function cargarPreciosEnTienda() {
+  const cbName = "cb_get_precios_distri_" + Date.now();
+
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success" && res.data) {
+      // 1. Actualizamos el catálogo local con los nuevos precios de la base de datos
+      res.data.forEach((itemSheet) => {
+        let producto = catálogoProductos.find((p) => p.id === itemSheet.codigo);
+        if (producto) {
+          producto.precio = itemSheet.precio;
+        }
+      });
+    }
+
+    // 2. Ahora que ya tenemos los precios actualizados, dibujamos la tienda y traemos el stock
+    renderTienda();
+    cargarStockEnTienda();
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPrecios&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
 }
 
 function actualizarSaldoUI() {
