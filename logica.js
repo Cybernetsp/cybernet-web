@@ -2662,7 +2662,8 @@ function renderizarListaGarantiasDefinitiva(data) {
 
   let html = "";
   data.forEach((item, index) => {
-    const textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${item.plataforma}\n📧 *Correo:* ${item.correo}\n🔑 *Clave:* ${item.clave}\n👤 *Proveedor:* ${item.proveedor}\n💬 *Motivo:* ${item.desc}`;
+    // 🔥 CORRECCIÓN AQUÍ: Se añade la Fecha de Compra al texto que se va al portapapeles
+    const textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${item.plataforma}\n📧 *Correo:* ${item.correo}\n🔑 *Clave:* ${item.clave}\n👤 *Proveedor:* ${item.proveedor}\n📅 *Fecha Compra:* ${item.fechaCompra || "No Registrada"}\n💬 *Motivo:* ${item.desc}`;
     const safeReporte = encodeURIComponent(textoReporte);
 
     let imagenHtml = "";
@@ -2674,14 +2675,12 @@ function renderizarListaGarantiasDefinitiva(data) {
       let srcLimpio = String(item.imagen).trim();
       let urlOriginalParaAbrir = srcLimpio;
 
-      // Si es un enlace de Google Drive, extraemos el ID usando un doble escáner seguro
       if (srcLimpio.includes("drive.google.com")) {
         let idMatch =
           srcLimpio.match(/file\/d\/([a-zA-Z0-9_-]+)/) ||
           srcLimpio.match(/id=([a-zA-Z0-9_-]+)/);
         if (idMatch && idMatch[1]) {
           let fileId = idMatch[1];
-          // 🚀 CAMBIO CLAVE: Usamos el canal 'thumbnail' que es 100% compatible con archivos locales file://
           srcLimpio = `https://drive.google.com/thumbnail?sz=w400&id=${fileId}`;
         }
       } else if (
@@ -2716,7 +2715,7 @@ function renderizarListaGarantiasDefinitiva(data) {
                       <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">${item.plataforma}</span>
                   </div>
                   <div style="font-size: 0.65rem; color: var(--text-secondary); text-align: right; text-transform: uppercase; font-weight: 600;">
-                      ${item.fecha}
+                      Reporte: ${item.fecha}
                   </div>
               </div>
 
@@ -2732,10 +2731,11 @@ function renderizarListaGarantiasDefinitiva(data) {
               </div>
 
               <div style="display: flex; flex-direction: column; gap: 4px; padding: 0 2px;">
-                  <div style="font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
                       <span>Proveedor: <b style="color: var(--ios-orange);">${item.proveedor || "Desconocido"}</b></span>
+                      <span>Compra: <b style="color: var(--text-primary);">${item.fechaCompra || "No Registrada"}</b></span>
                   </div>
-                  <div style="font-size: 0.8rem; color: var(--text-primary); background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--glass-border);">
+                  <div style="font-size: 0.8rem; color: var(--text-primary); background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--glass-border); margin-top: 4px;">
                       <span style="color: var(--text-secondary); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 2px;">Falla reportada</span>
                       ${item.desc}
                   </div>
