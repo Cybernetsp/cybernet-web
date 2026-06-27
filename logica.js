@@ -6153,25 +6153,45 @@ function renderDashboard() {
   );
   document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
 
+  // ─────────────── CONF CONFIGURACIÓN DE PORCENTAJES ───────────────
   let pM = 28,
     pNom = 17,
     pNeg = 55;
   const m = document.getElementById("appleMonthSelect").value;
   const dia = document.getElementById("appleDaySelect").value;
 
+  // Mantiene la regla histórica de Mayo
   if (m === "MAYO") {
     if (dia !== "TODOS" && parseInt(dia) <= 15) {
       pM = 30;
       pNom = 15;
+      pNeg = 55;
     } else if (dia === "TODOS") {
       pM = 29;
       pNom = 16;
+      pNeg = 55;
     }
+  }
+  // 🔥 NUEVA REGLA: Julio en adelante (30% / 54% / 16%)
+  else if (
+    [
+      "JULIO",
+      "AGOSTO",
+      "SEPTIEMBRE",
+      "OCTUBRE",
+      "NOVIEMBRE",
+      "DICIEMBRE",
+    ].includes(m)
+  ) {
+    pM = 30;
+    pNeg = 54;
+    pNom = 16;
   }
 
   document.getElementById("lblPorcMio").innerText = pM;
   document.getElementById("lblPorcNegocio").innerText = pNeg;
   document.getElementById("lblPorcNomina").innerText = pNom;
+  // ─────────────────────────────────────────────────────────────────
 
   let base = ventasBrutasReales;
   let miGananciaNeta =
@@ -6220,16 +6240,13 @@ function renderDashboard() {
     ringGastos.style.strokeDashoffset = strokeDashoffsetGastos;
   }
 
-  // 💥 SECCIÓN CORREGIDA: Solo tarjetas de información, sin tablas ni rayas.
   const container = document.getElementById("listaDesgloseGastos");
   if (itemsTemp.length === 0) {
     container.innerHTML =
       '<div class="empty-log-msg" style="padding: 20px;">No hay movimientos registrados en este periodo.</div>';
-    calcularDescuentoDeuda();
     return;
   }
 
-  // 1. Agrupar dinámicamente los movimientos por su Categoría
   let categoriasAgrupadas = {};
   let totalGastadoEnPeriodo = 0;
   let totalIngresadoEnPeriodo = 0;
@@ -6254,7 +6271,6 @@ function renderDashboard() {
 
   let htmlBuffer = "";
 
-  // 2. CONSTRUIR BLOQUE DE RESUMEN DE GASTOS (Tarjetas rojas)
   if (totalGastadoEnPeriodo > 0) {
     htmlBuffer += `
         <div style="margin-bottom: 24px;">
@@ -6267,7 +6283,6 @@ function renderDashboard() {
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;">
       `;
 
-    // Extraer y ordenar las categorías de mayor a menor gasto
     let catArrayGastos = Object.keys(categoriasAgrupadas).filter(
       (c) => categoriasAgrupadas[c].gastosPuros > 0,
     );
@@ -6277,7 +6292,8 @@ function renderDashboard() {
     );
 
     catArrayGastos.forEach((cat) => {
-      let gastosCat = categoriasAgrupadas[cat].gastosPuros;
+      let gastosCat = 1;
+      gastosCat = categoriasAgrupadas[cat].gastosPuros;
       htmlBuffer += `
           <div style="background: rgba(255, 69, 58, 0.05); border: 1px solid rgba(255, 69, 58, 0.2); padding: 12px; border-radius: 16px; display: flex; flex-direction: column; justify-content: center;">
             <span style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
@@ -6292,7 +6308,6 @@ function renderDashboard() {
       `;
   }
 
-  // 3. CONSTRUIR BLOQUE DE RESUMEN DE INGRESOS EXTRAS (Tarjetas verdes, si los hay)
   if (totalIngresadoEnPeriodo > 0) {
     htmlBuffer += `
         <div style="margin-bottom: 8px;">
@@ -6305,7 +6320,6 @@ function renderDashboard() {
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;">
       `;
 
-    // Extraer y ordenar las categorías de mayor a menor ingreso
     let catArrayIngresos = Object.keys(categoriasAgrupadas).filter(
       (c) => categoriasAgrupadas[c].ingresosPuros > 0,
     );
