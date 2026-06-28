@@ -3121,6 +3121,7 @@ function renderizarHorasEnPantalla(filtroBusqueda = "") {
     PABLO: "3153991383",
     MANUP: "3153991383",
     ANGELICA: "3015156037",
+    LAURA: "3126350623",
   };
 
   // 📅 VARIABLES DE TIEMPO CONTROLADAS POR LOS BOTONES
@@ -4301,6 +4302,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "3126117630",
         "3107137371",
         "3015156037",
+        "3126350623",
       ];
 
       // Verificamos si la opción ya está metida en el select actual
