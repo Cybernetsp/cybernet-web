@@ -4488,6 +4488,7 @@ function renderizarTotalNomina(listaNomina, detalles) {
     PABLO: "3153991383",
     MANUP: "3153991383",
     ANGELICA: "3015156037",
+    LAURA: "3126350623",
   };
 
   // 1. ABRIMOS EL CONTENEDOR DE LA TABLA (Sin la columna Acción)
