@@ -8107,6 +8107,134 @@
       </div>
     </div>
 
+    <div
+      class="overlay-ios"
+      id="loginOverlay"
+      style="
+        z-index: 3000000;
+        background: var(--bg-primary, #000000);
+        display: none;
+      "
+    >
+      <div
+        class="modal-ios"
+        style="
+          max-width: 380px;
+          width: 90%;
+          padding: 35px 24px;
+          border-radius: 28px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+        "
+      >
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 26px;
+          "
+        >
+          <img
+            src="logo.jpeg"
+            alt="Cybernet Logo"
+            style="
+              width: 80px;
+              height: 80px;
+              border-radius: 50%;
+              border: 2px solid var(--ios-blue);
+              margin-bottom: 14px;
+              object-fit: cover;
+            "
+          />
+          <h2
+            style="
+              color: var(--text-primary);
+              margin: 0;
+              font-size: 1.4rem;
+              font-weight: 800;
+              letter-spacing: -0.5px;
+            "
+          >
+            Cybernet OS
+          </h2>
+          <p
+            class="text-secondary"
+            style="font-size: 0.82rem; margin: 4px 0 0 0; text-align: center"
+          >
+            Identifícate para desbloquear la estación operativa.
+          </p>
+        </div>
+
+        <form
+          id="loginForm"
+          class="flex-col"
+          style="gap: 16px"
+          onsubmit="
+            event.preventDefault();
+            validateStaffAccess(event);
+          "
+          autocomplete="off"
+        >
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <input
+              type="text"
+              id="staffUser"
+              class="input-ios"
+              placeholder="Nombre de Usuario"
+              required
+              style="
+                border-radius: 14px;
+                padding: 14px 18px;
+                text-transform: uppercase;
+              "
+              autocomplete="off"
+            />
+            <input
+              type="password"
+              id="staffPass"
+              class="input-ios"
+              placeholder="Contraseña de Acceso"
+              required
+              style="border-radius: 14px; padding: 14px 18px"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div
+            id="error-login-toast"
+            class="card-ios"
+            style="
+              display: none;
+              padding: 10px 14px;
+              background: rgba(255, 69, 58, 0.1);
+              border-color: rgba(255, 69, 58, 0.2);
+              color: var(--ios-red);
+              font-size: 0.8rem;
+              border-radius: 12px;
+              margin-bottom: 0;
+            "
+          ></div>
+
+          <button
+            type="submit"
+            class="btn-ios btn-primary w-100"
+            style="
+              padding: 15px;
+              font-size: 0.95rem;
+              font-weight: 800;
+              border-radius: 50px;
+              margin-top: 6px;
+              box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3);
+            "
+          >
+            Verificar Identidad
+          </button>
+        </form>
+      </div>
+    </div>
+
     <script src="logica.js"></script>
   </body>
 </html>
