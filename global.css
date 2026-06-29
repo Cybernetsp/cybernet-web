@@ -55,17 +55,22 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* =========================================================================
+   🌌 RECALIBRACIÓN ENTORNO: macOS MIDNIGHT AURA GRADIENT (PREMIUM TECH)
+   ========================================================================= */
 body {
-  /* 🌌 NUEVO FONDO: Ondas topográficas en escala de grises oscuros fluidos (Ref: image_b538ff.png) */
-  background: url("https://www.xtrafondos.com/wallpapers/estructura-abstracta-3d-gris-oscuro-3593.jpg")
-    no-repeat center center fixed !important;
+  /* Gradiente líquido difuminado estilo Apple con velo oscuro integrado */
+  background:
+    linear-gradient(rgba(11, 11, 13, 0.6), rgba(11, 11, 13, 0.82)),
+    url("https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2074")
+      no-repeat center center fixed !important;
   background-size: cover !important;
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  overflow: hidden; /* Desktop sin scroll, como un SO real */
+  overflow: hidden; /* Mantiene el escritorio de Cybernet OS fijo como un sistema real */
 }
 
 /* Scrollbars estilo macOS (Píldoras flotantes) */
@@ -399,28 +404,6 @@ body {
   color: white !important;
   border-color: var(--mac-red) !important;
   transform: scale(1.08) !important;
-}
-
-/* Animación Menú Desplegable Superior */
-#codesOverlay .sheet-ios,
-#shiftsOverlay .sheet-ios,
-#inventarioOverlay .sheet-ios {
-  top: 40px !important;
-  left: 90px !important;
-  transform: none !important;
-  margin: 0 !important;
-  animation: macMenuDropDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)
-    forwards !important;
-}
-@keyframes macMenuDropDown {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.98);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 /* --- 7. COMPONENTES INTERNOS (CARDS, INPUTS, BOTONES) --- */
@@ -1149,7 +1132,7 @@ textarea.input-ios {
     🏎️ ACCELERACIÓN Y FLUIDEZ EN REJILLAS INTERNAS (MODO COMPACTO SEGURO)
     ========================================================================= */
 
-/* 🛡️ FIX TALLER NETFLIX: Fuerza a que los botones sticky de navegación interna no se estiren verticalmente (Ref: image_b58fd5.png) */
+/* 🛡️ FIX TALLER NETFLIX: Fuerza a que los botones sticky de navegación interna no se estiren verticalmente */
 #netflixPanelCortes div[style*="position: sticky"] {
   display: flex !important;
   flex-direction: row !important;
@@ -1164,7 +1147,7 @@ textarea.input-ios {
   align-self: center !important;
 }
 
-/* Forzar que los formularios y botones de confirmación ocupen bloques limpios y simétricos (Ref: image_b59018.png) */
+/* Forzar que los formularios y botones de confirmación ocupen bloques limpios y simétricos */
 #formFinanzas button,
 #formGenerarVenta button[type="submit"],
 #formReportar button,
@@ -1222,8 +1205,8 @@ textarea.input-ios {
   margin-top: auto !important;
 }
 /* =========================================================================
-   🔒 BLINDAJE DEL DOCK: FILA HORIZONTAL ÚNICA E INMUNE
-   ========================================================================= */
+    🔒 BLINDAJE DEL DOCK: FILA HORIZONTAL ÚNICA E INMUNE
+    ========================================================================= */
 .macos-dock {
   flex-wrap: nowrap !important; /* 🔥 Prohíbe terminantemente que los iconos salten de línea */
   display: flex !important;
@@ -1231,8 +1214,8 @@ textarea.input-ios {
   align-items: center !important;
 }
 /* =========================================================================
-   🔔 RECALIBRADO DE NOTIFICACIONES: DESPEJAR MENÚ SUPERIOR (CLEAR TOP BAR)
-   ========================================================================= */
+    HN RECALIBRADO DE NOTIFICACIONES: DESPEJAR MENÚ SUPERIOR (CLEAR TOP BAR)
+    ========================================================================= */
 
 /* 1. Forzar a la Isla Dinámica / Toast central a bajar y flotar libre */
 .apple-notification-toast {
@@ -1242,4 +1225,194 @@ textarea.input-ios {
 /* 2. Forzar al bloque lateral de alertas (Inventario / Turnos) a despejar el menú */
 .cyber-notification-center {
   top: 38px !important;
+}
+/* ==========================================================================
+    📱 SYSTEMA DE WIDGETS BENTO (ESTILO IPADOS MAESTRO)
+    ========================================================================== */
+.ipad-bento-container {
+  display: grid !important;
+  grid-template-columns: repeat(12, 1fr) !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+/* Proporciones de Widgets iPadOS */
+.bento-w-12 {
+  grid-column: span 12 !important;
+}
+.bento-w-8 {
+  grid-column: span 8 !important;
+}
+.bento-w-7 {
+  grid-column: span 7 !important;
+}
+.bento-w-6 {
+  grid-column: span 6 !important;
+}
+.bento-w-5 {
+  grid-column: span 5 !important;
+}
+.bento-w-4 {
+  grid-column: span 4 !important;
+}
+.bento-w-3 {
+  grid-column: span 3 !important;
+}
+
+/* Estilo Base para las Tarjetas tipo Widget */
+.widget-ipad {
+  background: #1c1c1e !important; /* Gris oscuro mate original de Apple */
+  border: 1px solid #2c2c2e !important;
+  border-radius: 20px !important; /* Curva fluida y nativa de iPadOS */
+  padding: 22px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease !important;
+}
+
+.widget-ipad:hover {
+  background: #2c2c2e !important;
+  border-color: #3a3a3c !important;
+}
+
+/* 📱 Ruptura responsiva extrema para Celular (Media Query integrada) */
+@media (max-width: 1024px) {
+  .ipad-bento-container {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .bento-w-12,
+  .bento-w-8,
+  .bento-w-7,
+  .bento-w-6,
+  .bento-w-5,
+  .bento-w-4,
+  .bento-w-3 {
+    grid-column: span 12 !important;
+  }
+}
+/* ==========================================================================
+    🛠️ PARCHE: ESTILO OSCURO PARA MENÚS DESPLEGABLES (SELECT OPTIONS)
+    ========================================================================== */
+select.input-ios {
+  color-scheme: dark !important; /* 👈 Fuerza al motor del navegador a usar modo oscuro */
+}
+
+select.input-ios option {
+  background-color: #1c1c1e !important; /* Fondo gris oscuro premium Apple */
+  color: #ffffff !important; /* Texto blanco */
+  font-weight: 600 !important;
+  padding: 12px !important; /* Un poco más de aire entre opciones */
+}
+
+/* Color especial para la opción deshabilitada (placeholder) */
+select.input-ios option:disabled {
+  color: #8e8e93 !important;
+}
+
+/* ==========================================================================
+    🎯 RECALIBRACIÓN: BANDEJA DE CÓDIGOS CENTRADA EN ESCRITORIO
+    ========================================================================== */
+@media (min-width: 769px) {
+  #codesOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Inyectamos una animación elástica de brote central estilo iPadOS */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+
+/* Animación nativa Apple de brote central con escalado elástico */
+@keyframes applePopIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+/* ==========================================================================
+    🔒 CAPAS DE SUPERPOSICIÓN: HERRAMIENTAS MÁSTER DE PERSONAL
+    ========================================================================== */
+#addHoursOverlay {
+  z-index: 16000 !important;
+}
+#nominaOverlay {
+  z-index: 17000 !important;
+}
+#adelantoShiftOverlay {
+  z-index: 17000 !important;
+}
+/* ==========================================================================
+    🎯 RECALIBRACIÓN: VENTANA DE PERSONAL CENTRADA EN ESCRITORIO
+    ========================================================================== */
+@media (min-width: 769px) {
+  #shiftsOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Reutiliza la animación premium de brote central estilo iPadOS */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+/* ==========================================================================
+    🚫 BLOQUEO RADICAL ANTI-CLICS: DOCK INERTE CUANDO HAY MODALES ACTIVOS
+    ========================================================================== */
+body:has(.overlay-ios.open) [class*="dock"],
+body:has(.overlay-ios.open) [id*="dock"],
+body:has(.overlay-ios[style*="display: flex"]) [class*="dock"],
+body:has(.overlay-ios[style*="display: flex"]) [id*="dock"],
+body:has(.overlay-ios[style*="display: block"]) [class*="dock"],
+body:has(.overlay-ios[style*="display: block"]) [id*="dock"] {
+  pointer-events: none !important; /* 👈 Los clics pasan de largo como si no existiera */
+  visibility: hidden !important; /* 👈 Lo remueve por completo del mapa interactivo */
+  opacity: 0 !important;
+}
+/* ==========================================================================
+    🎯 RECALIBRACIÓN: VENTANA DE PROMOCIONES CENTRADA EN ESCRITORIO
+    ========================================================================== */
+@media (min-width: 769px) {
+  #promoOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Reutiliza la animación premium de brote central estilo iPadOS */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+/* ==========================================================================
+    🎯 RECALIBRACIÓN: VENTANA DE RECORDATORIOS CENTRADA EN ESCRITORIO
+    ========================================================================== */
+@media (min-width: 769px) {
+  #recordatoriosOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Dispara la animación elástica de brote central estilo iPadOS */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+/* ==========================================================================
+    🎯 RECALIBRACIÓN: BÓVEDA CHAYO ULTRA-SIZE CENTRADA EN ESCRITORIO
+    ========================================================================== */
+@media (min-width: 769px) {
+  #chayoOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Aplica el sutil efecto brote elástico de Apple */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
 }
