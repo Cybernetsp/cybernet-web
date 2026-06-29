@@ -1,37 +1,42 @@
-// 👑 LÍNEA 1: INTERCEPTOR ULTRA INTELIGENTE ANTI-BUCLES (LOCAL & WEB)
+// 👑 LÍNEA 1: INTERCEPTOR ULTRA INTELIGENTE FUSIONADO (LOCAL & WEB)
 (function () {
   let sessionStaff = sessionStorage.getItem("active_staff");
   let localStaff = localStorage.getItem("cyber_saved_staff");
   let user = sessionStaff || localStaff;
 
-  const currentUrl = window.location.href.toLowerCase();
-  const esPaginaLogin = currentUrl.includes("login");
+  // Esperamos a que el HTML cargue por completo para manipular las ventanas
+  window.addEventListener("DOMContentLoaded", () => {
+    let savedTheme = localStorage.getItem("cyber_theme") || "dark";
+    document.documentElement.setAttribute("data-theme", savedTheme);
 
-  // Si NO hay usuario logueado
-  if (!user) {
-    if (!esPaginaLogin) {
-      // Si estás en PC local usa .html, si estás en la web usa ruta limpia
-      window.location.href = currentUrl.includes(".html")
-        ? "login.html"
-        : "login";
+    const loginOverlay = document.getElementById("loginOverlay");
+    const workspace = document.getElementById("mainWorkspace");
+    const header = document.getElementById("globalHeader");
+    const controlPanel = document.getElementById("controlPanel");
+    const controlRight = document.getElementById("macControlCenterRight"); // 🔥 Esquina derecha
+
+    // Si NO hay usuario logueado, forzamos a abrir el Login integrado
+    if (!user) {
+      if (loginOverlay) {
+        loginOverlay.classList.add("open");
+        loginOverlay.style.setProperty("display", "flex", "important");
+      }
+      // Apagamos TODOS los componentes del admin por seguridad
+      if (workspace) workspace.style.display = "none";
+      if (header) header.style.display = "none";
+      if (controlPanel) controlPanel.style.display = "none";
+      if (controlRight) controlRight.style.display = "none"; // Desaparece "Camilo" y el reloj
     }
-  }
-  // Si SÍ hay usuario logueado
-  else {
-    if (esPaginaLogin) {
-      // Si ya inició sesión, lo saca del login y lo manda al admin
-      window.location.href = currentUrl.includes(".html")
-        ? "admin.html"
-        : "admin";
-    } else {
-      // Si ya está en la página correcta (admin), enciende el sistema al cargar el DOM
-      window.addEventListener("DOMContentLoaded", () => {
-        let savedTheme = localStorage.getItem("cyber_theme") || "dark";
-        document.documentElement.setAttribute("data-theme", savedTheme);
-        entrarAlSistema(user);
-      });
+    // Si SÍ hay usuario logueado, entra directo al sistema
+    else {
+      if (loginOverlay) {
+        loginOverlay.classList.remove("open");
+        loginOverlay.style.setProperty("display", "none", "important");
+      }
+      if (controlRight) controlRight.style.display = "flex";
+      entrarAlSistema(user);
     }
-  }
+  });
 })();
 const GOOGLE_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
@@ -4025,6 +4030,7 @@ function validateStaffAccess(e) {
   const submitBtn = document.querySelector('#loginForm button[type="submit"]');
 
   if (!userInput || !passInput) return;
+
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Verificando...`;
@@ -4036,7 +4042,7 @@ function validateStaffAccess(e) {
   window.procesarLoginSheets = function (res) {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerText = "Verificar Identidad";
+      submitBtn.innerHTML = "Verificar Identidad";
     }
     const scriptNode = document.getElementById("cyber_login_node");
     if (scriptNode) scriptNode.remove();
@@ -4047,10 +4053,18 @@ function validateStaffAccess(e) {
       sessionStorage.setItem("active_staff", userInput);
       if (rememberMe) localStorage.setItem("cyber_saved_staff", userInput);
 
-      // Redirección elástica: Si estás en PC local usa admin.html, si estás en la web usa la ruta limpia /admin
-      window.location.href = window.location.href.includes(".html")
-        ? "admin.html"
-        : "admin"; // Redirige al admin real
+      // Escondemos el login
+      const loginOverlay = document.getElementById("loginOverlay");
+      if (loginOverlay) {
+        loginOverlay.classList.remove("open");
+        loginOverlay.style.setProperty("display", "none", "important");
+      }
+
+      // Volvemos a encender la esquina derecha antes de entrar
+      const controlRight = document.getElementById("macControlCenterRight");
+      if (controlRight) controlRight.style.display = "flex";
+
+      entrarAlSistema(userInput);
     } else {
       let errMsg = "Credenciales incorrectas en la base de datos.";
       if (res && res.message) errMsg = res.message;
@@ -4065,6 +4079,20 @@ function validateStaffAccess(e) {
 
   const scriptElement = document.createElement("script");
   scriptElement.id = "cyber_login_node";
+
+  // 🔥 SEGURO ANTI-CONGELAMIENTO: Restaura el botón si Google bloquea la conexión
+  scriptElement.onerror = function () {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = "Verificar Identidad";
+    }
+    if (errorToast) {
+      errorToast.innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Error de conexión. Revisa los permisos de Google.</span></div>`;
+      errorToast.style.display = "block";
+    }
+    scriptElement.remove();
+  };
+
   let queryParams =
     "?action=verificarLogin&user=" +
     encodeURIComponent(userInput) +
