@@ -1415,3 +1415,16 @@ body:has(.overlay-ios[style*="display: block"]) [id*="dock"] {
     animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
 }
+/* ==========================================================================
+   🎯 RECALIBRACIÓN: VENTANA DE DISTRIBUIDORES CENTRADA EN ESCRITORIO
+   ========================================================================== */
+@media (min-width: 769px) {
+  #distrisOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Dispara la animación elástica de brote central estilo iPadOS */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
