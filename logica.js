@@ -936,6 +936,9 @@ window.toggleNetflixManagerPanel = window.toggleNetflixPanel = function () {
   }
 };
 
+// =========================================================================
+// 🍿 REESCANEO Y RENDERIZADO BENTO DE CORTES NETFLIX (IPADOS EDITION)
+// =========================================================================
 window.abrirPanelCortesNet = function () {
   if (typeof haptic === "function") haptic();
   document.getElementById("netflixMenuPrincipal").style.display = "none";
@@ -943,10 +946,10 @@ window.abrirPanelCortesNet = function () {
 
   const contenedor = document.getElementById("listaCuentasCorte");
 
-  // Cargador de diseño corporativo Netflix Red
+  // Cargador de diseño corporativo elegante
   contenedor.innerHTML = `
-    <div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:0.95rem;">
-      <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e50914" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line></svg>
+    <div style="text-align:center; padding:30px 20px; color:var(--text-secondary); font-size:0.9rem;">
+      <svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e50914" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
       <br><span style="color:#e50914; font-weight:700; letter-spacing:0.3px;">Escaneando perfiles vencidos en Sheets...</span>
     </div>`;
 
@@ -959,15 +962,12 @@ window.abrirPanelCortesNet = function () {
     contenedor.innerHTML = "";
 
     if (res && res.status === "success") {
-      // 🛡️ NUEVO FILTRO INTELIGENTE: Memoria temporal y anti-errores
       let cortadosLocales = JSON.parse(
         sessionStorage.getItem("cyber_cortes_recientes") || "[]",
       );
 
       let cuentasValidas = res.data.filter((cuenta) => {
-        // 1. Si el correo está vacío, no existe o dice #ERROR! lo bloquea
         if (!cuenta.correo || cuenta.correo.includes("#ERROR")) return false;
-        // 2. Si Sheets envió la fecha o el vencimiento vacíos, los bloquea
         if (cuenta.fecha !== undefined && cuenta.fecha.trim() === "")
           return false;
         if (
@@ -975,19 +975,15 @@ window.abrirPanelCortesNet = function () {
           cuenta.vencimiento.trim() === ""
         )
           return false;
-        // 3. Si no hay perfiles para cortar, lo bloquea
         if (!cuenta.perfilesVencidos || cuenta.perfilesVencidos.length === 0)
           return false;
-        // 4. Si la acabamos de cortar en esta misma sesión, la bloquea
         if (cortadosLocales.includes(cuenta.correo)) return false;
-
         return true;
       });
 
-      // Validamos si después de filtrar quedaron cuentas
       if (cuentasValidas.length === 0) {
         contenedor.innerHTML =
-          '<div style="text-align:center; padding:40px; color:var(--ios-green); font-weight:bold; font-size:1rem;">🎉 ¡Todo limpio! No quedan perfiles vencidos.</div>';
+          '<div style="text-align:center; padding:30px 20px; color:var(--ios-green); font-weight:bold; font-size:1rem;">🎉 ¡Todo limpio! No quedan perfiles vencidos.</div>';
         return;
       }
 
@@ -997,29 +993,30 @@ window.abrirPanelCortesNet = function () {
         let perfilesOcultosSeguros = cuenta.perfilesVencidos.join("|||");
 
         let div = document.createElement("div");
-        div.className = "card-ios account-cut-card";
+        // 🌟 Mutamos a widget-ipad con borde izquierdo rojo de acento estricto
+        div.className = "widget-ipad account-cut-card";
         div.style.cssText =
-          "padding: 18px; display: flex; flex-direction: column; gap: 14px; background: rgba(229, 9, 20, 0.01); border: 1px solid rgba(229, 9, 20, 0.15); border-radius: 20px; margin-bottom: 12px; transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);";
+          "padding: 16px !important; margin-bottom: 12px !important; gap: 14px !important; border-left: 4px solid #e50914 !important;";
 
         div.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; width: 100%;">
             <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex-grow: 1;">
-              <span style="font-size: 0.68rem; color: #e50914; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #e50914; box-shadow: 0 0 8px #e50914;"></span> CORTE REQUERIDO
+              <span style="font-size: 0.65rem; color: #e50914; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #e50914; box-shadow: 0 0 8px #e50914;"></span> Corte Requerido
               </span>
               <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                <span style="font-size: 1.05rem; color: var(--text-primary); font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; font-family: monospace;">${cuenta.correo}</span>
-                <button style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 5px 8px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center;" onclick="window.copiarCorreoNetflixCorte(this, '${cuenta.correo}')">
+                <span style="font-size: 1rem; color: var(--text-primary); font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 82%; font-family: monospace;">${cuenta.correo}</span>
+                <button style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 4px 6px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center;" onclick="window.copiarCorreoNetflixCorte(this, '${cuenta.correo}')">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
               </div>
             </div>
-            <div style="background: rgba(255, 69, 58, 0.12); color: #ff453a; padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1px solid rgba(255, 69, 58, 0.2); white-space: nowrap;">
+            <div style="background: rgba(229, 9, 20, 0.12); color: #ff453a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(229, 9, 20, 0.2); white-space: nowrap;">
               Perfiles: ${perfilesTexto}
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(0,0,0,0.15); padding: 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.03);">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05);">
             <div style="display: flex; flex-direction: column; gap: 4px;">
               <span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Clave Vencida</span>
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
@@ -1030,17 +1027,15 @@ window.abrirPanelCortesNet = function () {
               </div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 4px; border-left: 1px solid rgba(255,255,255,0.06); padding-left: 12px;">
-              <span style="font-size: 0.65rem; color: var(--ios-green); font-weight: 800; text-transform: uppercase;">Nueva Clave</span>
+              <span style="font-size: 0.65rem; color: var(--ios-green); font-weight: 800; text-transform: uppercase;">Nueva Clave TV</span>
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
-                <input type="text" id="nueva_clave_${index}" style="background: transparent; border: none; color: var(--ios-green); font-size: 0.9rem; font-weight: 800; font-family: monospace; width: 100%; outline: none; padding: 0;" value="${claveNuevaSugerida}">
-                <button style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.2); border-radius: 6px; padding: 3px 6px; color: var(--ios-green); cursor: pointer;" onclick="copiarInputRapido(this, 'nueva_clave_${index}')">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </button>
+                <input type="text" id="nueva_clave_${index}" style="background: transparent !important; border: none !important; color: var(--ios-green); font-size: 0.9rem; font-weight: 800; font-family: monospace; width: 100%; outline: none; padding: 0; box-shadow: none !important;" value="${claveNuevaSugerida}">
+                <button style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.2); border-radius: 6px; padding: 3px 6px; color: var(--ios-green); cursor: pointer; font-size: 0.7rem; font-weight: bold;" onclick="copiarInputRapido(this, 'nueva_clave_${index}')">Copiar</button>
               </div>
             </div>
           </div>
 
-          <button class="btn-ios" style="background: #e50914; color: white; padding: 12px; font-size: 0.88rem; font-weight: 800; border-radius: 12px; width: 100%; margin: 0; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(229, 9, 20, 0.2);" onclick="window.procesarCorteReal(this, '${cuenta.correo}', '${perfilesOcultosSeguros}', 'nueva_clave_${index}')">
+          <button class="btn-ios" style="background: #e50914 !important; color: white !important; padding: 12px; font-size: 0.88rem; font-weight: 800; border-radius: 12px; width: 100%; margin: 0; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(229, 9, 20, 0.25);" onclick="window.procesarCorteReal(this, '${cuenta.correo}', '${perfilesOcultosSeguros}', 'nueva_clave_${index}')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             Procesar Corte y Subir a Hoy
           </button>
@@ -1057,7 +1052,6 @@ window.abrirPanelCortesNet = function () {
   script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerCortesNetflix&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
-
 window.procesarCorteReal = function (
   btn,
   correo,
@@ -2282,32 +2276,45 @@ function copiarCuentaCompleta(btn, index) {
     });
 }
 
+// =========================================================================
+// 👥 GESTOR DE TURNOS: INTERCEPTOR DE SEGURIDAD ESTRICTO PARA CAMILO
+// =========================================================================
 function toggleShiftsPanel() {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("shiftsOverlay");
   overlay.classList.toggle("open");
 
   if (overlay.classList.contains("open")) {
-    document.getElementById("searchShiftsInput").value = "";
-    document.getElementById("formularioIngresoHoras").style.display = "none";
+    if (document.getElementById("searchShiftsInput")) {
+      document.getElementById("searchShiftsInput").value = "";
+    }
 
-    const userActivo = sessionStorage.getItem("active_staff") || "";
+    // Identificamos con total autoridad quién está operando el sistema
+    const userActivo = (sessionStorage.getItem("active_staff") || "")
+      .toUpperCase()
+      .trim();
     const inpVendedor = document.getElementById("inputVendedorShift");
     const btnAde = document.getElementById("btnAdelantoCamilo");
-    const btnNom = document.getElementById("btnNominaCamilo"); // 👈 Captura el nuevo botón
+    const btnNom = document.getElementById("btnNominaCamilo"); // 👈 Captura el botón de Nómina
 
-    if (userActivo.toUpperCase() === "CAMILO") {
-      inpVendedor.disabled = false;
-      inpVendedor.value = "";
+    if (userActivo === "CAMILO") {
+      // 🔓 ACCESO TOTAL: Camilo puede alterar nombres y ve las herramientas financieras
+      if (inpVendedor) {
+        inpVendedor.disabled = false;
+        inpVendedor.value = "";
+      }
       if (btnAde)
         btnAde.style.setProperty("display", "inline-flex", "important");
       if (btnNom)
-        btnNom.style.setProperty("display", "inline-flex", "important"); // 🔥 Muestra a Camilo
+        btnNom.style.setProperty("display", "inline-flex", "important"); // 🔥 Se revela solo para ti
     } else {
-      inpVendedor.disabled = true;
-      inpVendedor.value = userActivo.toUpperCase();
+      // 🔒 RESTRICCIÓN: Los empleados solo ven sus horas y tienen bloqueados los botones
+      if (inpVendedor) {
+        inpVendedor.disabled = true;
+        inpVendedor.value = userActivo;
+      }
       if (btnAde) btnAde.style.setProperty("display", "none", "important");
-      if (btnNom) btnNom.style.setProperty("display", "none", "important"); // 🔒 Esconde a empleados
+      if (btnNom) btnNom.style.setProperty("display", "none", "important"); // 🛡️ Ocultado absoluto contra personal
     }
 
     sincronizarTachadosConNube(() => {
@@ -2321,14 +2328,47 @@ function toggleShiftsPanel() {
   }
 }
 
+// Modificar el disparador para abrir el nuevo modal independiente
+// =========================================================================
+// ⏰ CONTROLADOR DE APERTURA: POPUP FLOTANTE DE HORAS EXTRAS
+// =========================================================================
 function toggleFormularioHoras() {
-  haptic();
-  const form = document.getElementById("formularioIngresoHoras");
-  if (form.style.display === "none") {
-    form.style.display = "flex";
-    document.getElementById("inputHorasShift").focus();
-  } else {
-    form.style.display = "none";
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("addHoursOverlay");
+
+  if (overlay) {
+    // Si está oculto, lo mostramos con flex con máxima prioridad
+    if (overlay.style.display === "none" || overlay.style.display === "") {
+      overlay.style.setProperty("display", "flex", "important");
+      overlay.classList.add("open");
+
+      // 🛡️ CONTROL DE SEGURIDAD INTERNO PARA EL POPUP
+      const userActivo = (sessionStorage.getItem("active_staff") || "")
+        .toUpperCase()
+        .trim();
+      const inpVendedor = document.getElementById("inputVendedorShift");
+
+      if (inpVendedor) {
+        if (userActivo === "CAMILO") {
+          inpVendedor.disabled = false;
+          inpVendedor.value = "";
+          inpVendedor.placeholder = "Nombre del vendedor...";
+        } else {
+          inpVendedor.disabled = true;
+          inpVendedor.value = userActivo;
+        }
+      }
+
+      // Pone el cursor automáticamente en la caja de texto del tiempo
+      setTimeout(() => {
+        const input = document.getElementById("inputHorasShift");
+        if (input) input.focus();
+      }, 50);
+    } else {
+      // Si ya estaba abierto, lo ocultamos limpiamente
+      overlay.style.setProperty("display", "none", "important");
+      overlay.classList.remove("open");
+    }
   }
 }
 
@@ -2380,24 +2420,23 @@ function ejecutarGuardadoHorasManual() {
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(paramObj),
-  })
-    .then(function () {
-      triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Las horas se han ingresado correctamente.</span></div>`,
-      );
-      btn.disabled = false;
-      btn.innerText = "Guardar Horas en Sheets";
-      document.getElementById("inputHorasShift").value = "";
-      document.getElementById("formularioIngresoHoras").style.display = "none";
-      forzarRefrescoDeHoras();
-    })
-    .catch(function (e) {
-      triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Ocurrió un error. Verifica tu conexión.</span></div>`,
-      );
-      btn.disabled = false;
-      btn.innerText = "Guardar Horas en Sheets";
-    });
+  }).then(function () {
+    triggerToast(
+      `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Las horas se han ingresado correctamente.</span></div>`,
+    );
+    btn.disabled = false;
+    btn.innerText = "Guardar Horas en Sheets";
+    document.getElementById("inputHorasShift").value = "";
+
+    // 🔒 AUTO-CIERRE SEGURO CON APAGADO DE DISPLAY
+    const popHoras = document.getElementById("addHoursOverlay");
+    if (popHoras) {
+      popHoras.style.setProperty("display", "none", "important");
+      popHoras.classList.remove("open");
+    }
+
+    forzarRefrescoDeHoras();
+  });
 }
 
 function abrirEdicionHoras(
@@ -2964,56 +3003,78 @@ function ejecutarResolverGarantia(e) {
 }
 
 // =========================================================================
-// 📐 CYBERNET OS: GESTOR ESTRICTO DE VISIBILIDAD DEL DOCK (OCULTADO TOTAL)
+// 📐 CYBERNET OS: GESTOR ESTRICTO DE VISIBILIDAD DEL DOCK (ANTI-CLICS FANTASMA)
 // =========================================================================
 function actualizarVisibilidadDock() {
-  // Buscamos si existe CUALQUIER ventana operativa abierta en la pantalla
-  const algunModalAbierto = document.querySelector(".overlay-ios.open");
-  const dockWrapper = document.querySelector(".macos-dock-wrapper");
+  // 🔍 Escaneo robusto: Busca si hay modales con la clase 'open' O que tengan display activo
+  const algunModalAbierto = Array.from(
+    document.querySelectorAll(".overlay-ios"),
+  ).some((modal) => {
+    return (
+      modal.classList.contains("open") ||
+      (modal.style.display && modal.style.display !== "none")
+    );
+  });
 
+  const dockWrapper = document.querySelector(".macos-dock-wrapper");
   if (!dockWrapper) return;
 
   if (algunModalAbierto) {
-    // 🔒 CASO: Hay una ventana abierta -> Se esconde por completo al instante hacia abajo
+    // 🔒 CASO: Ventana abierta -> Desactivación física y reubicación total fuera de la pantalla
     document.body.style.overflow = "hidden";
     dockWrapper.style.setProperty("opacity", "0", "important");
     dockWrapper.style.setProperty("pointer-events", "none", "important");
-    dockWrapper.style.setProperty("transform", "translateY(30px)", "important");
+    dockWrapper.style.setProperty(
+      "visibility",
+      "hidden",
+      "important",
+    ); /* 👈 Mata la interactividad en el navegador */
+    dockWrapper.style.setProperty(
+      "transform",
+      "translateY(120px)",
+      "important",
+    ); /* 👈 Lo expulsa del área clickeable */
     dockWrapper.style.setProperty(
       "transition",
-      "all 0.18s ease-out",
+      "all 0.22s cubic-bezier(0.16, 1, 0.3, 1)",
       "important",
     );
   } else {
-    // 🏠 CASO: Escritorio limpio -> El Dock regresa flotando a su posición original
+    // 🏠 CASO: Escritorio limpio -> El Dock regresa flotando a su posición original con sus clics
     document.body.style.overflow = "";
     dockWrapper.style.setProperty("opacity", "1", "important");
     dockWrapper.style.setProperty("pointer-events", "auto", "important");
+    dockWrapper.style.setProperty("visibility", "visible", "important");
     dockWrapper.style.setProperty("transform", "translateY(0)", "important");
     dockWrapper.style.setProperty(
       "transition",
-      "all 0.18s ease-out",
+      "all 0.22s cubic-bezier(0.16, 1, 0.3, 1)",
       "important",
     );
   }
 }
 
-// Vigilante automático (MutationObserver) para detectar aperturas y cierres en el DOM
+// Inicializador y limpiador del Vigilante automático (MutationObserver)
 if (window.observadorModalesScroll) window.observadorModalesScroll.disconnect();
+
 window.observadorModalesScroll = new MutationObserver(() => {
   actualizarVisibilidadDock();
 });
 
-// Inicializador del ecosistema al cargar la página
+// Unificación de inicializadores al cargar el ecosistema del DOM
 document.addEventListener("DOMContentLoaded", () => {
   window.observadorModalesScroll.observe(document.body, {
     attributes: true,
     subtree: true,
-    attributeFilter: ["class"],
+    attributeFilter: [
+      "class",
+      "style",
+    ] /* 💡 🔥 CLAVE: Ahora también vigila cambios de estilos en línea */,
   });
 
-  // Ejecución preventiva inicial
+  // Ejecución preventiva inicial y vinculación al redimensionamiento
   actualizarVisibilidadDock();
+  window.addEventListener("resize", actualizarVisibilidadDock);
 });
 
 // Inicializador automático del radar
@@ -3728,6 +3789,34 @@ window.procesarCodigosSheets = function (res) {
   }
 };
 
+// =========================================================================
+// 🌐 HELPER GLOBAL DE COPIADO CON RESPUESTA TOAST (CYBERNET SECURITY)
+// =========================================================================
+if (!window.copiarTextoBandeja) {
+  window.copiarTextoBandeja = function (texto, mensajeExito) {
+    if (typeof haptic === "function") haptic();
+
+    navigator.clipboard
+      .writeText(texto)
+      .then(() => {
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green); font-weight:700;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> 
+            <span>${mensajeExito}</span>
+           </div>`,
+          );
+        }
+      })
+      .catch((err) => {
+        console.error("Error crítico al copiar: ", err);
+      });
+  };
+}
+
+// =========================================================================
+// 🔑 CORE BANDEJA: RENDERIZADOR DINÁMICO DE TARJETAS DE CÓDIGOS
+// =========================================================================
 function renderizarCodigosEnPantalla() {
   const container = document.getElementById("codesScrollArea");
   if (!container) return;
@@ -3743,10 +3832,43 @@ function renderizarCodigosEnPantalla() {
     let item = window.currentCodesStock[i];
     let colColor = item.colorText || "var(--ios-blue)";
 
+    // 🔍 ANALIZADOR INTELIGENTE ANTI-DESBORDAMIENTO
+    let textoLimpio = (item.codigoLink || "").trim();
+    // Escapamos comillas simples para evitar roturas en el atributo onclick de HTML
+    let textoEscapado = textoLimpio.replace(/'/g, "\\'");
+
+    // Filtro: Detecta si el valor es un enlace web válido
+    const esURL =
+      /^(http|https):\/\/[^ "]+$/.test(textoLimpio) ||
+      textoLimpio.toLowerCase().includes("www.");
+
+    let renderCodigoOEnlace = "";
+
+    if (esURL) {
+      // 🔗 CASO URL: Oculta por completo el link largo y dibuja un botón compacto Apple Style
+      renderCodigoOEnlace = `
+        <button class="btn-ios" style="padding: 6px 14px; font-size: 0.82rem; border-radius: 10px; margin: 0; background: rgba(10, 132, 255, 0.1) !important; color: var(--ios-blue) !important; border: 1px solid rgba(10, 132, 255, 0.2); font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;" 
+                onclick="window.copiarTextoBandeja('${textoEscapado}', 'Enlace de acceso copiado')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          Copiar Enlace
+        </button>
+      `;
+    } else {
+      // 🔢 CASO CÓDIGO NUMÉRICO/PIN: Se mantiene 100% visible, destacado y clickeable para copiar
+      renderCodigoOEnlace = `
+        <span style="font-size: 1.15rem; color: ${colColor}; font-weight: 800; font-family: monospace; background: rgba(255, 255, 255, 0.03); padding: 4px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); letter-spacing: 0.5px; cursor: pointer; display: inline-block; transition: transform 0.1s; text-shadow: 0 0 10px rgba(255,255,255,0.05);" 
+              onclick="window.copiarTextoBandeja('${textoEscapado}', 'Código copiado al portapapeles')"
+              onmousedown="this.style.transform='scale(0.96)'"
+              onmouseup="this.style.transform='scale(1)'"
+              title="Haz clic para copiar código">
+          ${textoLimpio}
+        </span>
+      `;
+    }
+
     htmlCards += `
         <div class="card-ios mb-1" style="padding: 16px; background: rgba(255, 255, 255, 0.015); border: 1px solid var(--glass-border); border-radius: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--glass-shadow);">
             
-            <!-- 🌟 CABECERA: Plataforma + Punto de Estado Neon y Hora -->
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="width: 8px; height: 8px; border-radius: 50%; background: ${colColor}; box-shadow: 0 0 10px ${colColor};"></span>
@@ -3755,7 +3877,6 @@ function renderizarCodigosEnPantalla() {
                 <span style="font-size: 0.75rem; color: var(--text-secondary); font-family: monospace; font-weight: 600; opacity: 0.8;">${item.hora}</span>
             </div>
 
-            <!-- 📊 CUERPO: Información organizada sin textos amontonados -->
             <div style="display: flex; flex-direction: column; gap: 8px; padding: 2px 0;">
                 <div style="display: flex; align-items: baseline; gap: 8px;">
                     <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600; letter-spacing: 0.3px;">Cliente:</span>
@@ -3767,11 +3888,10 @@ function renderizarCodigosEnPantalla() {
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
                     <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600; letter-spacing: 0.3px;">Código / Enlace:</span>
-                    <span style="font-size: 1.15rem; color: ${colColor}; font-weight: 800; font-family: monospace; background: rgba(255, 255, 255, 0.03); padding: 3px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); letter-spacing: 0.5px; word-break: break-all; text-shadow: 0 0 10px rgba(255,255,255,0.05);">${item.codigoLink}</span>
+                    ${renderCodigoOEnlace}
                 </div>
             </div>
 
-            <!-- 🔘 BOTÓN: Copiado Premium e Integrado -->
             <button class="btn-ios btn-secondary w-100" style="display: flex; justify-content: center; align-items: center; gap: 8px; padding: 12px; font-weight: 700; font-size: 0.85rem; border-radius: 12px; margin: 0; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border); transition: all 0.2s;" onclick="copiarMensajeRapidoGmail(this, ${i})">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 COPIAR MENSAJE
@@ -6132,6 +6252,9 @@ function calcularDescuentoDeuda() {
     formatMoneda(descuento);
 }
 
+// =========================================================================
+// 📈 RENDERIZADOR CONTABLE BENTO ACTUALIZADO CON HISTORIAL DE SALIDAS
+// =========================================================================
 function renderDashboard() {
   if (!globalFinanzasData) return;
   const d = globalFinanzasData[activePeriod];
@@ -6184,14 +6307,13 @@ function renderDashboard() {
   );
   document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
 
-  // ─────────────── CONF CONFIGURACIÓN DE PORCENTAJES ───────────────
+  // ─────────────── CONFIGURACIÓN DE PORCENTAJES DINÁMICOS ───────────────
   let pM = 28,
     pNom = 17,
     pNeg = 55;
   const m = document.getElementById("appleMonthSelect").value;
   const dia = document.getElementById("appleDaySelect").value;
 
-  // Mantiene la regla histórica de Mayo
   if (m === "MAYO") {
     if (dia !== "TODOS" && parseInt(dia) <= 15) {
       pM = 30;
@@ -6202,9 +6324,7 @@ function renderDashboard() {
       pNom = 16;
       pNeg = 55;
     }
-  }
-  // 🔥 NUEVA REGLA: Julio en adelante (30% / 54% / 16%)
-  else if (
+  } else if (
     [
       "JULIO",
       "AGOSTO",
@@ -6222,7 +6342,6 @@ function renderDashboard() {
   document.getElementById("lblPorcMio").innerText = pM;
   document.getElementById("lblPorcNegocio").innerText = pNeg;
   document.getElementById("lblPorcNomina").innerText = pNom;
-  // ─────────────────────────────────────────────────────────────────
 
   let base = ventasBrutasReales;
   let miGananciaNeta =
@@ -6285,10 +6404,7 @@ function renderDashboard() {
   itemsTemp.forEach((item) => {
     let cat = item.categoria || "OTROS";
     if (!categoriasAgrupadas[cat]) {
-      categoriasAgrupadas[cat] = {
-        gastosPuros: 0,
-        ingresosPuros: 0,
-      };
+      categoriasAgrupadas[cat] = { gastosPuros: 0, ingresosPuros: 0 };
     }
     let montoNum = parseFloat(item.monto) || 0;
     if (item.tipo === "INGRESO") {
@@ -6302,55 +6418,41 @@ function renderDashboard() {
 
   let htmlBuffer = "";
 
+  // Bloque 1: Resumen de Gastos por Categoría
   if (totalGastadoEnPeriodo > 0) {
     htmlBuffer += `
-        <div style="margin-bottom: 24px;">
-          <h4 style="margin: 0 0 16px 0; color: var(--ios-red); font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-            <div style="background: rgba(255, 69, 58, 0.15); padding: 6px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            </div>
-            Gastos del Periodo Seleccionado
+        <div style="margin-bottom: 20px;">
+          <h4 style="margin: 0 0 12px 0; color: var(--ios-red); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
+            🔴 Resumen de Egresos por Categoría
           </h4>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;">
       `;
-
     let catArrayGastos = Object.keys(categoriasAgrupadas).filter(
-      (c) => categoriasAgrupadas[c].gastosPuros > 0,
+      (c) => (sorted = categoriasAgrupadas[c].gastosPuros > 0),
     );
     catArrayGastos.sort(
       (a, b) =>
         categoriasAgrupadas[b].gastosPuros - categoriasAgrupadas[a].gastosPuros,
     );
-
     catArrayGastos.forEach((cat) => {
-      let gastosCat = 1;
-      gastosCat = categoriasAgrupadas[cat].gastosPuros;
       htmlBuffer += `
-          <div style="background: rgba(255, 69, 58, 0.05); border: 1px solid rgba(255, 69, 58, 0.2); padding: 12px; border-radius: 16px; display: flex; flex-direction: column; justify-content: center;">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
-            <span style="color: var(--ios-red); font-weight: 800; font-size: 1.1rem; font-family: monospace;">${formatMoneda(gastosCat)}</span>
-          </div>
-        `;
+          <div style="background: rgba(255, 69, 58, 0.04); border: 1px solid rgba(255, 69, 58, 0.15); padding: 10px; border-radius: 12px;">
+            <span style="font-size: 0.68rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
+            <span style="color: var(--ios-red); font-weight: 800; font-size: 1.05rem; font-family: monospace;">${formatMoneda(categoriasAgrupadas[cat].gastosPuros)}</span>
+          </div>`;
     });
-
-    htmlBuffer += `
-          </div>
-        </div>
-      `;
+    htmlBuffer += `</div></div>`;
   }
 
+  // Bloque 2: Resumen de Ingresos por Categoría
   if (totalIngresadoEnPeriodo > 0) {
     htmlBuffer += `
-        <div style="margin-bottom: 8px;">
-          <h4 style="margin: 0 0 16px 0; color: var(--ios-green); font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-            <div style="background: rgba(48, 209, 88, 0.15); padding: 6px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-            </div>
-            Ingresos Extras del Periodo
+        <div style="margin-bottom: 20px;">
+          <h4 style="margin: 0 0 12px 0; color: var(--ios-green); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
+            🟢 Resumen de Ingresos Extra
           </h4>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;">
       `;
-
     let catArrayIngresos = Object.keys(categoriasAgrupadas).filter(
       (c) => categoriasAgrupadas[c].ingresosPuros > 0,
     );
@@ -6359,23 +6461,46 @@ function renderDashboard() {
         categoriasAgrupadas[b].ingresosPuros -
         categoriasAgrupadas[a].ingresosPuros,
     );
-
     catArrayIngresos.forEach((cat) => {
-      let ingresosCat = categoriasAgrupadas[cat].ingresosPuros;
       htmlBuffer += `
-          <div style="background: rgba(48, 209, 88, 0.05); border: 1px solid rgba(48, 209, 88, 0.2); padding: 12px; border-radius: 16px; display: flex; flex-direction: column; justify-content: center;">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
-            <span style="color: var(--ios-green); font-weight: 800; font-size: 1.1rem; font-family: monospace;">${formatMoneda(ingresosCat)}</span>
-          </div>
-        `;
+          <div style="background: rgba(48, 209, 88, 0.04); border: 1px solid rgba(48, 209, 88, 0.15); padding: 10px; border-radius: 12px;">
+            <span style="font-size: 0.68rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
+            <span style="color: var(--ios-green); font-weight: 800; font-size: 1.05rem; font-family: monospace;">${formatMoneda(categoriasAgrupadas[cat].ingresosPuros)}</span>
+          </div>`;
     });
-
-    htmlBuffer += `
-          </div>
-        </div>
-      `;
+    htmlBuffer += `</div></div>`;
   }
 
+  // 🔥 NUEVO BLOQUE 3: HISTORIAL CRONOLÓGICO DE SALIDAS DETALLADAS (LO QUE SE PIDIÓ)
+  htmlBuffer += `
+      <div style="margin-top: 10px; width: 100%;">
+        <h4 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
+          📋 Historial Detallado de Salidas (Libro)
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+    `;
+
+  // Iteramos de atrás hacia adelante para que los últimos movimientos salgan primero arriba
+  for (let i = itemsTemp.length - 1; i >= 0; i--) {
+    let item = itemsTemp[i];
+
+    // Filtramos estrictamente las salidas de dinero (Gastos, Inversiones, Adelantos, etc.)
+    if (item.tipo !== "INGRESO") {
+      let montoMovimiento = parseFloat(item.monto) || 0;
+      htmlBuffer += `
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px;">
+            <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden; padding-right: 5px;">
+              <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.detalle || "Sin nota"}">${item.detalle || "Sin nota"}</span>
+              <span style="font-size: 0.68rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">${item.fecha || ""} | ${item.categoria || "Otros"}</span>
+            </div>
+            <strong style="color: var(--ios-red); font-size: 0.95rem; font-family: monospace; flex-shrink: 0;">-${formatMoneda(montoMovimiento)}</strong>
+          </div>`;
+    }
+  }
+
+  htmlBuffer += `</div></div>`;
+
+  // Inyectamos todo el acumulado en la caja con scroll de tu Widget Bento
   container.innerHTML = htmlBuffer;
   calcularDescuentoDeuda();
 }
@@ -6900,7 +7025,7 @@ window.filtrarPlataformasCotizador = function () {
 };
 
 // =========================================================================
-// 🧮 CEREBRO DEL COTIZADOR AUTOMÁTICO DE COMBOS (PARCHADO PARA PARAMOUNT+)
+// 🧮 CEREBRO DEL COTIZADOR AUTOMÁTICO DE COMBOS (SOPORTE MÚLTIPLES PANTALLAS)
 // =========================================================================
 window.calcularPreciosSistemaCotizador = function () {
   let tieneNetflix = false;
@@ -6908,40 +7033,67 @@ window.calcularPreciosSistemaCotizador = function () {
   let cantidadEstandar = 0;
   let sumatoriaHerramientas = 0;
   let tieneAmazon = false;
-  let tieneParamount = false; // 🌟 Nueva bandera de control
+  let tieneParamount = false;
 
-  // 1. Escaneo profundo de plataformas seleccionadas
-  document.querySelectorAll(".chk-cotizar-plat").forEach((cb) => {
-    if (cb.checked) {
+  let costoPantallasExtra = 0; // 🔥 NUEVO ACUMULADOR PARA PANTALLAS ADICIONALES
+
+  // 1. Escaneo profundo de plataformas y pantallas seleccionadas
+  document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
+    const cb = row.querySelector(".chk-cotizar-plat");
+    if (cb && cb.checked) {
       const tipo = cb.getAttribute("data-tipo");
-      if (tipo === "netflix") tieneNetflix = true;
-      else if (tipo === "disneypre") tieneDisneyPremium = true;
-      else if (tipo === "estandar" || tipo === "disneyest") {
+      const val = cb.value;
+      const selectPantallas = row.querySelector(".sel-pantallas-cotizador");
+      const pantallas = selectPantallas
+        ? parseInt(selectPantallas.value) || 1
+        : 1;
+      const extras = pantallas - 1; // Solo cobramos las "adicionales"
+
+      if (tipo === "netflix") {
+        tieneNetflix = true;
+        if (pantallas === 2) costoPantallasExtra += 11500;
+        else if (pantallas === 3) costoPantallasExtra += 21500;
+        else if (pantallas === 4) costoPantallasExtra += 31500;
+        else if (pantallas === 5) costoPantallasExtra += 40500;
+      } else if (tipo === "disneypre") {
+        tieneDisneyPremium = true;
+        costoPantallasExtra += extras * 10000;
+      } else if (tipo === "estandar" || tipo === "disneyest") {
         cantidadEstandar++;
-        if (cb.value === "Amazon Prime") tieneAmazon = true;
-        if (cb.value === "Paramount+") tieneParamount = true; // 🌟 Detectamos si marcaron Paramount
+        if (val === "Amazon Prime") {
+          tieneAmazon = true;
+          costoPantallasExtra += extras * 5000;
+        } else if (val === "Paramount+") {
+          tieneParamount = true;
+          costoPantallasExtra += extras * 18000;
+        } else if (val === "Disney Estándar") {
+          costoPantallasExtra += extras * 4000;
+        } else {
+          // Max, Vix, Plex, Crunchyroll, Apple TV, Universal+
+          costoPantallasExtra += extras * 3000;
+        }
       } else if (tipo === "herramienta") {
-        sumatoriaHerramientas +=
-          parseFloat(cb.getAttribute("data-precio")) || 0;
+        const precioBase = parseFloat(cb.getAttribute("data-precio")) || 0;
+        sumatoriaHerramientas += precioBase; // Base (1 cuenta)
+        if (val === "Metegol") {
+          costoPantallasExtra += extras * 12000; // Excepción regla Metegol
+        } else {
+          costoPantallasExtra += extras * precioBase; // Multiplica directo para herramientas
+        }
       }
     }
   });
 
-  // 🎯 MOTOR DE CONTROL DINÁMICO PARA PARAMOUNT+ 🎯
+  // 🎯 MOTOR DE CONTROL DINÁMICO PARA PARAMOUNT+
   let abonoParamountCombo = 0;
   let esParamountIndividualSolo = false;
 
   if (tieneParamount) {
-    // Calculamos el universo total de pantallas de streaming marcadas (sin contar herramientas)
     let totalPlatasStreaming =
       (tieneNetflix ? 1 : 0) + (tieneDisneyPremium ? 1 : 0) + cantidadEstandar;
-
     if (totalPlatasStreaming === 1) {
-      // Caso A: Paramount está completamente solo en la cotización
       esParamountIndividualSolo = true;
     } else {
-      // Caso B: Está acompañando un combo. Lo extraemos del pool plano estándar
-      // para que sume $10.000 limpios y no interfiera con los descuentos de las otras
       cantidadEstandar--;
       abonoParamountCombo = 18000;
     }
@@ -6949,70 +7101,56 @@ window.calcularPreciosSistemaCotizador = function () {
 
   let precioBaseUnMes = 0;
 
-  // Interceptamos si está solo, de lo contrario ejecuta tu árbol de decisiones original intacto
   if (esParamountIndividualSolo) {
-    precioBaseUnMes = 20000; // 🔥 Standalone forzado a 15k
+    precioBaseUnMes = 20000;
   } else {
-    // 2. REGLAS AUTOMATIZADAS CYBERNET CORREGIDAS
+    // 2. REGLAS AUTOMATIZADAS CYBERNET (Basadas en 1 pantalla)
     if (tieneNetflix) {
       if (tieneDisneyPremium) {
-        // 💎 COMBOS PREMIUM CON NETFLIX
-        if (cantidadEstandar === 0)
-          precioBaseUnMes = 25000; // Combo 4
-        else if (cantidadEstandar === 1)
-          precioBaseUnMes = 29000; // Combo 5
-        else if (cantidadEstandar === 2)
-          precioBaseUnMes = 32000; // Combo 6
+        if (cantidadEstandar === 0) precioBaseUnMes = 25000;
+        else if (cantidadEstandar === 1) precioBaseUnMes = 29000;
+        else if (cantidadEstandar === 2) precioBaseUnMes = 32000;
         else if (cantidadEstandar >= 3)
-          precioBaseUnMes = 35000 + (cantidadEstandar - 3) * 3000; // Combo 7 + Adicionales
+          precioBaseUnMes = 35000 + (cantidadEstandar - 3) * 3000;
       } else {
-        // 🍿 COMBOS CLÁSICOS CON NETFLIX
-        if (cantidadEstandar === 0)
-          precioBaseUnMes = 14500; // Combo 0
-        else if (cantidadEstandar === 1)
-          precioBaseUnMes = 20000; // Combo 1
-        else if (cantidadEstandar === 2)
-          precioBaseUnMes = 24000; // Combo 2
+        if (cantidadEstandar === 0) precioBaseUnMes = 14500;
+        else if (cantidadEstandar === 1) precioBaseUnMes = 20000;
+        else if (cantidadEstandar === 2) precioBaseUnMes = 24000;
         else if (cantidadEstandar >= 3)
-          precioBaseUnMes = 27000 + (cantidadEstandar - 3) * 3000; // Combo 3 + Adicionales
+          precioBaseUnMes = 27000 + (cantidadEstandar - 3) * 3000;
       }
     } else {
-      // 🚫 COMBOS STREAMING SIN NETFLIX
       if (tieneDisneyPremium) {
-        // 💎 COMBOS PREMIUM (Con Disney Premium - Sin Netflix)
         if (cantidadEstandar === 0) precioBaseUnMes = 15000;
-        else if (cantidadEstandar === 1)
-          precioBaseUnMes = 20000; // Combo 4
-        else if (cantidadEstandar === 2)
-          precioBaseUnMes = 22000; // Combo 5
-        else if (cantidadEstandar === 3)
-          precioBaseUnMes = 24000; // Combo 6
+        else if (cantidadEstandar === 1) precioBaseUnMes = 20000;
+        else if (cantidadEstandar === 2) precioBaseUnMes = 22000;
+        else if (cantidadEstandar === 3) precioBaseUnMes = 24000;
         else if (cantidadEstandar >= 4)
-          precioBaseUnMes = 24000 + (cantidadEstandar - 3) * 3000; // Mega VIP + Adicionales
+          precioBaseUnMes = 24000 + (cantidadEstandar - 3) * 3000;
       } else {
-        // 🍿 COMBOS ECONÓMICOS (Sin Netflix - Sin Disney Premium)
         if (cantidadEstandar === 0) {
           precioBaseUnMes = 0;
         } else if (cantidadEstandar === 1) {
           precioBaseUnMes = tieneAmazon ? 10500 : 8500;
         } else if (cantidadEstandar === 2) {
-          precioBaseUnMes = 13000; // Combo 1
+          precioBaseUnMes = 13000;
         } else if (cantidadEstandar === 3) {
-          precioBaseUnMes = 16000; // Combo 2
+          precioBaseUnMes = 16000;
         } else if (cantidadEstandar === 4) {
-          precioBaseUnMes = 18000; // Combo 3
+          precioBaseUnMes = 18000;
         } else if (cantidadEstandar >= 5) {
-          precioBaseUnMes = 18000 + (cantidadEstandar - 4) * 3000; // Paquete Familiar + Adicionales
+          precioBaseUnMes = 18000 + (cantidadEstandar - 4) * 3000;
         }
       }
     }
   }
 
-  // 3. Sumar el abono de Paramount (si aplica) y las herramientas independientes fijas
+  // 3. Sumar el abono de Paramount, herramientas y 🔥 PANTALLAS EXTRA
   precioBaseUnMes += abonoParamountCombo;
   precioBaseUnMes += sumatoriaHerramientas;
+  precioBaseUnMes += costoPantallasExtra;
 
-  // 4. Captura de meses y cálculo de descuentos quincenales/mensuales
+  // 4. Captura de meses y cálculo de descuentos
   const monthSelect = document.getElementById("calcMonths");
   const meses = parseFloat(monthSelect.value) || 1;
   const porcDesc =
@@ -7020,16 +7158,13 @@ window.calcularPreciosSistemaCotizador = function () {
       monthSelect.options[monthSelect.selectedIndex].getAttribute("data-desc"),
     ) || 0;
 
-  // Operaciones contables base
   const subtotal = precioBaseUnMes * meses;
   const montoDescuento = subtotal * (porcDesc / 100);
 
-  // 5. CALCULAR DESCUENTO POR CLIENTE FIEL EN CASCADA
   const esClienteFiel = document.getElementById("calcFidelidad").checked;
   let descuentoFielTotal =
     esClienteFiel && precioBaseUnMes > 0 ? 1000 * meses : 0;
 
-  // Control visual de la fila de fidelidad
   if (descuentoFielTotal > 0) {
     document.getElementById("rowCalcDescFiel").style.display = "flex";
     document.getElementById("calcDiscountFiel").innerText =
@@ -7039,9 +7174,8 @@ window.calcularPreciosSistemaCotizador = function () {
   }
 
   let totalA_Cobrar = subtotal - montoDescuento - descuentoFielTotal;
-  if (totalA_Cobrar < 0) totalA_Cobrar = 0; // Blindaje contra valores negativos
+  if (totalA_Cobrar < 0) totalA_Cobrar = 0;
 
-  // 6. Imprimir en los visores contables
   document.getElementById("calcBasePriceDisplay").value =
     "$" + precioBaseUnMes.toLocaleString("es-CO");
   document.getElementById("calcSubtotal").innerText =
@@ -7056,8 +7190,20 @@ function copiarCotizacionCombo(btn) {
   if (typeof haptic === "function") haptic();
 
   let plataformasSeleccionadas = [];
-  document.querySelectorAll(".chk-cotizar-plat").forEach((cb) => {
-    if (cb.checked) plataformasSeleccionadas.push(cb.value.toUpperCase());
+  document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
+    const cb = row.querySelector(".chk-cotizar-plat");
+    if (cb && cb.checked) {
+      const selectPantallas = row.querySelector(".sel-pantallas-cotizador");
+      const pantallas = selectPantallas
+        ? parseInt(selectPantallas.value) || 1
+        : 1;
+
+      // Si pidió más de 1, agregamos el texto "(X Pantallas)" al WhatsApp
+      const textoPantallas = pantallas > 1 ? ` (${pantallas} Pantallas)` : "";
+      plataformasSeleccionadas.push(
+        `   • 📺 *${cb.value.toUpperCase()}*${textoPantallas}`,
+      );
+    }
   });
 
   if (plataformasSeleccionadas.length === 0) {
@@ -7077,25 +7223,19 @@ function copiarCotizacionCombo(btn) {
   const discountText = document.getElementById("calcDiscount").innerText;
   const totalText = document.getElementById("calcTotal").innerText;
 
-  let listaPlatFormateada = plataformasSeleccionadas
-    .map((p) => `   • 📺 *${p}*`)
-    .join("\n");
+  let listaPlatFormateada = plataformasSeleccionadas.join("\n");
 
-  // Cuerpo base del mensaje para WhatsApp
   let mensajeVIP =
     `💻 *¡TU COMBO STREAMING CYBERNET ESTÁ LISTO!* 🚀📺\n\n` +
     `🔥 *Servicios Incluidos:*\n${listaPlatFormateada}\n\n` +
     `🗓️ *Vigencia contratada:* ${meses} Mes(es) Garantizados\n`;
 
-  // Si tiene meses o fidelidad activa, desglosamos las pildoras de regalos
   if (parseInt(meses) > 1 || esClienteFiel) {
     mensajeVIP += `\n💵 Valor Comercial: ${subtotalText}\n`;
 
     if (parseInt(meses) > 1) {
       mensajeVIP += `🎁 *Descuento Especial (${porcDesc}%):* ${discountText}\n`;
     }
-
-    // Inyectar texto persuasivo de Cliente Fiel
     if (esClienteFiel) {
       let descFielAcumulado = 1000 * parseInt(meses);
       mensajeVIP += `✨ *Descuento Cliente Fiel:* -$${descFielAcumulado.toLocaleString("es-CO")} _(¡Por tu lealtad con la casa!)_\n`;
@@ -7109,13 +7249,13 @@ function copiarCotizacionCombo(btn) {
       `───────────────────────\n` + `💰 *TOTAL A PAGAR: ${totalText}* 🔥🍿\n`;
   }
 
-  if (plataformasSeleccionadas.includes("NETFLIX")) {
+  // Verifica de forma segura si la palabra "NETFLIX" está en el texto de las plataformas seleccionadas
+  if (listaPlatFormateada.includes("NETFLIX")) {
     mensajeVIP += `\n🤖 *¡BENEFICIO AUTOMÁTICO!* Tu cuenta de Netflix incluye acceso a nuestra web para retirar códigos 24/7 al instante y sin filas en el chat. 🔓`;
   }
 
   mensajeVIP += `\n\n¿Te agrada la oferta para enviarte los medios de pago y activarte de inmediato? ⚡🍿`;
 
-  // Copiar al portapapeles
   navigator.clipboard.writeText(mensajeVIP).then(() => {
     const originalHTML = btn.innerHTML;
     btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Ficha Copiada!`;
@@ -7239,6 +7379,9 @@ function obtenerConteoLibreDinamico(idProducto) {
   return encontrado ? encontrado.libres : "0";
 }
 
+// =========================================================================
+// 🎛️ INVENTARIO UNIFICADO BENTO DE DOS COLUMNAS (IPADOS EDITION)
+// =========================================================================
 window.renderizarPanelCamilo = function () {
   const contenedor = document.getElementById("panelSwitchesStock");
   if (!contenedor) return;
@@ -7254,30 +7397,28 @@ window.renderizarPanelCamilo = function () {
 
   productosTiendaMaster.forEach((p) => {
     const estaAgotado = agotados.includes(p.id);
-
-    // Extraemos la cantidad disponible sin formatos raros ni colores
-    const cantLibres = obtenerConteoLibreDinamico(p.id);
+    const cantLibres = window.obtenerConteoLibreDinamico(p.id);
 
     const row = document.createElement("div");
+    // Transformamos cada celda en un micro-widget iPadOS perfectamente alineado
+    row.className = "widget-ipad";
     row.style.cssText =
-      "display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 0.95rem; font-weight: 600; background: rgba(0,0,0,0.15); border-radius: 12px; margin-bottom: 6px;";
+      "padding: 12px 16px !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; margin: 0 !important; gap: 10px !important; background: #1c1c1e !important; border-radius: 16px !important;";
 
-    // Filtro estricto de seguridad para el switch
     const inputDisabled = esCamilo
       ? ""
       : "disabled style='cursor: not-allowed;'";
     const labelAction = esCamilo
       ? ""
-      : `onclick="alert('🔒 ACCESO RESTRINGIDO\\n\\nTu usuario solo tiene permisos de consulta. Solo el administrador Camilo puede alterar el estado de venta de las plataformas.')"`;
+      : `onclick="alert('🔒 ACCESO RESTRINGIDO\\n\\nSolo el administrador Camilo puede alterar el estado de venta de las plataformas.')"`;
 
     row.innerHTML = `
-        <!-- Nombre de plataforma + stock en frente limpio y gris tipo Mac -->
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span>${p.nombre}</span>
-          <span style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; font-family: monospace;">(${cantLibres} libres)</span>
+        <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden; padding-right: 4px;">
+          <span style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.nombre}</span>
+          <span style="font-size: 0.76rem; color: var(--text-secondary); font-weight: 600; font-family: monospace;">(${cantLibres} libres)</span>
         </div>
         
-        <label class="switch-camilo" ${labelAction}>
+        <label class="switch-camilo" ${labelAction} style="flex-shrink: 0;">
           <input type="checkbox" ${estaAgotado ? "checked" : ""} ${inputDisabled} onchange="window.cambiarStockDesdeAdmin('${p.id}')">
           <span class="slider-camilo" style="${!esCamilo ? "opacity: 0.5; filter: grayscale(1);" : ""}"></span>
         </label>
@@ -7285,7 +7426,6 @@ window.renderizarPanelCamilo = function () {
     contenedor.appendChild(row);
   });
 };
-
 window.cambiarStockDesdeAdmin = function (id) {
   let agotados = JSON.parse(
     localStorage.getItem("cyber_items_agotados") || "[]",
@@ -7561,6 +7701,7 @@ document.addEventListener(
         "inventarioOverlay",
         "promoOverlay",
         "recordatoriosOverlay",
+        "addHoursOverlay",
         "anaCodesOverlay", // 🌟 Corregido de función a ID
         "chayoOverlay", // 🌟 Corregido de función a ID
         "yopmailOverlay", // 🌟 Corregido de función a ID
@@ -7641,48 +7782,6 @@ window.obtenerConteoLibreDinamico = function (idProducto) {
   });
 
   return encontrado ? encontrado.libres : "0";
-};
-
-window.renderizarPanelCamilo = function () {
-  const contenedor = document.getElementById("panelSwitchesStock");
-  if (!contenedor) return;
-  contenedor.innerHTML = "";
-
-  const userActivo = (sessionStorage.getItem("active_staff") || "")
-    .toUpperCase()
-    .trim();
-  const esCamilo = userActivo === "CAMILO";
-  const agotados = JSON.parse(
-    localStorage.getItem("cyber_items_agotados") || "[]",
-  );
-
-  productosTiendaMaster.forEach((p) => {
-    const estaAgotado = agotados.includes(p.id);
-    const cantLibres = window.obtenerConteoLibreDinamico(p.id);
-
-    const row = document.createElement("div");
-    row.style.cssText =
-      "display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-primary); font-size: 0.95rem; font-weight: 600; background: rgba(0,0,0,0.15); border-radius: 12px; margin-bottom: 6px;";
-
-    const inputDisabled = esCamilo
-      ? ""
-      : "disabled style='cursor: not-allowed;'";
-    const labelAction = esCamilo
-      ? ""
-      : `onclick="alert('🔒 ACCESO RESTRINGIDO\\n\\nSolo el administrador Camilo puede alterar el estado de venta de las plataformas.')"`;
-
-    row.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span>${p.nombre}</span>
-          <span style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; font-family: monospace;">(${cantLibres} libres)</span>
-        </div>
-        <label class="switch-camilo" ${labelAction}>
-          <input type="checkbox" ${estaAgotado ? "checked" : ""} ${inputDisabled} onchange="window.cambiarStockDesdeAdmin('${p.id}')">
-          <span class="slider-camilo" style="${!esCamilo ? "opacity: 0.5; filter: grayscale(1);" : ""}"></span>
-        </label>
-      `;
-    contenedor.appendChild(row);
-  });
 };
 
 function verificarStockCritico(data) {
@@ -8304,3 +8403,125 @@ window.cerrarLectorCorreoGlobal = function () {
   document.getElementById("modalLectorCorreoGlobal").style.display = "none";
   document.getElementById("cuerpoLectorCorreoGlobal").innerHTML = "";
 };
+// =========================================================================
+// 🔒 GESTOR DE SEGURIDAD PRIVADA DE 10 SEGUNDOS: BÓVEDA CHAYO (DISPLAY ENGINE)
+// =========================================================================
+let cronometroChayo = null;
+
+function revelarDatosChayoTemporizados() {
+  if (typeof haptic === "function") haptic();
+
+  const barra = document.getElementById("barraCredencialesChayo");
+  const botonVer = document.getElementById("btnVerDatosChayo");
+  if (!barra || !botonVer) return;
+
+  // 🔥 Revelación absoluta en formato Flex superando cualquier bloqueo
+  barra.style.setProperty("display", "flex", "important");
+
+  // Congelamos el botón de activación para evitar spam
+  botonVer.disabled = true;
+  botonVer.style.setProperty("opacity", "0.5", "important");
+
+  let cuentaRegresiva = 10;
+  botonVer.innerText = `Mostrando (${cuentaRegresiva}s)`;
+
+  if (cronometroChayo) clearInterval(cronometroChayo);
+
+  cronometroChayo = setInterval(() => {
+    cuentaRegresiva--;
+
+    if (cuentaRegresiva <= 0) {
+      clearInterval(cronometroChayo);
+      // Destruimos la presencia de los botones del DOM tras los 10 segundos
+      barra.style.setProperty("display", "none", "important");
+
+      botonVer.disabled = false;
+      botonVer.style.setProperty("opacity", "1", "important");
+      botonVer.innerText = "Ver datos de ingresos";
+    } else {
+      botonVer.innerText = `Mostrando (${cuentaRegresiva}s)`;
+    }
+  }, 1000);
+}
+
+// Reseteador preventivo al cerrar el panel
+function toggleChayoPanel() {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("chayoOverlay");
+  if (!overlay) return;
+
+  overlay.classList.toggle("open");
+
+  // Si cierras la ventana antes de cumplirse el tiempo, ejecutamos limpieza inmediata
+  if (!overlay.classList.contains("open")) {
+    if (cronometroChayo) clearInterval(cronometroChayo);
+    const barra = document.getElementById("barraCredencialesChayo");
+    const botonVer = document.getElementById("btnVerDatosChayo");
+
+    if (barra) {
+      barra.style.setProperty("display", "none", "important");
+    }
+    if (botonVer) {
+      botonVer.disabled = false;
+      botonVer.style.setProperty("opacity", "1", "important");
+      botonVer.innerText = "Ver datos de ingresos";
+    }
+  }
+}
+
+// Reemplazar tu función de toggle original con este reseteador preventivo
+function toggleChayoPanel() {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("chayoOverlay");
+  if (!overlay) return;
+
+  overlay.classList.toggle("open");
+
+  // 🔥 Si cierras la ventana antes de los 10 segundos, borramos los hilos del reloj
+  if (!overlay.classList.contains("open")) {
+    if (cronometroChayo) clearInterval(cronometroChayo);
+    const barra = document.getElementById("barraCredencialesChayo");
+    const botonVer = document.getElementById("btnVerDatosChayo");
+
+    if (barra) {
+      barra.style.setProperty("max-height", "0px", "important");
+      barra.style.setProperty("opacity", "0", "important");
+      barra.style.setProperty(
+        "border-bottom",
+        "1px solid transparent",
+        "important",
+      );
+    }
+    if (botonVer) {
+      botonVer.disabled = false;
+      botonVer.style.setProperty("opacity", "1", "important");
+      botonVer.innerText = "Ver datos de ingresos";
+    }
+  }
+}
+
+// Inyector de seguridad para resetear el estado si cierras la ventana manualmente
+function toggleChayoPanel() {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("chayoOverlay");
+  if (!overlay) return;
+
+  overlay.classList.toggle("open");
+
+  // Interceptor: Si se cierra la ventana, destruimos los datos revelados al instante
+  if (!overlay.classList.contains("open")) {
+    if (cronometroChayo) clearInterval(cronometroChayo);
+    const bloqueCredenciales = document.getElementById(
+      "credencialesChayoBlock",
+    );
+    const botonVer = document.getElementById("btnVerDatosChayo");
+    if (bloqueCredenciales)
+      bloqueCredenciales.style.setProperty("display", "none", "important");
+    if (botonVer) {
+      botonVer.disabled = false;
+      botonVer.style.setProperty("opacity", "1", "important");
+      botonVer.innerText = "Ver datos de ingresos";
+    }
+  }
+}
+
