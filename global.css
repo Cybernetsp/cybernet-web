@@ -1428,3 +1428,43 @@ body:has(.overlay-ios[style*="display: block"]) [id*="dock"] {
     animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
 }
+
+/* ==========================================================================
+   🔒 CYBERNET OS LAYER MANAGER: CONTROL DE CAPAS Y VENTANAS AL FRENTE
+   ========================================================================== */
+
+/* 1️⃣ CAPA DE SUB-MODALS (Ventanas de edición, Lápiz, filtros y resultados) 
+   Forzamos a que se posicionen por encima de las apps principales (15000) */
+#editShiftModalOverlay,
+#resultadoCortesOverlay,
+#modalRenovacionFlotante {
+  z-index: 18000 !important;
+}
+
+/* 2️⃣ CAPA DE CASOS DE ÉXITO (La ficha comercial que sale al terminar una operación)
+   Debe estar arriba incluso de las ventanas de edición por si se abren en paralelo */
+#ventaGeneradaModalOverlay {
+  z-index: 18500 !important;
+}
+
+/* 3️⃣ CAPA ULTRA-PROFUNDA (Lectores de contenido individual/HTML plano)
+   Garantiza que leer un correo específico tape cualquier otra ventana abierta */
+#modalLectorCorreo,
+#modalLectorCorreoGlobal {
+  z-index: 19000 !important;
+}
+
+/* 4️⃣ REAJUSTE DE ANIMACIÓN SEGURO PARA LAS NUEVAS VENTANAS SECUNDARIAS
+   Asegura que el Lápiz y los resultados del corte también usen el pop elástico de Apple */
+@media (min-width: 769px) {
+  #editShiftModalOverlay .sheet-ios,
+  #resultadoCortesOverlay .sheet-ios,
+  #ventaGeneradaModalOverlay .sheet-ios,
+  #modalRenovacionFlotante .modal-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
