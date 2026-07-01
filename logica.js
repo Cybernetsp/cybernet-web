@@ -6253,7 +6253,7 @@ function calcularDescuentoDeuda() {
 }
 
 // =========================================================================
-// 📈 RENDERIZADOR CONTABLE BENTO ACTUALIZADO CON HISTORIAL DE SALIDAS
+// 📈 RENDERIZADOR CONTABLE BENTO ACTUALIZADO CON AISLAMIENTO PERSONAL
 // =========================================================================
 function renderDashboard() {
   if (!globalFinanzasData) return;
@@ -6268,40 +6268,67 @@ function renderDashboard() {
   netEl.innerText = formatMoneda(d.neto);
   netEl.style.color = d.neto >= 0 ? "var(--ios-green)" : "var(--ios-red)";
 
+  // ─────────────── ESCÁNER MÁSTER DE CATEGORÍAS ───────────────
   let sumaIngresoExtra = 0,
     sumaJeisson = 0,
-    sumaAngelica = 0;
+    sumaAngelica = 0,
+    sumaPersonalIngreso = 0, // Separador de flujos personales
+    sumaPersonalEgreso = 0;
+
   const itemsTemp = globalFinanzasData.listaDetallada || [];
 
   itemsTemp.forEach((item) => {
     const cat = (item.categoria || "").toLowerCase();
     const det = (item.detalle || "").toLowerCase();
+    let val = parseFloat(item.monto) || 0;
+
     if (item.tipo === "INGRESO") {
-      let val = parseFloat(item.monto) || 0;
-      if (cat.includes("angelica") || det.includes("angelica"))
+      if (cat.includes("angelica") || det.includes("angelica")) {
         sumaAngelica += val;
-      else if (
+      } else if (cat === "personal" || det.includes("personal")) {
+        sumaPersonalIngreso += val; // Aísla el ingreso personal
+      } else if (
         cat.includes("ingreso extra") ||
         det.includes("jeisson") ||
         cat.includes("jeisson")
       ) {
         sumaIngresoExtra += val;
-        if (det.includes("jeisson") || cat.includes("jeisson"))
+        if (det.includes("jeisson") || cat.includes("jeisson")) {
           sumaJeisson += val;
+        }
+      }
+    } else {
+      // Es un egreso, inversión, gasto o salida de caja
+      if (cat === "personal" || det.includes("personal")) {
+        sumaPersonalEgreso += val; // Aísla el gasto personal
       }
     }
   });
 
+  // Pintar el balance neto de tu flujo personal en la nueva tarjeta Bento
+  const personalDisplay = document.getElementById("valProyPersonal");
+  if (personalDisplay) {
+    personalDisplay.innerText = formatMoneda(
+      sumaPersonalIngreso - sumaPersonalEgreso,
+    );
+  }
+
   document.getElementById("valProyJeisson").innerText =
     formatMoneda(sumaJeisson);
+
+  // 🔥 SOLUCIÓN CRÍTICA: Restamos el ingreso personal para obtener las Ventas Reales del Negocio
   let ventasBrutasReales = Math.max(
     0,
-    (d.ingresos || 0) - sumaIngresoExtra - sumaAngelica,
+    (d.ingresos || 0) - sumaIngresoExtra - sumaAngelica - sumaPersonalIngreso,
   );
+
+  // 🔥 SOLUCIÓN CRÍTICA: Restamos los egresos personales para limpiar los Gastos del Negocio
+  let gastosNegocioLimpios = Math.max(0, (d.gastos || 0) - sumaPersonalEgreso);
 
   document.getElementById("val_ingresos").innerText =
     formatMoneda(ventasBrutasReales);
-  document.getElementById("val_gastos").innerText = formatMoneda(d.gastos);
+  document.getElementById("val_gastos").innerText =
+    formatMoneda(gastosNegocioLimpios);
   document.getElementById("val_inversiones").innerText = formatMoneda(
     d.inversiones,
   );
@@ -6361,12 +6388,17 @@ function renderDashboard() {
     currentMiGananciaBruta,
   );
 
-  const totalFlujo = ventasBrutasReales + d.gastos + d.inversiones + d.nomina;
+  // 🔥 RECALIBRACIÓN GRÁFICA: Las barras de carga ahora ignoran los flujos personales
+  const totalFlujo =
+    ventasBrutasReales + gastosNegocioLimpios + d.inversiones + d.nomina;
   let pctIn =
     totalFlujo > 0 ? Math.round((ventasBrutasReales / totalFlujo) * 100) : 0;
   let pctOut =
     totalFlujo > 0
-      ? Math.round(((d.gastos + d.inversiones + d.nomina) / totalFlujo) * 100)
+      ? Math.round(
+          ((gastosNegocioLimpios + d.inversiones + d.nomina) / totalFlujo) *
+            100,
+        )
       : 0;
 
   document.getElementById("txtBarPorcIngresos").innerText = pctIn + "%";
@@ -6425,7 +6457,7 @@ function renderDashboard() {
           <h4 style="margin: 0 0 12px 0; color: var(--ios-red); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
             🔴 Resumen de Egresos por Categoría
           </h4>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
       `;
     let catArrayGastos = Object.keys(categoriasAgrupadas).filter(
       (c) => (sorted = categoriasAgrupadas[c].gastosPuros > 0),
@@ -6471,7 +6503,7 @@ function renderDashboard() {
     htmlBuffer += `</div></div>`;
   }
 
-  // 🔥 NUEVO BLOQUE 3: HISTORIAL CRONOLÓGICO DE SALIDAS DETALLADAS (LO QUE SE PIDIÓ)
+  // 📋 HISTORIAL CRONOLÓGICO DE SALIDAS DETALLADAS (LIBRO)
   htmlBuffer += `
       <div style="margin-top: 10px; width: 100%;">
         <h4 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
@@ -6480,11 +6512,9 @@ function renderDashboard() {
         <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
     `;
 
-  // Iteramos de atrás hacia adelante para que los últimos movimientos salgan primero arriba
   for (let i = itemsTemp.length - 1; i >= 0; i--) {
     let item = itemsTemp[i];
 
-    // Filtramos estrictamente las salidas de dinero (Gastos, Inversiones, Adelantos, etc.)
     if (item.tipo !== "INGRESO") {
       let montoMovimiento = parseFloat(item.monto) || 0;
       htmlBuffer += `
@@ -6500,7 +6530,6 @@ function renderDashboard() {
 
   htmlBuffer += `</div></div>`;
 
-  // Inyectamos todo el acumulado en la caja con scroll de tu Widget Bento
   container.innerHTML = htmlBuffer;
   calcularDescuentoDeuda();
 }
@@ -8524,4 +8553,3 @@ function toggleChayoPanel() {
     }
   }
 }
-
