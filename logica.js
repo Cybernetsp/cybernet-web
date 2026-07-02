@@ -5029,19 +5029,63 @@ function ejecutarCambioCuenta(e) {
 window.verificationLinkInterval = null;
 
 function iniciarCreacionCuentaNetflix(btn) {
+  if (typeof haptic === "function") haptic();
+  const contenidoOriginal = btn.innerHTML;
+
+  // 🛡️ REVISAR SI HAY UNA CUENTA PENDIENTE EN MEMORIA
+  let pendienteGuardada = localStorage.getItem("cyber_netflix_pendiente");
+  if (pendienteGuardada) {
+    let d = JSON.parse(pendienteGuardada);
+
+    // Ponemos el botón en modo de escaneo
+    btn.style.pointerEvents = "none";
+    btn.innerHTML = `<div style="text-align:center; width:100%; padding: 14px;"><svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-orange)" stroke-width="2.5" style="margin-right:8px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="color:var(--ios-orange); font-weight:bold;">Verificando estado en la base...</span></div>`;
+
+    const cbCheck = "cb_check_" + Date.now();
+    window[cbCheck] = function (res) {
+      btn.style.pointerEvents = "auto";
+      btn.innerHTML = contenidoOriginal;
+
+      const node = document.getElementById("node_" + cbCheck);
+      if (node) node.remove();
+      delete window[cbCheck];
+
+      if (res && res.status === "success" && res.existe) {
+        // La cuenta sigue en el Excel: Forzamos a terminar de guardarla
+        alert(
+          "⚠️ Se ha detectado una cuenta de Netflix previamente generada que NO fue guardada en el inventario maestro.\n\nEl sistema la recuperará obligatoriamente para que finalices el proceso.",
+        );
+        restaurarInterfazCuentaGenerada(d, btn);
+      } else {
+        // 🧹 MAGIA AQUÍ: La cuenta ya no existe en Sheets (la borraste). Limpiamos la caché y creamos una nueva libremente.
+        localStorage.removeItem("cyber_netflix_pendiente");
+        ejecutarGeneracionNuevaCuenta(btn, contenidoOriginal);
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_" + cbCheck;
+    script.src = `${GOOGLE_SCRIPT_URL}?action=verificarCuentaPines&correo=${encodeURIComponent(d.correo)}&callback=${cbCheck}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+    return;
+  }
+
+  // Si no hay nada en memoria, va directo a crear la nueva
+  ejecutarGeneracionNuevaCuenta(btn, contenidoOriginal);
+}
+
+// Sub-función que aísla la carga de la cuenta (Mantiene el código limpio)
+function ejecutarGeneracionNuevaCuenta(btn, contenidoOriginal) {
   let preConfirmacion = confirm(
     "❓ ¿Estás seguro de que deseas CREAR UNA CUENTA NUEVA de Netflix en este momento?\n\n(Esto procesará un PIN de Refácil e iniciará la creación del correo)",
   );
 
   if (!preConfirmacion) return;
 
-  if (typeof haptic === "function") haptic();
-
-  const contenidoOriginal = btn.innerHTML;
   btn.style.pointerEvents = "none";
   btn.innerHTML = `<div style="text-align:center; width:100%; padding: 14px;"><svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" style="margin-right:8px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="color:var(--ios-blue); font-weight:bold;">Generando credenciales...</span></div>`;
 
-  // 🔒 RESET DE RADAR E INVENTARIO: Forzamos a que el botón verde nazca escondido
+  // 🔒 RESET DE RADAR E INVENTARIO
   document
     .getElementById("radarVerificacionContenedor")
     .style.setProperty("display", "flex", "important");
@@ -5055,7 +5099,7 @@ function iniciarCreacionCuentaNetflix(btn) {
     .style.setProperty("display", "none", "important");
   document
     .getElementById("btnGuardarMaestroNetflix")
-    .style.setProperty("display", "none", "important"); // Anclado invisible
+    .style.setProperty("display", "none", "important");
 
   if (window.verificationLinkInterval)
     clearInterval(window.verificationLinkInterval);
@@ -5079,41 +5123,10 @@ function iniciarCreacionCuentaNetflix(btn) {
         return;
       }
 
-      // Inyectar datos planos en la pantalla
-      document.getElementById("displayCtaCorreo").innerText = d.correo;
-      document.getElementById("displayCtaClave").innerText = d.clave;
-      document.getElementById("displayCtaPinRecarga").innerText = d.pinRecarga;
+      // 🔥 GUARDAR EN MEMORIA LOCAL PARA QUE NUNCA SE PIERDA
+      localStorage.setItem("cyber_netflix_pendiente", JSON.stringify(d));
 
-      // Inyectar los 5 Pines de Perfil
-      let htmlPerfiles = "";
-      for (let p = 1; p <= 5; p++) {
-        htmlPerfiles += `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.02);">
-            <span style="color:var(--text-secondary); font-size:0.75rem; font-weight:600;">Perfil ${p}: <b style="color:#ffffff; font-family:monospace; font-size:0.85rem; margin-left:4px;">${d.pinesPerfiles[p]}</b></span>
-            <span style="color:var(--ios-blue); font-size:0.75rem; cursor:pointer; font-weight:800;" onclick="window.copiarTextoAisladoDirecto(this, '${d.pinesPerfiles[p]}')">Copiar</span>
-          </div>`;
-      }
-      document.getElementById("displayCtaPinesPerfiles").innerHTML =
-        htmlPerfiles;
-
-      // 📡 EL RADAR INICIA AUTOMÁTICAMENTE AQUÍ (Como querías al principio)
-      window.lanzarRadarEspiaVerificacionGmail(d.correo);
-
-      // Configuramos la inyección para cuando le den clic al botón verde (cuando aparezca)
-      const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
-      btnGuardar.onclick = function () {
-        window.cerrarModalCreacionNetflixTotalmente();
-        guardarCuentaConfirmadaNetflix(
-          btnGuardar,
-          "Guardar en Inventario Maestro",
-          d,
-        );
-      };
-
-      const modal =
-        document.getElementById("cuentaGeneratedModalOverlay") ||
-        document.getElementById("cuentaGeneradaModalOverlay");
-      if (modal) modal.classList.add("open");
+      restaurarInterfazCuentaGenerada(d, btn);
     } else {
       alert(
         "❌ Error del Servidor: " + (res ? res.message : "Fallo desconocido."),
@@ -5129,6 +5142,158 @@ function iniciarCreacionCuentaNetflix(btn) {
   script.src = `${GOOGLE_SCRIPT_URL}?action=generarNuevaCuenta&user=${encodeURIComponent(empleadoActivo)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 }
+
+// 🔥 FUNCIÓN MÁSTER: Pinta la pantalla tanto al crear como al restaurar
+function restaurarInterfazCuentaGenerada(d, btnOrigen) {
+  document.getElementById("displayCtaCorreo").innerText = d.correo;
+  document.getElementById("displayCtaClave").innerText = d.clave;
+  document.getElementById("displayCtaPinRecarga").innerText = d.pinRecarga;
+
+  let htmlPerfiles = "";
+  for (let p = 1; p <= 5; p++) {
+    htmlPerfiles += `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.02);">
+        <span style="color:var(--text-secondary); font-size:0.75rem; font-weight:600;">Perfil ${p}: <b style="color:#ffffff; font-family:monospace; font-size:0.85rem; margin-left:4px;">${d.pinesPerfiles[p]}</b></span>
+        <span style="color:var(--ios-blue); font-size:0.75rem; cursor:pointer; font-weight:800;" onclick="window.copiarTextoAisladoDirecto(this, '${d.pinesPerfiles[p]}')">Copiar</span>
+      </div>`;
+  }
+  document.getElementById("displayCtaPinesPerfiles").innerHTML = htmlPerfiles;
+
+  // 📡 EL RADAR INICIA AUTOMÁTICAMENTE
+  window.lanzarRadarEspiaVerificacionGmail(d.correo);
+
+  const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
+  btnGuardar.onclick = function () {
+    guardarCuentaConfirmadaNetflix(
+      btnGuardar,
+      "Guardar en Inventario Maestro",
+      d,
+    );
+  };
+
+  const modal =
+    document.getElementById("cuentaGeneradaModalOverlay") ||
+    document.getElementById("cuentaGeneratedModalOverlay");
+  if (modal) modal.classList.add("open");
+}
+
+window.lanzarRadarEspiaVerificacionGmail = function (correoTarget) {
+  window.verificationLinkInterval = setInterval(function () {
+    const cbRadarName = "cb_radar_verify_" + Date.now();
+
+    window[cbRadarName] = function (res) {
+      const node = document.getElementById("node_" + cbRadarName);
+      if (node) node.remove();
+      delete window[cbRadarName];
+
+      if (res && res.status === "success" && res.link) {
+        if (
+          res.correoOriginal &&
+          res.correoOriginal.toLowerCase() !== correoTarget.toLowerCase()
+        ) {
+          console.log(
+            "Se detectó un link, pero es de otro correo. Ignorando...",
+          );
+          return;
+        }
+
+        clearInterval(window.verificationLinkInterval);
+
+        if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+
+        document
+          .getElementById("radarVerificacionSpinner")
+          .style.setProperty("display", "none", "important");
+
+        const btnLink = document.getElementById("btnLinkVerificarGmail");
+        btnLink.href = res.link;
+        btnLink.style.setProperty("display", "inline-flex", "important");
+
+        // 🎯 CANDADO MAESTRO INVERTIDO: Muestra el botón de Guardar
+        btnLink.onclick = function () {
+          if (typeof haptic === "function") haptic();
+          document
+            .getElementById("btnGuardarMaestroNetflix")
+            .style.setProperty("display", "block", "important");
+        };
+
+        const contenedor = document.getElementById(
+          "radarVerificacionContenedor",
+        );
+        contenedor.style.background = "rgba(48, 209, 88, 0.06)";
+        contenedor.style.borderColor = "rgba(48, 209, 88, 0.35)";
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_" + cbRadarName;
+    script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerLinkVerificacion&correo=${encodeURIComponent(correoTarget)}&callback=${cbRadarName}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+  }, 4000);
+};
+
+function guardarCuentaConfirmadaNetflix(btn, contenidoOriginal, datosCuenta) {
+  btn.disabled = true;
+  btn.style.pointerEvents = "none";
+  btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Guardando en Sheets...`;
+
+  const cbName = "cb_save_cta_" + Date.now();
+  window[cbName] = function (res) {
+    btn.disabled = false;
+    btn.style.pointerEvents = "auto";
+    btn.innerHTML = "¡Guardado con Éxito!";
+    btn.style.background = "var(--ios-green)";
+
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      // 🔥 LIBERACIÓN DE MEMORIA: Al guardar con éxito borramos el bloqueo
+      localStorage.removeItem("cyber_netflix_pendiente");
+
+      // Cerramos la ventana forzosamente ahora que ya cumplió su deber
+      window.cerrarModalCreacionNetflixTotalmente();
+
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg> <span>Cuenta inyectada al maestro.</span></div>`,
+        );
+      }
+    } else {
+      alert(
+        "❌ Error al guardar en Sheets: " +
+          (res
+            ? res.message
+            : "Fallo de comunicación. Intenta darle al botón Guardar de nuevo."),
+      );
+      btn.innerHTML = contenidoOriginal;
+      btn.style.background = "";
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  const urlParams =
+    `?action=confirmarGuardadoNetflix` +
+    `&correo=${encodeURIComponent(datosCuenta.correo)}` +
+    `&clave=${encodeURIComponent(datosCuenta.clave)}` +
+    `&pinesPerfiles=${encodeURIComponent(JSON.stringify(datosCuenta.pinesPerfiles))}` +
+    `&callback=${cbName}&_ts=${Date.now()}`;
+  script.src = GOOGLE_SCRIPT_URL + urlParams;
+  document.body.appendChild(script);
+}
+
+window.cerrarModalCreacionNetflixTotalmente = function () {
+  if (typeof haptic === "function") haptic();
+  if (window.verificationLinkInterval)
+    clearInterval(window.verificationLinkInterval);
+
+  const modal =
+    document.getElementById("cuentaGeneradaModalOverlay") ||
+    document.getElementById("cuentaGeneratedModalOverlay");
+  if (modal) modal.classList.remove("open");
+};
 
 window.lanzarRadarEspiaVerificacionGmail = function (correoTarget) {
   window.verificationLinkInterval = setInterval(function () {
@@ -5188,55 +5353,6 @@ window.lanzarRadarEspiaVerificacionGmail = function (correoTarget) {
     document.body.appendChild(script);
   }, 4000); // Rastreando la bandeja cada 4 segundos
 };
-function guardarCuentaConfirmadaNetflix(btn, contenidoOriginal, datosCuenta) {
-  btn.disabled = true;
-  btn.style.pointerEvents = "none";
-  btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Guardando en Sheets...`;
-
-  const cbName = "cb_save_cta_" + Date.now();
-  window[cbName] = function (res) {
-    btn.disabled = false;
-    btn.style.pointerEvents = "auto";
-    btn.innerHTML = "¡Guardado con Éxito!";
-    btn.style.background = "var(--ios-green)";
-
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
-
-    if (res && res.status === "success") {
-      if (typeof triggerToast === "function") {
-        triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg> <span>Cuenta inyectada al maestro.</span></div>`,
-        );
-      }
-
-      // Cambiamos el texto de espera del radar para avisar que el Excel ya guardó todo normal
-      const spinnerTexto = document.getElementById("radarVerificacionSpinner");
-      if (spinnerTexto && spinnerTexto.style.display !== "none") {
-        spinnerTexto.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> ¡Sheets Guardado! Dale al botón apenas aparezca el link`;
-      }
-    } else {
-      alert(
-        "❌ Error al guardar en Sheets: " +
-          (res ? res.message : "Fallo de comunicación."),
-      );
-      btn.innerHTML = contenidoOriginal;
-      btn.style.background = "";
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  const urlParams =
-    `?action=confirmarGuardadoNetflix` +
-    `&correo=${encodeURIComponent(datosCuenta.correo)}` +
-    `&clave=${encodeURIComponent(datosCuenta.clave)}` +
-    `&pinesPerfiles=${encodeURIComponent(JSON.stringify(datosCuenta.pinesPerfiles))}` +
-    `&callback=${cbName}&_ts=${Date.now()}`;
-  script.src = GOOGLE_SCRIPT_URL + urlParams;
-  document.body.appendChild(script);
-}
 
 window.cerrarModalCreacionNetflixTotalmente = function () {
   if (typeof haptic === "function") haptic();
@@ -6926,6 +7042,13 @@ document.addEventListener("keydown", function (e) {
 
   // 🛑 Tecla ESC: Limpieza total
   if (e.key === "Escape") {
+    // 🛡️ RESTRICCIÓN MÁSTER: Si la ventana de creación de Netflix está abierta, bloqueamos el escape
+    const modalCritico = document.getElementById("cuentaGeneradaModalOverlay");
+    if (modalCritico && modalCritico.classList.contains("open")) {
+      e.preventDefault();
+      return; // Aborta por completo el cierre de la pantalla
+    }
+
     if (typeof haptic === "function") haptic();
     limpiarPantalla();
   }
@@ -8553,3 +8676,37 @@ function toggleChayoPanel() {
     }
   }
 }
+
+// =========================================================================
+// 🔗 EXTENSIÓN: DESPACHO DE ENLACES DE CREACIÓN (MODO INCÓGNITO COERCIÓN)
+// =========================================================================
+window.copiarEnlaceCreacionNetflix = function (btn) {
+  if (typeof haptic === "function") haptic();
+
+  const urlNetflixSignup =
+    "https://www.netflix.com/signup?serverState=%7B%22realm%22%3A%22growth%22%2C%22name%22%3A%22REGISTRATION%22%2C%22clcsSessionId%22%3A%22e6e03881-f169-4087-a06f-4d3efd943c2e%22%2C%22sessionContext%22%3A%7B%22session-breadcrumbs%22%3A%7B%22funnel_name%22%3A%22signupSimplicity%22%7D%7D%7D";
+
+  navigator.clipboard.writeText(urlNetflixSignup).then(function () {
+    let originalText = btn.innerHTML;
+
+    btn.innerHTML = "✅ ¡Enlace Copiado!";
+    btn.style.background = "var(--ios-green)";
+    btn.style.color = "white";
+
+    // Disparamos la alerta Toast con tu letrero estricto de Modo Incógnito
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange); font-weight:700;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span>Recuerda abrir este enlace en modo incógnito para la creación de la cuenta</span>
+        </div>`,
+      );
+    }
+
+    setTimeout(function () {
+      btn.innerHTML = originalText;
+      btn.style.background = "rgba(10, 132, 255, 0.12)";
+      btn.style.color = "var(--ios-blue)";
+    }, 2500);
+  });
+};
