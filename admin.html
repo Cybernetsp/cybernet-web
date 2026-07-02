@@ -4563,13 +4563,6 @@
             </div>
             Suscripción Creada
           </h3>
-          <button
-            class="btn-close-circle"
-            style="position: static !important; margin: 0"
-            onclick="window.cerrarModalCreacionNetflixTotalmente()"
-          >
-            ✕
-          </button>
         </div>
 
         <div
@@ -4586,14 +4579,16 @@
           <span
             style="
               font-size: 0.8rem;
-              color: var(--text-secondary);
-              font-weight: 600;
+              color: var(--ios-red);
+              font-weight: 800;
               text-align: center;
               margin-top: -4px;
               display: block;
+              text-transform: uppercase;
+              letter-spacing: 0.3px;
             "
           >
-            Copia las credenciales antes de inyectar al maestro
+            ⚠️ Obligatorio: Debes inyectar al maestro antes de salir
           </span>
 
           <div
@@ -4875,6 +4870,25 @@
             "
           >
             <button
+              type="button"
+              class="btn-ios"
+              style="
+                padding: 14px;
+                font-weight: 800;
+                font-size: 0.95rem;
+                border-radius: 14px;
+                margin: 0;
+                background: rgba(10, 132, 255, 0.12) !important;
+                color: var(--ios-blue) !important;
+                border: 1px solid rgba(10, 132, 255, 0.2) !important;
+                box-shadow: 0 4px 10px rgba(10, 132, 255, 0.05);
+              "
+              onclick="window.copiarEnlaceCreacionNetflix(this)"
+            >
+              🔗 Copiar Enlace para Crear Cuenta
+            </button>
+
+            <button
               id="btnGuardarMaestroNetflix"
               class="btn-ios btn-success w-100"
               style="
@@ -4888,21 +4902,6 @@
               "
             >
               Guardar en Inventario Maestro
-            </button>
-            <button
-              class="btn-ios btn-secondary w-100"
-              style="
-                padding: 12px;
-                font-weight: 700;
-                font-size: 0.9rem;
-                border-radius: 14px;
-                margin: 0;
-                background: transparent !important;
-                border: 1px solid rgba(255, 255, 255, 0.12);
-              "
-              onclick="window.cerrarModalCreacionNetflixTotalmente()"
-            >
-              Cerrar Ventana
             </button>
           </div>
         </div>
