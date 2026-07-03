@@ -8400,58 +8400,56 @@ window.toggleLibroPanel = function () {
   }
 };
 // =========================================================================
-// 🔴 MOTOR: LECTOR DE CORREOS GLOBAL (ÚLTIMAS 2 HORAS)
+// 🔴 MOTOR: LECTOR DE CORREOS GLOBAL FILTRADO POR DESTINATARIO (ÚLTIMA HORA)
 // =========================================================================
+window.correosGlobalesData = [];
 
 window.toggleGmailPanel = function () {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("gmailOverlay");
-
   if (overlay) {
-    // 👇 ESTE ES EL TRUCO: Destruye cualquier bloqueo invisible
     overlay.style.setProperty("display", "", "important");
-
     overlay.classList.toggle("open");
+
     if (overlay.classList.contains("open")) {
-      cargarCorreosRecientesGmail();
+      // Limpiamos la interfaz y dejamos una pantalla de espera limpia
+      document.getElementById("inputBuscadorGmailReal").value = "";
+      document.getElementById("gmailScrollArea").innerHTML = `
+        <div style="margin: auto; color: var(--text-secondary); text-align: center; padding: 60px 20px;">
+           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2" style="margin-bottom: 15px; opacity: 0.7;">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+           </svg>
+           <br><span style="font-weight: 600;">Ingresa un correo arriba para escanear su bandeja</span>
+        </div>`;
+      setTimeout(() => {
+        document.getElementById("inputBuscadorGmailReal").focus();
+      }, 150);
     }
-  } else {
-    alert(
-      "⚠️ Error: No se encontró la ventana de Gmail en el HTML. Asegúrate de haber pegado el código en admin.html",
-    );
   }
 };
 
-// =========================================================================
-// 🔴 MOTOR: LECTOR DE CORREOS GLOBAL (VERSIÓN TABLA ESTILO GMAIL)
-// =========================================================================
-
-window.correosGlobalesData = []; // Memoria para guardar los correos completos
-
-window.toggleGmailPanel = function () {
+window.ejecutarBusquedaGmailEspecifica = function () {
   if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("gmailOverlay");
-  if (overlay) {
-    overlay.classList.toggle("open");
-    if (overlay.classList.contains("open")) {
-      cargarCorreosRecientesGmail();
-    }
-  }
-};
 
-window.cargarCorreosRecientesGmail = function () {
+  const inputVisual = document.getElementById("inputBuscadorGmailReal");
+  const correoBuscar = inputVisual.value.trim();
   const container = document.getElementById("gmailScrollArea");
-  if (!container) return;
 
-  // Limpiamos el buscador al refrescar
-  const buscador = document.getElementById("buscadorGmailGlobal");
-  if (buscador) buscador.value = "";
+  if (correoBuscar === "") {
+    alert("⚠️ Por favor ingresa el correo completo que deseas buscar.");
+    inputVisual.focus();
+    return;
+  }
 
   container.innerHTML = `
     <div style="text-align:center; padding:60px 20px; color:var(--text-secondary); font-size:0.95rem;">
       <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-      <br><span style="color:#ea4335; font-weight:700;">Sincronizando bandeja de la última hora...</span>
-      </div>`;
+      <br><span style="color:#ea4335; font-weight:700;">Buscando correos de la última hora para: ${correoBuscar}...</span>
+    </div>`;
+
+  const oldScript = document.getElementById("cyber_gmail_global_node");
+  if (oldScript) oldScript.remove();
 
   const cbName = "cb_gmail_global_" + Date.now();
   window[cbName] = function (res) {
@@ -8462,12 +8460,11 @@ window.cargarCorreosRecientesGmail = function () {
     if (res && res.status === "success") {
       if (res.data.length === 0) {
         container.innerHTML =
-          '<div style="text-align:center; padding:60px 20px; color:var(--ios-green); font-weight:bold; font-size:1rem;">📭 No hay correos nuevos en la última hora.</div>';
+          '<div style="text-align:center; padding:60px 20px; color:var(--ios-orange); font-weight:bold; font-size:1rem;">📭 No se encontraron correos nuevos para este destinatario.</div>';
         return;
       }
 
       window.correosGlobalesData = res.data;
-
       let htmlTabla = `<table style="width: 100%; border-collapse: collapse; text-align: left;">`;
 
       res.data.forEach((mail, i) => {
@@ -8478,7 +8475,7 @@ window.cargarCorreosRecientesGmail = function () {
         if (destinatarioLimpio === "") destinatarioLimpio = mail.destinatario;
 
         htmlTabla += `
-          <tr class="fila-correo-global" style="border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s;" 
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s;" 
               onmouseover="this.style.background='rgba(234, 67, 53, 0.1)'" 
               onmouseout="this.style.background='transparent'" 
               onclick="window.abrirLectorCorreoGlobal(${i})">
@@ -8512,10 +8509,12 @@ window.cargarCorreosRecientesGmail = function () {
   };
 
   const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerCorreosRecientesGlobal&callback=${cbName}&_ts=${Date.now()}`;
+  script.id = "cyber_gmail_global_node";
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerCorreosRecientesGlobal&correo=${encodeURIComponent(correoBuscar)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
+
+// Puedes borrar la función filtrarCorreosGlobales vieja ya que el buscador opera en la nube
 
 // 👇 NUEVO: FUNCIÓN PARA EL BUSCADOR 👇
 window.filtrarCorreosGlobales = function () {
