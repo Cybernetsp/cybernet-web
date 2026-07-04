@@ -4239,6 +4239,10 @@ function validateStaffAccess(e) {
 }
 
 function entrarAlSistema(userInput) {
+  // 🔥 FIX CRÍTICO: Sellar el usuario en la memoria de la sesión activa
+  // Esto evita que los pulsos automáticos pierdan el rastro del trabajador
+  sessionStorage.setItem("active_staff", userInput.toUpperCase().trim());
+
   if (userInput.toUpperCase().trim() !== "CAMILO") {
     ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
   }
@@ -4508,7 +4512,7 @@ function ejecutarAutoPulsoTiempo() {
     String(minutes).padStart(2, "0") +
     ":" +
     String(seconds).padStart(2, "0");
-  const activeUser = sessionStorage.getItem("active_staff") || "Vendedor";
+  const activeUser = sessionStorage.getItem("active_staff") || localStorage.getItem("cyber_saved_staff") || "Vendedor";
 
   sessionStorage.setItem("cyber_last_sync_time", ahora);
 
@@ -4555,7 +4559,7 @@ function ejecutarCierreSesionDefinitivo() {
       String(minutes).padStart(2, "0") +
       ":" +
       String(seconds).padStart(2, "0");
-    const activeUser = sessionStorage.getItem("active_staff") || "Vendedor";
+    const activeUser = sessionStorage.getItem("active_staff") || localStorage.getItem("cyber_saved_staff") || "Vendedor";
 
     fetch(
       "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec",
