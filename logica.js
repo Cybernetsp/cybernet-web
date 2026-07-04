@@ -468,6 +468,7 @@ function ejecutarCargaLote(e) {
   if (oldScript) oldScript.remove();
 
   // Función de retorno desde Apps Script
+  // Reemplazar la función de retorno existente dentro de ejecutarCargaLote
   window.procesarCargaLoteSheets = function (res) {
     const scriptNode = document.getElementById("cyber_cargamasiva_node");
     if (scriptNode) scriptNode.remove();
@@ -476,53 +477,66 @@ function ejecutarCargaLote(e) {
     btnSubmit.innerText = "Cargar Cuentas en Lote";
 
     if (res && res.status === "success") {
+      // 1. Toast de éxito general para las que SÍ pasaron
       triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${res.message || "Lote cargado con éxito."}</span></div>`,
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${res.message}</span></div>`,
       );
 
+      // (Aquí mantenemos tu lógica de actualizar la caché local y renderizar el historial de la sesión)
       let cacheTurno = JSON.parse(
         sessionStorage.getItem("cyber_history_cargas") || "[]",
       );
-
       listaCuentasExtraidas.forEach((linea) => {
         let fragmentos = linea.trim().split(/\s+/);
         if (fragmentos.length >= 2) {
           let correoUser = fragmentos[0];
           let claveUser = fragmentos[1];
-
-          cacheTurno.push({
-            plataforma: plataforma,
-            proveedor: proveedorFinal,
-            correo: correoUser,
-            clave: claveUser,
-          });
-
-          // Si tienes esta función, la llamamos para actualizar la UI
-          if (typeof renderizarTarjetaHistorial === "function") {
-            renderizarTarjetaHistorial(
-              plataforma,
-              proveedorFinal,
-              correoUser,
-              claveUser,
+          // Solo guardamos en historial visual si NO está en la lista de repetidas (si la hay)
+          let esRepetida =
+            res.repetidas &&
+            res.repetidas.some(
+              (r) => r.correo.toLowerCase() === correoUser.toLowerCase(),
             );
+          if (!esRepetida) {
+            cacheTurno.push({
+              plataforma: plataforma,
+              proveedor: proveedorFinal,
+              correo: correoUser,
+              clave: claveUser,
+            });
+            if (typeof renderizarTarjetaHistorial === "function") {
+              renderizarTarjetaHistorial(
+                plataforma,
+                proveedorFinal,
+                correoUser,
+                claveUser,
+              );
+            }
           }
         }
       });
-
       sessionStorage.setItem(
         "cyber_history_cargas",
         JSON.stringify(cacheTurno),
       );
       document.getElementById("formCargarCuentas").reset();
       document.getElementById("wrapperProveedorManual").style.display = "none";
-
-      // Actualizamos UI
       if (typeof cargarResumenProveedores === "function")
         cargarResumenProveedores();
+
+      // 2. Revisamos si hubo cuentas repetidas para abrir el Modal
+      if (res.repetidas && res.repetidas.length > 0) {
+        mostrarModalRepetidasCybernet(res.repetidas);
+      }
     } else {
-      triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Error: ${res ? res.message : "Fallo de comunicación."}</span></div>`,
-      );
+      // Si el status fue error, puede ser porque TODAS estaban repetidas o hubo un error de red
+      if (res && res.repetidas && res.repetidas.length > 0) {
+        mostrarModalRepetidasCybernet(res.repetidas);
+      } else {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Error: ${res ? res.message : "Fallo de comunicación."}</span></div>`,
+        );
+      }
     }
   };
 
@@ -8708,4 +8722,32 @@ window.copiarEnlaceCreacionNetflix = function (btn) {
       btn.style.color = "var(--ios-blue)";
     }, 2500);
   });
+};
+// =========================================================================
+// RENDERIZADOR DEL MODAL DE CUENTAS REPETIDAS
+// =========================================================================
+window.mostrarModalRepetidasCybernet = function (repetidasArray) {
+  if (typeof haptic === "function") haptic();
+
+  const contenedor = document.getElementById("listaCuentasRepetidas");
+  const modal = document.getElementById("modalRepetidasOverlay");
+
+  if (!contenedor || !modal) return;
+
+  contenedor.innerHTML = "";
+
+  repetidasArray.forEach((cuenta) => {
+    let div = document.createElement("div");
+    div.style.cssText =
+      "background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 159, 10, 0.15); border-left: 3px solid var(--ios-orange); padding: 10px 14px; border-radius: 12px; display: flex; flex-direction: column; gap: 4px;";
+
+    div.innerHTML = `
+      <span style="font-family: monospace; font-size: 0.95rem; font-weight: 700; color: var(--text-primary); word-break: break-all;">${cuenta.correo}</span>
+      <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">Ya en sistema. Fecha original: <b style="color: var(--ios-orange);">${cuenta.fecha}</b></span>
+    `;
+
+    contenedor.appendChild(div);
+  });
+
+  modal.classList.add("open");
 };
