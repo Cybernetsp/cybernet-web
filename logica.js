@@ -4181,28 +4181,32 @@ function validateStaffAccess(e) {
     const scriptNode = document.getElementById("cyber_login_node");
     if (scriptNode) scriptNode.remove();
 
-    if (res && res.status === "success") {
-      if (errorToast) errorToast.style.display = "none";
+    if (res && res.status === "need_email") {
+      // Falta correo: Oculta login, muestra registro de email
+      window.tempAuthUser = userInput; // Memoria temporal
+      document.getElementById("loginOverlay").style.display = "none";
+      document.getElementById("emailRegisterOverlay").style.display = "flex";
+      setTimeout(() => document.getElementById("staffNewEmail").focus(), 200);
+    } else if (res && res.status === "need_code") {
+      // Tiene correo y despachó OTP: Muestra ventana 6 dígitos y arranca reloj
+      window.tempAuthUser = userInput;
+      document.getElementById("lblMaskedEmail").innerText = res.emailMasked;
+      document.getElementById("loginOverlay").style.display = "none";
+      document.getElementById("emailRegisterOverlay").style.display = "none";
+      document.getElementById("otpVerificationOverlay").style.display = "flex";
 
+      iniciarRelojOTP(300); // 300 segundos = 5 min
+      setTimeout(() => document.getElementById("staffOtpCode").focus(), 200);
+    } else if (res && res.status === "success") {
+      // Esto ocurrirá solo para excepciones o si apagas el 2FA en el futuro
       sessionStorage.setItem("active_staff", userInput);
       if (rememberMe) localStorage.setItem("cyber_saved_staff", userInput);
-
-      // Escondemos el login
-      const loginOverlay = document.getElementById("loginOverlay");
-      if (loginOverlay) {
-        loginOverlay.classList.remove("open");
-        loginOverlay.style.setProperty("display", "none", "important");
-      }
-
-      // Volvemos a encender la esquina derecha antes de entrar
+      document.getElementById("loginOverlay").style.display = "none";
       const controlRight = document.getElementById("macControlCenterRight");
       if (controlRight) controlRight.style.display = "flex";
-
       entrarAlSistema(userInput);
     } else {
-      let errMsg = "Credenciales incorrectas en la base de datos.";
-      if (res && res.message) errMsg = res.message;
-
+      let errMsg = res ? res.message : "Credenciales incorrectas.";
       if (errorToast) {
         errorToast.innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>${errMsg}</span></div>`;
         errorToast.style.display = "block";
@@ -4512,7 +4516,10 @@ function ejecutarAutoPulsoTiempo() {
     String(minutes).padStart(2, "0") +
     ":" +
     String(seconds).padStart(2, "0");
-  const activeUser = sessionStorage.getItem("active_staff") || localStorage.getItem("cyber_saved_staff") || "Vendedor";
+  const activeUser =
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "Vendedor";
 
   sessionStorage.setItem("cyber_last_sync_time", ahora);
 
@@ -4559,7 +4566,10 @@ function ejecutarCierreSesionDefinitivo() {
       String(minutes).padStart(2, "0") +
       ":" +
       String(seconds).padStart(2, "0");
-    const activeUser = sessionStorage.getItem("active_staff") || localStorage.getItem("cyber_saved_staff") || "Vendedor";
+    const activeUser =
+      sessionStorage.getItem("active_staff") ||
+      localStorage.getItem("cyber_saved_staff") ||
+      "Vendedor";
 
     fetch(
       "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec",
@@ -8754,4 +8764,119 @@ window.mostrarModalRepetidasCybernet = function (repetidasArray) {
   });
 
   modal.classList.add("open");
+};
+// =========================================================================
+// MOTORES DE AUTENTICACIÓN DE 2 FACTORES (2FA) FRONTEND
+// =========================================================================
+window.otpInterval = null;
+
+function iniciarRelojOTP(segundosTotales) {
+  const display = document.getElementById("otpTimerDisplay");
+  const btnOtp = document.getElementById("btnSubmitOtp");
+  const inputOtp = document.getElementById("staffOtpCode");
+
+  if (window.otpInterval) clearInterval(window.otpInterval);
+
+  window.otpInterval = setInterval(() => {
+    segundosTotales--;
+    let mins = Math.floor(segundosTotales / 60);
+    let secs = segundosTotales % 60;
+    display.innerText =
+      String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+
+    if (segundosTotales <= 0) {
+      clearInterval(window.otpInterval);
+      display.innerText = "00:00 (Expirado)";
+      display.style.color = "var(--ios-red)";
+      btnOtp.disabled = true;
+      inputOtp.disabled = true;
+      document.getElementById("otp-error-toast").innerHTML =
+        "Código expirado. Por favor regresa al login.";
+      document.getElementById("otp-error-toast").style.display = "block";
+    }
+  }, 1000);
+}
+
+window.registrarEmailOperador = function () {
+  if (typeof haptic === "function") haptic();
+  const btn = document.getElementById("btnSubmitNewEmail");
+  const emailInput = document.getElementById("staffNewEmail").value.trim();
+
+  btn.disabled = true;
+  btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle></svg> Vinculando...`;
+
+  const cbName = "cb_reg_email_" + Date.now();
+  window[cbName] = function (res) {
+    btn.disabled = false;
+    btn.innerText = "Enviar y Recibir Código";
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      // Correo registrado, pasamos al OTP
+      document.getElementById("emailRegisterOverlay").style.display = "none";
+      document.getElementById("lblMaskedEmail").innerText = res.emailMasked;
+      document.getElementById("otpVerificationOverlay").style.display = "flex";
+      iniciarRelojOTP(300);
+      setTimeout(() => document.getElementById("staffOtpCode").focus(), 200);
+    } else {
+      alert("Error: " + (res ? res.message : "Fallo de conexión"));
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=registrarEmailStaff&user=${encodeURIComponent(window.tempAuthUser)}&email=${encodeURIComponent(emailInput)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.verificarCodigoAcceso = function () {
+  if (typeof haptic === "function") haptic();
+  const btn = document.getElementById("btnSubmitOtp");
+  const codeInput = document.getElementById("staffOtpCode").value.trim();
+  const errorToast = document.getElementById("otp-error-toast");
+
+  if (codeInput.length < 6) return;
+
+  btn.disabled = true;
+  btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle></svg> Validando...`;
+  errorToast.style.display = "none";
+
+  const cbName = "cb_verify_otp_" + Date.now();
+  window[cbName] = function (res) {
+    btn.disabled = false;
+    btn.innerText = "Confirmar Acceso";
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      clearInterval(window.otpInterval);
+
+      // LOGUEO MÁSTER COMPLETADO: Destruimos pantallas negras de bloqueo
+      document.getElementById("otpVerificationOverlay").style.display = "none";
+
+      const remElement = document.getElementById("rememberMe");
+      const rememberMe = remElement ? remElement.checked : false;
+
+      sessionStorage.setItem("active_staff", window.tempAuthUser);
+      if (rememberMe)
+        localStorage.setItem("cyber_saved_staff", window.tempAuthUser);
+
+      const controlRight = document.getElementById("macControlCenterRight");
+      if (controlRight) controlRight.style.display = "flex";
+
+      entrarAlSistema(window.tempAuthUser);
+    } else {
+      document.getElementById("staffOtpCode").value = "";
+      errorToast.innerText = res ? res.message : "Código incorrecto.";
+      errorToast.style.display = "block";
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=verificarOTPStaff&user=${encodeURIComponent(window.tempAuthUser)}&code=${encodeURIComponent(codeInput)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
 };
