@@ -8880,3 +8880,66 @@ window.verificarCodigoAcceso = function () {
   script.src = `${GOOGLE_SCRIPT_URL}?action=verificarOTPStaff&user=${encodeURIComponent(window.tempAuthUser)}&code=${encodeURIComponent(codeInput)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
+// =========================================================================
+// 🔵 MOTOR: ACCESO DIRECTO OUTLOOK / HOTMAIL
+// =========================================================================
+
+window.toggleOutlookDirectPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("outlookDirectOverlay");
+  if (overlay) {
+    overlay.classList.toggle("open");
+
+    if (overlay.classList.contains("open")) {
+      document.getElementById("inputOutlookCorreos").value = "";
+      setTimeout(() => {
+        document.getElementById("inputOutlookCorreos").focus();
+      }, 150);
+    }
+  }
+};
+
+window.abrirVentanaOutlookManual = function () {
+  if (typeof haptic === "function") haptic();
+
+  let inputVisual = document.getElementById("inputOutlookCorreos");
+  let correoBuscar = inputVisual.value.trim();
+
+  if (correoBuscar === "" || !correoBuscar.includes("@")) {
+    alert("⚠️ Por favor ingresa un correo de Outlook o Hotmail válido.");
+    inputVisual.focus();
+    return;
+  }
+
+  window.lanzarPopUpOutlook(correoBuscar);
+};
+
+// =========================================================================
+// 🔵 MOTOR: ACCESO DIRECTO OUTLOOK / HOTMAIL (SELECTOR DE CUENTAS)
+// =========================================================================
+window.toggleOutlookDirectPanel = function () {
+  if (typeof haptic === "function") haptic();
+  if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+
+  // 🔥 SOLUCIÓN: Usamos 'prompt=select_account'.
+  // Esto obliga a Microsoft a detener el auto-login de tu cuenta personal y te muestra
+  // la pantalla de cuentas, donde solo debes darle clic a "Usar otra cuenta".
+  let urlOutlook =
+    "https://login.live.com/login.srf?wa=wsignin1.0&wreply=https://outlook.live.com/owa/&prompt=select_account";
+
+  // Abre directamente en una nueva pestaña
+  window.open(urlOutlook, "_blank");
+
+  // Avisamos en la Isla Dinámica
+  if (typeof triggerToast === "function") {
+    triggerToast(
+      `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-blue); font-weight:700;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+        <span>Abriendo Outlook (Clic en "Usar otra cuenta")</span>
+      </div>`,
+    );
+  }
+};
