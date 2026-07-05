@@ -286,6 +286,13 @@
           >Yopmail</span
         >
 
+        <span
+          class="mac-menu-item"
+          style="color: #ffffff"
+          onclick="toggleOutlookDirectPanel()"
+          >Outlook</span
+        >
+
         <!-- 🔒 EXCLUSIVO CAMILO: INTERRUPTORES DE INVENTARIO -->
         <span
           class="mac-menu-item"
@@ -8795,6 +8802,143 @@
         </div>
       </div>
     </div>
+
+    <div
+      class="overlay-ios"
+      id="outlookDirectOverlay"
+      style="
+        z-index: 15500;
+        justify-content: flex-start;
+        align-items: flex-start;
+      "
+    >
+      <div
+        class="sheet-ios"
+        onclick="event.stopPropagation()"
+        style="
+          position: absolute;
+          top: 60px;
+          left: 250px; /* Un poco más a la derecha que el de Yopmail */
+          max-width: 440px;
+          width: 90%;
+          height: auto !important;
+          min-height: auto !important;
+          display: flex;
+          flex-direction: column;
+          padding: 24px;
+          border-radius: 24px;
+          margin: 0;
+          transform-origin: top left;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+          border: 1px solid rgba(0, 120, 212, 0.3);
+        "
+      >
+        <button
+          class="btn-close-circle"
+          style="
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            margin: 0;
+            background: rgba(255, 255, 255, 0.1);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+          "
+          onclick="toggleOutlookDirectPanel()"
+        >
+          ✕
+        </button>
+
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            color: #0078d4;
+            font-weight: 800;
+            font-size: 1.05rem;
+          "
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path
+              d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+            ></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          Acceso Rápido Outlook
+        </div>
+
+        <div
+          style="
+            display: flex;
+            gap: 10px;
+            margin-right: 35px;
+            margin-bottom: 5px;
+          "
+        >
+          <input
+            type="text"
+            id="inputOutlookCorreos"
+            class="input-ios"
+            style="
+              margin: 0;
+              flex: 1;
+              border-radius: 14px;
+              padding: 14px 16px;
+              font-family: monospace;
+              font-size: 0.95rem;
+              background: var(--input-bg);
+            "
+            placeholder="Escribe el correo..."
+            onkeypress="if (event.key === 'Enter') abrirVentanaOutlookManual();"
+          />
+          <button
+            class="btn-ios btn-primary"
+            style="
+              margin: 0;
+              padding: 14px 20px;
+              border-radius: 14px;
+              font-weight: 800;
+              background: #0078d4 !important;
+              color: white !important;
+              box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+            "
+            onclick="abrirVentanaOutlookManual()"
+          >
+            Abrir
+          </button>
+        </div>
+
+        <div
+          style="
+            margin-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 15px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+          "
+        >
+          ⚠️ <b>Nota de Seguridad:</b> A diferencia de Yopmail, Microsoft
+          requiere que ingreses la contraseña manualmente. Al darle "Abrir", usa
+          tu teclado para pegar la clave (Ctrl+V) si ya la habías copiado desde
+          el buscador de Cybernet.
+        </div>
+      </div>
+    </div>
+
     <!-- ========================================================================= -->
     <!-- 🔴 MODAL: CÓD CHAYO (CABECERA FIJA DE SEGURIDAD CON AUTO-COLAPSO) -->
     <!-- ========================================================================= -->
