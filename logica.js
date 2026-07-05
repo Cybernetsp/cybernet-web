@@ -4,6 +4,7 @@
   let localStaff = localStorage.getItem("cyber_saved_staff");
   let user = sessionStaff || localStaff;
 
+  
   // Esperamos a que el HTML cargue por completo para manipular las ventanas
   window.addEventListener("DOMContentLoaded", () => {
     let savedTheme = localStorage.getItem("cyber_theme") || "dark";
