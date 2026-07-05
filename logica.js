@@ -1787,9 +1787,6 @@ function ejecutarCreacionVentaLocal(e) {
 
         if (b.pin && b.pin !== "") cuerpo += `📍 *Pin:* ${b.pin}\n`;
         cuerpo += `📅 *Vence:* ${b.venc}\n`;
-
-        if (b.id === "NETFLIX") {
-          cuerpo += `🤖 *¿NECESITAS CÓDIGO DE ACCESO?*\nObtenlo al instante de forma automática 24/7 sin esperar soporte ingresando a nuestra web:\n🌐 https://www.cybernetsp.com/\n`;
         }
       });
 
