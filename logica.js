@@ -1787,7 +1787,6 @@ function ejecutarCreacionVentaLocal(e) {
 
         if (b.pin && b.pin !== "") cuerpo += `📍 *Pin:* ${b.pin}\n`;
         cuerpo += `📅 *Vence:* ${b.venc}\n`;
-        }
       });
 
       let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
