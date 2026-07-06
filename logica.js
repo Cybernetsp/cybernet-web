@@ -4,7 +4,6 @@
   let localStaff = localStorage.getItem("cyber_saved_staff");
   let user = sessionStaff || localStaff;
 
-  
   // Esperamos a que el HTML cargue por completo para manipular las ventanas
   window.addEventListener("DOMContentLoaded", () => {
     let savedTheme = localStorage.getItem("cyber_theme") || "dark";
@@ -1413,9 +1412,9 @@ function buscarHistorialNetflixEnVenta(telefono) {
         }
 
         if (res && res.status === "success" && res.data.length > 0) {
-          let cuentasFiltradas = res.data.filter((cuenta) =>
-            cuenta.correo.toLowerCase().endsWith("@cybernetsp.com"),
-          );
+          // 🔥 LIBERACIÓN DE CANDADO: Ya no filtramos por @cybernetsp.com
+          // Tomamos todas las cuentas asociadas al número del cliente directamente.
+          let cuentasFiltradas = res.data;
 
           if (cuentasFiltradas.length > 0) {
             if (labelWrapper) labelWrapper.style.color = "var(--ios-green)";
@@ -4240,15 +4239,25 @@ function validateStaffAccess(e) {
 }
 
 function entrarAlSistema(userInput) {
-  // 🔥 FIX CRÍTICO: Sellar el usuario en la memoria de la sesión activa
-  // Esto evita que los pulsos automáticos pierdan el rastro del trabajador
+  // 🔥 1. LIMPIEZA MAESTRA: Destruimos rastros de ventanas de Login y 2FA
+  ["loginOverlay", "emailRegisterOverlay", "otpVerificationOverlay"].forEach(
+    (id) => {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.classList.remove("open"); // <-- ESTE ERA EL CULPABLE
+        modal.style.setProperty("display", "none", "important");
+      }
+    },
+  );
+
+  // 🔒 2. SELLAR USUARIO EN MEMORIA (Previene el error de "Vendedor")
   sessionStorage.setItem("active_staff", userInput.toUpperCase().trim());
 
   if (userInput.toUpperCase().trim() !== "CAMILO") {
     ejecutarNotificacionDeCorreo(userInput, "inicio", "00:00:00");
   }
 
-  // Encendemos la interfaz en admin.html
+  // 🖥️ 3. ENCENDEMOS LA INTERFAZ PRINCIPAL
   const workspace = document.getElementById("mainWorkspace");
   if (workspace) workspace.style.display = "flex";
 
@@ -4269,20 +4278,23 @@ function entrarAlSistema(userInput) {
   if (btnRegistro)
     btnRegistro.style.setProperty("display", "flex", "important");
 
-  // 🍎 PROTECCIÓN DE CONTROLES: OCULTAR SOLO EL TEXTO DEL TIMER, NO EL CONTENEDOR PADRE
+  // 🍎 PROTECCIÓN DE CONTROLES
   if (currentOperator === "CAMILO") {
-    if (shiftTimer) {
-      shiftTimer.style.setProperty("display", "none", "important"); // 🫵 Apaga SOLO el reloj, no el panel
-    }
+    if (shiftTimer)
+      shiftTimer.style.setProperty("display", "none", "important");
     if (cajaBtn) cajaBtn.style.setProperty("display", "flex", "important");
   } else {
-    if (shiftTimer) {
-      shiftTimer.style.setProperty("display", "inline-flex", "important"); // Enciende el reloj para empleados
-    }
+    if (shiftTimer)
+      shiftTimer.style.setProperty("display", "inline-flex", "important");
     if (cajaBtn) cajaBtn.style.setProperty("display", "none", "important");
   }
 
-  // 🔥 ESTO ES LO QUE CARGA LAS TARJETAS DESDE SHEETS 🔥
+  // 🚀 4. FORZAR LA APARICIÓN DEL DOCK AL INSTANTE
+  if (typeof actualizarVisibilidadDock === "function") {
+    actualizarVisibilidadDock();
+  }
+
+  // ⚙️ 5. INICIALIZAR EL ESCRITORIO Y EL MOTOR FANTASMA
   inicializarWorkspace();
 }
 
@@ -4361,7 +4373,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
 const qrPrincipal = {
   titulo: "PAGOS",
-  imagenUrl: "https://i.postimg.cc/ydfJzvp8/unnamed.png",
+  imagenUrl:
+    "https://i.postimg.cc/9Fb55dGq/Whats-App-Image-2026-07-02-at-4-18-01-PM.jpg",
   texto: `Te comparto nuestra llave para el pago de tu servicio desde cualquier entidad bancaria:\n\n📌 *Llave:* 0090878219\n👤 *Verificar nombre:* REF CYBERNET\n\n⚠️ *Nota:* Esta llave es exclusiva para pagos mediante Bre-B desde cualquier banco.\n\n*Pasos para activar tu servicio:* 1️⃣ Realiza la transferencia.\n2️⃣ Envía el comprobante de pago por este medio.\n3️⃣ ¡Recibe tu acceso y empieza a disfrutar! 🚀🎬`,
 };
 
