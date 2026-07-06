@@ -1764,8 +1764,20 @@ function ejecutarCreacionVentaLocal(e) {
         let mesesComprados = memoriaMeses[b.id] || "1";
         let textoMeses = mesesComprados > 1 ? ` (${mesesComprados} Meses)` : "";
 
-        // Construimos la cabecera, usuario y clave
-        cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n────────────────────\n👤 *${etiquetaUser}:* ${b.correo}\n🔐 *Contraseña:* ${b.clave}\n`;
+        // =========================================================
+        // 🔥 INYECCIÓN NETFLIX: Construcción de cabecera y advertencia
+        // =========================================================
+
+        cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n────────────────────\n`;
+
+        if (b.id === "NETFLIX") {
+          cuerpo += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+        }
+
+        // Usuario y clave
+        cuerpo += `👤 *${etiquetaUser}:* ${b.correo}\n🔐 *Contraseña:* ${b.clave}\n`;
+
+        // =========================================================
 
         // Inyectamos el Servidor / Perfil / URL si aplica
         if (
@@ -7432,11 +7444,6 @@ function copiarCotizacionCombo(btn) {
   } else {
     mensajeVIP +=
       `───────────────────────\n` + `💰 *TOTAL A PAGAR: ${totalText}* 🔥🍿\n`;
-  }
-
-  // Verifica de forma segura si la palabra "NETFLIX" está en el texto de las plataformas seleccionadas
-  if (listaPlatFormateada.includes("NETFLIX")) {
-    mensajeVIP += `\n🤖 *¡BENEFICIO AUTOMÁTICO!* Tu cuenta de Netflix incluye acceso a nuestra web para retirar códigos 24/7 al instante y sin filas en el chat. 🔓`;
   }
 
   mensajeVIP += `\n\n¿Te agrada la oferta para enviarte los medios de pago y activarte de inmediato? ⚡🍿`;
