@@ -7120,8 +7120,9 @@ document.addEventListener("keydown", function (e) {
       toggleSearchAccountPanel();
   }
 });
+
 // =========================================================================
-// 🧮 CEREBRO DEL COTIZADOR AUTOMÁTICO DE COMBOS CYBERNET (CON PANTALLAS)
+// 🧮 CEREBRO DEL COTIZADOR AUTOMÁTICO DE COMBOS CYBERNET (ALGORITMO MAX-BASE)
 // =========================================================================
 
 function abrirCalculadoraCombos() {
@@ -7144,11 +7145,11 @@ function abrirCalculadoraCombos() {
     container.appendChild(iptvRow);
   }
 
-  // 🔥 2. ACTUALIZAR ETIQUETAS VISUALES AL NUEVO PRECIO AL ABRIR
+  // 🔥 2. ACTUALIZAR ETIQUETAS VISUALES AL NUEVO PRECIO INDIVIDUAL AL ABRIR
   document.querySelectorAll(".row-cotizar-plat label span").forEach((span) => {
-    if (span.innerText.includes("Spotify")) span.innerText = "Spotify ($10k)";
-    if (span.innerText.includes("Deezer")) span.innerText = "Deezer ($8k)";
-    if (span.innerText.includes("Metegol")) span.innerText = "Metegol ($12k)";
+    if (span.innerText.includes("Spotify")) span.innerText = "Spotify ($14k)";
+    if (span.innerText.includes("Deezer")) span.innerText = "Deezer ($12k)";
+    if (span.innerText.includes("Metegol")) span.innerText = "Metegol ($15k)";
     if (span.innerText.includes("YouTube"))
       span.innerText = "YouTube Premium ($14k)";
   });
@@ -7275,52 +7276,137 @@ window.filtrarPlataformasCotizador = function () {
   });
 };
 
-// 🔥 EL NUEVO CEREBRO MATEMÁTICO PURO 🔥
+// 🔥 EL NUEVO CEREBRO MATEMÁTICO PURO (ALGORITMO MAX-BASE) 🔥
 window.calcularPreciosSistemaCotizador = function () {
-  let precioBaseUnMes = 0;
+  // DICCIONARIO MAESTRO DE PRECIOS EXACTOS
+  const mapValores = {
+    "DISNEY-PREMIUM": { indiv: 15000, combo: 10000, isTier: false },
+    "Amazon Prime": { indiv: 10500, combo: 5000, isTier: true },
+    "Disney Estándar": { indiv: 8500, combo: 4000, isTier: true },
+    Max: { indiv: 8500, combo: 3000, isTier: true },
+    "Apple TV": { indiv: 8500, combo: 3000, isTier: true },
+    Crunchyroll: { indiv: 8500, combo: 3000, isTier: true },
+    Plex: { indiv: 8500, combo: 3000, isTier: true },
+    "Universal+": { indiv: 8500, combo: 3000, isTier: true },
+    Vix: { indiv: 8500, combo: 3000, isTier: true },
+    // Herramientas Add-ons
+    "Paramount+": { indiv: 18000, combo: 18000, isTier: false },
+    Metegol: { indiv: 15000, combo: 12000, isTier: false },
+    Spotify: { indiv: 14000, combo: 10000, isTier: false },
+    "YouTube Premium": { indiv: 14000, combo: 14000, isTier: false },
+    Deezer: { indiv: 12000, combo: 8000, isTier: false },
+    "Canva Pro": { indiv: 20000, combo: 20000, isTier: false },
+    IPTV: { indiv: 7000, combo: 7000, isTier: false },
+  };
 
-  // Escaneo lineal y directo multiplicando pantallas
+  let precioBaseUnMes = 0;
+  let tieneNetflix = false;
+  let costoNetflixCalculado = 0;
+
+  let allOtherScreens = []; // Para lógica sin Netflix
+
+  let countDisneyPremium = 0;
+  let countTierEligible = 0;
+  let arrayAddonsDirectosYExtras = []; // Pantallas que siempre suman a precio combo
+
+  // 1. Escaneo de las plataformas y recolección de pantallas
   document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
     const cb = row.querySelector(".chk-cotizar-plat");
     if (cb && cb.checked) {
-      const tipo = cb.getAttribute("data-tipo");
       const val = cb.value;
       const selectPantallas = row.querySelector(".sel-pantallas-cotizador");
       const pantallas = selectPantallas
         ? parseInt(selectPantallas.value) || 1
         : 1;
 
-      if (tipo === "netflix") {
-        if (pantallas === 1) precioBaseUnMes += 14500;
-        else if (pantallas === 2) precioBaseUnMes += 26000;
-        else if (pantallas === 3) precioBaseUnMes += 36000;
-        else if (pantallas === 4) precioBaseUnMes += 46000;
-        else if (pantallas >= 5) precioBaseUnMes += 55000;
-      } else if (tipo === "disneypre") {
-        precioBaseUnMes += pantallas * 10000;
-      } else if (val === "Amazon Prime") {
-        precioBaseUnMes += pantallas * 5000;
-      } else if (val === "Disney Estándar") {
-        precioBaseUnMes += pantallas * 4000;
-      } else if (val === "Paramount+") {
-        precioBaseUnMes += pantallas * 18000;
-      } else if (tipo === "estandar") {
-        // Max, Apple TV, Crunchyroll, Plex, Universal+, Vix
-        precioBaseUnMes += pantallas * 3000;
-      } else if (tipo === "herramienta") {
-        // Spotify, YouTube, Metegol, Deezer, Canva, IPTV
-        if (val === "Metegol") precioBaseUnMes += pantallas * 12000;
-        else if (val === "Spotify") precioBaseUnMes += pantallas * 10000;
-        else if (val === "YouTube Premium")
-          precioBaseUnMes += pantallas * 14000;
-        else if (val === "Deezer") precioBaseUnMes += pantallas * 8000;
-        else if (val === "Canva Pro")
-          precioBaseUnMes += pantallas * 20000; // Por defecto
-        else if (val === "IPTV") precioBaseUnMes += pantallas * 7000;
+      if (val === "NETFLIX") {
+        tieneNetflix = true;
+        if (pantallas === 1) costoNetflixCalculado = 14500;
+        else if (pantallas === 2) costoNetflixCalculado = 26000;
+        else if (pantallas === 3) costoNetflixCalculado = 36000;
+        else if (pantallas === 4) costoNetflixCalculado = 46000;
+        else if (pantallas >= 5) costoNetflixCalculado = 55000;
+      } else {
+        if (mapValores[val]) {
+          // Llenamos el arreglo maestro para la lógica SIN Netflix
+          for (let i = 0; i < pantallas; i++) {
+            allOtherScreens.push(val);
+          }
+
+          // Separamos contadores para la lógica CON Netflix
+          if (val === "DISNEY-PREMIUM") {
+            countDisneyPremium += pantallas;
+          } else if (mapValores[val].isTier) {
+            countTierEligible++; // La 1ra pantalla activa el Tier Clásico
+            for (let i = 1; i < pantallas; i++) {
+              arrayAddonsDirectosYExtras.push(val); // Pantallas extra de la misma app se cobran a combo
+            }
+          } else {
+            for (let i = 0; i < pantallas; i++) {
+              arrayAddonsDirectosYExtras.push(val);
+            }
+          }
+        }
       }
     }
   });
 
+  // 2. Aplicación de la Matemática de Cobro
+  if (tieneNetflix) {
+    precioBaseUnMes = costoNetflixCalculado;
+
+    // Bloque de Tiers: Disney Premium vs Clásico
+    if (countDisneyPremium > 0) {
+      // Si lleva Disney Premium, entra a la tabla VIP
+      if (countTierEligible === 0)
+        precioBaseUnMes += 10500; // (25k - 14.5k)
+      else if (countTierEligible === 1)
+        precioBaseUnMes += 14500; // (29k - 14.5k)
+      else if (countTierEligible === 2)
+        precioBaseUnMes += 17500; // (32k - 14.5k)
+      else if (countTierEligible >= 3)
+        precioBaseUnMes += 20500 + (countTierEligible - 3) * 3000; // (35k - 14.5k)
+
+      // Si compró más de 1 pantalla de Disney Premium, se suman a precio combo ($10.000)
+      precioBaseUnMes +=
+        (countDisneyPremium - 1) * mapValores["DISNEY-PREMIUM"].combo;
+    } else {
+      // Si NO lleva Disney Premium, entra a la tabla Clásica
+      if (countTierEligible === 0) precioBaseUnMes += 0;
+      else if (countTierEligible === 1)
+        precioBaseUnMes += 5500; // (20k - 14.5k)
+      else if (countTierEligible === 2)
+        precioBaseUnMes += 9500; // (24k - 14.5k)
+      else if (countTierEligible >= 3)
+        precioBaseUnMes += 12500 + (countTierEligible - 3) * 3000; // (27k - 14.5k)
+    }
+
+    // Sumamos todas las pantallas de Add-ons Directos y extras (Spotify, Metegol, Canva, etc) a precio COMBO
+    arrayAddonsDirectosYExtras.forEach((plat) => {
+      precioBaseUnMes += mapValores[plat].combo;
+    });
+  } else {
+    // ⚠️ LÓGICA SIN NETFLIX: ALGORITMO MAX-BASE ⚠️
+    if (allOtherScreens.length === 0) {
+      precioBaseUnMes = 0;
+    } else if (allOtherScreens.length === 1) {
+      precioBaseUnMes = mapValores[allOtherScreens[0]].indiv; // Cobra precio Full Individual
+    } else {
+      // Si hay varias, las ordena de la más cara a la más barata (según precio individual)
+      allOtherScreens.sort((a, b) => mapValores[b].indiv - mapValores[a].indiv);
+
+      // Saca la más cara de la lista y la cobra FULL
+      let masCaro = allOtherScreens.shift();
+      precioBaseUnMes += mapValores[masCaro].indiv;
+
+      // Todas las demás que quedaron en la lista, las suma a precio COMBO barato
+      allOtherScreens.forEach((plat) => {
+        precioBaseUnMes += mapValores[plat].combo;
+      });
+    }
+  }
+
+  // 3. Captura de Meses y Fidelidad
   const monthSelect = document.getElementById("calcMonths");
   const meses = parseFloat(monthSelect.value) || 1;
   const porcDesc =
@@ -7444,6 +7530,7 @@ function copiarCotizacionCombo(btn) {
     }, 1500);
   });
 }
+
 // =========================================================================
 // 🎛️ PANEL DE CONTROL DE INVENTARIO (ADMIN CAMILO)
 // =========================================================================
