@@ -7121,16 +7121,66 @@ document.addEventListener("keydown", function (e) {
   }
 });
 // =========================================================================
-// 🧮 CEREBRO DEL COTIZADOR AUTOMÁTICO DE COMBOS CYBERNET (CON BUSCADOR)
+// 🧮 CEREBRO DEL COTIZADOR AUTOMÁTICO DE COMBOS CYBERNET (CON PANTALLAS)
 // =========================================================================
 
 function abrirCalculadoraCombos() {
   if (typeof haptic === "function") haptic();
 
-  // Desmarcar todos los checks, vaciar buscador y resetear interfaz
-  document
-    .querySelectorAll(".chk-cotizar-plat")
-    .forEach((cb) => (cb.checked = false));
+  // 🔥 1. INYECTAR IPTV SI NO EXISTE EN EL HTML ORIGINAL
+  const container = document.getElementById("contenedorPlataformasCotizador");
+  if (container && !document.querySelector('.chk-cotizar-plat[value="IPTV"]')) {
+    const iptvRow = document.createElement("div");
+    iptvRow.className = "row-cotizar-plat";
+    iptvRow.setAttribute("data-nombre", "iptv smarters");
+    iptvRow.style.cssText =
+      "display: none; border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);";
+    iptvRow.innerHTML = `
+      <label style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; width: 100%;">
+          <span style="font-size: 0.9rem; font-weight: 600; color: #30d158">IPTV Smarters ($7k)</span>
+          <input type="checkbox" class="chk-cotizar-plat" value="IPTV" data-tipo="herramienta" onchange="controlarDisneyMutuo(this); calcularPreciosSistemaCotizador();" style="accent-color: var(--ios-blue); width: 18px; height: 18px;" />
+      </label>
+    `;
+    container.appendChild(iptvRow);
+  }
+
+  // 🔥 2. ACTUALIZAR ETIQUETAS VISUALES AL NUEVO PRECIO AL ABRIR
+  document.querySelectorAll(".row-cotizar-plat label span").forEach((span) => {
+    if (span.innerText.includes("Spotify")) span.innerText = "Spotify ($10k)";
+    if (span.innerText.includes("Deezer")) span.innerText = "Deezer ($8k)";
+    if (span.innerText.includes("Metegol")) span.innerText = "Metegol ($12k)";
+    if (span.innerText.includes("YouTube"))
+      span.innerText = "YouTube Premium ($14k)";
+  });
+
+  // 🔥 3. INYECTAR SELECTOR DE HASTA 5 PANTALLAS EN TODAS LAS PLATAFORMAS (AUTOMÁTICO)
+  document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
+    if (!row.querySelector(".cotizador-pantallas-wrapper")) {
+      let wrapper = document.createElement("div");
+      wrapper.className = "cotizador-pantallas-wrapper";
+      wrapper.style.display = "none";
+      wrapper.style.padding = "0 14px 12px 14px";
+      wrapper.style.justifyContent = "flex-end";
+
+      wrapper.innerHTML = `
+          <select class="input-ios sel-pantallas-cotizador" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin:0; border-radius: 8px; background: rgba(0,0,0,0.3); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1);" onchange="calcularPreciosSistemaCotizador()">
+              <option value="1">1 Pantalla</option>
+              <option value="2">2 Pantallas</option>
+              <option value="3">3 Pantallas</option>
+              <option value="4">4 Pantallas</option>
+              <option value="5">5 Pantallas (Cuenta Completa)</option>
+          </select>
+      `;
+      row.appendChild(wrapper);
+    }
+  });
+
+  // Desmarcar todos los checks y ocultar selects
+  document.querySelectorAll(".chk-cotizar-plat").forEach((cb) => {
+    cb.checked = false;
+    controlarDisneyMutuo(cb); // Esto oculta el select de pantallas automáticamente
+  });
+
   document.getElementById("buscarPlataformaCotizador").value = "";
   document.getElementById("calcMonths").value = "1";
   document.getElementById("calcFidelidad").checked = false;
@@ -7141,12 +7191,9 @@ function abrirCalculadoraCombos() {
   document.getElementById("rowCalcDescFiel").style.display = "none";
   document.getElementById("calcTotal").innerText = "$0";
 
-  // Sincronizar el filtro para que oculte todo lo que no esté marcado al iniciar
   filtrarPlataformasCotizador();
-
   document.getElementById("comboCalcOverlay").classList.add("open");
 
-  // Auto-focus al buscador para agilizar
   setTimeout(() => {
     document.getElementById("buscarPlataformaCotizador").focus();
   }, 120);
@@ -7157,43 +7204,52 @@ function cerrarCalculadoraCombos() {
   document.getElementById("comboCalcOverlay").classList.remove("open");
 }
 
-// 🔥 CONTROL MAESTRO: EXCLUSIVIDAD MUTUA DE LOS DOS DISNEY Y AUTO-LIMPIEZA 🔥
 window.controlarDisneyMutuo = function (checkbox) {
-  if (checkbox.checked) {
-    const tipo = checkbox.getAttribute("data-tipo");
+  const tipo = checkbox.getAttribute("data-tipo");
 
+  if (checkbox.checked) {
     // Exclusión mutua de Disney
     if (tipo === "disneypre") {
       const de = document.querySelector(
         '.chk-cotizar-plat[data-tipo="disneyest"]',
       );
-      if (de) {
+      if (de && de.checked) {
         de.checked = false;
+        controlarDisneyMutuo(de);
       }
     } else if (tipo === "disneyest") {
       const dp = document.querySelector(
         '.chk-cotizar-plat[data-tipo="disneypre"]',
       );
-      if (dp) {
+      if (dp && dp.checked) {
         dp.checked = false;
+        controlarDisneyMutuo(dp);
       }
     }
 
-    // Limpiar buscador al seleccionar (Igual que en ventas)
+    // Limpiar buscador
     const buscador = document.getElementById("buscarPlataformaCotizador");
     if (buscador && buscador.value !== "") {
       buscador.value = "";
-      buscador.focus();
-
-      // Volvemos a filtrar para que la lista se cierre mágicamente
       if (typeof filtrarPlataformasCotizador === "function") {
         filtrarPlataformasCotizador();
       }
     }
   }
+
+  // Mostrar u ocultar el selector de pantallas de esta fila
+  const row = checkbox.closest(".row-cotizar-plat");
+  if (row) {
+    let selectWrapper = row.querySelector(".cotizador-pantallas-wrapper");
+    if (selectWrapper) {
+      selectWrapper.style.display = checkbox.checked ? "flex" : "none";
+      if (!checkbox.checked) {
+        selectWrapper.querySelector("select").value = "1"; // Resetear al desmarcar
+      }
+    }
+  }
 };
 
-// 🔥 BUSCADOR EN TIEMPO REAL COPIADO EXACTAMENTE DE LAS VENTAS 🔥
 window.filtrarPlataformasCotizador = function () {
   const query = document
     .getElementById("buscarPlataformaCotizador")
@@ -7208,10 +7264,8 @@ window.filtrarPlataformasCotizador = function () {
     const checkbox = fila.querySelector('input[type="checkbox"]');
 
     if (query === "") {
-      // Si la barra está vacía, solo muestra lo que ya esté seleccionado
       fila.style.display = checkbox.checked ? "block" : "none";
     } else {
-      // Si está escribiendo, muestra si coincide con el buscador o si está marcado
       if (nombrePlat.includes(query) || checkbox.checked) {
         fila.style.display = "block";
       } else {
@@ -7221,20 +7275,11 @@ window.filtrarPlataformasCotizador = function () {
   });
 };
 
-// =========================================================================
-// 🧮 CEREBRO DEL COTIZADOR AUTOMÁTICO DE COMBOS (SOPORTE MÚLTIPLES PANTALLAS)
-// =========================================================================
+// 🔥 EL NUEVO CEREBRO MATEMÁTICO PURO 🔥
 window.calcularPreciosSistemaCotizador = function () {
-  let tieneNetflix = false;
-  let tieneDisneyPremium = false;
-  let cantidadEstandar = 0;
-  let sumatoriaHerramientas = 0;
-  let tieneAmazon = false;
-  let tieneParamount = false;
+  let precioBaseUnMes = 0;
 
-  let costoPantallasExtra = 0; // 🔥 NUEVO ACUMULADOR PARA PANTALLAS ADICIONALES
-
-  // 1. Escaneo profundo de plataformas y pantallas seleccionadas
+  // Escaneo lineal y directo multiplicando pantallas
   document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
     const cb = row.querySelector(".chk-cotizar-plat");
     if (cb && cb.checked) {
@@ -7244,110 +7289,38 @@ window.calcularPreciosSistemaCotizador = function () {
       const pantallas = selectPantallas
         ? parseInt(selectPantallas.value) || 1
         : 1;
-      const extras = pantallas - 1; // Solo cobramos las "adicionales"
 
       if (tipo === "netflix") {
-        tieneNetflix = true;
-        if (pantallas === 2) costoPantallasExtra += 11500;
-        else if (pantallas === 3) costoPantallasExtra += 21500;
-        else if (pantallas === 4) costoPantallasExtra += 31500;
-        else if (pantallas === 5) costoPantallasExtra += 40500;
+        if (pantallas === 1) precioBaseUnMes += 14500;
+        else if (pantallas === 2) precioBaseUnMes += 26000;
+        else if (pantallas === 3) precioBaseUnMes += 36000;
+        else if (pantallas === 4) precioBaseUnMes += 46000;
+        else if (pantallas >= 5) precioBaseUnMes += 55000;
       } else if (tipo === "disneypre") {
-        tieneDisneyPremium = true;
-        costoPantallasExtra += extras * 10000;
-      } else if (tipo === "estandar" || tipo === "disneyest") {
-        cantidadEstandar++;
-        if (val === "Amazon Prime") {
-          tieneAmazon = true;
-          costoPantallasExtra += extras * 5000;
-        } else if (val === "Paramount+") {
-          tieneParamount = true;
-          costoPantallasExtra += extras * 18000;
-        } else if (val === "Disney Estándar") {
-          costoPantallasExtra += extras * 4000;
-        } else {
-          // Max, Vix, Plex, Crunchyroll, Apple TV, Universal+
-          costoPantallasExtra += extras * 3000;
-        }
+        precioBaseUnMes += pantallas * 10000;
+      } else if (val === "Amazon Prime") {
+        precioBaseUnMes += pantallas * 5000;
+      } else if (val === "Disney Estándar") {
+        precioBaseUnMes += pantallas * 4000;
+      } else if (val === "Paramount+") {
+        precioBaseUnMes += pantallas * 18000;
+      } else if (tipo === "estandar") {
+        // Max, Apple TV, Crunchyroll, Plex, Universal+, Vix
+        precioBaseUnMes += pantallas * 3000;
       } else if (tipo === "herramienta") {
-        const precioBase = parseFloat(cb.getAttribute("data-precio")) || 0;
-        sumatoriaHerramientas += precioBase; // Base (1 cuenta)
-        if (val === "Metegol") {
-          costoPantallasExtra += extras * 12000; // Excepción regla Metegol
-        } else {
-          costoPantallasExtra += extras * precioBase; // Multiplica directo para herramientas
-        }
+        // Spotify, YouTube, Metegol, Deezer, Canva, IPTV
+        if (val === "Metegol") precioBaseUnMes += pantallas * 12000;
+        else if (val === "Spotify") precioBaseUnMes += pantallas * 10000;
+        else if (val === "YouTube Premium")
+          precioBaseUnMes += pantallas * 14000;
+        else if (val === "Deezer") precioBaseUnMes += pantallas * 8000;
+        else if (val === "Canva Pro")
+          precioBaseUnMes += pantallas * 20000; // Por defecto
+        else if (val === "IPTV") precioBaseUnMes += pantallas * 7000;
       }
     }
   });
 
-  // 🎯 MOTOR DE CONTROL DINÁMICO PARA PARAMOUNT+
-  let abonoParamountCombo = 0;
-  let esParamountIndividualSolo = false;
-
-  if (tieneParamount) {
-    let totalPlatasStreaming =
-      (tieneNetflix ? 1 : 0) + (tieneDisneyPremium ? 1 : 0) + cantidadEstandar;
-    if (totalPlatasStreaming === 1) {
-      esParamountIndividualSolo = true;
-    } else {
-      cantidadEstandar--;
-      abonoParamountCombo = 18000;
-    }
-  }
-
-  let precioBaseUnMes = 0;
-
-  if (esParamountIndividualSolo) {
-    precioBaseUnMes = 20000;
-  } else {
-    // 2. REGLAS AUTOMATIZADAS CYBERNET (Basadas en 1 pantalla)
-    if (tieneNetflix) {
-      if (tieneDisneyPremium) {
-        if (cantidadEstandar === 0) precioBaseUnMes = 25000;
-        else if (cantidadEstandar === 1) precioBaseUnMes = 29000;
-        else if (cantidadEstandar === 2) precioBaseUnMes = 32000;
-        else if (cantidadEstandar >= 3)
-          precioBaseUnMes = 35000 + (cantidadEstandar - 3) * 3000;
-      } else {
-        if (cantidadEstandar === 0) precioBaseUnMes = 14500;
-        else if (cantidadEstandar === 1) precioBaseUnMes = 20000;
-        else if (cantidadEstandar === 2) precioBaseUnMes = 24000;
-        else if (cantidadEstandar >= 3)
-          precioBaseUnMes = 27000 + (cantidadEstandar - 3) * 3000;
-      }
-    } else {
-      if (tieneDisneyPremium) {
-        if (cantidadEstandar === 0) precioBaseUnMes = 15000;
-        else if (cantidadEstandar === 1) precioBaseUnMes = 20000;
-        else if (cantidadEstandar === 2) precioBaseUnMes = 22000;
-        else if (cantidadEstandar === 3) precioBaseUnMes = 24000;
-        else if (cantidadEstandar >= 4)
-          precioBaseUnMes = 24000 + (cantidadEstandar - 3) * 3000;
-      } else {
-        if (cantidadEstandar === 0) {
-          precioBaseUnMes = 0;
-        } else if (cantidadEstandar === 1) {
-          precioBaseUnMes = tieneAmazon ? 10500 : 8500;
-        } else if (cantidadEstandar === 2) {
-          precioBaseUnMes = 13000;
-        } else if (cantidadEstandar === 3) {
-          precioBaseUnMes = 16000;
-        } else if (cantidadEstandar === 4) {
-          precioBaseUnMes = 18000;
-        } else if (cantidadEstandar >= 5) {
-          precioBaseUnMes = 18000 + (cantidadEstandar - 4) * 3000;
-        }
-      }
-    }
-  }
-
-  // 3. Sumar el abono de Paramount, herramientas y 🔥 PANTALLAS EXTRA
-  precioBaseUnMes += abonoParamountCombo;
-  precioBaseUnMes += sumatoriaHerramientas;
-  precioBaseUnMes += costoPantallasExtra;
-
-  // 4. Captura de meses y cálculo de descuentos
   const monthSelect = document.getElementById("calcMonths");
   const meses = parseFloat(monthSelect.value) || 1;
   const porcDesc =
@@ -7395,8 +7368,15 @@ function copiarCotizacionCombo(btn) {
         ? parseInt(selectPantallas.value) || 1
         : 1;
 
-      // Si pidió más de 1, agregamos el texto "(X Pantallas)" al WhatsApp
-      const textoPantallas = pantallas > 1 ? ` (${pantallas} Pantallas)` : "";
+      // Anota "(3 Pantallas)" en el ticket final si es necesario
+      let textoPantallas = "";
+      if (pantallas > 1) {
+        textoPantallas =
+          pantallas >= 5 && cb.value === "NETFLIX"
+            ? " (Cuenta Completa)"
+            : ` (${pantallas} Pantallas)`;
+      }
+
       plataformasSeleccionadas.push(
         `   • 📺 *${cb.value.toUpperCase()}*${textoPantallas}`,
       );
@@ -7438,12 +7418,9 @@ function copiarCotizacionCombo(btn) {
       mensajeVIP += `✨ *Descuento Cliente Fiel:* -$${descFielAcumulado.toLocaleString("es-CO")} _(¡Por tu lealtad con la casa!)_\n`;
     }
 
-    mensajeVIP +=
-      `───────────────────────\n` +
-      `💰 *TOTAL NETO A PAGAR: ${totalText}* 🔥✨\n`;
+    mensajeVIP += `───────────────────────\n💰 *TOTAL NETO A PAGAR: ${totalText}* 🔥✨\n`;
   } else {
-    mensajeVIP +=
-      `───────────────────────\n` + `💰 *TOTAL A PAGAR: ${totalText}* 🔥🍿\n`;
+    mensajeVIP += `───────────────────────\n💰 *TOTAL A PAGAR: ${totalText}* 🔥🍿\n`;
   }
 
   mensajeVIP += `\n\n¿Te agrada la oferta para enviarte los medios de pago y activarte de inmediato? ⚡🍿`;
