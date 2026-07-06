@@ -932,7 +932,7 @@ function copiarBloqueNumerosCorte(btn) {
 }
 
 // =========================================================================
-// 🍿 CONTROLADOR DEL TALLER NETFLIX (DISEÑO PREMIUM & AUTO-BORRADO EN VIVO)
+// 🍿 CONTROLADOR DEL TALLER NETFLIX (BYPASS DIRECTO A CORTES)
 // =========================================================================
 window.toggleNetflixManagerPanel = window.toggleNetflixPanel = function () {
   if (typeof haptic === "function") haptic();
@@ -940,25 +940,21 @@ window.toggleNetflixManagerPanel = window.toggleNetflixPanel = function () {
   if (overlay) {
     overlay.classList.toggle("open");
 
-    // 🔄 AUTO-REFRESCO: Si se abre el panel y la pestaña de cortes estaba activa, busca cambios en vivo
+    // 🔄 AUTO-LANZAMIENTO: Al abrir el panel de Netflix, va directo a escanear los cortes
     if (overlay.classList.contains("open")) {
-      const panelCortes = document.getElementById("netflixPanelCortes");
-      if (panelCortes && panelCortes.style.display === "flex") {
-        window.abrirPanelCortesNet();
-      }
+      window.abrirPanelCortesNet();
     }
   }
 };
 
 // =========================================================================
-// 🍿 REESCANEO Y RENDERIZADO BENTO DE CORTES NETFLIX (IPADOS EDITION)
+// 🍿 REESCANEO Y RENDERIZADO BENTO DE CORTES NETFLIX
 // =========================================================================
 window.abrirPanelCortesNet = function () {
   if (typeof haptic === "function") haptic();
-  document.getElementById("netflixMenuPrincipal").style.display = "none";
-  document.getElementById("netflixPanelCortes").style.display = "flex";
 
   const contenedor = document.getElementById("listaCuentasCorte");
+  if (!contenedor) return;
 
   // Cargador de diseño corporativo elegante
   contenedor.innerHTML = `
@@ -1007,7 +1003,6 @@ window.abrirPanelCortesNet = function () {
         let perfilesOcultosSeguros = cuenta.perfilesVencidos.join("|||");
 
         let div = document.createElement("div");
-        // 🌟 Mutamos a widget-ipad con borde izquierdo rojo de acento estricto
         div.className = "widget-ipad account-cut-card";
         div.style.cssText =
           "padding: 16px !important; margin-bottom: 12px !important; gap: 14px !important; border-left: 4px solid #e50914 !important;";
