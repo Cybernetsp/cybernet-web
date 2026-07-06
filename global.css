@@ -1468,3 +1468,26 @@ body:has(.overlay-ios[style*="display: block"]) [id*="dock"] {
     animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
 }
+/* 1️⃣ CAPA DE SUB-MODALS (Ventanas de edición, Lápiz, filtros, resolver garantías y resultados) 
+   Forzamos a que se posicionen por encima de las apps principales (15000) */
+#editShiftModalOverlay,
+#resultadoCortesOverlay,
+#modalRenovacionFlotante,
+#resolverGarantiaOverlay {
+  z-index: 18000 !important;
+}
+/* 4️⃣ REAJUSTE DE ANIMACIÓN SEGURO PARA LAS NUEVAS VENTANAS SECUNDARIAS
+   Asegura que el Lápiz, resolver garantías y los resultados usen el pop elástico de Apple */
+@media (min-width: 769px) {
+  #editShiftModalOverlay .sheet-ios,
+  #resultadoCortesOverlay .sheet-ios,
+  #ventaGeneradaModalOverlay .sheet-ios,
+  #modalRenovacionFlotante .modal-ios,
+  #resolverGarantiaOverlay .modal-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
