@@ -1180,12 +1180,12 @@
 
       <div id="step-4" class="step">
         <p class="instruction" id="instruction-correo">
-          Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com) 📧
+          Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com o @outlook) 📧
         </p>
         <input
           type="email"
           id="correo"
-          placeholder="ejemplo@cybernetsp.com"
+          placeholder="ejemplo@cybernetsp.com o @outlook.com"
           spellcheck="false"
         />
         <button id="btn-rastrear" class="btn-primary" onclick="executeSearch()">
@@ -1772,7 +1772,7 @@
             "Ingresa el <b>correo</b> de la cuenta 📧<br><span style='display:block; margin-top:5px; font-size:0.8rem; color:var(--ios-green); font-weight:700;'>🔓 Acceso Distribuidor VIP Activado</span>";
         } else {
           instCorreo.innerHTML =
-            "Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com) 📧";
+            "Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com o @outlook) 📧";
         }
 
         btn.disabled = false;
@@ -1883,8 +1883,14 @@
         let m = document.getElementById("correo").value.toLowerCase().trim();
         if (!m.includes("@")) return fireError("Correo inválido.");
 
-        if (!window.isDistri && !m.endsWith("@cybernetsp.com")) {
-          return fireError("Solo disponible para correos @cybernetsp.com");
+        if (
+          !window.isDistri &&
+          !m.endsWith("@cybernetsp.com") &&
+          !m.includes("@outlook")
+        ) {
+          return fireError(
+            "Solo disponible para correos @cybernetsp.com o @outlook",
+          );
         }
 
         const btnTrack = document.getElementById("btn-rastrear");
