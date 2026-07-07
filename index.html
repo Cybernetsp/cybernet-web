@@ -1232,17 +1232,33 @@
             display: none;
           "
         >
+          <
           <div
             id="val-code"
+            onclick="copiarCodigoResultante()"
             style="
               font-size: 3.5rem;
               font-weight: 700;
               color: var(--text-primary);
               letter-spacing: 8px;
               font-variant-numeric: tabular-nums;
-              transition: color 0.3s;
+              transition:
+                transform 0.1s,
+                color 0.3s;
+              cursor: pointer;
             "
+            title="Toca para copiar"
           ></div>
+          <div
+            style="
+              font-size: 0.8rem;
+              color: var(--text-secondary);
+              margin-top: 5px;
+              font-weight: 500;
+            "
+          >
+            👆 Toca el número para copiarlo
+          </div>
           <div
             id="val-timer"
             style="
@@ -1878,6 +1894,30 @@
         );
       }
 
+      function copiarCodigoResultante() {
+        haptic(); // Efecto de vibración en celulares
+        const codeElement = document.getElementById("val-code");
+        const codigoText = codeElement.innerText.trim();
+
+        if (!codigoText) return;
+
+        navigator.clipboard.writeText(codigoText).then(() => {
+          // Cambia de color a verde por 1 segundo para dar confirmación visual
+          codeElement.style.color = "var(--ios-green)";
+          codeElement.style.transform = "scale(0.95)"; // Pequeño efecto de hundimiento
+
+          setTimeout(() => {
+            codeElement.style.color = "var(--text-primary)";
+            codeElement.style.transform = "scale(1)";
+          }, 300);
+
+          // Lanza la notificación estilo Apple arriba
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>¡Código copiado!</span></div>`,
+          );
+        });
+      }
+
       async function executeSearch() {
         haptic();
         let m = document.getElementById("correo").value.toLowerCase().trim();
@@ -1955,7 +1995,7 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("sw.js?v=2.0")
+            .register("sw.js?v=20.0")
             .then((reg) => {
               console.log("Cybernet App lista para instalar");
               reg.update();
