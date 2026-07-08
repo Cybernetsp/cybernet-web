@@ -7173,6 +7173,7 @@ function abrirCalculadoraCombos() {
     if (span.innerText.includes("Metegol")) span.innerText = "Metegol ($15k)";
     if (span.innerText.includes("YouTube"))
       span.innerText = "YouTube Premium ($14k)";
+    if (span.innerText.includes("Paramount")) span.innerText = "Paramount+ ($15k)";
   });
 
   // 🔥 4. INYECTAR SELECTOR DE HASTA 5 PANTALLAS EN TODAS LAS PLATAFORMAS (AUTOMÁTICO)
