@@ -1753,34 +1753,23 @@ function ejecutarCreacionVentaLocal(e) {
 
       let cuerpo = "";
       bloques.forEach((b) => {
-        // 👤 Calibración dinámica de Usuario vs Correo
         let etiquetaUser =
           b.id === "IPTV" || b.id === "EMBY" ? "Usuario" : "Correo";
-
-        // 🌐 Calibración dinámica de URL vs Servidor vs Perfil
         let etiquetaPerfil =
           b.id === "IPTV" ? "URL" : b.id === "EMBY" ? "Servidor" : "Perfil";
-
         let mesesComprados = memoriaMeses[b.id] || "1";
         let textoMeses = mesesComprados > 1 ? ` (${mesesComprados} Meses)` : "";
 
-        // =========================================================
-        // 🔥 INYECCIÓN NETFLIX: Construcción de cabecera y advertencia
-        // =========================================================
-
         cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n────────────────────\n`;
 
+        // ⚠️ ADVERTENCIA ARRIBA (SOLO NETFLIX)
         if (b.id === "NETFLIX") {
-          cuerpo += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n`;
-          cuerpo += `🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n\n`;
+          cuerpo += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
         }
 
-        // Usuario y clave
+        // DATOS EN NEGRITA
         cuerpo += `👤 *${etiquetaUser}:* ${b.correo}\n🔐 *Contraseña:* ${b.clave}\n`;
 
-        // =========================================================
-
-        // Inyectamos el Servidor / Perfil / URL si aplica
         if (
           b.id === "IPTV" ||
           (b.perfil && b.perfil !== "" && b.perfil !== "N/A")
@@ -1788,13 +1777,17 @@ function ejecutarCreacionVentaLocal(e) {
           cuerpo += `🌐 *${etiquetaPerfil}:* ${b.perfil}\n`;
         }
 
-        // 🔌 CASO EXCLUSIVO EMBY: Inyección del campo Puerto requerido
         if (b.id === "EMBY") {
           cuerpo += `🔌 *Puerto:* Dejar vacío\n`;
         }
 
-        if (b.pin && b.pin !== "") cuerpo += `📍 *Pin:* ${b.pin}\n`;
+        if (b.pin && b.pin !== "") cuerpo += `📍 *PIN:* ${b.pin}\n`;
         cuerpo += `📅 *Vence:* ${b.venc}\n`;
+
+        // 🤖 BOT DE CÓDIGOS ABAJO (SOLO NETFLIX)
+        if (b.id === "NETFLIX") {
+          cuerpo += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/`;
+        }
       });
 
       let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
@@ -5017,27 +5010,31 @@ function ejecutarCambioCuenta(e) {
     if (res && res.status === "success") {
       // 🔥 ENCABEZADO IDÉNTICO A TU NUEVA PLANTILLA 🔥
       let nombreSaludo = nombreCliente ? " " + nombreCliente : "";
-      let fichaFinal = `🌟 ¡Hola${nombreSaludo}!\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
+      let fichaFinal = `🌟 *¡Hola${nombreSaludo}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
 
       res.data.forEach((d) => {
-        let perfilTexto = d.perfil ? `\n🌐 Perfil: ${d.perfil}` : "";
+        let perfilTexto = d.perfil ? `\n🌐 *Perfil:* ${d.perfil}` : "";
         if (d.pin) {
-          perfilTexto += ` | PIN: ${d.pin}`; // Si tiene PIN se anota de una vez en la misma línea
+          perfilTexto += ` | *PIN:* ${d.pin}`;
         }
 
-        // Bloque dinámico por cada plataforma del cambio
-        fichaFinal += `\n\n🎬 DETALLES DE ${d.plataforma} ✅\n────────────────────\n👤 Correo: ${d.correo}\n🔐 Contraseña: ${d.clave}${perfilTexto}\n📅 Vence: ${d.vencimiento}`;
-        
-        // 🔥 INYECCIÓN EXCLUSIVA PARA NETFLIX EN CAMBIOS 🔥
+        fichaFinal += `\n\n🎬 *DETALLES DE ${d.plataforma}* ✅\n────────────────────\n`;
+
+        // ⚠️ ADVERTENCIA ARRIBA (SOLO NETFLIX)
         if (d.plataforma === "NETFLIX") {
-          fichaFinal += `\n\n⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n`;
-          fichaFinal += `🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/`;
+          fichaFinal += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+        }
+
+        // DATOS EN NEGRITA
+        fichaFinal += `👤 *Correo:* ${d.correo}\n🔐 *Contraseña:* ${d.clave}${perfilTexto}\n📅 *Vence:* ${d.vencimiento}\n`;
+
+        // 🤖 BOT DE CÓDIGOS ABAJO (SOLO NETFLIX)
+        if (d.plataforma === "NETFLIX") {
+          fichaFinal += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/`;
         }
       });
 
-      // 🔥 TEXTO DE GARANTÍA E INFO IMPORTANTE AL FINAL 🔥
-      fichaFinal += `\n\n📢 INFORMACIÓN IMPORTANTE: \n────────────────────\n⚠️ Garantía activa: Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 Soporte: Si presentas algún inconveniente, infórmanos de inmediato para brindarte una solución rápida.\n\n💎 Disfruta tu servicio.\n✨ ¡Gracias por elegirnos! ✨`;
-
+      fichaFinal += `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
       document.getElementById("cambioCuentaOverlay").classList.remove("open");
       document.getElementById("outputTextoVentaFicha").value = fichaFinal;
 
@@ -7307,34 +7304,34 @@ window.filtrarPlataformasCotizador = function () {
 window.calcularPreciosSistemaCotizador = function () {
   // DICCIONARIO MAESTRO DE PRECIOS EXACTOS (INDIVIDUAL VS COMBO)
   const mapValores = {
-    "DISNEY-PREMIUM": { indiv: 15000, combo: 10000, isTier: false }, 
-    "Amazon Prime": { indiv: 10500, combo: 5000, isTier: true }, 
+    "DISNEY-PREMIUM": { indiv: 15000, combo: 10000, isTier: false },
+    "Amazon Prime": { indiv: 10500, combo: 5000, isTier: true },
     "Disney Estándar": { indiv: 8500, combo: 4000, isTier: true },
-    "Max": { id: "MAX", indiv: 8500, combo: 3000, isTier: true },
+    Max: { id: "MAX", indiv: 8500, combo: 3000, isTier: true },
     "Apple TV": { indiv: 8500, combo: 3000, isTier: true },
-    "Crunchyroll": { indiv: 8500, combo: 3000, isTier: true },
-    "Plex": { indiv: 8500, combo: 3000, isTier: true },
+    Crunchyroll: { indiv: 8500, combo: 3000, isTier: true },
+    Plex: { indiv: 8500, combo: 3000, isTier: true },
     "Universal+": { indiv: 8500, combo: 3000, isTier: true },
-    "Vix": { indiv: 8500, combo: 3000, isTier: true },
+    Vix: { indiv: 8500, combo: 3000, isTier: true },
     // Herramientas Add-ons y Otras Cuentas
     "DIRECTV-GO": { indiv: 30000, combo: 25000, isTier: false }, // 🔥 CORREGIDO: $30k individual / $25k combo
     "Paramount+": { indiv: 15000, combo: 13000, isTier: false },
-    "Metegol": { indiv: 15000, combo: 12000, isTier: false }, 
-    "Spotify": { indiv: 14000, combo: 10000, isTier: false }, 
-    "YouTube Premium": { indiv: 14000, combo: 14000, isTier: false }, 
-    "Deezer": { indiv: 12000, combo: 8000, isTier: false }, 
+    Metegol: { indiv: 15000, combo: 12000, isTier: false },
+    Spotify: { indiv: 14000, combo: 10000, isTier: false },
+    "YouTube Premium": { indiv: 14000, combo: 14000, isTier: false },
+    Deezer: { indiv: 12000, combo: 8000, isTier: false },
     "Canva Pro": { indiv: 20000, combo: 20000, isTier: false },
-    "IPTV": { indiv: 7000, combo: 7000, isTier: false }
+    IPTV: { indiv: 7000, combo: 7000, isTier: false },
   };
 
   let precioBaseUnMes = 0;
   let tieneNetflix = false;
   let costoNetflixCalculado = 0;
 
-  let allOtherScreens = []; 
+  let allOtherScreens = [];
   let countDisneyPremium = 0;
   let countTierEligible = 0;
-  let arrayAddonsDirectosYExtras = []; 
+  let arrayAddonsDirectosYExtras = [];
 
   // 1. Escaneo de las plataformas y recolección de pantallas marcadas
   document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
@@ -7342,7 +7339,9 @@ window.calcularPreciosSistemaCotizador = function () {
     if (cb && cb.checked) {
       const val = cb.value;
       const selectPantallas = row.querySelector(".sel-pantallas-cotizador");
-      const pantallas = selectPantallas ? parseInt(selectPantallas.value) || 1 : 1;
+      const pantallas = selectPantallas
+        ? parseInt(selectPantallas.value) || 1
+        : 1;
 
       if (val === "NETFLIX") {
         tieneNetflix = true;
@@ -7353,21 +7352,21 @@ window.calcularPreciosSistemaCotizador = function () {
         else if (pantallas >= 5) costoNetflixCalculado = 55000;
       } else {
         if (mapValores[val]) {
-          for(let i = 0; i < pantallas; i++) {
+          for (let i = 0; i < pantallas; i++) {
             allOtherScreens.push(val);
           }
 
           if (val === "DISNEY-PREMIUM") {
-             countDisneyPremium += pantallas;
+            countDisneyPremium += pantallas;
           } else if (mapValores[val].isTier) {
-             countTierEligible++; 
-             for(let i = 1; i < pantallas; i++) {
-               arrayAddonsDirectosYExtras.push(val); 
-             }
+            countTierEligible++;
+            for (let i = 1; i < pantallas; i++) {
+              arrayAddonsDirectosYExtras.push(val);
+            }
           } else {
-             for(let i = 0; i < pantallas; i++) {
-               arrayAddonsDirectosYExtras.push(val);
-             }
+            for (let i = 0; i < pantallas; i++) {
+              arrayAddonsDirectosYExtras.push(val);
+            }
           }
         }
       }
@@ -7376,60 +7375,73 @@ window.calcularPreciosSistemaCotizador = function () {
 
   // 2. Aplicación de la Facturación
   if (tieneNetflix) {
-      precioBaseUnMes = costoNetflixCalculado;
-      
-      // Lógica de Tiers del Combo de Netflix
-      if (countDisneyPremium > 0) {
-         if (countTierEligible === 0) precioBaseUnMes += 10500; // Combo Dúo Premium -> Total: $25.000
-         else if (countTierEligible === 1) precioBaseUnMes += 14500; // Combo Pro -> Total: $29.000
-         else if (countTierEligible === 2) precioBaseUnMes += 17500; // Combo Cine Total -> Total: $32.000
-         else if (countTierEligible >= 3) precioBaseUnMes += 20500 + ((countTierEligible - 3) * 3000); // El Rey -> Total: $35.000
+    precioBaseUnMes = costoNetflixCalculado;
 
-         precioBaseUnMes += (countDisneyPremium - 1) * mapValores["DISNEY-PREMIUM"].combo;
-      } else {
-         if (countTierEligible === 0) precioBaseUnMes += 0; // Solo Netflix -> Total: $14.500
-         else if (countTierEligible === 1) precioBaseUnMes += 5500; // Netflix + 1 -> Total: $20.000
-         else if (countTierEligible === 2) precioBaseUnMes += 9500; // Netflix + 2 -> Total: $24.000
-         else if (countTierEligible >= 3) precioBaseUnMes += 12500 + ((countTierEligible - 3) * 3000); // Netflix + 3 -> Total: $27.000
-      }
+    // Lógica de Tiers del Combo de Netflix
+    if (countDisneyPremium > 0) {
+      if (countTierEligible === 0)
+        precioBaseUnMes += 10500; // Combo Dúo Premium -> Total: $25.000
+      else if (countTierEligible === 1)
+        precioBaseUnMes += 14500; // Combo Pro -> Total: $29.000
+      else if (countTierEligible === 2)
+        precioBaseUnMes += 17500; // Combo Cine Total -> Total: $32.000
+      else if (countTierEligible >= 3)
+        precioBaseUnMes += 20500 + (countTierEligible - 3) * 3000; // El Rey -> Total: $35.000
 
-      // Sumamos las demás pantallas adicionales o Add-ons (Directv Go, Spotify, etc.) a precio combo
-      arrayAddonsDirectosYExtras.forEach(plat => {
-          precioBaseUnMes += mapValores[plat].combo;
-      });
+      precioBaseUnMes +=
+        (countDisneyPremium - 1) * mapValores["DISNEY-PREMIUM"].combo;
+    } else {
+      if (countTierEligible === 0)
+        precioBaseUnMes += 0; // Solo Netflix -> Total: $14.500
+      else if (countTierEligible === 1)
+        precioBaseUnMes += 5500; // Netflix + 1 -> Total: $20.000
+      else if (countTierEligible === 2)
+        precioBaseUnMes += 9500; // Netflix + 2 -> Total: $24.000
+      else if (countTierEligible >= 3)
+        precioBaseUnMes += 12500 + (countTierEligible - 3) * 3000; // Netflix + 3 -> Total: $27.000
+    }
 
+    // Sumamos las demás pantallas adicionales o Add-ons (Directv Go, Spotify, etc.) a precio combo
+    arrayAddonsDirectosYExtras.forEach((plat) => {
+      precioBaseUnMes += mapValores[plat].combo;
+    });
   } else {
-      // LÓGICA SIN NETFLIX: ALGORITMO MAX-BASE
-      if (allOtherScreens.length === 0) {
-         precioBaseUnMes = 0;
-      } else if (allOtherScreens.length === 1) {
-         precioBaseUnMes = mapValores[allOtherScreens[0]].indiv; // Única plataforma -> Precio Individual
-      } else {
-         allOtherScreens.sort((a, b) => mapValores[b].indiv - mapValores[a].indiv);
-         
-         let masCaro = allOtherScreens.shift(); // Extrae la más costosa
-         precioBaseUnMes += mapValores[masCaro].indiv; // Se cobra a precio Individual Full
-         
-         allOtherScreens.forEach(plat => {
-             precioBaseUnMes += mapValores[plat].combo; // El resto se suma a precio Combo barato
-         });
-      }
+    // LÓGICA SIN NETFLIX: ALGORITMO MAX-BASE
+    if (allOtherScreens.length === 0) {
+      precioBaseUnMes = 0;
+    } else if (allOtherScreens.length === 1) {
+      precioBaseUnMes = mapValores[allOtherScreens[0]].indiv; // Única plataforma -> Precio Individual
+    } else {
+      allOtherScreens.sort((a, b) => mapValores[b].indiv - mapValores[a].indiv);
+
+      let masCaro = allOtherScreens.shift(); // Extrae la más costosa
+      precioBaseUnMes += mapValores[masCaro].indiv; // Se cobra a precio Individual Full
+
+      allOtherScreens.forEach((plat) => {
+        precioBaseUnMes += mapValores[plat].combo; // El resto se suma a precio Combo barato
+      });
+    }
   }
 
   // 3. Captura de Meses y Fidelidad
   const monthSelect = document.getElementById("calcMonths");
   const meses = parseFloat(monthSelect.value) || 1;
-  const porcDesc = parseFloat(monthSelect.options[monthSelect.selectedIndex].getAttribute("data-desc")) || 0;
+  const porcDesc =
+    parseFloat(
+      monthSelect.options[monthSelect.selectedIndex].getAttribute("data-desc"),
+    ) || 0;
 
   const subtotal = precioBaseUnMes * meses;
   const montoDescuento = subtotal * (porcDesc / 100);
 
   const esClienteFiel = document.getElementById("calcFidelidad").checked;
-  let descuentoFielTotal = esClienteFiel && precioBaseUnMes > 0 ? 1000 * meses : 0;
+  let descuentoFielTotal =
+    esClienteFiel && precioBaseUnMes > 0 ? 1000 * meses : 0;
 
   if (descuentoFielTotal > 0) {
     document.getElementById("rowCalcDescFiel").style.display = "flex";
-    document.getElementById("calcDiscountFiel").innerText = "-$" + descuentoFielTotal.toLocaleString("es-CO");
+    document.getElementById("calcDiscountFiel").innerText =
+      "-$" + descuentoFielTotal.toLocaleString("es-CO");
   } else {
     document.getElementById("rowCalcDescFiel").style.display = "none";
   }
@@ -7438,10 +7450,14 @@ window.calcularPreciosSistemaCotizador = function () {
   if (totalA_Cobrar < 0) totalA_Cobrar = 0;
 
   // 4. Impresión en Pantalla
-  document.getElementById("calcBasePriceDisplay").value = "$" + precioBaseUnMes.toLocaleString("es-CO");
-  document.getElementById("calcSubtotal").innerText = "$" + subtotal.toLocaleString("es-CO");
-  document.getElementById("calcDiscount").innerText = "-$" + montoDescuento.toLocaleString("es-CO");
-  document.getElementById("calcTotal").innerText = "$" + totalA_Cobrar.toLocaleString("es-CO");
+  document.getElementById("calcBasePriceDisplay").value =
+    "$" + precioBaseUnMes.toLocaleString("es-CO");
+  document.getElementById("calcSubtotal").innerText =
+    "$" + subtotal.toLocaleString("es-CO");
+  document.getElementById("calcDiscount").innerText =
+    "-$" + montoDescuento.toLocaleString("es-CO");
+  document.getElementById("calcTotal").innerText =
+    "$" + totalA_Cobrar.toLocaleString("es-CO");
 };
 
 function copiarCotizacionCombo(btn) {
