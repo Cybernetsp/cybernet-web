@@ -233,6 +233,7 @@ const listaPlataformasVenta = [
     permitePantallas: true,
     permiteRenovacion: false,
   },
+  
   {
     id: "YOUTUBE",
     nombre: "YOUTUBE",
