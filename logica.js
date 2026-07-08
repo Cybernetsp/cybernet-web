@@ -7311,7 +7311,7 @@ window.calcularPreciosSistemaCotizador = function () {
     "Vix": { indiv: 8500, combo: 3000, isTier: true },
     // Herramientas Add-ons y Otras Cuentas
     "DIRECTV-GO": { indiv: 30000, combo: 25000, isTier: false }, // 🔥 CORREGIDO: $30k individual / $25k combo
-    "Paramount+": { indiv: 18000, combo: 18000, isTier: false },
+    "Paramount+": { indiv: 15000, combo: 10000, isTier: false },
     "Metegol": { indiv: 15000, combo: 12000, isTier: false }, 
     "Spotify": { indiv: 14000, combo: 10000, isTier: false }, 
     "YouTube Premium": { indiv: 14000, combo: 14000, isTier: false }, 
