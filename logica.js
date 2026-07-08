@@ -233,7 +233,6 @@ const listaPlataformasVenta = [
     permitePantallas: true,
     permiteRenovacion: false,
   },
-  
   {
     id: "YOUTUBE",
     nombre: "YOUTUBE",
@@ -1772,7 +1771,8 @@ function ejecutarCreacionVentaLocal(e) {
         cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n────────────────────\n`;
 
         if (b.id === "NETFLIX") {
-          cuerpo += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+          cuerpo += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n`;
+          cuerpo += `🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n\n`;
         }
 
         // Usuario y clave
@@ -5027,6 +5027,12 @@ function ejecutarCambioCuenta(e) {
 
         // Bloque dinámico por cada plataforma del cambio
         fichaFinal += `\n\n🎬 DETALLES DE ${d.plataforma} ✅\n────────────────────\n👤 Correo: ${d.correo}\n🔐 Contraseña: ${d.clave}${perfilTexto}\n📅 Vence: ${d.vencimiento}`;
+        
+        // 🔥 INYECCIÓN EXCLUSIVA PARA NETFLIX EN CAMBIOS 🔥
+        if (d.plataforma === "NETFLIX") {
+          fichaFinal += `\n\n⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n`;
+          fichaFinal += `🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/`;
+        }
       });
 
       // 🔥 TEXTO DE GARANTÍA E INFO IMPORTANTE AL FINAL 🔥
@@ -7173,7 +7179,6 @@ function abrirCalculadoraCombos() {
     if (span.innerText.includes("Metegol")) span.innerText = "Metegol ($15k)";
     if (span.innerText.includes("YouTube"))
       span.innerText = "YouTube Premium ($14k)";
-    if (span.innerText.includes("Paramount")) span.innerText = "Paramount+ ($15k)";
   });
 
   // 🔥 4. INYECTAR SELECTOR DE HASTA 5 PANTALLAS EN TODAS LAS PLATAFORMAS (AUTOMÁTICO)
@@ -7313,7 +7318,7 @@ window.calcularPreciosSistemaCotizador = function () {
     "Vix": { indiv: 8500, combo: 3000, isTier: true },
     // Herramientas Add-ons y Otras Cuentas
     "DIRECTV-GO": { indiv: 30000, combo: 25000, isTier: false }, // 🔥 CORREGIDO: $30k individual / $25k combo
-    "Paramount+": { indiv: 15000, combo: 10000, isTier: false },
+    "Paramount+": { indiv: 15000, combo: 13000, isTier: false },
     "Metegol": { indiv: 15000, combo: 12000, isTier: false }, 
     "Spotify": { indiv: 14000, combo: 10000, isTier: false }, 
     "YouTube Premium": { indiv: 14000, combo: 14000, isTier: false }, 
