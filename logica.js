@@ -9273,57 +9273,7 @@ window.ejecutarGeneracionNuevaCuentaAlias = function (btn, contenidoOriginal) {
   document.body.appendChild(script);
 };
 
-// 🔥 FUNCIÓN MÁSTER: Pinta la pantalla tanto al crear como al restaurar la memoria
-window.restaurarInterfazAliasGenerada = function (d, btnOrigen) {
-  document.getElementById("displayCtaCorreo").innerText = d.correo;
-  document.getElementById("displayCtaClave").innerText = d.clave;
 
-  // Reseteo visual del estado "Esperando"
-  document.getElementById("displayCtaPinRecarga").innerText =
-    "Oculto (Esperando a Netflix...)";
-  document.getElementById("displayCtaPinRecarga").style.color =
-    "var(--ios-orange)";
-
-  document
-    .getElementById("radarVerificacionContenedor")
-    .style.setProperty("display", "flex", "important");
-  document.getElementById("radarVerificacionContenedor").style.background =
-    "rgba(255, 159, 10, 0.04)";
-  document.getElementById("radarVerificacionContenedor").style.borderColor =
-    "rgba(255, 159, 10, 0.25)";
-
-  document
-    .getElementById("radarVerificacionSpinner")
-    .style.setProperty("display", "flex", "important");
-  document.getElementById("radarVerificacionSpinner").innerHTML =
-    `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Esperando correo '¡Ya casi terminas!' en Gmail...`;
-
-  document
-    .getElementById("btnLinkVerificarGmail")
-    .style.setProperty("display", "none", "important");
-  document
-    .getElementById("btnGuardarMaestroNetflix")
-    .style.setProperty("display", "none", "important");
-
-  const btnMala = document.getElementById("btnCuentaMalaAlias");
-  if (btnMala) btnMala.style.display = "block"; // Habilitamos botón de descartar
-
-  const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
-  btnGuardar.onclick = function () {
-    d.pinRecarga = window.pinOcultoActual; // Le pasamos el PIN real al maestro
-    guardarCuentaConfirmadaNetflix(
-      btnGuardar,
-      "Guardar en Inventario Maestro",
-      d,
-    );
-  };
-
-  const modal = document.getElementById("cuentaGeneradaModalOverlay");
-  if (modal) modal.classList.add("open");
-
-  // Lanzar el radar Dual
-  window.lanzarRadarEspiaAlias(d.correo);
-};
 
 // Radar DUAL: Busca el "Ya casi terminas" (para el PIN) y "Verifica tu correo" (para el Link)
 window.lanzarRadarEspiaAlias = function (correoTarget) {
@@ -9394,63 +9344,89 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
   }, 4000);
 };
 
+// 🔥 FUNCIÓN MÁSTER: Pinta la pantalla tanto al crear como al restaurar la memoria
+window.restaurarInterfazAliasGenerada = function(d, btnOrigen) {
+    document.getElementById("displayCtaCorreo").innerText = d.correo;
+    document.getElementById("displayCtaClave").innerText = d.clave;
+    
+    // Reseteo visual del estado "Esperando"
+    document.getElementById("displayCtaPinRecarga").innerText = "Oculto (Esperando a Netflix...)";
+    document.getElementById("displayCtaPinRecarga").style.color = "var(--ios-orange)";
+
+    document.getElementById("radarVerificacionContenedor").style.setProperty("display", "flex", "important");
+    document.getElementById("radarVerificacionContenedor").style.background = "rgba(255, 159, 10, 0.04)";
+    document.getElementById("radarVerificacionContenedor").style.borderColor = "rgba(255, 159, 10, 0.25)";
+    
+    document.getElementById("radarVerificacionSpinner").style.setProperty("display", "flex", "important");
+    document.getElementById("radarVerificacionSpinner").innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Esperando correo '¡Ya casi terminas!' en Gmail...`;
+    
+    document.getElementById("btnLinkVerificarGmail").style.setProperty("display", "none", "important");
+    document.getElementById("btnGuardarMaestroNetflix").style.setProperty("display", "none", "important");
+    
+    const btnMala = document.getElementById("btnCuentaMalaAlias");
+    if (btnMala) btnMala.style.display = "block"; // Habilitamos botón de descartar
+
+    const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
+    btnGuardar.onclick = function () {
+        // 🔥 CORRECCIÓN CRÍTICA: Lee SIEMPRE el dato más reciente de la memoria al dar clic
+        let datosFrescos = JSON.parse(localStorage.getItem("cyber_netflix_alias_pendiente")) || d;
+        datosFrescos.pinRecarga = window.pinOcultoActual; // Le pasamos el PIN real al maestro
+        guardarCuentaConfirmadaNetflix(btnGuardar, "Guardar en Inventario Maestro", datosFrescos);
+    };
+
+    const modal = document.getElementById("cuentaGeneradaModalOverlay");
+    if (modal) modal.classList.add("open");
+
+    // Lanzar el radar Dual
+    window.lanzarRadarEspiaAlias(d.correo);
+};
+
 // Función para descartar la cuenta y buscar otra (Actualizando la Memoria y UI completas)
-window.cambiarCuentaMalaAlias = function () {
-  if (
-    !confirm(
-      "⚠️ ¿Estás seguro de que esta cuenta no sirve?\n\nSe marcará en ROJO en ALIAS, se borrará de PINESMES y te entregaremos una nueva.",
-    )
-  )
-    return;
+window.cambiarCuentaMalaAlias = function() {
+    if (!confirm("⚠️ ¿Estás seguro de que esta cuenta no sirve?\n\nSe marcará en ROJO en ALIAS, se borrará de PINESMES y te entregaremos una nueva.")) return;
+    
+    let correoMalo = document.getElementById("displayCtaCorreo").innerText;
+    const btnMala = document.getElementById("btnCuentaMalaAlias");
+    btnMala.disabled = true;
+    btnMala.innerHTML = "Descartando...";
 
-  let correoMalo = document.getElementById("displayCtaCorreo").innerText;
-  const btnMala = document.getElementById("btnCuentaMalaAlias");
-  btnMala.disabled = true;
-  btnMala.innerHTML = "Descartando...";
+    const cbName = "cb_mala_" + Date.now();
+    window[cbName] = function (res) {
+        btnMala.disabled = false;
+        btnMala.innerHTML = "❌ Esta cuenta no sirve (Descartar y buscar otra)";
+        const scriptNode = document.getElementById("node_" + cbName);
+        if (scriptNode) scriptNode.remove();
+        delete window[cbName];
 
-  const cbName = "cb_mala_" + Date.now();
-  window[cbName] = function (res) {
-    btnMala.disabled = false;
-    btnMala.innerHTML = "❌ Esta cuenta no sirve (Descartar y buscar otra)";
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
+        if (res && res.status === "success") {
+            // 1. ACTUALIZAR LA MEMORIA LOCAL CON EL NUEVO CORREO Y CLAVE
+            let d = JSON.parse(localStorage.getItem("cyber_netflix_alias_pendiente"));
+            d.correo = res.correoNuevo;
+            d.clave = res.claveNueva; // Recibimos la nueva clave generada en Google Sheets
+            localStorage.setItem("cyber_netflix_alias_pendiente", JSON.stringify(d));
 
-    if (res && res.status === "success") {
-      // 🔥 1. ACTUALIZAR LA MEMORIA LOCAL CON EL NUEVO CORREO Y CLAVE
-      let d = JSON.parse(localStorage.getItem("cyber_netflix_alias_pendiente"));
-      d.correo = res.correoNuevo;
-      d.clave = res.claveNueva; // Recibimos la nueva clave generada en Google Sheets
-      localStorage.setItem("cyber_netflix_alias_pendiente", JSON.stringify(d));
+            // 2. Actualiza la UI con el correo nuevo y la clave nueva
+            document.getElementById("displayCtaCorreo").innerText = res.correoNuevo;
+            document.getElementById("displayCtaClave").innerText = res.claveNueva;
+            
+            // 3. Reinicia el Radar y oculta el PIN de nuevo
+            if (window.verificationLinkInterval) clearInterval(window.verificationLinkInterval);
+            document.getElementById("displayCtaPinRecarga").innerText = "Oculto (Esperando a Netflix...)";
+            document.getElementById("displayCtaPinRecarga").style.color = "var(--ios-orange)";
+            
+            document.getElementById("radarVerificacionSpinner").innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Esperando correo '¡Ya casi terminas!' en Gmail...`;
+            
+            window.lanzarRadarEspiaAlias(res.correoNuevo);
+        } else {
+            alert("❌ Error: " + (res ? res.message : "No se pudo cambiar la cuenta."));
+        }
+    };
 
-      // 2. Actualiza la UI con el correo nuevo y la clave nueva
-      document.getElementById("displayCtaCorreo").innerText = res.correoNuevo;
-      document.getElementById("displayCtaClave").innerText = res.claveNueva;
-
-      // 3. Reinicia el Radar y oculta el PIN de nuevo
-      if (window.verificationLinkInterval)
-        clearInterval(window.verificationLinkInterval);
-      document.getElementById("displayCtaPinRecarga").innerText =
-        "Oculto (Esperando a Netflix...)";
-      document.getElementById("displayCtaPinRecarga").style.color =
-        "var(--ios-orange)";
-
-      document.getElementById("radarVerificacionSpinner").innerHTML =
-        `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Esperando correo '¡Ya casi terminas!' en Gmail...`;
-
-      window.lanzarRadarEspiaAlias(res.correoNuevo);
-    } else {
-      alert(
-        "❌ Error: " + (res ? res.message : "No se pudo cambiar la cuenta."),
-      );
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  const user = sessionStorage.getItem("active_staff") || "Sistema";
-  script.src = `${GOOGLE_SCRIPT_URL}?action=cambiarCuentaMalaAlias&correoMalo=${encodeURIComponent(correoMalo)}&user=${encodeURIComponent(user)}&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
+    const script = document.createElement("script");
+    script.id = "node_" + cbName;
+    const user = sessionStorage.getItem("active_staff") || "Sistema";
+    script.src = `${GOOGLE_SCRIPT_URL}?action=cambiarCuentaMalaAlias&correoMalo=${encodeURIComponent(correoMalo)}&user=${encodeURIComponent(user)}&callback=${cbName}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
 };
 
 // Función maestra de guardado (Elimina la memoria al terminar)
