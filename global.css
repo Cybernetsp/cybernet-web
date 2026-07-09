@@ -131,15 +131,32 @@ body {
 }
 
 /* --- 4. DOCK MAGNÉTICO INFERIOR --- */
-.macos-dock-wrapper {
-  position: fixed;
-  bottom: 12px;
-  left: 0;
-  width: 100%;
+.macos-dock {
+  background: #1c1c1e;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: var(--glass-border-light);
+  border-radius: 24px;
+  padding: 10px 12px; /* 👈 Un poco más de espacio interno */
   display: flex;
+  gap: 12px; /* 👈 Separación perfecta entre íconos */
+  align-items: center; /* 👈 Alinea la rayita divisora */
+  pointer-events: auto;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.mac-icon-bg {
+  width: 52px; /* 👈 Tamaño exacto al de la foto */
+  height: 52px;
+  border-radius: 14px; /* 👈 La curva Squircle de Apple */
+  display: flex;
+  align-items: center;
   justify-content: center;
-  z-index: 999990;
-  pointer-events: none;
+  font-size: 1.6rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 👈 Sombra suave, sin borde blanco */
+  transition: all 0.2s ease;
 }
 .macos-dock {
   background: #1c1c1e; /* Sólido */
@@ -168,14 +185,14 @@ body {
 .mac-icon-bg {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: 14px; /* 🔥 EL SECRETO: 14px de curva en lugar de 50% */
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    inset 0 1px 1px rgba(255, 255, 255, 0.2); /* Sutil brillo superior tipo Apple */
 }
 
 .mac-tooltip {
