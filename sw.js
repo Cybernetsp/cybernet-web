@@ -1,4 +1,4 @@
-const CACHE_NAME = "cybernet-cache-v36"; // Súbele una versión más por si acaso
+const CACHE_NAME = "cybernet-cache-v37"; // Súbele una versión más por si acaso
 
 const assets = ["./"];
 
