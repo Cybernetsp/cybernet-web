@@ -9517,38 +9517,69 @@ const APP_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
 
 function cargarPagosBreB() {
-  const script = document.createElement("script");
-  const callbackName =
-    "jsonpCallbackBreB_" + Math.round(100000 * Math.random());
-
-  window[callbackName] = function (data) {
+    const script = document.createElement("script");
+    const callbackName = "jsonpCallbackBreB_" + Math.round(100000 * Math.random());
+    const fechaSeleccionada = document.getElementById("breb-fecha").value;
+    
     const contenedor = document.getElementById("breb-lista");
-    contenedor.innerHTML = ""; // Limpiamos lo anterior
+    contenedor.innerHTML = `<div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; padding: 40px 0;">Buscando pagos...</div>`;
 
-    if (data.status === "success" && data.data.length > 0) {
-      data.data.forEach((pago) => {
-        // Tarjetita de diseño Apple Glass para cada pago
-        contenedor.innerHTML += `
-          <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 10px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-              <span style="color: #30d158; font-weight: bold; font-size: 15px;">+$${pago.monto}</span>
-              <span style="color: rgba(255,255,255,0.5); font-size: 11px;">${pago.hora}</span>
-            </div>
-            <div style="color: #fff; font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pago.remitente}</div>
-            <div style="color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 2px;">📅 ${pago.fecha}</div>
-          </div>
-        `;
-      });
-    } else {
-      contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); text-align: center; font-size: 12px; padding: 20px 0;">No hay pagos recientes</div>`;
-    }
-    document.body.removeChild(script);
-    delete window[callbackName];
-  };
+    // 🔥 NUEVO: SEGURO ANTI-CUELGUES (Si tarda más de 12 segundos, cancela)
+    const seguroDeTiempo = setTimeout(() => {
+      if (window[callbackName]) {
+        contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Google no responde.<br>Presiona actualizar de nuevo.</div>`;
+        const icono = document.getElementById("icon-refresh-breb");
+        if (icono) icono.classList.remove("spin-breb-anim");
+        
+        // Limpiamos la basura para que no se trabe la página
+        delete window[callbackName];
+        if (document.body.contains(script)) document.body.removeChild(script);
+      }
+    }, 12000); // 12000 milisegundos = 12 segundos
 
-  script.src = `${APP_SCRIPT_URL}?action=obtenerPagosBreB&callback=${callbackName}`;
-  document.body.appendChild(script);
-}
+    window[callbackName] = function(data) {
+      clearTimeout(seguroDeTiempo); // Si Google responde rápido, cancelamos la alarma de 12 segundos
+      contenedor.innerHTML = ""; 
+      
+      const icono = document.getElementById("icon-refresh-breb");
+      if (icono) icono.classList.remove("spin-breb-anim");
+
+      if (data.status === "success") {
+        if (data.data.length > 0) {
+          data.data.forEach(pago => {
+            contenedor.innerHTML += `
+              <div class="breb-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="color: #30d158; font-weight: 800; font-size: 17px;">+$${pago.monto}</span>
+                  <span style="color: rgba(255,255,255,0.7); font-size: 10px; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 6px;">${pago.hora}</span>
+                </div>
+                <div style="color: #ffffff; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+                  👤 ${pago.remitente}
+                </div>
+                <div style="color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 2px;">
+                  📅 ${pago.fecha}
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 12px; padding: 30px 0;">No se detectaron pagos en esta fecha.</div>`;
+        }
+      } else {
+        contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Error de red:<br>${data.message}</div>`;
+      }
+      
+      if (document.body.contains(script)) document.body.removeChild(script);
+      delete window[callbackName];
+    };
+
+    const urlFinal = fechaSeleccionada 
+      ? `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&fechaBusqueda=${fechaSeleccionada}&callback=${callbackName}`
+      : `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&callback=${callbackName}`;
+
+    script.src = urlFinal;
+    document.body.appendChild(script);
+  }
 
 // 1. Cargar los pagos por primera vez al abrir la página
 cargarPagosBreB();
