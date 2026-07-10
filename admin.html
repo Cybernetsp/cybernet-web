@@ -10301,17 +10301,20 @@
         "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
 
       let timerBrebActivo = null;
+      let autoHideTimer = null; // 🔥 NUEVO: Reloj para el auto-ocultado
 
-      // --- 1. LÓGICA DE APAGADO Y ENCENDIDO REAL ---
+      // --- 1. LÓGICA DE APAGADO, ENCENDIDO Y AUTO-OCULTADO ---
       function mostrarWidgetBreB() {
         document.getElementById("btn-expand-breb").style.display = "none";
         document.getElementById("breb-widget").style.transform =
           "translateX(0)";
 
-        // 🔥 SOLO CUANDO LO ABRES SE INICIA EL CONSUMO DE RECURSOS
         establecerFechaHoy();
         cargarPagosBreB();
         iniciarTemporizadorBreB();
+
+        // Arranca la cuenta regresiva de 1 minuto
+        iniciarAutoOcultado();
       }
 
       function ocultarWidgetBreB() {
@@ -10321,11 +10324,24 @@
           document.getElementById("btn-expand-breb").style.display = "flex";
         }, 300);
 
-        // 🔥 DESTRUYE EL TEMPORIZADOR AL OCULTARLO (CERO consumo en 2do plano)
         if (timerBrebActivo) {
           clearInterval(timerBrebActivo);
           timerBrebActivo = null;
         }
+
+        // Apaga la cuenta regresiva si lo cierras manualmente
+        if (autoHideTimer) {
+          clearTimeout(autoHideTimer);
+          autoHideTimer = null;
+        }
+      }
+
+      function iniciarAutoOcultado() {
+        if (autoHideTimer) clearTimeout(autoHideTimer);
+        // 60000 milisegundos = 1 minuto. Al cumplirse, llama a ocultarWidgetBreB
+        autoHideTimer = setTimeout(() => {
+          ocultarWidgetBreB();
+        }, 60000);
       }
 
       function iniciarTemporizadorBreB() {
@@ -10338,11 +10354,13 @@
         if (icono) icono.classList.add("spin-breb-anim");
         cargarPagosBreB();
         iniciarTemporizadorBreB();
+        iniciarAutoOcultado(); // 🔥 Reinicia el minuto de espera para que no se cierre mientras buscas
       }
 
       function alCambiarFechaBreB() {
         cargarPagosBreB();
         iniciarTemporizadorBreB();
+        iniciarAutoOcultado(); // 🔥 Reinicia el minuto de espera
       }
 
       function establecerFechaHoy() {
@@ -10429,19 +10447,21 @@
           localStorage.getItem("cyber_saved_staff");
 
         if (estaLogueado) {
-          // El widget entra al HTML, pero escondido a la izquierda por defecto (-350px)
           if (widget.style.display === "none") {
             widget.style.display = "flex";
             widget.style.transform = "translateX(-350px)";
-            pestana.style.display = "flex"; // Se muestra la pestaña azul flotante
+            pestana.style.display = "flex";
           }
         } else {
-          // Si cierras sesión, desaparece todo y se mata el temporizador
           widget.style.display = "none";
           pestana.style.display = "none";
           if (timerBrebActivo) {
             clearInterval(timerBrebActivo);
             timerBrebActivo = null;
+          }
+          if (autoHideTimer) {
+            clearTimeout(autoHideTimer);
+            autoHideTimer = null;
           }
         }
       }, 1000);
