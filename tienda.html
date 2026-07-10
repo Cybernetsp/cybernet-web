@@ -51,9 +51,12 @@
         <img src="logo.jpeg" alt="Cybernet Logo" class="brand-logo" />
         <span class="brand-name">Cybernet Store</span>
       </div>
-      <a href="index.html" class="btn-ios btn-secondary btn-header-codigos"
-        >🔑 Códigos</a
-      >
+      <div style="display: flex; gap: 8px; align-items: center;">
+  <button id="theme-toggle" class="btn-ios btn-secondary" onclick="toggleTheme()" aria-label="Cambiar tema" style="padding: 6px 10px; border-radius: 50px;">
+    <!-- Icono se inyectará por JS -->
+  </button>
+  <a href="index.html" class="btn-ios btn-secondary btn-header-codigos">🔑 Códigos</a>
+</div>
     </header>
 
     <button class="cart-trigger-btn" onclick="abrirCarrito()">
