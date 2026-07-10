@@ -927,7 +927,7 @@ function sendQuickReply(question) {
         "4️⃣ <strong>Despacha:</strong> Recuerda siempre <strong>tomarle captura a la foto del pago, después darle al botón 'Ya realicé el pago'</strong> y <strong>enviar la foto con el texto</strong> por WhatsApp. ¡Y listo! 🍿";
     } else if (question.includes("medios de pago")) {
       botReply =
-        "💳 **¿CÓMO REALIZAR TU PAGO?** 🏦<br><br>" +
+        "💳 <strong>¿CÓMO REALIZAR TU PAGO?</strong> 🏦<br><br>" +
         "Para activar o renovar tu servicio, los pasos son súper sencillos:<br><br>" +
         "1️⃣ <strong>Realiza tu pago:</strong> Al abrir tu carrito y tocar en 'Anuncio de Pago', el sistema te desplegará los datos de nuestra llave comercial de la red principal <strong>Bre-B</strong> y las opciones alternativas de <strong>Nequi o Daviplata</strong>.<br><br>" +
         "2️⃣ <strong>Tómale captura a la foto del pago</strong> obligatoriamente una vez sea exitoso 📸.<br><br>" +
@@ -1020,4 +1020,32 @@ window.addEventListener("storage", function (e) {
   if (e.key === "cyber_items_agotados") {
     verificarStockDesdeMemoria();
   }
+});
+// =========================================
+// 🌙 SISTEMA DE MODO CLARO / OSCURO
+// =========================================
+function toggleTheme() {
+  haptic();
+  const currentTheme = document.documentElement.getAttribute("data-theme");
+  const newTheme = currentTheme === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", newTheme);
+  localStorage.setItem("cyber_theme", newTheme);
+  updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+  if (theme === "light") {
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+  } else {
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+  }
+}
+
+// Aplicar tema al cargar la página
+window.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("cyber_theme") || "dark";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  updateThemeIcon(savedTheme);
 });
