@@ -937,3 +937,143 @@ select.select-vigencia-store option {
   opacity: 1;
   visibility: visible;
 }
+/* =========================================
+   🍿 SECCIÓN DE ESTRENOS (CARRUSEL HORIZONTAL)
+   ========================================= */
+.horizontal-scroll-container {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 15px;
+  margin-top: 5px;
+}
+.horizontal-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+.release-card {
+  min-width: 260px;
+  height: 150px;
+  border-radius: 20px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  padding: 14px;
+  scroll-snap-align: start;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  position: relative;
+}
+.release-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.release-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 8px;
+  width: max-content;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.max-badge { background: rgba(191, 90, 242, 0.9); }
+.disney-badge { background: rgba(10, 132, 255, 0.9); }
+.release-info h3 {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 0;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+}
+.btn-release {
+  background: rgba(255,255,255,0.2) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white !important;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  width: max-content;
+  margin-top: 4px;
+  border: 0.5px solid rgba(255,255,255,0.3) !important;
+}
+
+/* =========================================
+   🪄 BANNER DEL QUIZ: ARMADOR MÁGICO
+   ========================================= */
+.quiz-banner {
+  background: var(--ai-gradient);
+  border-radius: 24px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(10, 132, 255, 0.3);
+  transition: var(--transition-spring);
+  color: white;
+  margin-bottom: 20px;
+}
+.quiz-banner:active { transform: scale(0.96); }
+.quiz-banner-icon { font-size: 2rem; }
+.quiz-banner-text h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; }
+.quiz-banner-text p { font-size: 0.85rem; opacity: 0.9; }
+.quiz-banner-arrow { margin-left: auto; font-size: 1.3rem; font-weight: bold; }
+
+/* =========================================
+   🪄 INTERFAZ DEL QUIZ (TARJETAS EN CUADRÍCULA)
+   ========================================= */
+.quiz-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(128, 128, 128, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.quiz-progress-fill {
+  height: 100%;
+  background: var(--ios-blue);
+  transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.quiz-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+.quiz-card-btn {
+  background: var(--input-bg);
+  border: var(--glass-border);
+  border-radius: 20px;
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: var(--transition-spring);
+  color: var(--text-primary);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+.quiz-card-btn:active {
+  transform: scale(0.92);
+  background: rgba(10, 132, 255, 0.15);
+  border-color: var(--ios-blue);
+}
+.quiz-card-icon {
+  font-size: 2.8rem;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+.quiz-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+}
