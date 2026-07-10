@@ -1,24 +1,30 @@
 /* =========================================================================
-   CYBERNET DESIGN SYSTEM - TIENDA PREMIUM (MODO OSCURO EXCLUSIVO)
+   CYBERNET DESIGN SYSTEM - TIENDA PREMIUM (MODO CLARO Y OSCURO)
    ========================================================================= */
 
+/* =========================================
+   SISTEMA DE TEMAS (CLARO Y OSCURO)
+   ========================================= */
 :root {
   --ios-blue: #0a84ff;
-  --ios-green: #32d74b;
+  --ios-green: #30d158;
   --ios-red: #ff453a;
   --ios-purple: #bf5af2;
   --ios-orange: #ff9f0a;
 
   --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
-  --success-gradient: linear-gradient(135deg, #32d74b 0%, #248a3d 100%);
+  --success-gradient: linear-gradient(135deg, #30d158 0%, #248a3d 100%);
   --danger-gradient: linear-gradient(135deg, #ff453a 0%, #d70015 100%);
 
   --transition-fluid:
     transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
   --transition-spring:
-    transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease;
+    transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease,
+    color 0.3s ease, border-color 0.3s ease;
+}
 
-  color-scheme: dark;
+/* 🌙 MODO OSCURO (Por defecto) */
+[data-theme="dark"] {
   --page-bg: #000000;
   --text-primary: #ffffff;
   --text-secondary: rgba(235, 235, 245, 0.6);
@@ -33,6 +39,36 @@
   --sheet-bg: rgba(28, 28, 30, 0.95);
   --sheet-modal-bg: rgba(28, 28, 30, 0.85);
   --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+
+  --orb-1: rgba(10, 132, 255, 0.2);
+  --orb-2: rgba(255, 69, 58, 0.15);
+}
+
+/* ☀️ MODO CLARO */
+[data-theme="light"] {
+  --ios-blue: #007aff;
+  --ios-green: #34c759;
+  --ios-red: #ff3b30;
+  --ios-purple: #af52de;
+  --ios-orange: #ff9500;
+
+  --page-bg: #f2f2f7;
+  --text-primary: #000000;
+  --text-secondary: rgba(60, 60, 67, 0.6);
+
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: 0.5px solid rgba(0, 0, 0, 0.1);
+  --glass-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+  --card-bg: #ffffff;
+  --input-bg: rgba(255, 255, 255, 0.6);
+  --sheet-bg: #f2f2f7;
+  --sheet-modal-bg: rgba(255, 255, 255, 0.95);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+
+  --orb-1: rgba(10, 132, 255, 0.1);
+  --orb-2: rgba(255, 69, 58, 0.08);
 }
 
 * {
@@ -54,6 +90,9 @@ body {
   align-items: center;
   min-height: 100vh;
   overflow-x: hidden;
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
 }
 
 .bg-orb-1 {
@@ -62,13 +101,10 @@ body {
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: radial-gradient(
-    circle,
-    rgba(10, 132, 255, 0.12) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, var(--orb-1) 0%, transparent 70%);
   z-index: -1;
   pointer-events: none;
+  transition: background 0.4s ease;
 }
 .bg-orb-2 {
   position: fixed;
@@ -76,13 +112,10 @@ body {
   right: -10%;
   width: 60vw;
   height: 60vw;
-  background: radial-gradient(
-    circle,
-    rgba(191, 90, 242, 0.08) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, var(--orb-2) 0%, transparent 70%);
   z-index: -1;
   pointer-events: none;
+  transition: background 0.4s ease;
 }
 
 /* 📱 HEADER SUPERIOR */
@@ -168,7 +201,7 @@ body {
   padding: 1px 6px;
   font-size: 0.68rem;
   font-weight: 800;
-  border: 2px solid #000;
+  border: 2px solid var(--page-bg);
 }
 
 /* =========================================
@@ -209,7 +242,7 @@ body {
   border-radius: 16px;
   border-bottom-left-radius: 4px;
   box-shadow: var(--glass-shadow);
-  color: var(--text-primary);
+  color: #ffffff; /* Fijo para que siempre se lea sobre el chat */
   font-size: 0.78rem;
   font-weight: 600;
   display: flex;
@@ -218,10 +251,14 @@ body {
   z-index: 98;
   animation: floatTooltip 3s ease-in-out infinite;
 }
+[data-theme="light"] .chat-tooltip-ios {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000000;
+}
 .chat-tooltip-ios .close-tooltip {
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  color: var(--text-secondary);
+  color: inherit;
   border-radius: 50%;
   width: 18px;
   height: 18px;
@@ -230,6 +267,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+[data-theme="light"] .chat-tooltip-ios .close-tooltip {
+  background: rgba(0, 0, 0, 0.1);
 }
 @keyframes floatTooltip {
   0%,
@@ -272,8 +312,8 @@ body {
 }
 .chat-header-store {
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(128, 128, 128, 0.05);
+  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -308,7 +348,7 @@ body {
 }
 .chat-bubble.bot {
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--input-bg);
   color: var(--text-primary);
   border-bottom-left-radius: 4px;
 }
@@ -321,8 +361,8 @@ body {
 
 .chat-options-store {
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.01);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(128, 128, 128, 0.02);
+  border-top: 1px solid rgba(128, 128, 128, 0.1);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -381,7 +421,7 @@ body {
   border: var(--glass-border);
   border-radius: 24px;
   padding: 16px 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -442,13 +482,12 @@ body {
 
 .btn-add-store {
   width: 100%;
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background: rgba(128, 128, 128, 0.1) !important;
+  border: 1px solid rgba(128, 128, 128, 0.15) !important;
   color: var(--ios-blue) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .btn-add-store:hover {
-  background: rgba(255, 255, 255, 0.14) !important;
+  background: rgba(128, 128, 128, 0.15) !important;
 }
 
 .btn-added {
@@ -470,7 +509,7 @@ body {
   box-shadow: 0 4px 15px rgba(50, 215, 75, 0.3);
 }
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(128, 128, 128, 0.1);
   border: var(--glass-border);
   color: var(--text-primary);
 }
@@ -491,7 +530,7 @@ body {
 }
 
 /* =========================================================================
-   🛠️ CORRECCIÓN DE CAPAS CRITICAL E STRUCTURAL Z-INDEX (SOLUCIÓN DISFUMINADO ACCIDENTAL)
+   🛠️ CORRECCIÓN DE CAPAS CRITICAL Y ESTRUCTURA (Z-INDEX)
    ========================================================================= */
 
 /* 1. Telas translúcidas base de fondo */
@@ -509,17 +548,20 @@ body {
   transition:
     opacity 0.25s ease,
     visibility 0.25s ease;
-  z-index: 1000; /* Nivel base de desenfoque */
+  z-index: 1000;
+}
+[data-theme="light"] .overlay-ios {
+  background: rgba(0, 0, 0, 0.3);
 }
 #promoOverlay {
   z-index: 1020 !important;
-} /* Sube un nivel cuando entra la oferta relámpago */
+}
 .overlay-ios.open {
   opacity: 1;
   visibility: visible;
 }
 
-/* 2. El Carrito: Sube por encima de la capa base y se mantiene nítido */
+/* 2. El Carrito */
 .cart-drawer {
   position: fixed;
   top: 0;
@@ -533,7 +575,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  z-index: 1005 !important; /* Más alto que overlay-ios (1000) */
+  z-index: 1005 !important;
   transition: right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .cart-drawer.active {
@@ -584,7 +626,7 @@ body {
 }
 
 .input-ios-container {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--input-bg);
   padding: 12px;
   border-radius: 18px;
   border: var(--glass-border);
@@ -593,20 +635,19 @@ body {
   width: 100%;
   padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  background: rgba(128, 128, 128, 0.1);
   color: var(--text-primary);
   font-size: 0.9rem;
   outline: none;
 }
 select.select-vigencia-store {
-  color: #ffffff !important;
-  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary) !important;
   font-weight: 700;
 }
 select.select-vigencia-store option {
-  background-color: #1c1c1e !important;
-  color: #ffffff !important;
+  background-color: var(--sheet-bg) !important;
+  color: var(--text-primary) !important;
   font-weight: 600;
   padding: 12px;
 }
@@ -626,7 +667,7 @@ select.select-vigencia-store option {
   appearance: none;
   width: 46px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(128, 128, 128, 0.3);
   border-radius: 50px;
   position: relative;
   cursor: pointer;
@@ -653,7 +694,7 @@ select.select-vigencia-store option {
 }
 
 .cart-item-row {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(128, 128, 128, 0.05);
   border: var(--glass-border);
   border-radius: 16px;
   padding: 14px;
@@ -661,7 +702,7 @@ select.select-vigencia-store option {
 .apple-list-container {
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--input-bg);
   border-radius: 20px;
   overflow: hidden;
   border: var(--glass-border);
@@ -671,7 +712,7 @@ select.select-vigencia-store option {
   display: flex;
   width: 100%;
   padding: 10px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
   align-items: center;
 }
 .td-cell {
@@ -686,19 +727,19 @@ select.select-vigencia-store option {
   text-align: right;
 }
 .total-row-store {
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.01);
+  border-top: 1px dashed rgba(128, 128, 128, 0.2);
+  background: rgba(128, 128, 128, 0.02);
   border-bottom: none;
 }
 
-/* 3. Las Ventanas Modales de pago: Flotan al nivel más alto por encima de todo */
+/* 3. Las Ventanas Modales de pago */
 .modal-ios-container {
   position: fixed;
   top: auto;
   bottom: -100%;
   left: 0;
   width: 100%;
-  z-index: 1015 !important; /* Más alto que el Carrito (1005) */
+  z-index: 1015 !important;
   transition: bottom 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -708,11 +749,11 @@ select.select-vigencia-store option {
 }
 .modal-ios {
   width: 100%;
-  background: #1e1e24;
+  background: var(--sheet-bg);
   border-top: var(--glass-border);
   border-radius: 28px 28px 0 0;
   padding: 20px 16px 24px;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
   max-height: 88dvh;
   display: flex;
   flex-direction: column;
@@ -737,9 +778,12 @@ select.select-vigencia-store option {
 .payment-modal-header {
   width: 100%;
   margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .btn-close-circle {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(128, 128, 128, 0.1);
   border: var(--glass-border);
   width: 34px;
   height: 34px;
@@ -752,7 +796,7 @@ select.select-vigencia-store option {
   justify-content: center;
 }
 
-/* 4. Ofertas relámpago: Nivel supremo de bloqueo de pantalla */
+/* 4. Ofertas relámpago */
 #promoModalContainer {
   z-index: 1030 !important;
 }
@@ -761,19 +805,19 @@ select.select-vigencia-store option {
    🎁 OFERTAS RELÁMPAGO CRISTAL
    ========================================= */
 .modal-promo-flash {
-  background: rgba(24, 24, 28, 0.95) !important;
+  background: var(--sheet-modal-bg) !important;
   backdrop-filter: blur(30px) !important;
   -webkit-backdrop-filter: blur(30px) !important;
   border: 1px solid rgba(255, 159, 10, 0.25) !important;
   box-shadow:
-    0 24px 50px rgba(0, 0, 0, 0.8),
+    0 24px 50px rgba(0, 0, 0, 0.4),
     0 0 35px rgba(255, 159, 10, 0.15) !important;
   border-radius: 28px !important;
 }
 .progress-bar-container-flash {
   width: 100%;
   height: 5px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(128, 128, 128, 0.2);
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 10px;
@@ -842,25 +886,23 @@ select.select-vigencia-store option {
     max-height: 85vh;
   }
 }
+
 /* ==========================================================
    ✨ AJUSTE PREMIUM PARA BOTONES AGOTADOS DE TU TIENDA
    ========================================================== */
-
-/* Apaga el botón azul original y lo vuelve gris traslúcido */
 .btn-ios.btn-add-store.agotado {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: #636366 !important;
+  background: rgba(128, 128, 128, 0.1) !important;
+  color: #8e8e93 !important;
   border: none !important;
   cursor: not-allowed;
   box-shadow: none !important;
-  pointer-events: none; /* Bloquea cualquier intento de clic */
+  pointer-events: none;
 }
-
-/* Opacidad elegante para la tarjeta completa */
 .card-ios.product-card.tarjeta-agotada {
   opacity: 0.55;
-  filter: grayscale(10%);
+  filter: grayscale(20%);
 }
+
 /* =========================================
    🍞 NOTIFICACIONES TOAST (ESTILO APPLE)
    ========================================= */
@@ -884,7 +926,12 @@ select.select-vigencia-store option {
   visibility: hidden;
   transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* Transición fluida iOS */
 }
-
+[data-theme="light"] .apple-notification-toast {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000000;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
 .apple-notification-toast.show {
   top: 30px; /* Desliza hacia abajo al activarse */
   opacity: 1;
