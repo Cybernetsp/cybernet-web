@@ -1075,108 +1075,99 @@ function agregarDesdeEstreno(id, nombre, btnId, priceBase) {
 }
 
 // =========================================================================
-// 🪄 LÓGICA ULTRA AVANZADA DEL ARMADOR DE COMBOS (8 PREGUNTAS CON FILTRO NETFLIX)
+// 🪄 LÓGICA DEL ARMADOR DE COMBOS (7 PREGUNTAS - SOLO VIDEO STREAMING)
 // =========================================================================
 let quizPasoActual = 0;
 let quizRespuestas = {};
 
 const quizPreguntas = [
-  {
-    pregunta: "1. ¿Te gustaría incluir Netflix en tu combo?",
-    opciones: [
-      { icono: "🍿", texto: "Sí, con Netflix", valor: "si" },
-      { icono: "❌", texto: "No, sin Netflix", valor: "no" },
-    ],
-  },
-  {
-    pregunta: "2. ¿Qué género disfrutas más?",
-    opciones: [
-      { icono: "💥", texto: "Acción y Sci-Fi", valor: "accion" },
-      { icono: "🎭", texto: "Drama y Romance", valor: "drama" },
-      { icono: "😂", texto: "Comedia y Animación", valor: "comedia" },
-      { icono: "👻", texto: "Terror y Suspenso", valor: "terror" },
-    ],
-  },
-  {
-    pregunta: "3. ¿Qué formato sueles consumir más?",
-    opciones: [
-      { icono: "🎬", texto: "Películas", valor: "cine" },
-      { icono: "📺", texto: "Series largas", valor: "series" },
-      { icono: "⚽", texto: "Deportes en Vivo", valor: "deportes" },
-      { icono: "🎌", texto: "Anime", valor: "anime" },
-    ],
-  },
-  {
-    pregunta: "4. ¿Qué estilo de producción prefieres?",
-    opciones: [
-      { icono: "🏆", texto: "Originales Premiadas", valor: "premiadas" },
-      { icono: "🦸‍♂️", texto: "Blockbusters/Héroes", valor: "blockbusters" },
-      { icono: "🏰", texto: "Clásicos Familiares", valor: "familia" },
-      { icono: "🌶️", texto: "Novelas y Realitys", valor: "novelas" },
-    ],
-  },
-  {
-    pregunta: "5. ¿Quién usará principalmente la cuenta?",
-    opciones: [
-      { icono: "👶", texto: "Hay niños en casa", valor: "ninos" },
-      { icono: "🔞", texto: "Solo para adultos", valor: "adultos" },
-      { icono: "🛹", texto: "Adolescentes", valor: "jovenes" },
-      { icono: "🍿", texto: "De todo un poco", valor: "todos" },
-    ],
-  },
-  {
-    pregunta: "6. ¿Cuántas pantallas simultáneas necesitas?",
-    opciones: [
-      { icono: "👤", texto: "1 Pantalla (Solo yo)", valor: 1 },
-      { icono: "👥", texto: "2 Pantallas (Pareja)", valor: 2 },
-      { icono: "👨‍👩‍B", texto: "3 Pantallas (Familia)", valor: 3 },
-      { icono: "📱", texto: "4 Pantallas (Multidispositivo)", valor: 4 },
-    ],
-  },
-  {
-    pregunta: "7. ¿Te sumamos música sin anuncios?",
-    opciones: [
-      { icono: "🎧", texto: "Sí, Spotify", valor: "spotify" },
-      { icono: "▶️", texto: "Sí, YouTube Premium", valor: "yt" },
-      { icono: "🎶", texto: "Sí, Deezer", valor: "deezer" },
-      { icono: "❌", texto: "No, gracias", valor: "nada" },
-    ],
-  },
-  {
-    pregunta: "8. Por último, ¿cuál es tu presupuesto ideal?",
-    opciones: [
-      { icono: "💰", texto: "Económico (Lo básico)", valor: "economico" },
-      { icono: "💎", texto: "Intermedio (Buen valor)", valor: "intermedio" },
-      { icono: "👑", texto: "Premium (Quiero todo)", valor: "premium" },
-      { icono: "🎁", texto: "¡Sorpréndeme!", valor: "sorpresa" },
-    ],
-  },
+    {
+        pregunta: "1. ¿Te gustaría incluir Netflix en tu combo?",
+        opciones: [
+            { icono: "🍿", texto: "Sí, con Netflix", valor: "si" },
+            { icono: "❌", texto: "No, sin Netflix", valor: "no" }
+        ]
+    },
+    {
+        pregunta: "2. ¿Qué género disfrutas más?",
+        opciones: [
+            { icono: "💥", texto: "Acción y Sci-Fi", valor: "accion" },
+            { icono: "🎭", texto: "Drama y Romance", valor: "drama" },
+            { icono: "😂", texto: "Comedia y Animación", valor: "comedia" },
+            { icono: "👻", texto: "Terror y Suspenso", valor: "terror" }
+        ]
+    },
+    {
+        pregunta: "3. ¿Qué formato sueles consumir más?",
+        opciones: [
+            { icono: "🎬", texto: "Películas", valor: "cine" },
+            { icono: "📺", texto: "Series largas", valor: "series" },
+            { icono: "⚽", texto: "Deportes en Vivo", valor: "deportes" },
+            { icono: "🎌", texto: "Anime", valor: "anime" }
+        ]
+    },
+    {
+        pregunta: "4. ¿Qué estilo de producción prefieres?",
+        opciones: [
+            { icono: "🏆", texto: "Originales Premiadas", valor: "premiadas" },
+            { icono: "🦸‍♂️", texto: "Blockbusters/Héroes", valor: "blockbusters" },
+            { icono: "🏰", texto: "Clásicos Familiares", valor: "familia" },
+            { icono: "🌶️", texto: "Novelas y Realitys", valor: "novelas" }
+        ]
+    },
+    {
+        pregunta: "5. ¿Quién usará principalmente la cuenta?",
+        opciones: [
+            { icono: "👶", texto: "Hay niños en casa", valor: "ninos" },
+            { icono: "🔞", texto: "Solo para adultos", valor: "adultos" },
+            { icono: "🛹", texto: "Adolescentes", valor: "jovenes" },
+            { icono: "🍿", texto: "De todo un poco", valor: "todos" }
+        ]
+    },
+    {
+        pregunta: "6. ¿Cuántas pantallas simultáneas necesitas?",
+        opciones: [
+            { icono: "👤", texto: "1 Pantalla (Solo yo)", valor: 1 },
+            { icono: "👥", texto: "2 Pantallas (Pareja)", valor: 2 },
+            { icono: "👨‍👩‍👦", texto: "3 Pantallas (Familia)", valor: 3 },
+            { icono: "📱", texto: "4 Pantallas (Multidispositivo)", valor: 4 }
+        ]
+    },
+    {
+        pregunta: "7. Por último, ¿cuál es tu presupuesto ideal?",
+        opciones: [
+            { icono: "💰", texto: "Económico (Lo básico)", valor: "economico" },
+            { icono: "💎", texto: "Intermedio (Buen valor)", valor: "intermedio" },
+            { icono: "👑", texto: "Premium (Quiero todo)", valor: "premium" },
+            { icono: "🎁", texto: "¡Sorpréndeme!", valor: "sorpresa" }
+        ]
+    }
 ];
 
 function abrirQuiz() {
-  haptic();
-  quizPasoActual = 0;
-  quizRespuestas = {};
-  renderizarQuiz();
-
-  document.getElementById("quizOverlay").classList.add("open");
-  document.getElementById("quizModal").classList.add("active");
+    haptic();
+    quizPasoActual = 0;
+    quizRespuestas = {};
+    renderizarQuiz();
+    
+    document.getElementById("quizOverlay").classList.add("open");
+    document.getElementById("quizModal").classList.add("active");
 }
 
 function cerrarQuiz() {
-  haptic();
-  document.getElementById("quizOverlay").classList.remove("open");
-  document.getElementById("quizModal").classList.remove("active");
+    haptic();
+    document.getElementById("quizOverlay").classList.remove("open");
+    document.getElementById("quizModal").classList.remove("active");
 }
 
 function renderizarQuiz() {
-  const quizBody = document.getElementById("quizBody");
+    const quizBody = document.getElementById("quizBody");
+    
+    if (quizPasoActual < quizPreguntas.length) {
+        const q = quizPreguntas[quizPasoActual];
+        const progreso = (quizPasoActual / quizPreguntas.length) * 100;
 
-  if (quizPasoActual < quizPreguntas.length) {
-    const q = quizPreguntas[quizPasoActual];
-    const progreso = (quizPasoActual / quizPreguntas.length) * 100;
-
-    let html = `
+        let html = `
             <div class="quiz-progress-bar">
                 <div class="quiz-progress-fill" style="width: ${progreso}%"></div>
             </div>
@@ -1184,46 +1175,37 @@ function renderizarQuiz() {
             
             <div class="quiz-grid">
         `;
-
-    q.opciones.forEach((opc) => {
-      html += `
+        
+        q.opciones.forEach(opc => {
+            html += `
             <div class="quiz-card-btn" onclick="responderQuiz('${opc.valor}')">
                 <div class="quiz-card-icon">${opc.icono}</div>
                 <div class="quiz-card-title">${opc.texto}</div>
             </div>`;
-    });
-
-    html += `</div>`;
-    quizBody.innerHTML = html;
-  } else {
-    procesarResultadoQuiz();
-  }
+        });
+        
+        html += `</div>`;
+        quizBody.innerHTML = html;
+    } else {
+        procesarResultadoQuiz();
+    }
 }
 
 function responderQuiz(valor) {
-  haptic();
-
-  // Lista actualizada de llaves con la nueva pregunta al inicio
-  const claves = [
-    "incluyeNetflix",
-    "genero",
-    "formato",
-    "estilo",
-    "compania",
-    "pantallas",
-    "musica",
-    "presupuesto",
-  ];
-  quizRespuestas[claves[quizPasoActual]] = valor;
-
-  quizPasoActual++;
-  renderizarQuiz();
+    haptic();
+    
+    // Removida la clave de música para alinearse con las 7 preguntas
+    const claves = ["incluyeNetflix", "genero", "formato", "estilo", "compania", "pantallas", "presupuesto"];
+    quizRespuestas[claves[quizPasoActual]] = valor;
+    
+    quizPasoActual++;
+    renderizarQuiz();
 }
 
 function procesarResultadoQuiz() {
-  const quizBody = document.getElementById("quizBody");
-
-  quizBody.innerHTML = `
+    const quizBody = document.getElementById("quizBody");
+    
+    quizBody.innerHTML = `
         <div class="quiz-progress-bar">
             <div class="quiz-progress-fill" style="width: 100%; background: var(--ios-green);"></div>
         </div>
@@ -1231,2857 +1213,416 @@ function procesarResultadoQuiz() {
         <p style="font-weight: 800; font-size: 1.1rem; color: var(--ios-green); margin-top: 15px;">¡Analizando tus gustos!</p>
         <p style="font-size: 0.85rem; color: var(--text-secondary);">Diseñando tu cartelera ideal...</p>
     `;
-
-  setTimeout(() => {
-    vaciarCarrito();
-
-    let itemsSet = new Set();
-
-    // 1. Reglas básicas por formato
-    if (quizRespuestas.formato === "anime") {
-      itemsSet.add("crunchy");
-      itemsSet.add("netflix");
-    }
-    if (quizRespuestas.formato === "deportes") {
-      itemsSet.add("disney_prem");
-      itemsSet.add("vix");
-    }
-    if (quizRespuestas.formato === "series") {
-      itemsSet.add("netflix");
-      itemsSet.add("max");
-    }
-    if (quizRespuestas.formato === "cine") {
-      itemsSet.add("max");
-      itemsSet.add("amazon");
-    }
-
-    // 2. Reglas por estilo de producción
-    if (quizRespuestas.estilo === "premiadas") {
-      itemsSet.add("apple");
-      itemsSet.add("max");
-    }
-    if (quizRespuestas.estilo === "blockbusters") {
-      itemsSet.add("disney_prem");
-      itemsSet.add("paramount");
-    }
-    if (quizRespuestas.estilo === "familia") {
-      itemsSet.add("disney_std");
-      itemsSet.add("netflix");
-    }
-    if (quizRespuestas.estilo === "novelas") {
-      itemsSet.add("vix");
-      itemsSet.add("amazon");
-    }
-
-    // 3. Reglas por género
-    if (quizRespuestas.genero === "accion") {
-      itemsSet.add("amazon");
-    }
-    if (quizRespuestas.genero === "terror") {
-      itemsSet.add("paramount");
-      itemsSet.add("max");
-    }
-
-    // 4. Modificador infantil
-    if (quizRespuestas.compania === "ninos") {
-      itemsSet.add("disney_std");
-    }
-
-    // =========================================================================
-    // ⭐ REGLA MAESTRA DE NETFLIX (INYECCIÓN / ELIMINACIÓN ESTRICTA)
-    // =========================================================================
-    if (quizRespuestas.incluyeNetflix === "si") {
-      itemsSet.add("netflix"); // Obliga a que esté
-    } else {
-      itemsSet.delete("netflix"); // Lo borra fulminantemente si salió por rebote en las otras reglas
-    }
-
-    // Convertimos el Set a Array para segmentarlo por presupuesto
-    let itemsAAgregar = Array.from(itemsSet);
-
-    // 5. Filtro de Presupuesto
-    if (quizRespuestas.presupuesto === "economico") {
-      itemsAAgregar = itemsAAgregar.slice(0, 1);
-    } else if (quizRespuestas.presupuesto === "intermedio") {
-      itemsAAgregar = itemsAAgregar.slice(0, 2);
-    } else if (quizRespuestas.presupuesto === "premium") {
-      itemsAAgregar = itemsAAgregar.slice(0, 4);
-    } else {
-      itemsAAgregar = itemsAAgregar.slice(0, 3);
-    }
-
-    // Seguro anticaídas modificado para respetar la decisión de Netflix
-    if (itemsAAgregar.length === 0) {
-      if (quizRespuestas.incluyeNetflix === "si") {
-        itemsAAgregar.push("netflix");
-      } else {
-        itemsAAgregar.push("disney_prem"); // Respaldo sin Netflix
-      }
-    }
-
-    // 6. Añadir Música/Addons (Queda por fuera del límite del presupuesto)
-    if (quizRespuestas.musica !== "nada") {
-      itemsAAgregar.push(quizRespuestas.musica);
-    }
-
-    // 7. INYECTAR DIRECTAMENTE AL CARRITO DE LA TIENDA
-    itemsAAgregar.forEach((id) => {
-      const data = PLATAFORMAS_INFO[id];
-      if (data) {
-        let cantPantallas =
-          data.type === "addon" ? 1 : parseInt(quizRespuestas.pantallas);
-
-        carrito.push({
-          id: id,
-          nombre: data.name,
-          type: data.type,
-          price: data.price,
-          pantallas: cantPantallas,
-        });
-
-        let btn = document.getElementById("btn_" + id);
-        if (btn) {
-          btn.classList.add("btn-added");
-          btn.innerText = "Quitar";
-        }
-      }
-    });
-
-    actualizarCarrito();
-    cerrarQuiz();
-
+    
     setTimeout(() => {
-      triggerToast("✨ ¡Combos añadidos a tu carrito!");
-      abrirCarrito();
-    }, 400);
-  }, 1800);
+        vaciarCarrito();
+        
+        let itemsSet = new Set();
+        
+        // 1. Reglas básicas por formato
+        if (quizRespuestas.formato === 'anime') { itemsSet.add('crunchy'); itemsSet.add('netflix'); }
+        if (quizRespuestas.formato === 'deportes') { itemsSet.add('disney_prem'); itemsSet.add('vix'); }
+        if (quizRespuestas.formato === 'series') { itemsSet.add('netflix'); itemsSet.add('max'); }
+        if (quizRespuestas.formato === 'cine') { itemsSet.add('max'); itemsSet.add('amazon'); }
+        
+        // 2. Reglas por estilo de producción
+        if (quizRespuestas.estilo === 'premiadas') { itemsSet.add('apple'); itemsSet.add('max'); }
+        if (quizRespuestas.estilo === 'blockbusters') { itemsSet.add('disney_prem'); itemsSet.add('paramount'); }
+        if (quizRespuestas.estilo === 'familia') { itemsSet.add('disney_std'); itemsSet.add('netflix'); }
+        if (quizRespuestas.estilo === 'novelas') { itemsSet.add('vix'); itemsSet.add('amazon'); }
+        
+        // 3. Reglas por género
+        if (quizRespuestas.genero === 'accion') { itemsSet.add('amazon'); }
+        if (quizRespuestas.genero === 'terror') { itemsSet.add('paramount'); itemsSet.add('max'); }
+        
+        // 4. Modificador infantil
+        if (quizRespuestas.compania === 'ninos') { itemsSet.add('disney_std'); }
+
+        // ⭐ REGLA MAESTRA DE NETFLIX
+        if (quizRespuestas.incluyeNetflix === 'si') {
+            itemsSet.add('netflix');
+        } else {
+            itemsSet.delete('netflix');
+        }
+
+        // Convertimos el Set a Array para segmentarlo por presupuesto
+        let itemsAAgregar = Array.from(itemsSet);
+
+        // 5. Filtro de Presupuesto
+        if (quizRespuestas.presupuesto === 'economico') {
+            itemsAAgregar = itemsAAgregar.slice(0, 1);
+        } else if (quizRespuestas.presupuesto === 'intermedio') {
+            itemsAAgregar = itemsAAgregar.slice(0, 2);
+        } else if (quizRespuestas.presupuesto === 'premium') {
+            itemsAAgregar = itemsAAgregar.slice(0, 4);
+        } else {
+            itemsAAgregar = itemsAAgregar.slice(0, 3);
+        }
+        
+        // Seguro anticaídas modificado para respetar la decisión de Netflix
+        if (itemsAAgregar.length === 0) {
+            if (quizRespuestas.incluyeNetflix === 'si') {
+                itemsAAgregar.push('netflix');
+            } else {
+                itemsAAgregar.push('disney_prem');
+            }
+        }
+
+        // 6. INYECTAR DIRECTAMENTE AL CARRITO DE LA TIENDA
+        itemsAAgregar.forEach(id => {
+            const data = PLATAFORMAS_INFO[id];
+            if (data) {
+                carrito.push({
+                    id: id,
+                    nombre: data.name,
+                    type: data.type,
+                    price: data.price,
+                    pantallas: parseInt(quizRespuestas.pantallas)
+                });
+                
+                let btn = document.getElementById("btn_" + id);
+                if (btn) {
+                    btn.classList.add("btn-added");
+                    btn.innerText = "Quitar";
+                }
+            }
+        });
+        
+        actualizarCarrito();
+        cerrarQuiz();
+        
+        setTimeout(() => {
+            triggerToast("✨ ¡Combos añadidos a tu carrito!");
+            abrirCarrito();
+        }, 400);
+
+    }, 1800);
 }
 // =========================================================================
 // 🎬 MOTOR DE ESTRENOS DINÁMICOS Y ALEATORIOS
 // =========================================================================
 
 const CARTELERA_TENDENCIAS = [
-  // 🍿 NETFLIX (SERIES Y PELÍCULAS EXCLUSIVAS)
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "El Juego del Calamar",
-    img: "https://tse2.mm.bing.net/th?q=Squid+Game+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Stranger Things",
-    img: "https://tse3.mm.bing.net/th?q=Stranger+Things+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Merlina",
-    img: "https://tse1.mm.bing.net/th?q=Wednesday+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Bridgerton",
-    img: "https://tse2.mm.bing.net/th?q=Bridgerton+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Cobra Kai",
-    img: "https://tse3.mm.bing.net/th?q=Cobra+Kai+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Peaky Blinders",
-    img: "https://tse1.mm.bing.net/th?q=Peaky+Blinders+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Arcane",
-    img: "https://tse2.mm.bing.net/th?q=Arcane+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "La Casa de Papel",
-    img: "https://tse3.mm.bing.net/th?q=Money+Heist+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Dark",
-    img: "https://tse1.mm.bing.net/th?q=Dark+Netflix+series+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Black Mirror",
-    img: "https://tse2.mm.bing.net/th?q=Black+Mirror+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Narcos",
-    img: "https://tse3.mm.bing.net/th?q=Narcos+Netflix+series+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "The Crown",
-    img: "https://tse1.mm.bing.net/th?q=The+Crown+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Lupin",
-    img: "https://tse2.mm.bing.net/th?q=Lupin+Netflix+series+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "You",
-    img: "https://tse3.mm.bing.net/th?q=You+Netflix+series+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Ozark",
-    img: "https://tse1.mm.bing.net/th?q=Ozark+Netflix+series+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "The Witcher",
-    img: "https://tse2.mm.bing.net/th?q=The+Witcher+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Mindhunter",
-    img: "https://tse3.mm.bing.net/th?q=Mindhunter+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Sex Education",
-    img: "https://tse1.mm.bing.net/th?q=Sex+Education+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  // 🍿 BLOQUE ADICIONAL EXCLUSIVO DE NETFLIX (30 TÍTULOS MÁS)
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Emily en París",
-    img: "https://tse1.mm.bing.net/th?q=Emily+in+Paris+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "El problema de los 3 cuerpos",
-    img: "https://tse2.mm.bing.net/th?q=3+Body+Problem+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Élite",
-    img: "https://tse3.mm.bing.net/th?q=Elite+Netflix+series+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Narcos: México",
-    img: "https://tse1.mm.bing.net/th?q=Narcos+Mexico+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Better Call Saul",
-    img: "https://tse2.mm.bing.net/th?q=Better+Call+Saul+wallpaper+hd",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Breaking Bad",
-    img: "https://tse3.mm.bing.net/th?q=Breaking+Bad+wallpaper+hd",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "La Diplomática",
-    img: "https://tse1.mm.bing.net/th?q=The+Diplomat+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Heartstopper",
-    img: "https://tse2.mm.bing.net/th?q=Heartstopper+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Sandman",
-    img: "https://tse3.mm.bing.net/th?q=The+Sandman+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Monstruos: Lyle y Erik Menendez",
-    img: "https://tse1.mm.bing.net/th?q=Monsters+Menendez+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Dahmer",
-    img: "https://tse2.mm.bing.net/th?q=Dahmer+Netflix+series+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Outer Banks",
-    img: "https://tse3.mm.bing.net/th?q=Outer+Banks+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Griselda",
-    img: "https://tse1.mm.bing.net/th?q=Griselda+Netflix+series+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Vikingos: Valhalla",
-    img: "https://tse2.mm.bing.net/th?q=Vikings+Valhalla+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Gambito de Dama",
-    img: "https://tse3.mm.bing.net/th?q=The+Queens+Gambit+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Sweet Home",
-    img: "https://tse1.mm.bing.net/th?q=Sweet+Home+Netflix+kdrama+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Estamos Muertos",
-    img: "https://tse2.mm.bing.net/th?q=All+of+Us+Are+Dead+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "BoJack Horseman",
-    img: "https://tse3.mm.bing.net/th?q=BoJack+Horseman+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "House of Cards",
-    img: "https://tse1.mm.bing.net/th?q=House+of+Cards+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Orange Is the New Black",
-    img: "https://tse2.mm.bing.net/th?q=Orange+Is+the+New+Black+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Pálpito",
-    img: "https://tse3.mm.bing.net/th?q=The+Marked+Heart+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Perfil Falso",
-    img: "https://tse1.mm.bing.net/th?q=Fake+Profile+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Alice in Borderland",
-    img: "https://tse2.mm.bing.net/th?q=Alice+in+Borderland+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "El abogado del Lincoln",
-    img: "https://tse3.mm.bing.net/th?q=The+Lincoln+Lawyer+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Sky Rojo",
-    img: "https://tse1.mm.bing.net/th?q=Sky+Rojo+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Love, Death & Robots",
-    img: "https://tse2.mm.bing.net/th?q=Love+Death+and+Robots+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Sense8",
-    img: "https://tse3.mm.bing.net/th?q=Sense8+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Castlevania",
-    img: "https://tse1.mm.bing.net/th?q=Castlevania+Netflix+animated+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Oscuro Deseo",
-    img: "https://tse2.mm.bing.net/th?q=Dark+Desire+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
-  {
-    id: "netflix",
-    nombre: "Netflix",
-    titulo: "Locke & Key",
-    img: "https://tse3.mm.bing.net/th?q=Locke+and+Key+Netflix+wallpaper",
-    btn: "btn_netflix",
-    precio: 0,
-    badgeStr:
-      'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"',
-  },
+    // 🍿 NETFLIX (SERIES Y PELÍCULAS EXCLUSIVAS)
+    { id: 'netflix', nombre: 'Netflix', titulo: 'El Juego del Calamar', img: 'https://tse2.mm.bing.net/th?q=Squid+Game+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Stranger Things', img: 'https://tse3.mm.bing.net/th?q=Stranger+Things+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Merlina', img: 'https://tse1.mm.bing.net/th?q=Wednesday+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Bridgerton', img: 'https://tse2.mm.bing.net/th?q=Bridgerton+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Cobra Kai', img: 'https://tse3.mm.bing.net/th?q=Cobra+Kai+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Peaky Blinders', img: 'https://tse1.mm.bing.net/th?q=Peaky+Blinders+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Arcane', img: 'https://tse2.mm.bing.net/th?q=Arcane+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'La Casa de Papel', img: 'https://tse3.mm.bing.net/th?q=Money+Heist+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Dark', img: 'https://tse1.mm.bing.net/th?q=Dark+Netflix+series+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Black Mirror', img: 'https://tse2.mm.bing.net/th?q=Black+Mirror+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Narcos', img: 'https://tse3.mm.bing.net/th?q=Narcos+Netflix+series+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'The Crown', img: 'https://tse1.mm.bing.net/th?q=The+Crown+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Lupin', img: 'https://tse2.mm.bing.net/th?q=Lupin+Netflix+series+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'You', img: 'https://tse3.mm.bing.net/th?q=You+Netflix+series+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Ozark', img: 'https://tse1.mm.bing.net/th?q=Ozark+Netflix+series+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'The Witcher', img: 'https://tse2.mm.bing.net/th?q=The+Witcher+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Mindhunter', img: 'https://tse3.mm.bing.net/th?q=Mindhunter+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Sex Education', img: 'https://tse1.mm.bing.net/th?q=Sex+Education+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    // 🍿 BLOQUE ADICIONAL EXCLUSIVO DE NETFLIX (30 TÍTULOS MÁS)
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Emily en París', img: 'https://tse1.mm.bing.net/th?q=Emily+in+Paris+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'El problema de los 3 cuerpos', img: 'https://tse2.mm.bing.net/th?q=3+Body+Problem+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Élite', img: 'https://tse3.mm.bing.net/th?q=Elite+Netflix+series+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Narcos: México', img: 'https://tse1.mm.bing.net/th?q=Narcos+Mexico+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Better Call Saul', img: 'https://tse2.mm.bing.net/th?q=Better+Call+Saul+wallpaper+hd', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Breaking Bad', img: 'https://tse3.mm.bing.net/th?q=Breaking+Bad+wallpaper+hd', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'La Diplomática', img: 'https://tse1.mm.bing.net/th?q=The+Diplomat+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Heartstopper', img: 'https://tse2.mm.bing.net/th?q=Heartstopper+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Sandman', img: 'https://tse3.mm.bing.net/th?q=The+Sandman+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Monstruos: Lyle y Erik Menendez', img: 'https://tse1.mm.bing.net/th?q=Monsters+Menendez+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Dahmer', img: 'https://tse2.mm.bing.net/th?q=Dahmer+Netflix+series+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Outer Banks', img: 'https://tse3.mm.bing.net/th?q=Outer+Banks+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Griselda', img: 'https://tse1.mm.bing.net/th?q=Griselda+Netflix+series+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Vikingos: Valhalla', img: 'https://tse2.mm.bing.net/th?q=Vikings+Valhalla+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Gambito de Dama', img: 'https://tse3.mm.bing.net/th?q=The+Queens+Gambit+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Sweet Home', img: 'https://tse1.mm.bing.net/th?q=Sweet+Home+Netflix+kdrama+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Estamos Muertos', img: 'https://tse2.mm.bing.net/th?q=All+of+Us+Are+Dead+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'BoJack Horseman', img: 'https://tse3.mm.bing.net/th?q=BoJack+Horseman+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'House of Cards', img: 'https://tse1.mm.bing.net/th?q=House+of+Cards+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Orange Is the New Black', img: 'https://tse2.mm.bing.net/th?q=Orange+Is+the+New+Black+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Pálpito', img: 'https://tse3.mm.bing.net/th?q=The+Marked+Heart+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Perfil Falso', img: 'https://tse1.mm.bing.net/th?q=Fake+Profile+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Alice in Borderland', img: 'https://tse2.mm.bing.net/th?q=Alice+in+Borderland+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'El abogado del Lincoln', img: 'https://tse3.mm.bing.net/th?q=The+Lincoln+Lawyer+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Sky Rojo', img: 'https://tse1.mm.bing.net/th?q=Sky+Rojo+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Love, Death & Robots', img: 'https://tse2.mm.bing.net/th?q=Love+Death+and+Robots+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Sense8', img: 'https://tse3.mm.bing.net/th?q=Sense8+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Castlevania', img: 'https://tse1.mm.bing.net/th?q=Castlevania+Netflix+animated+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Oscuro Deseo', img: 'https://tse2.mm.bing.net/th?q=Dark+Desire+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
+    { id: 'netflix', nombre: 'Netflix', titulo: 'Locke & Key', img: 'https://tse3.mm.bing.net/th?q=Locke+and+Key+Netflix+wallpaper', btn: 'btn_netflix', precio: 0, badgeStr: 'class="release-badge" style="background: rgba(229, 9, 20, 0.9);"' },
 
-  // 🔥 HBO MAX (MAX ORIGINALES)
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "La Casa del Dragón",
-    img: "https://tse1.mm.bing.net/th?q=House+of+the+Dragon+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "The Last of Us",
-    img: "https://tse2.mm.bing.net/th?q=The+Last of+Us+HBO+show+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Succession",
-    img: "https://tse1.mm.bing.net/th?q=Succession+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Juego de Tronos",
-    img: "https://tse1.mm.bing.net/th?q=Game+of+Thrones+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Euphoria",
-    img: "https://tse2.mm.bing.net/th?q=Euphoria+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "The Penguin",
-    img: "https://tse3.mm.bing.net/th?q=The+Penguin+DC+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Rick and Morty",
-    img: "https://tse2.mm.bing.net/th?q=Rick+and+Morty+wallpaper+hd",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Chernobyl",
-    img: "https://tse1.mm.bing.net/th?q=Chernobyl+HBO+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "True Detective",
-    img: "https://tse2.mm.bing.net/th?q=True+Detective+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "The Sopranos",
-    img: "https://tse3.mm.bing.net/th?q=The+Sopranos+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Friends",
-    img: "https://tse1.mm.bing.net/th?q=Friends+tv+show+wallpaper+hd",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "The Wire",
-    img: "https://tse2.mm.bing.net/th?q=The+Wire+HBO+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Peacemaker",
-    img: "https://tse3.mm.bing.net/th?q=Peacemaker+DC+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Hacks",
-    img: "https://tse1.mm.bing.net/th?q=Hacks+HBO+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  // 💜 BLOQUE ADICIONAL EXCLUSIVO DE HBO MAX (30 TÍTULOS MÁS)
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "The White Lotus",
-    img: "https://tse1.mm.bing.net/th?q=The+White+Lotus+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Tokyo Vice",
-    img: "https://tse2.mm.bing.net/th?q=Tokyo+Vice+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Barry",
-    img: "https://tse3.mm.bing.net/th?q=Barry+HBO+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Mare of Easttown",
-    img: "https://tse1.mm.bing.net/th?q=Mare+of+Easttown+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Westworld",
-    img: "https://tse2.mm.bing.net/th?q=Westworld+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Big Little Lies",
-    img: "https://tse3.mm.bing.net/th?q=Big+Little+Lies+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "True Blood",
-    img: "https://tse1.mm.bing.net/th?q=True+Blood+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Roma",
-    img: "https://tse2.mm.bing.net/th?q=Rome+HBO+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Hermanos de Sangre",
-    img: "https://tse3.mm.bing.net/th?q=Band+of+Brothers+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "The Pacific",
-    img: "https://tse1.mm.bing.net/th?q=The+Pacific+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Silicon Valley",
-    img: "https://tse2.mm.bing.net/th?q=Silicon+Valley+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Veep",
-    img: "https://tse3.mm.bing.net/th?q=Veep+HBO+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Entourage",
-    img: "https://tse1.mm.bing.net/th?q=Entourage+HBO+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Deadwood",
-    img: "https://tse2.mm.bing.net/th?q=Deadwood+HBO+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Boardwalk Empire",
-    img: "https://tse3.mm.bing.net/th?q=Boardwalk+Empire+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "The Flight Attendant",
-    img: "https://tse1.mm.bing.net/th?q=The+Flight+Attendant+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Doom Patrol",
-    img: "https://tse2.mm.bing.net/th?q=Doom+Patrol+DC+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Titans",
-    img: "https://tse3.mm.bing.net/th?q=Titans+DC+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Harley Quinn",
-    img: "https://tse1.mm.bing.net/th?q=Harley+Quinn+animated+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Raised by Wolves",
-    img: "https://tse2.mm.bing.net/th?q=Raised+by+Wolves+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Estación Once",
-    img: "https://tse3.mm.bing.net/th?q=Station+Eleven+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Nuestra bandera significa muerte",
-    img: "https://tse1.mm.bing.net/th?q=Our+Flag+Means+Death+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Gossip Girl",
-    img: "https://tse2.mm.bing.net/th?q=Gossip+Girl+series+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Pretty Little Liars: Pecado Original",
-    img: "https://tse3.mm.bing.net/th?q=Pretty+Little+Liars+Original+Sin+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Hora de Aventura: Fionna y Cake",
-    img: "https://tse1.mm.bing.net/th?q=Fionna+and+Cake+Max+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Sex and the City",
-    img: "https://tse2.mm.bing.net/th?q=Sex+and+the+City+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "And Just Like That...",
-    img: "https://tse3.mm.bing.net/th?q=And+Just+Like+That+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "La Edad Dorada",
-    img: "https://tse1.mm.bing.net/th?q=The+Gilded+Age+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Perry Mason",
-    img: "https://tse2.mm.bing.net/th?q=Perry+Mason+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
-  {
-    id: "max",
-    nombre: "HBO Max",
-    titulo: "Lakers: Tiempo de ganar",
-    img: "https://tse3.mm.bing.net/th?q=Winning+Time+HBO+wallpaper",
-    btn: "btn_max",
-    precio: 8500,
-    badgeStr: 'class="release-badge max-badge"',
-  },
+    // 🔥 HBO MAX (MAX ORIGINALES)
+    { id: 'max', nombre: 'HBO Max', titulo: 'La Casa del Dragón', img: 'https://tse1.mm.bing.net/th?q=House+of+the+Dragon+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'The Last of Us', img: 'https://tse2.mm.bing.net/th?q=The+Last of+Us+HBO+show+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Succession', img: 'https://tse1.mm.bing.net/th?q=Succession+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Juego de Tronos', img: 'https://tse1.mm.bing.net/th?q=Game+of+Thrones+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Euphoria', img: 'https://tse2.mm.bing.net/th?q=Euphoria+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'The Penguin', img: 'https://tse3.mm.bing.net/th?q=The+Penguin+DC+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Rick and Morty', img: 'https://tse2.mm.bing.net/th?q=Rick+and+Morty+wallpaper+hd', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Chernobyl', img: 'https://tse1.mm.bing.net/th?q=Chernobyl+HBO+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'True Detective', img: 'https://tse2.mm.bing.net/th?q=True+Detective+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'The Sopranos', img: 'https://tse3.mm.bing.net/th?q=The+Sopranos+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Friends', img: 'https://tse1.mm.bing.net/th?q=Friends+tv+show+wallpaper+hd', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'The Wire', img: 'https://tse2.mm.bing.net/th?q=The+Wire+HBO+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Peacemaker', img: 'https://tse3.mm.bing.net/th?q=Peacemaker+DC+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Hacks', img: 'https://tse1.mm.bing.net/th?q=Hacks+HBO+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    // 💜 BLOQUE ADICIONAL EXCLUSIVO DE HBO MAX (30 TÍTULOS MÁS)
+    { id: 'max', nombre: 'HBO Max', titulo: 'The White Lotus', img: 'https://tse1.mm.bing.net/th?q=The+White+Lotus+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Tokyo Vice', img: 'https://tse2.mm.bing.net/th?q=Tokyo+Vice+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Barry', img: 'https://tse3.mm.bing.net/th?q=Barry+HBO+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Mare of Easttown', img: 'https://tse1.mm.bing.net/th?q=Mare+of+Easttown+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Westworld', img: 'https://tse2.mm.bing.net/th?q=Westworld+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Big Little Lies', img: 'https://tse3.mm.bing.net/th?q=Big+Little+Lies+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'True Blood', img: 'https://tse1.mm.bing.net/th?q=True+Blood+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Roma', img: 'https://tse2.mm.bing.net/th?q=Rome+HBO+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Hermanos de Sangre', img: 'https://tse3.mm.bing.net/th?q=Band+of+Brothers+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'The Pacific', img: 'https://tse1.mm.bing.net/th?q=The+Pacific+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Silicon Valley', img: 'https://tse2.mm.bing.net/th?q=Silicon+Valley+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Veep', img: 'https://tse3.mm.bing.net/th?q=Veep+HBO+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Entourage', img: 'https://tse1.mm.bing.net/th?q=Entourage+HBO+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Deadwood', img: 'https://tse2.mm.bing.net/th?q=Deadwood+HBO+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Boardwalk Empire', img: 'https://tse3.mm.bing.net/th?q=Boardwalk+Empire+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'The Flight Attendant', img: 'https://tse1.mm.bing.net/th?q=The+Flight+Attendant+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Doom Patrol', img: 'https://tse2.mm.bing.net/th?q=Doom+Patrol+DC+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Titans', img: 'https://tse3.mm.bing.net/th?q=Titans+DC+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Harley Quinn', img: 'https://tse1.mm.bing.net/th?q=Harley+Quinn+animated+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Raised by Wolves', img: 'https://tse2.mm.bing.net/th?q=Raised+by+Wolves+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Estación Once', img: 'https://tse3.mm.bing.net/th?q=Station+Eleven+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Nuestra bandera significa muerte', img: 'https://tse1.mm.bing.net/th?q=Our+Flag+Means+Death+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Gossip Girl', img: 'https://tse2.mm.bing.net/th?q=Gossip+Girl+series+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Pretty Little Liars: Pecado Original', img: 'https://tse3.mm.bing.net/th?q=Pretty+Little+Liars+Original+Sin+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Hora de Aventura: Fionna y Cake', img: 'https://tse1.mm.bing.net/th?q=Fionna+and+Cake+Max+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Sex and the City', img: 'https://tse2.mm.bing.net/th?q=Sex+and+the+City+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'And Just Like That...', img: 'https://tse3.mm.bing.net/th?q=And+Just+Like+That+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'La Edad Dorada', img: 'https://tse1.mm.bing.net/th?q=The+Gilded+Age+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Perry Mason', img: 'https://tse2.mm.bing.net/th?q=Perry+Mason+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
+    { id: 'max', nombre: 'HBO Max', titulo: 'Lakers: Tiempo de ganar', img: 'https://tse3.mm.bing.net/th?q=Winning+Time+HBO+wallpaper', btn: 'btn_max', precio: 8500, badgeStr: 'class="release-badge max-badge"' },
 
-  // 🪄 DISNEY+ (CATÁLOGO STREAMING)
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "The Mandalorian",
-    img: "https://tse1.mm.bing.net/th?q=The+Mandalorian+Disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Loki",
-    img: "https://tse3.mm.bing.net/th?q=Loki+series+Disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Shōgun",
-    img: "https://tse2.mm.bing.net/th?q=Shogun+fx+series+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "The Bear",
-    img: "https://tse3.mm.bing.net/th?q=The+Bear+fx+series+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "WandaVision",
-    img: "https://tse1.mm.bing.net/th?q=Wandavision+marvel+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Ahsoka",
-    img: "https://tse2.mm.bing.net/th?q=Ahsoka+star+wars+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Andor",
-    img: "https://tse3.mm.bing.net/th?q=Andor+star+wars+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "X-Men 97",
-    img: "https://tse3.mm.bing.net/th?q=X-Men+97+Disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Moon Knight",
-    img: "https://tse1.mm.bing.net/th?q=Moon+Knight+marvel+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Hawkeye",
-    img: "https://tse2.mm.bing.net/th?q=Hawkeye+marvel+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  // 💙 BLOQUE ADICIONAL EXCLUSIVO DE DISNEY+ (30 TÍTULOS MÁS)
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Agatha en todas partes",
-    img: "https://tse1.mm.bing.net/th?q=Agatha+All+Along+Disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Percy Jackson y los dioses del Olimpo",
-    img: "https://tse2.mm.bing.net/th?q=Percy+Jackson+Disney+series+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Obi-Wan Kenobi",
-    img: "https://tse3.mm.bing.net/th?q=Obi+Wan+Kenobi+Disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Only Murders in the Building",
-    img: "https://tse1.mm.bing.net/th?q=Only+Murders+in+the+Building+Hulu+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Los Simpson",
-    img: "https://tse2.mm.bing.net/th?q=The+Simpsons+wallpaper+hd+disney",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Grey's Anatomy",
-    img: "https://tse3.mm.bing.net/th?q=Greys+Anatomy+series+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "The Falcon and the Winter Soldier",
-    img: "https://tse1.mm.bing.net/th?q=Falcon+and+Winter+Soldier+marvel+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "What If...?",
-    img: "https://tse2.mm.bing.net/th?q=What+If+marvel+Disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Star Wars: The Bad Batch",
-    img: "https://tse3.mm.bing.net/th?q=The+Bad+Batch+Star+Wars+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Modern Family",
-    img: "https://tse1.mm.bing.net/th?q=Modern+Family+tv+show+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Futurama",
-    img: "https://tse2.mm.bing.net/th?q=Futurama+hulu+disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Family Guy",
-    img: "https://tse3.mm.bing.net/th?q=Family+Guy+wallpaper+hd",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Malcolm el de en medio",
-    img: "https://tse1.mm.bing.net/th?q=Malcolm+in+the+Middle+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "The Walking Dead",
-    img: "https://tse2.mm.bing.net/th?q=The+Walking+Dead+series+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "American Horror Story",
-    img: "https://tse3.mm.bing.net/th?q=American+Horror+Story+series+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Invasión Secreta",
-    img: "https://tse1.mm.bing.net/th?q=Secret+Invasion+marvel+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Ms. Marvel",
-    img: "https://tse2.mm.bing.net/th?q=Ms+Marvel+disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "She-Hulk",
-    img: "https://tse3.mm.bing.net/th?q=She+Hulk+disney+marvel+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Eco",
-    img: "https://tse1.mm.bing.net/th?q=Echo+marvel+disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Daredevil",
-    img: "https://tse2.mm.bing.net/th?q=Daredevil+marvel+netflix+disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Prison Break",
-    img: "https://tse3.mm.bing.net/th?q=Prison+Break+series+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Lost",
-    img: "https://tse1.mm.bing.net/th?q=Lost+series+wallpaper+hd",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Criminal Minds",
-    img: "https://tse2.mm.bing.net/th?q=Criminal+Minds+series+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "How I Met Your Mother",
-    img: "https://tse3.mm.bing.net/th?q=How+I+Met+Your+Mother+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Glee",
-    img: "https://tse1.mm.bing.net/th?q=Glee+tv+show+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Monstruos a la obra",
-    img: "https://tse2.mm.bing.net/th?q=Monsters+at+Work+disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "High School Musical: La Serie",
-    img: "https://tse3.mm.bing.net/th?q=High+School+Musical+The+Series+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Star Wars: Visions",
-    img: "https://tse1.mm.bing.net/th?q=Star+Wars+Visions+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "El Rey León",
-    img: "https://tse2.mm.bing.net/th?q=The+Lion+King+disney+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
-  {
-    id: "disney_prem",
-    nombre: "Disney+",
-    titulo: "Frozen",
-    img: "https://tse3.mm.bing.net/th?q=Frozen+disney+movie+wallpaper",
-    btn: "btn_disney_prem",
-    precio: 0,
-    badgeStr: 'class="release-badge disney-badge"',
-  },
+    // 🪄 DISNEY+ (CATÁLOGO STREAMING)
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'The Mandalorian', img: 'https://tse1.mm.bing.net/th?q=The+Mandalorian+Disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Loki', img: 'https://tse3.mm.bing.net/th?q=Loki+series+Disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Shōgun', img: 'https://tse2.mm.bing.net/th?q=Shogun+fx+series+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'The Bear', img: 'https://tse3.mm.bing.net/th?q=The+Bear+fx+series+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'WandaVision', img: 'https://tse1.mm.bing.net/th?q=Wandavision+marvel+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Ahsoka', img: 'https://tse2.mm.bing.net/th?q=Ahsoka+star+wars+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Andor', img: 'https://tse3.mm.bing.net/th?q=Andor+star+wars+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'X-Men 97', img: 'https://tse3.mm.bing.net/th?q=X-Men+97+Disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Moon Knight', img: 'https://tse1.mm.bing.net/th?q=Moon+Knight+marvel+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Hawkeye', img: 'https://tse2.mm.bing.net/th?q=Hawkeye+marvel+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    // 💙 BLOQUE ADICIONAL EXCLUSIVO DE DISNEY+ (30 TÍTULOS MÁS)
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Agatha en todas partes', img: 'https://tse1.mm.bing.net/th?q=Agatha+All+Along+Disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Percy Jackson y los dioses del Olimpo', img: 'https://tse2.mm.bing.net/th?q=Percy+Jackson+Disney+series+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Obi-Wan Kenobi', img: 'https://tse3.mm.bing.net/th?q=Obi+Wan+Kenobi+Disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Only Murders in the Building', img: 'https://tse1.mm.bing.net/th?q=Only+Murders+in+the+Building+Hulu+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Los Simpson', img: 'https://tse2.mm.bing.net/th?q=The+Simpsons+wallpaper+hd+disney', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Grey\'s Anatomy', img: 'https://tse3.mm.bing.net/th?q=Greys+Anatomy+series+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'The Falcon and the Winter Soldier', img: 'https://tse1.mm.bing.net/th?q=Falcon+and+Winter+Soldier+marvel+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'What If...?', img: 'https://tse2.mm.bing.net/th?q=What+If+marvel+Disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Star Wars: The Bad Batch', img: 'https://tse3.mm.bing.net/th?q=The+Bad+Batch+Star+Wars+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Modern Family', img: 'https://tse1.mm.bing.net/th?q=Modern+Family+tv+show+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Futurama', img: 'https://tse2.mm.bing.net/th?q=Futurama+hulu+disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Family Guy', img: 'https://tse3.mm.bing.net/th?q=Family+Guy+wallpaper+hd', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Malcolm el de en medio', img: 'https://tse1.mm.bing.net/th?q=Malcolm+in+the+Middle+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'The Walking Dead', img: 'https://tse2.mm.bing.net/th?q=The+Walking+Dead+series+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'American Horror Story', img: 'https://tse3.mm.bing.net/th?q=American+Horror+Story+series+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Invasión Secreta', img: 'https://tse1.mm.bing.net/th?q=Secret+Invasion+marvel+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Ms. Marvel', img: 'https://tse2.mm.bing.net/th?q=Ms+Marvel+disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'She-Hulk', img: 'https://tse3.mm.bing.net/th?q=She+Hulk+disney+marvel+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Eco', img: 'https://tse1.mm.bing.net/th?q=Echo+marvel+disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Daredevil', img: 'https://tse2.mm.bing.net/th?q=Daredevil+marvel+netflix+disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Prison Break', img: 'https://tse3.mm.bing.net/th?q=Prison+Break+series+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Lost', img: 'https://tse1.mm.bing.net/th?q=Lost+series+wallpaper+hd', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Criminal Minds', img: 'https://tse2.mm.bing.net/th?q=Criminal+Minds+series+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'How I Met Your Mother', img: 'https://tse3.mm.bing.net/th?q=How+I+Met+Your+Mother+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Glee', img: 'https://tse1.mm.bing.net/th?q=Glee+tv+show+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Monstruos a la obra', img: 'https://tse2.mm.bing.net/th?q=Monsters+at+Work+disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'High School Musical: La Serie', img: 'https://tse3.mm.bing.net/th?q=High+School+Musical+The+Series+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Star Wars: Visions', img: 'https://tse1.mm.bing.net/th?q=Star+Wars+Visions+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'El Rey León', img: 'https://tse2.mm.bing.net/th?q=The+Lion+King+disney+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
+    { id: 'disney_prem', nombre: 'Disney+', titulo: 'Frozen', img: 'https://tse3.mm.bing.net/th?q=Frozen+disney+movie+wallpaper', btn: 'btn_disney_prem', precio: 0, badgeStr: 'class="release-badge disney-badge"' },
 
-  // 📦 AMAZON PRIME
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "The Boys",
-    img: "https://tse1.mm.bing.net/th?q=The+Boys+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Fallout",
-    img: "https://tse2.mm.bing.net/th?q=Fallout+series+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Invencible",
-    img: "https://tse3.mm.bing.net/th?q=Invincible+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Reacher",
-    img: "https://tse1.mm.bing.net/th?q=Reacher+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Los Anillos de Poder",
-    img: "https://tse2.mm.bing.net/th?q=Rings+of+Power+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Jack Ryan",
-    img: "https://tse1.mm.bing.net/th?q=Tom+Clancys+Jack+Ryan+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Fleabag",
-    img: "https://tse2.mm.bing.net/th?q=Fleabag+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Gen V",
-    img: "https://tse3.mm.bing.net/th?q=Gen+V+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "La Rueda del Tiempo",
-    img: "https://tse2.mm.bing.net/th?q=The+Wheel+of+Time+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  // 📦 BLOQUE ADICIONAL EXCLUSIVO DE AMAZON PRIME (30 TÍTULOS MÁS)
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "La maravillosa Sra. Maisel",
-    img: "https://tse1.mm.bing.net/th?q=The+Marvelous+Mrs+Maisel+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Good Omens",
-    img: "https://tse2.mm.bing.net/th?q=Good+Omens+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Citadel",
-    img: "https://tse3.mm.bing.net/th?q=Citadel+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "El Periférico",
-    img: "https://tse1.mm.bing.net/th?q=The+Peripheral+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Upload",
-    img: "https://tse2.mm.bing.net/th?q=Upload+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Sr. y Sra. Smith",
-    img: "https://tse3.mm.bing.net/th?q=Mr+and+Mrs+Smith+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Hazbin Hotel",
-    img: "https://tse1.mm.bing.net/th?q=Hazbin+Hotel+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "La Leyenda de Vox Machina",
-    img: "https://tse2.mm.bing.net/th?q=The+Legend+of+Vox+Machina+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "El Hombre en el Castillo Alta",
-    img: "https://tse3.mm.bing.net/th?q=The+Man+in+the+High+Castle+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "The Expanse",
-    img: "https://tse1.mm.bing.net/th?q=The+Expanse+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "El Grand Tour",
-    img: "https://tse2.mm.bing.net/th?q=The+Grand+Tour+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "La Granja de Clarkson",
-    img: "https://tse3.mm.bing.net/th?q=Clarksons+Farm+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Carnival Row",
-    img: "https://tse1.mm.bing.net/th?q=Carnival+Row+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Hunters",
-    img: "https://tse2.mm.bing.net/th?q=Hunters+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Bosch",
-    img: "https://tse3.mm.bing.net/th?q=Bosch+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Hanna",
-    img: "https://tse1.mm.bing.net/th?q=Hanna+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Outer Range",
-    img: "https://tse2.mm.bing.net/th?q=Outer+Range+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Goliath",
-    img: "https://tse3.mm.bing.net/th?q=Goliath+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Homecoming",
-    img: "https://tse1.mm.bing.net/th?q=Homecoming+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "El Verano en que me Enamoré",
-    img: "https://tse2.mm.bing.net/th?q=The+Summer+I+Turned+Pretty+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "El Continental",
-    img: "https://tse3.mm.bing.net/th?q=The+Continental+John+Wick+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "El Pacto de Guy Ritchie",
-    img: "https://tse1.mm.bing.net/th?q=Guy+Ritchies+The+Covenant+movie+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "El duro (Road House)",
-    img: "https://tse2.mm.bing.net/th?q=Road+House+2024+movie+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "La Guerra del Mañana",
-    img: "https://tse3.mm.bing.net/th?q=The+Tomorrow+War+movie+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Air: La historia detrás del logo",
-    img: "https://tse1.mm.bing.net/th?q=Air+movie+2023+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Saltburn",
-    img: "https://tse2.mm.bing.net/th?q=Saltburn+movie+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "La Idea de Ti",
-    img: "https://tse3.mm.bing.net/th?q=The+Idea+of+You+movie+Amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Samaritano",
-    img: "https://tse1.mm.bing.net/th?q=Samaritan+movie+Sylvester+Stallone+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Cruel Summer",
-    img: "https://tse2.mm.bing.net/th?q=Cruel+Summer+series+amazon+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
-  {
-    id: "amazon",
-    nombre: "Amazon",
-    titulo: "Los Billis",
-    img: "https://tse3.mm.bing.net/th?q=Los+Billis+Amazon+series+wallpaper",
-    btn: "btn_amazon",
-    precio: 10500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
-  },
+    // 📦 AMAZON PRIME
+    { id: 'amazon', nombre: 'Amazon', titulo: 'The Boys', img: 'https://tse1.mm.bing.net/th?q=The+Boys+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Fallout', img: 'https://tse2.mm.bing.net/th?q=Fallout+series+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Invencible', img: 'https://tse3.mm.bing.net/th?q=Invincible+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Reacher', img: 'https://tse1.mm.bing.net/th?q=Reacher+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Los Anillos de Poder', img: 'https://tse2.mm.bing.net/th?q=Rings+of+Power+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Jack Ryan', img: 'https://tse1.mm.bing.net/th?q=Tom+Clancys+Jack+Ryan+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Fleabag', img: 'https://tse2.mm.bing.net/th?q=Fleabag+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Gen V', img: 'https://tse3.mm.bing.net/th?q=Gen+V+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'La Rueda del Tiempo', img: 'https://tse2.mm.bing.net/th?q=The+Wheel+of+Time+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    // 📦 BLOQUE ADICIONAL EXCLUSIVO DE AMAZON PRIME (30 TÍTULOS MÁS)
+    { id: 'amazon', nombre: 'Amazon', titulo: 'La maravillosa Sra. Maisel', img: 'https://tse1.mm.bing.net/th?q=The+Marvelous+Mrs+Maisel+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Good Omens', img: 'https://tse2.mm.bing.net/th?q=Good+Omens+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Citadel', img: 'https://tse3.mm.bing.net/th?q=Citadel+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'El Periférico', img: 'https://tse1.mm.bing.net/th?q=The+Peripheral+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Upload', img: 'https://tse2.mm.bing.net/th?q=Upload+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Sr. y Sra. Smith', img: 'https://tse3.mm.bing.net/th?q=Mr+and+Mrs+Smith+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Hazbin Hotel', img: 'https://tse1.mm.bing.net/th?q=Hazbin+Hotel+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'La Leyenda de Vox Machina', img: 'https://tse2.mm.bing.net/th?q=The+Legend+of+Vox+Machina+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'El Hombre en el Castillo Alta', img: 'https://tse3.mm.bing.net/th?q=The+Man+in+the+High+Castle+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'The Expanse', img: 'https://tse1.mm.bing.net/th?q=The+Expanse+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'El Grand Tour', img: 'https://tse2.mm.bing.net/th?q=The+Grand+Tour+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'La Granja de Clarkson', img: 'https://tse3.mm.bing.net/th?q=Clarksons+Farm+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Carnival Row', img: 'https://tse1.mm.bing.net/th?q=Carnival+Row+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Hunters', img: 'https://tse2.mm.bing.net/th?q=Hunters+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Bosch', img: 'https://tse3.mm.bing.net/th?q=Bosch+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Hanna', img: 'https://tse1.mm.bing.net/th?q=Hanna+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Outer Range', img: 'https://tse2.mm.bing.net/th?q=Outer+Range+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Goliath', img: 'https://tse3.mm.bing.net/th?q=Goliath+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Homecoming', img: 'https://tse1.mm.bing.net/th?q=Homecoming+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'El Verano en que me Enamoré', img: 'https://tse2.mm.bing.net/th?q=The+Summer+I+Turned+Pretty+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'El Continental', img: 'https://tse3.mm.bing.net/th?q=The+Continental+John+Wick+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'El Pacto de Guy Ritchie', img: 'https://tse1.mm.bing.net/th?q=Guy+Ritchies+The+Covenant+movie+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'El duro (Road House)', img: 'https://tse2.mm.bing.net/th?q=Road+House+2024+movie+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'La Guerra del Mañana', img: 'https://tse3.mm.bing.net/th?q=The+Tomorrow+War+movie+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Air: La historia detrás del logo', img: 'https://tse1.mm.bing.net/th?q=Air+movie+2023+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Saltburn', img: 'https://tse2.mm.bing.net/th?q=Saltburn+movie+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'La Idea de Ti', img: 'https://tse3.mm.bing.net/th?q=The+Idea+of+You+movie+Amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Samaritano', img: 'https://tse1.mm.bing.net/th?q=Samaritan+movie+Sylvester+Stallone+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Cruel Summer', img: 'https://tse2.mm.bing.net/th?q=Cruel+Summer+series+amazon+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
+    { id: 'amazon', nombre: 'Amazon', titulo: 'Los Billis', img: 'https://tse3.mm.bing.net/th?q=Los+Billis+Amazon+series+wallpaper', btn: 'btn_amazon', precio: 10500, badgeStr: 'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"' },
 
-  // 🍏 APPLE TV+
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Severance",
-    img: "https://tse1.mm.bing.net/th?q=Severance+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Ted Lasso",
-    img: "https://tse2.mm.bing.net/th?q=Ted+Lasso+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Fundación",
-    img: "https://tse3.mm.bing.net/th?q=Foundation+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "The Morning Show",
-    img: "https://tse3.mm.bing.net/th?q=The+Morning+Show+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Silo",
-    img: "https://tse1.mm.bing.net/th?q=Silo+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Slow Horses",
-    img: "https://tse2.mm.bing.net/th?q=Slow+Horses+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  // 🍏 BLOQUE ADICIONAL EXCLUSIVO DE APPLE TV+ (30 TÍTULOS MÁS)
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Shrinking (Terapia sin filtro)",
-    img: "https://tse1.mm.bing.net/th?q=Shrinking+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Hijack (Secuestro en el aire)",
-    img: "https://tse2.mm.bing.net/th?q=Hijack+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Presumed Innocent (Presunto inocente)",
-    img: "https://tse3.mm.bing.net/th?q=Presumed+Innocent+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Dark Matter (Materia oscura)",
-    img: "https://tse1.mm.bing.net/th?q=Dark+Matter+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "For All Mankind (Para toda la humanidad)",
-    img: "https://tse2.mm.bing.net/th?q=For+All+Mankind+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Defending Jacob (Defendiendo a Jacob)",
-    img: "https://tse3.mm.bing.net/th?q=Defending+Jacob+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Black Bird (Encerrado con el diablo)",
-    img: "https://tse1.mm.bing.net/th?q=Black+Bird+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Bad Sisters (Hermanas hasta la muerte)",
-    img: "https://tse2.mm.bing.net/th?q=Bad+Sisters+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Lessons in Chemistry (Lecciones de química)",
-    img: "https://tse3.mm.bing.net/th?q=Lessons+in+Chemistry+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "The Crowded Room",
-    img: "https://tse1.mm.bing.net/th?q=The+Crowded+Room+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Monarch: Legacy of Monsters",
-    img: "https://tse2.mm.bing.net/th?q=Monarch+Legacy+of+Monsters+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Mythic Quest",
-    img: "https://tse3.mm.bing.net/th?q=Mythic+Quest+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Servant",
-    img: "https://tse1.mm.bing.net/th?q=Servant+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "See",
-    img: "https://tse2.mm.bing.net/th?q=See+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Dickinson",
-    img: "https://tse3.mm.bing.net/th?q=Dickinson+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Sugar",
-    img: "https://tse1.mm.bing.net/th?q=Sugar+Apple+TV+series+Colin+Farrell+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Loot (Fortuna)",
-    img: "https://tse2.mm.bing.net/th?q=Loot+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Platonic",
-    img: "https://tse3.mm.bing.net/th?q=Platonic+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Invasion",
-    img: "https://tse1.mm.bing.net/th?q=Invasion+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Pachinko",
-    img: "https://tse2.mm.bing.net/th?q=Pachinko+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Masters of the Air (Los amos del aire)",
-    img: "https://tse3.mm.bing.net/th?q=Masters+of+the+Air+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Palm Royale",
-    img: "https://tse1.mm.bing.net/th?q=Palm+Royale+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Constellation",
-    img: "https://tse2.mm.bing.net/th?q=Constellation+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Criminal Record (Historial delictivo)",
-    img: "https://tse3.mm.bing.net/th?q=Criminal+Record+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Franklin",
-    img: "https://tse1.mm.bing.net/th?q=Franklin+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Acapulco",
-    img: "https://tse2.mm.bing.net/th?q=Acapulco+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Trying (Ciclos)",
-    img: "https://tse3.mm.bing.net/th?q=Trying+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Tehran",
-    img: "https://tse1.mm.bing.net/th?q=Tehran+Apple+TV+series+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "Truth Be Told",
-    img: "https://tse2.mm.bing.net/th?q=Truth+Be+Told+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
-  {
-    id: "apple",
-    nombre: "Apple TV+",
-    titulo: "The Big Door Prize",
-    img: "https://tse3.mm.bing.net/th?q=The+Big+Door+Prize+Apple+TV+wallpaper",
-    btn: "apple",
-    precio: 8500,
-    badgeStr:
-      'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
-  },
+    // 🍏 APPLE TV+
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Severance', img: 'https://tse1.mm.bing.net/th?q=Severance+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Ted Lasso', img: 'https://tse2.mm.bing.net/th?q=Ted+Lasso+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Fundación', img: 'https://tse3.mm.bing.net/th?q=Foundation+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'The Morning Show', img: 'https://tse3.mm.bing.net/th?q=The+Morning+Show+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Silo', img: 'https://tse1.mm.bing.net/th?q=Silo+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Slow Horses', img: 'https://tse2.mm.bing.net/th?q=Slow+Horses+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    // 🍏 BLOQUE ADICIONAL EXCLUSIVO DE APPLE TV+ (30 TÍTULOS MÁS)
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Shrinking (Terapia sin filtro)', img: 'https://tse1.mm.bing.net/th?q=Shrinking+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Hijack (Secuestro en el aire)', img: 'https://tse2.mm.bing.net/th?q=Hijack+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Presumed Innocent (Presunto inocente)', img: 'https://tse3.mm.bing.net/th?q=Presumed+Innocent+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Dark Matter (Materia oscura)', img: 'https://tse1.mm.bing.net/th?q=Dark+Matter+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'For All Mankind (Para toda la humanidad)', img: 'https://tse2.mm.bing.net/th?q=For+All+Mankind+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Defending Jacob (Defendiendo a Jacob)', img: 'https://tse3.mm.bing.net/th?q=Defending+Jacob+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Black Bird (Encerrado con el diablo)', img: 'https://tse1.mm.bing.net/th?q=Black+Bird+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Bad Sisters (Hermanas hasta la muerte)', img: 'https://tse2.mm.bing.net/th?q=Bad+Sisters+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Lessons in Chemistry (Lecciones de química)', img: 'https://tse3.mm.bing.net/th?q=Lessons+in+Chemistry+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'The Crowded Room', img: 'https://tse1.mm.bing.net/th?q=The+Crowded+Room+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Monarch: Legacy of Monsters', img: 'https://tse2.mm.bing.net/th?q=Monarch+Legacy+of+Monsters+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Mythic Quest', img: 'https://tse3.mm.bing.net/th?q=Mythic+Quest+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Servant', img: 'https://tse1.mm.bing.net/th?q=Servant+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'See', img: 'https://tse2.mm.bing.net/th?q=See+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Dickinson', img: 'https://tse3.mm.bing.net/th?q=Dickinson+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Sugar', img: 'https://tse1.mm.bing.net/th?q=Sugar+Apple+TV+series+Colin+Farrell+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Loot (Fortuna)', img: 'https://tse2.mm.bing.net/th?q=Loot+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Platonic', img: 'https://tse3.mm.bing.net/th?q=Platonic+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Invasion', img: 'https://tse1.mm.bing.net/th?q=Invasion+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Pachinko', img: 'https://tse2.mm.bing.net/th?q=Pachinko+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Masters of the Air (Los amos del aire)', img: 'https://tse3.mm.bing.net/th?q=Masters+of+the+Air+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Palm Royale', img: 'https://tse1.mm.bing.net/th?q=Palm+Royale+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Constellation', img: 'https://tse2.mm.bing.net/th?q=Constellation+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Criminal Record (Historial delictivo)', img: 'https://tse3.mm.bing.net/th?q=Criminal+Record+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Franklin', img: 'https://tse1.mm.bing.net/th?q=Franklin+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Acapulco', img: 'https://tse2.mm.bing.net/th?q=Acapulco+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Trying (Ciclos)', img: 'https://tse3.mm.bing.net/th?q=Trying+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Tehran', img: 'https://tse1.mm.bing.net/th?q=Tehran+Apple+TV+series+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'Truth Be Told', img: 'https://tse2.mm.bing.net/th?q=Truth+Be+Told+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
+    { id: 'apple', nombre: 'Apple TV+', titulo: 'The Big Door Prize', img: 'https://tse3.mm.bing.net/th?q=The+Big+Door+Prize+Apple+TV+wallpaper', btn: 'apple', precio: 8500, badgeStr: 'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"' },
 
-  // ⛰️ PARAMOUNT+
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Halo",
-    img: "https://tse1.mm.bing.net/th?q=Halo+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Yellowstone",
-    img: "https://tse2.mm.bing.net/th?q=Yellowstone+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Mayor of Kingstown",
-    img: "https://tse1.mm.bing.net/th?q=Mayor+of+Kingstown+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Knuckles",
-    img: "https://tse2.mm.bing.net/th?q=Knuckles+series+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Tulsa King",
-    img: "https://tse3.mm.bing.net/th?q=Tulsa+King+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  // ⛰️ BLOQUE ADICIONAL EXCLUSIVO DE PARAMOUNT+ (30 TÍTULOS MÁS)
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Star Trek: Strange New Worlds",
-    img: "https://tse1.mm.bing.net/th?q=Star+Trek+Strange+New+Worlds+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Star Trek: Discovery",
-    img: "https://tse2.mm.bing.net/th?q=Star+Trek+Discovery+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Star Trek: Picard",
-    img: "https://tse3.mm.bing.net/th?q=Star+Trek+Picard+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "1883",
-    img: "https://tse1.mm.bing.net/th?q=1883+Paramount+series+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "1923",
-    img: "https://tse2.mm.bing.net/th?q=1923+Paramount+series+Harrison+Ford+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Special Ops: Lioness",
-    img: "https://tse3.mm.bing.net/th?q=Special+Ops+Lioness+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Evil",
-    img: "https://tse1.mm.bing.net/th?q=Evil+series+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Your Honor",
-    img: "https://tse2.mm.bing.net/th?q=Your+Honor+Paramount+show+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Dexter: New Blood",
-    img: "https://tse3.mm.bing.net/th?q=Dexter+New+Blood+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Billions",
-    img: "https://tse1.mm.bing.net/th?q=Billions+show+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Ray Donovan",
-    img: "https://tse2.mm.bing.net/th?q=Ray+Donovan+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Criminal Minds: Evolution",
-    img: "https://tse3.mm.bing.net/th?q=Criminal+Minds+Evolution+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "The Offer (El Ofrecimiento)",
-    img: "https://tse1.mm.bing.net/th?q=The+Offer+Paramount+series+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Rabbit Hole",
-    img: "https://tse2.mm.bing.net/th?q=Rabbit+Hole+Kiefer+Sutherland+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Lawmen: Bass Reeves",
-    img: "https://tse3.mm.bing.net/th?q=Lawmen+Bass+Reeves+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "South Park",
-    img: "https://tse1.mm.bing.net/th?q=South+Park+wallpaper+hd",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Bob Esponja",
-    img: "https://tse2.mm.bing.net/th?q=Spongebob+Squarepants+wallpaper+hd",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Paw Patrol (Patrulla Canina)",
-    img: "https://tse3.mm.bing.net/th?q=Paw+Patrol+wallpaper+hd",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "iCarly (2021)",
-    img: "https://tse1.mm.bing.net/th?q=iCarly+revival+Paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "School Spirits",
-    img: "https://tse2.mm.bing.net/th?q=School+Spirits+Paramount+series+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Wolf Pack",
-    img: "https://tse3.mm.bing.net/th?q=Wolf+Pack+Paramount+series+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Frasier (2023)",
-    img: "https://tse1.mm.bing.net/th?q=Frasier+2023+Paramount+series+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Ghosts",
-    img: "https://tse2.mm.bing.net/th?q=Ghosts+cbs+series+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Twin Peaks",
-    img: "https://tse3.mm.bing.net/th?q=Twin+Peaks+show+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Californication",
-    img: "https://tse1.mm.bing.net/th?q=Californication+show+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "The Good Fight",
-    img: "https://tse2.mm.bing.net/th?q=The+Good+Fight+series+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "RuPaul's Drag Race All Stars",
-    img: "https://tse3.mm.bing.net/th?q=RuPauls+Drag+Race+All+Stars+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Ink Master",
-    img: "https://tse1.mm.bing.net/th?q=Ink+Master+paramount+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Fatal Attraction",
-    img: "https://tse2.mm.bing.net/th?q=Fatal+Attraction+paramount+series+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
-  {
-    id: "paramount",
-    nombre: "Paramount+",
-    titulo: "Los Enviados",
-    img: "https://tse3.mm.bing.net/th?q=Los+Enviados+Paramount+series+wallpaper",
-    btn: "btn_paramount",
-    precio: 10000,
-    badgeStr:
-      'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"',
-  },
+    // ⛰️ PARAMOUNT+
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Halo', img: 'https://tse1.mm.bing.net/th?q=Halo+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Yellowstone', img: 'https://tse2.mm.bing.net/th?q=Yellowstone+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Mayor of Kingstown', img: 'https://tse1.mm.bing.net/th?q=Mayor+of+Kingstown+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Knuckles', img: 'https://tse2.mm.bing.net/th?q=Knuckles+series+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Tulsa King', img: 'https://tse3.mm.bing.net/th?q=Tulsa+King+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    // ⛰️ BLOQUE ADICIONAL EXCLUSIVO DE PARAMOUNT+ (30 TÍTULOS MÁS)
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Star Trek: Strange New Worlds', img: 'https://tse1.mm.bing.net/th?q=Star+Trek+Strange+New+Worlds+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Star Trek: Discovery', img: 'https://tse2.mm.bing.net/th?q=Star+Trek+Discovery+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Star Trek: Picard', img: 'https://tse3.mm.bing.net/th?q=Star+Trek+Picard+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: '1883', img: 'https://tse1.mm.bing.net/th?q=1883+Paramount+series+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: '1923', img: 'https://tse2.mm.bing.net/th?q=1923+Paramount+series+Harrison+Ford+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Special Ops: Lioness', img: 'https://tse3.mm.bing.net/th?q=Special+Ops+Lioness+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Evil', img: 'https://tse1.mm.bing.net/th?q=Evil+series+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Your Honor', img: 'https://tse2.mm.bing.net/th?q=Your+Honor+Paramount+show+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Dexter: New Blood', img: 'https://tse3.mm.bing.net/th?q=Dexter+New+Blood+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Billions', img: 'https://tse1.mm.bing.net/th?q=Billions+show+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Ray Donovan', img: 'https://tse2.mm.bing.net/th?q=Ray+Donovan+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Criminal Minds: Evolution', img: 'https://tse3.mm.bing.net/th?q=Criminal+Minds+Evolution+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'The Offer (El Ofrecimiento)', img: 'https://tse1.mm.bing.net/th?q=The+Offer+Paramount+series+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Rabbit Hole', img: 'https://tse2.mm.bing.net/th?q=Rabbit+Hole+Kiefer+Sutherland+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Lawmen: Bass Reeves', img: 'https://tse3.mm.bing.net/th?q=Lawmen+Bass+Reeves+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'South Park', img: 'https://tse1.mm.bing.net/th?q=South+Park+wallpaper+hd', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Bob Esponja', img: 'https://tse2.mm.bing.net/th?q=Spongebob+Squarepants+wallpaper+hd', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Paw Patrol (Patrulla Canina)', img: 'https://tse3.mm.bing.net/th?q=Paw+Patrol+wallpaper+hd', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'iCarly (2021)', img: 'https://tse1.mm.bing.net/th?q=iCarly+revival+Paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'School Spirits', img: 'https://tse2.mm.bing.net/th?q=School+Spirits+Paramount+series+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Wolf Pack', img: 'https://tse3.mm.bing.net/th?q=Wolf+Pack+Paramount+series+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Frasier (2023)', img: 'https://tse1.mm.bing.net/th?q=Frasier+2023+Paramount+series+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Ghosts', img: 'https://tse2.mm.bing.net/th?q=Ghosts+cbs+series+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Twin Peaks', img: 'https://tse3.mm.bing.net/th?q=Twin+Peaks+show+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Californication', img: 'https://tse1.mm.bing.net/th?q=Californication+show+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'The Good Fight', img: 'https://tse2.mm.bing.net/th?q=The+Good+Fight+series+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'RuPaul\'s Drag Race All Stars', img: 'https://tse3.mm.bing.net/th?q=RuPauls+Drag+Race+All+Stars+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Ink Master', img: 'https://tse1.mm.bing.net/th?q=Ink+Master+paramount+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Fatal Attraction', img: 'https://tse2.mm.bing.net/th?q=Fatal+Attraction+paramount+series+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
+    { id: 'paramount', nombre: 'Paramount+', titulo: 'Los Enviados', img: 'https://tse3.mm.bing.net/th?q=Los+Enviados+Paramount+series+wallpaper', btn: 'btn_paramount', precio: 10000, badgeStr: 'class="release-badge" style="background: rgba(10, 132, 255, 0.9);"' },
 
-  // 🎌 CRUNCHYROLL (ANIME)
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Demon Slayer",
-    img: "https://tse1.mm.bing.net/th?q=Demon+Slayer+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Jujutsu Kaisen",
-    img: "https://tse2.mm.bing.net/th?q=Jujutsu+Kaisen+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Attack on Titan",
-    img: "https://tse3.mm.bing.net/th?q=Attack+on+Titan+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "One Piece",
-    img: "https://tse1.mm.bing.net/th?q=One+Piece+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Solo Leveling",
-    img: "https://tse2.mm.bing.net/th?q=Solo+Leveling+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Chainsaw Man",
-    img: "https://tse3.mm.bing.net/th?q=Chainsaw+Man+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Kaiju No. 8",
-    img: "https://tse1.mm.bing.net/th?q=Kaiju+No+8+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "My Hero Academia",
-    img: "https://tse3.mm.bing.net/th?q=My+Hero+Academia+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  // 🎌 BLOQUE ADICIONAL EXCLUSIVO DE CRUNCHYROLL (30 TÍTULOS MÁS)
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "One Punch Man",
-    img: "https://tse1.mm.bing.net/th?q=One+Punch+Man+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Hunter x Hunter",
-    img: "https://tse2.mm.bing.net/th?q=Hunter+x+Hunter+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Frieren: Más allá del final del viaje",
-    img: "https://tse3.mm.bing.net/th?q=Frieren+Beyond+Journeys+End+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Spy x Family",
-    img: "https://tse1.mm.bing.net/th?q=Spy+x+Family+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Tokyo Revengers",
-    img: "https://tse2.mm.bing.net/th?q=Tokyo+Revengers+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Black Clover",
-    img: "https://tse3.mm.bing.net/th?q=Black+Clover+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Blue Lock",
-    img: "https://tse1.mm.bing.net/th?q=Blue+Lock+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Hell's Paradise",
-    img: "https://tse2.mm.bing.net/th?q=Hells+Paradise+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Mashle: Magic and Muscles",
-    img: "https://tse3.mm.bing.net/th?q=Mashle+Magic+and+Muscles+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Fullmetal Alchemist: Brotherhood",
-    img: "https://tse1.mm.bing.net/th?q=Fullmetal+Alchemist+Brotherhood+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Naruto Shippuden",
-    img: "https://tse2.mm.bing.net/th?q=Naruto+Shippuden+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Haikyu!!",
-    img: "https://tse3.mm.bing.net/th?q=Haikyu+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Mob Psycho 100",
-    img: "https://tse1.mm.bing.net/th?q=Mob+Psycho+100+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Dr. STONE",
-    img: "https://tse2.mm.bing.net/th?q=Dr+Stone+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Vinland Saga",
-    img: "https://tse3.mm.bing.net/th?q=Vinland+Saga+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Sword Art Online",
-    img: "https://tse1.mm.bing.net/th?q=Sword+Art+Online+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Overlord",
-    img: "https://tse2.mm.bing.net/th?q=Overlord+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Re:Zero - Starting Life in Another World",
-    img: "https://tse3.mm.bing.net/th?q=Re+Zero+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "That Time I Got Reincarnated as a Slime",
-    img: "https://tse1.mm.bing.net/th?q=That+Time+I+Got+Reincarnated+as+a+Slime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "The Rising of the Shield Hero",
-    img: "https://tse2.mm.bing.net/th?q=The+Rising+of+the+Shield+Hero+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "JoJo's Bizarre Adventure",
-    img: "https://tse3.mm.bing.net/th?q=Jojos+Bizarre+Adventure+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Bungo Stray Dogs",
-    img: "https://tse1.mm.bing.net/th?q=Bungo+Stray+Dogs+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Kaguya-sama: Love Is War",
-    img: "https://tse2.mm.bing.net/th?q=Kaguya+sama+Love+Is+War+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Death Note",
-    img: "https://tse3.mm.bing.net/th?q=Death+Note+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Tokyo Ghoul",
-    img: "https://tse1.mm.bing.net/th?q=Tokyo+Ghoul+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "My Dress-Up Darling",
-    img: "https://tse2.mm.bing.net/th?q=My+Dress+Up+Darling+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Fire Force",
-    img: "https://tse3.mm.bing.net/th?q=Fire+Force+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Zom 100: Bucket List of the Dead",
-    img: "https://tse1.mm.bing.net/th?q=Zom+100+Bucket+List+of+the+Dead+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Goblin Slayer",
-    img: "https://tse2.mm.bing.net/th?q=Goblin+Slayer+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
-  {
-    id: "crunchy",
-    nombre: "Crunchyroll",
-    titulo: "Rent-a-Girlfriend",
-    img: "https://tse3.mm.bing.net/th?q=Rent+a+Girlfriend+anime+wallpaper",
-    btn: "btn_crunchy",
-    precio: 8500,
-    badgeStr: 'class="release-badge" style="background: #F47521;"',
-  },
+    // 🎌 CRUNCHYROLL (ANIME)
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Demon Slayer', img: 'https://tse1.mm.bing.net/th?q=Demon+Slayer+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Jujutsu Kaisen', img: 'https://tse2.mm.bing.net/th?q=Jujutsu+Kaisen+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Attack on Titan', img: 'https://tse3.mm.bing.net/th?q=Attack+on+Titan+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'One Piece', img: 'https://tse1.mm.bing.net/th?q=One+Piece+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Solo Leveling', img: 'https://tse2.mm.bing.net/th?q=Solo+Leveling+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Chainsaw Man', img: 'https://tse3.mm.bing.net/th?q=Chainsaw+Man+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Kaiju No. 8', img: 'https://tse1.mm.bing.net/th?q=Kaiju+No+8+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'My Hero Academia', img: 'https://tse3.mm.bing.net/th?q=My+Hero+Academia+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },  
+    // 🎌 BLOQUE ADICIONAL EXCLUSIVO DE CRUNCHYROLL (30 TÍTULOS MÁS)
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'One Punch Man', img: 'https://tse1.mm.bing.net/th?q=One+Punch+Man+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Hunter x Hunter', img: 'https://tse2.mm.bing.net/th?q=Hunter+x+Hunter+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Frieren: Más allá del final del viaje', img: 'https://tse3.mm.bing.net/th?q=Frieren+Beyond+Journeys+End+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Spy x Family', img: 'https://tse1.mm.bing.net/th?q=Spy+x+Family+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Tokyo Revengers', img: 'https://tse2.mm.bing.net/th?q=Tokyo+Revengers+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Black Clover', img: 'https://tse3.mm.bing.net/th?q=Black+Clover+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Blue Lock', img: 'https://tse1.mm.bing.net/th?q=Blue+Lock+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Hell\'s Paradise', img: 'https://tse2.mm.bing.net/th?q=Hells+Paradise+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Mashle: Magic and Muscles', img: 'https://tse3.mm.bing.net/th?q=Mashle+Magic+and+Muscles+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Fullmetal Alchemist: Brotherhood', img: 'https://tse1.mm.bing.net/th?q=Fullmetal+Alchemist+Brotherhood+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Naruto Shippuden', img: 'https://tse2.mm.bing.net/th?q=Naruto+Shippuden+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Haikyu!!', img: 'https://tse3.mm.bing.net/th?q=Haikyu+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Mob Psycho 100', img: 'https://tse1.mm.bing.net/th?q=Mob+Psycho+100+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Dr. STONE', img: 'https://tse2.mm.bing.net/th?q=Dr+Stone+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Vinland Saga', img: 'https://tse3.mm.bing.net/th?q=Vinland+Saga+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Sword Art Online', img: 'https://tse1.mm.bing.net/th?q=Sword+Art+Online+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Overlord', img: 'https://tse2.mm.bing.net/th?q=Overlord+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Re:Zero - Starting Life in Another World', img: 'https://tse3.mm.bing.net/th?q=Re+Zero+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'That Time I Got Reincarnated as a Slime', img: 'https://tse1.mm.bing.net/th?q=That+Time+I+Got+Reincarnated+as+a+Slime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'The Rising of the Shield Hero', img: 'https://tse2.mm.bing.net/th?q=The+Rising+of+the+Shield+Hero+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'JoJo\'s Bizarre Adventure', img: 'https://tse3.mm.bing.net/th?q=Jojos+Bizarre+Adventure+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Bungo Stray Dogs', img: 'https://tse1.mm.bing.net/th?q=Bungo+Stray+Dogs+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Kaguya-sama: Love Is War', img: 'https://tse2.mm.bing.net/th?q=Kaguya+sama+Love+Is+War+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Death Note', img: 'https://tse3.mm.bing.net/th?q=Death+Note+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Tokyo Ghoul', img: 'https://tse1.mm.bing.net/th?q=Tokyo+Ghoul+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'My Dress-Up Darling', img: 'https://tse2.mm.bing.net/th?q=My+Dress+Up+Darling+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Fire Force', img: 'https://tse3.mm.bing.net/th?q=Fire+Force+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Zom 100: Bucket List of the Dead', img: 'https://tse1.mm.bing.net/th?q=Zom+100+Bucket+List+of+the+Dead+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Goblin Slayer', img: 'https://tse2.mm.bing.net/th?q=Goblin+Slayer+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
+    { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Rent-a-Girlfriend', img: 'https://tse3.mm.bing.net/th?q=Rent+a+Girlfriend+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
 ];
 
 function cargarEstrenosAleatorios() {
-  const contenedor = document.getElementById("contenedorEstrenos");
-  if (!contenedor) return;
+    const contenedor = document.getElementById('contenedorEstrenos');
+    if (!contenedor) return;
 
-  // 1. Barajar la lista aleatoriamente (Algoritmo de Fisher-Yates)
-  let carteleraMezclada = [...CARTELERA_TENDENCIAS];
-  for (let i = carteleraMezclada.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [carteleraMezclada[i], carteleraMezclada[j]] = [
-      carteleraMezclada[j],
-      carteleraMezclada[i],
-    ];
-  }
+    // 1. Barajar la lista aleatoriamente (Algoritmo de Fisher-Yates)
+    let carteleraMezclada = [...CARTELERA_TENDENCIAS];
+    for (let i = carteleraMezclada.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [carteleraMezclada[i], carteleraMezclada[j]] = [carteleraMezclada[j], carteleraMezclada[i]];
+    }
 
-  // 2. Tomar solo los primeros 5 después de barajar
-  const estrenosDelDia = carteleraMezclada.slice(0, 5);
+    // 2. Tomar solo los primeros 5 después de barajar
+    const estrenosDelDia = carteleraMezclada.slice(0, 5);
 
-  // 3. Crear el HTML y pegarlo en la tienda
-  let htmlFinal = "";
-  estrenosDelDia.forEach((item) => {
-    htmlFinal += `
+    // 3. Crear el HTML y pegarlo en la tienda
+    let htmlFinal = '';
+    estrenosDelDia.forEach(item => {
+        htmlFinal += `
           <div class="release-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.1) 100%), url('${item.img}');">
              <div class="release-info">
                <span ${item.badgeStr}>${item.nombre}</span>
@@ -4090,7 +1631,7 @@ function cargarEstrenosAleatorios() {
              </div>
           </div>
         `;
-  });
+    });
 
-  contenedor.innerHTML = htmlFinal;
+    contenedor.innerHTML = htmlFinal;
 }
