@@ -9580,44 +9580,4 @@ cargarPagosBreB();
 // 2. ACTIVAR EL RADAR: Consultar automáticamente cada 60 segundos (60000 milisegundos)
 setInterval(cargarPagosBreB, 60000);
 
-  // Este escáner revisa la página cada segundo por si aparecen botones nuevos
-  setInterval(() => {
-    // Buscamos todas las etiquetas que puedan ser botones
-    const botonesPosibles = document.querySelectorAll("button, div, span, a");
-    
-    botonesPosibles.forEach(boton => {
-      // Si el botón dice exactamente "COPIAR TEXTO" y aún no tiene nuestro efecto...
-      if (boton.innerText.trim() === "COPIAR TEXTO" && !boton.hasAttribute("data-efecto-listo")) {
-        
-        // Lo marcamos para no duplicar el efecto
-        boton.setAttribute("data-efecto-listo", "true");
-        
-        // Le agregamos la animación de clic
-        boton.addEventListener("click", function() {
-          // 1. Guardamos el texto original
-          const textoOriginal = "COPIAR TEXTO";
-          
-          // 2. Aplicamos el diseño de "Éxito" (Estilo Apple: Verde neón sutil)
-          this.innerText = "✅ ¡COPIADO!";
-          this.style.backgroundColor = "rgba(48, 209, 88, 0.15)"; 
-          this.style.color = "#30d158";
-          this.style.borderColor = "#30d158";
-          this.style.transform = "scale(0.97)"; // Pequeño efecto de hundimiento
-          this.style.transition = "all 0.2s ease";
-          
-          // Regresa el tamaño a la normalidad en una fracción de segundo
-          setTimeout(() => {
-            this.style.transform = "scale(1)";
-          }, 150);
 
-          // 3. Después de 2 segundos, lo regresamos a su estado oscuro original
-          setTimeout(() => {
-            this.innerText = textoOriginal;
-            this.style.backgroundColor = ""; // Vaciar esto hace que vuelva a usar tu CSS original
-            this.style.color = "";
-            this.style.borderColor = "";
-          }, 2000);
-        });
-      }
-    });
-  }, 1000);
