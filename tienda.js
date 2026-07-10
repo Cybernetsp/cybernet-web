@@ -1605,21 +1605,23 @@ const CARTELERA_TENDENCIAS = [
     { id: 'crunchy', nombre: 'Crunchyroll', titulo: 'Rent-a-Girlfriend', img: 'https://tse3.mm.bing.net/th?q=Rent+a+Girlfriend+anime+wallpaper', btn: 'btn_crunchy', precio: 8500, badgeStr: 'class="release-badge" style="background: #F47521;"' },
 ];
 
+// Variable global para controlar el temporizador del carrusel
+let autoScrollEstrenosInterval = null;
+
 function cargarEstrenosAleatorios() {
     const contenedor = document.getElementById('contenedorEstrenos');
     if (!contenedor) return;
 
-    // 1. Barajar la lista aleatoriamente (Algoritmo de Fisher-Yates)
+    // Barajamos el listado masivo manual
     let carteleraMezclada = [...CARTELERA_TENDENCIAS];
     for (let i = carteleraMezclada.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [carteleraMezclada[i], carteleraMezclada[j]] = [carteleraMezclada[j], carteleraMezclada[i]];
     }
 
-    // 2. Tomar solo los primeros 5 después de barajar
-    const estrenosDelDia = carteleraMezclada.slice(0, 5);
+    // 🔥 CAMBIO: Ahora toma 7 películas/series en lugar de 5
+    const estrenosDelDia = carteleraMezclada.slice(0, 7);
 
-    // 3. Crear el HTML y pegarlo en la tienda
     let htmlFinal = '';
     estrenosDelDia.forEach(item => {
         htmlFinal += `
@@ -1634,4 +1636,34 @@ function cargarEstrenosAleatorios() {
     });
 
     contenedor.innerHTML = htmlFinal;
+    
+    // 🪄 Iniciar el movimiento automático justo después de pintar las tarjetas
+    iniciarAutoScrollEstrenos();
+}
+
+// =========================================================================
+// 🔄 DESPLAZAMIENTO AUTOMÁTICO DEL CARRUSEL (ESTILO APPLE TV)
+// =========================================================================
+function iniciarAutoScrollEstrenos() {
+    const container = document.getElementById('contenedorEstrenos');
+    if (!container) return;
+    
+    // Limpiamos cualquier temporizador previo para evitar que se duplique la velocidad
+    clearInterval(autoScrollEstrenosInterval);
+    
+    autoScrollEstrenosInterval = setInterval(() => {
+        // Calculamos el límite máximo de scroll que tiene el contenedor
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        
+        // 274px es la medida perfecta exacta (260px de la tarjeta + 14px de espacio/gap)
+        const pasoDesplazamiento = 274; 
+        
+        // Si ya llegó al final (con una tolerancia de 10px), regresa suavemente al inicio
+        if (container.scrollLeft >= maxScroll - 10) {
+            container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+            // Si no, avanza una tarjeta de forma fluida
+            container.scrollBy({ left: pasoDesplazamiento, behavior: 'smooth' });
+        }
+    }, 3000); // 3000ms = Se mueve automáticamente cada 3 segundos
 }
