@@ -360,23 +360,25 @@
               Añadir
             </button>
           </div>
-         <div class="card-ios product-card">
-  <div class="icon-wrap" style="background: rgba(10, 132, 255, 0.1)">
-    <img
-      src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg"
-      alt="Paramount"
-    />
-  </div>
-  <h3>Paramount+</h3>
-  <p>Estrenos exclusivos</p>
-  <button
-    class="btn-ios btn-add-store"
-    id="btn_paramount"
-    onclick="toggleItem('paramount', 'Paramount+', 'regular', 20000, this)"
-  >
-    Añadir
-  </button>
-</div>
+          <div class="card-ios product-card">
+            <div class="icon-wrap" style="background: rgba(10, 132, 255, 0.1)">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg"
+                alt="Paramount"
+              />
+            </div>
+            <h3>Paramount+</h3>
+            <p>Estrenos exclusivos</p>
+            <button
+              class="btn-ios btn-add-store"
+              id="btn_paramount"
+              onclick="
+                toggleItem('paramount', 'Paramount+', 'regular', 10000, this)
+              "
+            >
+              Añadir
+            </button>
+          </div>
 
           <div class="card-ios product-card">
             <div class="icon-wrap" style="background: rgba(255, 69, 58, 0.1)">
@@ -475,61 +477,6 @@
             </button>
           </div>
 
-          <div class="card-ios product-card">
-            <div class="icon-wrap" style="background: rgba(48, 209, 88, 0.1)">
-              <img
-                src="https://img.icons8.com/color/512/tv.png"
-                alt="IPTV Smarters"
-              />
-            </div>
-            <h3>IPTV Smarters</h3>
-            <p>¡Ideal para ver todo el mundial! ⚽🏆</p>
-            <button
-              class="btn-ios btn-add-store"
-              id="btn_iptv"
-              onclick="
-                toggleItem('iptv', 'IPTV Smarters', 'regular', 10000, this)
-              "
-            >
-              Añadir
-            </button>
-          </div>
-
-          <div class="card-ios product-card">
-            <div class="icon-wrap" style="background: rgba(10, 132, 255, 0.15)">
-              <img
-                src="https://img.icons8.com/color/512/play.png"
-                alt="Flujo TV"
-              />
-            </div>
-            <h3>Flujo TV</h3>
-            <p>¡Ideal para ver todo el mundial! ⚽🏆</p>
-            <button
-              class="btn-ios btn-add-store"
-              id="btn_flujo"
-              onclick="toggleItem('flujo', 'Flujo TV', 'regular', 12000, this)"
-            >
-              Añadir
-            </button>
-          </div>
-
-          <div class="card-ios product-card">
-            <div class="icon-wrap" style="background: rgba(255, 159, 10, 0.1)">
-              <img
-                src="https://www.google.com/s2/favicons?domain=emby.media&sz=128"
-                alt="Emby"
-              />
-            </div>
-            <h3>Emby</h3>
-            <p>¡Ideal para ver todo el mundial! ⚽🏆</p>
-            <button
-              class="btn-ios btn-add-store"
-              id="btn_emby"
-              onclick="toggleItem('emby', 'Emby', 'regular', 12000, this)"
-            >
-              Añadir
-            </button>
-          </div>
         </div>
       </section>
 
@@ -616,31 +563,19 @@
             </button>
           </div>
 
-          <div class="card-ios product-card">
-            <div class="icon-wrap" style="background: rgba(50, 215, 75, 0.1)">
-              <img
-                src="https://img.icons8.com/color/512/retro-tv.png"
-                alt="Metegol"
-              />
-            </div>
-            <h3>Metegol</h3>
-            <p>Fútbol en vivo</p>
-            <button
-              class="btn-ios btn-add-store"
-              id="btn_metegol"
-              onclick="toggleItem('metegol', 'Metegol', 'addon', 15000, this)"
-            >
-              Añadir
-            </button>
-          </div>
-        </div>
       </section>
     </main>
 
     <aside class="sheet-ios cart-drawer" id="cartDrawer">
-      <div class="sheet-header">
-        <h3 style="font-weight: 800; font-size: 1.3rem">Mi Carrito</h3>
-        <button class="btn-close-circle" onclick="cerrarCarrito()">✕</button>
+      <div class="sheet-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h3 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 8px;">Mi Carrito</h3>
+          <button class="btn-close-circle" onclick="cerrarCarrito()">✕</button>
+        </div>
+        
+        <button onclick="vaciarCarrito()" style="background: rgba(255, 69, 58, 0.15); color: var(--ios-red); border: 1px solid rgba(255, 69, 58, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: transform 0.2s;">
+          🗑️ Vaciar
+        </button>
       </div>
 
       <div class="cart-unified-scroll-area">
@@ -904,7 +839,7 @@
                     font-size: 1.1rem;
                     font-weight: bold;
                   "
-                  >0090878219</span
+                  >1007416341</span
                 ></span
               >
               <button
@@ -920,7 +855,7 @@
                 📋 Copiar
               </button>
             </div>
-            <p>👤 <strong>A nombre de:</strong> CYBERNET</p>
+            <p>👤 <strong>A nombre de:</strong> Camilo</p>
             <span
               class="badge-ios badge-danger"
               style="
@@ -1134,7 +1069,7 @@
                 "
               >
                 Ingresa nuestra llave comercial y transfiere el monto exacto de
-                tu combo (te mostrará el nombre <strong>CYBERNET</strong>):
+                tu combo (te mostrará el nombre <strong>Camilo</strong>):
               </p>
               <div
                 style="
@@ -1155,7 +1090,7 @@
                     font-weight: bold;
                     color: var(--ios-blue);
                   "
-                  >0090878219</span
+                  >1007416341</span
                 >
                 <button
                   id="btnCopiarLlaveTutorial"
