@@ -9274,72 +9274,65 @@ window.ejecutarGeneracionNuevaCuentaAlias = function (btn, contenidoOriginal) {
 };
 
 // Radar DUAL: Busca el "Ya casi terminas" (para el PIN) y "Verifica tu correo" (para el Link)
-window.lanzarRadarEspiaAlias = function (correoTarget) {
-  if (window.verificationLinkInterval)
-    clearInterval(window.verificationLinkInterval);
+window.lanzarRadarEspiaAlias = function(correoTarget) {
+    if (window.verificationLinkInterval) clearInterval(window.verificationLinkInterval);
 
-  window.verificationLinkInterval = setInterval(function () {
-    const cbRadarName = "cb_radar_alias_" + Date.now();
+    window.verificationLinkInterval = setInterval(function () {
+        const cbRadarName = "cb_radar_alias_" + Date.now();
 
-    window[cbRadarName] = function (res) {
-      const node = document.getElementById("node_" + cbRadarName);
-      if (node) node.remove();
-      delete window[cbRadarName];
+        window[cbRadarName] = function (res) {
+            const node = document.getElementById("node_" + cbRadarName);
+            if (node) node.remove();
+            delete window[cbRadarName];
 
-      if (res && res.status === "success") {
-        // 1. Mostrar PIN si Netflix envió el "Ya casi terminas"
-        if (res.yaCasiTerminas) {
-          const pinEl = document.getElementById("displayCtaPinRecarga");
-          if (pinEl.innerText !== window.pinOcultoActual) {
-            if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
-            pinEl.innerText = window.pinOcultoActual; // Revelamos PIN de Refacil
-            pinEl.style.color = "var(--ios-green)";
+            if (res && res.status === "success") {
+                
+                // 1. 🔥 SOLUCIÓN: Mostrar PIN si Netflix envió el "Ya casi terminas" O si llegó directamente el link de verificación
+                if (res.yaCasiTerminas || res.linkVerificacion) {
+                    const pinEl = document.getElementById("displayCtaPinRecarga");
+                    if (pinEl.innerText !== window.pinOcultoActual) {
+                        if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+                        pinEl.innerText = window.pinOcultoActual; // Revelamos PIN de Refacil
+                        pinEl.style.color = "var(--ios-green)";
+                        
+                        document.getElementById("radarVerificacionSpinner").innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> PIN Revelado. Esperando link de verificación...`;
+                    }
+                }
 
-            document.getElementById("radarVerificacionSpinner").innerHTML =
-              `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> PIN Revelado. Esperando link de verificación...`;
-          }
-        }
+                // 2. Mostrar botón de Verificar si Netflix envió el enlace
+                if (res.linkVerificacion) {
+                    clearInterval(window.verificationLinkInterval);
+                    if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
 
-        // 2. Mostrar botón de Verificar si Netflix envió el enlace
-        if (res.linkVerificacion) {
-          clearInterval(window.verificationLinkInterval);
-          if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+                    document.getElementById("radarVerificacionSpinner").style.setProperty("display", "none", "important");
 
-          document
-            .getElementById("radarVerificacionSpinner")
-            .style.setProperty("display", "none", "important");
+                    const btnLink = document.getElementById("btnLinkVerificarGmail");
+                    btnLink.href = res.linkVerificacion;
+                    btnLink.innerHTML = "✉️ Verificar Correo en Netflix";
+                    btnLink.style.setProperty("display", "inline-flex", "important");
 
-          const btnLink = document.getElementById("btnLinkVerificarGmail");
-          btnLink.href = res.linkVerificacion;
-          btnLink.innerHTML = "✉️ Verificar Correo en Netflix";
-          btnLink.style.setProperty("display", "inline-flex", "important");
+                    // 🎯 CANDADO: Solo al verificar se habilita Guardar
+                    btnLink.onclick = function () {
+                        if (typeof haptic === "function") haptic();
+                        document.getElementById("btnGuardarMaestroNetflix").style.setProperty("display", "block", "important");
+                        
+                        // Ocultamos el botón de cuenta mala porque ya fue verificada
+                        const btnMala = document.getElementById("btnCuentaMalaAlias");
+                        if(btnMala) btnMala.style.display = "none";
+                    };
 
-          // 🎯 CANDADO: Solo al verificar se habilita Guardar
-          btnLink.onclick = function () {
-            if (typeof haptic === "function") haptic();
-            document
-              .getElementById("btnGuardarMaestroNetflix")
-              .style.setProperty("display", "block", "important");
+                    const contenedor = document.getElementById("radarVerificacionContenedor");
+                    contenedor.style.background = "rgba(48, 209, 88, 0.06)";
+                    contenedor.style.borderColor = "rgba(48, 209, 88, 0.35)";
+                }
+            }
+        };
 
-            // Ocultamos el botón de cuenta mala porque ya fue verificada
-            const btnMala = document.getElementById("btnCuentaMalaAlias");
-            if (btnMala) btnMala.style.display = "none";
-          };
-
-          const contenedor = document.getElementById(
-            "radarVerificacionContenedor",
-          );
-          contenedor.style.background = "rgba(48, 209, 88, 0.06)";
-          contenedor.style.borderColor = "rgba(48, 209, 88, 0.35)";
-        }
-      }
-    };
-
-    const script = document.createElement("script");
-    script.id = "node_" + cbRadarName;
-    script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoTarget)}&callback=${cbRadarName}&_ts=${Date.now()}`;
-    document.body.appendChild(script);
-  }, 4000);
+        const script = document.createElement("script");
+        script.id = "node_" + cbRadarName;
+        script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoTarget)}&callback=${cbRadarName}&_ts=${Date.now()}`;
+        document.body.appendChild(script);
+    }, 4000); 
 };
 
 // 🔥 FUNCIÓN MÁSTER: Pinta la pantalla tanto al crear como al restaurar la memoria
