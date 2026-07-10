@@ -9964,10 +9964,10 @@
     </div>
 
     <!-- ======================================================= -->
-    <!-- 📡 WIDGET FLOTANTE DE PAGOS BRE-B (CON PESTAÑA OCULTABLE) -->
+    <!-- 📡 WIDGET FLOTANTE DE PAGOS BRE-B (CON MINIBUSCADOR) -->
     <!-- ======================================================= -->
 
-    <!-- Pestaña para abrir el widget (Oculta por defecto) -->
+    <!-- Pestaña para abrir el widget -->
     <div
       id="btn-expand-breb"
       onclick="mostrarWidgetBreB()"
@@ -10006,6 +10006,7 @@
       <div class="breb-tooltip">Revisar pagos Bre-B</div>
     </div>
 
+    <!-- Contenedor Principal del Widget -->
     <div
       id="breb-widget"
       style="
@@ -10029,6 +10030,7 @@
         transform: translateX(-350px);
       "
     >
+      <!-- Cabecera -->
       <div
         style="
           padding: 15px;
@@ -10036,7 +10038,7 @@
           background: rgba(44, 44, 46, 0.5);
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
         "
       >
         <div
@@ -10069,6 +10071,7 @@
             ></span>
           </div>
 
+          <!-- Botones de Acción -->
           <div style="display: flex; gap: 6px">
             <button
               id="btn-refresh-breb"
@@ -10135,6 +10138,8 @@
             </button>
           </div>
         </div>
+
+        <!-- Input del Calendario -->
         <input
           type="date"
           id="breb-fecha"
@@ -10152,8 +10157,49 @@
           "
           onchange="alCambiarFechaBreB()"
         />
+
+        <!-- 🔥 NUEVO: MINIBUSCADOR EN TIEMPO REAL -->
+        <div style="position: relative; width: 100%">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="rgba(255,255,255,0.4)"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="
+              position: absolute;
+              left: 10px;
+              top: 50%;
+              transform: translateY(-50%);
+            "
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            id="breb-buscador"
+            placeholder="Buscar cliente o monto..."
+            style="
+              width: 100%;
+              background: rgba(0, 0, 0, 0.2);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              color: #fff;
+              border-radius: 8px;
+              padding: 6px 10px 6px 30px;
+              font-size: 12px;
+              outline: none;
+              transition: border 0.2s;
+            "
+            onkeyup="filtrarPagosEnVivo()"
+          />
+        </div>
       </div>
 
+      <!-- Contenedor -->
       <div
         id="breb-lista"
         class="breb-vertical-scroll"
@@ -10202,7 +10248,7 @@
     </div>
 
     <style>
-      /* 🔥 ESTILOS DEL LETRERO FLOTANTE (TOOLTIP) 🔥 */
+      /* Estilos del letrero flotante */
       .breb-tooltip {
         position: absolute;
         left: 100%;
@@ -10216,9 +10262,8 @@
         white-space: nowrap;
         box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4);
         animation: floatTooltip 2s ease-in-out infinite;
-        pointer-events: none; /* Evita que estorbe el clic */
+        pointer-events: none;
       }
-      /* Triangulito del letrero */
       .breb-tooltip::before {
         content: "";
         position: absolute;
@@ -10236,7 +10281,13 @@
         }
         50% {
           transform: translateX(5px);
-        } /* Animación suave hacia la derecha */
+        }
+      }
+
+      /* Efecto en el input de búsqueda */
+      #breb-buscador:focus {
+        border-color: rgba(10, 132, 255, 0.6) !important;
+        background: rgba(0, 0, 0, 0.4) !important;
       }
 
       /* Animaciones Base */
@@ -10296,121 +10347,133 @@
     </style>
 
     <script>
-      // ⚠️ TU URL DE APPS SCRIPT OFICIAL
-      const APP_SCRIPT_URL_BREB =
-        "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
+  // ⚠️ TU URL DE APPS SCRIPT OFICIAL
+  const APP_SCRIPT_URL_BREB = "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec"; 
 
-      let timerBrebActivo = null;
-      let autoHideTimer = null; // 🔥 NUEVO: Reloj para el auto-ocultado
+  let timerBrebActivo = null;
+  let autoHideTimer = null; 
 
-      // --- 1. LÓGICA DE APAGADO, ENCENDIDO Y AUTO-OCULTADO ---
-      function mostrarWidgetBreB() {
-        document.getElementById("btn-expand-breb").style.display = "none";
-        document.getElementById("breb-widget").style.transform =
-          "translateX(0)";
+  // --- BUSCADOR EN VIVO ---
+  function filtrarPagosEnVivo() {
+    const texto = document.getElementById("breb-buscador").value.toLowerCase();
+    const tarjetas = document.querySelectorAll("#breb-lista .breb-card");
 
-        establecerFechaHoy();
-        cargarPagosBreB();
-        iniciarTemporizadorBreB();
-
-        // Arranca la cuenta regresiva de 1 minuto
-        iniciarAutoOcultado();
+    tarjetas.forEach(tarjeta => {
+      const contenido = tarjeta.innerText.toLowerCase();
+      if (contenido.includes(texto)) {
+        tarjeta.style.display = "flex";
+      } else {
+        tarjeta.style.display = "none";
       }
+    });
 
-      function ocultarWidgetBreB() {
-        document.getElementById("breb-widget").style.transform =
-          "translateX(-350px)";
-        setTimeout(() => {
-          document.getElementById("btn-expand-breb").style.display = "flex";
-        }, 300);
+    iniciarAutoOcultado(); 
+  }
 
-        if (timerBrebActivo) {
-          clearInterval(timerBrebActivo);
-          timerBrebActivo = null;
-        }
+  // --- LÓGICA DE APAGADO, ENCENDIDO Y AUTO-OCULTADO ---
+  function mostrarWidgetBreB() {
+    document.getElementById("btn-expand-breb").style.display = "none";
+    document.getElementById("breb-widget").style.transform = "translateX(0)";
+    
+    establecerFechaHoy();
+    cargarPagosBreB();
+    iniciarTemporizadorBreB();
+    iniciarAutoOcultado();
+  }
 
-        // Apaga la cuenta regresiva si lo cierras manualmente
-        if (autoHideTimer) {
-          clearTimeout(autoHideTimer);
-          autoHideTimer = null;
-        }
-      }
+  function ocultarWidgetBreB() {
+    document.getElementById("breb-widget").style.transform = "translateX(-350px)";
+    setTimeout(() => {
+      document.getElementById("btn-expand-breb").style.display = "flex";
+    }, 300);
 
-      function iniciarAutoOcultado() {
-        if (autoHideTimer) clearTimeout(autoHideTimer);
-        // 60000 milisegundos = 1 minuto. Al cumplirse, llama a ocultarWidgetBreB
-        autoHideTimer = setTimeout(() => {
-          ocultarWidgetBreB();
-        }, 60000);
-      }
+    if (timerBrebActivo) {
+      clearInterval(timerBrebActivo);
+      timerBrebActivo = null;
+    }
+    if (autoHideTimer) {
+      clearTimeout(autoHideTimer);
+      autoHideTimer = null;
+    }
+  }
 
-      function iniciarTemporizadorBreB() {
-        if (timerBrebActivo) clearInterval(timerBrebActivo);
-        timerBrebActivo = setInterval(cargarPagosBreB, 600000);
-      }
+  function iniciarAutoOcultado() {
+    if (autoHideTimer) clearTimeout(autoHideTimer);
+    autoHideTimer = setTimeout(() => {
+      ocultarWidgetBreB();
+    }, 60000); 
+  }
 
-      function forzarActualizacionBreB() {
+  function iniciarTemporizadorBreB() {
+    if (timerBrebActivo) clearInterval(timerBrebActivo);
+    timerBrebActivo = setInterval(cargarPagosBreB, 600000); 
+  }
+
+  function forzarActualizacionBreB() {
+    const icono = document.getElementById("icon-refresh-breb");
+    if (icono) icono.classList.add("spin-breb-anim");
+    cargarPagosBreB();
+    iniciarTemporizadorBreB(); 
+    iniciarAutoOcultado(); 
+  }
+
+  function alCambiarFechaBreB() {
+    cargarPagosBreB();
+    iniciarTemporizadorBreB(); 
+    iniciarAutoOcultado(); 
+  }
+
+  function establecerFechaHoy() {
+    const inputFecha = document.getElementById("breb-fecha");
+    if (inputFecha && !inputFecha.value) {
+      const hoy = new Date();
+      const yyyy = hoy.getFullYear();
+      const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+      const dd = String(hoy.getDate()).padStart(2, '0');
+      inputFecha.value = `${yyyy}-${mm}-${dd}`; 
+    }
+  }
+
+  function cargarPagosBreB() {
+    const script = document.createElement("script");
+    const callbackName = "jsonpCallbackBreB_" + Math.round(100000 * Math.random());
+    const fechaSeleccionada = document.getElementById("breb-fecha").value;
+    
+    const contenedor = document.getElementById("breb-lista");
+    contenedor.innerHTML = `<div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; padding: 40px 0;">Buscando pagos...</div>`;
+
+    const buscador = document.getElementById("breb-buscador");
+    if (buscador) buscador.value = ""; 
+
+    const seguroDeTiempo = setTimeout(() => {
+      if (window[callbackName]) {
+        contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Google no responde.<br>Presiona actualizar de nuevo.</div>`;
         const icono = document.getElementById("icon-refresh-breb");
-        if (icono) icono.classList.add("spin-breb-anim");
-        cargarPagosBreB();
-        iniciarTemporizadorBreB();
-        iniciarAutoOcultado(); // 🔥 Reinicia el minuto de espera para que no se cierre mientras buscas
+        if (icono) icono.classList.remove("spin-breb-anim");
+        delete window[callbackName];
+        if (document.body.contains(script)) document.body.removeChild(script);
       }
+    }, 12000); 
 
-      function alCambiarFechaBreB() {
-        cargarPagosBreB();
-        iniciarTemporizadorBreB();
-        iniciarAutoOcultado(); // 🔥 Reinicia el minuto de espera
-      }
+    window[callbackName] = function(data) {
+      clearTimeout(seguroDeTiempo);
+      contenedor.innerHTML = ""; 
+      
+      const icono = document.getElementById("icon-refresh-breb");
+      if (icono) icono.classList.remove("spin-breb-anim");
 
-      function establecerFechaHoy() {
-        const inputFecha = document.getElementById("breb-fecha");
-        if (inputFecha && !inputFecha.value) {
-          const hoy = new Date();
-          const yyyy = hoy.getFullYear();
-          const mm = String(hoy.getMonth() + 1).padStart(2, "0");
-          const dd = String(hoy.getDate()).padStart(2, "0");
-          inputFecha.value = `${yyyy}-${mm}-${dd}`;
-        }
-      }
-
-      function cargarPagosBreB() {
-        const script = document.createElement("script");
-        const callbackName =
-          "jsonpCallbackBreB_" + Math.round(100000 * Math.random());
-        const fechaSeleccionada = document.getElementById("breb-fecha").value;
-
-        const contenedor = document.getElementById("breb-lista");
-        contenedor.innerHTML = `<div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; padding: 40px 0;">Buscando pagos...</div>`;
-
-        const seguroDeTiempo = setTimeout(() => {
-          if (window[callbackName]) {
-            contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Google no responde.<br>Presiona actualizar de nuevo.</div>`;
-            const icono = document.getElementById("icon-refresh-breb");
-            if (icono) icono.classList.remove("spin-breb-anim");
-            delete window[callbackName];
-            if (document.body.contains(script))
-              document.body.removeChild(script);
-          }
-        }, 12000);
-
-        window[callbackName] = function (data) {
-          clearTimeout(seguroDeTiempo);
-          contenedor.innerHTML = "";
-
-          const icono = document.getElementById("icon-refresh-breb");
-          if (icono) icono.classList.remove("spin-breb-anim");
-
-          if (data.status === "success") {
-            if (data.data.length > 0) {
-              data.data.forEach((pago) => {
-                contenedor.innerHTML += `
+      if (data.status === "success") {
+        if (data.data.length > 0) {
+          data.data.forEach(pago => {
+            
+            contenedor.innerHTML += `
               <div class="breb-card">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <span style="color: #30d158; font-weight: 800; font-size: 17px;">+$${pago.monto}</span>
                   <span style="color: rgba(255,255,255,0.7); font-size: 10px; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 6px;">${pago.hora}</span>
                 </div>
-                <div style="color: #ffffff; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+                <!-- 🔥 LA MAGIA OCURRE AQUÍ: text-transform: uppercase !important; 🔥 -->
+                <div style="color: #ffffff; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; text-transform: uppercase !important;">
                   👤 ${pago.remitente}
                 </div>
                 <div style="color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 2px;">
@@ -10418,54 +10481,53 @@
                 </div>
               </div>
             `;
-              });
-            } else {
-              contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 12px; padding: 30px 0;">No se detectaron pagos en esta fecha.</div>`;
-            }
-          } else {
-            contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Error de red:<br>${data.message}</div>`;
-          }
-
-          if (document.body.contains(script)) document.body.removeChild(script);
-          delete window[callbackName];
-        };
-
-        const urlFinal = fechaSeleccionada
-          ? `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&fechaBusqueda=${fechaSeleccionada}&callback=${callbackName}`
-          : `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&callback=${callbackName}`;
-
-        script.src = urlFinal;
-        document.body.appendChild(script);
-      }
-
-      // --- 2. DETECTOR DE LOGIN AJUSTADO ---
-      setInterval(() => {
-        const widget = document.getElementById("breb-widget");
-        const pestana = document.getElementById("btn-expand-breb");
-        const estaLogueado =
-          sessionStorage.getItem("active_staff") ||
-          localStorage.getItem("cyber_saved_staff");
-
-        if (estaLogueado) {
-          if (widget.style.display === "none") {
-            widget.style.display = "flex";
-            widget.style.transform = "translateX(-350px)";
-            pestana.style.display = "flex";
-          }
+          });
         } else {
-          widget.style.display = "none";
-          pestana.style.display = "none";
-          if (timerBrebActivo) {
-            clearInterval(timerBrebActivo);
-            timerBrebActivo = null;
-          }
-          if (autoHideTimer) {
-            clearTimeout(autoHideTimer);
-            autoHideTimer = null;
-          }
+          contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 12px; padding: 30px 0;">No se detectaron pagos en esta fecha.</div>`;
         }
-      }, 1000);
-    </script>
+      } else {
+        contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Error de red:<br>${data.message}</div>`;
+      }
+      
+      if (document.body.contains(script)) document.body.removeChild(script);
+      delete window[callbackName];
+    };
+
+    const urlFinal = fechaSeleccionada 
+      ? `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&fechaBusqueda=${fechaSeleccionada}&callback=${callbackName}`
+      : `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&callback=${callbackName}`;
+
+    script.src = urlFinal;
+    document.body.appendChild(script);
+  }
+
+  // --- DETECTOR DE LOGIN AJUSTADO ---
+  setInterval(() => {
+    const widget = document.getElementById("breb-widget");
+    const pestana = document.getElementById("btn-expand-breb");
+    const estaLogueado = sessionStorage.getItem("active_staff") || localStorage.getItem("cyber_saved_staff");
+    
+    if (estaLogueado) {
+      if (widget.style.display === "none") {
+        widget.style.display = "flex"; 
+        widget.style.transform = "translateX(-350px)";
+        pestana.style.display = "flex"; 
+      }
+    } else {
+      widget.style.display = "none";
+      pestana.style.display = "none";
+      if (timerBrebActivo) {
+        clearInterval(timerBrebActivo);
+        timerBrebActivo = null;
+      }
+      if (autoHideTimer) {
+        clearTimeout(autoHideTimer);
+        autoHideTimer = null;
+      }
+    }
+  }, 1000);
+
+</script>
 
     <style>
       /* 📡 ANIMACIONES Y SCROLL BRE-B */
