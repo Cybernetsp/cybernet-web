@@ -4120,7 +4120,13 @@
             style="display: flex; padding: 0; width: 100%"
           >
             <div
-              style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; width: 100%"
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 16px;
+                width: 100%;
+              "
             >
               <!-- NUEVO BOTÓN CREAR NETFLIX CON ALIAS -->
               <button
@@ -4142,7 +4148,17 @@
                 "
                 onclick="iniciarCreacionNetflixAlias(this)"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
                 Crear cuenta de Netflix (Usar Alias)
               </button>
 
@@ -9946,6 +9962,327 @@
         </form>
       </div>
     </div>
+
+    <!-- ======================================================= -->
+    <!-- 📡 WIDGET FLOTANTE DE PAGOS BRE-B (CON INFO DE SISTEMA) -->
+    <!-- ======================================================= -->
+    <div
+      id="breb-widget"
+      style="
+        position: fixed;
+        left: 30px;
+        top: 90px;
+        width: 300px;
+        height: 520px;
+        background: #1c1c1e;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        font-family:
+          -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto,
+          sans-serif;
+      "
+    >
+      <div
+        style="
+          padding: 15px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          background: rgba(44, 44, 46, 0.5);
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <div style="display: flex; align-items: center; gap: 8px">
+            <span
+              style="
+                color: #fff;
+                font-weight: 700;
+                font-size: 14px;
+                letter-spacing: 0.5px;
+              "
+              >💸 Pagos Bre-B</span
+            >
+            <span
+              id="breb-status"
+              style="
+                width: 8px;
+                height: 8px;
+                background: #30d158;
+                border-radius: 50%;
+                box-shadow: 0 0 8px #30d158;
+                animation: pulseBreb 2s infinite;
+              "
+            ></span>
+          </div>
+
+          <button
+            id="btn-refresh-breb"
+            onclick="forzarActualizacionBreB()"
+            style="
+              background: rgba(10, 132, 255, 0.15);
+              border: 1px solid rgba(10, 132, 255, 0.3);
+              color: #0a84ff;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 6px;
+              border-radius: 50%;
+              transition: all 0.2s;
+              outline: none;
+            "
+            title="Verificar pagos ahora"
+          >
+            <svg
+              id="icon-refresh-breb"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+          </button>
+        </div>
+
+        <input
+          type="date"
+          id="breb-fecha"
+          style="
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            color-scheme: dark;
+          "
+          onchange="alCambiarFechaBreB()"
+        />
+      </div>
+
+      <div
+        id="breb-lista"
+        class="breb-vertical-scroll"
+        style="
+          padding: 12px;
+          overflow-y: auto;
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        "
+      >
+        <div
+          style="
+            color: rgba(255, 255, 255, 0.4);
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            padding: 30px 0;
+          "
+        >
+          Iniciando radar...
+        </div>
+      </div>
+
+      <div
+        style="
+          background: rgba(0, 0, 0, 0.2);
+          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          padding: 10px 12px;
+          text-align: center;
+        "
+      >
+        <span
+          style="
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 10.5px;
+            line-height: 1.3;
+            display: block;
+          "
+        >
+          💡 El radar se actualiza cada 10 min. Para verificar un pago urgente,
+          presiona el botón <b style="color: #0a84ff">azul</b> superior.
+        </span>
+      </div>
+    </div>
+
+    <style>
+      /* Animaciones */
+      @keyframes pulseBreb {
+        0% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.7);
+        }
+        70% {
+          transform: scale(1);
+          box-shadow: 0 0 0 6px rgba(48, 209, 88, 0);
+        }
+        100% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(48, 209, 88, 0);
+        }
+      }
+      @keyframes spinBreb {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .spin-breb-anim {
+        animation: spinBreb 1s linear infinite;
+      }
+
+      /* Scroll Vertical Elegante */
+      .breb-vertical-scroll::-webkit-scrollbar {
+        width: 5px;
+      }
+      .breb-vertical-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .breb-vertical-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+      }
+      .breb-vertical-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Diseño de tarjeta individual de pago */
+      .breb-card {
+        background: linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.06),
+          rgba(255, 255, 255, 0.02)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 10px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transition: background 0.2s;
+        flex-shrink: 0;
+      }
+      .breb-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+    </style>
+
+    <script>
+      // ⚠️ RECUERDA MANTENER TU URL DE APPS SCRIPT AQUÍ
+      const APP_SCRIPT_URL_BREB =
+        "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
+
+      let timerBrebActivo = null;
+
+      function establecerFechaHoy() {
+        const inputFecha = document.getElementById("breb-fecha");
+        if (inputFecha && !inputFecha.value) {
+          const hoy = new Date();
+          const yyyy = hoy.getFullYear();
+          const mm = String(hoy.getMonth() + 1).padStart(2, "0");
+          const dd = String(hoy.getDate()).padStart(2, "0");
+          inputFecha.value = `${yyyy}-${mm}-${dd}`;
+        }
+      }
+
+      function iniciarTemporizadorBreB() {
+        if (timerBrebActivo) {
+          clearInterval(timerBrebActivo);
+        }
+        timerBrebActivo = setInterval(cargarPagosBreB, 600000);
+      }
+
+      function forzarActualizacionBreB() {
+        const icono = document.getElementById("icon-refresh-breb");
+        if (icono) icono.classList.add("spin-breb-anim");
+
+        cargarPagosBreB();
+        iniciarTemporizadorBreB();
+      }
+
+      function alCambiarFechaBreB() {
+        cargarPagosBreB();
+        iniciarTemporizadorBreB();
+      }
+
+      function cargarPagosBreB() {
+        const script = document.createElement("script");
+        const callbackName =
+          "jsonpCallbackBreB_" + Math.round(100000 * Math.random());
+        const fechaSeleccionada = document.getElementById("breb-fecha").value;
+
+        const contenedor = document.getElementById("breb-lista");
+        contenedor.innerHTML = `<div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; padding: 40px 0;">Buscando pagos...</div>`;
+
+        window[callbackName] = function (data) {
+          contenedor.innerHTML = "";
+
+          const icono = document.getElementById("icon-refresh-breb");
+          if (icono) icono.classList.remove("spin-breb-anim");
+
+          if (data.status === "success") {
+            if (data.data.length > 0) {
+              data.data.forEach((pago) => {
+                contenedor.innerHTML += `
+              <div class="breb-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="color: #30d158; font-weight: 800; font-size: 17px;">+$${pago.monto}</span>
+                  <span style="color: rgba(255,255,255,0.7); font-size: 10px; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 6px;">${pago.hora}</span>
+                </div>
+                <div style="color: #ffffff; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+                  👤 ${pago.remitente}
+                </div>
+                <div style="color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 2px;">
+                  📅 ${pago.fecha}
+                </div>
+              </div>
+            `;
+              });
+            } else {
+              contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 12px; padding: 30px 0;">No se detectaron pagos en esta fecha.</div>`;
+            }
+          } else {
+            contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Error de red:<br>${data.message}</div>`;
+          }
+
+          document.body.removeChild(script);
+          delete window[callbackName];
+        };
+
+        const urlFinal = fechaSeleccionada
+          ? `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&fechaBusqueda=${fechaSeleccionada}&callback=${callbackName}`
+          : `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&callback=${callbackName}`;
+
+        script.src = urlFinal;
+        document.body.appendChild(script);
+      }
+
+      establecerFechaHoy();
+      setTimeout(cargarPagosBreB, 500);
+      iniciarTemporizadorBreB();
+    </script>
 
     <script src="logica.js"></script>
   </body>
