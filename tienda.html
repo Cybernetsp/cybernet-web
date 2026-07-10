@@ -243,6 +243,29 @@
     </div>
 
     <main class="main-workspace">
+
+      <!-- 🎬 3. ESTRENOS DE LA SEMANA -->
+      <section class="store-section-box">
+        <div class="section-title-ios">
+          <h2>🔥 Top Estrenos</h2>
+          <p>Toca para añadir la plataforma y ver estas joyas hoy mismo.</p>
+        </div>
+        <!-- El contenedor ahora está vacío y tiene un ID -->
+        <div class="horizontal-scroll-container" id="contenedorEstrenos">
+            <!-- JavaScript inyectará las tarjetas aquí mágicamente -->
+        </div>
+      </section>
+
+      <!-- 🪄 1. BANNER ARMADOR DE COMBOS -->
+      <div class="quiz-banner" onclick="abrirQuiz()">
+        <div class="quiz-banner-icon">🪄</div>
+        <div class="quiz-banner-text">
+          <h3>¿No sabes qué ver?</h3>
+          <p>Arma tu combo ideal</p>
+        </div>
+        <div class="quiz-banner-arrow">→</div>
+      </div>
+      
       <section class="store-section-box">
         <div class="section-title-ios">
           <h2>Arma tu Combo Streaming 🍿</h2>
@@ -568,6 +591,22 @@
 
       </section>
     </main>
+
+    <!-- MODAL DEL QUIZ INTERACTIVO -->
+    <div class="overlay-ios" id="quizOverlay" onclick="cerrarQuiz()"></div>
+    <div class="modal-ios-container" id="quizModal">
+      <div class="modal-ios">
+        <div class="payment-modal-header">
+          <h4 style="font-weight: 800; font-size: 1.1rem; color: var(--ios-blue);">🪄 Armador Mágico</h4>
+          <button class="btn-close-circle" onclick="cerrarQuiz()">✕</button>
+        </div>
+        
+        <div class="payment-scrollable-body" id="quizBody" style="text-align: center;">
+            <!-- Contenido dinámico inyectado por JS -->
+        </div>
+      </div>
+    </div>
+    
 
     <aside class="sheet-ios cart-drawer" id="cartDrawer">
       <div class="sheet-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
