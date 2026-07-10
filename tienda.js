@@ -19,20 +19,16 @@ const PLATAFORMAS_INFO = {
   disney_std: { name: "Disney Estándar", type: "regular", price: 8500 },
   amazon: { name: "Amazon Prime", type: "regular", price: 10500 },
   max: { name: "HBO Max", type: "regular", price: 8500 },
-  paramount: { name: "Paramount+", type: "regular", price: 15000 },
+  paramount: { name: "Paramount+", type: "regular", price: 10000 },
   vix: { name: "Vix+", type: "regular", price: 8500 },
   plex: { name: "Plex TV", type: "regular", price: 8500 },
   crunchy: { name: "Crunchyroll", type: "regular", price: 8500 },
   apple: { name: "Apple TV+", type: "regular", price: 8500 },
   universal: { name: "Universal+", type: "regular", price: 8500 },
-  iptv: { name: "IPTV Smarters", type: "regular", price: 10000 }, // ADICIONADO
-  flujo: { name: "Flujo TV", type: "regular", price: 12000 }, // ADICIONADO
-  emby: { name: "Emby", type: "regular", price: 12000 }, // ADICIONADO
   canva: { name: "Canva Pro", type: "addon", price: 20000 },
   spotify: { name: "Spotify Premium", type: "addon", price: 14000 },
   yt: { name: "YouTube Premium", type: "addon", price: 14000 },
   deezer: { name: "Deezer", type: "addon", price: 12000 },
-  metegol: { name: "Metegol", type: "addon", price: 15000 },
 };
 
 // Base de Datos de Ofertas Variadas de Retención
@@ -72,6 +68,15 @@ const PROMOS_RELAMPAGO = [
     texto:
       "✨ <strong>Disney+ Premium (1 Mes)</strong> por solo <strong>$13.000</strong> (Normal: $15.000) 💠<br><br>¡Acceso Completo con ESPN y Sin Anuncios a precio de locura!",
     msjWhatsapp: "Disney+ Premium (1 Mes) a $13.000",
+  },
+  {
+    id: "p5",
+    items: ["max", "paramount"],
+    meses: 1,
+    precio: 9900,
+    texto:
+      "🔥 <strong>HBO Max + Paramount+</strong> por solo <strong>$9.900</strong> (Normal: $16.500) 🚀<br><br>¡Doble plataforma al precio de una, solo por 30 segundos!",
+    msjWhatsapp: "Dúo HBO Max + Paramount a $9.900",
   },
   {
     id: "p6",
@@ -166,14 +171,11 @@ function simularPrecioCart(tempCart, meses) {
   const itemNetflix = tempCart.find((i) => i.type === "netflix");
   const itemDisneyPrem = tempCart.find((i) => i.type === "disney_prem");
 
-  // Extracción de plataformas con lógicas de descuento aisladas de $2.000 fijos
+  // Extracción de plataformas con lógicas de descuento aisladas
   const itemParamount = tempCart.find((i) => i.id === "paramount");
-  const itemIptv = tempCart.find((i) => i.id === "iptv");
-  const itemFlujo = tempCart.find((i) => i.id === "flujo");
-  const itemEmby = tempCart.find((i) => i.id === "emby");
 
   // Filtramos las especiales para que no interfieran en los cálculos del combo base de básicas
-  const lasEspecialesIds = ["paramount", "iptv", "flujo", "emby"];
+  const lasEspecialesIds = ["paramount"];
   const regularPlats = tempCart.filter(
     (i) => i.type === "regular" && !lasEspecialesIds.includes(i.id),
   );
@@ -248,15 +250,10 @@ function simularPrecioCart(tempCart, meses) {
     }
   }
 
-  // ⚡ INYECTOR DE LA NUEVA MATEMÁTICA EN CADENA: Rebaja fijos $2.000 si hay combo o entre ellas
+  // ⚡ INYECTOR DE LA NUEVA MATEMÁTICA EN CADENA: Rebaja fijos si hay combo o entre ellas
   let colaEspeciales = [];
   if (itemParamount)
-    colaEspeciales.push({ name: "Paramount", full: 15000, combo: 10000 });
-  if (itemIptv) colaEspeciales.push({ name: "IPTV", full: 10000, combo: 8000 });
-  if (itemFlujo)
-    colaEspeciales.push({ name: "Flujo TV", full: 12000, combo: 10000 });
-  if (itemEmby)
-    colaEspeciales.push({ name: "Emby", full: 12000, combo: 10000 });
+    colaEspeciales.push({ name: "Paramount", full: 15000, combo: 13000 });
 
   colaEspeciales.forEach((esp) => {
     if (precioBase === 0) {
@@ -279,10 +276,7 @@ function simularPrecioCart(tempCart, meses) {
             sum + (PRECIOS_NETFLIX[item.pantallas] - PRECIOS_NETFLIX[1]) * meses
           );
         if (item.id === "disney_prem") return sum + extra * 7000 * meses;
-        if (item.id === "paramount" || item.id === "iptv")
-          return sum + extra * 10000 * meses;
-        if (item.id === "flujo" || item.id === "emby")
-          return sum + extra * 10000 * meses;
+        if (item.id === "paramount") return sum + extra * 8000 * meses;
         return sum + extra * 4000 * meses;
       }
       return sum;
@@ -556,7 +550,7 @@ function confirmarPagoYEnviar() {
 }
 
 function copiarLlave() {
-  const numeroLlave = "0090878219";
+  const numeroLlave = "1007416341";
   navigator.clipboard.writeText(numeroLlave).then(() => {
     const btn = document.getElementById("btnCopiarLlave");
     if (btn) {
@@ -608,7 +602,7 @@ function confirmarPagoTutorial() {
 }
 
 function copyLlaveTutorial() {
-  const numeroLlave = "0090878219";
+  const numeroLlave = "1007416341";
   navigator.clipboard.writeText(numeroLlave).then(() => {
     const btn = document.getElementById("btnCopiarLlaveTutorial");
     if (btn) {
@@ -878,6 +872,29 @@ function cerrarCarrito() {
   limpiarTodosLosOverlays();
 }
 
+// 🗑️ FUNCIÓN PARA VACIAR TODO EL CARRITO DE GOLPE
+function vaciarCarrito() {
+  haptic();
+
+  if (carrito.length === 0) return; // Si ya está vacío, no hace nada
+
+  // 1. Vaciamos la memoria del carrito
+  carrito = [];
+
+  // 2. Buscamos todos los botones que están en estado "Quitar" (btn-added)
+  const botonesActivos = document.querySelectorAll(".btn-add-store.btn-added");
+
+  // 3. Los recorremos y los regresamos a su estado original
+  botonesActivos.forEach((btn) => {
+    btn.classList.remove("btn-added");
+    btn.innerText = "Añadir";
+  });
+
+  // 4. Actualizamos la interfaz del carrito y reseteamos promos
+  promoAplicadaEnCarrito = null;
+  actualizarCarrito();
+}
+
 // ASISTENTE DE SOPORTE VIRTUAL
 function toggleChat() {
   haptic();
@@ -966,14 +983,9 @@ function verificarStockDesdeMemoria() {
     "btn_crunchy",
     "apple",
     "btn_universal",
-    "btn_iptv",
-    "btn_flujo",
-    "btn_emby",
     "btn_canva",
     "btn_spotify",
     "btn_yt",
-    "btn_deezer",
-    "btn_metegol",
   ];
 
   idsPlataformas.forEach((id) => {
