@@ -477,7 +477,7 @@ function actualizarCarrito() {
     }
   }
 
-  // ⚡ INTERCEPTADOR DE LA CAJA MISTERIOSA (COMPRA OBLIGATORIA, NO ACUMULABLE)
+  // ⚡ INTERCEPTADOR DE LA CAJA MISTERIOSA (COMPRA OBLIGATORIA, NO ACUMULABLE, PROTECCIÓN DE MARGEN)
   let descuentoMisterioso = 0;
   
   // Contamos cuántos productos pagados hay en el carrito (excluyendo el ID del premio gratuito si aplica)
@@ -502,17 +502,33 @@ function actualizarCarrito() {
           }
           if (rowRegalo) rowRegalo.querySelector(".td-cell").innerHTML = "🎁 Regalo (No acumulable con Oferta Relámpago)";
           
-          descuentoMisterioso = 0; // Forzamos a que el descuento sea cero pesos
+          descuentoMisterioso = 0; 
       } 
-      // CONDICIÓN NORMAL: Debe tener al menos un producto adicional comprado
+      // CONDICIÓN NORMAL: Debe tener al menos un producto adicional comprado para activar el regalo
       else if (productosPrincipalesEnCarrito > 0) {
           if (window.regaloMisteriosoAplicado.tipo === "descuento") {
               descuentoMisterioso = window.regaloMisteriosoAplicado.valor;
-          } else if (window.regaloMisteriosoAplicado.tipo === "gratis") {
-              const itemGratis = carrito.find(i => i.id === window.regaloMisteriosoAplicado.valor);
-              if (itemGratis) { descuentoMisterioso = itemGratis.price; } 
+              totalNetoFinal -= descuentoMisterioso;
+          } 
+          else if (window.regaloMisteriosoAplicado.tipo === "gratis") {
+              // 🛡️ PROTECCIÓN DE MARGEN: Clonamos el carrito y removemos el regalo para ver el valor real de los productos pagos
+              let carritoClonadoSinRegalo = JSON.parse(JSON.stringify(carrito));
+              let idx = carritoClonadoSinRegalo.findIndex(i => i.id === window.regaloMisteriosoAplicado.valor);
+              if (idx > -1) {
+                  if (carritoClonadoSinRegalo[idx].pantallas > 1) {
+                      carritoClonadoSinRegalo[idx].pantallas -= 1;
+                  } else {
+                      carritoClonadoSinRegalo.splice(idx, 1);
+                  }
+              }
+              
+              // Calculamos cuánto debería pagar de forma limpia únicamente por sus productos pagos
+              let resultadoSinRegalo = simularPrecioCart(carritoClonadoSinRegalo, meses);
+              
+              // El descuento será la diferencia exacta para obligar al TOTAL NETO a dar el valor real de los productos de pago
+              descuentoMisterioso = totalNetoFinal - resultadoSinRegalo.netoFinal;
+              totalNetoFinal = resultadoSinRegalo.netoFinal;
           }
-          totalNetoFinal -= descuentoMisterioso;
           
           if (lblRegalo) {
               lblRegalo.innerText = "-$" + descuentoMisterioso.toLocaleString("es-CO");
@@ -520,7 +536,7 @@ function actualizarCarrito() {
           }
           if (rowRegalo) rowRegalo.querySelector(".td-cell").innerHTML = "🎁 Regalo de la Caja (Activo)";
       } else {
-          // Si el carrito está vacío
+          // Si el carrito no cumple los requisitos (está vacío o solo tiene el regalo suelto)
           if (lblRegalo) {
               lblRegalo.innerText = "Inactivo";
               lblRegalo.style.color = "var(--ios-red)";
