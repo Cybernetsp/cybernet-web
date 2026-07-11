@@ -319,12 +319,18 @@ function actualizarCarrito() {
 
   if (!container) return;
 
+  // 🛑 CORRECCIÓN: Si el carrito está vacío, limpia la interfaz y oculta las filas especiales antes de salir
   if (carrito.length === 0) {
     container.innerHTML = `<div class="empty-cart-msg">Tu carrito está vacío. Empieza a añadir plataformas.</div>`;
     if (checkoutPanel) checkoutPanel.style.display = "none";
     if (actionContainer) actionContainer.style.display = "none";
     promoAplicadaEnCarrito = null;
-    return;
+    
+    const rowRegalo = document.getElementById("row_regalo_misterioso");
+    if (rowRegalo) rowRegalo.style.display = "none";
+    
+    localStorage.setItem("cyber_carrito", JSON.stringify(carrito));
+    return; 
   }
 
   let htmlItems = "";
@@ -458,7 +464,7 @@ function actualizarCarrito() {
       const lblDescMesesEl = document.getElementById("lblDescMeses");
       if (lblDescMesesEl)
         lblDescMesesEl.innerText =
-          "-$" + resultadoNormal.descVigencia.toLocaleString("es-CO");
+          "-$ + " + resultadoNormal.descVigencia.toLocaleString("es-CO");
     } else {
       rowDescMeses.style.display = "none";
     }
@@ -477,10 +483,8 @@ function actualizarCarrito() {
     }
   }
 
-  // ⚡ INTERCEPTADOR DE LA CAJA MISTERIOSA (COMPRA OBLIGATORIA, NO ACUMULABLE, PROTECCIÓN DE MARGEN)
+  // ⚡ INTERCEPTADOR DE LA CAJA MISTERIOSA (CON PARÁMETROS SEGUROS DE MARGEN)
   let descuentoMisterioso = 0;
-  
-  // Contamos cuántos productos pagados hay en el carrito (excluyendo el ID del premio gratuito si aplica)
   let productosPrincipalesEnCarrito = carrito.filter(item => {
       if (window.regaloMisteriosoAplicado && window.regaloMisteriosoAplicado.tipo === "gratis") {
           return item.id !== window.regaloMisteriosoAplicado.valor;
@@ -494,53 +498,31 @@ function actualizarCarrito() {
   if (window.regaloMisteriosoAplicado && window.tiempoRestanteRegalo > 0) {
       if (rowRegalo) rowRegalo.style.display = "flex";
       
-      // 🔥 REGLA DE NO ACUMULACIÓN: Si ya hay un descuento por Oferta Relámpago activo, bloqueamos el regalo
       if (descuentoPorPromo > 0) {
-          if (lblRegalo) {
-              lblRegalo.innerText = "No acumulable";
-              lblRegalo.style.color = "var(--ios-orange)";
-          }
+          if (lblRegalo) { lblRegalo.innerText = "No acumulable"; lblRegalo.style.color = "var(--ios-orange)"; }
           if (rowRegalo) rowRegalo.querySelector(".td-cell").innerHTML = "🎁 Regalo (No acumulable con Oferta Relámpago)";
-          
           descuentoMisterioso = 0; 
       } 
-      // CONDICIÓN NORMAL: Debe tener al menos un producto adicional comprado para activar el regalo
       else if (productosPrincipalesEnCarrito > 0) {
           if (window.regaloMisteriosoAplicado.tipo === "descuento") {
               descuentoMisterioso = window.regaloMisteriosoAplicado.valor;
               totalNetoFinal -= descuentoMisterioso;
           } 
           else if (window.regaloMisteriosoAplicado.tipo === "gratis") {
-              // 🛡️ PROTECCIÓN DE MARGEN: Clonamos el carrito y removemos el regalo para ver el valor real de los productos pagos
               let carritoClonadoSinRegalo = JSON.parse(JSON.stringify(carrito));
               let idx = carritoClonadoSinRegalo.findIndex(i => i.id === window.regaloMisteriosoAplicado.valor);
               if (idx > -1) {
-                  if (carritoClonadoSinRegalo[idx].pantallas > 1) {
-                      carritoClonadoSinRegalo[idx].pantallas -= 1;
-                  } else {
-                      carritoClonadoSinRegalo.splice(idx, 1);
-                  }
+                  if (carritoClonadoSinRegalo[idx].pantallas > 1) { carritoClonadoSinRegalo[idx].pantallas -= 1; } 
+                  else { carritoClonadoSinRegalo.splice(idx, 1); }
               }
-              
-              // Calculamos cuánto debería pagar de forma limpia únicamente por sus productos pagos
               let resultadoSinRegalo = simularPrecioCart(carritoClonadoSinRegalo, meses);
-              
-              // El descuento será la diferencia exacta para obligar al TOTAL NETO a dar el valor real de los productos de pago
               descuentoMisterioso = totalNetoFinal - resultadoSinRegalo.netoFinal;
               totalNetoFinal = resultadoSinRegalo.netoFinal;
           }
-          
-          if (lblRegalo) {
-              lblRegalo.innerText = "-$" + descuentoMisterioso.toLocaleString("es-CO");
-              lblRegalo.style.color = "var(--ios-green)";
-          }
+          if (lblRegalo) { lblRegalo.innerText = "-$" + descuentoMisterioso.toLocaleString("es-CO"); lblRegalo.style.color = "var(--ios-green)"; }
           if (rowRegalo) rowRegalo.querySelector(".td-cell").innerHTML = "🎁 Regalo de la Caja (Activo)";
       } else {
-          // Si el carrito no cumple los requisitos (está vacío o solo tiene el regalo suelto)
-          if (lblRegalo) {
-              lblRegalo.innerText = "Inactivo";
-              lblRegalo.style.color = "var(--ios-red)";
-          }
+          if (lblRegalo) { lblRegalo.innerText = "Inactivo"; lblRegalo.style.color = "var(--ios-red)"; }
           if (rowRegalo) rowRegalo.querySelector(".td-cell").innerHTML = "🎁 Regalo (Añade otra plataforma para activar)";
       }
   } else {
@@ -551,15 +533,11 @@ function actualizarCarrito() {
   const lblTotalEl = document.getElementById("lblTotal");
   if (lblTotalEl) lblTotalEl.innerText = totalFormateado;
 
-  if (document.getElementById("lblTotalPagoModal"))
-    document.getElementById("lblTotalPagoModal").innerText = totalFormateado;
-  if (document.getElementById("lblTotalTutorialModal"))
-    document.getElementById("lblTotalTutorialModal").innerText =
-      totalFormateado;
-  if (document.getElementById("lblTotalAlternativeModal"))
-    document.getElementById("lblTotalAlternativeModal").innerText =
-      totalFormateado;
-      localStorage.setItem("cyber_carrito", JSON.stringify(carrito));
+  if (document.getElementById("lblTotalPagoModal")) document.getElementById("lblTotalPagoModal").innerText = totalFormateado;
+  if (document.getElementById("lblTotalTutorialModal")) document.getElementById("lblTotalTutorialModal").innerText = totalFormateado;
+  if (document.getElementById("lblTotalAlternativeModal")) document.getElementById("lblTotalAlternativeModal").innerText = totalFormateado;
+
+  localStorage.setItem("cyber_carrito", JSON.stringify(carrito));
 }
 
 function limpiarTodosLosOverlays() {
@@ -1865,6 +1843,7 @@ function iniciarRelojRegalo() {
 
 function aplicarRegaloYIrAlCarrito() {
     haptic();
+    
     if (window.regaloMisteriosoAplicado.tipo === "gratis") {
         const idPlat = window.regaloMisteriosoAplicado.valor;
         if (!carrito.find(i => i.id === idPlat)) {
@@ -1882,13 +1861,26 @@ function aplicarRegaloYIrAlCarrito() {
             }
         }
     }
+    
     actualizarCarrito();
     cerrarModalRegalo();
+    
+    // 🔥 SOLO AQUÍ: Abrimos el carrito y lanzamos la alerta cuando el cliente hace el clic manual
     abrirCarrito();
+    
+    let productosReales = carrito.filter(item => {
+        return window.regaloMisteriosoAplicado.tipo === "gratis" ? item.id !== window.regaloMisteriosoAplicado.valor : true;
+    }).length;
+
+    if (productosReales > 0) {
+        triggerToast("🎁 ¡Regalo activado y aplicado con éxito!");
+    } else {
+        triggerToast("⚠️ ¡Regalo preparado! Añade otra plataforma para activarlo.");
+    }
 }
 
 function cargarMemoriaTienda() {
-    // Restaurar Carrito
+    // 1. Restaurar Carrito de forma silenciosa
     const carritoGuardado = localStorage.getItem("cyber_carrito");
     if (carritoGuardado) {
         carrito = JSON.parse(carritoGuardado);
@@ -1898,7 +1890,7 @@ function cargarMemoriaTienda() {
         });
     }
 
-    // Comprobar Bloqueo Diario
+    // 2. Comprobar si ya reclamó el regalo el día de hoy
     const hoy = new Date().toLocaleDateString('es-CO');
     const fechaRegaloReclamado = localStorage.getItem("cyber_gift_claimed_date");
     if (fechaRegaloReclamado === hoy) {
@@ -1910,7 +1902,7 @@ function cargarMemoriaTienda() {
         }
     }
 
-    // Restaurar Cronómetro del Regalo
+    // 3. Restaurar cronómetro activo de forma pasiva (SIN ABRIR PANELS NI LANZAR TOASTS)
     const regaloActivoGuardado = localStorage.getItem("cyber_active_gift");
     const regaloExpiracion = localStorage.getItem("cyber_gift_expires_at");
     if (regaloActivoGuardado && regaloExpiracion) {
@@ -1923,20 +1915,11 @@ function cargarMemoriaTienda() {
         } else {
             localStorage.removeItem("cyber_active_gift");
             localStorage.removeItem("cyber_gift_expires_at");
+            window.regaloMisteriosoAplicado = null;
         }
-    }    
-    actualizarCarrito();
-    cerrarModalRegalo();
-    abrirCarrito();
-    
-    let productosReales = carrito.filter(item => {
-        return window.regaloMisteriosoAplicado.tipo === "gratis" ? item.id !== window.regaloMisteriosoAplicado.valor : true;
-    }).length;
-
-    if (productosReales > 0) {
-        triggerToast("🎁 ¡Regalo activado y aplicado con éxito!");
-    } else {
-        triggerToast("⚠️ ¡Regalo preparado! Añade otra plataforma para activarlo.");
     }
+    
+    // Pintamos la interfaz silenciosamente
+    actualizarCarrito();
 }
 
