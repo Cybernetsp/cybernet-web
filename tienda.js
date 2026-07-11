@@ -1115,19 +1115,22 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 // =========================================================================
-// 🎬 FUNCIÓN PARA AÑADIR DESDE LOS ESTRENOS DE LA SEMANA
+// 🎬 FUNCIÓN PARA AÑADIR DESDE LOS ESTRENOS DE LA SEMANA (CORREGIDA)
 // =========================================================================
 function agregarDesdeEstreno(id, nombre, btnId, priceBase) {
   haptic();
-  // Reutilizamos tu función original para no romper la lógica de combos
   const btnReal = document.getElementById(btnId);
 
   // Si no está en el carrito, lo agregamos
   if (!carrito.find((i) => i.id === id)) {
+    
+    // 🔍 SOLUCIÓN: Extrae el tipo exacto e inteligente desde PLATAFORMAS_INFO
+    const tipoReal = PLATAFORMAS_INFO[id] ? PLATAFORMAS_INFO[id].type : "regular";
+
     toggleItem(
       id,
       nombre,
-      id === "disney_prem" ? "disney_prem" : "regular",
+      tipoReal, // Inyecta el tipo real ('netflix', 'disney_prem', 'regular')
       priceBase,
       btnReal,
     );
