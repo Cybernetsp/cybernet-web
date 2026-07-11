@@ -1077,3 +1077,89 @@ select.select-vigencia-store option {
   text-align: center;
   line-height: 1.2;
 }
+
+/* =========================================
+   🎁 CAJA MISTERIOSA DIARIA (GAMIFICACIÓN)
+   ========================================= */
+.gift-banner {
+  background: linear-gradient(135deg, #bf5af2 0%, #5e5ce6 100%);
+  border-radius: 24px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(191, 90, 242, 0.3);
+  transition: var(--transition-spring);
+  color: white;
+  margin-bottom: 20px;
+}
+.gift-banner:active { transform: scale(0.96); }
+.gift-banner-icon { font-size: 2rem; animation: gentleWobble 4s ease-in-out infinite; }
+.gift-banner-text h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; }
+.gift-banner-text p { font-size: 0.85rem; opacity: 0.9; }
+
+/* Animación de la caja dentro del Modal */
+.box-visual-container {
+  font-size: 5.5rem;
+  margin: 20px 0;
+  display: inline-block;
+  transition: transform 0.3s;
+}
+.box-shake-animation {
+  animation: intenseShake 0.5s ease-in-out infinite;
+}
+
+/* Keyframes de Animaciones Apple */
+@keyframes gentleWobble {
+  0%, 100% { transform: rotate(0deg); }
+  5%, 15% { transform: rotate(-10deg) scale(1.1); }
+  10%, 20% { transform: rotate(10deg) scale(1.1); }
+  25% { transform: rotate(0deg); }
+}
+@keyframes intenseShake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(-8px) rotate(-5deg); }
+  40% { transform: translateX(6px) rotate(5deg); }
+  60% { transform: translateX(-5px) rotate(-3deg); }
+  80% { transform: translateX(4px) rotate(3deg); }
+}
+
+/* Reloj de expiración del regalo */
+.gift-countdown-box {
+  background: rgba(255, 69, 58, 0.1);
+  border: 0.5px solid rgba(255, 69, 58, 0.2);
+  padding: 8px 14px;
+  border-radius: 12px;
+  color: var(--ios-red);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-top: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+/* =========================================================================
+   🔲 ALINEACIÓN HORIZONTAL DE BANNERS INTERACTIVOS (QUIZ + RECOMPENSA)
+   ========================================================================= */
+.banners-interactive-row {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+  margin-bottom: 25px; /* Controla el espacio con lo que viene abajo */
+}
+
+/* Forzamos a que ambos banners hereden el mismo ancho exacto */
+.banners-interactive-row .quiz-banner,
+.banners-interactive-row .gift-banner {
+  flex: 1;
+  margin-bottom: 0 !important; /* Limpiamos el margen viejo para que no descuadre */
+}
+
+/* 📱 Regla Responsive: En celulares se vuelven a acomodar verticalmente para que el texto quepa completo */
+@media (max-width: 768px) {
+  .banners-interactive-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
