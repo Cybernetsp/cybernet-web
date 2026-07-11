@@ -1737,17 +1737,18 @@ function iniciarAutoScrollEstrenos() {
     }, 3000); // 3000ms = Se mueve automáticamente cada 3 segundos
 }
 
-// =========================================================================
+// // =========================================================================
 // 🎁 SISTEMA DE CAJA MISTERIOSA (CON REGLA DE COMPRA OBLIGATORIA Y MEMORIA)
 // =========================================================================
 window.regaloMisteriosoAplicado = null;
 window.tiempoRestanteRegalo = 900; 
 let regaloCountdownInterval = null;
 
-// 🚫 Ajustado: Fuera Paramount+. Ahora rifa Descuentos, Vix+, HBO Max, Disney Std y Plex TV.
+// 🚫 Ruleta de premios autorizados (Vix, Max, Disney Std, Plex y Descuentos)
 const LISTA_REGALOS_CYBERNET = [
     { id: "r1", tipo: "descuento", valor: 1000, texto: "🎟️ ¡Genial! Ganaste <strong>$1.000 COP</strong> de rebaja total. _(Requiere llevar al menos 1 plataforma de la tienda)_.", msjWhatsapp: "$1.000 de descuento neto" },
     { id: "r2", tipo: "descuento", valor: 2000, texto: "🎟️ ¡Mega Descuento! Ganaste <strong>$2.000 COP</strong> de rebaja total. _(Requiere llevar al menos 1 plataforma de la tienda)_.", msjWhatsapp: "$2.000 de descuento neto" },
+    { id: "r3", tipo: "descuento", valor: 3000, texto: "🎟️ ¡Premio Máximo en Plata! Ganaste <strong>$3.000 COP</strong> de rebaja total. _(Requiere llevar al menos 1 plataforma de la tienda)_.", msjWhatsapp: "$3.000 de descuento neto" },
     { id: "r4", tipo: "gratis", valor: "vix", texto: "⚽ ¡Premio Especial! Ganaste 1 mes de <strong>Vix+ completamente GRATIS</strong>. _(Se activará únicamente al comprar otra plataforma adicional)_.", msjWhatsapp: "¡Vix+ Gratis por 1 Mes!" },
     { id: "r5", tipo: "gratis", valor: "max", texto: "💜 ¡Premio Especial! Ganaste 1 mes de <strong>HBO Max completamente GRATIS</strong>. _(Se activará únicamente al comprar otra plataforma adicional)_.", msjWhatsapp: "¡HBO Max Gratis por 1 Mes!" },
     { id: "r6", tipo: "gratis", valor: "disney_std", texto: "🏰 ¡Premio Especial! Ganaste 1 mes de <strong>Disney Estándar completamente GRATIS</strong>. _(Se activará únicamente al comprar otra plataforma adicional)_.", msjWhatsapp: "¡Disney Estándar Gratis por 1 Mes!" },
@@ -1757,7 +1758,7 @@ const LISTA_REGALOS_CYBERNET = [
 function abrirModalRegalo() {
     haptic();
     
-    // 🔒 DOBLE CANDADO: Si la fecha guardada en memoria es igual a hoy, frena la ejecución de golpe
+    // 🔒 DOBLE CANDADO: Si ya jugó hoy, frena la ejecución de golpe
     const hoy = new Date().toLocaleDateString('es-CO');
     if (localStorage.getItem("cyber_gift_claimed_date") === hoy) {
         triggerToast("⚠️ Ya reclamaste tu regalo de hoy. ¡Vuelve mañana!");
@@ -1791,11 +1792,11 @@ function animarYAbrirCaja() {
         window.regaloMisteriosoAplicado = premioGanado;
         window.tiempoRestanteRegalo = 900; 
         
-        // 🔒 MEMORIA: Bloquear juego por el día de hoy guardando la fecha actual
+        // 🔒 Guardar fecha para el bloqueo diario
         const hoy = new Date().toLocaleDateString('es-CO');
         localStorage.setItem("cyber_gift_claimed_date", hoy);
         
-        // 💾 MEMORIA: Guardar estado del premio activo y hora exacta de expiración mundial
+        // 💾 Guardar datos del cronómetro activo por si recarga
         localStorage.setItem("cyber_active_gift", JSON.stringify(premioGanado));
         localStorage.setItem("cyber_gift_expires_at", (Date.now() + 900 * 1000).toString());
         
@@ -1837,8 +1838,7 @@ function iniciarRelojRegalo() {
         
         if (window.tiempoRestanteRegalo <= 0) {
             clearInterval(regaloCountdownInterval);
-            window.regaloMisteriosoAplicado = null;
-            // Limpiamos memoria del cronómetro expirado
+            window.regaloMisteriosoAplicated = null;
             localStorage.removeItem("cyber_active_gift");
             localStorage.removeItem("cyber_gift_expires_at");
             actualizarCarrito();
@@ -1849,7 +1849,6 @@ function iniciarRelojRegalo() {
 
 function aplicarRegaloYIrAlCarrito() {
     haptic();
-    
     if (window.regaloMisteriosoAplicado.tipo === "gratis") {
         const idPlat = window.regaloMisteriosoAplicado.valor;
         if (!carrito.find(i => i.id === idPlat)) {
@@ -1867,7 +1866,49 @@ function aplicarRegaloYIrAlCarrito() {
             }
         }
     }
-    
+    actualizarCarrito();
+    cerrarModalRegalo();
+    abrirCarrito();
+}
+
+function cargarMemoriaTienda() {
+    // Restaurar Carrito
+    const carritoGuardado = localStorage.getItem("cyber_carrito");
+    if (carritoGuardado) {
+        carrito = JSON.parse(carritoGuardado);
+        carrito.forEach(item => {
+            let btn = document.getElementById("btn_" + item.id) || document.getElementById(item.id);
+            if (btn) { btn.classList.add("btn-added"); btn.innerText = "Quitar"; }
+        });
+    }
+
+    // Comprobar Bloqueo Diario
+    const hoy = new Date().toLocaleDateString('es-CO');
+    const fechaRegaloReclamado = localStorage.getItem("cyber_gift_claimed_date");
+    if (fechaRegaloReclamado === hoy) {
+        const bannerTienda = document.getElementById("cyberGiftBanner");
+        if (bannerTienda) {
+            bannerTienda.style.opacity = "0.5";
+            bannerTienda.style.pointerEvents = "none";
+            bannerTienda.querySelector("p").innerText = "Ya reclamaste tu recompensa por el día de hoy";
+        }
+    }
+
+    // Restaurar Cronómetro del Regalo
+    const regaloActivoGuardado = localStorage.getItem("cyber_active_gift");
+    const regaloExpiracion = localStorage.getItem("cyber_gift_expires_at");
+    if (regaloActivoGuardado && regaloExpiracion) {
+        const tiempoAhora = Date.now();
+        const expiraAt = parseInt(regaloExpiracion);
+        if (expiraAt > tiempoAhora) {
+            window.regaloMisteriosoAplicado = JSON.parse(regaloActivoGuardado);
+            window.tiempoRestanteRegalo = Math.floor((expiraAt - tiempoAhora) / 1000);
+            iniciarRelojRegalo();
+        } else {
+            localStorage.removeItem("cyber_active_gift");
+            localStorage.removeItem("cyber_gift_expires_at");
+        }
+    }    
     actualizarCarrito();
     cerrarModalRegalo();
     abrirCarrito();
@@ -1883,59 +1924,3 @@ function aplicarRegaloYIrAlCarrito() {
     }
 }
 
-// =========================================================================
-// 💾 MOTOR DE MEMORIA LOCAL (RESTALURADOR DE SESIÓN CYBERNET)
-// =========================================================================
-function cargarMemoriaTienda() {
-    // 1. Restaurar los productos del Carrito
-    const carritoGuardado = localStorage.getItem("cyber_carrito");
-    if (carritoGuardado) {
-        carrito = JSON.parse(carritoGuardado);
-        
-        // Sincronizamos visualmente los botones "Añadir/Quitar" de la rejilla principal
-        carrito.forEach(item => {
-            let btn = document.getElementById("btn_" + item.id) || document.getElementById(item.id);
-            if (btn) {
-                btn.classList.add("btn-added");
-                btn.innerText = "Quitar";
-            }
-        });
-    }
-
-    // 2. Comprobar si ya reclamó el regalo de la Caja Misteriosa el día de hoy
-    const hoy = new Date().toLocaleDateString('es-CO');
-    const fechaRegaloReclamado = localStorage.getItem("cyber_gift_claimed_date");
-    
-    if (fechaRegaloReclamado === hoy) {
-        const bannerTienda = document.getElementById("cyberGiftBanner");
-        if (bannerTienda) {
-            bannerTienda.style.opacity = "0.5";
-            bannerTienda.style.pointerEvents = "none";
-            bannerTienda.querySelector("p").innerText = "Ya reclamaste tu recompensa por el día de hoy";
-        }
-    }
-
-    // 3. Restaurar cronómetro del regalo activo (por si refrescó la página en los 15 minutos)
-    const regaloActivoGuardado = localStorage.getItem("cyber_active_gift");
-    const regaloExpiracion = localStorage.getItem("cyber_gift_expires_at");
-
-    if (regaloActivoGuardado && regaloExpiracion) {
-        const tiempoAhora = Date.now();
-        const expiraAt = parseInt(regaloExpiracion);
-
-        if (expiraAt > tiempoAhora) {
-            // El regalo sigue vigente, recalculamos los segundos restantes
-            window.regaloMisteriosoAplicado = JSON.parse(regActiveG = regaloActivoGuardado);
-            window.tiempoRestanteRegalo = Math.floor((expiraAt - tiempoAhora) / 1000);
-            iniciarRelojRegalo();
-        } else {
-            // Expiró mientras la página estaba cerrada, lo limpiamos
-            localStorage.removeItem("cyber_active_gift");
-            localStorage.removeItem("cyber_gift_expires_at");
-            window.regaloMisteriosoAplicado = null;
-        }
-    }
-    
-    // Ejecutamos el recalculador matemático para pintar la interfaz con los datos viejos
-    actualizarCarrito();
-}
