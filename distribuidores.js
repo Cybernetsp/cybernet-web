@@ -22,7 +22,7 @@ const PLATAFORMAS_MANUALES = [
 ];
 
 // =========================================================================
-// 🎨 CATÁLOGO DE PRODUCTOS (Imágenes Nativas y Google Proxy Anti-Adblock)
+// 🎨 CATÁLOGO DE PRODUCTOS ACTUALIZADO (MUBI, METEGOL Y DEEZER ELIMINADOS)
 // =========================================================================
 const catálogoProductos = [
   {
@@ -122,27 +122,6 @@ const catálogoProductos = [
     precio: 7000,
     color: "#ff37a6",
     logo: `<img src="https://img.icons8.com/color/512/tv.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
-  },
-  {
-    id: "METEGOL",
-    nombre: "Metegol TV",
-    precio: 12000,
-    color: "#52c41a",
-    logo: `<img src="https://img.icons8.com/color/512/retro-tv.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
-  },
-  {
-    id: "DEEZER",
-    nombre: "Deezer Music",
-    precio: 8000,
-    color: "#ff2a6d",
-    logo: `<img src="https://img.icons8.com/color/512/deezer.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
-  },
-  {
-    id: "MUBI",
-    nombre: "MUBI Cine",
-    precio: 3000,
-    color: "#00f5ff",
-    logo: `<img src="https://www.google.com/s2/favicons?domain=mubi.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); border-radius: 8px;">`,
   },
 ];
 
@@ -779,6 +758,26 @@ function agregarAlCarrito(id) {
   triggerToast(`🛒 ${prod.nombre} añadido.`);
   actualizarCarritoUI();
 
+  // 🔥 NUEVA INTERACCIÓN VISUAL ADAPTATIVA
+  const btn = document.getElementById(`btn-add-${id}`);
+  if (btn) {
+    const textoOriginal = btn.innerHTML;
+
+    // Encendemos la animación y cambiamos el estado visual temporalmente
+    btn.classList.add("btn-pop-anim");
+    btn.innerHTML = "✓ Añadido";
+    btn.style.setProperty("background", "var(--ios-green)", "important");
+    btn.style.setProperty("color", "#ffffff", "important");
+
+    // Esperamos 800ms para que el usuario asimile el cambio y regresamos al estado base
+    setTimeout(() => {
+      btn.classList.remove("btn-pop-anim");
+      btn.innerHTML = textoOriginal;
+      btn.style.background = "";
+      btn.style.color = "";
+    }, 800);
+  }
+
   const fab = document.getElementById("fabCarrito");
   if (fab) {
     fab.style.transform = "scale(1.1)";
@@ -939,9 +938,9 @@ function actualizarCarritoUI() {
   const totalDisplay = document.getElementById("cartTotalCost");
   const btnCheckout = document.getElementById("btnCheckoutShop");
 
-  if (window.carrito.length === 0) {
+  if (!window.carrito || window.carrito.length === 0) {
     if (container)
-      container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 20px 0;">Tu carrito está vacío.</div>`;
+      container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; padding: 30px 0; font-weight: 600;">Tu carrito está vacío.</div>`;
     if (countBadge) countBadge.innerText = "0";
     if (fabBadge) fabBadge.innerText = "0";
     if (totalDisplay) totalDisplay.innerText = "$0";
@@ -966,12 +965,12 @@ function actualizarCarritoUI() {
       let btnColor = item.correoReno ? "var(--ios-green)" : "var(--ios-orange)";
 
       opcionesReno = `
-          <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px; width: 100%; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
+          <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px; width: 100%; border-top: 1px dashed var(--surface-border); padding-top: 10px;">
               <select class="input-ios" style="margin: 0; padding: 8px; font-size: 0.8rem; border-radius: 10px; font-weight: 600;" onchange="window.cambiarTipoVentaCarrito('${item.id}', this.value)">
                   <option value="Nueva" ${!isReno ? "selected" : ""}>Crear Pantalla Nueva</option>
                   <option value="Reno" ${isReno ? "selected" : ""}>Renovar Pantalla Existente</option>
               </select>
-              <button class="btn-ios" style="display: ${displayBtn}; background: rgba(0,0,0,0.2); color: ${btnColor}; border: 1px solid ${btnColor}; padding: 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; width: 100%; text-align: center; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" onclick="window.abrirModalRenoB2B('${item.id}')">
+              <button class="btn-ios" style="display: ${displayBtn}; background: transparent; color: ${btnColor}; border: 1px solid ${btnColor}; padding: 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; width: 100%; text-align: center; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" onclick="window.abrirModalRenoB2B('${item.id}')">
                   ${btnText}
               </button>
           </div>
@@ -979,17 +978,24 @@ function actualizarCarritoUI() {
     }
 
     html += `
-      <div class="cart-item-row" style="display:flex; flex-direction:column; gap:10px; background:rgba(255,255,255,0.02); padding:12px; border-radius:16px; border:1px solid rgba(255,255,255,0.04);">
+      <div class="cart-item-row" style="display:flex; flex-direction:column; gap:12px; background: var(--input-bg); padding:14px; border-radius:16px; border: 1px solid var(--surface-border);">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
             <div style="display:flex; flex-direction:column; text-align:left; overflow:hidden; flex-grow:1;">
-              <strong style="font-size:0.9rem; color:var(--text-primary); text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">${item.nombre}</strong>
-              <span style="font-size:0.85rem; color:var(--ios-green); font-family:monospace; font-weight:700;">${formatMoneda(subtotal)} <span style="font-size:0.65rem; color:var(--text-secondary); font-weight:normal;">(${formatMoneda(item.precio)} c/u)</span></span>
+              <strong style="font-size:0.95rem; color:var(--text-primary); text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">${item.nombre}</strong>
+              <span style="font-size:0.85rem; color:var(--ios-green); font-family:monospace; font-weight:700;">${formatMoneda(subtotal)} <span style="font-size:0.7rem; color:var(--text-secondary); font-weight:normal;">(${formatMoneda(item.precio)} c/u)</span></span>
             </div>
-            <div style="display:flex; align-items:center; background:rgba(0,0,0,0.2); border-radius:30px; padding:2px; border:1px solid rgba(255,255,255,0.05);">
-              <button onclick="cambiarCantidad('${item.id}', -1)" style="background:transparent; border:none; color:white; width:26px; height:26px; font-weight:bold; cursor:pointer;">-</button>
+            
+            <!-- CONTROLES DE CANTIDAD -->
+            <div style="display:flex; align-items:center; background: rgba(0,0,0,0.15); border-radius:30px; padding:2px; border:1px solid rgba(255,255,255,0.05);">
+              <button onclick="cambiarCantidad('${item.id}', -1)" style="background:transparent; border:none; color:var(--text-primary); width:26px; height:26px; font-weight:bold; cursor:pointer;">-</button>
               <span style="font-family:monospace; font-size:0.9rem; font-weight:bold; min-width:20px; text-align:center;">${item.amount}</span>
-              <button onclick="cambiarCantidad('${item.id}', 1)" style="background:transparent; border:none; color:white; width:26px; height:26px; font-weight:bold; cursor:pointer;">+</button>
+              <button onclick="cambiarCantidad('${item.id}', 1)" style="background:transparent; border:none; color:var(--text-primary); width:26px; height:26px; font-weight:bold; cursor:pointer;">+</button>
             </div>
+
+            <!-- 🔥 NUEVO: BOTÓN ELIMINAR DIRECTO TIPO ICONO -->
+            <button onclick="eliminarDelCarrito('${item.id}')" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); color: var(--ios-red); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink:0; font-size: 0.9rem; font-weight: bold; transition: background 0.2s;" title="Eliminar del carrito">
+              ✕
+            </button>
         </div>
         ${opcionesReno}
       </div>`;
@@ -1003,11 +1009,11 @@ function actualizarCarritoUI() {
   if (btnCheckout) {
     if (totalCost > window.saldoNumericoActual) {
       btnCheckout.disabled = true;
-      btnCheckout.style.background = "var(--ios-red, #ff453a)";
+      btnCheckout.style.background = "var(--ios-red)";
       btnCheckout.innerText = "SALDO INSUFICIENTE";
     } else {
       btnCheckout.disabled = false;
-      btnCheckout.style.background = "var(--ios-blue, #0a84ff)";
+      btnCheckout.style.background = "var(--ios-blue)";
       btnCheckout.innerText = "CONFIRMAR COMPRA";
     }
   }
@@ -1389,7 +1395,6 @@ async function rastrearCodigo() {
     .value.toLowerCase()
     .trim();
 
-  // 🔥 Filtro eliminado: Ahora solo verifica que sea un correo válido (que contenga un @)
   if (!m.includes("@")) {
     alert("⚠️ Escribe un correo electrónico válido.");
     return;
@@ -1401,30 +1406,32 @@ async function rastrearCodigo() {
     btnTrack.innerText = "Rastreando...";
   }
 
+  // Sincronizamos el correo en el objeto de transferencia
   codeData.correo = m;
-  changeCodeStep(4);
+  changeCodeStep(4); // Pone la pantalla de carga "Interceptando códigos..."
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 14000);
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos de tiempo de espera
 
   try {
     const query = new URLSearchParams(codeData);
-    const res = await (
-      await fetch(`${BOT_API_URL}?${query.toString()}`, {
-        signal: controller.signal,
-      })
-    ).json();
+
+    // 🔥 CORRECCIÓN: Cambiado BOT_API_URL por GOOGLE_SCRIPT_URL para usar tu servidor activo y evitar el CORS/Error
+    const resp = await fetch(`${GOOGLE_SCRIPT_URL}?${query.toString()}`, {
+      signal: controller.signal,
+    });
+    const res = await resp.json();
     clearTimeout(timeoutId);
 
-    changeCodeStep(5);
+    changeCodeStep(5); // Muestra la pantalla de resultados
     document.getElementById("codeResultBox").style.display = "none";
     document.getElementById("linkResultBox").style.display = "none";
 
     if (res.exito) {
       document.getElementById("codeResultTitle").innerHTML =
-        `<span style="color:var(--ios-green);">¡LOCALIZADO!</span>`;
+        `<span style="color:var(--ios-green); font-weight:800;">¡LOCALIZADO!</span>`;
       document.getElementById("codeResultDesc").innerText =
-        res.msj || "Información recuperada:";
+        res.msj || "Información recuperada con éxito:";
 
       if (res.tipo === "codigo") {
         document.getElementById("codeResultBox").style.display = "block";
@@ -1437,27 +1444,27 @@ async function rastrearCodigo() {
       }
     } else {
       document.getElementById("codeResultTitle").innerHTML =
-        `<span style="color:var(--ios-orange);">SIN RESULTADOS</span>`;
+        `<span style="color:var(--ios-orange); font-weight:800;">SIN RESULTADOS</span>`;
       document.getElementById("codeResultDesc").innerText =
-        res.msj || "No hay datos recientes.";
+        res.msj || "No se detectaron solicitudes recientes para este buzón.";
     }
   } catch (err) {
     changeCodeStep(5);
     if (err.name === "AbortError") {
       document.getElementById("codeResultTitle").innerHTML =
-        `<span style="color:var(--ios-red);">TIEMPO AGOTADO</span>`;
+        `<span style="color:var(--ios-red); font-weight:800;">TIEMPO AGOTADO</span>`;
       document.getElementById("codeResultDesc").innerText =
-        "La conexión falló o tardó demasiado.";
-      alert("⚠️ Conexión inestable.");
+        "La conexión con el buzón de Gmail tardó demasiado. Vuelve a solicitar el código en tu pantalla e intenta de nuevo.";
     } else {
-      document.getElementById("codeResultTitle").innerText = "Error";
+      document.getElementById("codeResultTitle").innerHTML =
+        `<span style="color:var(--ios-red); font-weight:800;">ERROR DE RED</span>`;
       document.getElementById("codeResultDesc").innerText =
-        "Ocurrió un error inesperado.";
+        "No se pudo establecer comunicación con el servidor central de Cybernet.";
     }
   } finally {
     if (btnTrack) {
       btnTrack.disabled = false;
-      btnTrack.innerText = "Rastrear en la Nube";
+      btnTrack.innerText = "Rastrear Código";
     }
   }
 }
@@ -1497,8 +1504,24 @@ function desbloquearScroll() {
 }
 
 // =========================================================================
-// 🔄 AUTOREFRESCO AUTOMÁTICO DE SALDO EN SEGUNDO PLANO (CADA 5 MINUTOS)
+// 🔄 SISTEMA DE ACTUALIZACIÓN MANUAL Y CONTROLADA DE SALDO B2B
 // =========================================================================
+
+function manualRefrescarSaldo() {
+  if (typeof haptic === "function") haptic();
+
+  const btn = document.getElementById("btnRefrescarSaldoManual");
+  if (btn) btn.classList.add("spin-anim"); // Enciende el giro de la flecha
+
+  // Llama a la función nativa que consulta los distribuidores en Sheets
+  refrescarSaldoDistribuidorFondo();
+
+  // Escudo de seguridad por si la conexión a internet del cliente es lenta
+  setTimeout(() => {
+    if (btn) btn.classList.remove("spin-anim");
+  }, 4000);
+}
+
 function refrescarSaldoDistribuidorFondo() {
   const telActivo =
     localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
@@ -1509,6 +1532,10 @@ function refrescarSaldoDistribuidorFondo() {
     const scriptNode = document.getElementById("node_" + cbName);
     if (scriptNode) scriptNode.remove();
     delete window[cbName];
+
+    // Apagar la animación del botón de refresco apenas el servidor responda
+    const btnRefrescar = document.getElementById("btnRefrescarSaldoManual");
+    if (btnRefrescar) btnRefrescar.classList.remove("spin-anim");
 
     if (res && res.status === "success" && res.data) {
       const distriFresco = res.data.find(
@@ -1536,8 +1563,7 @@ function refrescarSaldoDistribuidorFondo() {
           actualizarCarritoUI();
         }
         console.log(
-          "🤖 [Cybernet System] Saldo sincronizado automáticamente: ",
-          saldoNum,
+          "🤖 [Cybernet System] Saldo sincronizado exitosamente de forma manual.",
         );
       }
     }
@@ -2043,3 +2069,54 @@ window.updateThemeIconDistri = function (theme) {
   if (btnDesktop) btnDesktop.innerHTML = svgIcon;
   if (btnMobile) btnMobile.innerHTML = svgIcon;
 };
+// 🗑️ FUNCIÓN PARA ELIMINAR UN ELEMENTO ESPECÍFICO DEL CARRITO
+function eliminarDelCarrito(id) {
+  haptic(); // Efecto de vibración sutil en móviles
+
+  // Filtramos el carrito dejando por fuera el id seleccionado
+  window.carrito = window.carrito.filter((item) => item.id !== id);
+
+  // Forzamos el cambio visual en los botones "Añadir" de la tienda de forma pasiva
+  const btnTienda = document.getElementById(`btn-add-${id}`);
+  if (btnTienda) {
+    btnTienda.classList.remove("btn-added");
+    btnTienda.innerHTML = "+ Añadir";
+  }
+
+  // Refrescamos los totales e items del carrito
+  actualizarCarritoUI();
+  triggerToast("🗑️ Plataforma removida del carrito");
+}
+// =========================================================================
+// 📋 COPIADOR EN UN TOQUE PARA EL CENTRO DE CÓDIGOS B2B
+// =========================================================================
+function copiarCodigoResultanteB2B() {
+  if (typeof haptic === "function") haptic(); // Pequeña vibración táctil
+
+  const codeElement = document.getElementById("codeVal");
+  const codigoText = codeElement.innerText.trim();
+
+  if (!codigoText) return;
+
+  // Ejecutamos la copia nativa en el portapapeles del dispositivo
+  navigator.clipboard
+    .writeText(codigoText)
+    .then(() => {
+      // Efecto elástico de confirmación (Se hunde y se pone verde)
+      codeElement.style.color = "var(--ios-green)";
+      codeElement.style.transform = "scale(0.93)";
+
+      setTimeout(() => {
+        codeElement.style.color = "var(--text-primary)";
+        codeElement.style.transform = "scale(1)";
+      }, 250);
+
+      // Lanza la alerta flotante estilo Apple arriba
+      if (typeof triggerToast === "function") {
+        triggerToast("📋 Código copiado con éxito");
+      }
+    })
+    .catch((err) => {
+      console.log("Error al copiar portapapeles", err);
+    });
+}
