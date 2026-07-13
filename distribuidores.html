@@ -317,20 +317,56 @@
         <!-- Lado Derecho: Controles de Saldo y Menús -->
         <div style="display: flex; gap: 10px; align-items: center">
           <!-- El saldo se queda fijo y visible en Celulares y PC -->
-          <div
-            style="
-              background: rgba(48, 209, 88, 0.1);
-              border: 1px solid rgba(48, 209, 88, 0.2);
-              padding: 9px 16px;
-              border-radius: 50px;
-              font-weight: 800;
-              color: var(--ios-green);
-              font-family: monospace;
-              font-size: 0.9rem;
-            "
-            id="distriBarBalance"
-          >
-            $--
+          <!-- Etiqueta de Saldo + Botón de Actualización Manual -->
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div
+              style="
+                background: rgba(48, 209, 88, 0.1);
+                border: 1px solid rgba(48, 209, 88, 0.2);
+                padding: 9px 16px;
+                border-radius: 50px;
+                font-weight: 800;
+                color: var(--ios-green);
+                font-family: monospace;
+                font-size: 0.9rem;
+              "
+              id="distriBarBalance"
+            >
+              $--
+            </div>
+
+            <button
+              id="btnRefrescarSaldoManual"
+              onclick="manualRefrescarSaldo()"
+              class="btn-ios btn-secondary"
+              style="
+                padding: 0;
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: var(--input-bg);
+                border: var(--surface-border);
+                cursor: pointer;
+              "
+              title="Actualizar saldo"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+            </button>
           </div>
 
           <!-- GRUPO PC: Se muestra solo en pantallas grandes -->
@@ -1346,161 +1382,242 @@
       </div>
     </div>
 
+    <!-- =========================================================
+         📩 MODAL: CENTRO DE CÓDIGOS (ESTÍTICA PREMIUM UNIFORME)
+         ========================================================= -->
     <div class="overlay-modal-code" id="codesCenterOverlay">
-      <div class="modal-ios" style="max-width: 380px">
+      <div class="modal-ios" style="max-width: 400px; width: 92%">
+        <!-- ENCABEZADO -->
         <div
           style="
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            border-bottom: 1px solid var(--surface-border);
+            padding-bottom: 16px;
+            margin-bottom: 8px;
           "
         >
-          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
-            📩 Centro de Códigos
+          <h3
+            style="
+              margin: 0;
+              font-size: 1.25rem;
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+              ></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            Centro de Códigos
           </h3>
           <button
             onclick="cerrarCentroCodigos()"
             style="
-              background: transparent;
+              background: var(--input-bg);
               border: none;
-              font-size: 1.5rem;
-              color: var(--text-secondary);
+              color: var(--text-primary);
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              font-size: 1.2rem;
               cursor: pointer;
+              display: flex;
+              justify-content: center;
+              align-items: center;
             "
           >
             &times;
           </button>
         </div>
-        <div
-          id="codeStep1"
-          class="code-step"
-          style="display: none; flex-direction: column; gap: 10px"
-        >
+
+        <!-- PASO 1: SELECCIÓN DE PLATAFORMA -->
+        <div id="codeStep1" class="code-step">
           <button
-            class="btn-ios btn-primary w-100"
-            style="background: #e50914"
+            class="btn-ios w-100"
+            style="background: #e50914; color: white"
             onclick="setCodigoPlat('NETFLIX')"
           >
-            Netflix</button
-          ><button
-            class="btn-ios btn-primary w-100"
-            style="background: var(--ios-blue)"
+            🍿 Netflix Original
+          </button>
+          <button
+            class="btn-ios w-100"
+            style="background: #007aff; color: white"
             onclick="setCodigoPlat('DISNEY')"
           >
-            Disney Premium
+            🔷 Disney+ Premium
           </button>
         </div>
-        <div
-          id="codeStep2"
-          class="code-step"
-          style="display: none; flex-direction: column; gap: 10px"
-        >
+
+        <!-- PASO 2: TIPO DE SOLICITUD -->
+        <div id="codeStep2" class="code-step">
           <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(1)">
-            Código de Inicio</button
-          ><button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(2)">
-            Código 'De Viaje'</button
-          ><button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(3)">
-            Enlace de Actualización
+            📺 Código de Inicio Sesión
+          </button>
+          <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(2)">
+            ✈️ Código 'Estoy de Viaje'
+          </button>
+          <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(3)">
+            🔗 Enlace de Actualización
           </button>
         </div>
-        <div
-          id="codeStep3"
-          class="code-step"
-          style="display: none; flex-direction: column; gap: 10px"
-        >
-          <input
-            type="email"
-            id="inputCorreoCodigo"
-            class="input-ios"
-            placeholder="ejemplo@cybernetsp.com"
-            style="padding: 14px"
-          /><button
+
+        <!-- PASO 3: ENTRADA DE CORREO -->
+        <div id="codeStep3" class="code-step" style="gap: 16px">
+          <div style="text-align: left; width: 100%">
+            <label
+              style="
+                font-size: 0.8rem;
+                color: var(--text-secondary);
+                margin-bottom: 6px;
+                display: block;
+                font-weight: 700;
+                text-transform: uppercase;
+              "
+              >Correo electrónico de la cuenta</label
+            >
+            <input
+              type="email"
+              id="inputCorreoCodigo"
+              class="input-ios"
+              placeholder="ejemplo@cybernetsp.com o outlook"
+              style="width: 100%; box-sizing: border-box"
+              spellcheck="false"
+            />
+          </div>
+          <button
             id="btnRastrearCodigo"
             class="btn-ios btn-success w-100"
             onclick="rastrearCodigo()"
           >
-            Rastrear en la Nube
+            Rastrear en la Nube →
           </button>
         </div>
+
+        <!-- PASO 4: PANTALLA DE CARGA -->
         <div
           id="codeStep4"
           class="code-step"
-          style="display: none; text-align: center; padding: 30px 0"
+          style="padding: 20px 0; align-items: center !important"
         >
           <svg
             class="spin-anim"
-            width="30"
-            height="30"
+            width="38"
+            height="38"
             viewBox="0 0 24 24"
             fill="none"
             stroke="var(--ios-blue)"
-            stroke-width="2.5"
+            stroke-width="3"
           >
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M12 2v4"></path>
           </svg>
-          <p style="margin-top: 10px; font-weight: 600">
+          <p
+            style="
+              margin: 0;
+              font-weight: 700;
+              font-size: 1.1rem;
+              color: var(--text-primary);
+            "
+          >
             Interceptando códigos...
           </p>
         </div>
-        <div
-          id="codeStep5"
-          class="code-step"
-          style="display: none; text-align: center"
-        >
+
+        <!-- PASO 5: DESPLIEGUE RESULTADO FINAL -->
+        <div id="codeStep5" class="code-step">
           <h3
             id="codeResultTitle"
-            style="margin: 0 0 10px; font-weight: 800"
+            style="margin: 0; font-weight: 800; font-size: 1.3rem"
           ></h3>
           <p
             id="codeResultDesc"
             style="
-              font-size: 0.9rem;
+              font-size: 0.95rem;
               color: var(--text-secondary);
-              margin-bottom: 15px;
+              margin-bottom: 5px;
             "
           ></p>
+
           <div
             id="codeResultBox"
             style="
               display: none;
-              background: rgba(255, 69, 58, 0.1);
-              padding: 20px;
-              border-radius: 15px;
-              border: 1px dashed var(--ios-red);
-              margin-bottom: 15px;
+              background: rgba(48, 209, 88, 0.08);
+              padding: 25px 15px;
+              border-radius: 20px;
+              border: 1px dashed var(--ios-green);
+              cursor: pointer;
+              user-select: none;
+              width: 100%;
             "
+            onclick="copiarCodigoResultanteB2B()"
           >
             <div
               id="codeVal"
-              style="font-size: 2.5rem; font-weight: 800; letter-spacing: 5px"
+              style="
+                font-size: 3.5rem;
+                font-weight: 900;
+                letter-spacing: 6px;
+                color: var(--text-primary);
+                transition:
+                  transform 0.1s ease,
+                  color 0.2s ease;
+                display: inline-block;
+                width: 100%;
+              "
             ></div>
+            <div
+              style="
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+                margin-top: 6px;
+                font-weight: bold;
+              "
+            >
+              👆 Toca el recuadro para copiar el código
+            </div>
             <div
               id="codeTimer"
               style="
                 color: var(--ios-red);
-                font-size: 0.8rem;
+                font-size: 0.9rem;
                 font-weight: bold;
-                margin-top: 10px;
+                margin-top: 15px;
               "
             ></div>
           </div>
-          <div id="linkResultBox" style="display: none; margin-bottom: 15px">
+
+          <div id="linkResultBox" style="display: none; width: 100%">
             <a
               id="linkVal"
               href="#"
               target="_blank"
-              style="text-decoration: none"
-              ><button class="btn-ios btn-success w-100">
-                Abrir Enlace
-              </button></a
+              style="text-decoration: none; width: 100%"
             >
+              <button class="btn-ios btn-success w-100">
+                Abrir Enlace Oficial
+              </button>
+            </a>
           </div>
+
           <button
             class="btn-ios btn-secondary w-100"
+            style="margin-top: 8px"
             onclick="changeCodeStep(1)"
           >
             Nueva Consulta
