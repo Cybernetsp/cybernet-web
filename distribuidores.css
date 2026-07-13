@@ -332,15 +332,54 @@ body {
   }
 }
 /* =========================================================================
-   📩 CORRECCIÓN FLUIDA PARA EL CENTRO DE CÓDIGOS
+   📩 ENTRADAS Y BOTONES SIMÉTRICOS PARA EL CENTRO DE CÓDIGOS
    ========================================================================= */
 .code-step {
   display: none !important;
   flex-direction: column;
-  gap: 12px;
+  align-items: stretch; /* 🔥 CORRECCIÓN: Estira los botones a lo ancho de forma estética */
+  justify-content: center;
+  gap: 12px; /* Separación limpia entre botones */
   width: 100%;
+  box-sizing: border-box;
+  padding: 10px 4px;
 }
 
 .code-step.active {
   display: flex !important;
+}
+
+/* Forzar que todos los botones de este módulo tengan la misma altura y radio premium */
+.code-step .btn-ios {
+  width: 100% !important;
+  padding: 15px !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  border-radius: 14px !important; /* Bordes suaves estilo iOS */
+  box-sizing: border-box;
+}
+
+.code-step.active {
+  display: flex !important;
+}
+/* =========================================================================
+   🪄 MICRO-INTERACCIÓN ELÁSTICA PREMIUM PARA EL BOTÓN AÑADIR
+   ========================================================================= */
+@keyframes appleButtonBounce {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(0.86);
+  } /* Se encoge al toque */
+  60% {
+    transform: scale(1.06);
+  } /* Rebota expandiéndose un poco */
+  100% {
+    transform: scale(1);
+  } /* Regresa a su tamaño original */
+}
+
+.btn-pop-anim {
+  animation: appleButtonBounce 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
