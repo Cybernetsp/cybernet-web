@@ -1358,8 +1358,10 @@ async function rastrearCodigo() {
     .getElementById("inputCorreoCodigo")
     .value.toLowerCase()
     .trim();
-  if (!m.includes("@cybernetsp.com")) {
-    triggerToast("⚠️ Escribe un correo @cybernetsp.com");
+
+  // 🔥 Filtro eliminado: Ahora solo verifica que sea un correo válido (que contenga un @)
+  if (!m.includes("@")) {
+    alert("⚠️ Escribe un correo electrónico válido.");
     return;
   }
 
@@ -1393,6 +1395,7 @@ async function rastrearCodigo() {
         `<span style="color:var(--ios-green);">¡LOCALIZADO!</span>`;
       document.getElementById("codeResultDesc").innerText =
         res.msj || "Información recuperada:";
+
       if (res.tipo === "codigo") {
         document.getElementById("codeResultBox").style.display = "block";
         document.getElementById("codeVal").innerText = res.valor;
@@ -1415,7 +1418,7 @@ async function rastrearCodigo() {
         `<span style="color:var(--ios-red);">TIEMPO AGOTADO</span>`;
       document.getElementById("codeResultDesc").innerText =
         "La conexión falló o tardó demasiado.";
-      triggerToast("⚠️ Conexión inestable.");
+      alert("⚠️ Conexión inestable.");
     } else {
       document.getElementById("codeResultTitle").innerText = "Error";
       document.getElementById("codeResultDesc").innerText =
@@ -1424,7 +1427,7 @@ async function rastrearCodigo() {
   } finally {
     if (btnTrack) {
       btnTrack.disabled = false;
-      btnTrack.innerText = "Rastrear Código";
+      btnTrack.innerText = "Rastrear en la Nube";
     }
   }
 }
@@ -1582,4 +1585,281 @@ function cerrarMenuMovil() {
   desbloquearScroll();
   const modal = document.getElementById("modalMenuMovil");
   if (modal) modal.classList.remove("open");
+}
+
+// =========================================================================
+// 💰 MÓDULO DE RECARGAS OCR AUTÓNOMO (TESSERACT AI)
+// =========================================================================
+
+// Variables globales para guardar los datos leídos
+window.ocrValorFinal = 0;
+window.ocrHoraFinal = "";
+
+function abrirModalInstruccionesRecarga() {
+  haptic();
+  bloquearScroll();
+  document.getElementById("modalInstruccionesRecarga").classList.add("open");
+}
+
+function cerrarModalInstruccionesRecarga() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("modalInstruccionesRecarga").classList.remove("open");
+}
+
+function abrirModalFormularioRecarga() {
+  haptic();
+  document.getElementById("modalInstruccionesRecarga").classList.remove("open");
+  document.getElementById("modalFormularioRecarga").classList.add("open");
+
+  // Resetear UI
+  document.getElementById("recargaComprobante").value = "";
+  document.getElementById("ocrLoadingUI").style.display = "none";
+  document.getElementById("ocrResultsUI").style.display = "none";
+}
+
+function cerrarModalFormularioRecarga() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("modalFormularioRecarga").classList.remove("open");
+}
+
+// 🧠 Motor de Inteligencia Artificial (Escáner de imagen)
+async function analizarComprobanteIA(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  haptic();
+  document.getElementById("ocrLoadingUI").style.display = "block";
+  document.getElementById("ocrResultsUI").style.display = "none";
+
+  try {
+    const worker = await Tesseract.createWorker("spa"); // Español
+    const ret = await worker.recognize(file);
+    const texto = ret.data.text.toLowerCase();
+    await worker.terminate();
+
+    // 1. Validar que la fecha sea estrictamente de HOY
+    const hoy = new Date();
+    const dia = hoy.getDate();
+    const mes = hoy.getMonth();
+    const nombresMes = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre",
+    ];
+
+    // Formatos comunes en Colombia: "13 de julio", "13/07", "13 jul"
+    const fechaA = `${dia} de ${nombresMes[mes]}`;
+    const fechaB = `${dia} ${nombresMes[mes].substring(0, 3)}`;
+    const fechaC = `${dia < 10 ? "0" + dia : dia}/${mes + 1 < 10 ? "0" + (mes + 1) : mes + 1}`;
+    const palabraHoy = "hoy"; // Nequi a veces pone "hoy"
+
+    const esDeHoy =
+      texto.includes(fechaA) ||
+      texto.includes(fechaB) ||
+      texto.includes(fechaC) ||
+      texto.includes(palabraHoy);
+
+    if (!esDeHoy) {
+      alert(
+        "❌ El comprobante no registra la fecha de hoy.\n\nPor favor comunícate con Soporte Técnico para validar este pago manualmente.",
+      );
+      document.getElementById("ocrLoadingUI").style.display = "none";
+      input.value = "";
+      return;
+    }
+
+    // 2. Extraer Valor Monetario
+    let monto = 0;
+    // Busca el símbolo de peso y los números que le siguen (ej: $ 20.000)
+    const matchMonto = texto.match(/(?:[$s])\s*(\d{1,3}(?:[.,]\d{3})+)/i);
+    if (matchMonto) {
+      monto = parseFloat(matchMonto[1].replace(/[.,]/g, ""));
+    }
+
+    // 3. Extraer Hora (Ej: 9:28 a.m. o 14:30)
+    let horaExtr = "";
+    const matchHora = texto.match(/(\d{1,2}):(\d{2})\s*(a\.?m\.?|p\.?m\.?|)/i);
+    if (matchHora) {
+      let hh = parseInt(matchHora[1], 10);
+      let mm = parseInt(matchHora[2], 10);
+      let ampm = matchHora[3] ? matchHora[3].replace(/\./g, "") : "";
+
+      // Convertir a formato 24h para facilitar el cruce con el servidor
+      if (ampm === "pm" && hh < 12) hh += 12;
+      else if (ampm === "am" && hh === 12) hh = 0;
+      horaExtr = `${hh.toString().padStart(2, "0")}:${mm.toString().padStart(2, "0")}`;
+    }
+
+    if (!monto || !horaExtr) {
+      alert(
+        "⚠️ No logramos leer el valor o la hora del comprobante con claridad.\n\nIntenta tomar una captura más nítida y súbela de nuevo.",
+      );
+      document.getElementById("ocrLoadingUI").style.display = "none";
+      input.value = "";
+      return;
+    }
+
+    // Guardar variables y mostrar interfaz
+    window.ocrValorFinal = monto;
+    window.ocrHoraFinal = horaExtr;
+
+    document.getElementById("displayOcrValor").innerText =
+      "$" + monto.toLocaleString("es-CO");
+    document.getElementById("displayOcrHora").innerText = horaExtr;
+
+    document.getElementById("ocrLoadingUI").style.display = "none";
+    document.getElementById("ocrResultsUI").style.display = "flex";
+  } catch (error) {
+    alert("❌ Ocurrió un error analizando la imagen. Intenta de nuevo.");
+    document.getElementById("ocrLoadingUI").style.display = "none";
+  }
+}
+
+// 🌐 Cruzar datos del OCR con los correos del Banco
+function procesarRecargaDistribuidor() {
+  haptic();
+  const nombreInput = document
+    .getElementById("recargaNombre")
+    .value.trim()
+    .toLowerCase();
+
+  if (!nombreInput) {
+    alert(
+      "⚠️ Por favor ingresa el nombre o apellido del titular para poder confirmar.",
+    );
+    return;
+  }
+
+  const btn = document.getElementById("btnVerificarRecarga");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin-anim" style="display:inline-block; margin-right:8px;">⏳</span>Cruzando con el banco...`;
+
+  const cbBreB = "cb_breb_ocr_" + Date.now();
+  window[cbBreB] = function (res) {
+    if (res && res.status === "success") {
+      const pagos = res.data;
+
+      const [inputHoraStr, inputMinStr] = window.ocrHoraFinal.split(":");
+      const inputHora = parseInt(inputHoraStr, 10);
+      const inputMin = parseInt(inputMinStr, 10);
+
+      const matchPago = pagos.find((p) => {
+        let montoLimpio = parseFloat(
+          p.monto.replace(/\./g, "").replace(/,/g, "."),
+        );
+        let remitente = p.remitente.toLowerCase();
+        let horaCorreoRaw = p.hora.toLowerCase();
+
+        let emailHora = 0;
+        let emailMin = 0;
+        const timeMatch = horaCorreoRaw.match(
+          /(\d{1,2}):(\d{2})\s*(a\.?m\.?|p\.?m\.?|)/i,
+        );
+        if (timeMatch) {
+          emailHora = parseInt(timeMatch[1], 10);
+          emailMin = parseInt(timeMatch[2], 10);
+          const ampm = timeMatch[3] ? timeMatch[3].replace(/\./g, "") : "";
+          if (ampm === "pm" && emailHora < 12) emailHora += 12;
+          else if (ampm === "am" && emailHora === 12) emailHora = 0;
+        }
+
+        return (
+          montoLimpio === window.ocrValorFinal &&
+          remitente.includes(nombreInput) &&
+          emailHora === inputHora &&
+          emailMin === inputMin
+        );
+      });
+
+      if (matchPago) {
+        ejecutarInyeccionSaldo(window.ocrValorFinal, matchPago.remitente);
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = "Verificar y Recargar";
+        alert(
+          `❌ No detectamos este pago en los últimos correos del banco.\n\nEspera un minuto si acabas de pagar, y vuelve a darle al botón.`,
+        );
+      }
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = "Verificar y Recargar";
+      alert("❌ Error al conectar con el servidor bancario.");
+    }
+  };
+
+  ejecutarPeticionConTimeout(
+    GOOGLE_SCRIPT_URL,
+    { action: "obtenerPagosBreB" },
+    cbBreB,
+    25000,
+    () => {
+      btn.disabled = false;
+      btn.innerHTML = "Verificar y Recargar";
+    },
+  );
+}
+
+function ejecutarInyeccionSaldo(valorBase, remitenteReal) {
+  let porcentajeBono = valorBase >= 100000 ? 30 : 15;
+  let revendedor =
+    localStorage.getItem("active_distri_name") || window.distriTelefonoCache;
+
+  const btn = document.getElementById("btnVerificarRecarga");
+  btn.innerHTML = `<span class="spin-anim" style="display:inline-block; margin-right:8px;">⏳</span>Acreditando saldo...`;
+
+  const cbRecarga = "cb_add_saldo_" + Date.now();
+  window[cbRecarga] = function (res) {
+    btn.disabled = false;
+    btn.innerHTML = "Verificar y Recargar";
+
+    if (res && res.status === "success") {
+      // Limpiar UI
+      document.getElementById("recargaComprobante").value = "";
+      document.getElementById("recargaNombre").value = "";
+      document.getElementById("ocrResultsUI").style.display = "none";
+
+      window.saldoNumericoActual = parseFloat(res.nuevoSaldo);
+      localStorage.setItem("active_distri_saldo", window.saldoNumericoActual);
+      actualizarSaldoUI();
+
+      cerrarModalFormularioRecarga();
+
+      triggerToast(
+        `✅ Saldo acreditado. Recibiste bono de ${porcentajeBono}%.`,
+      );
+      alert(
+        `🎉 ¡Pago validado exitosamente!\n\nSe ha sumado el saldo a tu cuenta junto con un bono automático del ${porcentajeBono}%.\n\n💰 Nuevo Saldo: $${window.saldoNumericoActual.toLocaleString("es-CO")}`,
+      );
+    } else {
+      alert("❌ Hubo un error grabando el saldo en la base de datos.");
+    }
+  };
+
+  ejecutarPeticionConTimeout(
+    GOOGLE_SCRIPT_URL,
+    {
+      action: "recargarSaldo",
+      revendedor: revendedor,
+      totalRecarga: valorBase,
+      bono: porcentajeBono,
+      banco: "Bre-B: " + remitenteReal,
+    },
+    cbRecarga,
+    20000,
+    () => {
+      btn.disabled = false;
+      btn.innerHTML = "Verificar y Recargar";
+    },
+  );
 }
