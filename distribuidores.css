@@ -331,3 +331,16 @@ body {
     display: flex !important; /* Activa la hamburguesa en celulares */
   }
 }
+/* =========================================================================
+   📩 CORRECCIÓN FLUIDA PARA EL CENTRO DE CÓDIGOS
+   ========================================================================= */
+.code-step {
+  display: none !important;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.code-step.active {
+  display: flex !important;
+}
