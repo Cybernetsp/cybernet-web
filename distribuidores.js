@@ -1726,7 +1726,7 @@ async function analizarComprobanteIA(input) {
   }
 }
 
-// 🌐 Cruzar datos del OCR con los correos del Banco
+// 🌐 Cruzar datos del OCR con los correos del Banco (CON ESCUDO ANTI-DUPLICADOS)
 function procesarRecargaDistribuidor() {
   haptic();
   const nombreInput = document
@@ -1783,7 +1783,29 @@ function procesarRecargaDistribuidor() {
       });
 
       if (matchPago) {
-        ejecutarInyeccionSaldo(window.ocrValorFinal, matchPago.remitente);
+        // 🔥 SISTEMA ANTI-DUPLICADOS: Creamos una huella única para este pago exacto
+        const firmaUnicaPago = `PAGO_${window.ocrValorFinal}_${window.ocrHoraFinal}_${matchPago.remitente.replace(/\s+/g, "")}_${new Date().toLocaleDateString("es-CO")}`;
+
+        // Revisamos si esta huella ya está guardada en la memoria del dispositivo
+        const pagosProcesados = JSON.parse(
+          localStorage.getItem("cyber_pagos_procesados") || "[]",
+        );
+
+        if (pagosProcesados.includes(firmaUnicaPago)) {
+          btn.disabled = false;
+          btn.innerHTML = "Verificar y Recargar";
+          alert(
+            "⚠️ ESTE PAGO YA ESTÁ REGISTRADO.\n\nEl sistema detectó que este comprobante ya fue subido y el saldo ya se te acreditó anteriormente.\n\nNo puedes usar el mismo comprobante dos veces.",
+          );
+          return; // Detenemos la función aquí mismo
+        }
+
+        // Si es un pago nuevo y válido, procedemos a inyectar el saldo
+        ejecutarInyeccionSaldo(
+          window.ocrValorFinal,
+          matchPago.remitente,
+          firmaUnicaPago,
+        );
       } else {
         btn.disabled = false;
         btn.innerHTML = "Verificar y Recargar";
@@ -1810,7 +1832,7 @@ function procesarRecargaDistribuidor() {
   );
 }
 
-function ejecutarInyeccionSaldo(valorBase, remitenteReal) {
+function ejecutarInyeccionSaldo(valorBase, remitenteReal, firmaUnicaPago) {
   let porcentajeBono = valorBase >= 100000 ? 30 : 15;
   let revendedor =
     localStorage.getItem("active_distri_name") || window.distriTelefonoCache;
@@ -1824,6 +1846,16 @@ function ejecutarInyeccionSaldo(valorBase, remitenteReal) {
     btn.innerHTML = "Verificar y Recargar";
 
     if (res && res.status === "success") {
+      // 🔥 GUARDAR LA FIRMA EN MEMORIA PARA QUE NO LO VUELVA A USAR NUNCA
+      const pagosProcesados = JSON.parse(
+        localStorage.getItem("cyber_pagos_procesados") || "[]",
+      );
+      pagosProcesados.push(firmaUnicaPago);
+      localStorage.setItem(
+        "cyber_pagos_procesados",
+        JSON.stringify(pagosProcesados),
+      );
+
       // Limpiar UI
       document.getElementById("recargaComprobante").value = "";
       document.getElementById("recargaNombre").value = "";
@@ -1846,6 +1878,9 @@ function ejecutarInyeccionSaldo(valorBase, remitenteReal) {
     }
   };
 
+  // Se envía la hora exacta para que quede registrado en tu Excel de contabilidad
+  const stringBanco = `Bre-B: ${remitenteReal} (${window.ocrHoraFinal})`;
+
   ejecutarPeticionConTimeout(
     GOOGLE_SCRIPT_URL,
     {
@@ -1853,7 +1888,7 @@ function ejecutarInyeccionSaldo(valorBase, remitenteReal) {
       revendedor: revendedor,
       totalRecarga: valorBase,
       bono: porcentajeBono,
-      banco: "Bre-B: " + remitenteReal,
+      banco: stringBanco,
     },
     cbRecarga,
     20000,
