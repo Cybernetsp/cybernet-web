@@ -809,7 +809,7 @@ window.abrirModalRenoB2B = function (idItem) {
   const modal = document.getElementById("modalRenovacionDistri");
   const container = document.getElementById("listaCuentasModalRenoDistri");
 
-  container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>Buscando tus pantallas de Netflix...</div>`;
+  container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>Buscando tus pantallas en la base de datos...</div>`;
   modal.classList.add("open");
 
   const cbName = "cb_reno_b2b_" + Date.now();
@@ -820,13 +820,12 @@ window.abrirModalRenoB2B = function (idItem) {
 
     container.innerHTML = "";
     if (res && res.status === "success" && res.data.length > 0) {
-      window.cuentasActivasB2B = res.data.filter((c) =>
-        c.correo.toLowerCase().includes("@cybernetsp.com"),
-      );
+      // 🔥 CORRECCIÓN CRÍTICA: Quitamos el filtro selectivo para permitir @outlook y cualquier otro correo
+      window.cuentasActivasB2B = res.data;
 
       if (window.cuentasActivasB2B.length === 0) {
         container.innerHTML =
-          "<div style='color:var(--ios-orange); text-align:center; padding: 20px;'>No se detectaron cuentas aptas para renovación.</div>";
+          "<div style='color:var(--ios-orange); text-align:center; padding: 20px;'>No se detectaron cuentas asignadas a tu número.</div>";
         return;
       }
 
@@ -834,7 +833,7 @@ window.abrirModalRenoB2B = function (idItem) {
         let div = document.createElement("div");
         div.className = "card-ios item-reno-b2b";
         div.style =
-          "padding: 15px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px;";
+          "padding: 15px; cursor: pointer; background: var(--input-bg); border: var(--surface-border); border-radius: 14px; margin-bottom: 8px; text-align: left;";
         div.setAttribute(
           "data-search",
           cuenta.correo.toLowerCase() +
@@ -844,12 +843,12 @@ window.abrirModalRenoB2B = function (idItem) {
             cuenta.cliente.toLowerCase(),
         );
         div.innerHTML = `
-                    <div style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px;">${cuenta.correo}</div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
-                        <span>Perfil: <b style="color: var(--ios-blue);">${cuenta.perfil}</b></span>
-                        <span>Cliente: <b>${cuenta.cliente}</b></span>
-                    </div>
-                `;
+            <div style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; word-break: break-all;">${cuenta.correo}</div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+                <span>Perfil: <b style="color: var(--ios-blue);">${cuenta.perfil}</b></span>
+                <span>Cliente: <b>${cuenta.cliente}</b></span>
+            </div>
+        `;
         div.onclick = function () {
           let itemCarrito = window.carrito.find((i) => i.id === idItem);
           if (itemCarrito) {
