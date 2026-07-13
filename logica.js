@@ -307,26 +307,300 @@ const listaPlataformasVenta = [
   },
 ];
 
+// =========================================================================
+// 🚀 NUEVA LÓGICA DE VENTAS (MÓDULO DINÁMICO POR BLOQUES)
+// =========================================================================
+
+let contadorFilasVenta = 0;
+
 function toggleVentasPanel() {
-  haptic();
+  if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("ventasOverlay");
   overlay.classList.toggle("open");
+
   if (overlay.classList.contains("open")) {
-    document.getElementById("buscarPlataformaVenta").value = "";
-    filtrarPlataformasVenta();
-    document.getElementById("ventaNombre").focus();
-
-    // 🔥 FIX CRÍTICO: Formatear la memoria de meses al abrir la ventana
-    // Evita que el sistema recuerde si la venta anterior fue de 2 o más meses.
+    document.getElementById("formGenerarVenta").reset();
+    document.getElementById("listaServiciosVentaDinamica").innerHTML = "";
+    contadorFilasVenta = 0;
     window.ultimoMesesSeleccionado = "1";
+    window.cuentasNetflixClienteActivo = []; // 🧹 Limpieza de memoria
 
-    // LÍNEAS NUEVAS: Identificar al empleado activo
+    // Agrega la primera fila obligatoria
+    agregarFilaServicioVenta();
+
+    setTimeout(() => document.getElementById("ventaTelefono").focus(), 150);
+
     const optNomina = document.getElementById("optPagoNomina");
     if (optNomina) {
       const staffActivo = sessionStorage.getItem("active_staff") || "STAFF";
       optNomina.value = "NÓMINA: " + staffActivo.toUpperCase();
     }
   }
+}
+
+function sincronizarMesesVenta(selectElement, idFilaOrigen) {
+  // Lógica inteligente: Si tocas el primer mes, todos los demás heredan
+  const container = document.getElementById("listaServiciosVentaDinamica");
+  const primeraFila = container.querySelector(".vta-row-item");
+
+  if (primeraFila && primeraFila.id === idFilaOrigen) {
+    window.ultimoMesesSeleccionado = selectElement.value;
+    const todosLosSelects = container.querySelectorAll(".select-meses-vta");
+    todosLosSelects.forEach((sel) => {
+      sel.value = selectElement.value;
+    });
+  }
+}
+
+// Interceptor del Modal para escribir en la fila correcta
+function seleccionarCuentaModalNet(correo, perfil, cliente) {
+  if (typeof haptic === "function") haptic();
+
+  if (window.targetInputRenoDinamico) {
+    window.targetInputRenoDinamico.value = correo + " | Perfil: " + perfil;
+  }
+
+  const inputNombre = document.getElementById("ventaNombre");
+  if (inputNombre && inputNombre.value.trim() === "" && cliente !== "N/A") {
+    inputNombre.value = cliente;
+  }
+  document.getElementById("modalRenovacionFlotante").classList.remove("open");
+}
+
+function ejecutarCreacionVentaLocal(e) {
+  e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const nombre = document.getElementById("ventaNombre").value.trim();
+  const telefono = document
+    .getElementById("ventaTelefono")
+    .value.replace(/\s+/g, "")
+    .trim();
+  const cantidadRaw = document
+    .getElementById("ventaCantidad")
+    .value.replace(/\D/g, "");
+  const cantidad = parseFloat(cantidadRaw) || 0;
+  const banco = document.getElementById("ventaBanco").value;
+
+  const filasUI = document.querySelectorAll(
+    ".listaServiciosVentaDinamica .vta-row-item, #listaServiciosVentaDinamica .vta-row-item",
+  );
+  let plataformasAdquiridas = false;
+  let esRecargaSaldoPura = false;
+  let bonoElegidoGlobal = "0";
+
+  let descripcionSheetsArray = [];
+  let resumenConfirmarArray = [];
+  let correoNetflixReno = "";
+  let esR = false;
+  let memoriaMeses = {};
+
+  filasUI.forEach((fila) => {
+    const selectPlat = fila.querySelector(".select-plat-vta");
+    if (selectPlat && selectPlat.value !== "") {
+      const idPlat = selectPlat.value;
+
+      if (idPlat === "SALDO") {
+        esRecargaSaldoPura = true;
+        bonoElegidoGlobal = fila.querySelector(".select-bono-vta").value;
+        plataformasAdquiridas = true;
+      } else {
+        plataformasAdquiridas = true;
+        let numPantallas = fila.querySelector(".select-pant-vta")
+          ? fila.querySelector(".select-pant-vta").value
+          : "1";
+        let numMeses = fila.querySelector(".select-meses-vta")
+          ? fila.querySelector(".select-meses-vta").value
+          : "1";
+        let elTipo = fila.querySelector(".select-tipo-vta")
+          ? fila.querySelector(".select-tipo-vta").value
+          : "Nueva";
+
+        let esRenovacionActiva = elTipo === "Reno (Historial)";
+        let prefixSheets = esRenovacionActiva ? "RENO: " : "";
+        if (esRenovacionActiva) esR = true;
+
+        if (idPlat === "NETFLIX" && esRenovacionActiva) {
+          const inputReno = fila.querySelector(".input-correo-vta");
+          if (inputReno && inputReno.value.trim() !== "") {
+            correoNetflixReno = inputReno.value.trim();
+          } else {
+            alert(
+              "⚠️ Error: Selecciona la cuenta de Netflix a renovar tocando el recuadro azul.",
+            );
+            throw new Error("Abort");
+          }
+        }
+
+        memoriaMeses[idPlat] = numMeses;
+        let platNombreScript =
+          idPlat === "AMAZON" ? "AMAZON-PRIME-VIDEO" : idPlat;
+        descripcionSheetsArray.push(
+          `${prefixSheets}${numPantallas} ${platNombreScript}`,
+        );
+        resumenConfirmarArray.push(
+          `    •  ${numPantallas}x ${platNombreScript} ➔ [${numMeses} Mes(es) / ${esRenovacionActiva ? "Reno" : "Nueva"}]`,
+        );
+      }
+    }
+  });
+
+  if (!plataformasAdquiridas) {
+    alert("⚠️ Selecciona al menos una plataforma para registrar la venta.");
+    return;
+  }
+
+  const btnSubmit = document.getElementById("btnSubmitVentaV2");
+
+  // 💼 CASO A: RECARGA DE SALDO DISTRIBUIDOR
+  if (esRecargaSaldoPura) {
+    let avisoRecarga = `❓ ¿CONFIRMAR INYECCIÓN DE SALDO? 💼\n\n👤 Distribuidor: ${nombre || telefono}\n🏦 Cuenta Origen: ${banco}\n💰 Monto Recarga: $${cantidad.toLocaleString("es-CO")}\n🎁 Bono Aplicado: ${bonoElegidoGlobal}%\n\n¿Estás seguro de que los datos son correctos?`;
+    if (!confirm(avisoRecarga)) return;
+
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Inyectando saldo...`;
+
+    const callbackName = "cb_recarga_" + Date.now();
+    window[callbackName] = function (res) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerText = "Realizar Venta";
+      const scriptNode = document.getElementById("node_" + callbackName);
+      if (scriptNode) scriptNode.remove();
+      delete window[callbackName];
+
+      if (res && res.status === "success") {
+        let Richmond = `🔔 *NOTIFICACIÓN DE RECARGA CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${res.revendedor}\n💰 *Monto Inyectado:* $${Math.round(res.recargadoBase).toLocaleString("es-CO")}\n🎁 *Bono Otorgado:* ${res.bonoAplicado}%\n📈 *Saldo de Regalo:* +$${Math.round(res.regaloAdicional).toLocaleString("es-CO")}\n💵 *Nuevo Saldo Total:* $${Math.round(res.nuevoSaldo).toLocaleString("es-CO")}\n────────────────────\n✨ _¡Tu saldo acumulado ya se encuentra disponible para compras!_`;
+
+        window.textoSaldoRevendedorGlobal = Richmond;
+        let btnSaldo = document.getElementById("btnCopiarSaldoRevendedor");
+        if (btnSaldo) btnSaldo.style.display = "flex";
+
+        document.getElementById("ventasOverlay").classList.remove("open");
+        document.getElementById("outputTextoVentaFicha").value = Richmond;
+        document
+          .getElementById("ventaGeneradaModalOverlay")
+          .classList.add("open");
+
+        if (typeof cargarResumenProveedores === "function")
+          cargarResumenProveedores();
+      } else {
+        alert("❌ Error: " + (res ? res.message : "Fallo al inyectar saldo."));
+      }
+    };
+    const script = document.createElement("script");
+    script.id = "node_" + callbackName;
+    script.src = `${GOOGLE_SCRIPT_URL}?action=recargarSaldo&revendedor=${encodeURIComponent(telefono !== "" ? telefono : nombre)}&totalRecarga=${encodeURIComponent(cantidad)}&bono=${encodeURIComponent(bonoElegidoGlobal)}&banco=${encodeURIComponent(banco)}&callback=${callbackName}`;
+    document.body.appendChild(script);
+    return;
+  }
+
+  // 🎬 CASO B: VENTAS DE PANTALLAS TRADICIONALES
+  const descripcionFinalSheets = descripcionSheetsArray.join(" + ");
+  let mensajeVenta = `❓ ¿CONFIRMAR REGISTRO DE VENTA? 🍿\n────────────────────────────\n👤 Cliente: ${nombre || "No especificado"}\n📞 Celular: ${telefono}\n🏦 Recibe: ${banco}\n💰 Valor Cobrado: $${cantidad.toLocaleString("es-CO")}\n\n📺 Cuentas a entregar:\n${resumenConfirmarArray.join("\n")}\n────────────────────────────\n¿Estás seguro de que los datos ingresados son correctos?`;
+
+  if (!confirm(mensajeVenta)) return;
+
+  btnSubmit.disabled = true;
+  btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Conectando...`;
+
+  const callbackName = "cb_venta_" + Date.now();
+  window[callbackName] = function (res) {
+    btnSubmit.disabled = false;
+    btnSubmit.innerText = "Realizar Venta";
+    const scriptNode = document.getElementById("node_" + callbackName);
+    if (scriptNode) scriptNode.remove();
+    delete window[callbackName];
+
+    if (res && res.status === "success") {
+      let bloques = res.bloques || [];
+      let blocks = bloques.sort((a, b) => {
+        if (a.id === "NETFLIX") return -1;
+        if (b.id === "NETFLIX") return 1;
+        return 0;
+      });
+
+      const nombreCliente = nombre !== "" ? nombre : "";
+      let intro = `🌟 *¡Hola ${nombreCliente}!*\n\n`;
+      intro += esR
+        ? `Tu servicio ha sido *RENOVADO* con éxito. Mantienes tus mismos accesos:`
+        : `Tu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
+
+      let cuerpo = "";
+      bloques.forEach((b) => {
+        let etiquetaUser =
+          b.id === "IPTV" || b.id === "EMBY" ? "Usuario" : "Correo";
+        let etiquetaPerfil =
+          b.id === "IPTV" ? "URL" : b.id === "EMBY" ? "Servidor" : "Perfil";
+        let mesesComprados = memoriaMeses[b.id] || "1";
+        let textoMeses = mesesComprados > 1 ? ` (${mesesComprados} Meses)` : "";
+
+        cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n────────────────────\n`;
+        if (b.id === "NETFLIX")
+          cuerpo += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+        cuerpo += `👤 *${etiquetaUser}:* ${b.correo}\n🔐 *Contraseña:* ${b.clave}\n`;
+        if (
+          b.id === "IPTV" ||
+          (b.perfil && b.perfil !== "" && b.perfil !== "N/A")
+        )
+          cuerpo += `🌐 *${etiquetaPerfil}:* ${b.perfil}\n`;
+        if (b.id === "EMBY") cuerpo += `🔌 *Puerto:* Dejar vacío\n`;
+        if (b.pin && b.pin !== "") cuerpo += `📍 *PIN:* ${b.pin}\n`;
+        cuerpo += `📅 *Vence:* ${b.venc}\n`;
+        if (b.id === "NETFLIX")
+          cuerpo += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/`;
+      });
+
+      let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
+      const mensajeFinalFicha =
+        intro +
+        cuerpo +
+        soporte +
+        `\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
+
+      let btnSaldo = document.getElementById("btnCopiarSaldoRevendedor");
+      if (res.esRevendedor) {
+        let montoDescontado = res.valorCobrado || 0;
+        let distribuidorNombre = res.nombreRevendedor || telefono;
+        window.textoSaldoRevendedorGlobal = `🔔 *NOTIFICACIÓN DE SALDO CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${distribuidorNombre}\n📉 *Débito por compra:* -$${Math.round(montoDescontado).toLocaleString("es-CO")}\n💰 *Saldo Disponible:* $${Math.round(res.saldoQuedante).toLocaleString("es-CO")}\n────────────────────\n✨ _¡Gracias por tu compra mayorista en Cybernet!_`;
+        if (btnSaldo) btnSaldo.style.display = "flex";
+      } else {
+        window.textoSaldoRevendedorGlobal = "";
+        if (btnSaldo) btnSaldo.style.display = "none";
+      }
+
+      document.getElementById("ventasOverlay").classList.remove("open");
+      document.getElementById("outputTextoVentaFicha").value =
+        mensajeFinalFicha;
+      document
+        .getElementById("ventaGeneradaModalOverlay")
+        .classList.add("open");
+
+      // Resetear a fila 1 limpia
+      document.getElementById("formGenerarVenta").reset();
+      document.getElementById("listaServiciosVentaDinamica").innerHTML = "";
+      contadorFilasVenta = 0;
+      agregarFilaServicioVenta();
+
+      if (res.alertasStock && res.alertasStock.length > 0) {
+        let avisoTexto =
+          "⚠️ ¡ALERTA DE INVENTARIO CRÍTICO! ⚠️\n───────────────────────────\n";
+        res.alertasStock.forEach((a) => {
+          avisoTexto += `🚨 Plataforma: ${a.plat} ➔ ¡Solo quedan ${a.cant} perfiles libres!\n`;
+        });
+        setTimeout(() => {
+          alert(avisoTexto);
+        }, 600);
+      }
+    } else {
+      alert("❌ Error: " + (res ? res.message : "Fallo de comunicación."));
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + callbackName;
+  const mesesParam = encodeURIComponent(JSON.stringify(memoriaMeses));
+  script.src = `${GOOGLE_SCRIPT_URL}?action=registrarVentaDirectaV13&nombre=${encodeURIComponent(nombre)}&telefono=${encodeURIComponent(telefono)}&descripcion=${encodeURIComponent(descripcionFinalSheets)}&correoReno=${encodeURIComponent(correoNetflixReno)}&cantidad=${encodeURIComponent(cantidad)}&banco=${encodeURIComponent(banco)}&meses=${mesesParam}&callback=${callbackName}`;
+  document.body.appendChild(script);
 }
 window.toggleCargarPanel = function () {
   const panel = document.getElementById("cargarOverlay");
@@ -1592,9 +1866,21 @@ function abrirModalRenovacionNet() {
   window.cuentasNetflixClienteActivo.forEach((cuenta) => {
     let div = document.createElement("div");
     div.className = "card-ios item-reno-modal";
-    div.style.padding = "15px";
-    div.style.cursor = "pointer";
-    div.style.background = "var(--glass-bg)";
+
+    // 🔥 ESTILO CORREGIDO: Forzamos la alineación en fila y quitamos los saltos
+    div.style.cssText =
+      "padding: 14px 16px !important; cursor: pointer; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 16px !important; margin-bottom: 0 !important; transition: all 0.2s ease;";
+
+    // Efecto Hover brillante
+    div.onmouseover = function () {
+      this.style.background = "rgba(10, 132, 255, 0.1) !important";
+      this.style.borderColor = "rgba(10, 132, 255, 0.3) !important";
+    };
+    div.onmouseout = function () {
+      this.style.background = "rgba(255, 255, 255, 0.03) !important";
+      this.style.borderColor = "rgba(255, 255, 255, 0.06) !important";
+    };
+
     div.setAttribute(
       "data-search",
       cuenta.correo.toLowerCase() +
@@ -1605,14 +1891,23 @@ function abrirModalRenovacionNet() {
     );
 
     div.innerHTML = `
-                      <div style="color: var(--text-primary); font-weight: 700; font-size: 1rem; margin-bottom: 6px;">
-                          ${cuenta.correo}
-                      </div>
-                      <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary);">
-                          <span>Perfil: <b style="color: var(--ios-blue);">${cuenta.perfil}</b></span>
-                          <span>Cliente: <b>${cuenta.cliente}</b></span>
-                      </div>
-                  `;
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div style="display: flex; flex-direction: column; gap: 6px; overflow: hidden; padding-right: 10px;">
+              <span style="color: var(--text-primary); font-weight: 800; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace;">${cuenta.correo}</span>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: var(--ios-blue); padding: 3px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+                      Perfil ${cuenta.perfil}
+                  </span>
+                  <span style="color: var(--text-secondary); font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      👤 Cliente: <b style="color: var(--text-primary); font-weight: 600;">${cuenta.cliente !== "" && cuenta.cliente !== "N/A" ? cuenta.cliente : "Sin nombre"}</b>
+                  </span>
+              </div>
+          </div>
+          <div style="color: var(--text-secondary); flex-shrink: 0; display: flex; align-items: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </div>
+      </div>
+    `;
 
     div.onclick = function () {
       seleccionarCuentaModalNet(cuenta.correo, cuenta.perfil, cuenta.cliente);
@@ -1621,7 +1916,8 @@ function abrirModalRenovacionNet() {
   });
 
   modal.classList.add("open");
-  buscador.focus();
+
+  setTimeout(() => buscador.focus(), 100);
 }
 
 function cerrarModalRenovacionNet() {
@@ -1638,18 +1934,269 @@ function cerrarModalRenovacionNet() {
   }
 }
 
-function seleccionarCuentaModalNet(correo, perfil, cliente) {
-  haptic();
-  const inputReno = document.getElementById("correo_reno_NETFLIX");
-  const inputNombre = document.getElementById("ventaNombre");
+// =========================================================================
+// 🚀 NUEVA LÓGICA DE VENTAS (MÓDULO DINÁMICO POR BLOQUES BLINDADO)
+// =========================================================================
 
-  if (inputReno) {
-    inputReno.value = correo + " | Perfil: " + perfil;
+function agregarFilaServicioVenta() {
+  if (typeof haptic === "function") haptic();
+  const container = document.getElementById("listaServiciosVentaDinamica");
+  contadorFilasVenta++;
+  const idFila = `fila_vta_${contadorFilasVenta}`;
+
+  // Genera opciones base de la lista global
+  let optionsPlat =
+    '<option value="" disabled selected>— Elige servicio —</option>';
+  optionsPlat += '<option value="SALDO">💼 Recarga de Saldo</option>';
+
+  listaPlataformasVenta.forEach((p) => {
+    if (p.id !== "SALDO") {
+      optionsPlat += `<option value="${p.id}" data-pantallas="${p.permitePantallas}" data-reno="${p.permiteRenovacion}">${p.nombre}</option>`;
+    }
+  });
+
+  let mesHeredado = window.ultimoMesesSeleccionado || "1";
+
+  const rowHTML = `
+    <div id="${idFila}" class="vta-row-item" style="display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+        
+        <div style="display: flex; gap: 8px; width: 100%; align-items: center;">
+            <select class="input-ios select-plat-vta" style="flex: 2; margin: 0; font-weight: 700; background: rgba(0,0,0,0.3) !important;" required onchange="alCambiarPlataformaVenta('${idFila}')">
+                ${optionsPlat}
+            </select>
+            
+            <div class="wrapper-pantallas" style="flex: 1; display: none;">
+                <select class="input-ios select-pant-vta" style="margin: 0; background: rgba(0,0,0,0.3) !important; text-align: center; padding: 14px 4px;">
+                    <option value="1">1 Pant.</option>
+                    <option value="2">2 Pant.</option>
+                    <option value="3">3 Pant.</option>
+                    <option value="4">4 Pant.</option>
+                    <option value="5">5 Pant.</option>
+                </select>
+            </div>
+
+            <div class="wrapper-meses" style="flex: 1; display: none;">
+                <select class="input-ios select-meses-vta" style="margin: 0; background: rgba(0,0,0,0.3) !important; text-align: center; padding: 14px 4px;" onchange="sincronizarMesesVenta(this, '${idFila}')">
+                    <option value="1" ${mesHeredado === "1" ? "selected" : ""}>1 Mes</option>
+                    <option value="2" ${mesHeredado === "2" ? "selected" : ""}>2 Meses</option>
+                    <option value="3" ${mesHeredado === "3" ? "selected" : ""}>3 Meses</option>
+                    <option value="4" ${mesHeredado === "4" ? "selected" : ""}>4 Meses</option>
+                    <option value="5" ${mesHeredado === "5" ? "selected" : ""}>5 Meses</option>
+                </select>
+            </div>
+            
+            <!-- 🔥 AGREGADOS LOS PORCENTAJES DEL 25% Y 30% AL MENÚ DEL BONO 🔥 -->
+            <div class="wrapper-bono" style="flex: 1; display: none;">
+                <select class="input-ios select-bono-vta" style="margin: 0; background: rgba(255,159,10,0.1) !important; color: var(--ios-orange); border-color: rgba(255,159,10,0.3); text-align: center; padding: 14px 4px; font-weight:bold;">
+                    <option value="0">0% Bono</option>
+                    <option value="5">5%</option>
+                    <option value="10">10%</option>
+                    <option value="15">15%</option>
+                    <option value="20">20%</option>
+                    <option value="25">25%</option>
+                    <option value="30">30%</option>
+                </select>
+            </div>
+
+            ${
+              contadorFilasVenta > 1
+                ? `
+              <div class="wrapper-delete-vta" style="width: 46px; height: 46px; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                <button type="button" onclick="document.getElementById('${idFila}').remove(); if(typeof haptic==='function')haptic();" style="width: 46px !important; height: 46px !important; min-width: 46px !important; max-width: 46px !important; min-height: 46px !important; max-height: 46px !important; background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; cursor: pointer; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; padding: 0; box-sizing: border-box;" onmouseover="this.style.background='rgba(255, 69, 58, 0.25)'" onmouseout="this.style.background='rgba(255, 69, 58, 0.15)'" title="Eliminar fila">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+            `
+                : ""
+            }
+        </div>
+        
+        <div class="wrapper-reno-tipo" style="display: none; gap: 8px; width: 100%; margin-top: 2px; ${contadorFilasVenta > 1 ? "padding-right: 54px;" : ""}">
+            <select class="input-ios select-tipo-vta" style="flex: 1; margin: 0; background: rgba(0,0,0,0.3) !important;" onchange="alCambiarTipoVenta('${idFila}')">
+                <option value="Nueva">Nueva</option>
+                <option value="Reno (Historial)" class="opt-historial-net" style="display: none; background: rgba(10, 132, 255, 0.2); font-weight:bold; color:var(--ios-blue);" disabled hidden>Reno (Elegir Cliente)</option>
+            </select>
+            <input type="text" class="input-ios input-correo-vta" placeholder="Correo de la cuenta a renovar..." style="flex: 2; margin: 0; display: none; background: rgba(0,0,0,0.3) !important; font-weight: 700; color: var(--ios-blue);" />
+        </div>
+    </div>
+  `;
+  container.insertAdjacentHTML("beforeend", rowHTML);
+
+  const optHistorial = document.querySelector(`#${idFila} .opt-historial-net`);
+  if (
+    window.cuentasNetflixClienteActivo &&
+    window.cuentasNetflixClienteActivo.length > 0
+  ) {
+    optHistorial.disabled = false;
+    optHistorial.removeAttribute("hidden");
+    optHistorial.style.display = "";
   }
+}
+
+function ajustarInterfazPorMetodoPagoV2() {
+  // 🔥 BLINDAJE LOGÍSTICO COMPLETO 🔥
+  // Dejamos esta función limpia y vacía. Ya no forzamos el bono en plataformas normales.
+  // La visualización de meses o bonos se controla de manera estricta según el servicio seleccionado, no por el medio de pago.
+}
+
+function alCambiarPlataformaVenta(idFila) {
+  const fila = document.getElementById(idFila);
+  const selectPlat = fila.querySelector(".select-plat-vta");
+  const platKey = selectPlat.value;
+  const opt = selectPlat.options[selectPlat.selectedIndex];
+
+  const wPant = fila.querySelector(".wrapper-pantallas");
+  const wMes = fila.querySelector(".wrapper-meses");
+  const wBono = fila.querySelector(".wrapper-bono");
+  const wReno = fila.querySelector(".wrapper-reno-tipo");
+  const selectTipo = fila.querySelector(".select-tipo-vta");
+
+  wPant.style.display = "none";
+  wMes.style.display = "none";
+  wBono.style.display = "none";
+  wReno.style.display = "none";
+
+  if (platKey === "SALDO") {
+    wBono.style.display = "block";
+  } else {
+    if (opt.getAttribute("data-pantallas") === "true")
+      wPant.style.display = "block";
+    wMes.style.display = "block";
+
+    if (opt.getAttribute("data-reno") === "true") {
+      wReno.style.display = "flex";
+
+      if (
+        platKey === "NETFLIX" &&
+        window.cuentasNetflixClienteActivo &&
+        window.cuentasNetflixClienteActivo.length > 0
+      ) {
+        selectTipo.innerHTML =
+          '<option value="Nueva">Nueva</option><option value="Reno (Historial)">Renovar</option>';
+        // Lo pasamos a Renovar automáticamente para ahorrarte un clic
+        selectTipo.value = "Reno (Historial)";
+      } else {
+        selectTipo.innerHTML = '<option value="Nueva">Nueva</option>';
+      }
+    }
+  }
+  alCambiarTipoVenta(idFila);
+}
+
+function alCambiarTipoVenta(idFila) {
+  const fila = document.getElementById(idFila);
+  const selectTipo = fila.querySelector(".select-tipo-vta");
+  const inputCorreo = fila.querySelector(".input-correo-vta");
+  const platKey = fila.querySelector(".select-plat-vta").value;
+
+  if (selectTipo.value === "Reno (Historial)") {
+    // Renovación Mágica desde el Historial
+    inputCorreo.style.display = "block";
+    inputCorreo.required = true;
+    inputCorreo.readOnly = true;
+    inputCorreo.placeholder = "👉 Toca aquí para elegir cuenta";
+    inputCorreo.style.cursor = "pointer";
+
+    inputCorreo.onclick = function () {
+      if (
+        platKey === "NETFLIX" &&
+        typeof abrirModalRenovacionNet === "function"
+      ) {
+        window.targetInputRenoDinamico = inputCorreo;
+        abrirModalRenovacionNet();
+      }
+    };
+
+    // 🔥 ELIMINAMOS EL AUTO-LANZAMIENTO DE LA VENTANA 🔥
+    // Ahora el usuario tiene el control de cuándo tocar la caja azul para abrirla.
+  } else {
+    // Venta Nueva
+    inputCorreo.style.display = "none";
+    inputCorreo.required = false;
+    inputCorreo.value = "";
+  }
+}
+
+function buscarHistorialNetflixEnVenta(telefono) {
+  let telLimpio = telefono.replace(/\D/g, "");
+
+  // Si se borra el número, limpiamos todo y devolvemos a "Nueva"
+  if (telLimpio.length < 8) {
+    window.cuentasNetflixClienteActivo = [];
+    document.querySelectorAll(".vta-row-item").forEach((fila) => {
+      const selectTipo = fila.querySelector(".select-tipo-vta");
+      if (selectTipo) {
+        selectTipo.innerHTML = '<option value="Nueva">Nueva</option>';
+        alCambiarTipoVenta(fila.id);
+      }
+    });
+    return;
+  }
+
+  clearTimeout(window.timeoutBusquedaNet);
+  window.timeoutBusquedaNet = setTimeout(() => {
+    const cbName = "cb_net_search_" + Date.now();
+    window[cbName] = function (res) {
+      const scriptNode = document.getElementById("node_" + cbName);
+      if (scriptNode) scriptNode.remove();
+      delete window[cbName];
+
+      window.cuentasNetflixClienteActivo = [];
+
+      if (res && res.status === "success" && res.data.length > 0) {
+        window.cuentasNetflixClienteActivo = res.data;
+
+        if (typeof triggerToast === "function")
+          triggerToast(
+            "✨ ¡Historial de Netflix encontrado para este cliente!",
+          );
+
+        document.querySelectorAll(".vta-row-item").forEach((fila) => {
+          const platKey = fila.querySelector(".select-plat-vta").value;
+          const selectTipo = fila.querySelector(".select-tipo-vta");
+
+          // Si tiene Netflix puesto, le activamos la opción de Renovar
+          if (platKey === "NETFLIX") {
+            selectTipo.innerHTML =
+              '<option value="Nueva">Nueva</option><option value="Reno (Historial)">Renovar</option>';
+            selectTipo.value = "Reno (Historial)";
+            alCambiarTipoVenta(fila.id);
+          }
+        });
+      } else {
+        document.querySelectorAll(".vta-row-item").forEach((fila) => {
+          const selectTipo = fila.querySelector(".select-tipo-vta");
+          if (selectTipo) {
+            selectTipo.innerHTML = '<option value="Nueva">Nueva</option>';
+            alCambiarTipoVenta(fila.id);
+          }
+        });
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_" + cbName;
+    script.src = `${GOOGLE_SCRIPT_URL}?action=buscarRenovacionNetflix&tel=${encodeURIComponent(telLimpio)}&callback=${cbName}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+  }, 800);
+}
+
+// 🔥 CORRECCIÓN: Esta función ahora escribe en el input dinámico correcto
+function seleccionarCuentaModalNet(correo, perfil, cliente) {
+  if (typeof haptic === "function") haptic();
+
+  // 1. Inyecta el texto exacto en la caja que disparó la ventana
+  if (window.targetInputRenoDinamico) {
+    window.targetInputRenoDinamico.value = correo + " | Perfil: " + perfil;
+  }
+
+  // 2. Autocompleta el nombre del cliente si está vacío
+  const inputNombre = document.getElementById("ventaNombre");
   if (inputNombre && inputNombre.value.trim() === "" && cliente !== "N/A") {
     inputNombre.value = cliente;
   }
 
+  // 3. Cierra la ventana
   document.getElementById("modalRenovacionFlotante").classList.remove("open");
 }
 
@@ -1683,292 +2230,6 @@ function formatearMontoEnVivoCOP(input) {
 }
 
 window.textoSaldoRevendedorGlobal = "";
-
-function ejecutarCreacionVentaLocal(e) {
-  e.preventDefault();
-  haptic();
-
-  const nombre = document.getElementById("ventaNombre").value.trim();
-  const telefono = document
-    .getElementById("ventaTelefono")
-    .value.replace(/\s+/g, "")
-    .trim();
-  const cantidadRaw = document
-    .getElementById("ventaCantidad")
-    .value.replace(/\D/g, "");
-  const cantidad = parseFloat(cantidadRaw) || 0;
-  const banco = document.getElementById("ventaBanco").value;
-
-  const recargaSaldoChequeada = document.querySelector(
-    'input[name="platformCheckVenta"][value="SALDO"]',
-  )?.checked;
-
-  const btnSubmit = document.querySelector(
-    '#formGenerarVenta button[type="submit"]',
-  );
-
-  // 💼 CASO A: RECARGA DE SALDO DISTRIBUIDOR
-  if (recargaSaldoChequeada) {
-    const bonoElegido = document.getElementById("bono_SALDO").value;
-
-    let avisoRecarga =
-      `❓ ¿CONFIRMAR INYECCIÓN DE SALDO? 💼\n\n` +
-      `👤 Distribuidor: ${nombre || telefono}\n` +
-      `🏦 Cuenta Origen: ${banco}\n` +
-      `💰 Monto Recarga: $${cantidad.toLocaleString("es-CO")}\n` +
-      `🎁 Bono Aplicado: ${bonoElegido}%\n\n` +
-      `¿Estás seguro de que los datos son correctos?`;
-
-    if (!confirm(avisoRecarga)) return;
-
-    // Deshabilitamos el botón y ponemos el spinner de carga en la misma ventana
-    btnSubmit.disabled = true;
-    btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Inyectando saldo...`;
-
-    const callbackName = "cb_recarga_" + Date.now();
-    window[callbackName] = function (res) {
-      btnSubmit.disabled = false;
-      btnSubmit.innerText = "REGISTRAR VENTA COMPLETA";
-
-      const scriptNode = document.getElementById("node_" + callbackName);
-      if (scriptNode) scriptNode.remove();
-      delete window[callbackName];
-
-      if (res && res.status === "success") {
-        let Richmond = `🔔 *NOTIFICACIÓN DE RECARGA CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${res.revendedor}\n💰 *Monto Inyectado:* $${Math.round(res.recargadoBase).toLocaleString("es-CO")}\n🎁 *Bono Otorgado:* ${res.bonoAplicado}%\n📈 *Saldo de Regalo:* +$${Math.round(res.regaloAdicional).toLocaleString("es-CO")}\n💵 *Nuevo Saldo Total:* $${Math.round(res.nuevoSaldo).toLocaleString("es-CO")}\n────────────────────\n✨ _¡Tu saldo acumulado ya se encuentra disponible para compras!_`;
-
-        // =========================================================================
-        // 🔥 SOLUCIÓN AQUÍ: Sincronizamos la variable global y mostramos el botón
-        // =========================================================================
-        window.textoSaldoRevendedorGlobal = Richmond;
-        let btnSaldo = document.getElementById("btnCopiarSaldoRevendedor");
-        if (btnSaldo) btnSaldo.style.display = "flex";
-        // =========================================================================
-
-        // Solo ahora que fue exitoso, cerramos y abrimos la ficha
-        document.getElementById("ventasOverlay").classList.remove("open");
-        document.getElementById("outputTextoVentaFicha").value = Richmond;
-        document
-          .getElementById("ventaGeneradaModalOverlay")
-          .classList.add("open");
-        document.getElementById("formGenerarVenta").reset();
-
-        // 🔥 FIX CRÍTICO: Formatear la memoria justo después de terminar
-        window.ultimoMesesSeleccionado = "1";
-
-        cargarResumenProveedores();
-      } else {
-        alert("❌ Error: " + (res ? res.message : "Fallo al inyectar saldo."));
-      }
-    };
-
-    const script = document.createElement("script");
-    script.id = "node_" + callbackName;
-    script.src = `${GOOGLE_SCRIPT_URL}?action=recargarSaldo&revendedor=${encodeURIComponent(telefono !== "" ? telefono : nombre)}&totalRecarga=${encodeURIComponent(cantidad)}&bono=${encodeURIComponent(bonoElegido)}&banco=${encodeURIComponent(banco)}&callback=${callbackName}`;
-    document.body.appendChild(script);
-    return;
-  }
-
-  // 🎬 CASO B: VENTAS DE PANTALLAS TRADICIONALES
-  const checkboxes = document.getElementsByName("platformCheckVenta");
-  let plataformasAdquiridas = false;
-  let descripcionSheetsArray = [];
-  let resumenConfirmarArray = [];
-  let correoNetflixReno = "";
-  let esR = false;
-  let memoriaMeses = {};
-
-  for (let i = 0; i < checkboxes.length; i++) {
-    if (checkboxes[i].checked) {
-      plataformasAdquiridas = true;
-      const idPlat = checkboxes[i].value;
-
-      let numPantallas = document.getElementById(`pantallas_${idPlat}`)
-        ? document.getElementById(`pantallas_${idPlat}`).value
-        : "1";
-      let numMeses = document.getElementById(`meses_${idPlat}`)
-        ? document.getElementById(`meses_${idPlat}`).value
-        : "1";
-      let elTipo = document.getElementById(`tipo_${idPlat}`)
-        ? document.getElementById(`tipo_${idPlat}`).value
-        : "Nueva";
-
-      let esRenovacionActiva =
-        elTipo === "Reno (Manual)" || elTipo === "Reno (Historial)";
-      let prefixSheets = esRenovacionActiva ? "RENO: " : "";
-      if (esRenovacionActiva) esR = true;
-
-      if (idPlat === "NETFLIX" && esRenovacionActiva) {
-        const inputReno = document.getElementById(`correo_reno_${idPlat}`);
-        if (inputReno && inputReno.value.trim() !== "") {
-          correoNetflixReno = inputReno.value.trim();
-        } else {
-          alert(
-            "⚠️ Error: Por favor toca una de las cuentas del historial para renovarla, o escríbela en modo Manual.",
-          );
-          return;
-        }
-      }
-
-      memoriaMeses[idPlat] = numMeses;
-      let platNombreScript =
-        idPlat === "AMAZON" ? "AMAZON-PRIME-VIDEO" : idPlat;
-      descripcionSheetsArray.push(
-        `${prefixSheets}${numPantallas} ${platNombreScript}`,
-      );
-      resumenConfirmarArray.push(
-        `    •  ${numPantallas}x ${platNombreScript} ➔ [${numMeses} Mes(es) / ${elTipo}]`,
-      );
-    }
-  }
-
-  if (!plataformasAdquiridas) {
-    alert("⚠️ Selecciona al menos una plataforma para registrar la venta.");
-    return;
-  }
-
-  const descripcionFinalSheets = descripcionSheetsArray.join(" + ");
-
-  let mensajeVenta =
-    `❓ ¿CONFIRMAR REGISTRO DE VENTA? 🍿\n` +
-    `────────────────────────────\n` +
-    `👤 Cliente: ${nombre || "No especificado"}\n` +
-    `📞 Celular: ${telefono}\n` +
-    `🏦 Recibe: ${banco}\n` +
-    `💰 Valor Cobrado: $${cantidad.toLocaleString("es-CO")}\n\n` +
-    `📺 Cuentas a entregar:\n` +
-    resumenConfirmarArray.join("\n") +
-    `\n` +
-    `────────────────────────────\n` +
-    `¿Estás seguro de que los datos ingresados son correctos?`;
-
-  if (!confirm(mensajeVenta)) return;
-
-  // Cambiamos el estado del botón en la misma ventana sin cerrarla
-  btnSubmit.disabled = true;
-  btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Conectando con Sheets...`;
-
-  const callbackName = "cb_venta_" + Date.now();
-  window[callbackName] = function (res) {
-    btnSubmit.disabled = false;
-    btnSubmit.innerText = "REGISTRAR VENTA COMPLETA";
-
-    const scriptNode = document.getElementById("node_" + callbackName);
-    if (scriptNode) scriptNode.remove();
-    delete window[callbackName];
-
-    if (res && res.status === "success") {
-      let bloques = res.bloques || [];
-      let blocks = bloques.sort((a, b) => {
-        if (a.id === "NETFLIX") return -1;
-        if (b.id === "NETFLIX") return 1;
-        return 0;
-      });
-
-      const nombreCliente = nombre !== "" ? nombre : "";
-      let intro = `🌟 *¡Hola ${nombreCliente}!*\n\n`;
-      intro += esR
-        ? `Tu servicio ha sido *RENOVADO* con éxito. Mantienes tus mismos accesos:`
-        : `Tu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
-
-      let cuerpo = "";
-      bloques.forEach((b) => {
-        let etiquetaUser =
-          b.id === "IPTV" || b.id === "EMBY" ? "Usuario" : "Correo";
-        let etiquetaPerfil =
-          b.id === "IPTV" ? "URL" : b.id === "EMBY" ? "Servidor" : "Perfil";
-        let mesesComprados = memoriaMeses[b.id] || "1";
-        let textoMeses = mesesComprados > 1 ? ` (${mesesComprados} Meses)` : "";
-
-        cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n────────────────────\n`;
-
-        // ⚠️ ADVERTENCIA ARRIBA (SOLO NETFLIX)
-        if (b.id === "NETFLIX") {
-          cuerpo += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
-        }
-
-        // DATOS EN NEGRITA
-        cuerpo += `👤 *${etiquetaUser}:* ${b.correo}\n🔐 *Contraseña:* ${b.clave}\n`;
-
-        if (
-          b.id === "IPTV" ||
-          (b.perfil && b.perfil !== "" && b.perfil !== "N/A")
-        ) {
-          cuerpo += `🌐 *${etiquetaPerfil}:* ${b.perfil}\n`;
-        }
-
-        if (b.id === "EMBY") {
-          cuerpo += `🔌 *Puerto:* Dejar vacío\n`;
-        }
-
-        if (b.pin && b.pin !== "") cuerpo += `📍 *PIN:* ${b.pin}\n`;
-        cuerpo += `📅 *Vence:* ${b.venc}\n`;
-
-        // 🤖 BOT DE CÓDIGOS ABAJO (SOLO NETFLIX)
-        if (b.id === "NETFLIX") {
-          cuerpo += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/`;
-        }
-      });
-
-      let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
-      const mensajeFinalFicha =
-        intro +
-        cuerpo +
-        soporte +
-        `\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
-
-      let btnSaldo = document.getElementById("btnCopiarSaldoRevendedor");
-      if (res.esRevendedor) {
-        let montoDescontado = res.valorCobrado || 0;
-        let distribuidorNombre = res.nombreRevendedor || telefono;
-        window.textoSaldoRevendedorGlobal = `🔔 *NOTIFICACIÓN DE SALDO CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${distribuidorNombre}\n📉 *Débito por compra:* -$${Math.round(montoDescontado).toLocaleString("es-CO")}\n💰 *Saldo Disponible:* $${Math.round(res.saldoQuedante).toLocaleString("es-CO")}\n────────────────────\n✨ _¡Gracias por tu compra mayorista en Cybernet!_`;
-        if (btnSaldo) btnSaldo.style.display = "flex";
-      } else {
-        window.textoSaldoRevendedorGlobal = "";
-        if (btnSaldo) btnSaldo.style.display = "none";
-      }
-
-      document.getElementById("ventasOverlay").classList.remove("open");
-      document.getElementById("outputTextoVentaFicha").value =
-        mensajeFinalFicha;
-      document
-        .getElementById("ventaGeneradaModalOverlay")
-        .classList.add("open");
-
-      document.getElementById("formGenerarVenta").reset();
-
-      // 🔥 FIX CRÍTICO: Formatear la memoria justo después de terminar la venta
-      window.ultimoMesesSeleccionado = "1";
-
-      const checksABorrar = document.getElementsByName("platformCheckVenta");
-      for (let c = 0; c < checksABorrar.length; c++) {
-        checksABorrar[c].checked = false;
-        comprobarDesbloqueoVentaPill(checksABorrar[c], checksABorrar[c].value);
-      }
-      if (document.getElementById("buscarPlataformaVenta"))
-        document.getElementById("buscarPlataformaVenta").value = "";
-
-      if (res.alertasStock && res.alertasStock.length > 0) {
-        let avisoTexto =
-          "⚠️ ¡ALERTA DE INVENTARIO CRÍTICO! ⚠️\n───────────────────────────\n";
-        res.alertasStock.forEach((a) => {
-          avisoTexto += `🚨 Plataforma: ${a.plat} ➔ ¡Solo quedan ${a.cant} perfiles libres!\n`;
-        });
-        setTimeout(() => {
-          alert(avisoTexto);
-        }, 600);
-      }
-    } else {
-      alert("❌ Error: " + (res ? res.message : "Fallo de comunicación."));
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + callbackName;
-  const mesesParam = encodeURIComponent(JSON.stringify(memoriaMeses));
-  script.src = `${GOOGLE_SCRIPT_URL}?action=registrarVentaDirectaV13&nombre=${encodeURIComponent(nombre)}&telefono=${encodeURIComponent(telefono)}&descripcion=${encodeURIComponent(descripcionFinalSheets)}&correoReno=${encodeURIComponent(correoNetflixReno)}&cantidad=${encodeURIComponent(cantidad)}&banco=${encodeURIComponent(banco)}&meses=${mesesParam}&callback=${callbackName}`;
-  document.body.appendChild(script);
-}
 
 function copiarTextoSaldoRevendedorDefinitiva() {
   haptic();
@@ -8932,10 +9193,10 @@ window.copiarEnlaceCreacionNetflix = function (btn) {
         `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange); font-weight:700;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
           <span>Recuerda abrir en ventana de Incógnito</span>
-        </div>`
+        </div>`,
       );
     }
-    
+
     setTimeout(function () {
       btn.innerHTML = originalText;
       btn.style.background = "";
@@ -9274,65 +9535,72 @@ window.ejecutarGeneracionNuevaCuentaAlias = function (btn, contenidoOriginal) {
 };
 
 // Radar DUAL: Busca el "Ya casi terminas" (para el PIN) y "Verifica tu correo" (para el Link)
-window.lanzarRadarEspiaAlias = function(correoTarget) {
-    if (window.verificationLinkInterval) clearInterval(window.verificationLinkInterval);
+window.lanzarRadarEspiaAlias = function (correoTarget) {
+  if (window.verificationLinkInterval)
+    clearInterval(window.verificationLinkInterval);
 
-    window.verificationLinkInterval = setInterval(function () {
-        const cbRadarName = "cb_radar_alias_" + Date.now();
+  window.verificationLinkInterval = setInterval(function () {
+    const cbRadarName = "cb_radar_alias_" + Date.now();
 
-        window[cbRadarName] = function (res) {
-            const node = document.getElementById("node_" + cbRadarName);
-            if (node) node.remove();
-            delete window[cbRadarName];
+    window[cbRadarName] = function (res) {
+      const node = document.getElementById("node_" + cbRadarName);
+      if (node) node.remove();
+      delete window[cbRadarName];
 
-            if (res && res.status === "success") {
-                
-                // 1. 🔥 SOLUCIÓN: Mostrar PIN si Netflix envió el "Ya casi terminas" O si llegó directamente el link de verificación
-                if (res.yaCasiTerminas || res.linkVerificacion) {
-                    const pinEl = document.getElementById("displayCtaPinRecarga");
-                    if (pinEl.innerText !== window.pinOcultoActual) {
-                        if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
-                        pinEl.innerText = window.pinOcultoActual; // Revelamos PIN de Refacil
-                        pinEl.style.color = "var(--ios-green)";
-                        
-                        document.getElementById("radarVerificacionSpinner").innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> PIN Revelado. Esperando link de verificación...`;
-                    }
-                }
+      if (res && res.status === "success") {
+        // 1. 🔥 SOLUCIÓN: Mostrar PIN si Netflix envió el "Ya casi terminas" O si llegó directamente el link de verificación
+        if (res.yaCasiTerminas || res.linkVerificacion) {
+          const pinEl = document.getElementById("displayCtaPinRecarga");
+          if (pinEl.innerText !== window.pinOcultoActual) {
+            if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+            pinEl.innerText = window.pinOcultoActual; // Revelamos PIN de Refacil
+            pinEl.style.color = "var(--ios-green)";
 
-                // 2. Mostrar botón de Verificar si Netflix envió el enlace
-                if (res.linkVerificacion) {
-                    clearInterval(window.verificationLinkInterval);
-                    if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+            document.getElementById("radarVerificacionSpinner").innerHTML =
+              `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> PIN Revelado. Esperando link de verificación...`;
+          }
+        }
 
-                    document.getElementById("radarVerificacionSpinner").style.setProperty("display", "none", "important");
+        // 2. Mostrar botón de Verificar si Netflix envió el enlace
+        if (res.linkVerificacion) {
+          clearInterval(window.verificationLinkInterval);
+          if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
 
-                    const btnLink = document.getElementById("btnLinkVerificarGmail");
-                    btnLink.href = res.linkVerificacion;
-                    btnLink.innerHTML = "✉️ Verificar Correo en Netflix";
-                    btnLink.style.setProperty("display", "inline-flex", "important");
+          document
+            .getElementById("radarVerificacionSpinner")
+            .style.setProperty("display", "none", "important");
 
-                    // 🎯 CANDADO: Solo al verificar se habilita Guardar
-                    btnLink.onclick = function () {
-                        if (typeof haptic === "function") haptic();
-                        document.getElementById("btnGuardarMaestroNetflix").style.setProperty("display", "block", "important");
-                        
-                        // Ocultamos el botón de cuenta mala porque ya fue verificada
-                        const btnMala = document.getElementById("btnCuentaMalaAlias");
-                        if(btnMala) btnMala.style.display = "none";
-                    };
+          const btnLink = document.getElementById("btnLinkVerificarGmail");
+          btnLink.href = res.linkVerificacion;
+          btnLink.innerHTML = "✉️ Verificar Correo en Netflix";
+          btnLink.style.setProperty("display", "inline-flex", "important");
 
-                    const contenedor = document.getElementById("radarVerificacionContenedor");
-                    contenedor.style.background = "rgba(48, 209, 88, 0.06)";
-                    contenedor.style.borderColor = "rgba(48, 209, 88, 0.35)";
-                }
-            }
-        };
+          // 🎯 CANDADO: Solo al verificar se habilita Guardar
+          btnLink.onclick = function () {
+            if (typeof haptic === "function") haptic();
+            document
+              .getElementById("btnGuardarMaestroNetflix")
+              .style.setProperty("display", "block", "important");
 
-        const script = document.createElement("script");
-        script.id = "node_" + cbRadarName;
-        script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoTarget)}&callback=${cbRadarName}&_ts=${Date.now()}`;
-        document.body.appendChild(script);
-    }, 4000); 
+            // Ocultamos el botón de cuenta mala porque ya fue verificada
+            const btnMala = document.getElementById("btnCuentaMalaAlias");
+            if (btnMala) btnMala.style.display = "none";
+          };
+
+          const contenedor = document.getElementById(
+            "radarVerificacionContenedor",
+          );
+          contenedor.style.background = "rgba(48, 209, 88, 0.06)";
+          contenedor.style.borderColor = "rgba(48, 209, 88, 0.35)";
+        }
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_" + cbRadarName;
+    script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoTarget)}&callback=${cbRadarName}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+  }, 4000);
 };
 
 // 🔥 FUNCIÓN MÁSTER: Pinta la pantalla tanto al crear como al restaurar la memoria
@@ -9510,37 +9778,38 @@ const APP_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
 
 function cargarPagosBreB() {
-    const script = document.createElement("script");
-    const callbackName = "jsonpCallbackBreB_" + Math.round(100000 * Math.random());
-    const fechaSeleccionada = document.getElementById("breb-fecha").value;
-    
-    const contenedor = document.getElementById("breb-lista");
-    contenedor.innerHTML = `<div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; padding: 40px 0;">Buscando pagos...</div>`;
+  const script = document.createElement("script");
+  const callbackName =
+    "jsonpCallbackBreB_" + Math.round(100000 * Math.random());
+  const fechaSeleccionada = document.getElementById("breb-fecha").value;
 
-    // 🔥 NUEVO: SEGURO ANTI-CUELGUES (Si tarda más de 12 segundos, cancela)
-    const seguroDeTiempo = setTimeout(() => {
-      if (window[callbackName]) {
-        contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Google no responde.<br>Presiona actualizar de nuevo.</div>`;
-        const icono = document.getElementById("icon-refresh-breb");
-        if (icono) icono.classList.remove("spin-breb-anim");
-        
-        // Limpiamos la basura para que no se trabe la página
-        delete window[callbackName];
-        if (document.body.contains(script)) document.body.removeChild(script);
-      }
-    }, 12000); // 12000 milisegundos = 12 segundos
+  const contenedor = document.getElementById("breb-lista");
+  contenedor.innerHTML = `<div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; padding: 40px 0;">Buscando pagos...</div>`;
 
-    window[callbackName] = function(data) {
-      clearTimeout(seguroDeTiempo); // Si Google responde rápido, cancelamos la alarma de 12 segundos
-      contenedor.innerHTML = ""; 
-      
+  // 🔥 NUEVO: SEGURO ANTI-CUELGUES (Si tarda más de 12 segundos, cancela)
+  const seguroDeTiempo = setTimeout(() => {
+    if (window[callbackName]) {
+      contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Google no responde.<br>Presiona actualizar de nuevo.</div>`;
       const icono = document.getElementById("icon-refresh-breb");
       if (icono) icono.classList.remove("spin-breb-anim");
 
-      if (data.status === "success") {
-        if (data.data.length > 0) {
-          data.data.forEach(pago => {
-            contenedor.innerHTML += `
+      // Limpiamos la basura para que no se trabe la página
+      delete window[callbackName];
+      if (document.body.contains(script)) document.body.removeChild(script);
+    }
+  }, 12000); // 12000 milisegundos = 12 segundos
+
+  window[callbackName] = function (data) {
+    clearTimeout(seguroDeTiempo); // Si Google responde rápido, cancelamos la alarma de 12 segundos
+    contenedor.innerHTML = "";
+
+    const icono = document.getElementById("icon-refresh-breb");
+    if (icono) icono.classList.remove("spin-breb-anim");
+
+    if (data.status === "success") {
+      if (data.data.length > 0) {
+        data.data.forEach((pago) => {
+          contenedor.innerHTML += `
               <div class="breb-card">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <span style="color: #30d158; font-weight: 800; font-size: 17px;">+$${pago.monto}</span>
@@ -9554,30 +9823,28 @@ function cargarPagosBreB() {
                 </div>
               </div>
             `;
-          });
-        } else {
-          contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 12px; padding: 30px 0;">No se detectaron pagos en esta fecha.</div>`;
-        }
+        });
       } else {
-        contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Error de red:<br>${data.message}</div>`;
+        contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 12px; padding: 30px 0;">No se detectaron pagos en esta fecha.</div>`;
       }
-      
-      if (document.body.contains(script)) document.body.removeChild(script);
-      delete window[callbackName];
-    };
+    } else {
+      contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Error de red:<br>${data.message}</div>`;
+    }
 
-    const urlFinal = fechaSeleccionada 
-      ? `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&fechaBusqueda=${fechaSeleccionada}&callback=${callbackName}`
-      : `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&callback=${callbackName}`;
+    if (document.body.contains(script)) document.body.removeChild(script);
+    delete window[callbackName];
+  };
 
-    script.src = urlFinal;
-    document.body.appendChild(script);
-  }
+  const urlFinal = fechaSeleccionada
+    ? `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&fechaBusqueda=${fechaSeleccionada}&callback=${callbackName}`
+    : `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&callback=${callbackName}`;
+
+  script.src = urlFinal;
+  document.body.appendChild(script);
+}
 
 // 1. Cargar los pagos por primera vez al abrir la página
 cargarPagosBreB();
 
 // 2. ACTIVAR EL RADAR: Consultar automáticamente cada 60 segundos (60000 milisegundos)
 setInterval(cargarPagosBreB, 60000);
-
-
