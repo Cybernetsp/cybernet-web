@@ -319,3 +319,15 @@ body {
 .input-ios:focus {
   border-color: var(--ios-blue);
 }
+
+/* =========================================================================
+   🚦 CONTROL RESPONSIVE ADAPTATIVO MÓVIL
+   ========================================================================= */
+@media (max-width: 860px) {
+  .desktop-menu-group {
+    display: none !important; /* Esconde los botones de PC en celulares */
+  }
+  .mobile-menu-trigger {
+    display: flex !important; /* Activa la hamburguesa en celulares */
+  }
+}
