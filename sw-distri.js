@@ -1,4 +1,4 @@
-const CACHE_NAME = "cyber-distri-v16"; // 🔄 Cambiamos a V2 para forzar al celular a borrar el error anterior
+const CACHE_NAME = "cyber-distri-v17"; // 🔄 Cambiamos a V2 para forzar al celular a borrar el error anterior
 
 const assetsToCache = [
   "./distribuidores",
