@@ -8,243 +8,19 @@
     />
     <title>Cybernet - Portal Mayoristas</title>
 
-    <!-- 🔥 Conexión PWA Exclusiva Distribuidores -->
     <link rel="manifest" href="manifest-distri.json" />
     <meta name="theme-color" content="#000000" />
-   <link rel="apple-touch-icon" href="distris.jpeg" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
 
-    <link rel="stylesheet" href="global.css" />
-    <style>
-      /* =========================================================================
-       ESTILOS EXCLUSIVOS DEL PORTAL B2B (Diseño Apple / Glassmorphism)
-       ========================================================================= */
-
-      .tienda-layout {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 20px;
-        width: 100%;
-      }
-
-      .grid-tienda {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-        gap: 14px;
-      }
-      .platform-card-shop {
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      .platform-card-shop:hover {
-        transform: translateY(-4px);
-        border-color: rgba(10, 132, 255, 0.3) !important;
-        background: rgba(255, 255, 255, 0.04) !important;
-      }
-      .cart-item-row {
-        animation: fadeIn 0.2s ease;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(5px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .credential-pill {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-family: monospace;
-        font-size: 0.85rem;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s;
-      }
-      .credential-pill:hover {
-        background: rgba(10, 132, 255, 0.08);
-        border-color: rgba(10, 132, 255, 0.2);
-      }
-
-      /* Modales Flotantes Generales */
-      .overlay-modal-code {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        z-index: 12000;
-        justify-content: center;
-        align-items: center;
-      }
-      .overlay-modal-code.open {
-        display: flex;
-      }
-      .code-step {
-        display: none;
-        animation: appleSlideUp 0.4s ease;
-      }
-      .code-step.active {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-      }
-      @keyframes appleSlideUp {
-        from {
-          opacity: 0;
-          transform: translateY(15px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .btn-code-option {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: var(--text-primary);
-        padding: 16px;
-        border-radius: 16px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        transition: all 0.2s;
-      }
-      .btn-code-option:active {
-        transform: scale(0.97);
-      }
-      .btn-code-option:hover {
-        background: rgba(255, 255, 255, 0.08);
-      }
-      .back-link-code {
-        color: var(--text-secondary);
-        font-size: 0.85rem;
-        text-decoration: none;
-        font-weight: 600;
-        text-align: center;
-        margin-top: 10px;
-        cursor: pointer;
-      }
-
-      .renovaciones-container::-webkit-scrollbar {
-        height: 6px;
-      }
-      .renovaciones-container::-webkit-scrollbar-thumb {
-        background: rgba(255, 149, 0, 0.4);
-        border-radius: 10px;
-      }
-      .cuenta-resultado-card {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 16px;
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        text-align: left;
-      }
-
-      /* === CONTROL RESPONSIVO DEL ENCABEZADO Y MENÚ MÓVIL === */
-      .desktop-actions {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .mobile-actions {
-        display: none;
-        gap: 8px;
-        align-items: center;
-      }
-
-      /* Animación del Menú Inferior Apple */
-      @keyframes slideUpSheet {
-        from {
-          transform: translateY(100%);
-        }
-        to {
-          transform: translateY(0);
-        }
-      }
-      .bottom-sheet-ios {
-        width: 100%;
-        max-width: 500px;
-        background: var(--glass-bg, rgba(30, 30, 30, 0.9));
-        border-top: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-        border-radius: 32px 32px 0 0;
-        padding: 24px 24px 40px 24px;
-        backdrop-filter: blur(40px);
-        -webkit-backdrop-filter: blur(40px);
-        animation: slideUpSheet 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
-      .menu-item-ios {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 16px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        color: var(--text-primary, #fff);
-        font-weight: 700;
-        font-size: 1.05rem;
-        cursor: pointer;
-        margin-bottom: 10px;
-        transition: all 0.2s;
-      }
-      .menu-item-ios:active {
-        background: rgba(255, 255, 255, 0.1);
-        transform: scale(0.98);
-      }
-
-      /* Breakpoint Celulares y Tablets pequeñas */
-      @media (max-width: 850px) {
-        .desktop-actions {
-          display: none !important;
-        }
-        .mobile-actions {
-          display: flex !important;
-        }
-        .header-box {
-          padding: 14px 16px !important;
-          border-radius: 20px !important;
-        }
-        .header-avatar {
-          width: 38px !important;
-          height: 38px !important;
-          font-size: 1rem !important;
-        }
-        .header-name {
-          font-size: 1.05rem !important;
-        }
-      }
-    </style>
+    <!-- Script de IA para el OCR del Comprobante -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <link rel="stylesheet" href="distribuidores.css" />
   </head>
-  <body
-    style="
-      padding: 0;
-      margin: 0;
-      background: var(--main-bg, #000);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family:
-        -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto,
-        Helvetica, Arial, sans-serif;
-    "
-  >
+  <body>
+    <!-- NOTIFICACIONES TOAST -->
+    <div id="appleToast"></div>
+
+    <!-- PANTALLA DE INICIO DE SESIÓN -->
     <div
       id="loginSection"
       style="
@@ -255,6 +31,7 @@
         justify-content: center;
         padding: 20px;
         box-sizing: border-box;
+        padding-top: 80px;
       "
     >
       <div
@@ -263,11 +40,7 @@
           max-width: 400px;
           width: 100%;
           padding: 40px 24px 32px 24px;
-          border-radius: 32px;
           text-align: center;
-          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
-          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-          backdrop-filter: blur(20px);
         "
       >
         <div
@@ -281,7 +54,7 @@
           <div
             style="
               background: rgba(48, 209, 88, 0.15);
-              color: var(--ios-green, #30d158);
+              color: var(--ios-green);
               padding: 14px;
               border-radius: 50%;
               display: flex;
@@ -306,57 +79,41 @@
             </svg>
           </div>
           <h2
-            class="card-title"
             style="
-              justify-content: center;
-              color: var(--text-primary, #fff);
+              color: var(--text-primary);
               font-size: 1.6rem;
               font-weight: 800;
               letter-spacing: -0.5px;
               margin: 0 0 4px 0;
             "
           >
-            Cybernet Mayoristas
+            Portal Mayoristas
           </h2>
           <p
-            id="txtLoginInstruccion"
-            class="text-secondary"
             style="
               font-size: 0.9rem;
               margin: 0;
               line-height: 1.4;
-              color: var(--text-secondary, #aaa);
+              color: var(--text-secondary);
             "
           >
-            Ingresa tu número de celular registrado para iniciar la
-            verificación.
+            Ingresa tu celular autorizado.
           </p>
         </div>
 
-        <div
-          class="flex-col"
-          style="gap: 20px; display: flex; flex-direction: column"
-        >
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <!-- PASO 1: TELEFONO -->
           <div
             id="stepTelefono"
-            class="flex-col"
-            style="
-              display: flex;
-              flex-direction: column;
-              gap: 14px;
-              width: 100%;
-            "
+            style="display: flex; flex-direction: column; gap: 14px"
           >
             <input
-              type="text"
+              type="tel"
               id="distriLoginTelefono"
               class="input-ios"
               placeholder="Celular (Ej: 321 593 XXXX)"
-              required
               style="
-                border-radius: 18px;
-                padding: 14px 20px;
-                margin-bottom: 0;
+                padding: 16px;
                 text-align: center;
                 font-weight: bold;
                 font-size: 1.1rem;
@@ -368,30 +125,15 @@
               id="btnVerificarTelefono"
               onclick="verificarTelefonoDistribuidor()"
               class="btn-ios btn-success w-100"
-              style="
-                padding: 16px;
-                font-size: 1rem;
-                font-weight: 800;
-                border-radius: 50px;
-                box-shadow: 0 4px 15px rgba(48, 209, 88, 0.25);
-                background: var(--ios-green, #30d158);
-                color: white;
-                border: none;
-                width: 100%;
-              "
             >
               Continuar →
             </button>
           </div>
+
+          <!-- PASO 2: REGISTRO DE CORREO (SI NO TIENE) -->
           <div
             id="stepCorreoRegistrar"
-            class="flex-col"
-            style="
-              display: none;
-              flex-direction: column;
-              gap: 14px;
-              width: 100%;
-            "
+            style="display: none; flex-direction: column; gap: 14px"
           >
             <div
               style="
@@ -400,73 +142,59 @@
                 border-radius: 14px;
                 padding: 12px;
                 font-size: 0.85rem;
-                color: var(--ios-orange, #ff9f0a);
+                color: var(--ios-orange);
                 font-weight: 600;
-                line-height: 1.4;
               "
             >
-              ⚠️ Tu cuenta no posee un correo en el sistema. Escríbelo para
-              registrarlo y recibir tu código de acceso.
+              ⚠️ Tu cuenta no posee correo. Escríbelo para recibir tu código.
             </div>
             <input
               type="email"
               id="distriCorreoRegistrarInput"
               class="input-ios"
               placeholder="nuevo@correo.com"
-              style="
-                border-radius: 18px;
-                padding: 14px 20px;
-                margin-bottom: 0;
-                text-align: center;
-                font-weight: 600;
-              "
+              style="padding: 14px; text-align: center; font-weight: 600"
             />
             <button
               type="button"
               id="btnRegistrarEmailYEnviar"
               onclick="registrarEmailYEnviarCodigo()"
               class="btn-ios btn-primary w-100"
-              style="
-                padding: 16px;
-                font-size: 1rem;
-                font-weight: 800;
-                border-radius: 50px;
-                background: var(--ios-orange, #ff9f0a);
-                border: none;
-                color: white;
-                width: 100%;
-              "
+              style="background: var(--ios-orange)"
             >
-              Registrar y Enviar Código
+              Registrar y Enviar
             </button>
-            <a href="#" onclick="regresarAlPasoInicial()" class="back-link-code"
-              >← Cambiar número</a
+            <a
+              href="#"
+              onclick="regresarAlPasoInicial()"
+              style="
+                color: var(--text-secondary);
+                font-size: 0.85rem;
+                font-weight: 600;
+                text-decoration: none;
+              "
+              >← Cancelar</a
             >
           </div>
+
+          <!-- PASO 3: VERIFICAR TOKEN -->
           <div
             id="stepTokenVerificar"
-            class="flex-col"
-            style="
-              display: none;
-              flex-direction: column;
-              gap: 14px;
-              width: 100%;
-            "
+            style="display: none; flex-direction: column; gap: 14px"
           >
             <div
+              id="txtAvisoTokenDespachado"
               style="
                 background: rgba(48, 209, 88, 0.08);
                 border: 1px solid rgba(48, 209, 88, 0.15);
                 border-radius: 14px;
                 padding: 12px;
                 font-size: 0.85rem;
-                color: var(--ios-green, #30d158);
+                color: var(--ios-green);
                 font-weight: 600;
-                line-height: 1.4;
               "
-              id="txtAvisoTokenDespachado"
             >
-              Código enviado automáticamente a tu correo.
+              Código enviado.
             </div>
             <input
               type="text"
@@ -475,14 +203,12 @@
               placeholder="******"
               maxlength="6"
               style="
-                border-radius: 18px;
-                padding: 14px 20px;
-                margin-bottom: 0;
+                padding: 16px;
                 text-align: center;
                 font-weight: 900;
                 font-size: 1.5rem;
                 letter-spacing: 6px;
-                color: var(--ios-green, #30d158);
+                color: var(--ios-green);
               "
             />
             <button
@@ -490,81 +216,61 @@
               id="btnVerificarCodigoFinal"
               onclick="verificarCodigoDeSeguridadFinal()"
               class="btn-ios btn-success w-100"
-              style="
-                padding: 16px;
-                font-size: 1rem;
-                font-weight: 800;
-                border-radius: 50px;
-                box-shadow: 0 4px 15px rgba(48, 209, 88, 0.25);
-                background: var(--ios-green, #30d158);
-                color: white;
-                border: none;
-                width: 100%;
-              "
             >
-              Verificar e Ingresar
+              Ingresar al Portal
             </button>
-            <a href="#" onclick="regresarAlPasoInicial()" class="back-link-code"
-              >← Cancelar / Cambiar número</a
+            <a
+              href="#"
+              onclick="regresarAlPasoInicial()"
+              style="
+                color: var(--text-secondary);
+                font-size: 0.85rem;
+                font-weight: 600;
+                text-decoration: none;
+              "
+              >← Cambiar número</a
             >
           </div>
         </div>
       </div>
     </div>
 
+    <!-- PANTALLA PRINCIPAL B2B -->
     <div
       id="dashboardSection"
-      class="flex-col"
       style="
         display: none;
         flex-direction: column;
         width: 100%;
         min-height: 100vh;
         max-width: 1200px;
-        margin: 0 auto;
-        padding: 25px 20px;
-        box-sizing: border-box;
+        padding: 80px 20px 30px;
         gap: 20px;
-        align-self: flex-start;
       "
     >
-      <!-- Header Estático (Sticky) -->
+      <!-- HEADER INTERNO B2B (REEMPLAZA EL EXISTENTE POR ESTE) -->
       <div
-        class="header-box"
+        class="card-ios"
         style="
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
-          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
           padding: 16px 24px;
-          border-radius: 24px;
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          width: 100%;
-          box-sizing: border-box;
           position: sticky;
           top: 15px;
-          z-index: 8000;
+          z-index: 90;
+          flex-wrap: wrap;
+          gap: 10px;
         "
       >
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            overflow: hidden;
-          "
-        >
+        <div style="display: flex; align-items: center; gap: 12px">
           <div
-            class="header-avatar"
             style="
               background: rgba(10, 132, 255, 0.1);
-              color: var(--ios-blue, #0a84ff);
+              color: var(--ios-blue);
               min-width: 44px;
               height: 44px;
               border-radius: 14px;
-              border: 1px solid rgba(10, 132, 255, 0.15);
               display: flex;
               align-items: center;
               justify-content: center;
@@ -573,17 +279,14 @@
           >
             💼
           </div>
-          <div style="text-align: left; overflow: hidden">
+          <div style="text-align: left">
             <h2
               id="distriWelcomeName"
-              class="header-name"
               style="
                 margin: 0;
                 font-size: 1.2rem;
                 font-weight: 800;
-                color: var(--text-primary, #fff);
-                white-space: nowrap;
-                text-overflow: ellipsis;
+                color: var(--text-primary);
               "
             >
               Cargando...
@@ -592,7 +295,7 @@
               id="distriWelcomePhone"
               style="
                 font-size: 0.8rem;
-                color: var(--text-secondary, #aaa);
+                color: var(--text-secondary);
                 font-family: monospace;
               "
               >Tel: --</span
@@ -600,276 +303,125 @@
           </div>
         </div>
 
-        <div class="desktop-actions">
-          <!-- 🔥 Botón de Instalación PWA (Aparece dinámicamente) -->
-          <button
-            id="btnInstalarAppDesktop"
-            onclick="instalarPWA()"
-            class="btn-ios"
-            style="
-              display: none;
-              background: rgba(255, 149, 0, 0.1);
-              border: 1px solid rgba(255, 149, 0, 0.2);
-              color: var(--ios-orange, #ff9f0a);
-              padding: 10px 20px;
-              border-radius: 50px;
-              font-weight: 700;
-              margin: 0;
-              align-items: center;
-              gap: 6px;
-            "
-          >
-            📲 Instalar App
-          </button>
-
+        <div
+          style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"
+        >
           <button
             onclick="abrirModalBusquedaCuentas()"
-            class="btn-ios btn-primary"
-            style="
-              background: var(--ios-blue, #0a84ff);
-              color: white;
-              border: none;
-              box-shadow: 0 4px 12px rgba(10, 132, 255, 0.2);
-              padding: 10px 20px;
-              border-radius: 50px;
-              font-weight: 700;
-              margin: 0;
-              display: flex;
-              align-items: center;
-              gap: 6px;
-            "
+            class="btn-ios btn-secondary"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            Buscar Cuentas
+            🔍 Cuentas
+          </button>
+          <button onclick="abrirCentroCodigos()" class="btn-ios btn-secondary">
+            📩 Códigos
+          </button>
+          <button onclick="abrirModalHistorial()" class="btn-ios btn-secondary">
+            📊 Movimientos
           </button>
           <button
-            onclick="abrirCentroCodigos()"
-            class="btn-ios btn-primary"
-            style="
-              background: var(--ios-blue, #0a84ff);
-              color: white;
-              border: none;
-              padding: 10px 20px;
-              border-radius: 50px;
-              font-weight: 700;
-              margin: 0;
-              display: flex;
-              align-items: center;
-              gap: 6px;
-            "
+            onclick="abrirModalInstruccionesRecarga()"
+            class="btn-ios btn-success"
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            Códigos
+            💰 Recargar
           </button>
-          <button
-            onclick="abrirModalHistorial()"
-            class="btn-ios"
-            style="
-              background: rgba(255, 255, 255, 0.05);
-              border: 1px solid rgba(255, 255, 255, 0.1);
-              color: var(--text-primary, #fff);
-              padding: 10px 20px;
-              border-radius: 50px;
-              font-weight: 700;
-              margin: 0;
-            "
-          >
-            📊 Historial
-          </button>
+
+          <!-- Etiqueta de Saldo -->
           <div
             style="
               background: rgba(48, 209, 88, 0.1);
               border: 1px solid rgba(48, 209, 88, 0.2);
-              padding: 8px 16px;
-              border-radius: 30px;
+              padding: 10px 16px;
+              border-radius: 50px;
               font-weight: 800;
-              color: var(--ios-green, #30d158);
+              color: var(--ios-green);
               font-family: monospace;
             "
             id="distriBarBalance"
           >
             $--
           </div>
+
           <button
             onclick="cerrarSesionDistribuidor()"
-            class="btn-ios btn-secondary"
-            style="
-              background: transparent;
-              border: 1px solid var(--ios-red, #ff453a);
-              padding: 10px 20px;
-              border-radius: 50px;
-              color: var(--ios-red, #ff453a);
-              font-weight: 700;
-              margin: 0;
-            "
+            class="btn-ios"
+            style="background: rgba(255, 69, 58, 0.1); color: var(--ios-red)"
           >
             Salir ✕
           </button>
-        </div>
 
-        <div class="mobile-actions">
-          <div
-            style="
-              background: rgba(48, 209, 88, 0.1);
-              border: 1px solid rgba(48, 209, 88, 0.2);
-              padding: 6px 12px;
-              border-radius: 30px;
-              font-weight: 800;
-              color: var(--ios-green, #30d158);
-              font-family: monospace;
-              font-size: 0.9rem;
-            "
-            id="distriBarBalanceMobile"
-          >
-            $--
-          </div>
+          <!-- NUEVO: Botón de Modo Oscuro/Claro al lado de Salir -->
           <button
-            onclick="abrirMenuMovil()"
+            id="theme-toggle"
+            class="btn-ios btn-secondary"
+            onclick="toggleThemeDistri()"
             style="
-              background: rgba(255, 255, 255, 0.05);
-              border: 1px solid rgba(255, 255, 255, 0.1);
-              color: var(--text-primary, #fff);
-              width: 38px;
-              height: 38px;
-              border-radius: 12px;
+              padding: 0;
+              width: 42px;
+              height: 42px;
+              border-radius: 50%;
               display: flex;
               align-items: center;
               justify-content: center;
-              cursor: pointer;
             "
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-            >
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
+            <!-- Icono se inyectará por JS -->
           </button>
         </div>
       </div>
 
       <div class="tienda-layout">
-        <div
-          class="flex-col"
-          style="display: flex; flex-direction: column; gap: 16px"
-        >
+        <div class="card-ios" style="padding: 20px">
           <div
-            class="card-ios"
             style="
-              background: var(--glass-bg, rgba(30, 30, 30, 0.8));
-              border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-              border-radius: 24px;
-              padding: 20px;
-              margin: 0;
               display: flex;
-              flex-direction: column;
-              gap: 14px;
+              justify-content: space-between;
+              align-items: center;
+              border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+              padding-bottom: 15px;
             "
           >
-            <div
-              class="flex-row-between"
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                padding-bottom: 10px;
-              "
-            >
-              <h3
-                style="
-                  margin: 0;
-                  font-size: 1.1rem;
-                  font-weight: 800;
-                  color: var(--text-primary, #fff);
-                  display: flex;
-                  align-items: center;
-                  gap: 8px;
-                "
-              >
-                🛍️ Catálogo Mayorista
-              </h3>
-              <input
-                type="text"
-                id="searchShopInput"
-                class="input-ios"
-                placeholder="Buscar plataforma..."
-                oninput="filtrarTiendaLocal()"
-                style="
-                  margin-bottom: 0;
-                  max-width: 200px;
-                  padding: 8px 14px;
-                  border-radius: 12px;
-                  font-size: 0.85rem;
-                "
-              />
-            </div>
-            <div class="grid-tienda" id="shopCatalogContainer"></div>
+            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+              🛍️ Catálogo Mayorista
+            </h3>
+            <input
+              type="text"
+              id="searchShopInput"
+              class="input-ios"
+              placeholder="Buscar..."
+              oninput="filtrarTiendaLocal()"
+              style="max-width: 200px; padding: 10px 14px"
+            />
           </div>
+          <div
+            class="grid-tienda"
+            id="shopCatalogContainer"
+            style="margin-top: 20px"
+          ></div>
         </div>
       </div>
 
+      <!-- Alertas de Renovación -->
       <div
         class="card-ios"
         id="widgetRenovaciones"
         style="
           display: none;
-          background: linear-gradient(
-            135deg,
-            rgba(255, 149, 0, 0.08) 0%,
-            rgba(0, 0, 0, 0) 100%
-          );
-          border: 1px solid rgba(255, 149, 0, 0.2);
-          border-radius: 24px;
-          padding: 20px 24px;
-          width: 100%;
-          box-sizing: border-box;
-          margin: 0;
+          border-color: rgba(255, 149, 0, 0.3);
+          padding: 20px;
         "
       >
         <h3
           style="
             margin: 0 0 16px 0;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             font-weight: 800;
-            color: var(--ios-orange, #ff9f0a);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: var(--ios-orange);
           "
         >
           ⏰ Alertas de Renovación (Vencen en 3 días o menos)
         </h3>
         <div
           id="listaRenovacionesCards"
-          class="renovaciones-container"
           style="
             display: flex;
             gap: 14px;
@@ -880,27 +432,8 @@
       </div>
     </div>
 
-    <button
-      id="fabCarrito"
-      onclick="abrirCarrito()"
-      style="
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: var(--ios-blue, #0a84ff);
-        box-shadow: 0 10px 25px rgba(10, 132, 255, 0.4);
-        border: none;
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-        cursor: pointer;
-        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      "
-    >
+    <!-- BOTÓN CARRITO FLOTANTE -->
+    <button id="fabCarrito" onclick="abrirCarrito()" style="display: none">
       <svg
         width="26"
         height="26"
@@ -908,8 +441,6 @@
         fill="none"
         stroke="white"
         stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
       >
         <circle cx="9" cy="21" r="1"></circle>
         <circle cx="20" cy="21" r="1"></circle>
@@ -923,7 +454,7 @@
           position: absolute;
           top: -4px;
           right: -4px;
-          background: var(--ios-red, #ff453a);
+          background: var(--ios-red);
           color: white;
           font-size: 0.75rem;
           font-weight: 800;
@@ -933,72 +464,336 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 2px solid var(--main-bg, #000);
         "
         >0</span
       >
     </button>
 
-    <div
-      class="overlay-modal-code"
-      id="modalCarritoTienda"
-      style="z-index: 15000"
-    >
-      <div
-        class="modal-ios"
-        style="
-          max-width: 400px;
-          width: 95%;
-          padding: 24px;
-          border-radius: 28px;
-          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
-          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-          backdrop-filter: blur(40px);
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        "
-      >
+    <!-- MODAL 1: INSTRUCCIONES DE RECARGA (PREMIUM) -->
+    <div class="overlay-modal-code" id="modalInstruccionesRecarga">
+      <div class="modal-ios" style="max-width: 360px; text-align: center">
+        <div
+          style="
+            background: rgba(48, 209, 88, 0.15);
+            color: var(--ios-green);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            border: 1px solid rgba(48, 209, 88, 0.2);
+          "
+        >
+          <svg
+            width="30"
+            height="30"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <h3 style="margin: 0 0 10px 0; font-size: 1.3rem; font-weight: 800">
+          Recargar Saldo
+        </h3>
+        <p
+          style="
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 25px;
+          "
+        >
+          Para recargar, transfiere el monto exacto al siguiente número de
+          <b>BRE-B</b>. Toca el número para copiarlo.
+        </p>
+        <div
+          style="
+            background: rgba(48, 209, 88, 0.08);
+            border: 1px solid rgba(48, 209, 88, 0.3);
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--ios-green);
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+          "
+          onclick="copiarTextoAlToque(this, '1007416341')"
+        >
+          1007416341
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path
+              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            ></path>
+          </svg>
+        </div>
+        <div style="display: flex; gap: 12px">
+          <button
+            onclick="cerrarModalInstruccionesRecarga()"
+            class="btn-ios btn-secondary"
+            style="flex: 1"
+          >
+            Cancelar
+          </button>
+          <button
+            onclick="abrirModalFormularioRecarga()"
+            class="btn-ios btn-primary"
+            style="flex: 1.2"
+          >
+            Ya pagué →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 2: FORMULARIO Y VERIFICACIÓN (OCR AI) -->
+    <div class="overlay-modal-code" id="modalFormularioRecarga">
+      <div class="modal-ios" style="max-width: 380px">
         <div
           style="
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
           "
         >
           <h3
             style="
               margin: 0;
               font-size: 1.2rem;
-              color: var(--text-primary, #fff);
               font-weight: 800;
               display: flex;
               align-items: center;
               gap: 8px;
             "
           >
-            🛒 Mi Carrito
-            <span
-              id="cartCountBadge"
-              style="
-                background: var(--ios-blue, #0a84ff);
-                color: white;
-                font-size: 0.75rem;
-                padding: 2px 8px;
-                border-radius: 10px;
-                font-weight: 800;
-              "
-              >0</span
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
             >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Escanear Pago
+          </h3>
+          <button
+            onclick="cerrarModalFormularioRecarga()"
+            style="
+              background: rgba(128, 128, 128, 0.15);
+              border: none;
+              color: var(--text-primary);
+              width: 30px;
+              height: 30px;
+              border-radius: 50%;
+              font-size: 1.2rem;
+              cursor: pointer;
+            "
+          >
+            &times;
+          </button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <!-- ZONA DE CARGA DEL COMPROBANTE -->
+          <div
+            style="
+              border: 2px dashed rgba(10, 132, 255, 0.4);
+              border-radius: 16px;
+              padding: 20px;
+              text-align: center;
+              position: relative;
+              background: rgba(10, 132, 255, 0.05);
+            "
+          >
+            <input
+              type="file"
+              id="recargaComprobante"
+              accept="image/*"
+              onchange="analizarComprobanteIA(this)"
+              style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0;
+                cursor: pointer;
+              "
+            />
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2"
+              style="margin-bottom: 8px"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <p
+              style="
+                margin: 0;
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: var(--ios-blue);
+              "
+            >
+              Toca aquí para subir captura
+            </p>
+            <p
+              style="
+                margin: 5px 0 0 0;
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+              "
+            >
+              El sistema analizará fecha, hora y valor.
+            </p>
+          </div>
+
+          <!-- ESTADO DE ANÁLISIS -->
+          <div
+            id="ocrLoadingUI"
+            style="display: none; text-align: center; padding: 15px"
+          >
+            <svg
+              class="spin-anim"
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
+              style="margin-bottom: 10px"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 2v4"></path>
+            </svg>
+            <p style="margin: 0; font-size: 0.9rem; font-weight: 700">
+              Analizando comprobante...
+            </p>
+          </div>
+
+          <!-- RESULTADOS Y CONFIRMACIÓN -->
+          <div
+            id="ocrResultsUI"
+            style="display: none; flex-direction: column; gap: 14px"
+          >
+            <div
+              style="
+                background: rgba(48, 209, 88, 0.1);
+                border: 1px solid rgba(48, 209, 88, 0.2);
+                border-radius: 12px;
+                padding: 15px;
+              "
+            >
+              <p
+                style="
+                  margin: 0 0 8px 0;
+                  font-size: 0.8rem;
+                  color: var(--text-secondary);
+                "
+              >
+                DATOS DETECTADOS (HOY):
+              </p>
+              <p
+                style="
+                  margin: 0;
+                  font-size: 1.2rem;
+                  font-weight: 800;
+                  color: var(--ios-green);
+                "
+              >
+                💰 <span id="displayOcrValor">--</span>
+              </p>
+              <p style="margin: 4px 0 0 0; font-size: 1rem; font-weight: 700">
+                ⏰ <span id="displayOcrHora">--</span>
+              </p>
+            </div>
+            <div style="text-align: left">
+              <label
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 6px;
+                  display: block;
+                  font-weight: 600;
+                "
+                >Nombre o Apellido del titular</label
+              >
+              <input
+                type="text"
+                id="recargaNombre"
+                class="input-ios"
+                placeholder="Ej: Ivan"
+                style="width: 100%; padding: 14px"
+              />
+            </div>
+            <button
+              id="btnVerificarRecarga"
+              onclick="procesarRecargaDistribuidor()"
+              class="btn-ios btn-success w-100"
+            >
+              Verificar y Recargar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARRITO DE COMPRAS -->
+    <div class="overlay-modal-code" id="modalCarritoTienda">
+      <div class="modal-ios" style="max-width: 400px">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+          "
+        >
+          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+            🛒 Mi Carrito
           </h3>
           <button
             onclick="cerrarCarrito()"
             style="
               background: transparent;
               border: none;
-              color: var(--text-secondary, #aaa);
+              color: var(--text-secondary);
               font-size: 1.6rem;
               cursor: pointer;
             "
@@ -1014,207 +809,103 @@
             gap: 10px;
             max-height: 250px;
             overflow-y: auto;
-            padding-right: 4px;
           "
-        >
-          <div
-            style="
-              text-align: center;
-              color: var(--text-secondary, #aaa);
-              font-size: 0.85rem;
-              padding: 20px 0;
-            "
-          >
-            Tu carrito está vacío.
-          </div>
-        </div>
-        <div
-          class="flex-col"
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-top: 4px;
-          "
-        >
-          <label
-            class="text-secondary"
-            style="
-              color: var(--text-secondary, #aaa);
-              font-size: 0.72rem;
-              font-weight: 800;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-              padding-left: 2px;
-            "
-            >Nombre de tu Cliente (Opcional)</label
-          >
-          <input
-            type="text"
-            id="cartClientName"
-            class="input-ios"
-            placeholder="Ej: Juan Pérez"
-            style="
-              border-radius: 14px;
-              padding: 11px 16px;
-              margin-bottom: 0;
-              font-size: 0.9rem;
-            "
-          />
-        </div>
+        ></div>
+
+        <input
+          type="text"
+          id="cartClientName"
+          class="input-ios"
+          placeholder="Nombre del Cliente (Opcional)"
+          style="margin-top: 15px; padding: 14px"
+        />
+
         <div
           style="
             display: flex;
             flex-direction: column;
             gap: 6px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(128, 128, 128, 0.2);
             padding-top: 12px;
             font-size: 0.85rem;
+            margin-top: 10px;
           "
         >
           <div
-            class="flex-row-between"
             style="
               display: flex;
               justify-content: space-between;
-              color: var(--text-secondary, #aaa);
+              color: var(--text-secondary);
             "
           >
             <span>Saldo Actual:</span
-            ><span
-              id="cartTotalSaldo"
-              style="font-family: monospace; font-weight: bold"
-              >$0</span
-            >
+            ><span id="cartTotalSaldo" style="font-weight: bold">$0</span>
           </div>
           <div
-            class="flex-row-between"
             style="
               display: flex;
               justify-content: space-between;
-              color: var(--text-primary, #fff);
               font-size: 1.05rem;
               font-weight: 800;
               margin-top: 4px;
             "
           >
             <span>TOTAL PEDIDO:</span
-            ><span
-              id="cartTotalCost"
-              style="color: var(--ios-blue, #0a84ff); font-family: monospace"
-              >$0</span
-            >
+            ><span id="cartTotalCost" style="color: var(--ios-blue)">$0</span>
           </div>
         </div>
         <button
           id="btnCheckoutShop"
           onclick="procesarCompraDistribuidor()"
           class="btn-ios btn-primary w-100"
-          style="
-            background: var(--ios-blue, #0a84ff);
-            color: white;
-            border: none;
-            padding: 14px;
-            font-weight: 800;
-            font-size: 0.95rem;
-            border-radius: 50px;
-            margin-top: 4px;
-          "
-          disabled
+          style="margin-top: 15px"
         >
           CONFIRMAR COMPRA
         </button>
       </div>
     </div>
 
+    <!-- MODALES EXTRAS MANTENIDOS OCULTOS (Historial, Cuentas, Códigos, Exito, RenovaciónB2B) -->
+    <!-- (Solo les aplico la estructura .overlay-modal-code > .modal-ios por consistencia, el JS inyecta el contenido) -->
     <div class="overlay-modal-code" id="modalBusquedaCuentas">
-      <div
-        class="modal-ios"
-        style="
-          max-width: 550px;
-          width: 95%;
-          padding: 28px;
-          border-radius: 28px;
-          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
-          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-          backdrop-filter: blur(40px);
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        "
-      >
+      <div class="modal-ios" style="max-width: 450px">
         <div
           style="
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
           "
         >
-          <h3
-            style="
-              margin: 0;
-              font-size: 1.2rem;
-              color: var(--text-primary, #fff);
-              font-weight: 800;
-              display: flex;
-              align-items: center;
-              gap: 8px;
-            "
-          >
-            🔍 Bóveda Personal de Cuentas
+          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+            🔍 Buscar en Casillero
           </h3>
           <button
             onclick="cerrarModalBusquedaCuentas()"
             style="
               background: transparent;
               border: none;
-              color: var(--text-secondary, #aaa);
-              font-size: 1.6rem;
+              font-size: 1.5rem;
+              color: var(--text-secondary);
               cursor: pointer;
             "
           >
             &times;
           </button>
         </div>
-        <p
-          style="
-            color: var(--text-secondary, #aaa);
-            font-size: 0.85rem;
-            margin: 0;
-            line-height: 1.4;
-          "
-        >
-          Ingresa el nombre del cliente final para extraer las credenciales.
-        </p>
-        <div style="display: flex; gap: 10px; width: 100%">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px">
           <input
             type="text"
             id="inputCasilleroSearch"
             class="input-ios"
-            placeholder="Ej: Camilo"
-            style="
-              margin-bottom: 0;
-              flex-grow: 1;
-              border-radius: 12px;
-              padding: 12px 16px;
-              font-size: 0.95rem;
-            "
-          />
-          <button
-            class="btn-ios btn-primary"
-            onclick="buscarCasilleroDistri()"
+            placeholder="Nombre o Teléfono del cliente"
+            style="flex: 1; padding: 12px"
+          /><button
             id="btnBuscarCasillero"
-            style="
-              background: var(--ios-blue, #0a84ff);
-              color: white;
-              border: none;
-              margin: 0;
-              border-radius: 12px;
-              padding: 12px 20px;
-              font-weight: 800;
-            "
+            onclick="buscarCasilleroDistri()"
+            class="btn-ios btn-primary"
           >
             Buscar
           </button>
@@ -1222,846 +913,286 @@
         <div
           id="contenedorResultadosCasillero"
           style="
-            max-height: 380px;
+            max-height: 60vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            padding-right: 4px;
-            margin-top: 4px;
+            gap: 10px;
           "
-        >
-          <div
-            style="
-              text-align: center;
-              color: var(--text-secondary, #aaa);
-              font-size: 0.88rem;
-              padding: 30px 0;
-            "
-          >
-            Ingresa un parámetro y presiona buscar. El sistema filtrará solo tus
-            compras registradas.
-          </div>
-        </div>
+        ></div>
       </div>
     </div>
 
-    <div
-      class="overlay-modal-code"
-      id="modalEstadoCuenta"
-      style="z-index: 14000"
-    >
-      <div
-        class="modal-ios"
-        style="
-          max-width: 600px;
-          width: 95%;
-          padding: 24px;
-          border-radius: 24px;
-          text-align: left;
-          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
-          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-          backdrop-filter: blur(40px);
-        "
-      >
+    <div class="overlay-modal-code" id="modalEstadoCuenta">
+      <div class="modal-ios" style="max-width: 500px">
         <div
           style="
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 12px;
-            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
           "
         >
-          <h3
-            style="
-              margin: 0;
-              font-size: 1.2rem;
-              color: var(--text-primary, #fff);
-              font-weight: 800;
-              display: flex;
-              align-items: center;
-              gap: 8px;
-            "
-          >
-            📊 Extracto de Movimientos
+          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+            📊 Movimientos y Descuentos
           </h3>
           <button
             onclick="cerrarModalHistorial()"
             style="
               background: transparent;
               border: none;
-              color: var(--text-secondary, #aaa);
               font-size: 1.5rem;
+              color: var(--text-secondary);
               cursor: pointer;
             "
           >
             &times;
           </button>
         </div>
-        <div style="max-height: 400px; overflow-y: auto; padding-right: 4px">
+        <div style="max-height: 60vh; overflow-y: auto">
           <table
-            style="
-              width: 100%;
-              border-collapse: collapse;
-              font-size: 0.85rem;
-              text-align: left;
-            "
+            style="width: 100%; border-collapse: collapse; text-align: left"
           >
-            <thead>
-              <tr
-                style="
-                  color: var(--text-secondary, #aaa);
-                  text-transform: uppercase;
-                  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                "
-              >
-                <th style="padding: 10px 8px">Fecha</th>
-                <th style="padding: 10px 8px">Concepto / Cliente</th>
-                <th style="padding: 10px 8px; text-align: right">Monto</th>
-              </tr>
-            </thead>
-            <tbody id="tablaHistorialBody">
-              <tr>
-                <td
-                  colspan="3"
-                  style="
-                    text-align: center;
-                    padding: 20px;
-                    color: var(--text-secondary, #aaa);
-                  "
-                >
-                  Cargando extracto...
-                </td>
-              </tr>
-            </tbody>
+            <tbody id="tablaHistorialBody"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <div
-      class="overlay-modal-code"
-      id="successCheckoutOverlay"
-      style="z-index: 13000"
-    >
-      <div
-        class="modal-ios"
-        style="
-          max-width: 450px;
-          width: 95%;
-          padding: 32px 24px;
-          border-radius: 32px;
-          text-align: center;
-          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
-          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-          backdrop-filter: blur(40px);
-        "
-      >
-        <div
+    <div class="overlay-modal-code" id="successCheckoutOverlay">
+      <div class="modal-ios" style="max-width: 400px; text-align: center">
+        <h2 style="font-size: 3rem; margin: 0 0 10px">✅</h2>
+        <h3
           style="
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 16px;
+            margin: 0 0 15px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--ios-green);
           "
         >
-          <div
-            style="
-              background: rgba(48, 209, 88, 0.15);
-              color: var(--ios-green, #30d158);
-              padding: 12px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              margin-bottom: 12px;
-              border: 1px solid rgba(48, 209, 88, 0.2);
-            "
-          >
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-          </div>
-          <h3
-            class="card-title"
-            style="
-              margin: 0;
-              font-size: 1.4rem;
-              color: var(--text-primary, #fff);
-              font-weight: 800;
-            "
-          >
-            ¡Pedido Entregado!
-          </h3>
-          <p
-            id="successCheckoutDesc"
-            class="text-secondary"
-            style="
-              color: var(--text-secondary, #aaa);
-              font-size: 0.85rem;
-              margin-top: 6px;
-            "
-          >
-            Copia los accesos para enviárselos a tu cliente.
-          </p>
-        </div>
+          ¡Pedido Procesado!
+        </h3>
         <div
-          style="
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 16px;
-            text-align: left;
-            max-height: 250px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-            color: var(--text-primary, #fff);
-            white-space: pre-wrap;
-            font-family: monospace;
-          "
           id="cajaTextoFichas"
+          style="
+            background: rgba(128, 128, 128, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            text-align: left;
+            font-family: monospace;
+            margin-bottom: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+          "
         ></div>
         <button
-          class="btn-ios btn-success w-100"
           id="btnCopiarFichasCheckout"
+          class="btn-ios btn-primary w-100"
+          style="margin-bottom: 10px"
           onclick="copiarCuentasCheckout()"
-          style="
-            background: var(--ios-green, #30d158);
-            color: white;
-            border: none;
-            padding: 16px;
-            font-size: 1rem;
-            font-weight: 800;
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(48, 209, 88, 0.25);
-            margin-bottom: 12px;
-            width: 100%;
-          "
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            style="margin-right: 6px; vertical-align: middle"
-          >
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path
-              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-            ></path>
-          </svg>
-          Copiar Mensaje
-        </button>
-        <a
+          📋 Copiar Accesos</button
+        ><a
           id="btnWhatsAppActivacion"
           href="#"
           target="_blank"
           style="display: none; text-decoration: none"
-        >
-          <button
-            class="btn-ios w-100"
-            style="
-              background: #25d366;
-              color: white;
-              padding: 16px;
-              font-size: 1rem;
-              font-weight: 800;
-              border-radius: 50px;
-              box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-              margin-bottom: 12px;
-              border: none;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: 8px;
-              width: 100%;
-            "
+          ><button
+            class="btn-ios btn-success w-100"
+            style="margin-bottom: 10px"
           >
-            Solicitar Activación por WhatsApp
-          </button>
-        </a>
-        <button
+            💬 Pedir Activación por Chat
+          </button></a
+        ><button
           class="btn-ios btn-secondary w-100"
           onclick="cerrarModalExitoCheckout()"
-          style="
-            background: transparent;
-            color: var(--text-primary, #fff);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 14px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border-radius: 50px;
-            width: 100%;
-          "
         >
-          Cerrar Ventana
+          Cerrar
         </button>
       </div>
     </div>
 
     <div class="overlay-modal-code" id="codesCenterOverlay">
-      <div
-        class="modal-ios"
-        style="
-          max-width: 420px;
-          width: 95%;
-          padding: 32px 24px;
-          border-radius: 32px;
-          text-align: center;
-          background: var(--glass-bg, rgba(30, 30, 30, 0.8));
-          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-          backdrop-filter: blur(40px);
-        "
-      >
+      <div class="modal-ios" style="max-width: 380px">
         <div
           style="
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
           "
         >
-          <div
-            style="
-              background: rgba(10, 132, 255, 0.15);
-              color: var(--ios-blue, #0a84ff);
-              padding: 12px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              margin-bottom: 12px;
-              border: 1px solid rgba(10, 132, 255, 0.2);
-            "
-          >
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-          </div>
-          <h3
-            class="card-title"
-            style="
-              margin: 0;
-              font-size: 1.4rem;
-              color: var(--text-primary, #fff);
-              font-weight: 800;
-            "
-          >
-            Centro de Códigos
+          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+            📩 Centro de Códigos
           </h3>
-        </div>
-        <div id="codeStep1" class="code-step active">
-          <p
+          <button
+            onclick="cerrarCentroCodigos()"
             style="
-              color: var(--text-secondary, #aaa);
-              font-size: 0.9rem;
-              font-weight: 600;
-              text-align: left;
-              margin: 0;
+              background: transparent;
+              border: none;
+              font-size: 1.5rem;
+              color: var(--text-secondary);
+              cursor: pointer;
             "
           >
-            ¿De qué plataforma es la cuenta?
-          </p>
+            &times;
+          </button>
+        </div>
+        <div
+          id="codeStep1"
+          class="code-step"
+          style="display: none; flex-direction: column; gap: 10px"
+        >
           <button
-            class="btn-code-option"
-            style="color: #e50914"
+            class="btn-ios btn-primary w-100"
+            style="background: #e50914"
             onclick="setCodigoPlat('NETFLIX')"
           >
-            Netflix
-          </button>
-          <button
-            class="btn-code-option"
-            style="color: var(--ios-blue, #0a84ff)"
+            Netflix</button
+          ><button
+            class="btn-ios btn-primary w-100"
+            style="background: var(--ios-blue)"
             onclick="setCodigoPlat('DISNEY')"
           >
             Disney Premium
           </button>
-          <a class="back-link-code" onclick="cerrarCentroCodigos()">Cancelar</a>
         </div>
-        <div id="codeStep2" class="code-step">
-          <p
-            style="
-              color: var(--text-secondary, #aaa);
-              font-size: 0.9rem;
-              font-weight: 600;
-              text-align: left;
-              margin: 0;
-            "
-          >
-            ¿Qué tipo de código solicita el TV?
-          </p>
-          <button class="btn-code-option" onclick="setCodigoOp(1)">
-            Código de Inicio Sesión
+        <div
+          id="codeStep2"
+          class="code-step"
+          style="display: none; flex-direction: column; gap: 10px"
+        >
+          <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(1)">
+            Código de Inicio</button
+          ><button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(2)">
+            Código 'De Viaje'</button
+          ><button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(3)">
+            Enlace de Actualización
           </button>
-          <button class="btn-code-option" onclick="setCodigoOp(2)">
-            Código 'Estoy de Viaje'
-          </button>
-          <button class="btn-code-option" onclick="setCodigoOp(3)">
-            Enlace de Aprobación
-          </button>
-          <a class="back-link-code" onclick="changeCodeStep(1)"
-            >← Volver atrás</a
-          >
         </div>
-        <div id="codeStep3" class="code-step">
-          <p
-            style="
-              color: var(--text-secondary, #aaa);
-              font-size: 0.9rem;
-              font-weight: 600;
-              text-align: left;
-              margin: 0;
-            "
-          >
-            Escribe el correo de la cuenta:
-          </p>
+        <div
+          id="codeStep3"
+          class="code-step"
+          style="display: none; flex-direction: column; gap: 10px"
+        >
           <input
             type="email"
             id="inputCorreoCodigo"
             class="input-ios"
             placeholder="ejemplo@cybernetsp.com"
-            style="
-              border-radius: 16px;
-              padding: 16px 20px;
-              font-size: 1rem;
-              text-align: center;
-              margin-bottom: 0;
-            "
-          />
-          <button
-            class="btn-ios btn-primary w-100"
+            style="padding: 14px"
+          /><button
             id="btnRastrearCodigo"
+            class="btn-ios btn-success w-100"
             onclick="rastrearCodigo()"
-            style="
-              background: var(--ios-blue, #0a84ff);
-              color: white;
-              border: none;
-              padding: 16px;
-              font-weight: 800;
-              border-radius: 50px;
-              margin-top: 14px;
-              width: 100%;
-            "
           >
-            Rastrear Código
+            Rastrear en la Nube
           </button>
-          <a class="back-link-code" onclick="changeCodeStep(1)">← Cancelar</a>
         </div>
-        <div id="codeStep4" class="code-step">
-          <div
-            style="
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              height: 120px;
-            "
+        <div
+          id="codeStep4"
+          class="code-step"
+          style="display: none; text-align: center; padding: 30px 0"
+        >
+          <svg
+            class="spin-anim"
+            width="30"
+            height="30"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--ios-blue)"
+            stroke-width="2.5"
           >
-            <svg
-              class="spin-anim"
-              width="40"
-              height="40"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--ios-blue, #0a84ff)"
-              stroke-width="2.5"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M12 2v4"></path>
-            </svg>
-          </div>
-          <p
-            style="color: var(--ios-blue, #0a84ff); font-weight: 600; margin: 0"
-          >
-            Buscando en la bandeja de entrada...
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2v4"></path>
+          </svg>
+          <p style="margin-top: 10px; font-weight: 600">
+            Interceptando códigos...
           </p>
         </div>
-        <div id="codeStep5" class="code-step">
-          <h2
+        <div
+          id="codeStep5"
+          class="code-step"
+          style="display: none; text-align: center"
+        >
+          <h3
             id="codeResultTitle"
-            style="
-              color: var(--ios-green, #30d158);
-              font-size: 1.4rem;
-              margin: 0;
-              font-weight: 800;
-            "
-          >
-            --
-          </h2>
+            style="margin: 0 0 10px; font-weight: 800"
+          ></h3>
           <p
             id="codeResultDesc"
             style="
-              color: var(--text-secondary, #aaa);
               font-size: 0.9rem;
-              margin: 0;
+              color: var(--text-secondary);
+              margin-bottom: 15px;
             "
-          >
-            --
-          </p>
+          ></p>
           <div
             id="codeResultBox"
             style="
-              background: rgba(255, 69, 58, 0.1);
-              border: 1px dashed var(--ios-red, #ff453a);
-              padding: 30px 20px;
-              border-radius: 20px;
-              margin: 10px 0;
               display: none;
+              background: rgba(255, 69, 58, 0.1);
+              padding: 20px;
+              border-radius: 15px;
+              border: 1px dashed var(--ios-red);
+              margin-bottom: 15px;
             "
           >
             <div
               id="codeVal"
-              style="
-                font-size: 3rem;
-                font-weight: 800;
-                color: var(--text-primary, #fff);
-                letter-spacing: 8px;
-                font-variant-numeric: tabular-nums;
-              "
+              style="font-size: 2.5rem; font-weight: 800; letter-spacing: 5px"
             ></div>
             <div
               id="codeTimer"
               style="
-                color: var(--ios-red, #ff453a);
-                font-size: 0.9rem;
-                font-weight: 700;
+                color: var(--ios-red);
+                font-size: 0.8rem;
+                font-weight: bold;
                 margin-top: 10px;
               "
             ></div>
           </div>
-          <div id="linkResultBox" style="margin: 10px 0; display: none">
+          <div id="linkResultBox" style="display: none; margin-bottom: 15px">
             <a
               id="linkVal"
               href="#"
               target="_blank"
               style="text-decoration: none"
+              ><button class="btn-ios btn-success w-100">
+                Abrir Enlace
+              </button></a
             >
-              <button
-                class="btn-ios w-100"
-                style="
-                  background: var(--ios-green, #30d158);
-                  color: white;
-                  border: none;
-                  padding: 16px;
-                  font-weight: 800;
-                  border-radius: 50px;
-                  font-size: 1rem;
-                  width: 100%;
-                "
-              >
-                Abrir Enlace de Aprobación
-              </button>
-            </a>
           </div>
           <button
             class="btn-ios btn-secondary w-100"
-            onclick="rastrearCodigo()"
-            style="
-              background: transparent;
-              color: var(--text-primary, #fff);
-              border: 1px solid rgba(255, 255, 255, 0.2);
-              padding: 14px;
-              font-weight: 700;
-              border-radius: 50px;
-              margin-top: 10px;
-              width: 100%;
-            "
+            onclick="changeCodeStep(1)"
           >
-            Reintentar Búsqueda
+            Nueva Consulta
           </button>
-          <a class="back-link-code" onclick="changeCodeStep(1)"
-            >Hacer nueva consulta</a
-          >
         </div>
       </div>
     </div>
 
-    <div
-      class="overlay-modal-code"
-      id="modalMenuMovil"
-      style="align-items: flex-end; padding: 0; z-index: 16000"
-    >
-      <div class="bottom-sheet-ios">
+    <div class="overlay-modal-code" id="modalRenovacionDistri">
+      <div class="modal-ios" style="max-width: 400px">
         <div
           style="
-            width: 40px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            margin: 0 auto 24px auto;
-          "
-        ></div>
-
-        <!-- 🔥 FIX PWA: Botón Instalar Móvil (Aparece Dinámicamente) -->
-        <div
-          class="menu-item-ios"
-          id="btnInstalarAppMobile"
-          style="
-            display: none;
-            border-color: rgba(255, 149, 0, 0.3);
-            color: var(--ios-orange, #ff9f0a);
-          "
-          onclick="
-            cerrarMenuMovil();
-            instalarPWA();
-          "
-        >
-          <div
-            style="
-              background: rgba(255, 149, 0, 0.15);
-              color: var(--ios-orange, #ff9f0a);
-              padding: 10px;
-              border-radius: 12px;
-              display: flex;
-            "
-          >
-            📲
-          </div>
-          Instalar Aplicación
-        </div>
-
-        <div
-          class="menu-item-ios"
-          onclick="
-            cerrarMenuMovil();
-            abrirModalBusquedaCuentas();
-          "
-        >
-          <div
-            style="
-              background: rgba(10, 132, 255, 0.15);
-              color: var(--ios-blue, #0a84ff);
-              padding: 10px;
-              border-radius: 12px;
-              display: flex;
-            "
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-          </div>
-          Buscar Cuentas
-        </div>
-
-        <div
-          class="menu-item-ios"
-          onclick="
-            cerrarMenuMovil();
-            abrirCentroCodigos();
-          "
-        >
-          <div
-            style="
-              background: rgba(10, 132, 255, 0.15);
-              color: var(--ios-blue, #0a84ff);
-              padding: 10px;
-              border-radius: 12px;
-              display: flex;
-            "
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-          </div>
-          Centro de Códigos
-        </div>
-
-        <div
-          class="menu-item-ios"
-          onclick="
-            cerrarMenuMovil();
-            abrirModalHistorial();
-          "
-        >
-          <div
-            style="
-              background: rgba(255, 255, 255, 0.1);
-              color: var(--text-primary, #fff);
-              padding: 10px;
-              border-radius: 12px;
-              display: flex;
-              font-size: 1.1rem;
-            "
-          >
-            📊
-          </div>
-          Historial Financiero
-        </div>
-
-        <div
-          class="menu-item-ios"
-          onclick="cerrarSesionDistribuidor()"
-          style="
-            border-color: rgba(255, 69, 58, 0.2);
-            color: var(--ios-red, #ff453a);
-            margin-top: 24px;
-          "
-        >
-          <div
-            style="
-              background: rgba(255, 69, 58, 0.1);
-              color: var(--ios-red, #ff453a);
-              padding: 10px;
-              border-radius: 12px;
-              display: flex;
-              font-size: 1.1rem;
-            "
-          >
-            ✕
-          </div>
-          Cerrar Sesión
-        </div>
-
-        <button
-          class="btn-ios w-100"
-          onclick="cerrarMenuMovil()"
-          style="
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary, #fff);
-            border: none;
-            padding: 16px;
-            border-radius: 18px;
-            font-weight: 700;
-            font-size: 1rem;
-            margin-top: 10px;
-          "
-        >
-          Cancelar
-        </button>
-      </div>
-    </div>
-
-    <div
-      id="appleToast"
-      class="toast-ios"
-      style="
-        position: fixed;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%) translateY(100px);
-        opacity: 0;
-        transition: all 0.4s cubic-bezier(0.15, 0.85, 0.35, 1);
-        background: rgba(30, 30, 30, 0.85);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        padding: 12px 24px;
-        border-radius: 50px;
-        z-index: 999999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        color: white;
-        font-weight: 700;
-      "
-    ></div>
-
-    <div
-      class="overlay-modal-code"
-      id="modalRenovacionDistri"
-      style="z-index: 17000"
-    >
-      <div
-        class="modal-ios"
-        onclick="event.stopPropagation()"
-        style="
-          max-width: 500px;
-          width: 95%;
-          height: 75vh;
-          max-height: 750px;
-          display: flex;
-          flex-direction: column;
-          padding: 24px;
-          border-radius: 28px;
-          background: var(--glass-bg, rgba(30, 30, 30, 0.9));
-          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-          backdrop-filter: blur(40px);
-        "
-      >
-        <div
-          style="
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 16px;
-            margin-bottom: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
           "
         >
-          <h3
-            style="
-              margin: 0;
-              font-size: 1.15rem;
-              color: var(--text-primary, #fff);
-              font-weight: 800;
-              display: flex;
-              align-items: center;
-              gap: 8px;
-            "
-          >
-            <div
-              style="
-                background: rgba(10, 132, 255, 0.15);
-                color: var(--ios-blue, #0a84ff);
-                padding: 8px;
-                border-radius: 12px;
-                display: flex;
-              "
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-            </div>
-            Renovar Cuenta Netflix
+          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+            🔄 Seleccionar Cuenta
           </h3>
           <button
             onclick="
@@ -2072,106 +1203,63 @@
             style="
               background: transparent;
               border: none;
-              color: var(--text-secondary, #aaa);
               font-size: 1.5rem;
+              color: var(--text-secondary);
               cursor: pointer;
             "
           >
-            ✕
+            &times;
           </button>
         </div>
-
         <input
           type="text"
           id="buscadorModalRenoDistri"
           class="input-ios"
-          placeholder="Buscar por correo, perfil o cliente..."
-          oninput="window.filtrarModalRenovacionB2B()"
-          style="
-            border-radius: 16px;
-            padding: 14px 20px;
-            margin-bottom: 16px;
-            font-size: 0.9rem;
-          "
+          placeholder="Buscar por correo, perfil o cliente"
+          onkeyup="filtrarModalRenovacionB2B()"
+          style="width: 100%; padding: 12px; margin-bottom: 15px"
         />
-
         <div
           id="listaCuentasModalRenoDistri"
           style="
-            overflow-y: auto;
-            flex-grow: 1;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding-right: 5px;
+            max-height: 300px;
+            overflow-y: auto;
           "
         ></div>
       </div>
     </div>
 
-    <!-- Carga tu JavaScript Principal -->
-    <script src="distribuidores.js"></script>
-
-    <!-- 🔥 FIX PWA: Registro del Service Worker y Lógica del Botón de Instalación -->
     <script>
-      // 1. Registro del Service Worker
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("sw-distri.js")
-            .then((reg) =>
-              console.log("⚙️ App B2B instalable lista (SW registrado)"),
-            )
-            .catch((err) => console.log("Error al registrar App B2B: ", err));
-        });
-      }
-
-      // 2. Lógica del Botón Inteligente de Instalación
-      let deferredPrompt;
-      window.addEventListener("beforeinstallprompt", (e) => {
-        // Evita que Chrome muestre el aviso automático nativo
-        e.preventDefault();
-        // Guarda el evento para usarlo cuando el usuario toque el botón
-        deferredPrompt = e;
-
-        // Muestra el botón de instalar en móvil y en escritorio
-        const installBtnMobile = document.getElementById(
-          "btnInstalarAppMobile",
-        );
-        if (installBtnMobile) installBtnMobile.style.display = "flex";
-
-        const installBtnDesktop = document.getElementById(
-          "btnInstalarAppDesktop",
-        );
-        if (installBtnDesktop) installBtnDesktop.style.display = "flex";
-      });
-
-      function instalarPWA() {
+      function toggleThemeDistri() {
         if (typeof haptic === "function") haptic();
-        if (!deferredPrompt) return;
-
-        // Muestra la ventana de instalación del sistema operativo
-        deferredPrompt.prompt();
-
-        // Espera a que el usuario responda
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === "accepted") {
-            console.log("El usuario aceptó la instalación de Cybernet B2B");
-          }
-          deferredPrompt = null;
-
-          // Oculta los botones ya que la app fue instalada o el prompt fue usado
-          const installBtnMobile = document.getElementById(
-            "btnInstalarAppMobile",
-          );
-          if (installBtnMobile) installBtnMobile.style.display = "none";
-
-          const installBtnDesktop = document.getElementById(
-            "btnInstalarAppDesktop",
-          );
-          if (installBtnDesktop) installBtnDesktop.style.display = "none";
-        });
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "light" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("cyber_theme_distri", newTheme);
+        updateThemeIconDistri(newTheme);
       }
+
+      function updateThemeIconDistri(theme) {
+        const btn = document.getElementById("theme-toggle");
+        if (theme === "light") {
+          btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+        } else {
+          btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("cyber_theme_distri") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        updateThemeIconDistri(savedTheme);
+
+        // El resto del cargador de sesión se manejará desde distribuidores.js
+      });
     </script>
+    <script src="distribuidores.js"></script>
   </body>
 </html>
