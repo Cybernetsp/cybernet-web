@@ -154,9 +154,20 @@ function haptic() {
 }
 
 function formatMoneda(v) {
+  if (!v) return "$0";
+
+  // Si el valor ya viene formateado como texto con el signo '$' desde el Excel, lo deja pasar intacto
+  if (typeof v === "string" && v.includes("$")) {
+    return v;
+  }
+
+  // Si es un número crudo, lo limpia de caracteres extraños y lo formatea como moneda colombiana
+  let num =
+    typeof v === "number" ? v : parseFloat(String(v).replace(/[^0-9.-]/g, ""));
+  if (isNaN(num)) return "$0";
+
   return (
-    "$" +
-    parseFloat(v || 0).toLocaleString("es-CO", { maximumFractionDigits: 0 })
+    "$" + Math.round(num).toLocaleString("es-CO", { maximumFractionDigits: 0 })
   );
 }
 
@@ -802,6 +813,9 @@ window.cambiarTipoVentaCarrito = function (id, tipo) {
   }
 };
 
+// =========================================================================
+// 🔄 VENTANA DE RENOVACIONES B2B (CORREGIDA: BUSCA POR NOMBRE Y CORREO)
+// =========================================================================
 window.abrirModalRenoB2B = function (idItem) {
   haptic();
   const telDistri =
@@ -820,7 +834,6 @@ window.abrirModalRenoB2B = function (idItem) {
 
     container.innerHTML = "";
     if (res && res.status === "success" && res.data.length > 0) {
-      // 🔥 CORRECCIÓN CRÍTICA: Quitamos el filtro selectivo para permitir @outlook y cualquier otro correo
       window.cuentasActivasB2B = res.data;
 
       if (window.cuentasActivasB2B.length === 0) {
@@ -830,41 +843,50 @@ window.abrirModalRenoB2B = function (idItem) {
       }
 
       window.cuentasActivasB2B.forEach((cuenta) => {
+        // Blindaje total contra celdas vacías en Sheets para que no rompa el buscador
+        let correoTexto = String(cuenta.correo || "").trim();
+        let perfilTexto = String(cuenta.perfil || "").trim();
+        let clienteTexto = String(cuenta.cliente || "").trim();
+
         let div = document.createElement("div");
         div.className = "card-ios item-reno-b2b";
         div.style =
           "padding: 15px; cursor: pointer; background: var(--input-bg); border: var(--surface-border); border-radius: 14px; margin-bottom: 8px; text-align: left;";
+
+        // Creamos la data de búsqueda unificada en minúsculas y sin peligro de colapso
         div.setAttribute(
           "data-search",
-          cuenta.correo.toLowerCase() +
+          correoTexto.toLowerCase() +
             " " +
-            cuenta.perfil.toLowerCase() +
+            perfilTexto.toLowerCase() +
             " " +
-            cuenta.cliente.toLowerCase(),
+            clienteTexto.toLowerCase(),
         );
+
         div.innerHTML = `
-            <div style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; word-break: break-all;">${cuenta.correo}</div>
+            <div style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; word-break: break-all;">${correoTexto}</div>
             <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
-                <span>Perfil: <b style="color: var(--ios-blue);">${cuenta.perfil}</b></span>
-                <span>Cliente: <b>${cuenta.cliente}</b></span>
+                <span>Perfil: <b style="color: var(--ios-blue);">${perfilTexto}</b></span>
+                <span>Cliente: <b style="color: var(--ios-orange);">${clienteTexto || "Sin Nombre"}</b></span>
             </div>
         `;
+
         div.onclick = function () {
           let itemCarrito = window.carrito.find((i) => i.id === idItem);
           if (itemCarrito) {
-            itemCarrito.correoReno = `${cuenta.correo} | Perfil: ${cuenta.perfil}`;
+            itemCarrito.correoReno = `${correoTexto} | Perfil: ${perfilTexto}`;
 
             let inputNombre = document.getElementById("cartClientName");
             if (
               inputNombre &&
-              cuenta.cliente &&
-              cuenta.cliente !== "N/A" &&
-              cuenta.cliente.toLowerCase() !== "cliente"
+              clienteTexto &&
+              clienteTexto !== "N/A" &&
+              clienteTexto.toLowerCase() !== "cliente"
             ) {
-              inputNombre.value = cuenta.cliente;
+              inputNombre.value = clienteTexto;
             }
 
-            let cantidadDetectada = cuenta.perfil
+            let cantidadDetectada = perfilTexto
               .split(/[-y,]/i)
               .filter((p) => p.trim() !== "").length;
             if (cantidadDetectada > 0) {
@@ -889,15 +911,24 @@ window.abrirModalRenoB2B = function (idItem) {
   document.body.appendChild(script);
 };
 
+// =========================================================================
+// 🔍 FILTRADO EN TIEMPO REAL DEL MODAL (BUSCA CORREO Y NOMBRE)
+// =========================================================================
 window.filtrarModalRenovacionB2B = function () {
   const q = document
     .getElementById("buscadorModalRenoDistri")
     .value.toLowerCase()
     .trim();
+
   document.querySelectorAll(".item-reno-b2b").forEach((item) => {
-    item.style.display = item.getAttribute("data-search").includes(q)
-      ? "block"
-      : "none";
+    const indiceBusqueda = item.getAttribute("data-search") || "";
+
+    // Si la huella del contenedor incluye el texto del buscador, lo muestra instantáneamente
+    if (indiceBusqueda.includes(q)) {
+      item.style.setProperty("display", "block", "important");
+    } else {
+      item.style.setProperty("display", "none", "important");
+    }
   });
 };
 
