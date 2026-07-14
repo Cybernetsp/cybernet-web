@@ -1508,3 +1508,164 @@ body:has(.overlay-ios[style*="display: block"]) [id*="dock"] {
     animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
 }
+
+/* =========================================================================
+   🌍 PARCHE UNIVERSAL DE RESPONSIVIDAD (MÓVILES, TABLETS Y ESCRITORIOS)
+   ========================================================================= */
+
+/* 1. FLUIDEZ EN CAJAS FLEXIBLES (Evita el amontonamiento horizontal) */
+.flex-row,
+.flex-row-between {
+  flex-wrap: wrap !important;
+}
+
+/* Hacer que cualquier contenedor con "display: flex" inline permita saltos de línea en móviles */
+@media (max-width: 768px) {
+  div[style*="display: flex"]:not(.macos-dock):not(.mac-menu-left):not(
+      .mac-window-header
+    ) {
+    flex-wrap: wrap !important;
+  }
+
+  /* 2. FORZAR COLUMNAS AL 100% EN CELULARES */
+  div[style*="flex: 1"],
+  div[style*="flex: 2"],
+  div[style*="flex: 1.2"],
+  .balance-hero-section,
+  .chart-layout-box {
+    flex: none !important;
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* 3. INPUTS Y SELECTS A ANCHO COMPLETO */
+  .input-ios,
+  select.input-ios,
+  .btn-ios {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 4. RECALIBRACIÓN DE MODALES PARA MÓVILES (Uso de 'svh' para evitar cortes de pantalla) */
+  .sheet-ios,
+  .modal-ios {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 90svh !important; /* 'svh' respeta la barra de direcciones de Safari/Chrome */
+    max-height: 90svh !important;
+    border-radius: 24px 24px 0 0 !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  }
+
+  .overlay-ios.open .sheet-ios,
+  .overlay-ios.open .modal-ios {
+    transform: translateY(0) !important;
+  }
+
+  /* 5. PROTECCIÓN PARA TABLAS Y CONTENEDORES LARGOS */
+  table {
+    min-width: 100% !important; /* Permite que la tabla se deslice sin romper la tarjeta */
+  }
+
+  .card-ios,
+  .widget-ipad {
+    overflow-x: auto !important; /* Si algo adentro es muy ancho, permite scroll interno */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 6. CORRECCIÓN DEL DOCK EN MÓVILES PARA QUE NO TAPE EL CONTENIDO */
+  body,
+  main,
+  #mainWorkspace {
+    padding-bottom: 120px !important;
+  }
+}
+
+/* =========================================================================
+   📱 RESPONSIVIDAD PARA TABLETS (PANTALLAS MEDIANAS: 769px - 1024px)
+   ========================================================================= */
+@media (min-width: 769px) and (max-width: 1100px) {
+  /* El diseño Bento se pasa a 2 columnas en vez de amontonar 3 o 4 */
+  .ipad-bento-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Todas las clases bento toman 1 columna entera en iPad vertical */
+  .bento-w-12,
+  .bento-w-8,
+  .bento-w-7,
+  .bento-w-6,
+  .bento-w-5,
+  .bento-w-4,
+  .bento-w-3 {
+    grid-column: span 2 !important;
+  }
+
+  /* Modales al 90% de la pantalla para no verse estirados ni muy pequeños */
+  .sheet-ios {
+    width: 90% !important;
+    max-width: 90% !important;
+  }
+}
+
+/* 7. PREVENCIÓN UNIVERSAL DE DESBORDAMIENTO DE TEXTO (Cuentas, correos largos, etc.) */
+* {
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+/* =========================================================================
+   🔍 BUSCADOR ESTÁTICO Y SCROLL INDEPENDIENTE (CYBERNET OS)
+   ========================================================================= */
+
+.mac-right-panel {
+  /* Quitamos el scroll del panel completo */
+  overflow: hidden !important;
+}
+
+.mac-search-wrapper {
+  /* El buscador no se encoje y se mantiene siempre visible */
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  z-index: 10;
+}
+
+#grid-container.mac-filtered-cards {
+  /* Le damos el scroll EXCLUSIVAMENTE a la cuadrícula de plantillas */
+  flex-grow: 1;
+  overflow-y: auto !important;
+  align-content: flex-start; /* Evita que las tarjetas se estiren si hay pocas */
+  padding-right: 8px; /* Espacio para la barrita de scroll */
+  padding-bottom: 30px !important;
+}
+/* =========================================================================
+   📭 CENTRADO PERFECTO PARA EL AVISO DE "NO SE ENCONTRARON PLANTILLAS"
+   ========================================================================= */
+
+.mac-empty-state {
+  flex-direction: column; /* Coloca el icono arriba y el texto abajo */
+  align-items: center; /* Lo centra horizontalmente */
+  justify-content: center; /* Lo centra verticalmente */
+  text-align: center;
+  flex-grow: 1; /* Obliga al contenedor a estirarse en todo el espacio vacío */
+  color: var(
+    --text-secondary
+  ); /* Un color gris sutil para que no resalte tanto */
+  gap: 15px; /* Espacio entre el icono y el texto */
+  min-height: 250px; /* Altura mínima de seguridad */
+}
+
+.mac-empty-state svg {
+  opacity: 0.4; /* Hace que el icono se vea semi-transparente y elegante */
+  width: 48px;
+  height: 48px;
+}
+
+.mac-empty-state span {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
