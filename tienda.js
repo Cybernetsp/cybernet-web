@@ -28,7 +28,6 @@ const PLATAFORMAS_INFO = {
   canva: { name: "Canva Pro", type: "addon", price: 20000 },
   spotify: { name: "Spotify Premium", type: "addon", price: 14000 },
   yt: { name: "YouTube Premium", type: "addon", price: 14000 },
-  deezer: { name: "Deezer", type: "addon", price: 12000 },
 };
 
 // Base de Datos de Ofertas Variadas de Retención
@@ -1925,4 +1924,3 @@ function cargarMemoriaTienda() {
     // Pintamos la interfaz silenciosamente
     actualizarCarrito();
 }
-
