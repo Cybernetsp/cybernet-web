@@ -1970,7 +1970,16 @@ function procesarRecargaDistribuidor() {
 }
 
 function ejecutarInyeccionSaldo(valorBase, remitenteReal) {
-  let porcentajeBono = valorBase >= 100000 ? 30 : 15;
+  // 🔥 NUEVA LÓGICA DE BONOS CONFIGURABLE:
+  let porcentajeBono = 0;
+  if (valorBase >= 100000) {
+    porcentajeBono = 30; // De 100 mil pesos en adelante -> 30%
+  } else if (valorBase >= 30000) {
+    porcentajeBono = 15; // De 30 mil a 99,999 pesos -> 15%
+  } else {
+    porcentajeBono = 0; // Menos de 30 mil pesos -> Sin bono (0%)
+  }
+
   let revendedor =
     localStorage.getItem("active_distri_name") || window.distriTelefonoCache;
 
@@ -2003,12 +2012,20 @@ function ejecutarInyeccionSaldo(valorBase, remitenteReal) {
 
       cerrarModalFormularioRecarga();
 
-      triggerToast(
-        `✅ Saldo acreditado. Recibiste bono de ${porcentajeBono}%.`,
-      );
-      alert(
-        `🎉 ¡Pago validado exitosamente!\n\nSe ha sumado el saldo a tu cuenta junto con un bono automático del ${porcentajeBono}%.\n\n💰 Nuevo Saldo: $${window.saldoNumericoActual.toLocaleString("es-CO")}`,
-      );
+      // 📢 Mensajes dinámicos dependiendo de si hubo bono o no
+      if (porcentajeBono > 0) {
+        triggerToast(
+          `✅ Saldo acreditado. Recibiste bono de ${porcentajeBono}%.`,
+        );
+        alert(
+          `🎉 ¡Pago validado exitosamente!\n\nSe ha sumado el saldo a tu cuenta junto con un bono automático del ${porcentajeBono}%.\n\n💰 Nuevo Saldo: $${window.saldoNumericoActual.toLocaleString("es-CO")}`,
+        );
+      } else {
+        triggerToast(`✅ Saldo acreditado en tu cuenta.`);
+        alert(
+          `🎉 ¡Pago validado exitosamente!\n\nSe ha acreditado el dinero en tu cuenta de forma segura.\n\n💰 Nuevo Saldo: $${window.saldoNumericoActual.toLocaleString("es-CO")}`,
+        );
+      }
     } else {
       alert("❌ Hubo un error grabando el saldo en la base de datos.");
     }
