@@ -79,9 +79,6 @@ window.pendingOldPass = "";
 window.pendingRemember = false;
 window.isForcedChange = false;
 
-// =========================================================================
-// 🔊 MOTOR ACÚSTICO APPLE VIP V2 (AUTOMATIZACIÓN TOTAL DE CLICS Y ALERTAS)
-// =========================================================================
 window.CyberSonidos = {
   play: function (tipo) {
     try {
@@ -91,50 +88,57 @@ window.CyberSonidos = {
 
       const now = window.audioCtx.currentTime;
 
-      // 📱 1. SONIDO: CLICK NATIVO DE KEYBOARD/BOTÓN IPHONE ("TOCK")
-      if (tipo === "pop" || tipo === "click") {
+      // Función maestra para crear cualquier sonido
+      const playTone = (freq, type, startTime, duration, vol) => {
         const osc = window.audioCtx.createOscillator();
         const gain = window.audioCtx.createGain();
-
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(850, now); // Frecuencia seca de madera/tock
-
-        gain.gain.setValueAtTime(0.06, now); // Volumen calibrado cómodo
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02); // Caída ultra rápida (20ms) para el golpe seco
-
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, startTime);
+        gain.gain.setValueAtTime(vol, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
         osc.connect(gain);
         gain.connect(window.audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.03);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+        return osc; // Devolvemos el oscilador por si queremos curvar el sonido
+      };
+
+      // 1. Tock clásico (Botones normales)
+      if (tipo === "click" || tipo === "pop") {
+        playTone(850, "sine", now, 0.03, 0.06);
       }
-
-      // 🔔 2. SONIDO: NOTIFICACIÓN PREMIUM DE IOS ("CHIME / NOTE")
+      // 2. Chime doble (Notificaciones generales o éxito)
       else if (tipo === "exito" || tipo === "notif") {
-        // Función interna para crear armónicos puros de campana
-        const crearNotaChime = (frecuencia, inicio, duracion) => {
-          const oscNode = window.audioCtx.createOscillator();
-          const gainNode = window.audioCtx.createGain();
-
-          oscNode.type = "sine";
-          oscNode.frequency.setValueAtTime(frecuencia, inicio);
-
-          gainNode.gain.setValueAtTime(0.12, inicio);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, inicio + duracion);
-
-          oscNode.connect(gainNode);
-          gainNode.connect(window.audioCtx.destination);
-          oscNode.start(inicio);
-          oscNode.stop(inicio + duracion);
-        };
-
-        // Recreación del icónico tono doble de Apple Pay / Notificación
-        crearNotaChime(1050, now, 0.12); // Primer pulso agudo corto
-        crearNotaChime(1320, now + 0.06, 0.25); // Segundo pulso resonante elegante
+        playTone(1050, "sine", now, 0.12, 0.1);
+        playTone(1320, "sine", now + 0.06, 0.25, 0.1);
+      }
+      // 3. Blip ascendente (Abrir ventanas/paneles)
+      else if (tipo === "abrir") {
+        const osc = playTone(400, "sine", now, 0.15, 0.05);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+      }
+      // 4. Blip descendente (Cerrar ventanas/paneles)
+      else if (tipo === "cerrar") {
+        const osc = playTone(800, "sine", now, 0.15, 0.05);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+      }
+      // 5. Doble Blip rápido y agudo (Copiar al portapapeles)
+      else if (tipo === "copiar") {
+        playTone(1500, "sine", now, 0.05, 0.05);
+        playTone(2000, "sine", now + 0.05, 0.1, 0.05);
+      }
+      // 6. Sonido de caja registradora sintetizada (Ventas/Cobros)
+      else if (tipo === "dinero" || tipo === "venta") {
+        playTone(2000, "triangle", now, 0.1, 0.03);
+        playTone(3000, "triangle", now + 0.1, 0.2, 0.03);
+      }
+      // 7. Zumbido grave doble (Errores o Alertas críticas)
+      else if (tipo === "error") {
+        playTone(200, "square", now, 0.15, 0.08);
+        playTone(150, "square", now + 0.15, 0.2, 0.08);
       }
     } catch (e) {
-      console.log(
-        "AudioContext bloqueado por seguridad del navegador hasta el primer clic.",
-      );
+      console.log("AudioContext bloqueado por el navegador.");
     }
   },
 };
@@ -147,24 +151,46 @@ window.haptic = function () {
   window.CyberSonidos.play("click");
 };
 
-// =========================================================================
-// 🎯 RADAR DE CAPTURA GLOBAL: ASIGNA AUDIO A CUALQUIER ELEMENTO INTERACTIVO
-// =========================================================================
 document.addEventListener(
   "click",
   (e) => {
-    // Filtro inteligente para capturar clics en botones, menús, dock, checkboxes, etc.
     const elementoInteractivo = e.target.closest(
       "button, .mac-menu-item, .mac-dock-icon, .btn-ios, .btn-close-circle, .mobile-menu-trigger, input[type='submit'], input[type='checkbox'], select",
     );
 
     if (elementoInteractivo) {
-      window.CyberSonidos.play("click");
+      // Vibración táctil si aplica
       if (navigator.vibrate) navigator.vibrate(10);
+
+      // Lógica inteligente de sonidos
+      if (
+        elementoInteractivo.classList.contains("btn-close-circle") ||
+        elementoInteractivo.innerText.includes("Cancelar")
+      ) {
+        window.CyberSonidos.play("cerrar");
+      } else if (
+        elementoInteractivo.classList.contains("btn-danger") ||
+        elementoInteractivo.innerText.includes("Eliminar")
+      ) {
+        window.CyberSonidos.play("error");
+      } else if (
+        elementoInteractivo.innerText.includes("Copiar") ||
+        elementoInteractivo.classList.contains("copy-text-btn")
+      ) {
+        window.CyberSonidos.play("copiar");
+      } else if (
+        elementoInteractivo.innerText.includes("Venta") ||
+        elementoInteractivo.innerText.includes("Cobrar")
+      ) {
+        window.CyberSonidos.play("dinero");
+      } else {
+        // Sonido por defecto para clics normales
+        window.CyberSonidos.play("click");
+      }
     }
   },
   true,
-); // Usamos 'true' para interceptar el evento antes de que lo detenga otro script
+);
 
 const listaPlataformasVenta = [
   {
@@ -314,11 +340,18 @@ const listaPlataformasVenta = [
 let contadorFilasVenta = 0;
 
 function toggleVentasPanel() {
-  if (typeof haptic === "function") haptic();
+  // Opcional: mantenemos solo la vibración táctil para móviles
+  if (navigator.vibrate) navigator.vibrate(10);
+
   const overlay = document.getElementById("ventasOverlay");
   overlay.classList.toggle("open");
 
   if (overlay.classList.contains("open")) {
+    // 🔊 NUEVO: Reproducir sonido de apertura
+    if (typeof window.CyberSonidos !== "undefined")
+      window.CyberSonidos.play("abrir");
+
+    // Lógica original de reseteo del formulario
     document.getElementById("formGenerarVenta").reset();
     document.getElementById("listaServiciosVentaDinamica").innerHTML = "";
     contadorFilasVenta = 0;
@@ -335,6 +368,10 @@ function toggleVentasPanel() {
       const staffActivo = sessionStorage.getItem("active_staff") || "STAFF";
       optNomina.value = "NÓMINA: " + staffActivo.toUpperCase();
     }
+  } else {
+    // 🔊 NUEVO: Reproducir sonido de cierre cuando el panel se oculta
+    if (typeof window.CyberSonidos !== "undefined")
+      window.CyberSonidos.play("cerrar");
   }
 }
 
@@ -2672,11 +2709,15 @@ function copiarCuentaCompleta(btn, index) {
 // 👥 GESTOR DE TURNOS: INTERCEPTOR DE SEGURIDAD ESTRICTO PARA CAMILO
 // =========================================================================
 function toggleShiftsPanel() {
-  if (typeof haptic === "function") haptic();
+  if (navigator.vibrate) navigator.vibrate(10);
   const overlay = document.getElementById("shiftsOverlay");
   overlay.classList.toggle("open");
 
   if (overlay.classList.contains("open")) {
+    // 🔊 NUEVO: Sonido de apertura
+    if (typeof window.CyberSonidos !== "undefined")
+      window.CyberSonidos.play("abrir");
+
     if (document.getElementById("searchShiftsInput")) {
       document.getElementById("searchShiftsInput").value = "";
     }
@@ -2717,6 +2758,10 @@ function toggleShiftsPanel() {
         forzarRefrescoDeHoras();
       }
     });
+  } else {
+    // 🔊 NUEVO: Sonido de cierre
+    if (typeof window.CyberSonidos !== "undefined")
+      window.CyberSonidos.play("cerrar");
   }
 }
 
@@ -4073,11 +4118,15 @@ function filtrarHorasInternas() {
 }
 
 function toggleCodesPanel() {
-  haptic();
+  if (navigator.vibrate) navigator.vibrate(10);
   const overlay = document.getElementById("codesOverlay");
   overlay.classList.toggle("open");
 
   if (overlay.classList.contains("open")) {
+    // 🔊 NUEVO: Sonido de apertura
+    if (typeof window.CyberSonidos !== "undefined")
+      window.CyberSonidos.play("abrir");
+
     if (window.currentCodesStock && window.currentCodesStock.length > 0) {
       renderizarCodigosEnPantalla();
       cargarCodigosDesdeGmail(true);
@@ -4089,6 +4138,10 @@ function toggleCodesPanel() {
       cargarCodigosDesdeGmail(true);
     }, 12000);
   } else {
+    // 🔊 NUEVO: Sonido de cierre
+    if (typeof window.CyberSonidos !== "undefined")
+      window.CyberSonidos.play("cerrar");
+
     if (autoRefreshCodesInterval) {
       clearInterval(autoRefreshCodesInterval);
       autoRefreshCodesInterval = null;
@@ -6577,13 +6630,23 @@ const mesesArray = [
 ];
 
 function toggleFinanzasPanel() {
-  if (typeof haptic === "function") haptic();
+  if (navigator.vibrate) navigator.vibrate(10);
   const overlay = document.getElementById("finanzasOverlay");
+
   if (overlay) {
     overlay.classList.toggle("open");
+
     if (overlay.classList.contains("open")) {
+      // 🔊 NUEVO: Sonido de apertura
+      if (typeof window.CyberSonidos !== "undefined")
+        window.CyberSonidos.play("abrir");
+
       construirSelectores();
       cargarDashboardFinanzas();
+    } else {
+      // 🔊 NUEVO: Sonido de cierre
+      if (typeof window.CyberSonidos !== "undefined")
+        window.CyberSonidos.play("cerrar");
     }
   }
 }
@@ -7154,31 +7217,85 @@ function cargarPlantillasDesdeSheets() {
 
     if (res && res.status === "success") {
       const data = res.data;
+
+      // Variables para guardar nuestras dos plantillas principales
+      let plantillaPagos = null;
+      let plantillaNequi = null;
       window.currentGridStock = [];
 
+      // 1. Clasificamos las plantillas que llegan desde el Excel
       data.forEach((item) => {
-        // Si el título es PAGOS, se renderiza de forma especial en la parte del QR
-        if (item.titulo.toUpperCase() === "PAGOS") {
-          const headerContainer = document.getElementById("header-container");
-          if (headerContainer) {
-            headerContainer.innerHTML = `
-                <div class="card-ios w-100" style="max-width: 440px;">
-                  <h2 class="card-title text-center" style="justify-content:center;">${item.titulo}</h2>
-                  <img src="${item.imagenUrl}" alt="QR" style="max-width:210px; width:100%; border-radius:16px; border:var(--glass-border); box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto;">
-                  <span class="text-secondary text-center" style="font-size:0.75rem; margin-top:-8px; font-weight:500;">(Mantén presionado o clic derecho para copiar imagen)</span>
-                  <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${item.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">COPIAR TEXTO</button>
-                </div>
-              `;
-          }
+        const tituloUP = item.titulo.toUpperCase();
+
+        if (tituloUP === "PAGOS") {
+          plantillaPagos = item;
+        } else if (tituloUP === "NEQUI") {
+          plantillaNequi = item;
         } else {
-          // Si es cualquier otro mensaje, va para las tarjetas del buscador inferior
+          // El resto va al buscador normal
           window.currentGridStock.push(item);
         }
       });
 
-      // Una vez distribuidos, pintamos el catálogo en pantalla
+      // 2. Dibujamos la tarjeta especial en el panel izquierdo
+      const headerContainer = document.getElementById("header-container");
+      if (headerContainer && plantillaPagos) {
+        let textoPagosSeguro = plantillaPagos.texto
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+
+        // Verificamos si existe Nequi en tu Excel para armar su botón
+        let btnNequiHtml = "";
+        if (plantillaNequi) {
+          let textoNequiSeguro = plantillaNequi.texto
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+          // Le damos un estilo rosa/magenta nativo para que parezca de Nequi
+          btnNequiHtml = `
+            <button class="btn-ios btn-secondary copy-text-btn w-100" 
+                    style="padding: 14px; font-size: 0.85rem; font-weight: 800; border-radius: 12px; background: rgba(224, 0, 150, 0.1); color: #ff37a6; border: 1px solid rgba(224, 0, 150, 0.3);" 
+                    data-clipboard-text="${textoNequiSeguro}">
+              COPIAR NEQUI
+            </button>
+          `;
+        }
+
+        headerContainer.innerHTML = `
+            <div class="card-ios w-100" style="max-width: 440px; align-items: center; gap: 12px; padding: 20px;">
+              
+              <!-- Se eliminó el <h2>PAGOS</h2> como pediste -->
+              
+              <img src="${plantillaPagos.imagenUrl}" alt="QR" 
+     onclick="window.copiarImagenQRPagos(this, '${plantillaPagos.imagenUrl}')"
+     style="max-width:210px; width:100%; border-radius:16px; border: 2px solid transparent; box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto; cursor: pointer; transition: all 0.2s;"
+     onmouseover="this.style.transform='scale(1.05)'"
+     onmouseout="this.style.transform='scale(1)'"
+     title="Haz clic para copiar la imagen del QR">
+              
+<span class="text-secondary text-center" style="font-size:0.75rem; font-weight:500; margin-top: -4px;">
+  (Haz clic sobre el QR para copiar la imagen)
+</span>
+              
+              <!-- Contenedor de Botones de Pago -->
+              <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 4px;">
+                
+                <button class="btn-ios btn-secondary copy-text-btn w-100" 
+                        style="padding: 14px; font-size: 0.85rem; font-weight: 800; border-radius: 12px; background: rgba(10, 132, 255, 0.1); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.3);" 
+                        data-clipboard-text="${textoPagosSeguro}">
+                  COPIAR PAGOS (BRE-B)
+                </button>
+                
+                ${btnNequiHtml}
+
+              </div>
+            </div>
+          `;
+      }
+
+      // 3. Pintamos el resto de las tarjetas en el buscador
       renderGrid("");
     } else {
+      const container = document.getElementById("grid-container");
       if (container)
         container.innerHTML =
           '<div class="empty-log-msg" style="color:var(--ios-red);">❌ Error al descargar mensajes.</div>';
@@ -8224,8 +8341,9 @@ window.ejecutarAdelantoDesdeShift = function (e) {
     Date.now();
   document.body.appendChild(scriptNode);
 };
+
 // =========================================================================
-// 🔍 CYBERNET OS: MOTOR SPOTLIGHT RECALIBRADO (BÚSQUEDA EXCLUSIVA POR NOMBRE)
+// 🔍 CYBERNET OS: MOTOR SPOTLIGHT RECALIBRADO (FILTRO VERSÁTIL)
 // =========================================================================
 window.filtrarTarjetasMac = function () {
   const input = document.getElementById("macSearchCards");
@@ -8234,38 +8352,23 @@ window.filtrarTarjetasMac = function () {
 
   if (!input || !container) return;
 
-  // Limpiamos el texto del buscador (minúsculas y sin espacios locos)
+  // Texto limpio: minúsculas y sin espacios a los lados
   const filtro = input.value.toLowerCase().trim();
   const tarjetas = container.getElementsByClassName("card-ios");
   let encontradas = 0;
 
-  // 🏠 CASO 1: El buscador está vacío -> Se muestran TODAS las tarjetas de una
-  if (filtro === "") {
-    if (emptyState)
-      emptyState.style.setProperty("display", "none", "important");
-    for (let i = 0; i < tarjetas.length; i++) {
-      tarjetas[i].style.setProperty("display", "flex", "important");
-    }
-    return;
-  }
-
-  // 🎯 CASO 2: El usuario escribe -> Filtro estricto por palabras iniciales del título
   for (let i = 0; i < tarjetas.length; i++) {
     const tarjeta = tarjetas[i];
 
-    // Extraemos únicamente la primera línea de texto de la tarjeta (que siempre es el TÍTULO)
-    const lineas = tarjeta.innerText.toLowerCase().split("\n");
-    const titulo = lineas[0] ? lineas[0].trim() : "";
+    // Capturamos el título de la tarjeta (el <h2> interno)
+    const tituloEl = tarjeta.querySelector(".card-title");
+    const titulo = tituloEl
+      ? tituloEl.innerText.toLowerCase()
+      : tarjeta.innerText.toLowerCase();
 
-    // Separamos el título en palabras independientes
-    const palabras = titulo.split(/\s+/);
-
-    // Comprobamos si ALGUNAS de las palabras del título EMPIEZA con las letras del buscador
-    const coincideConNombre = palabras.some((palabra) =>
-      palabra.startsWith(filtro),
-    );
-
-    if (coincideConNombre) {
+    // 🎯 LÓGICA VERSÁTIL: Si el título INCLUYE el texto escrito, lo muestra.
+    // Si el buscador está vacío (filtro === ""), también muestra todo.
+    if (titulo.includes(filtro) || filtro === "") {
       tarjeta.style.setProperty("display", "flex", "important");
       encontradas++;
     } else {
@@ -8273,12 +8376,13 @@ window.filtrarTarjetasMac = function () {
     }
   }
 
-  // ⚠️ CASO 3: Control de pantalla vacía si escribe algo que no existe
+  // ⚠️ Control visual de estado vacío si no hay coincidencias
   if (emptyState) {
     if (encontradas === 0) {
       const textoMensaje = emptyState.querySelector("span");
-      if (textoMensaje)
-        textoMensaje.innerText = `No se encontraron plantillas con el nombre "${input.value}".`;
+      if (textoMensaje) {
+        textoMensaje.innerText = `No se encontraron plantillas con "${input.value}".`;
+      }
       emptyState.style.setProperty("display", "flex", "important");
     } else {
       emptyState.style.setProperty("display", "none", "important");
@@ -9848,3 +9952,86 @@ cargarPagosBreB();
 
 // 2. ACTIVAR EL RADAR: Consultar automáticamente cada 60 segundos (60000 milisegundos)
 setInterval(cargarPagosBreB, 60000);
+
+// =========================================================================
+// 📸 MOTOR PARA COPIAR IMÁGENES AL PORTAPAPELES (VÍA CANVAS / PNG)
+// =========================================================================
+window.copiarImagenQRPagos = function (imgElement, urlImagen) {
+  if (typeof haptic === "function") haptic();
+
+  // Efecto visual: la imagen se encoge un poquito mientras carga
+  imgElement.style.transform = "scale(0.95)";
+  imgElement.style.opacity = "0.6";
+
+  try {
+    // 1. Creamos una imagen fantasma en memoria
+    const imgObj = new Image();
+    imgObj.crossOrigin = "anonymous"; // 🔓 Desbloquea la seguridad CORS
+    imgObj.src = urlImagen;
+
+    // 2. Cuando la imagen fantasma cargue, la procesamos
+    imgObj.onload = function () {
+      try {
+        // Creamos un lienzo (canvas) invisible del tamaño exacto de la imagen
+        const canvas = document.createElement("canvas");
+        canvas.width = imgObj.width;
+        canvas.height = imgObj.height;
+        const ctx = canvas.getContext("2d");
+
+        // Dibujamos la imagen en el lienzo
+        ctx.drawImage(imgObj, 0, 0);
+
+        // Convertimos el lienzo forzosamente a formato PNG (El único que acepta el portapapeles)
+        canvas.toBlob(async function (blob) {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                "image/png": blob,
+              }),
+            ]);
+
+            // 3. Restauramos la imagen y le ponemos un borde verde de éxito
+            imgElement.style.transform = "scale(1.05)";
+            imgElement.style.opacity = "1";
+            imgElement.style.borderColor = "var(--ios-green)";
+
+            // Lanzamos el toast de Cybernet confirmando la acción
+            if (typeof triggerToast === "function") {
+              triggerToast(
+                `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>¡Imagen copiada! (Ctrl + V para pegar)</span></div>`,
+              );
+            }
+            if (typeof window.CyberSonidos !== "undefined")
+              window.CyberSonidos.play("exito");
+
+            // Quitamos el borde verde después de 1 segundo
+            setTimeout(() => {
+              imgElement.style.transform = "scale(1)";
+              imgElement.style.borderColor = "transparent";
+            }, 1200);
+          } catch (err) {
+            lanzarErrorCopia(imgElement);
+          }
+        }, "image/png");
+      } catch (err) {
+        lanzarErrorCopia(imgElement);
+      }
+    };
+
+    imgObj.onerror = function () {
+      lanzarErrorCopia(imgElement);
+    };
+  } catch (error) {
+    lanzarErrorCopia(imgElement);
+  }
+};
+
+// Función auxiliar para cuando falla definitivamente
+function lanzarErrorCopia(imgElement) {
+  console.error("El navegador bloqueó la API del portapapeles.");
+  imgElement.style.transform = "scale(1)";
+  imgElement.style.opacity = "1";
+  alert(
+    "Tu navegador bloqueó la copia automática de imágenes. Por favor, usa clic derecho -> 'Copiar imagen' o mantén presionado en tu celular.",
+  );
+}
