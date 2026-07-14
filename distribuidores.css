@@ -321,14 +321,14 @@ body {
 }
 
 /* =========================================================================
-   🚦 CONTROL RESPONSIVE ADAPTATIVO MÓVIL
+   🚦 CONTROL RESPONSIVE ADAPTATIVO MÓVIL ESTRICTO
    ========================================================================= */
 @media (max-width: 860px) {
   .desktop-menu-group {
-    display: none !important; /* Esconde los botones de PC en celulares */
+    display: none !important; /* Esconde los menús largos de PC */
   }
   .mobile-menu-trigger {
-    display: flex !important; /* Activa la hamburguesa en celulares */
+    display: flex !important; /* Obliga a la hamburguesa a mostrarse */
   }
 }
 /* =========================================================================
