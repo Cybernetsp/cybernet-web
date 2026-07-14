@@ -1,12 +1,27 @@
-const CACHE_NAME = "cybernet-cache-v38"; // Súbele una versión más por si acaso
+const CACHE_NAME = "cybernet-cache-v18"; // Subimos la versión para que fuerce la actualización
 
-const assets = ["./"];
+// ⚡ ARRAY COMBINADO: Aquí guardamos los archivos de TODAS tus páginas
+const assets = [
+  "./", // Carga la raíz (usualmente tu index.html o página principal)
+  
+  // Archivos de tu panel de Administrador
+  "./admin.html",
+  "./global.css",
+  "./logica.js",
+  "./logo.jpeg"
+  
+  // Si tu "otra pag" usa un CSS o JS distinto, agrégalo aquí abajo:
+  // "./otro-estilo.css",
+  // "./otra-logica.js"
+];
 
 self.addEventListener("install", (e) => {
-  // 1. ESTA LÍNEA ES NUEVA: Obliga a instalarse de inmediato sin esperar
+  // 1. Obliga a instalarse de inmediato sin esperar
   self.skipWaiting();
 
-  e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(assets)));
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(assets))
+  );
 });
 
 self.addEventListener("activate", (e) => {
@@ -20,10 +35,13 @@ self.addEventListener("activate", (e) => {
     }),
   );
 
-  // 2. ESTA LÍNEA ES NUEVA: Toma el control de la pantalla en este mismo segundo
+  // 2. Toma el control de la pantalla en este mismo segundo
   self.clients.claim();
 });
 
 self.addEventListener("fetch", (e) => {
-  e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
+  // 3. Estrategia "Cache-First": Busca primero en la memoria, si no está, va a internet
+  e.respondWith(
+    caches.match(e.request).then((res) => res || fetch(e.request))
+  );
 });
