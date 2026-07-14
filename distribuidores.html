@@ -249,212 +249,50 @@
       "
     >
       <!-- =========================================================
-         📱 NAV/HEADER DINÁMICO ADAPTADO A CELULAR Y PC (SÓLIDO)
+         📱 HEADER ULTRA-COMPACTO CONTROLADO PARA MÓVILES (SÓLIDO)
          ========================================================= -->
-      <div
-        class="card-ios"
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 16px 20px;
-          position: sticky;
-          top: 15px;
-          z-index: 90;
-          box-sizing: border-box;
-          width: 100%;
-        "
-      >
-        <!-- Lado Izquierdo: Info del Distribuidor -->
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-align: left;
-          "
-        >
-          <div
-            style="
-              background: rgba(10, 132, 255, 0.1);
-              color: var(--ios-blue);
-              min-width: 42px;
-              height: 42px;
-              border-radius: 12px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 1.2rem;
-            "
-          >
-            💼
-          </div>
-          <div>
-            <h2
-              id="distriWelcomeName"
-              style="
-                margin: 0;
-                font-size: 1.15rem;
-                font-weight: 800;
-                color: var(--text-primary);
-                line-height: 1.2;
-              "
-            >
-              Cargando...
-            </h2>
-            <span
-              id="distriWelcomePhone"
-              style="
-                font-size: 0.75rem;
-                color: var(--text-secondary);
-                font-family: monospace;
-              "
-              >Tel: --</span
-            >
-          </div>
-        </div>
-
-        <!-- Lado Derecho: Controles de Saldo y Menús -->
-        <div style="display: flex; gap: 10px; align-items: center">
-          <!-- El saldo se queda fijo y visible en Celulares y PC -->
-          <!-- Etiqueta de Saldo + Botón de Actualización Manual -->
-          <div style="display: flex; align-items: center; gap: 8px">
-            <div
-              style="
-                background: rgba(48, 209, 88, 0.1);
-                border: 1px solid rgba(48, 209, 88, 0.2);
-                padding: 9px 16px;
-                border-radius: 50px;
-                font-weight: 800;
-                color: var(--ios-green);
-                font-family: monospace;
-                font-size: 0.9rem;
-              "
-              id="distriBarBalance"
-            >
-              $--
-            </div>
-
-            <button
-              id="btnRefrescarSaldoManual"
-              onclick="manualRefrescarSaldo()"
-              class="btn-ios btn-secondary"
-              style="
-                padding: 0;
-                width: 38px;
-                height: 38px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: var(--input-bg);
-                border: var(--surface-border);
-                cursor: pointer;
-              "
-              title="Actualizar saldo"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <polyline points="23 4 23 10 17 10"></polyline>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-              </svg>
-            </button>
-          </div>
-
-          <!-- GRUPO PC: Se muestra solo en pantallas grandes -->
-          <div
-            class="desktop-menu-group"
-            style="display: flex; gap: 10px; align-items: center"
-          >
-            <button
-              onclick="abrirModalBusquedaCuentas()"
-              class="btn-ios btn-secondary"
-            >
-              🔍 Cuentas
-            </button>
-            <button
-              onclick="abrirCentroCodigos()"
-              class="btn-ios btn-secondary"
-            >
-              📩 Códigos
-            </button>
-            <button
-              onclick="abrirModalHistorial()"
-              class="btn-ios btn-secondary"
-            >
-              📊 Movimientos
-            </button>
-            <button
-              onclick="abrirModalInstruccionesRecarga()"
-              class="btn-ios btn-success"
-            >
-              💰 Recargar
-            </button>
-            <button
-              onclick="cerrarSesionDistribuidor()"
-              class="btn-ios"
-              style="background: rgba(255, 69, 58, 0.1); color: var(--ios-red)"
-            >
-              Salir ✕
-            </button>
-            <!-- Lunita/Sol en PC -->
-            <button
-              id="theme-toggle"
-              class="btn-ios btn-secondary"
-              onclick="toggleThemeDistri()"
-              style="
-                padding: 0;
-                width: 42px;
-                height: 42px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            ></button>
-          </div>
-
-          <!-- GRUPO MÓVIL: Botón Hamburguesa que aparece solo en celulares -->
-          <button
-            class="mobile-menu-trigger"
-            onclick="abrirMenuMovil()"
-            style="
-              background: var(--input-bg);
-              border: var(--surface-border);
-              width: 42px;
-              height: 42px;
-              border-radius: 50%;
-              display: none;
-              align-items: center;
-              justify-content: center;
-              color: var(--text-primary);
-              cursor: pointer;
-            "
-          >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-            >
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
+    <div class="card-ios" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; position: sticky; top: 10px; z-index: 90; box-sizing: border-box; width: 100%; gap: 8px;">
+      
+      <!-- LADO IZQUIERDO: Info Distribuidor (Con escudo protector contra nombres largos) -->
+      <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; text-align: left;">
+        <div style="background: rgba(10, 132, 255, 0.1); color: var(--ios-blue); min-width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">💼</div>
+        <div style="min-width: 0; flex: 1;">
+          <h2 id="distriWelcomeName" style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Cargando...</h2>
+          <span id="distriWelcomePhone" style="font-size: 0.72rem; color: var(--text-secondary); font-family: monospace; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tel: --</span>
         </div>
       </div>
+
+      <!-- LADO DERECHO: Controles (Saldo + Actualizar + Menú) -> Todo compacto alineado en una fila -->
+      <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+        
+        <!-- Saldo Fijo Adaptativo -->
+        <div id="distriBarBalance" style="background: rgba(48, 209, 88, 0.1); border: 1px solid rgba(48, 209, 88, 0.2); padding: 8px 12px; border-radius: 50px; font-weight: 800; color: var(--ios-green); font-family: monospace; font-size: 0.85rem; white-space: nowrap;">$--</div>
+        
+        <!-- Botón Refrescar Manual Mini -->
+        <button id="btnRefrescarSaldoManual" onclick="manualRefrescarSaldo()" class="btn-ios" style="padding: 0; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--input-bg); border: var(--surface-border); cursor: pointer; color: var(--text-primary); flex-shrink: 0;" title="Actualizar saldo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+        </button>
+
+        <!-- GRUPO PC (Se oculta en celulares por CSS) -->
+        <div class="desktop-menu-group" style="display: flex; gap: 6px; align-items: center;">
+          <button onclick="abrirModalBusquedaCuentas()" class="btn-ios btn-secondary" style="padding: 8px 12px; font-size: 0.85rem;">🔍 Cuentas</button>
+          <button onclick="abrirCentroCodigos()" class="btn-ios btn-secondary" style="padding: 8px 12px; font-size: 0.85rem;">📩 Códigos</button>
+          <button onclick="abrirModalHistorial()" class="btn-ios btn-secondary" style="padding: 8px 12px; font-size: 0.85rem;">📊 Movimientos</button>
+          <button onclick="abrirModalInstruccionesRecarga()" class="btn-ios btn-success" style="padding: 8px 12px; font-size: 0.85rem;">💰 Recargar</button>
+          <button onclick="cerrarSesionDistribuidor()" class="btn-ios" style="background: rgba(255, 69, 58, 0.1); color: var(--ios-red); padding: 8px 12px; font-size: 0.85rem;">Salir ✕</button>
+          <button id="theme-toggle" class="btn-ios btn-secondary" onclick="toggleThemeDistri()" style="padding: 0; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;"></button>
+        </div>
+
+        <!-- BOTÓN HAMBURGUESA (Forzado para aparecer perfectamente en celulares) -->
+        <button class="mobile-menu-trigger" onclick="abrirMenuMovil()" style="background: var(--input-bg); border: var(--surface-border); width: 36px; height: 36px; border-radius: 50%; display: none; align-items: center; justify-content: center; color: var(--text-primary); cursor: pointer; padding: 0; flex-shrink: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+
+      </div>
+    </div>
 
       <!-- =========================================================
          📱 VENTANA MENÚ DESPLEGABLE EXCLUSIVA PARA CELULARES
