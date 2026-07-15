@@ -1995,15 +1995,15 @@ function agregarFilaServicioVenta() {
   let mesHeredado = window.ultimoMesesSeleccionado || "1";
 
   const rowHTML = `
-    <div id="${idFila}" class="vta-row-item" style="display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+    <div id="${idFila}" class="vta-row-item" style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.06);">
         
-        <div style="display: flex; gap: 8px; width: 100%; align-items: center;">
-            <select class="input-ios select-plat-vta" style="flex: 2; margin: 0; font-weight: 700; background: rgba(0,0,0,0.3) !important;" required onchange="alCambiarPlataformaVenta('${idFila}')">
+        <div style="display: flex; gap: 6px; width: 100%; align-items: center;">
+            <select class="input-ios select-plat-vta" style="flex: 2; margin: 0; font-weight: 700; font-size: 0.85rem; padding: 8px 10px !important; height: 38px !important; background: rgba(0,0,0,0.3) !important;" required onchange="alCambiarPlataformaVenta('${idFila}')">
                 ${optionsPlat}
             </select>
             
             <div class="wrapper-pantallas" style="flex: 1; display: none;">
-                <select class="input-ios select-pant-vta" style="margin: 0; background: rgba(0,0,0,0.3) !important; text-align: center; padding: 14px 4px;">
+                <select class="input-ios select-pant-vta" style="margin: 0; font-size: 0.85rem; padding: 8px 4px !important; height: 38px !important; background: rgba(0,0,0,0.3) !important; text-align: center;">
                     <option value="1">1 Pant.</option>
                     <option value="2">2 Pant.</option>
                     <option value="3">3 Pant.</option>
@@ -2013,7 +2013,7 @@ function agregarFilaServicioVenta() {
             </div>
 
             <div class="wrapper-meses" style="flex: 1; display: none;">
-                <select class="input-ios select-meses-vta" style="margin: 0; background: rgba(0,0,0,0.3) !important; text-align: center; padding: 14px 4px;" onchange="sincronizarMesesVenta(this, '${idFila}')">
+                <select class="input-ios select-meses-vta" style="margin: 0; font-size: 0.85rem; padding: 8px 4px !important; height: 38px !important; background: rgba(0,0,0,0.3) !important; text-align: center;" onchange="sincronizarMesesVenta(this, '${idFila}')">
                     <option value="1" ${mesHeredado === "1" ? "selected" : ""}>1 Mes</option>
                     <option value="2" ${mesHeredado === "2" ? "selected" : ""}>2 Meses</option>
                     <option value="3" ${mesHeredado === "3" ? "selected" : ""}>3 Meses</option>
@@ -2022,9 +2022,8 @@ function agregarFilaServicioVenta() {
                 </select>
             </div>
             
-            <!-- 🔥 AGREGADOS LOS PORCENTAJES DEL 25% Y 30% AL MENÚ DEL BONO 🔥 -->
             <div class="wrapper-bono" style="flex: 1; display: none;">
-                <select class="input-ios select-bono-vta" style="margin: 0; background: rgba(255,159,10,0.1) !important; color: var(--ios-orange); border-color: rgba(255,159,10,0.3); text-align: center; padding: 14px 4px; font-weight:bold;">
+                <select class="input-ios select-bono-vta" style="margin: 0; font-size: 0.85rem; padding: 8px 4px !important; height: 38px !important; background: rgba(255,159,10,0.08) !important; color: var(--ios-orange); border-color: rgba(255,159,10,0.3); text-align: center; font-weight:bold;">
                     <option value="0">0% Bono</option>
                     <option value="5">5%</option>
                     <option value="10">10%</option>
@@ -2038,9 +2037,9 @@ function agregarFilaServicioVenta() {
             ${
               contadorFilasVenta > 1
                 ? `
-              <div class="wrapper-delete-vta" style="width: 46px; height: 46px; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
-                <button type="button" onclick="document.getElementById('${idFila}').remove(); if(typeof haptic==='function')haptic();" style="width: 46px !important; height: 46px !important; min-width: 46px !important; max-width: 46px !important; min-height: 46px !important; max-height: 46px !important; background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; cursor: pointer; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; padding: 0; box-sizing: border-box;" onmouseover="this.style.background='rgba(255, 69, 58, 0.25)'" onmouseout="this.style.background='rgba(255, 69, 58, 0.15)'" title="Eliminar fila">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <div class="wrapper-delete-vta" style="width: 38px; height: 38px; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                <button type="button" onclick="document.getElementById('${idFila}').remove(); if(typeof haptic==='function')haptic();" style="width: 38px !important; height: 38px !important; min-width: 38px !important; max-width: 38px !important; min-height: 38px !important; max-height: 38px !important; background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); color: #ff453a; cursor: pointer; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; padding: 0; box-sizing: border-box;" onmouseover="this.style.background='rgba(255, 69, 58, 0.2)'" onmouseout="this.style.background='rgba(255, 69, 58, 0.1)'" title="Eliminar fila">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
               </div>
             `
@@ -2048,12 +2047,12 @@ function agregarFilaServicioVenta() {
             }
         </div>
         
-        <div class="wrapper-reno-tipo" style="display: none; gap: 8px; width: 100%; margin-top: 2px; ${contadorFilasVenta > 1 ? "padding-right: 54px;" : ""}">
-            <select class="input-ios select-tipo-vta" style="flex: 1; margin: 0; background: rgba(0,0,0,0.3) !important;" onchange="alCambiarTipoVenta('${idFila}')">
+        <div class="wrapper-reno-tipo" style="display: none; gap: 6px; width: 100%; margin-top: 0px; ${contadorFilasVenta > 1 ? "padding-right: 44px;" : ""}">
+            <select class="input-ios select-tipo-vta" style="flex: 1; margin: 0; font-size: 0.8rem; padding: 6px 8px !important; height: 32px !important; background: rgba(0,0,0,0.3) !important;" onchange="alCambiarTipoVenta('${idFila}')">
                 <option value="Nueva">Nueva</option>
                 <option value="Reno (Historial)" class="opt-historial-net" style="display: none; background: rgba(10, 132, 255, 0.2); font-weight:bold; color:var(--ios-blue);" disabled hidden>Reno (Elegir Cliente)</option>
             </select>
-            <input type="text" class="input-ios input-correo-vta" placeholder="Correo de la cuenta a renovar..." style="flex: 2; margin: 0; display: none; background: rgba(0,0,0,0.3) !important; font-weight: 700; color: var(--ios-blue);" />
+            <input type="text" class="input-ios input-correo-vta" placeholder="Correo de la cuenta a renovar..." style="flex: 2; margin: 0; font-size: 0.8rem; padding: 6px 10px !important; height: 32px !important; display: none; background: rgba(0,0,0,0.3) !important; font-weight: 700; color: var(--ios-blue);" />
         </div>
     </div>
   `;
