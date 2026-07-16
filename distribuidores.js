@@ -1699,6 +1699,20 @@ async function analizarComprobanteIA(input) {
 
   haptic();
 
+  // 🔥 NUEVO: Guardar la imagen en Base64 en memoria para enviarla a Drive luego
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    window.imagenComprobanteDistri = e.target.result;
+  };
+  reader.readAsDataURL(file);
+
+  // 🔥 NUEVO: Asignar la imagen al contenedor de vista previa
+  const previewImg = document.getElementById("previewComprobante");
+  if (previewImg) {
+    previewImg.src = URL.createObjectURL(file);
+    previewImg.style.display = "inline-block";
+  }
+
   // Ocultamos la carga inicial y encendemos el procesador visual de forma correcta
   document
     .getElementById("ocrUploadArea")
@@ -1909,36 +1923,35 @@ function procesarRecargaDistribuidor() {
     if (res && res.status === "success") {
       const pagos = res.data;
 
-      const [inputHoraStr, inputMinStr] = window.ocrHoraFinal.split(":");
-      const inputHora = parseInt(inputHoraStr, 10);
-      const inputMin = parseInt(inputMinStr, 10);
+      // Normalizamos el nombre ingresado para ignorar tildes y mayúsculas
+      const nombreNorm = nombreInput
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
 
       const matchPago = pagos.find((p) => {
         let montoLimpio = parseFloat(
           p.monto.replace(/\./g, "").replace(/,/g, "."),
         );
-        let remitente = p.remitente.toLowerCase();
-        let horaCorreoRaw = p.hora.toLowerCase();
 
-        let emailHora = 0;
-        let emailMin = 0;
-        const timeMatch = horaCorreoRaw.match(
-          /(\d{1,2}):(\d{2})\s*(a\.?m\.?|p\.?m\.?|)/i,
-        );
-        if (timeMatch) {
-          emailHora = parseInt(timeMatch[1], 10);
-          emailMin = parseInt(timeMatch[2], 10);
-          const ampm = timeMatch[3] ? timeMatch[3].replace(/\./g, "") : "";
-          if (ampm === "pm" && emailHora < 12) emailHora += 12;
-          else if (ampm === "am" && emailHora === 12) emailHora = 0;
-        }
+        // Normalizamos el nombre del remitente del correo
+        let remitenteNorm = p.remitente
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
 
-        return (
-          montoLimpio === window.ocrValorFinal &&
-          remitente.includes(nombreInput) &&
-          emailHora === inputHora &&
-          emailMin === inputMin
-        );
+        // 1. Validar el monto exacto
+        let coincideMonto = montoLimpio === window.ocrValorFinal;
+
+        // 2. Validar que las palabras del nombre ingresado existan en el remitente
+        let coincideNombre = nombreNorm
+          .split(" ")
+          .every((palabra) => remitenteNorm.includes(palabra));
+
+        // Relajamos la restricción estricta de la hora, ya que el OCR suele fallar leyendo
+        // los números pequeños de las fotos, y el correo a veces llega minutos después.
+        return coincideMonto && coincideNombre;
       });
 
       if (matchPago) {
@@ -1995,6 +2008,27 @@ function ejecutarInyeccionSaldo(valorBase, remitenteReal) {
     "cyber_referencias_procesadas",
     JSON.stringify(pagosProcesados),
   );
+
+  // 🔥 NUEVO: Enviar imagen a Drive y Gmail por POST de forma silenciosa e invisible
+  if (window.imagenComprobanteDistri) {
+    const telDistri =
+      localStorage.getItem("active_distri_tel") ||
+      window.distriTelefonoCache ||
+      "0000000000";
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "subirComprobanteYEnviarMail",
+        imagen: window.imagenComprobanteDistri,
+        referencia: window.ocrReferenciaFinal, // Sacamos la referencia que leyó el OCR
+        cliente: revendedor,
+        telefono: telDistri,
+        monto: valorBase,
+      }),
+    }).catch((e) => console.log("Carga silenciosa a Drive iniciada."));
+  }
 
   const cbRecarga = "cb_add_saldo_" + Date.now();
   window[cbRecarga] = function (res) {
