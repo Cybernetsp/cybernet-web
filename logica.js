@@ -540,6 +540,23 @@ function ejecutarCreacionVentaLocal(e) {
   btnSubmit.disabled = true;
   btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Conectando...`;
 
+  // 🔥 NUEVO: Enviar imagen a Drive y Gmail por POST de forma invisible
+  if (window.imagenComprobanteActual) {
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "subirComprobanteYEnviarMail",
+        imagen: window.imagenComprobanteActual,
+        referencia: window.referenciaComprobanteActual,
+        cliente: nombre || telefono,
+        telefono: telefono, // 🔥 Añadimos el celular explícitamente aquí
+        monto: cantidad,
+      }),
+    }).catch((e) => console.log("Carga silenciosa a Drive iniciada."));
+  }
+
   const callbackName = "cb_venta_" + Date.now();
   window[callbackName] = function (res) {
     btnSubmit.disabled = false;
@@ -617,6 +634,8 @@ function ejecutarCreacionVentaLocal(e) {
       document.getElementById("listaServiciosVentaDinamica").innerHTML = "";
       contadorFilasVenta = 0;
       agregarFilaServicioVenta();
+      if (typeof window.limpiarVisorComprobante === "function")
+        window.limpiarVisorComprobante(); // LIMPIA LA IMAGEN DE LA PANTALLA
 
       if (res.alertasStock && res.alertasStock.length > 0) {
         let avisoTexto =
@@ -2069,10 +2088,54 @@ function agregarFilaServicioVenta() {
   }
 }
 
+// =========================================================================
+// 🚀 EVENTO AUTOMÁTICO: GMAIL AL SELECCIONAR MÉTODO DE PAGO
+// =========================================================================
 function ajustarInterfazPorMetodoPagoV2() {
-  // 🔥 BLINDAJE LOGÍSTICO COMPLETO 🔥
-  // Dejamos esta función limpia y vacía. Ya no forzamos el bono en plataformas normales.
-  // La visualización de meses o bonos se controla de manera estricta según el servicio seleccionado, no por el medio de pago.
+  const selectBanco = document.getElementById("ventaBanco");
+  if (!selectBanco) return;
+
+  const bancoElegido = selectBanco.value;
+  const statusEl = document.getElementById("statusBrebVerif");
+
+  // 🔥 SOLO si seleccionas Bre-B dispara la búsqueda en Gmail
+  if (bancoElegido === "Bre-B") {
+    if (statusEl) {
+      statusEl.style.display = "flex";
+      statusEl.style.color = "var(--ios-orange)";
+      statusEl.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="text-align:left; line-height:1.2;">Sincronizando pagos de Gmail...</span>`;
+    }
+
+    const cbBreb = "cb_breb_manual_" + Date.now();
+    window[cbBreb] = function (res) {
+      const node = document.getElementById("node_" + cbBreb);
+      if (node) node.remove();
+      delete window[cbBreb];
+
+      if (res && res.status === "success" && res.data.length > 0) {
+        window.gmailDataTemp = res.data; // Guardamos en memoria
+        if (window.imagenComprobanteActual) {
+          window.verificarMatchGmail(); // Si ya había imagen, cruzamos de una vez
+        } else if (statusEl) {
+          statusEl.style.color = "var(--ios-green)";
+          statusEl.innerHTML = `✅ <span style="text-align:left; line-height:1.3;">Pagos sincronizados. Esperando monto/foto para verificar.</span>`;
+        }
+      } else {
+        if (statusEl) {
+          statusEl.style.color = "var(--ios-red)";
+          statusEl.innerHTML = `❌ <span style="text-align:left; line-height:1.3;">No hay pagos recientes en Gmail</span>`;
+        }
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_" + cbBreb;
+    script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPagosBreB&fechaBusqueda=&callback=${cbBreb}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+  } else {
+    // Si elige cualquier otra opción (ej. Nequi), re-evalúa con la lógica normal
+    if (window.imagenComprobanteActual) window.verificarMatchGmail();
+  }
 }
 
 function alCambiarPlataformaVenta(idFila) {
@@ -10034,3 +10097,888 @@ function lanzarErrorCopia(imgElement) {
     "Tu navegador bloqueó la copia automática de imágenes. Por favor, usa clic derecho -> 'Copiar imagen' o mantén presionado en tu celular.",
   );
 }
+
+// =========================================================================
+// 🛡️ INTERCEPTORES DE RED PARA INYECTAR EL NOMBRE REAL HACIA DRIVE
+// =========================================================================
+window.titularDriveComprobanteActual = "Desconocido";
+
+const originalFetch = window.fetch;
+window.fetch = async function () {
+  if (
+    arguments[1] &&
+    arguments[1].method &&
+    arguments[1].method.toUpperCase() === "POST"
+  ) {
+    try {
+      let payload = JSON.parse(arguments[1].body);
+      if (payload.action === "subirComprobanteYEnviarMail" || payload.imagen) {
+        if (window.titularDriveComprobanteActual !== "Desconocido") {
+          payload.titularDrive = window.titularDriveComprobanteActual;
+          arguments[1].body = JSON.stringify(payload);
+        }
+      }
+    } catch (e) {}
+  }
+  return originalFetch.apply(this, arguments);
+};
+
+const originalSend = XMLHttpRequest.prototype.send;
+XMLHttpRequest.prototype.send = function (body) {
+  try {
+    if (
+      typeof body === "string" &&
+      (body.includes("subirComprobanteYEnviarMail") || body.includes("imagen"))
+    ) {
+      let payload = JSON.parse(body);
+      if (window.titularDriveComprobanteActual !== "Desconocido") {
+        payload.titularDrive = window.titularDriveComprobanteActual;
+        body = JSON.stringify(payload);
+      }
+    }
+  } catch (e) {}
+  originalSend.call(this, body);
+};
+
+// =========================================================================
+// 🚀 EVENTO AUTOMÁTICO: GMAIL AL SELECCIONAR MÉTODO DE PAGO
+// =========================================================================
+window.ajustarInterfazPorMetodoPagoV2 = function () {
+  const selectBanco = document.getElementById("ventaBanco");
+  if (!selectBanco) return;
+
+  const bancoElegido = selectBanco.value;
+  const statusEl = document.getElementById("statusBrebVerif");
+
+  if (bancoElegido === "Bre-B") {
+    if (statusEl) {
+      statusEl.style.display = "flex";
+      statusEl.style.color = "var(--ios-orange)";
+      statusEl.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="text-align:left; line-height:1.2;">Sincronizando pagos de Gmail...</span>`;
+    }
+
+    const cbBreb = "cb_breb_manual_" + Date.now();
+    window[cbBreb] = function (res) {
+      const node = document.getElementById("node_" + cbBreb);
+      if (node) node.remove();
+      delete window[cbBreb];
+
+      if (res && res.status === "success" && res.data.length > 0) {
+        window.gmailDataTemp = res.data;
+        if (window.imagenComprobanteActual) {
+          window.verificarMatchGmail();
+        } else if (statusEl) {
+          statusEl.style.color = "var(--ios-green)";
+          statusEl.innerHTML = `✅ <span style="text-align:left; line-height:1.3;">Pagos sincronizados. Esperando monto/foto para verificar.</span>`;
+        }
+      } else {
+        if (statusEl) {
+          statusEl.style.color = "var(--ios-red)";
+          statusEl.innerHTML = `❌ <span style="text-align:left; line-height:1.3;">No hay pagos recientes en Gmail</span>`;
+        }
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_" + cbBreb;
+    script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPagosBreB&fechaBusqueda=&callback=${cbBreb}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+  } else {
+    if (window.imagenComprobanteActual) window.verificarMatchGmail();
+  }
+};
+
+// =========================================================================
+// 🤖 MOTOR IA: ESCÁNER DE COMPROBANTES + VERIFICACIÓN MANUAL EN TIEMPO REAL
+// =========================================================================
+window.imagenComprobanteActual = null;
+window.referenciaComprobanteActual = "Sin_Referencia";
+window.gmailDataTemp = null;
+window.hOCRTemp = null;
+window.mOCRTemp = null;
+window.bancoDetectadoTemp = null;
+window.destinoDetectadoTemp = null;
+window.textoOCRTemp = "";
+window.nombresUsadosSesion = window.nombresUsadosSesion || [];
+
+document.addEventListener("DOMContentLoaded", () => {
+  const dropZone = document.getElementById("escaner-comprobantes");
+  const icon = document.getElementById("escaner-icono");
+  const texto = document.getElementById("escaner-texto");
+  const inputMonto = document.getElementById("ventaCantidad");
+
+  if (!dropZone) return;
+
+  if (inputMonto) {
+    inputMonto.addEventListener("input", (e) => {
+      let v = parseInt(e.target.value.replace(/[^\d]/g, ""), 10) || 0;
+      const visual = document.getElementById("monto-visual");
+      if (visual) {
+        visual.innerText = v > 0 ? `💰 $${v.toLocaleString("es-CO")}` : "💰 $0";
+      }
+      if (window.imagenComprobanteActual) {
+        window.verificarMatchGmail();
+      }
+    });
+  }
+
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.style.background = "rgba(191, 90, 242, 0.1)";
+  });
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.style.background = "rgba(0,0,0,0.3)";
+  });
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.style.background = "rgba(0,0,0,0.3)";
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0)
+      procesarImagenComprobante(e.dataTransfer.files[0]);
+  });
+  window.addEventListener("paste", (e) => {
+    const ventasOverlay = document.getElementById("ventasOverlay");
+    if (ventasOverlay && ventasOverlay.classList.contains("open")) {
+      if (e.clipboardData.files && e.clipboardData.files.length > 0)
+        procesarImagenComprobante(e.clipboardData.files[0]);
+    }
+  });
+
+  function procesarImagenComprobante(file) {
+    if (!file.type.startsWith("image/")) {
+      alert("Solo se admiten imágenes.");
+      return;
+    }
+    if (typeof haptic === "function") haptic();
+
+    window.gmailDataTemp = null;
+    window.hOCRTemp = null;
+    window.mOCRTemp = null;
+    window.bancoDetectadoTemp = null;
+    window.destinoDetectadoTemp = null;
+    window.textoOCRTemp = "";
+    window.titularDriveComprobanteActual = "Desconocido";
+
+    dropZone.style.background = "rgba(0,0,0,0.5)";
+    icon.style.display = "flex";
+    icon.innerHTML = `<svg class="spin-anim" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>`;
+    icon.style.color = "var(--ios-orange)";
+    icon.style.background = "rgba(255, 159, 10, 0.15)";
+    texto.innerHTML =
+      "Analizando comprobante...<br>Verificando identidad y seguridad.";
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64Image = event.target.result;
+
+      try {
+        const result = await Tesseract.recognize(base64Image, "spa");
+        const txtLimpio = result.data.text.toLowerCase();
+        window.textoOCRTemp = txtLimpio;
+
+        const txtSinEspacios = txtLimpio.replace(/\s+/g, "");
+        const txtOCRNormalizado = txtSinEspacios
+          .replace(/[l|!iI]/g, "1")
+          .replace(/[oOQ]/g, "0")
+          .replace(/[^\d]/g, "");
+
+        // 1. FILTRO DE IDENTIDAD DEL NEGOCIO (CON BYPASS MAESTRO)
+        const esSeguro =
+          txtLimpio.includes("camilo") ||
+          txtLimpio.includes("angelica") ||
+          txtLimpio.includes("mera arteaga") ||
+          txtLimpio.includes("cybernet") ||
+          txtOCRNormalizado.includes("3215938767") ||
+          txtOCRNormalizado.includes("1007416341") ||
+          txtOCRNormalizado.includes("3015156037") ||
+          txtOCRNormalizado.includes("0090878219");
+
+        if (!esSeguro) {
+          let forzarSubida = confirm(
+            "❌ ADVERTENCIA DE LECTURA:\n\nLa Inteligencia Artificial no pudo leer claramente tu nombre o número en este comprobante (la foto puede estar borrosa o muy oscura).\n\n¿Deseas FORZAR LA SUBIDA de este pago de todos modos?",
+          );
+
+          if (!forzarSubida) {
+            window.limpiarVisorComprobante();
+            return; // Si le das a Cancelar, aborta la subida
+          }
+          // Si le das a Aceptar, el sistema ignorará el error y continuará el proceso.
+        }
+
+        // 2. DETECTAR DESTINO
+        let destinoDetectado = "No detectado";
+        const regexDestino =
+          /(?:documento|llave|número nequi|numero nequi|nequi|producto)[\s:.-]*([0-9\s]{8,15})/i;
+        const matchDestino = txtLimpio.match(regexDestino);
+
+        if (matchDestino && matchDestino[1]) {
+          destinoDetectado = matchDestino[1].replace(/\s+/g, "");
+        }
+
+        if (txtOCRNormalizado.includes("1007416341"))
+          destinoDetectado = "1007416341";
+        if (
+          txtOCRNormalizado.includes("3215938767") ||
+          txtOCRNormalizado.includes("321593")
+        )
+          destinoDetectado = "3215938767";
+        if (txtOCRNormalizado.includes("3015156037"))
+          destinoDetectado = "3015156037";
+        if (txtOCRNormalizado.includes("0090878219"))
+          destinoDetectado = "0090878219";
+
+        // Respaldo absoluto para tirillas: Si ve Redeban y Nequi, sabe que va a tu cuenta
+        if (
+          txtLimpio.includes("redeban") &&
+          txtLimpio.includes("nequ") &&
+          destinoDetectado === "No detectado"
+        ) {
+          destinoDetectado = "3215938767";
+        }
+
+        // 3. ESCUDO ANTI-FRAUDE CIBERNÉTICO
+        if (destinoDetectado === "0090878219" && !txtLimpio.includes("movii")) {
+          alert(
+            "🚨 ALERTA DE FRAUDE: COMPROBANTE FALSO 🚨\n\nEl sistema ha detectado una alteración. La llave 0090878219 pertenece exclusivamente a 'Movii'. Bloqueando intento de fraude.",
+          );
+          window.limpiarVisorComprobante();
+          return;
+        }
+
+        // 4. DETECTAR BANCO
+        let bancoDetectado = "Bre-B";
+        if (
+          txtLimpio.includes("nequi") ||
+          txtLimpio.includes("nequ") ||
+          txtLimpio.includes("llave")
+        )
+          bancoDetectado = "Nequi";
+        if (txtLimpio.includes("daviplata")) bancoDetectado = "Daviplata";
+        if (
+          txtLimpio.includes("bancolombia") ||
+          txtLimpio.includes("ahorros libreton") ||
+          txtLimpio.includes("avvillas") ||
+          txtLimpio.includes("redeban")
+        )
+          bancoDetectado = "Bre-B";
+        if (txtLimpio.includes("movii")) bancoDetectado = "Movii";
+
+        if (
+          destinoDetectado.includes("3215938767") ||
+          txtOCRNormalizado.includes("3215938767")
+        ) {
+          bancoDetectado = "Nequi Personal";
+          destinoDetectado = "3215938767";
+        }
+
+        window.bancoDetectadoTemp = bancoDetectado;
+        window.destinoDetectadoTemp = destinoDetectado;
+
+        // 5. EXTRAER REFERENCIA
+        let refEncontrada =
+          "Sin_Referencia_" + Math.floor(Math.random() * 10000);
+
+        const matchAprobacion = txtLimpio.match(
+          /(?:n[uú]mero de transacci[oó]n|aprobaci[oó]n|apro\b|recibo)[\s:.-]*([a-zA-Z0-9]{5,30})/i,
+        );
+
+        if (matchAprobacion && matchAprobacion[1]) {
+          refEncontrada = matchAprobacion[1].toUpperCase();
+        } else {
+          const regexRefNormal =
+            /(?:comprobante\s*no\.?|referencia|ref\b|operaci[oó]n|autorizaci[oó]n|transacci[oó]n)[\s:.-]*([a-zA-Z0-9]{6,30})/i;
+          const matchRefNormal = txtLimpio.match(regexRefNormal);
+
+          if (matchRefNormal && matchRefNormal[1]) {
+            refEncontrada = matchRefNormal[1].trim().toUpperCase();
+          } else {
+            let txtSeguro = txtSinEspacios.split("costo")[0] || txtSinEspacios;
+            const matchRefLarga = txtSeguro.match(
+              /(?:numerodetransaccion|transaccion|comprobanteno|referencia|ref|operaci[oó]n|autorizaci[oó]n)([a-zA-Z0-9]{10,60})/i,
+            );
+
+            if (matchRefLarga && matchRefLarga[1]) {
+              refEncontrada = matchRefLarga[1].toUpperCase();
+            } else {
+              const matchRef = txtLimpio.match(/([0-9]{7,15})/);
+              if (matchRef && matchRef[1])
+                refEncontrada = matchRef[1].trim().toUpperCase();
+            }
+          }
+        }
+
+        // 6. EXTRAER HORA EXACTA
+        let hOCR = null,
+          mOCR = null;
+        let horaFormateada = "";
+
+        const regexHoraFuerte =
+          /(?:hora|las)?[\s:.]*(\d{1,2}):(\d{2})(?:\s*([ap][\s\.\,\-_]*m))?/gi;
+        let matchesFuertes = [...txtLimpio.matchAll(regexHoraFuerte)];
+        let matchHCompleto = null;
+
+        if (matchesFuertes.length > 0) {
+          matchHCompleto = matchesFuertes[matchesFuertes.length - 1];
+        } else {
+          const regexHoraAislada =
+            /(\d{1,2}):(\d{2})(?:\s*([ap][\s\.\,\-_]*m))?/gi;
+          let matchesAislados = [...txtLimpio.matchAll(regexHoraAislada)];
+          if (matchesAislados.length > 0) {
+            matchHCompleto = matchesAislados[matchesAislados.length - 1];
+          }
+        }
+
+        if (matchHCompleto) {
+          let rawH = parseInt(matchHCompleto[1], 10);
+          let rawM = parseInt(matchHCompleto[2], 10);
+          let ampmRaw = matchHCompleto[3]
+            ? matchHCompleto[3].toLowerCase().replace(/[^ap]/g, "")
+            : "";
+
+          let h24 = rawH;
+          if (ampmRaw === "p" && rawH < 12) h24 += 12;
+          else if (ampmRaw === "a" && rawH === 12) h24 = 0;
+          else if (!ampmRaw && rawH >= 12) h24 = rawH;
+
+          hOCR = h24;
+          mOCR = rawM;
+
+          let displayH = h24 % 12 || 12;
+          let displayAmPm = h24 >= 12 ? "p.m." : "a.m.";
+          horaFormateada = `a las ${displayH}:${String(mOCR).padStart(2, "0")} ${displayAmPm}`;
+        }
+
+        window.hOCRTemp = hOCR;
+        window.mOCRTemp = mOCR;
+
+        // 7. EXTRAER FECHA
+        let fechaDetectada = "fecha no detectada";
+        let fechaBusquedaParam = "";
+
+        const mesesMap = {
+          ene: "01",
+          feb: "02",
+          mar: "03",
+          abr: "04",
+          may: "05",
+          jun: "06",
+          jul: "07",
+          jui: "07",
+          ju1: "07",
+          ago: "08",
+          ag0: "08",
+          sep: "09",
+          oct: "10",
+          nov: "11",
+          dic: "12",
+        };
+        const mesesNombres = {
+          "01": "enero",
+          "02": "febrero",
+          "03": "marzo",
+          "04": "abril",
+          "05": "mayo",
+          "06": "junio",
+          "07": "julio",
+          "08": "agosto",
+          "09": "septiembre",
+          10: "octubre",
+          11: "noviembre",
+          12: "diciembre",
+        };
+
+        let matchF = txtLimpio.match(
+          /(\d{1,2})[\s\-]+(?:de\s+)?(ene|feb|mar|abr|may|jun|jul|jui|ju1|ago|ag0|sep|oct|nov|dic)[a-z]*[\s\-]+(?:de\s+)?(\d{2,4})/i,
+        );
+
+        if (!matchF) {
+          let matchFDavi = txtLimpio.match(
+            /(ene|feb|mar|abr|may|jun|jul|jui|ju1|ago|ag0|sep|oct|nov|dic)[a-z]*\s+(\d{1,2})\s*(?:de\s+|,)?\s*(\d{2,4})/i,
+          );
+          if (matchFDavi && matchFDavi.length >= 4) {
+            matchF = [
+              matchFDavi[0],
+              matchFDavi[2],
+              matchFDavi[1],
+              matchFDavi[3],
+            ];
+          }
+        }
+
+        if (!matchF) {
+          let matchFNum = txtLimpio.match(
+            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/,
+          );
+          if (matchFNum && matchFNum.length >= 4) {
+            let mIndex = parseInt(matchFNum[2], 10);
+            let mKeys = [
+              "ene",
+              "feb",
+              "mar",
+              "abr",
+              "may",
+              "jun",
+              "jul",
+              "ago",
+              "sep",
+              "oct",
+              "nov",
+              "dic",
+            ];
+            if (mIndex >= 1 && mIndex <= 12) {
+              matchF = [
+                matchFNum[0],
+                matchFNum[1],
+                mKeys[mIndex - 1],
+                matchFNum[3],
+              ];
+            }
+          }
+        }
+
+        if (matchF && matchF.length >= 4) {
+          let dia = parseInt(matchF[1], 10);
+          let mesStr = matchF[2].toLowerCase();
+          let anio = matchF[3].trim();
+          if (anio.length === 2) anio = "20" + anio;
+
+          let mesNumerico = mesesMap[mesStr] || "01";
+          let mesCompleto = mesesNombres[mesNumerico] || "enero";
+
+          fechaBusquedaParam = `${anio}-${mesNumerico}-${String(dia).padStart(2, "0")}`;
+
+          if (horaFormateada !== "") {
+            fechaDetectada =
+              `${dia} de ${mesCompleto} de ${anio} ${horaFormateada}`.toLowerCase();
+          } else {
+            fechaDetectada =
+              `${dia} de ${mesCompleto} de ${anio}`.toLowerCase();
+          }
+        } else if (horaFormateada !== "") {
+          fechaDetectada = `hora de la imagen: ${horaFormateada}`.toLowerCase();
+        }
+
+        // 🔥 FILTRO ANTI-ZOMBIS (CON BYPASS MANUAL PARA EL ADMIN) 🔥
+        if (fechaBusquedaParam !== "") {
+          let parts = fechaBusquedaParam.split("-");
+          let receiptDate = new Date(
+            parseInt(parts[0]),
+            parseInt(parts[1]) - 1,
+            parseInt(parts[2]),
+          );
+          let hoy = new Date();
+          hoy.setHours(0, 0, 0, 0);
+          receiptDate.setHours(0, 0, 0, 0);
+
+          let diffDays = Math.floor(
+            (hoy.getTime() - receiptDate.getTime()) / (1000 * 3600 * 24),
+          );
+
+          if (diffDays > 1) {
+            // 🛑 NUEVA FUNCIÓN: Advertencia con opción de forzar (Bypass)
+            let forzar = confirm(
+              "⚠️ ATENCIÓN: COMPROBANTE ANTIGUO ⚠️\n\nEl sistema detectó que este comprobante es del " +
+                fechaDetectada +
+                " (hace " +
+                diffDays +
+                " días).\n\nNormalmente solo se aceptan pagos de hoy o ayer.\n¿Estás completamente seguro de que deseas ACEPTAR y FORZAR el ingreso de este comprobante?",
+            );
+            if (!forzar) {
+              window.limpiarVisorComprobante();
+              return; // Si le das a Cancelar, aborta la subida
+            }
+          }
+        }
+
+        window.imagenComprobanteActual = base64Image;
+        window.referenciaComprobanteActual = refEncontrada;
+
+        dropZone.style.backgroundImage = `url(${base64Image})`;
+        dropZone.style.backgroundSize = "contain";
+        dropZone.style.backgroundPosition = "center";
+        dropZone.style.backgroundRepeat = "no-repeat";
+        icon.style.display = "none";
+
+        const selectBanco = document.getElementById("ventaBanco");
+        if (bancoDetectado !== "" && selectBanco)
+          selectBanco.value = bancoDetectado;
+        if (inputMonto) {
+          inputMonto.value = "";
+          inputMonto.focus();
+        }
+
+        let etiquetaHTML = `
+          <div style="background: rgba(0,0,0,0.85); color: white; padding: 10px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(8px); display: flex; flex-direction: column; gap: 6px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%;">
+            <span style="font-weight: 800; color: var(--ios-blue); font-family: monospace; font-size: 0.95rem; word-break: break-all; line-height: 1.2;">Ref: ${refEncontrada}</span>
+            <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">⏱️ ${fechaDetectada}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 6px;">
+                <span id="monto-visual" style="font-size: 0.9rem; color: var(--ios-green); font-weight: 800;">💰 $0</span>
+                <span style="font-size: 0.85rem; color: var(--ios-orange); font-weight: 800;">📲 Doc: ${destinoDetectado}</span>
+            </div>
+            <div id="statusDriveVerif" style="display:none; margin-top: 4px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.2); font-size: 0.8rem; align-items: center; gap: 8px; justify-content: flex-start; font-weight: 700;"></div>
+            <div id="statusBrebVerif" style="display:none; margin-top: 4px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.2); font-size: 0.8rem; align-items: flex-start; gap: 8px; justify-content: flex-start; font-weight: 700;"></div>
+          </div>
+        `;
+        texto.innerHTML = etiquetaHTML;
+
+        // VERIFICACIÓN DRIVE
+        if (refEncontrada && !refEncontrada.includes("Sin_Referencia")) {
+          const statusDrive = document.getElementById("statusDriveVerif");
+          statusDrive.style.display = "flex";
+          statusDrive.style.color = "var(--ios-orange)";
+          statusDrive.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Verificando en Drive...`;
+
+          const cbDrive = "cb_drive_verif_" + Date.now();
+          window[cbDrive] = function (res) {
+            const node = document.getElementById("node_" + cbDrive);
+            if (node) node.remove();
+            delete window[cbDrive];
+
+            if (res && res.status === "success") {
+              if (res.duplicado) {
+                statusDrive.style.color = "var(--ios-red)";
+                statusDrive.innerHTML = `❌ DUPLICADO: Usado el ${res.fecha}`;
+                if (typeof CyberSonidos !== "undefined")
+                  CyberSonidos.play("error");
+              } else {
+                statusDrive.style.color = "var(--ios-green)";
+                statusDrive.innerHTML = `✅ Referencia Nueva en Drive`;
+              }
+            } else {
+              statusDrive.style.display = "none";
+            }
+          };
+          const scriptDrive = document.createElement("script");
+          scriptDrive.id = "node_" + cbDrive;
+          scriptDrive.src = `${GOOGLE_SCRIPT_URL}?action=verificarDuplicadoDrive&referencia=${encodeURIComponent(refEncontrada)}&callback=${cbDrive}&_ts=${Date.now()}`;
+          document.body.appendChild(scriptDrive);
+        }
+
+        // DESCARGAR GMAIL
+        if (
+          bancoDetectado === "Bre-B" ||
+          bancoDetectado === "Nequi" ||
+          bancoDetectado === "Bancolombia" ||
+          bancoDetectado === "Daviplata"
+        ) {
+          const statusEl = document.getElementById("statusBrebVerif");
+          statusEl.style.display = "flex";
+          statusEl.style.color = "var(--ios-orange)";
+          statusEl.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="text-align:left; line-height:1.2;">Descargando pagos de Gmail...</span>`;
+
+          const cbBreb = "cb_breb_verif_" + Date.now();
+          window[cbBreb] = function (res) {
+            const node = document.getElementById("node_" + cbBreb);
+            if (node) node.remove();
+            delete window[cbBreb];
+
+            if (res && res.status === "success" && res.data.length > 0) {
+              window.gmailDataTemp = res.data;
+              window.verificarMatchGmail();
+            } else {
+              statusEl.style.color = "var(--ios-red)";
+              statusEl.innerHTML = `❌ <span style="text-align:left; line-height:1.3;">No hay pagos recientes en Gmail</span>`;
+            }
+          };
+
+          const script = document.createElement("script");
+          script.id = "node_" + cbBreb;
+          script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerPagosBreB&fechaBusqueda=${fechaBusquedaParam}&callback=${cbBreb}&_ts=${Date.now()}`;
+          document.body.appendChild(script);
+        } else if (
+          bancoDetectado === "Nequi Personal" ||
+          bancoDetectado === "Movii"
+        ) {
+          window.verificarMatchGmail();
+        }
+      } catch (error) {
+        console.error("Error OCR:", error);
+        alert("Hubo un error al leer la imagen. Intenta de nuevo.");
+        window.limpiarVisorComprobante();
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // 🔥 FUNCIÓN DE VALIDACIÓN EN VIVO 🔥
+  window.verificarMatchGmail = function () {
+    const statusEl = document.getElementById("statusBrebVerif");
+    if (!statusEl) return;
+
+    const bancoElegidoUI = document.getElementById("ventaBanco")
+      ? document.getElementById("ventaBanco").value
+      : "";
+
+    if (window.bancoDetectadoTemp === "Movii") {
+      let txt = window.textoOCRTemp || "";
+      let esCybernet =
+        txt.includes("cybernet") ||
+        txt.includes("streaming") ||
+        txt.includes("platforms");
+
+      if (esCybernet) {
+        statusEl.style.display = "flex";
+        statusEl.style.color = "var(--ios-yellow)";
+        statusEl.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <span>Pago a: <b>Movii (Cybernet)</b></span>
+                  </div>
+                  <div style="background:rgba(255, 214, 10, 0.15); padding:6px 10px; border-radius:8px; border:1px solid rgba(255, 214, 10, 0.3);">
+                    <span style="font-size:0.65rem; color:rgba(255,255,255,0.7); text-transform:uppercase; font-weight:700; display:block; margin-bottom:2px;">Atención</span>
+                    <span style="color:white; font-size:0.9rem; font-weight:800;">⚠️ Toca realizar verificación manual antes de entregar</span>
+                  </div>
+                </div>
+              `;
+      } else {
+        statusEl.style.display = "flex";
+        statusEl.style.color = "var(--ios-red)";
+        statusEl.innerHTML = `❌ <span style="text-align:left; line-height:1.3;">El nombre no corresponde a REF CYBERNET STREAMING PLATFORMS. No es del negocio.</span>`;
+      }
+      return;
+    }
+
+    if (
+      window.bancoDetectadoTemp === "Nequi Personal" &&
+      bancoElegidoUI !== "Bre-B"
+    ) {
+      window.titularDriveComprobanteActual = "Nequi_Personal";
+      statusEl.style.display = "flex";
+      statusEl.style.color = "var(--ios-green)";
+      statusEl.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Pago a: <b>Nequi Personal</b></span>
+              </div>
+              <div style="background:rgba(48, 209, 88, 0.15); padding:6px 10px; border-radius:8px; border:1px solid rgba(48, 209, 88, 0.3);">
+                <span style="font-size:0.65rem; color:rgba(255,255,255,0.7); text-transform:uppercase; font-weight:700; display:block; margin-bottom:2px;">Estado</span>
+                <span style="color:white; font-size:0.9rem; font-weight:800;">✅ Validado por IA (Sin Gmail)</span>
+              </div>
+            </div>
+          `;
+      return;
+    }
+
+    if (!window.gmailDataTemp) {
+      if (bancoElegidoUI === "Bre-B") return;
+      return;
+    }
+
+    let inputVal = document.getElementById("ventaCantidad")
+      ? document.getElementById("ventaCantidad").value
+      : "0";
+    let montoIngresado = parseInt(inputVal.replace(/[^\d]/g, ""), 10) || 0;
+
+    if (montoIngresado === 0) {
+      statusEl.style.display = "flex";
+      statusEl.style.color = "var(--ios-yellow)";
+      statusEl.innerHTML = `⏳ <span style="text-align:left; line-height:1.2;">Escribe el monto EXACTO en "Cantidad" para verificar en vivo...</span>`;
+      return;
+    }
+
+    let matchEncontrado = false;
+    let nombreRemitente = "";
+    let posiblesMatches = [];
+
+    for (let p of window.gmailDataTemp) {
+      let strLimpio = String(p.monto)
+        .replace(/[,.]\d{2}$/, "")
+        .replace(/[^\d]/g, "");
+      let montoEmail = parseInt(strLimpio, 10) || 0;
+
+      if (montoEmail > 0 && montoEmail === montoIngresado) {
+        let hGmail = null,
+          mGmail = null;
+        const matchHoraG = String(p.hora || "")
+          .toLowerCase()
+          .match(/(\d{1,2})[\s:.;]+(\d{2})/);
+        if (matchHoraG) {
+          hGmail = parseInt(matchHoraG[1], 10);
+          mGmail = parseInt(matchHoraG[2], 10);
+        }
+
+        if (
+          window.hOCRTemp !== null &&
+          window.mOCRTemp !== null &&
+          hGmail !== null &&
+          mGmail !== null
+        ) {
+          let hOCR12 = window.hOCRTemp % 12 || 12;
+          let hGmail12 = hGmail % 12 || 12;
+
+          let totalMinOCR = hOCR12 * 60 + window.mOCRTemp;
+          let totalMinGmail = hGmail12 * 60 + mGmail;
+
+          let dif = Math.abs(totalMinOCR - totalMinGmail);
+
+          if (dif <= 1 || Math.abs(dif - 720) <= 1) {
+            posiblesMatches.push(p);
+          }
+        }
+      }
+    }
+
+    if (posiblesMatches.length > 0) {
+      matchEncontrado = true;
+      let mejorMatch = posiblesMatches[0];
+
+      if (posiblesMatches.length > 1) {
+        let txtOcr = (window.textoOCRTemp || "").toLowerCase();
+        let maxScore = -999;
+
+        for (let pm of posiblesMatches) {
+          let score = 0;
+          let nomPartes = (pm.remitente || "").toLowerCase().split(" ");
+
+          for (let np of nomPartes) {
+            if (np.length > 2 && txtOcr.includes(np)) {
+              score += 5;
+            }
+          }
+
+          if (window.nombresUsadosSesion.includes(pm.remitente)) {
+            score -= 10;
+          }
+
+          if (score > maxScore) {
+            maxScore = score;
+            mejorMatch = pm;
+          }
+        }
+      }
+
+      nombreRemitente = mejorMatch.remitente || "TITULAR GMAIL";
+
+      if (!window.nombresUsadosSesion.includes(nombreRemitente)) {
+        window.nombresUsadosSesion.push(nombreRemitente);
+      }
+    }
+
+    if (matchEncontrado) {
+      window.titularDriveComprobanteActual = nombreRemitente.toUpperCase();
+
+      statusEl.style.color = "var(--ios-green)";
+      statusEl.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Pago Confirmado en Gmail</span>
+              </div>
+              <div style="background:rgba(48, 209, 88, 0.15); padding:6px 10px; border-radius:8px; border:1px solid rgba(48, 209, 88, 0.3);">
+                <span style="font-size:0.65rem; color:rgba(255,255,255,0.7); text-transform:uppercase; font-weight:700; display:block; margin-bottom:2px;">Titular Exacto</span>
+                <span style="color:white; font-size:0.9rem; font-weight:800;">👤 ${nombreRemitente.toUpperCase()}</span>
+              </div>
+            </div>
+          `;
+
+      if (typeof CyberSonidos !== "undefined") CyberSonidos.play("exito");
+    } else {
+      statusEl.style.color = "var(--ios-red)";
+      let dH = window.hOCRTemp % 12 || 12;
+      let dAmPm = window.hOCRTemp >= 12 ? "p.m." : "a.m.";
+      statusEl.innerHTML = `❌ <span style="text-align:left; line-height:1.3;">El Monto y la Hora (${dH}:${String(window.mOCRTemp).padStart(2, "0")} ${dAmPm} ±1 min) no coinciden con la base de datos</span>`;
+    }
+  };
+
+  window.limpiarVisorComprobante = function () {
+    window.imagenComprobanteActual = null;
+    window.referenciaComprobanteActual = "Sin_Referencia";
+    window.titularDriveComprobanteActual = "Desconocido";
+    dropZone.style.backgroundImage = "none";
+    icon.style.display = "flex";
+    icon.classList.remove("spin-anim");
+    icon.style.color = "var(--ios-purple)";
+    icon.style.background = "rgba(191, 90, 242, 0.15)";
+    icon.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`;
+    texto.innerHTML = `Haz clic aquí y pega <b>(Ctrl + V)</b><br>o arrastra la imagen del pago.<br><span style="font-size:0.75rem; opacity:0.7; display:block; margin-top:8px;">La IA validará la hora y lo cruzará con Gmail.</span>`;
+  };
+});
+
+// =========================================================================
+// 🔍 LÓGICA DEL BUSCADOR DE PAGOS EN DRIVE (CON IMÁGENES)
+// =========================================================================
+
+window.abrirBuscadorDrive = function () {
+  document.getElementById("modalBuscadorDrive").classList.add("open");
+  document.getElementById("resultadosDrive").innerHTML = "";
+  document.getElementById("inputBusquedaDrive").value = "";
+  setTimeout(() => {
+    document.getElementById("inputBusquedaDrive").focus();
+  }, 100);
+};
+
+window.cerrarBuscadorDrive = function () {
+  document.getElementById("modalBuscadorDrive").classList.remove("open");
+};
+
+window.ejecutarBusquedaDrive = function () {
+  let tel = document.getElementById("inputBusquedaDrive").value.trim();
+  if (!tel) return alert("⚠️ Por favor ingresa el número de celular a buscar.");
+
+  let resDiv = document.getElementById("resultadosDrive");
+  resDiv.innerHTML = `
+        <div style="text-align:center; padding:20px; color:var(--ios-orange);">
+            <svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+            <br><span style="font-weight:bold; display:block; margin-top:10px;">Rastreando archivos en Drive...</span>
+        </div>`;
+
+  let cbName = "cb_drive_search_" + Date.now();
+  window[cbName] = function (res) {
+    if (res.status === "success") {
+      if (res.data.length === 0) {
+        resDiv.innerHTML = `<div style="text-align:center; padding:15px; color:#ff453a; background:rgba(255, 69, 58, 0.1); border-radius:10px; border:1px solid rgba(255,69,58,0.3);">❌ No se encontró ningún comprobante vinculado al número <b>${tel}</b>.</div>`;
+      } else {
+        let html = `<span style="color:#30d158; font-weight:800; font-size:0.9rem;">✅ ${res.data.length} Pago(s) Encontrado(s):</span><hr style="border:0; border-top:1px dashed rgba(255,255,255,0.1); margin:8px 0;">`;
+
+        res.data.forEach((p) => {
+          let refMostrada = "N/A";
+          if (p.nombre.includes("referencia_")) {
+            refMostrada = p.nombre.split("referencia_")[1].split(".jpg")[0];
+          }
+
+          // Extraer ID de Drive
+          let fileId = p.id;
+          if (!fileId && p.url) {
+            let m = p.url.match(/[\w-]{25,}/);
+            if (m) fileId = m[0];
+          }
+
+          let imgHtml = "";
+          if (fileId) {
+            imgHtml = `
+                        <div style="margin-top: 10px; text-align: center; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 8px;">
+                            <img src="https://drive.google.com/thumbnail?sz=w400&id=${fileId}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); cursor:pointer;" onclick="window.open('${p.url}', '_blank')" title="Clic para ampliar en Drive">
+                        </div>`;
+          }
+
+          html += `
+                    <div style="background:rgba(255,255,255,0.05); padding:16px; border-radius:14px; border:1px solid rgba(255,255,255,0.1);">
+                       <span style="color:var(--text-secondary); font-size:0.75rem; text-transform:uppercase; font-weight:bold;">📅 ${p.fecha}</span><br>
+                       <span style="color:white; font-weight:900; font-size: 1.1rem; display:block; margin-top:4px; font-family: monospace;">REF: ${refMostrada}</span>
+                       
+                       ${imgHtml}
+                       
+                       <div style="display:flex; gap:8px; margin-top:12px;">
+                           <a href="${p.url}" target="_blank" style="flex:1; text-align:center; background:rgba(10, 132, 255, 0.15); color:#0a84ff; text-decoration:none; font-weight:800; padding:10px 12px; border-radius:10px; font-size:0.85rem; border:1px solid rgba(10, 132, 255, 0.3);">
+                               👁️ Ver Original Completo
+                           </a>
+                       </div>
+                    </div>`;
+        });
+        resDiv.innerHTML = html;
+      }
+    } else {
+      resDiv.innerHTML = `<div style="color:#ff453a; font-weight:bold;">❌ Error: ${res.message}</div>`;
+    }
+
+    let node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+  };
+
+  let script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=buscarPagosDrive&telefono=${tel}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
