@@ -10171,6 +10171,7 @@
       </div>
     </div>
 
+    <!-- 🔐 MODAL DE VERIFICACIÓN 2FA CON AUTO-VERIFICACIÓN -->
     <div
       class="overlay-ios"
       id="otpVerificationOverlay"
@@ -10242,6 +10243,7 @@
             <b id="lblMaskedEmail" style="color: var(--text-primary)">---</b>
           </p>
         </div>
+
         <form
           id="otpForm"
           class="flex-col"
@@ -10251,6 +10253,7 @@
             verificarCodigoAcceso();
           "
         >
+          <!-- ⚡ INPUT CON DETECTOR AUTOMÁTICO DE 6 DÍGITOS -->
           <input
             type="text"
             id="staffOtpCode"
@@ -10258,6 +10261,7 @@
             placeholder="000000"
             required
             maxlength="6"
+            oninput="comprobarAutoVerificacionOTP(this)"
             style="
               border-radius: 14px;
               padding: 16px;
@@ -10284,7 +10288,7 @@
             "
           ></div>
 
-          <div style="text-align: center; margin-bottom: 10px">
+          <div style="text-align: center; margin-bottom: 4px">
             <span style="font-size: 0.8rem; color: var(--text-secondary)"
               >El código expira en:
               <b
@@ -10318,7 +10322,7 @@
             type="button"
             class="btn-ios btn-secondary w-100"
             style="
-              padding: 12px;
+              padding: 10px;
               font-size: 0.85rem;
               border-radius: 50px;
               background: transparent !important;
