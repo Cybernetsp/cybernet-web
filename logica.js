@@ -6892,45 +6892,295 @@ function cargarDashboardFinanzas() {
   document.body.appendChild(script);
 }
 
-function calcularDescuentoDeuda() {
-  const modo = document.getElementById("modoDescuentoDeuda").value;
-  const deudaInput = document
-    .getElementById("valDeudaTotal")
-    .value.replace(/\D/g, "");
-  const deuda = parseFloat(deudaInput) || 0;
+// 🧼 Helper para formatear con puntos de miles eliminando automáticamente los ceros a la izquierda
+window.formatearMontoDeudaSinSigno = function (input) {
+  // 1. Extraer únicamente los dígitos numéricos
+  let valorLimpio = input.value.replace(/\D/g, "");
 
-  document.getElementById("divDiasDeuda").style.display =
-    modo === "dias" ? "block" : "none";
-
-  let descuento = 0;
-  if (deuda > 0) {
-    if (modo === "90") {
-      descuento = Math.round(currentMiGananciaBruta * 0.9);
-      if (descuento > deuda) descuento = deuda;
-    } else {
-      let dias = parseInt(document.getElementById("inputDiasDeuda").value) || 1;
-      descuento = Math.round(deuda / dias);
-    }
+  if (valorLimpio === "") {
+    input.value = "";
+    return;
   }
-  document.getElementById("valDescuentoHoy").innerText =
-    formatMoneda(descuento);
+
+  // 2. Convertir a entero elimina cualquier cero inicial (ej: "0800000" pasa a ser 800000)
+  let numero = parseInt(valorLimpio, 10) || 0;
+
+  if (numero === 0) {
+    input.value = "";
+    return;
+  }
+
+  // 3. Formatear con puntos de miles
+  input.value = numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+// 🧼 Helper auxiliar para formatear números limpitos desde variables
+function formatNumeroLimpio(v) {
+  let num =
+    typeof v === "number" ? v : parseFloat(String(v).replace(/\D/g, "")) || 0;
+  if (num === 0) return "";
+  return num.toLocaleString("es-CO", { maximumFractionDigits: 0 });
 }
 
 // =========================================================================
-// 📈 RENDERIZADOR CONTABLE BENTO ACTUALIZADO CON AISLAMIENTO PERSONAL
+// 🧮 CEREBRO Y CÁLCULO DE DEUDA MUTUA (CON RANGO MES AUTOMÁTICO)
+// =========================================================================
+window.calcularDescuentoDeuda = function () {
+  const tipoDeudaElem = document.getElementById("tipoDeudaMutua");
+  const tipoDeuda = tipoDeudaElem ? tipoDeudaElem.value : "negocio_debe";
+  const modoElem = document.getElementById("modoDescuentoDeuda");
+  const modo = modoElem ? modoElem.value : "deuda_50";
+
+  const valDeudaElem = document.getElementById("valDeudaTotal");
+  const signoPrefix = document.getElementById("signoDeudaPrefix");
+  if (!valDeudaElem) return;
+
+  const deudaInput = valDeudaElem.value.replace(/\D/g, "");
+  const deuda = parseFloat(deudaInput) || 0;
+
+  const lblResultado = document.getElementById("lblTextoResultadoDeuda");
+  const btnCobrar = document.getElementById("btnCobrarHoyDeuda");
+
+  // 🔄 Adaptar colores y textos según el tipo de deuda
+  if (tipoDeuda === "yo_debo") {
+    valDeudaElem.style.color = "var(--mac-red)";
+    if (signoPrefix) signoPrefix.style.color = "var(--mac-red)";
+    if (lblResultado) lblResultado.innerText = "Abono Sugerido hoy:";
+    if (btnCobrar) btnCobrar.innerText = "🔴 Aboné lo de hoy";
+  } else {
+    valDeudaElem.style.color = "var(--mac-green)";
+    if (signoPrefix) signoPrefix.style.color = "var(--mac-green)";
+    if (lblResultado) lblResultado.innerText = "Retiro Sugerido hoy:";
+    if (btnCobrar) btnCobrar.innerText = "🟢 Retiré lo de hoy";
+  }
+
+  let sugerencia = 0;
+
+  if (deuda > 0) {
+    if (modo === "deuda_50") {
+      sugerencia = Math.round(deuda * 0.5);
+    } else if (modo === "deuda_25") {
+      sugerencia = Math.round(deuda * 0.25);
+    } else if (modo === "resta_mes") {
+      // 🗓️ CÁLCULO AUTOMÁTICO DE DÍAS RESTANTES DEL MES
+      let hoy = new Date();
+      // Obtiene el último día del mes actual (ej: 31 para Julio, 30 para Junio)
+      let totalDiasMes = new Date(
+        hoy.getFullYear(),
+        hoy.getMonth() + 1,
+        0,
+      ).getDate();
+      let diaActual = hoy.getDate();
+
+      // Días restantes en el mes (incluyendo el día de hoy)
+      let diasRestantes = totalDiasMes - diaActual + 1;
+      if (diasRestantes < 1) diasRestantes = 1;
+
+      sugerencia = Math.round(deuda / diasRestantes);
+    }
+  }
+
+  const valDescuentoHoyElem = document.getElementById("valDescuentoHoy");
+  if (valDescuentoHoyElem) {
+    valDescuentoHoyElem.innerText = formatMoneda(sugerencia);
+  }
+};
+
+// Variable global para rastrear el tipo de operación actual
+window.modoOperacionModalActual = "prestamo";
+
+// =========================================================================
+// ➕ ABRIR MODAL: NUEVO PRÉSTAMO
+// =========================================================================
+window.agregarNuevoPrestamo = function () {
+  if (typeof haptic === "function") haptic();
+
+  window.modoOperacionModalActual = "prestamo";
+  const tipoDeuda = document.getElementById("tipoDeudaMutua")
+    ? document.getElementById("tipoDeudaMutua").value
+    : "negocio_debe";
+
+  const titleEl = document.getElementById("titlePrestamoModal");
+  const descEl = document.getElementById("descPrestamoModal");
+  const iconEl = document.getElementById("iconPrestamoModal");
+  const signoEl = document.getElementById("signoPrestamoModal");
+  const inputEl = document.getElementById("inputMontoPrestamoModal");
+
+  if (tipoDeuda === "negocio_debe") {
+    if (titleEl) titleEl.innerText = "🟢 Prestar al Negocio";
+    if (descEl)
+      descEl.innerText =
+        "¿Cuánto dinero le estás prestando adicional al negocio?";
+    if (iconEl) {
+      iconEl.style.color = "var(--mac-green)";
+      iconEl.style.background = "rgba(48, 209, 88, 0.15)";
+    }
+    if (signoEl) signoEl.style.color = "var(--mac-green)";
+  } else {
+    if (titleEl) titleEl.innerText = "🔴 Préstamo del Negocio";
+    if (descEl)
+      descEl.innerText =
+        "¿Cuánto dinero te está prestando adicional el negocio?";
+    if (iconEl) {
+      iconEl.style.color = "var(--mac-red)";
+      iconEl.style.background = "rgba(255, 69, 58, 0.15)";
+    }
+    if (signoEl) signoEl.style.color = "var(--mac-red)";
+  }
+
+  if (inputEl) inputEl.value = "";
+
+  const modal = document.getElementById("prestamoModalOverlay");
+  if (modal) modal.classList.add("open");
+
+  setTimeout(() => {
+    if (inputEl) inputEl.focus();
+  }, 100);
+};
+
+// =========================================================================
+// 💸 ABRIR MODAL: RETIRAR / ABONAR LO DE HOY
+// =========================================================================
+window.aplicarRetiroDeudaHoy = function () {
+  if (typeof haptic === "function") haptic();
+
+  let deudaActualText = document.getElementById("valDeudaTotal")
+    ? document.getElementById("valDeudaTotal").value.replace(/\D/g, "")
+    : "0";
+  let deudaActual = parseFloat(deudaActualText) || 0;
+
+  if (deudaActual <= 0) {
+    alert("Actualmente no hay ninguna deuda registrada.");
+    return;
+  }
+
+  window.modoOperacionModalActual = "retiro";
+  const tipoDeuda = document.getElementById("tipoDeudaMutua")
+    ? document.getElementById("tipoDeudaMutua").value
+    : "negocio_debe";
+  let sugeridoText = document.getElementById("valDescuentoHoy")
+    ? document.getElementById("valDescuentoHoy").innerText.replace(/\D/g, "")
+    : "0";
+  let sugerido = parseFloat(sugeridoText) || 0;
+
+  const titleEl = document.getElementById("titlePrestamoModal");
+  const descEl = document.getElementById("descPrestamoModal");
+  const iconEl = document.getElementById("iconPrestamoModal");
+  const signoEl = document.getElementById("signoPrestamoModal");
+  const inputEl = document.getElementById("inputMontoPrestamoModal");
+
+  if (tipoDeuda === "negocio_debe") {
+    if (titleEl) titleEl.innerText = "🟢 Retirar Dinero de Hoy";
+    if (descEl)
+      descEl.innerText =
+        "Confirma o modifica la cantidad que te retiraste hoy:";
+    if (iconEl) {
+      iconEl.style.color = "var(--mac-green)";
+      iconEl.style.background = "rgba(48, 209, 88, 0.15)";
+    }
+    if (signoEl) signoEl.style.color = "var(--mac-green)";
+  } else {
+    if (titleEl) titleEl.innerText = "🔴 Abonar Dinero de Hoy";
+    if (descEl)
+      descEl.innerText =
+        "Confirma o modifica la cantidad que le abonaste al negocio hoy:";
+    if (iconEl) {
+      iconEl.style.color = "var(--mac-red)";
+      iconEl.style.background = "rgba(255, 69, 58, 0.15)";
+    }
+    if (signoEl) signoEl.style.color = "var(--mac-red)";
+  }
+
+  if (inputEl) {
+    inputEl.value = sugerido > 0 ? formatNumeroLimpio(sugerido) : "";
+  }
+
+  const modal = document.getElementById("prestamoModalOverlay");
+  if (modal) modal.classList.add("open");
+
+  setTimeout(() => {
+    if (inputEl) inputEl.focus();
+  }, 100);
+};
+
+// =========================================================================
+// 🔒 ACCIONES DEL MODAL (CONFIRMAR Y CERRAR)
+// =========================================================================
+window.cerrarPrestamoModal = function () {
+  if (typeof haptic === "function") haptic();
+  const modal = document.getElementById("prestamoModalOverlay");
+  if (modal) modal.classList.remove("open");
+};
+
+window.confirmarOperacionPrestamoModal = function (e) {
+  e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const inputEl = document.getElementById("inputMontoPrestamoModal");
+  let montoRaw = inputEl ? inputEl.value.replace(/\D/g, "") : "0";
+  let montoIngresado = parseFloat(montoRaw) || 0;
+
+  if (montoIngresado <= 0) return;
+
+  let deudaActualText = document
+    .getElementById("valDeudaTotal")
+    .value.replace(/\D/g, "");
+  let deudaActual = parseFloat(deudaActualText) || 0;
+
+  if (window.modoOperacionModalActual === "prestamo") {
+    // ➕ Sumar préstamo a la deuda
+    let nuevaDeuda = deudaActual + montoIngresado;
+    document.getElementById("valDeudaTotal").value =
+      formatNumeroLimpio(nuevaDeuda);
+  } else {
+    // 💸 Restar abono/retiro de la deuda
+    if (montoIngresado > deudaActual) montoIngresado = deudaActual;
+    let nuevaDeuda = deudaActual - montoIngresado;
+    if (nuevaDeuda < 0) nuevaDeuda = 0;
+    document.getElementById("valDeudaTotal").value =
+      formatNumeroLimpio(nuevaDeuda);
+  }
+
+  calcularDescuentoDeuda();
+  cerrarPrestamoModal();
+
+  // Guardar en Google Sheets automáticamente
+  if (typeof guardarDeudaEnSheets === "function") {
+    guardarDeudaEnSheets();
+  }
+};
+
+// =========================================================================
+// 📈 RENDERIZADOR CONTABLE BENTO ACTUALIZADO CON DOBLE CUADRO DE DISTRIBUCIÓN
 // =========================================================================
 function renderDashboard() {
   if (!globalFinanzasData) return;
   const d = globalFinanzasData[activePeriod];
   if (!d) return;
 
-  document.getElementById("valDeudaTotal").value = formatMoneda(
-    globalFinanzasData.deudaActual || 0,
-  );
+  // 🔄 Carga automática de Deuda y Tipo de Deuda desde Google Sheets
+  if (
+    globalFinanzasData.deudaActual !== undefined &&
+    document.getElementById("valDeudaTotal")
+  ) {
+    document.getElementById("valDeudaTotal").value = formatNumeroLimpio(
+      globalFinanzasData.deudaActual || 0,
+    );
+  }
+
+  if (
+    globalFinanzasData.tipoDeudaActual &&
+    document.getElementById("tipoDeudaMutua")
+  ) {
+    document.getElementById("tipoDeudaMutua").value =
+      globalFinanzasData.tipoDeudaActual;
+  }
 
   const netEl = document.getElementById("val_neto");
-  netEl.innerText = formatMoneda(d.neto);
-  netEl.style.color = d.neto >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+  if (netEl) {
+    netEl.innerText = formatMoneda(d.neto);
+    netEl.style.color = d.neto >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+  }
 
   // ─────────────── ESCÁNER MÁSTER DE CATEGORÍAS ───────────────
   let sumaIngresoExtra = 0,
@@ -6950,7 +7200,7 @@ function renderDashboard() {
       if (cat.includes("angelica") || det.includes("angelica")) {
         sumaAngelica += val;
       } else if (cat === "personal" || det.includes("personal")) {
-        sumaPersonalIngreso += val; // Aísla el ingreso personal
+        sumaPersonalIngreso += val;
       } else if (
         cat.includes("ingreso extra") ||
         det.includes("jeisson") ||
@@ -6962,48 +7212,53 @@ function renderDashboard() {
         }
       }
     } else {
-      // Es un egreso, inversión, gasto o salida de caja
       if (cat === "personal" || det.includes("personal")) {
-        sumaPersonalEgreso += val; // Aísla el gasto personal
+        sumaPersonalEgreso += val;
       }
     }
   });
 
-  // Pintar el balance neto de tu flujo personal en la nueva tarjeta Bento
-  const personalDisplay = document.getElementById("valProyPersonal");
-  if (personalDisplay) {
-    personalDisplay.innerText = formatMoneda(
-      sumaPersonalIngreso - sumaPersonalEgreso,
-    );
+  if (document.getElementById("valProyJeisson")) {
+    document.getElementById("valProyJeisson").innerText =
+      formatMoneda(sumaJeisson);
   }
 
-  document.getElementById("valProyJeisson").innerText =
-    formatMoneda(sumaJeisson);
-
-  // 🔥 SOLUCIÓN CRÍTICA: Restamos el ingreso personal para obtener las Ventas Reales del Negocio
+  // 🔥 Ventas Reales del Negocio
   let ventasBrutasReales = Math.max(
     0,
     (d.ingresos || 0) - sumaIngresoExtra - sumaAngelica - sumaPersonalIngreso,
   );
 
-  // 🔥 SOLUCIÓN CRÍTICA: Restamos los egresos personales para limpiar los Gastos del Negocio
+  // 🔥 Gastos Limpios del Negocio
   let gastosNegocioLimpios = Math.max(0, (d.gastos || 0) - sumaPersonalEgreso);
 
-  document.getElementById("val_ingresos").innerText =
-    formatMoneda(ventasBrutasReales);
-  document.getElementById("val_gastos").innerText =
-    formatMoneda(gastosNegocioLimpios);
-  document.getElementById("val_inversiones").innerText = formatMoneda(
-    d.inversiones,
-  );
-  document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
+  if (document.getElementById("val_ingresos")) {
+    document.getElementById("val_ingresos").innerText =
+      formatMoneda(ventasBrutasReales);
+  }
+  if (document.getElementById("val_gastos")) {
+    document.getElementById("val_gastos").innerText =
+      formatMoneda(gastosNegocioLimpios);
+  }
+  if (document.getElementById("val_inversiones")) {
+    document.getElementById("val_inversiones").innerText = formatMoneda(
+      d.inversiones,
+    );
+  }
+  if (document.getElementById("val_nomina")) {
+    document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
+  }
 
   // ─────────────── CONFIGURACIÓN DE PORCENTAJES DINÁMICOS ───────────────
-  let pM = 28,
-    pNom = 17,
-    pNeg = 55;
-  const m = document.getElementById("appleMonthSelect").value;
-  const dia = document.getElementById("appleDaySelect").value;
+  let pM = 30,
+    pNom = 16,
+    pNeg = 54;
+  const m = document.getElementById("appleMonthSelect")
+    ? document.getElementById("appleMonthSelect").value
+    : "";
+  const dia = document.getElementById("appleDaySelect")
+    ? document.getElementById("appleDaySelect").value
+    : "";
 
   if (m === "MAYO") {
     if (dia !== "TODOS" && parseInt(dia) <= 15) {
@@ -7030,29 +7285,60 @@ function renderDashboard() {
     pNom = 16;
   }
 
-  document.getElementById("lblPorcMio").innerText = pM;
-  document.getElementById("lblPorcNegocio").innerText = pNeg;
-  document.getElementById("lblPorcNomina").innerText = pNom;
+  if (document.getElementById("lblPorcMio"))
+    document.getElementById("lblPorcMio").innerText = pM;
+  if (document.getElementById("lblPorcNegocio"))
+    document.getElementById("lblPorcNegocio").innerText = pNeg;
+  if (document.getElementById("lblPorcNomina"))
+    document.getElementById("lblPorcNomina").innerText = pNom;
 
   let base = ventasBrutasReales;
+
+  // 🏢 CÁLCULOS CUADRO 1: FONDOS DEL NEGOCIO
+  let montoFondoNegocio = Math.round(base * (pNeg / 100));
+  let montoReservaNomina = Math.round(base * (pNom / 100));
+  let totalFondosEmpresa = montoFondoNegocio + montoReservaNomina;
+
+  if (document.getElementById("valProyNegocio")) {
+    document.getElementById("valProyNegocio").innerText =
+      formatMoneda(montoFondoNegocio);
+  }
+  if (document.getElementById("valProyNomina")) {
+    document.getElementById("valProyNomina").innerText =
+      formatMoneda(montoReservaNomina);
+  }
+  if (document.getElementById("valTotalFondosNegocio")) {
+    document.getElementById("valTotalFondosNegocio").innerText =
+      formatMoneda(totalFondosEmpresa);
+  }
+
+  // 💰 CÁLCULOS CUADRO 2: MI GANANCIA, AHORRO Y TOTAL (+ JEISSON)
   let miGananciaNeta =
     Math.round(base * (pM / 100)) + (sumaIngresoExtra - sumaJeisson);
+  let ahorro70 = Math.round(miGananciaNeta * 0.7);
+  let otros30 = miGananciaNeta - ahorro70; // Previene desfases de centavos por redondeo
 
-  document.getElementById("valProyMio").innerText =
-    formatMoneda(miGananciaNeta);
-  document.getElementById("valProyNegocio").innerText = formatMoneda(
-    Math.round(base * (pNeg / 100)),
-  );
-  document.getElementById("valProyNomina").innerText = formatMoneda(
-    Math.round(base * (pNom / 100)),
-  );
+  if (document.getElementById("valProyMio")) {
+    document.getElementById("valProyMio").innerText =
+      formatMoneda(miGananciaNeta);
+  }
+  if (document.getElementById("valGananciaAhorro")) {
+    document.getElementById("valGananciaAhorro").innerText =
+      formatMoneda(ahorro70);
+  }
+  if (document.getElementById("valGananciaOtros")) {
+    document.getElementById("valGananciaOtros").innerText =
+      formatMoneda(otros30);
+  }
 
   currentMiGananciaBruta = miGananciaNeta + sumaJeisson;
-  document.getElementById("valProyMioMasJeisson").innerText = formatMoneda(
-    currentMiGananciaBruta,
-  );
+  if (document.getElementById("valProyMioMasJeisson")) {
+    document.getElementById("valProyMioMasJeisson").innerText = formatMoneda(
+      currentMiGananciaBruta,
+    );
+  }
 
-  // 🔥 RECALIBRACIÓN GRÁFICA: Las barras de carga ahora ignoran los flujos personales
+  // 🔥 RECALIBRACIÓN GRÁFICA DE ANILLOS & BARRAS
   const totalFlujo =
     ventasBrutasReales + gastosNegocioLimpios + d.inversiones + d.nomina;
   let pctIn =
@@ -7065,10 +7351,14 @@ function renderDashboard() {
         )
       : 0;
 
-  document.getElementById("txtBarPorcIngresos").innerText = pctIn + "%";
-  document.getElementById("barFillIngresos").style.width = pctIn + "%";
-  document.getElementById("txtBarPorcGastos").innerText = pctOut + "%";
-  document.getElementById("barFillGastos").style.width = pctOut + "%";
+  if (document.getElementById("txtBarPorcIngresos"))
+    document.getElementById("txtBarPorcIngresos").innerText = pctIn + "%";
+  if (document.getElementById("barFillIngresos"))
+    document.getElementById("barFillIngresos").style.width = pctIn + "%";
+  if (document.getElementById("txtBarPorcGastos"))
+    document.getElementById("txtBarPorcGastos").innerText = pctOut + "%";
+  if (document.getElementById("barFillGastos"))
+    document.getElementById("barFillGastos").style.width = pctOut + "%";
 
   const circVentas = 251.3;
   const strokeDashoffsetVentas = circVentas - (pctIn / 100) * circVentas;
@@ -7087,115 +7377,122 @@ function renderDashboard() {
   }
 
   const container = document.getElementById("listaDesgloseGastos");
-  if (itemsTemp.length === 0) {
-    container.innerHTML =
-      '<div class="empty-log-msg" style="padding: 20px;">No hay movimientos registrados en este periodo.</div>';
-    return;
-  }
-
-  let categoriasAgrupadas = {};
-  let totalGastadoEnPeriodo = 0;
-  let totalIngresadoEnPeriodo = 0;
-
-  itemsTemp.forEach((item) => {
-    let cat = item.categoria || "OTROS";
-    if (!categoriasAgrupadas[cat]) {
-      categoriasAgrupadas[cat] = { gastosPuros: 0, ingresosPuros: 0 };
+  if (container) {
+    if (itemsTemp.length === 0) {
+      container.innerHTML =
+        '<div class="empty-log-msg" style="padding: 20px;">No hay movimientos registrados en este periodo.</div>';
+      return;
     }
-    let montoNum = parseFloat(item.monto) || 0;
-    if (item.tipo === "INGRESO") {
-      categoriasAgrupadas[cat].ingresosPuros += montoNum;
-      totalIngresadoEnPeriodo += montoNum;
-    } else {
-      categoriasAgrupadas[cat].gastosPuros += montoNum;
-      totalGastadoEnPeriodo += montoNum;
-    }
-  });
 
-  let htmlBuffer = "";
+    let categoriasAgrupadas = {};
+    let totalGastadoEnPeriodo = 0;
+    let totalIngresadoEnPeriodo = 0;
 
-  // Bloque 1: Resumen de Gastos por Categoría
-  if (totalGastadoEnPeriodo > 0) {
-    htmlBuffer += `
-        <div style="margin-bottom: 20px;">
-          <h4 style="margin: 0 0 12px 0; color: var(--ios-red); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
-            🔴 Resumen de Egresos por Categoría
-          </h4>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
-      `;
-    let catArrayGastos = Object.keys(categoriasAgrupadas).filter(
-      (c) => (sorted = categoriasAgrupadas[c].gastosPuros > 0),
-    );
-    catArrayGastos.sort(
-      (a, b) =>
-        categoriasAgrupadas[b].gastosPuros - categoriasAgrupadas[a].gastosPuros,
-    );
-    catArrayGastos.forEach((cat) => {
-      htmlBuffer += `
-          <div style="background: rgba(255, 69, 58, 0.04); border: 1px solid rgba(255, 69, 58, 0.15); padding: 10px; border-radius: 12px;">
-            <span style="font-size: 0.68rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
-            <span style="color: var(--ios-red); font-weight: 800; font-size: 1.05rem; font-family: monospace;">${formatMoneda(categoriasAgrupadas[cat].gastosPuros)}</span>
-          </div>`;
+    itemsTemp.forEach((item) => {
+      let cat = item.categoria || "OTROS";
+      if (!categoriasAgrupadas[cat]) {
+        categoriasAgrupadas[cat] = { gastosPuros: 0, ingresosPuros: 0 };
+      }
+      let montoNum = parseFloat(item.monto) || 0;
+      if (item.tipo === "INGRESO") {
+        categoriasAgrupadas[cat].ingresosPuros += montoNum;
+        totalIngresadoEnPeriodo += montoNum;
+      } else {
+        categoriasAgrupadas[cat].gastosPuros += montoNum;
+        totalGastadoEnPeriodo += montoNum;
+      }
     });
-    htmlBuffer += `</div></div>`;
-  }
 
-  // Bloque 2: Resumen de Ingresos por Categoría
-  if (totalIngresadoEnPeriodo > 0) {
-    htmlBuffer += `
-        <div style="margin-bottom: 20px;">
-          <h4 style="margin: 0 0 12px 0; color: var(--ios-green); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
-            🟢 Resumen de Ingresos Extra
-          </h4>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;">
-      `;
-    let catArrayIngresos = Object.keys(categoriasAgrupadas).filter(
-      (c) => categoriasAgrupadas[c].ingresosPuros > 0,
-    );
-    catArrayIngresos.sort(
-      (a, b) =>
-        categoriasAgrupadas[b].ingresosPuros -
-        categoriasAgrupadas[a].ingresosPuros,
-    );
-    catArrayIngresos.forEach((cat) => {
+    let htmlBuffer = "";
+
+    // Bloque 1: Resumen de Gastos por Categoría
+    if (totalGastadoEnPeriodo > 0) {
       htmlBuffer += `
-          <div style="background: rgba(48, 209, 88, 0.04); border: 1px solid rgba(48, 209, 88, 0.15); padding: 10px; border-radius: 12px;">
-            <span style="font-size: 0.68rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
-            <span style="color: var(--ios-green); font-weight: 800; font-size: 1.05rem; font-family: monospace;">${formatMoneda(categoriasAgrupadas[cat].ingresosPuros)}</span>
-          </div>`;
-    });
-    htmlBuffer += `</div></div>`;
-  }
-
-  // 📋 HISTORIAL CRONOLÓGICO DE SALIDAS DETALLADAS (LIBRO)
-  htmlBuffer += `
-      <div style="margin-top: 10px; width: 100%;">
-        <h4 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
-          📋 Historial Detallado de Salidas (Libro)
-        </h4>
-        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-    `;
-
-  for (let i = itemsTemp.length - 1; i >= 0; i--) {
-    let item = itemsTemp[i];
-
-    if (item.tipo !== "INGRESO") {
-      let montoMovimiento = parseFloat(item.monto) || 0;
-      htmlBuffer += `
-          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px;">
-            <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden; padding-right: 5px;">
-              <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.detalle || "Sin nota"}">${item.detalle || "Sin nota"}</span>
-              <span style="font-size: 0.68rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">${item.fecha || ""} | ${item.categoria || "Otros"}</span>
-            </div>
-            <strong style="color: var(--ios-red); font-size: 0.95rem; font-family: monospace; flex-shrink: 0;">-${formatMoneda(montoMovimiento)}</strong>
-          </div>`;
+          <div style="margin-bottom: 20px;">
+            <h4 style="margin: 0 0 12px 0; color: var(--ios-red); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
+              🔴 Resumen de Egresos por Categoría
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+        `;
+      let catArrayGastos = Object.keys(categoriasAgrupadas).filter(
+        (c) => categoriasAgrupadas[c].gastosPuros > 0,
+      );
+      catArrayGastos.sort(
+        (a, b) =>
+          categoriasAgrupadas[b].gastosPuros -
+          categoriasAgrupadas[a].gastosPuros,
+      );
+      catArrayGastos.forEach((cat) => {
+        htmlBuffer += `
+            <div style="background: rgba(255, 69, 58, 0.04); border: 1px solid rgba(255, 69, 58, 0.15); padding: 10px; border-radius: 12px;">
+              <span style="font-size: 0.68rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
+              <span style="color: var(--ios-red); font-weight: 800; font-size: 1.05rem; font-family: monospace;">${formatMoneda(categoriasAgrupadas[cat].gastosPuros)}</span>
+            </div>`;
+      });
+      htmlBuffer += `</div></div>`;
     }
+
+    // Bloque 2: Resumen de Ingresos por Categoría
+    if (totalIngresadoEnPeriodo > 0) {
+      htmlBuffer += `
+          <div style="margin-bottom: 20px;">
+            <h4 style="margin: 0 0 12px 0; color: var(--ios-green); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
+              🟢 Resumen de Ingresos Extra
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;">
+        `;
+      let catArrayIngresos = Object.keys(categoriasAgrupadas).filter(
+        (c) => categoriasAgrupadas[c].ingresosPuros > 0,
+      );
+      catArrayIngresos.sort(
+        (a, b) =>
+          categoriasAgrupadas[b].ingresosPuros -
+          categoriasAgrupadas[a].ingresosPuros,
+      );
+      catArrayIngresos.forEach((cat) => {
+        htmlBuffer += `
+            <div style="background: rgba(48, 209, 88, 0.04); border: 1px solid rgba(48, 209, 88, 0.15); padding: 10px; border-radius: 12px;">
+              <span style="font-size: 0.68rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cat}">${cat}</span>
+              <span style="color: var(--ios-green); font-weight: 800; font-size: 1.05rem; font-family: monospace;">${formatMoneda(categoriasAgrupadas[cat].ingresosPuros)}</span>
+            </div>`;
+      });
+      htmlBuffer += `</div></div>`;
+    }
+
+    // 📋 HISTORIAL CRONOLÓGICO DE SALIDAS DETALLADAS (LIBRO)
+    htmlBuffer += `
+        <div style="margin-top: 10px; width: 100%;">
+          <h4 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 0.88rem; font-weight: 800; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px;">
+            📋 Historial Detallado de Salidas (Libro)
+          </h4>
+          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+      `;
+
+    for (let i = itemsTemp.length - 1; i >= 0; i--) {
+      let item = itemsTemp[i];
+
+      if (item.tipo !== "INGRESO") {
+        let montoMovimiento = parseFloat(item.monto) || 0;
+        htmlBuffer += `
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px;">
+              <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden; padding-right: 5px;">
+                <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.detalle || "Sin nota"}">${item.detalle || "Sin nota"}</span>
+                <span style="font-size: 0.68rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">${item.fecha || ""} | ${item.categoria || "Otros"}</span>
+              </div>
+              <strong style="color: var(--ios-red); font-size: 0.95rem; font-family: monospace; flex-shrink: 0;">-${formatMoneda(montoMovimiento)}</strong>
+            </div>`;
+      }
+    }
+
+    htmlBuffer += `</div></div>`;
+
+    container.innerHTML = htmlBuffer;
   }
 
-  htmlBuffer += `</div></div>`;
-
-  container.innerHTML = htmlBuffer;
-  calcularDescuentoDeuda();
+  // 🔥 Dispara el cálculo automático de la calculadora de deuda
+  if (typeof calcularDescuentoDeuda === "function") {
+    calcularDescuentoDeuda();
+  }
 }
 
 function guardarTransaccion(e) {
@@ -10980,5 +11277,48 @@ window.ejecutarBusquedaDrive = function () {
   let script = document.createElement("script");
   script.id = "node_" + cbName;
   script.src = `${GOOGLE_SCRIPT_URL}?action=buscarPagosDrive&telefono=${tel}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.guardarDeudaEnSheets = function () {
+  if (typeof haptic === "function") haptic();
+  const btn = document.getElementById("btnGuardarDeudaSheets");
+  const tipo = document.getElementById("tipoDeudaMutua").value;
+  const montoRaw = document
+    .getElementById("valDeudaTotal")
+    .value.replace(/\D/g, "");
+  const monto = parseFloat(montoRaw) || 0;
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "Guardando...";
+  }
+
+  const cbName = "cb_save_deuda_" + Date.now();
+  window[cbName] = function (res) {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "💾 Guardar";
+    }
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Deuda guardada en Google Sheets</span></div>`,
+        );
+      }
+    } else {
+      alert(
+        "❌ Error: " + (res ? res.message : "Fallo de conexión al guardar"),
+      );
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=actualizarDeudaMutua&monto=${encodeURIComponent(monto)}&tipo=${encodeURIComponent(tipo)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
