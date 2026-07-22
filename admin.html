@@ -333,8 +333,6 @@
           onclick="toggleGmailPanel()"
           >Gmail</span
         >
-
-        
       </div>
     </header>
 
@@ -6510,7 +6508,17 @@
             </div>
           </section>
 
-          <section class="widget-ipad bento-w-7">
+          <!-- 🟢 TARJETA EJECUTIVA REUNIFICADA (CAJA REAL + ANILLOS + METRICAS) -->
+          <section
+            class="widget-ipad bento-w-7"
+            style="
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              gap: 16px;
+            "
+          >
+            <!-- 1. PARTE SUPERIOR: Hero Caja Real + Anillos de Balance -->
             <div
               style="
                 display: flex;
@@ -6551,6 +6559,7 @@
                   >
                 </div>
               </div>
+
               <div
                 class="chart-layout-box"
                 style="
@@ -6613,8 +6622,176 @@
                 </div>
               </div>
             </div>
+
+            <!-- 2. SEPARADOR SUTIL ESTILO APPLE -->
+            <div
+              style="
+                border-top: 1px solid rgba(255, 255, 255, 0.08);
+                width: 100%;
+                margin: 2px 0;
+              "
+            ></div>
+
+            <!-- 3. PARTE INFERIOR INTEGRADA: Rejilla con las 4 Métricas (Ventas, Gastos, Inversiones, Nómina) -->
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+                width: 100%;
+              "
+            >
+              <!-- Ventas Brutas -->
+              <div
+                style="
+                  background: rgba(0, 0, 0, 0.25);
+                  border: 1px solid rgba(255, 255, 255, 0.06);
+                  border-radius: 14px;
+                  padding: 12px 10px;
+                  text-align: center;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <span
+                  class="text-secondary"
+                  style="
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  "
+                  >Ventas Brutas</span
+                >
+                <span
+                  style="
+                    font-size: 1.25rem;
+                    font-weight: 800;
+                    color: var(--mac-blue);
+                    font-family: monospace;
+                    margin-top: 3px;
+                  "
+                  id="val_ingresos"
+                  >$0</span
+                >
+              </div>
+
+              <!-- Gastos Caja -->
+              <div
+                style="
+                  background: rgba(0, 0, 0, 0.25);
+                  border: 1px solid rgba(255, 255, 255, 0.06);
+                  border-radius: 14px;
+                  padding: 12px 10px;
+                  text-align: center;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <span
+                  class="text-secondary"
+                  style="
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  "
+                  >Gastos Caja</span
+                >
+                <span
+                  style="
+                    font-size: 1.25rem;
+                    font-weight: 800;
+                    color: var(--mac-red);
+                    font-family: monospace;
+                    margin-top: 3px;
+                  "
+                  id="val_gastos"
+                  >$0</span
+                >
+              </div>
+
+              <!-- Inversiones -->
+              <div
+                style="
+                  background: rgba(0, 0, 0, 0.25);
+                  border: 1px solid rgba(255, 255, 255, 0.06);
+                  border-radius: 14px;
+                  padding: 12px 10px;
+                  text-align: center;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <span
+                  class="text-secondary"
+                  style="
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  "
+                  >Inversiones</span
+                >
+                <span
+                  style="
+                    font-size: 1.25rem;
+                    font-weight: 800;
+                    color: var(--mac-orange);
+                    font-family: monospace;
+                    margin-top: 3px;
+                  "
+                  id="val_inversiones"
+                  >$0</span
+                >
+              </div>
+
+              <!-- Staff Nómina -->
+              <div
+                style="
+                  background: rgba(0, 0, 0, 0.25);
+                  border: 1px solid rgba(255, 255, 255, 0.06);
+                  border-radius: 14px;
+                  padding: 12px 10px;
+                  text-align: center;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <span
+                  class="text-secondary"
+                  style="
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  "
+                  >Staff Nómina</span
+                >
+                <span
+                  style="
+                    font-size: 1.25rem;
+                    font-weight: 800;
+                    color: var(--mac-purple);
+                    font-family: monospace;
+                    margin-top: 3px;
+                  "
+                  id="val_nomina"
+                  >$0</span
+                >
+              </div>
+            </div>
           </section>
 
+          <!-- 🏢 CUADRO 1: FONDOS DEL NEGOCIO (FONDO + NÓMINA + TOTAL) -->
           <section
             class="widget-ipad bento-w-5"
             style="
@@ -6629,7 +6806,7 @@
                 font-weight: 700;
                 text-transform: uppercase;
               "
-              >📋 Distribución Ponderada s/ Ventas Brutas</span
+              >🏢 Fondos del Negocio</span
             >
             <div
               style="
@@ -6640,6 +6817,7 @@
                 margin-top: 3px;
               "
             >
+              <!-- Fondo Negocio -->
               <div
                 style="
                   display: flex;
@@ -6648,34 +6826,11 @@
                 "
               >
                 <span class="text-secondary" style="font-size: 0.85rem"
-                  >Mi Ganancia (<span id="lblPorcMio">28</span>%)</span
+                  >Fondo Negocio (<span id="lblPorcNegocio">54</span>%)</span
                 >
                 <span
                   style="
-                    font-size: 1.3rem;
-                    font-weight: 700;
-                    color: var(--mac-green);
-                    font-family: monospace;
-                  "
-                  id="valProyMio"
-                  >$0</span
-                >
-              </div>
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  border-top: 1px solid rgba(255, 255, 255, 0.05);
-                  padding-top: 8px;
-                "
-              >
-                <span class="text-secondary" style="font-size: 0.85rem"
-                  >Fondo Negocio (<span id="lblPorcNegocio">55</span>%)</span
-                >
-                <span
-                  style="
-                    font-size: 1.3rem;
+                    font-size: 1.25rem;
                     font-weight: 700;
                     color: var(--mac-blue);
                     font-family: monospace;
@@ -6684,6 +6839,8 @@
                   >$0</span
                 >
               </div>
+
+              <!-- Reserva Nómina -->
               <div
                 style="
                   display: flex;
@@ -6694,11 +6851,11 @@
                 "
               >
                 <span class="text-secondary" style="font-size: 0.85rem"
-                  >Reserva Nómina (<span id="lblPorcNomina">17</span>%)</span
+                  >Reserva Nómina (<span id="lblPorcNomina">16</span>%)</span
                 >
                 <span
                   style="
-                    font-size: 1.3rem;
+                    font-size: 1.25rem;
                     font-weight: 700;
                     color: var(--mac-purple);
                     font-family: monospace;
@@ -6707,44 +6864,177 @@
                   >$0</span
                 >
               </div>
+
+              <!-- TOTAL FONDOS SUMADOS -->
               <div
                 style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                  border-top: 1px solid rgba(255, 255, 255, 0.05);
+                  border-top: 1px solid rgba(255, 255, 255, 0.1);
                   padding-top: 8px;
+                  background: rgba(10, 132, 255, 0.05);
+                  padding: 8px 10px;
+                  border-radius: 10px;
+                  margin-top: 4px;
                 "
               >
-                <span class="text-secondary" style="font-size: 0.85rem"
-                  >Personal</span
+                <span
+                  class="text-secondary"
+                  style="
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                  "
+                  >Total Fondos Empresa</span
                 >
                 <span
                   style="
                     font-size: 1.3rem;
-                    font-weight: 700;
-                    color: var(--mac-orange);
+                    font-weight: 800;
+                    color: var(--mac-blue);
                     font-family: monospace;
                   "
-                  id="valProyPersonal"
+                  id="valTotalFondosNegocio"
                   >$0</span
                 >
               </div>
+            </div>
+          </section>
+
+          <!-- 💰 CUADRO 2: MI GANANCIA (AHORRO 70% + OTROS 30% + TOTAL JEISSON) -->
+          <section
+            class="widget-ipad bento-w-6"
+            style="
+              border-top: 3px solid var(--mac-green) !important;
+              border-radius: 20px !important;
+            "
+          >
+            <span
+              class="text-secondary mb-1"
+              style="
+                font-size: 0.8rem;
+                font-weight: 700;
+                text-transform: uppercase;
+              "
+              >💼 Mi Ganancia & Distribución</span
+            >
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+                margin-top: 3px;
+              "
+            >
+              <!-- Mi Ganancia (30%) -->
               <div
                 style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                  border-top: 1px solid rgba(255, 255, 255, 0.05);
-                  padding-top: 6px;
-                  background: rgba(48, 209, 88, 0.04);
-                  padding: 6px 10px;
-                  border-radius: 10px;
                 "
               >
                 <span
                   class="text-secondary"
                   style="font-size: 0.85rem; font-weight: 700"
+                  >Mi Ganancia (<span id="lblPorcMio">30</span>%)</span
+                >
+                <span
+                  style="
+                    font-size: 1.25rem;
+                    font-weight: 800;
+                    color: var(--mac-green);
+                    font-family: monospace;
+                  "
+                  id="valProyMio"
+                  >$0</span
+                >
+              </div>
+
+              <!-- SUB-RAMAS: AHORRO (70%) Y OTROS (30%) -->
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 6px;
+                  background: rgba(0, 0, 0, 0.25);
+                  padding: 8px 12px;
+                  border-radius: 12px;
+                  border: 1px solid rgba(255, 255, 255, 0.05);
+                  margin-left: 8px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
+                  <span
+                    class="text-secondary"
+                    style="font-size: 0.78rem; font-weight: 600"
+                    >↳ Ahorro (70%)</span
+                  >
+                  <span
+                    style="
+                      font-size: 1.05rem;
+                      font-weight: 700;
+                      color: var(--mac-green);
+                      font-family: monospace;
+                    "
+                    id="valGananciaAhorro"
+                    >$0</span
+                  >
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
+                  <span
+                    class="text-secondary"
+                    style="font-size: 0.78rem; font-weight: 600"
+                    >↳ Otros / Libre (30%)</span
+                  >
+                  <span
+                    style="
+                      font-size: 1.05rem;
+                      font-weight: 700;
+                      color: var(--mac-orange);
+                      font-family: monospace;
+                    "
+                    id="valGananciaOtros"
+                    >$0</span
+                  >
+                </div>
+              </div>
+
+              <!-- Ganancia Total (+ Jeisson) -->
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  border-top: 1px solid rgba(255, 255, 255, 0.08);
+                  padding-top: 8px;
+                  background: rgba(48, 209, 88, 0.05);
+                  padding: 8px 10px;
+                  border-radius: 10px;
+                  margin-top: 2px;
+                "
+              >
+                <span
+                  class="text-secondary"
+                  style="
+                    font-size: 0.85rem;
+                    font-weight: 800;
+                    color: var(--text-primary);
+                  "
                   >Ganancia Total (+ Jeisson)</span
                 >
                 <span
@@ -6758,135 +7048,12 @@
                   >$0</span
                 >
               </div>
+
               <input type="hidden" id="valProyJeisson" value="0" />
             </div>
           </section>
 
-          <div
-            class="widget-ipad bento-w-3"
-            style="
-              align-items: center;
-              justify-content: center;
-              text-align: center;
-              padding: 16px !important;
-            "
-          >
-            <span
-              class="text-secondary"
-              style="
-                font-size: 0.72rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-              "
-              >Ventas Brutas</span
-            >
-            <span
-              style="
-                font-size: 1.4rem;
-                font-weight: 800;
-                color: var(--mac-blue);
-                font-family: monospace;
-                margin-top: 2px;
-              "
-              id="val_ingresos"
-              >$0</span
-            >
-          </div>
-          <div
-            class="widget-ipad bento-w-3"
-            style="
-              align-items: center;
-              justify-content: center;
-              text-align: center;
-              padding: 16px !important;
-            "
-          >
-            <span
-              class="text-secondary"
-              style="
-                font-size: 0.72rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-              "
-              >Gastos Caja</span
-            >
-            <span
-              style="
-                font-size: 1.4rem;
-                font-weight: 800;
-                color: var(--mac-red);
-                font-family: monospace;
-                margin-top: 2px;
-              "
-              id="val_gastos"
-              >$0</span
-            >
-          </div>
-          <div
-            class="widget-ipad bento-w-3"
-            style="
-              align-items: center;
-              justify-content: center;
-              text-align: center;
-              padding: 16px !important;
-            "
-          >
-            <span
-              class="text-secondary"
-              style="
-                font-size: 0.72rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-              "
-              >Inversiones</span
-            >
-            <span
-              style="
-                font-size: 1.4rem;
-                font-weight: 800;
-                color: var(--mac-orange);
-                font-family: monospace;
-                margin-top: 2px;
-              "
-              id="val_inversiones"
-              >$0</span
-            >
-          </div>
-          <div
-            class="widget-ipad bento-w-3"
-            style="
-              align-items: center;
-              justify-content: center;
-              text-align: center;
-              padding: 16px !important;
-            "
-          >
-            <span
-              class="text-secondary"
-              style="
-                font-size: 0.72rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-              "
-              >Staff Nómina</span
-            >
-            <span
-              style="
-                font-size: 1.4rem;
-                font-weight: 800;
-                color: var(--mac-purple);
-                font-family: monospace;
-                margin-top: 2px;
-              "
-              id="val_nomina"
-              >$0</span
-            >
-          </div>
-
+          <!-- 📊 CONTROL DE DEUDA MUTUA -->
           <section
             class="widget-ipad bento-w-6"
             style="
@@ -6921,22 +7088,49 @@
                     d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
                   ></path>
                 </svg>
-                Deuda al Negocio
+                Control de Deuda Mutua
               </span>
-              <div
-                class="badge-ios"
-                style="
-                  background: rgba(255, 159, 10, 0.1);
-                  color: #ff9f0a;
-                  border: 1px solid rgba(255, 159, 10, 0.2);
-                  font-size: 0.68rem;
-                  font-weight: 800;
-                  padding: 3px 6px;
-                "
-              >
-                CALCULADORA
+
+              <!-- 🎛️ BOTONES DE ACCIÓN RÁPIDA -->
+              <div style="display: flex; align-items: center; gap: 6px">
+                <button
+                  type="button"
+                  onclick="agregarNuevoPrestamo()"
+                  class="btn-ios btn-secondary"
+                  style="
+                    padding: 4px 8px;
+                    font-size: 0.72rem;
+                    border-radius: 8px;
+                    font-weight: 800;
+                    color: var(--ios-blue);
+                    border: 1px solid rgba(10, 132, 255, 0.3);
+                    margin: 0;
+                  "
+                  title="Agregar nuevo préstamo al saldo"
+                >
+                  ➕ Préstamo
+                </button>
+
+                <button
+                  type="button"
+                  id="btnGuardarDeudaSheets"
+                  onclick="guardarDeudaEnSheets()"
+                  class="btn-ios btn-secondary"
+                  style="
+                    padding: 4px 8px;
+                    font-size: 0.72rem;
+                    border-radius: 8px;
+                    font-weight: 800;
+                    color: var(--mac-orange);
+                    border: 1px solid rgba(255, 159, 10, 0.3);
+                    margin: 0;
+                  "
+                >
+                  💾 Guardar
+                </button>
               </div>
             </div>
+
             <div
               style="
                 display: flex;
@@ -6949,122 +7143,188 @@
               <div
                 style="
                   display: flex;
-                  gap: 12px;
+                  gap: 10px;
                   align-items: center;
                   width: 100%;
                 "
               >
                 <div style="flex: 1.2">
-                  <span
-                    class="text-secondary"
-                    style="
-                      font-size: 0.75rem;
-                      font-weight: 600;
-                      display: block;
-                      margin-bottom: 4px;
-                    "
-                    >Deuda Actual</span
-                  >
-                  <input
-                    type="text"
-                    id="valDeudaTotal"
+                  <select
+                    id="tipoDeudaMutua"
                     class="input-ios"
-                    value="$0"
-                    oninput="
-                      formatearMontoEnVivoCOP(this);
-                      calcularDescuentoDeuda();
-                    "
                     style="
-                      font-size: 1.3rem;
+                      font-size: 0.72rem;
                       font-weight: 800;
-                      color: var(--mac-red);
-                      padding: 8px 12px;
+                      padding: 0;
+                      margin-bottom: 4px;
+                      background: transparent;
+                      border: none;
+                      color: var(--text-secondary);
+                      text-transform: uppercase;
+                      cursor: pointer;
+                      outline: none;
+                      box-shadow: none;
+                      appearance: none;
+                    "
+                    onchange="calcularDescuentoDeuda()"
+                  >
+                    <option value="negocio_debe" selected>
+                      🟢 El Negocio me debe a mí ▾
+                    </option>
+                    <option value="yo_debo">🔴 Yo le debo al Negocio ▾</option>
+                  </select>
+
+                  <!-- CAJA DE TEXTO CON $ ESTÁTICO -->
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
                       background: rgba(0, 0, 0, 0.2);
                       border-radius: 10px;
-                      margin-bottom: 0;
+                      padding: 0 12px;
+                      border: 1px solid rgba(255, 255, 255, 0.08);
                     "
-                  />
+                  >
+                    <span
+                      id="signoDeudaPrefix"
+                      style="
+                        font-size: 1.25rem;
+                        font-weight: 800;
+                        color: var(--mac-green);
+                        margin-right: 2px;
+                        user-select: none;
+                      "
+                      >$</span
+                    >
+                    <input
+                      type="text"
+                      id="valDeudaTotal"
+                      class="input-ios"
+                      value="800.000"
+                      placeholder="0"
+                      oninput="
+                        formatearMontoDeudaSinSigno(this);
+                        calcularDescuentoDeuda();
+                      "
+                      style="
+                        font-size: 1.25rem;
+                        font-weight: 800;
+                        color: var(--mac-green);
+                        padding: 8px 0;
+                        background: transparent !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                        margin-bottom: 0;
+                        outline: none;
+                        width: 100%;
+                      "
+                    />
+                  </div>
                 </div>
+
                 <div style="flex: 1">
                   <span
                     class="text-secondary"
                     style="
-                      font-size: 0.75rem;
+                      font-size: 0.72rem;
                       font-weight: 600;
                       display: block;
                       margin-bottom: 4px;
                     "
                     >Modo de Pago</span
                   >
+                  <!-- 🎯 NUEVAS OPCIONES LIMPIAS -->
                   <select
                     id="modoDescuentoDeuda"
                     class="input-ios"
                     style="
-                      font-size: 0.8rem;
-                      padding: 8px 12px;
+                      font-size: 0.78rem;
+                      padding: 8px 10px;
                       font-weight: 700;
                       border-radius: 10px;
                       margin-bottom: 0;
                     "
                     onchange="calcularDescuentoDeuda()"
                   >
-                    <option value="90">Retener 90% Ganancia</option>
-                    <option value="dias">Dividir en X Días</option>
+                    <option value="deuda_50" selected>50% de la Deuda</option>
+                    <option value="deuda_25">25% de la Deuda</option>
+                    <option value="resta_mes">Lo que resta del mes</option>
                   </select>
                 </div>
               </div>
-              <div id="divDiasDeuda" style="display: none; width: 100%">
-                <input
-                  type="number"
-                  id="inputDiasDeuda"
-                  class="input-ios"
-                  placeholder="Cantidad de días"
-                  value="5"
-                  min="1"
-                  oninput="calcularDescuentoDeuda()"
-                  style="font-size: 0.85rem; padding: 10px; margin-bottom: 0"
-                />
-              </div>
+
+              <!-- RESULTADO Y BOTÓN DE RETIRO -->
               <div
                 style="
                   background: rgba(255, 159, 10, 0.04);
-                  border: 1px dashed rgba(255, 159, 10, 0.2);
-                  padding: 10px 14px;
+                  border: 1px dashed rgba(255, 159, 10, 0.25);
+                  padding: 10px 12px;
                   border-radius: 12px;
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
+                  gap: 10px;
                   margin-top: 2px;
                 "
               >
-                <span
-                  class="text-secondary"
-                  style="font-size: 0.85rem; font-weight: 600"
-                  >Descuento Sugerido (Hoy):</span
-                >
-                <span
+                <div style="display: flex; flex-direction: column">
+                  <span
+                    class="text-secondary"
+                    id="lblTextoResultadoDeuda"
+                    style="font-size: 0.75rem; font-weight: 600"
+                    >Sugerido (Hoy):</span
+                  >
+                  <span
+                    style="
+                      font-size: 1.2rem;
+                      font-weight: 800;
+                      color: var(--mac-orange);
+                      font-family: monospace;
+                    "
+                    id="valDescuentoHoy"
+                    >$0</span
+                  >
+                </div>
+
+                <button
+                  type="button"
+                  id="btnCobrarHoyDeuda"
+                  onclick="aplicarRetiroDeudaHoy()"
+                  class="btn-ios btn-success"
                   style="
-                    font-size: 1.3rem;
+                    padding: 8px 12px;
+                    font-size: 0.78rem;
                     font-weight: 800;
-                    color: var(--mac-orange);
-                    font-family: monospace;
+                    border-radius: 10px;
+                    margin: 0;
+                    white-space: nowrap;
                   "
-                  id="valDescuentoHoy"
-                  >$0</span
                 >
+                  🟢 Retiré lo de hoy
+                </button>
               </div>
             </div>
           </section>
 
-          <section class="widget-ipad bento-w-6">
+          <!-- 📝 REGISTRO Y DISTRIBUCIÓN DE MOVIMIENTOS (TARJETA UNIFICADA) -->
+          <section
+            class="widget-ipad bento-w-6"
+            style="
+              border-top: 3px solid var(--mac-blue) !important;
+              border-radius: 20px !important;
+            "
+          >
+            <!-- 1. FORMULARIO DE INGRESO MANUAL -->
             <h3
               class="card-title"
               style="
                 color: var(--text-primary);
                 font-size: 0.95rem;
                 font-weight: 800;
-                margin-bottom: 2px;
-                margin: 0;
+                margin: 0 0 6px 0;
+                display: flex;
+                align-items: center;
+                gap: 6px;
               "
             >
               <svg
@@ -7074,7 +7334,6 @@
                 fill="none"
                 stroke="var(--mac-blue)"
                 stroke-width="2.5"
-                style="vertical-align: middle; margin-right: 4px"
               >
                 <path d="M12 20h9"></path>
                 <path
@@ -7083,12 +7342,13 @@
               </svg>
               Movimiento Contable Manual
             </h3>
+
             <form
               id="formFinanzas"
               class="ipad-bento-container"
               style="
                 gap: 10px !important;
-                margin-top: 5px;
+                margin-top: 4px;
                 width: 100%;
                 display: grid !important;
               "
@@ -7137,6 +7397,7 @@
                   <option value="Personal">👤 Personal</option>
                 </select>
               </div>
+
               <div
                 style="grid-column: span 6 !important; margin-bottom: 0"
                 class="flex-col"
@@ -7157,6 +7418,7 @@
                   autocomplete="off"
                 />
               </div>
+
               <div
                 style="grid-column: span 9 !important; margin-bottom: 0"
                 class="flex-col"
@@ -7176,6 +7438,7 @@
                   autocomplete="off"
                 />
               </div>
+
               <div
                 style="
                   grid-column: span 3 !important;
@@ -7202,54 +7465,18 @@
                 </button>
               </div>
             </form>
-          </section>
 
-          <section class="widget-ipad bento-w-6">
-            <span
-              class="text-secondary"
-              style="
-                font-size: 0.8rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                margin-bottom: 3px;
-              "
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--mac-purple)"
-                stroke-width="2.5"
-              >
-                <polygon
-                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-                ></polygon>
-              </svg>
-              Rentabilidad (Ventas vs Costos)
-            </span>
+            <!-- SEPARADOR DISCRETO ESTILO APPLE -->
             <div
-              id="rankingPlataformasVentas"
-              class="flex-col"
               style="
-                gap: 12px;
-                max-height: 260px;
-                overflow-y: auto;
-                padding-right: 4px;
-                margin-top: 5px;
+                border-top: 1px solid rgba(255, 255, 255, 0.08);
+                width: 100%;
+                margin: 12px 0 8px 0;
               "
-            >
-              <div class="empty-log-msg" style="padding: 15px">
-                Calculando rentabilidad...
-              </div>
-            </div>
-          </section>
+            ></div>
 
-          <section class="widget-ipad bento-w-6">
-            <div class="flex-row-between" style="margin-bottom: 3px">
+            <!-- 2. CABECERA E HISTORIAL DE MOVIMIENTOS -->
+            <div class="flex-row-between" style="margin-bottom: 6px">
               <span
                 class="card-title"
                 style="
@@ -7288,20 +7515,76 @@
                 >Ciclo Activo</span
               >
             </div>
+
             <div
               id="listaDesgloseGastos"
               class="flex-col"
               style="
                 gap: 12px;
-                max-height: 260px;
+                max-height: 280px;
                 overflow-y: auto;
                 padding-right: 4px;
-                margin-top: 5px;
+                margin-top: 2px;
                 width: 100%;
               "
             >
               <div class="empty-log-msg">
                 Sincronizando registros contables...
+              </div>
+            </div>
+          </section>
+
+          <!-- 💜 RENTABILIDAD DE PLATAFORMAS (ALTURA AMPLIADA Y SCROLL MAC) -->
+          <section
+            class="widget-ipad bento-w-6"
+            style="
+              border-top: 3px solid var(--mac-purple) !important;
+              border-radius: 20px !important;
+              display: flex !important;
+              flex-direction: column !important;
+            "
+          >
+            <span
+              class="text-secondary"
+              style="
+                font-size: 0.8rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-bottom: 8px;
+              "
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--mac-purple)"
+                stroke-width="2.5"
+              >
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                ></polygon>
+              </svg>
+              Rentabilidad (Ventas vs Costos)
+            </span>
+
+            <div
+              id="rankingPlataformasVentas"
+              class="flex-col cyber-custom-scroll"
+              style="
+                gap: 14px;
+                max-height: 520px;
+                overflow-y: auto;
+                padding-right: 10px;
+                margin-top: 4px;
+                width: 100%;
+              "
+            >
+              <div class="empty-log-msg" style="padding: 15px">
+                Calculando rentabilidad...
               </div>
             </div>
           </section>
@@ -10697,7 +10980,155 @@
       }
     </style>
 
-    
+    <!-- 🟢 VENTANA EMERGENTE PERSONALIZADA DE PRÉSTAMO / RETIRO (CYBERNET OS) -->
+    <div class="overlay-ios" id="prestamoModalOverlay" style="z-index: 18000">
+      <div
+        class="modal-ios"
+        onclick="event.stopPropagation()"
+        style="max-width: 380px; padding: 28px 22px; border-radius: 28px"
+      >
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 18px;
+          "
+        >
+          <div
+            id="iconPrestamoModal"
+            style="
+              background: rgba(48, 209, 88, 0.15);
+              color: var(--mac-green);
+              padding: 12px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 12px;
+              border: 1px solid rgba(48, 209, 88, 0.2);
+            "
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+              ></path>
+            </svg>
+          </div>
+          <h3
+            id="titlePrestamoModal"
+            style="
+              color: var(--text-primary);
+              font-size: 1.15rem;
+              font-weight: 800;
+              margin: 0 0 4px 0;
+              text-align: center;
+            "
+          >
+            Registrar Préstamo
+          </h3>
+          <p
+            id="descPrestamoModal"
+            class="text-secondary"
+            style="
+              font-size: 0.82rem;
+              margin: 0;
+              text-align: center;
+              line-height: 1.4;
+            "
+          >
+            Ingresa el monto correspondiente:
+          </p>
+        </div>
+
+        <form
+          onsubmit="confirmarOperacionPrestamoModal(event)"
+          style="display: flex; flex-direction: column; gap: 16px"
+        >
+          <!-- CAJA DE TEXTO CON PESOS FIJO EN EL FONDO -->
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              background: rgba(0, 0, 0, 0.3);
+              border-radius: 14px;
+              padding: 4px 14px;
+              border: 1px solid rgba(255, 255, 255, 0.1);
+            "
+          >
+            <span
+              id="signoPrestamoModal"
+              style="
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: var(--mac-green);
+                margin-right: 4px;
+                user-select: none;
+              "
+              >$</span
+            >
+            <input
+              type="text"
+              id="inputMontoPrestamoModal"
+              class="input-ios"
+              placeholder="0"
+              oninput="formatearMontoDeudaSinSigno(this)"
+              style="
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: var(--text-primary);
+                padding: 10px 0;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                margin-bottom: 0;
+                outline: none;
+                width: 100%;
+                font-family: monospace;
+              "
+              required
+              autocomplete="off"
+            />
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 4px">
+            <button
+              type="button"
+              class="btn-ios btn-secondary"
+              style="
+                flex: 1;
+                padding: 12px;
+                border-radius: 50px;
+                font-weight: 700;
+              "
+              onclick="cerrarPrestamoModal()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              id="btnConfirmarPrestamoModal"
+              class="btn-ios btn-success"
+              style="
+                flex: 1;
+                padding: 12px;
+                border-radius: 50px;
+                font-weight: 800;
+              "
+            >
+              Confirmar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <script src="logica.js"></script>
   </body>
