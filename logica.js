@@ -9761,55 +9761,117 @@ window.registrarEmailOperador = function () {
   document.body.appendChild(script);
 };
 
+window.tempAuthUser = "";
+let isVerifyingOTP = false;
+
+// =========================================================================
+// ⚡ AUTO-VERIFICACIÓN AL DIGITAR LOS 6 DÍGITOS
+// =========================================================================
+window.comprobarAutoVerificacionOTP = function (input) {
+  // Limpia cualquier caracter que no sea número
+  input.value = input.value.replace(/\D/g, "");
+
+  // Cuando llegue exactamente a 6 dígitos y no esté verificando
+  if (input.value.length === 6 && !isVerifyingOTP) {
+    isVerifyingOTP = true;
+    verificarCodigoAcceso();
+  }
+};
+
+// =========================================================================
+// 🔑 VERIFICAR CÓDIGO DE SEGURIDAD (OTP)
+// =========================================================================
 window.verificarCodigoAcceso = function () {
   if (typeof haptic === "function") haptic();
-  const btn = document.getElementById("btnSubmitOtp");
-  const codeInput = document.getElementById("staffOtpCode").value.trim();
-  const errorToast = document.getElementById("otp-error-toast");
 
-  if (codeInput.length < 6) return;
+  const codeInput = document.getElementById("staffOtpCode");
+  const otpError = document.getElementById("otp-error-toast");
+  const btnSubmit = document.getElementById("btnSubmitOtp");
+  const code = codeInput ? codeInput.value.trim() : "";
+  const user = window.tempAuthUser || "";
 
-  btn.disabled = true;
-  btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle></svg> Validando...`;
-  errorToast.style.display = "none";
+  if (!code || code.length !== 6) {
+    isVerifyingOTP = false;
+    return;
+  }
 
-  const cbName = "cb_verify_otp_" + Date.now();
+  if (otpError) otpError.style.display = "none";
+
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Verificando...`;
+  }
+
+  const cbName = "cb_otp_" + Date.now();
   window[cbName] = function (res) {
-    btn.disabled = false;
-    btn.innerText = "Confirmar Acceso";
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerText = "Confirmar Acceso";
+    }
+    isVerifyingOTP = false;
+
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
     delete window[cbName];
 
     if (res && res.status === "success") {
-      clearInterval(window.otpInterval);
-
-      // LOGUEO MÁSTER COMPLETADO: Destruimos pantallas negras de bloqueo
+      // 🟢 ÉXITO TOTAL: Desbloquea la estación
+      sessionStorage.setItem("active_staff", user);
       document.getElementById("otpVerificationOverlay").style.display = "none";
-
-      const remElement = document.getElementById("rememberMe");
-      const rememberMe = remElement ? remElement.checked : false;
-
-      sessionStorage.setItem("active_staff", window.tempAuthUser);
-      if (rememberMe)
-        localStorage.setItem("cyber_saved_staff", window.tempAuthUser);
-
       const controlRight = document.getElementById("macControlCenterRight");
       if (controlRight) controlRight.style.display = "flex";
-
-      entrarAlSistema(window.tempAuthUser);
+      entrarAlSistema(user);
     } else {
-      document.getElementById("staffOtpCode").value = "";
-      errorToast.innerText = res ? res.message : "Código incorrecto.";
-      errorToast.style.display = "block";
+      // 🔴 CÓDIGO INCORRECTO: Muestra error y limpia la casilla
+      let errMsg = res ? res.message : "Código de seguridad incorrecto.";
+      if (otpError) {
+        otpError.innerText = errMsg;
+        otpError.style.display = "block";
+      }
+      if (codeInput) {
+        codeInput.value = "";
+        setTimeout(() => codeInput.focus(), 100);
+      }
     }
   };
 
   const script = document.createElement("script");
   script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=verificarOTPStaff&user=${encodeURIComponent(window.tempAuthUser)}&code=${encodeURIComponent(codeInput)}&callback=${cbName}&_ts=${Date.now()}`;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=verificarOTPStaff&user=${encodeURIComponent(user)}&code=${encodeURIComponent(code)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
+
+// =========================================================================
+// ⏱️ RELOJ TEMPORIZADOR DE OTP (5 MINUTOS)
+// =========================================================================
+window.otpTimerInterval = null;
+
+function iniciarRelojOTP(segundosTotales) {
+  if (window.otpTimerInterval) clearInterval(window.otpTimerInterval);
+
+  let tiempoRestante = segundosTotales;
+  const display = document.getElementById("otpTimerDisplay");
+
+  const actualizarDisplay = () => {
+    let m = Math.floor(tiempoRestante / 60);
+    let s = tiempoRestante % 60;
+    let mStr = String(m).padStart(2, "0");
+    let sStr = String(s).padStart(2, "0");
+    if (display) display.innerText = `${mStr}:${sStr}`;
+  };
+
+  actualizarDisplay();
+
+  window.otpTimerInterval = setInterval(() => {
+    tiempoRestante--;
+    if (tiempoRestante <= 0) {
+      clearInterval(window.otpTimerInterval);
+      if (display) display.innerText = "00:00 (Expirado)";
+    } else {
+      actualizarDisplay();
+    }
+  }, 1000);
+}
 // =========================================================================
 // 🔵 MOTOR: ACCESO DIRECTO OUTLOOK / HOTMAIL
 // =========================================================================
