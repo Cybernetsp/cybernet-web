@@ -1687,3 +1687,26 @@ body:has(.overlay-ios[style*="display: block"]) [id*="dock"] {
 .cyber-custom-scroll::-webkit-scrollbar-thumb:hover {
   background: var(--mac-purple) !important;
 }
+
+/* 🔴 BADGE CONTADOR DE GARANTÍAS EN EL DOCK */
+.dock-badge-counter {
+  position: absolute !important;
+  top: -6px !important;
+  right: -6px !important;
+  background: #ff3b30 !important; /* Rojo vivo estilo Apple */
+  color: #ffffff !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  padding: 0 5px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.6) !important;
+  border: 2px solid #1c1c1e !important;
+  z-index: 25 !important;
+  pointer-events: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
