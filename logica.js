@@ -2401,6 +2401,7 @@ function cerrarModalVentaGenerada() {
   document.getElementById("ventaGeneradaModalOverlay").classList.remove("open");
 }
 
+// 🔄 FUNCIÓN PRINCIPAL DE GARANTÍAS (ACTUALIZA EL DOCK Y EL BANNER MAC)
 function actualizarBadgeGarantias() {
   const oldScript = document.getElementById("cyber_badge_garantias_node");
   if (oldScript) oldScript.remove();
@@ -2411,14 +2412,22 @@ function actualizarBadgeGarantias() {
 
     let badge = document.getElementById("badgeGarantiasCount");
 
-    if (res && res.status === "success" && badge) {
-      const count = res.data.length;
-      if (count > 0) {
-        badge.innerText = count;
-        badge.style.display = "flex";
-      } else {
-        badge.style.display = "none";
+    if (res && res.status === "success") {
+      const data = res.data || [];
+      const count = data.length;
+
+      // 1. Actualiza la burbuja del Dock
+      if (badge) {
+        if (count > 0) {
+          badge.innerText = count;
+          badge.style.display = "flex";
+        } else {
+          badge.style.display = "none";
+        }
       }
+
+      // 2. Dispara el Banner Mac flotante con el desglose por plataforma
+      mostrarAlertaGarantiasMac(data);
     }
     delete window.procesarBadgeGarantias;
   };
@@ -2430,6 +2439,51 @@ function actualizarBadgeGarantias() {
     "?action=obtenerGarantias&callback=procesarBadgeGarantias&_ts=" +
     Date.now();
   document.body.appendChild(scriptElement);
+}
+
+// 🛡️ MOTOR DEL BANNER FLOTANTE DE GARANTÍAS EN PANTALLA
+function mostrarAlertaGarantiasMac(listaGarantias) {
+  const banner = document.getElementById("macGarantiasBanner");
+  const textoEl = document.getElementById("macGarantiasNotifText");
+
+  if (!banner || !textoEl) return;
+
+  // Si no hay garantías pendientes, oculta la alerta
+  if (!listaGarantias || listaGarantias.length === 0) {
+    banner.style.transform = "translateX(120%)";
+    banner.style.opacity = "0";
+    return;
+  }
+
+  // Contar y agrupar cuántas garantías tiene cada plataforma
+  let conteoPorPlat = {};
+  listaGarantias.forEach((item) => {
+    let plat = (item.plataforma || "OTRA")
+      .toUpperCase()
+      .replace(/-/g, " ")
+      .trim();
+    conteoPorPlat[plat] = (conteoPorPlat[plat] || 0) + 1;
+  });
+
+  // Construir texto formateado: ej "AMAZON (2), DISNEY PREMIUM (1), HBO MAX (3)"
+  let resumen = Object.keys(conteoPorPlat)
+    .map((p) => `<strong>${p} (${conteoPorPlat[p]})</strong>`)
+    .join(", ");
+
+  textoEl.innerHTML = resumen;
+
+  // Deslizar el banner hacia adentro
+  banner.style.transform = "translateX(0)";
+  banner.style.opacity = "1";
+}
+
+// ✕ FUNCIÓN PARA CERRAR EL BANNER DE GARANTÍAS
+function cerrarBannerGarantiasManualmente() {
+  const banner = document.getElementById("macGarantiasBanner");
+  if (banner) {
+    banner.style.transform = "translateX(120%)";
+    banner.style.opacity = "0";
+  }
 }
 
 function toggleTheme() {
@@ -3286,15 +3340,18 @@ function renderizarListaGarantiasDefinitiva(data) {
               
               ${imagenHtml}
 
-              <div style="display: flex; gap: 8px; margin-top: 4px;">
-                  <button class="btn-ios btn-secondary" style="flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="copiarTextoRapido(this, decodeURIComponent('${safeReporte}'))">
+              <div style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;">
+                  <button class="btn-ios btn-secondary" style="flex: 1; min-width: 70px; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="copiarTextoRapido(this, decodeURIComponent('${safeReporte}'))">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Texto
                   </button>
                   ${btnCopiarFoto}
-                  <button class="btn-ios" style="flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(245, 158, 11, 0.1); color: var(--ios-orange); border: 1px solid rgba(245, 158, 11, 0.2); font-weight: 600;" onclick="solicitarCuentaTemporal(this, '${item.plataforma}', '${item.correo}')">
+                  <button class="btn-ios" style="flex: 1; min-width: 70px; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(245, 158, 11, 0.1); color: var(--ios-orange); border: 1px solid rgba(245, 158, 11, 0.2); font-weight: 600;" onclick="solicitarCuentaTemporal(this, '${item.plataforma}', '${item.correo}')">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Temp
                   </button>
-                  <button class="btn-ios btn-success" style="flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="abrirModalResolverGarantia('${item.filaIndex}', '${item.correo}', '${item.plataforma}')">
+                  <button class="btn-ios" style="flex: 1; min-width: 80px; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(255, 69, 58, 0.15); color: var(--ios-red); border: 1px solid rgba(255, 69, 58, 0.3); font-weight: 700;" onclick="ejecutarDescartarGarantia(this, '${item.filaIndex}', '${item.plataforma}', '${item.correo}')">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Descartar
+                  </button>
+                  <button class="btn-ios btn-success" style="flex: 1; min-width: 80px; padding: 8px; font-size: 0.75rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="abrirModalResolverGarantia('${item.filaIndex}', '${item.correo}', '${item.plataforma}')">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Resolver
                   </button>
               </div>
@@ -4796,10 +4853,16 @@ function entrarAlSistema(userInput) {
 }
 
 function inicializarWorkspace() {
-  cargarPlantillasDesdeSheets(); // 👈 Llama a Google Sheets por los mensajes
+  cargarPlantillasDesdeSheets();
   startShiftTimer();
   iniciarControlInactividad();
   cargarHorasDesdeSheets();
+
+  // 🔴 Cargar el contador de garantías al iniciar y refrescar cada minuto
+  if (typeof actualizarBadgeGarantias === "function") {
+    actualizarBadgeGarantias();
+    setInterval(actualizarBadgeGarantias, 60000);
+  }
 }
 
 function cerrarSesionStaff() {
@@ -11382,5 +11445,61 @@ window.guardarDeudaEnSheets = function () {
   const script = document.createElement("script");
   script.id = "node_" + cbName;
   script.src = `${GOOGLE_SCRIPT_URL}?action=actualizarDeudaMutua&monto=${encodeURIComponent(monto)}&tipo=${encodeURIComponent(tipo)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+// =========================================================================
+// 🗑️ FUNCIÓN PARA DESCARTAR/ELIMINAR TICKET DE GARANTÍA DIRECTAMENTE
+// =========================================================================
+window.ejecutarDescartarGarantia = function (
+  btn,
+  filaIndex,
+  plataforma,
+  correo,
+) {
+  if (
+    !confirm(
+      `¿Estás seguro de DESCARTAR el reporte de garantía de ${plataforma} (${correo})?\n\nSe eliminará de la lista de garantías sin modificar la cuenta.`,
+    )
+  ) {
+    return;
+  }
+
+  if (typeof haptic === "function") haptic();
+
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg>`;
+
+  const cbName = "cb_desc_gar_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    btn.disabled = false;
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Garantía descartada.</span></div>`,
+        );
+      }
+
+      // Recargar la lista de garantías y actualizar los badges/banners flotantes
+      cargarGarantias();
+      if (typeof actualizarBadgeGarantias === "function") {
+        actualizarBadgeGarantias();
+      }
+    } else {
+      btn.innerHTML = originalHtml;
+      alert(
+        "❌ Error: " + (res ? res.message : "No se pudo descartar el reporte."),
+      );
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=descartarGarantia&filaIndex=${encodeURIComponent(filaIndex)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
