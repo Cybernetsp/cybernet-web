@@ -1,4 +1,4 @@
-const CACHE_NAME = "cybernet-cache-v47"; // Subimos la versión para que fuerce la actualización
+const CACHE_NAME = "cybernet-cache-v48"; // Subimos la versión para que fuerce la actualización
 
 // ⚡ ARRAY COMBINADO: Aquí guardamos los archivos de TODAS tus páginas
 const assets = [
