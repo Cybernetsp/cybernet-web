@@ -5001,22 +5001,39 @@ document.addEventListener("DOMContentLoaded", () => {
   const headerContainer = document.getElementById("header-container");
   if (headerContainer && typeof qrPrincipal !== "undefined") {
     headerContainer.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%;">
-          <span style="font-size: 0.9rem; color: rgba(255,255,255,0.8); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">
-            💳 ${qrPrincipal.titulo}
-          </span>
+        <div class="card-ios w-100" style="max-width: 440px; align-items: center; gap: 12px; padding: 20px;">
           
-          <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-            <img src="${qrPrincipal.imagenUrl}" alt="QR" style="width: 160px; height: 160px; border-radius: 12px; padding: 6px; background: white; object-fit: contain;">
-          </div>
+          <img src="${qrPrincipal.imagenUrl}" alt="QR" 
+ onclick="window.copiarImagenQRPagos(this, '${qrPrincipal.imagenUrl}')"
+ style="max-width:210px; width:100%; border-radius:16px; border: 2px solid transparent; box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto; cursor: pointer; transition: all 0.2s;"
+ onmouseover="this.style.transform='scale(1.05)'"
+ onmouseout="this.style.transform='scale(1)'"
+ title="Haz clic para copiar la imagen del QR">
           
-          <span style="font-size: 0.75rem; color: var(--text-secondary); text-align: center; margin-top: -4px;">
-            (Mantén presionado para copiar imagen)
-          </span>
+<span class="text-secondary text-center" style="font-size:0.75rem; font-weight:500; margin-top: -4px;">
+  (Haz clic sobre el QR para copiar la imagen)
+</span>
+          
+          <!-- Contenedor de Botones de Pago -->
+          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 4px;">
+            
+            <!-- 🔥 BOTÓN GRIS CLARO PAGOS (BRE-B) 🔥 -->
+            <button class="btn-ios copy-text-btn w-100" 
+                    style="padding: 14px !important; font-size: 0.85rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;" 
+                    data-clipboard-text="${qrPrincipal.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              COPIAR PAGOS (BRE-B)
+            </button>
+            
+            <!-- 🔥 BOTÓN GRIS CLARO NEQUI (Carga Inicial) 🔥 -->
+            <button class="btn-ios copy-text-btn w-100" 
+                    style="padding: 14px !important; font-size: 0.85rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;" 
+                    data-clipboard-text="Transferencias Nequi: 3215938767">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              COPIAR NEQUI
+            </button>
 
-          <button class="btn-ios btn-secondary copy-text-btn w-100" style="padding: 14px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: rgba(10, 132, 255, 0.15); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.2);" data-clipboard-text="${qrPrincipal.texto.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">
-            Copiar Datos de Pago
-          </button>
+          </div>
         </div>
       `;
   }
@@ -5038,24 +5055,47 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof haptic === "function") haptic();
       const btn = e.trigger;
       const card = btn.closest(".card-ios");
-      const originalText = btn.textContent;
+      const originalHTML = btn.innerHTML;
 
-      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡COPIADO!`;
-      btn.classList.remove("btn-secondary");
-      btn.classList.add("btn-danger");
+      // 🟢 RELLENO VERDE ÉXITO AL DAR CLIC (Usando Hexadecimal seguro) 🟢
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡COPIADO!`;
+      btn.style.setProperty("background", "#30d158", "important");
+      btn.style.setProperty("color", "#ffffff", "important");
+      btn.style.setProperty("border-color", "#30d158", "important");
+      btn.style.setProperty("transform", "scale(1.05)", "important");
 
       if (card) {
-        card.style.borderColor = "var(--ios-red)";
-        card.style.boxShadow = "0 0 20px rgba(255, 69, 58, 0.25)";
+        card.style.setProperty("border-color", "#30d158", "important");
+        card.style.setProperty(
+          "box-shadow",
+          "0 0 20px rgba(48, 209, 88, 0.4)",
+          "important",
+        );
       }
 
+      // 🔄 RESTAURAMOS A SU DISEÑO GRIS TRANSLÚCIDO NORMAL DESPUÉS DE 1.5s
       setTimeout(function () {
-        btn.textContent = originalText;
-        btn.classList.remove("btn-danger");
-        btn.classList.add("btn-secondary");
+        btn.innerHTML = originalHTML;
+        btn.style.setProperty(
+          "background",
+          "rgba(255, 255, 255, 0.08)",
+          "important",
+        );
+        btn.style.setProperty("color", "var(--text-primary)", "important");
+        btn.style.setProperty(
+          "border-color",
+          "rgba(255, 255, 255, 0.15)",
+          "important",
+        );
+        btn.style.setProperty("transform", "scale(1)", "important");
+
         if (card) {
-          card.style.borderColor = "var(--glass-border)";
-          card.style.boxShadow = "var(--glass-shadow)";
+          card.style.setProperty(
+            "border-color",
+            "rgba(255, 255, 255, 0.06)",
+            "important",
+          );
+          card.style.setProperty("box-shadow", "none", "important");
         }
       }, 1500);
     });
@@ -7730,46 +7770,48 @@ function cargarPlantillasDesdeSheets() {
           let textoNequiSeguro = plantillaNequi.texto
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
-          // Le damos un estilo rosa/magenta nativo para que parezca de Nequi
+
+          // 🔥 NUEVO DISEÑO GRIS PARA EL BOTÓN NEQUI (CARGA FINAL) 🔥
           btnNequiHtml = `
-            <button class="btn-ios btn-secondary copy-text-btn w-100" 
-                    style="padding: 14px; font-size: 0.85rem; font-weight: 800; border-radius: 12px; background: rgba(224, 0, 150, 0.1); color: #ff37a6; border: 1px solid rgba(224, 0, 150, 0.3);" 
-                    data-clipboard-text="${textoNequiSeguro}">
-              COPIAR NEQUI
-            </button>
-          `;
+          <button class="btn-ios copy-text-btn w-100" 
+                  style="padding: 14px !important; font-size: 0.85rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;" 
+                  data-clipboard-text="${textoNequiSeguro}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            COPIAR NEQUI
+          </button>
+        `;
         }
 
         headerContainer.innerHTML = `
-            <div class="card-ios w-100" style="max-width: 440px; align-items: center; gap: 12px; padding: 20px;">
-              
-              <!-- Se eliminó el <h2>PAGOS</h2> como pediste -->
-              
-              <img src="${plantillaPagos.imagenUrl}" alt="QR" 
-     onclick="window.copiarImagenQRPagos(this, '${plantillaPagos.imagenUrl}')"
-     style="max-width:210px; width:100%; border-radius:16px; border: 2px solid transparent; box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto; cursor: pointer; transition: all 0.2s;"
-     onmouseover="this.style.transform='scale(1.05)'"
-     onmouseout="this.style.transform='scale(1)'"
-     title="Haz clic para copiar la imagen del QR">
-              
+          <div class="card-ios w-100" style="max-width: 440px; align-items: center; gap: 12px; padding: 20px;">
+            
+            <img src="${plantillaPagos.imagenUrl}" alt="QR" 
+   onclick="window.copiarImagenQRPagos(this, '${plantillaPagos.imagenUrl}')"
+   style="max-width:210px; width:100%; border-radius:16px; border: 2px solid transparent; box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto; cursor: pointer; transition: all 0.2s;"
+   onmouseover="this.style.transform='scale(1.05)'"
+   onmouseout="this.style.transform='scale(1)'"
+   title="Haz clic para copiar la imagen del QR">
+            
 <span class="text-secondary text-center" style="font-size:0.75rem; font-weight:500; margin-top: -4px;">
   (Haz clic sobre el QR para copiar la imagen)
 </span>
+            
+            <!-- Contenedor de Botones de Pago -->
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 4px;">
               
-              <!-- Contenedor de Botones de Pago -->
-              <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 4px;">
-                
-                <button class="btn-ios btn-secondary copy-text-btn w-100" 
-                        style="padding: 14px; font-size: 0.85rem; font-weight: 800; border-radius: 12px; background: rgba(10, 132, 255, 0.1); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.3);" 
-                        data-clipboard-text="${textoPagosSeguro}">
-                  COPIAR PAGOS (BRE-B)
-                </button>
-                
-                ${btnNequiHtml}
+              <!-- 🔥 BOTÓN GRIS PAGOS BRE-B (CARGA FINAL) 🔥 -->
+              <button class="btn-ios copy-text-btn w-100" 
+                      style="padding: 14px !important; font-size: 0.85rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;" 
+                      data-clipboard-text="${textoPagosSeguro}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                COPIAR PAGOS (BRE-B)
+              </button>
+              
+              ${btnNequiHtml}
 
-              </div>
             </div>
-          `;
+          </div>
+        `;
       }
 
       // 3. Pintamos el resto de las tarjetas en el buscador
@@ -7802,7 +7844,7 @@ function renderGrid(filtro = "") {
 
   if (filtrados.length === 0) {
     gridContainer.innerHTML =
-      '<div class="empty-log-msg">No se encontraron plantillas con ese nombre.</div>';
+      '<div class="empty-log-msg" style="grid-column: 1 / -1;">No se encontraron plantillas con ese nombre.</div>';
     return;
   }
 
@@ -7810,15 +7852,27 @@ function renderGrid(filtro = "") {
     const card = document.createElement("div");
     card.className = "card-ios";
 
-    // 🔥 Validación por si algún texto de Google Sheets viene vacío o nulo
+    // Mantenemos la corrección para que no se salga de la caja
+    card.style.cssText =
+      "display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; padding: 18px !important; background: rgba(255, 255, 255, 0.02) !important; border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 16px !important; margin: 0 !important; box-sizing: border-box !important;";
+
     let textoSeguro = currentItem.texto
       ? String(currentItem.texto).replace(/"/g, "&quot;").replace(/'/g, "&#39;")
       : "";
-    let tituloSeguro = currentItem.titulo || "Sin título";
 
+    let tituloLimpio = currentItem.titulo ? currentItem.titulo.trim() : "";
+    let tituloSeguro =
+      tituloLimpio !== "" ? tituloLimpio : "Plantilla Sin Nombre";
+
+    // 🔥 NUEVO BOTÓN GRIS CLARO ELEGANTE 🔥
     card.innerHTML = `
-        <h2 class="card-title" style="justify-content:center;">${tituloSeguro}</h2>
-        <button class="btn-ios btn-secondary copy-text-btn mt-1 w-100" data-clipboard-text="${textoSeguro}">COPIAR TEXTO</button>
+        <div style="margin-bottom: 14px; flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start;">
+          <h2 class="card-title" style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4;">${tituloSeguro}</h2>
+        </div>
+        <button class="btn-ios copy-text-btn w-100" data-clipboard-text="${textoSeguro}" style="margin-top: auto !important; padding: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 0.85rem !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+           COPIAR TEXTO
+        </button>
       `;
     gridContainer.appendChild(card);
   });
