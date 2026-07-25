@@ -2448,12 +2448,18 @@ function mostrarAlertaGarantiasMac(listaGarantias) {
 
   if (!banner || !textoEl) return;
 
-  // Si no hay garantías pendientes, oculta la alerta
+  // Si no hay garantías pendientes, oculta la alerta y colapsa el espacio
   if (!listaGarantias || listaGarantias.length === 0) {
     banner.style.transform = "translateX(120%)";
     banner.style.opacity = "0";
+    setTimeout(() => {
+      banner.style.display = "none";
+    }, 400); // 👈 Quita el hueco
     return;
   }
+
+  // 👈 Despierta el banner antes de animarlo
+  banner.style.display = "flex";
 
   // Contar y agrupar cuántas garantías tiene cada plataforma
   let conteoPorPlat = {};
@@ -2472,19 +2478,71 @@ function mostrarAlertaGarantiasMac(listaGarantias) {
 
   textoEl.innerHTML = resumen;
 
-  // Deslizar el banner hacia adentro
-  banner.style.transform = "translateX(0)";
-  banner.style.opacity = "1";
+  // 👈 Pequeño retraso para asegurar que la transición CSS funcione al cambiar de 'display: none' a 'flex'
+  setTimeout(() => {
+    banner.style.transform = "translateX(0)";
+    banner.style.opacity = "1";
+  }, 10);
 }
 
-// ✕ FUNCIÓN PARA CERRAR EL BANNER DE GARANTÍAS
-function cerrarBannerGarantiasManualmente() {
-  const banner = document.getElementById("macGarantiasBanner");
+// ✕ FUNCIÓN PARA CERRAR EL BANNER DE INVENTARIO MANUALMENTE
+window.cerrarBannerNotificacionManualmente = function () {
+  const banner = document.getElementById("macNotificationBanner");
   if (banner) {
+    // 1. Animación de salida hacia la derecha
     banner.style.transform = "translateX(120%)";
     banner.style.opacity = "0";
+    clearInterval(window.timerElapsedNotif);
+
+    // 2. Colapsamos el espacio para que el banner de abajo suba suavemente
+    setTimeout(() => {
+      banner.style.margin = "0";
+      banner.style.padding = "0";
+      banner.style.height = "0";
+      banner.style.border = "none";
+      banner.style.overflow = "hidden";
+    }, 300);
+
+    // 3. Lo apagamos del todo y restauramos sus estilos base para la próxima vez que se active
+    setTimeout(() => {
+      banner.style.display = "none";
+      banner.style.margin = "";
+      banner.style.padding = "14px 16px";
+      banner.style.height = "";
+      banner.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+      banner.style.overflow = "";
+    }, 600);
   }
-}
+};
+
+// ✕ FUNCIÓN PARA CERRAR EL BANNER DE GARANTÍAS MANUALMENTE
+window.cerrarBannerGarantiasManualmente = function () {
+  const banner = document.getElementById("macGarantiasBanner");
+  if (banner) {
+    // 1. Animación de salida hacia la derecha
+    banner.style.transform = "translateX(120%)";
+    banner.style.opacity = "0";
+
+    // 2. Colapsamos el espacio suavemente
+    setTimeout(() => {
+      banner.style.margin = "0";
+      banner.style.padding = "0";
+      banner.style.height = "0";
+      banner.style.border = "none";
+      banner.style.overflow = "hidden";
+    }, 300);
+
+    // 3. Apagado total
+    setTimeout(() => {
+      banner.style.display = "none";
+      banner.style.margin = "";
+      banner.style.padding = "14px 16px";
+      banner.style.height = "";
+      banner.style.border = "1px solid rgba(255, 159, 10, 0.3)";
+      banner.style.overflow = "";
+    }, 600);
+  }
+};
 
 function toggleTheme() {
   haptic();
@@ -8990,6 +9048,7 @@ function verificarStockCritico(data) {
   }
 }
 
+// 🛡️ MOTOR DEL BANNER FLOTANTE DE INVENTARIO EN PANTALLA
 function lanzarBannerMacosStock(listaPlataformas) {
   const banner = document.getElementById("macNotificationBanner");
   const texto = document.getElementById("macNotifText");
@@ -9000,6 +9059,9 @@ function lanzarBannerMacosStock(listaPlataformas) {
   clearInterval(window.timerElapsedNotif);
   banner.style.transform = "translateX(120%)";
   banner.style.opacity = "0";
+
+  // 👈 Despierta el banner antes de animarlo para que ocupe su espacio
+  banner.style.display = "flex";
 
   setTimeout(() => {
     texto.innerHTML = `Plataformas bajas o agotadas:<br><b style="color:#ffffff;">${listaPlataformas}</b>`;
@@ -9014,15 +9076,21 @@ function lanzarBannerMacosStock(listaPlataformas) {
       minutosTranscurridos++;
       visorTiempo.innerText = `Hace ${minutosTranscurridos} min`;
     }, 60000);
-  }, 250);
+  }, 50); // 👈 Reducido a 50ms para que la animación sea más rápida y fluida
 }
 
+// ✕ FUNCIÓN PARA CERRAR EL BANNER DE INVENTARIO MANUALMENTE
 window.cerrarBannerNotificacionManualmente = function () {
   const banner = document.getElementById("macNotificationBanner");
   if (banner) {
     banner.style.transform = "translateX(120%)";
     banner.style.opacity = "0";
     clearInterval(window.timerElapsedNotif);
+
+    // 👈 Elimina el hueco fantasma cuando termina la animación de salida
+    setTimeout(() => {
+      banner.style.display = "none";
+    }, 400);
   }
 };
 
@@ -9060,15 +9128,7 @@ document.addEventListener("DOMContentLoaded", () => {
     txtNombreBarra.innerText = sesionGuardada.toUpperCase().trim();
   }
 });
-// Función para fulminar el banner de notificación manualmente
-window.cerrarBannerNotificacionManualmente = function () {
-  const banner = document.getElementById("macNotificationBanner");
-  if (banner) {
-    banner.style.transform = "translateX(120%)";
-    banner.style.opacity = "0";
-    clearInterval(window.timerElapsedNotif); // Detiene el segundero interno
-  }
-};
+
 // =========================================================================
 // 📥 MOTOR DE BÚSQUEDA DE CORREOS INTEGRADO (TKDJGZ)
 // =========================================================================
