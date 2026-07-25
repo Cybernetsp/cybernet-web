@@ -11617,3 +11617,275 @@ window.ejecutarDescartarGarantia = function (
   script.src = `${GOOGLE_SCRIPT_URL}?action=descartarGarantia&filaIndex=${encodeURIComponent(filaIndex)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
+/* =========================================================================
+   🔍 BUSCADOR GLOBAL A PRUEBA DE ERRORES (0 LATENCIA - SOLO LUPA)
+   ========================================================================= */
+
+let memoriaBuscador = [];
+const TIEMPO_CACHE_BUSQUEDA = 10 * 60 * 1000; // 10 minutos de memoria
+
+// 🧹 Función para forzar limpieza del caché si hace falta
+function limpiarCacheLupa() {
+  localStorage.removeItem("cache_inventario_lupa");
+  localStorage.removeItem("cache_inventario_lupa_time");
+  memoriaBuscador = [];
+  console.log("🧹 Caché de la lupa limpiado.");
+}
+
+async function obtenerCuentasParaBuscador() {
+  const cacheGuardado = localStorage.getItem("cache_inventario_lupa");
+  const tiempoGuardado = localStorage.getItem("cache_inventario_lupa_time");
+  const ahora = Date.now();
+
+  // 1. Usar memoria local instantánea si existe y tiene datos válidos
+  if (
+    cacheGuardado &&
+    tiempoGuardado &&
+    ahora - parseInt(tiempoGuardado) < TIEMPO_CACHE_BUSQUEDA
+  ) {
+    const datosParseados = JSON.parse(cacheGuardado);
+    if (Array.isArray(datosParseados) && datosParseados.length > 0) {
+      console.log(
+        `⚡ Lupa: ${datosParseados.length} cuentas cargadas desde memoria local (0ms)`,
+      );
+      return datosParseados;
+    }
+  }
+
+  // 2. Traer datos frescos de Google Sheets
+  console.log("☁️ Lupa: Descargando base de datos desde Google...");
+  try {
+    const URL_SCRIPT =
+      "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec?action=descargarInventarioBuscador";
+
+    const response = await fetch(URL_SCRIPT);
+    const textoBruto = await response.text();
+
+    // Limpiamos la envoltura callbackCiber(...) de tu backend
+    const jsonLimpio = textoBruto.replace(/^.*?\(/, "").replace(/\)$/, "");
+    const datos = JSON.parse(jsonLimpio);
+
+    if (
+      datos.status === "success" &&
+      Array.isArray(datos.data) &&
+      datos.data.length > 0
+    ) {
+      localStorage.setItem("cache_inventario_lupa", JSON.stringify(datos.data));
+      localStorage.setItem("cache_inventario_lupa_time", ahora.toString());
+      console.log(
+        `✅ Lupa: Se descargaron ${datos.data.length} cuentas de Google Sheets.`,
+      );
+      return datos.data;
+    } else {
+      console.warn(
+        "⚠️ Google Sheets devolvió respuesta pero sin datos:",
+        datos,
+      );
+      return [];
+    }
+  } catch (error) {
+    console.error("❌ Error descargando cuentas para la lupa:", error);
+    if (cacheGuardado) return JSON.parse(cacheGuardado);
+    return [];
+  }
+}
+
+async function abrirBuscadorGlobal() {
+  const modal = document.getElementById("modal-buscador-global");
+  if (!modal) return;
+  modal.style.display = "block";
+
+  const input = document.getElementById("input-buscador-global");
+  if (input) {
+    input.value = "";
+    input.focus();
+  }
+
+  const cajaResultados = document.getElementById("resultados-buscador");
+  cajaResultados.innerHTML =
+    '<div style="color: #a1a1aa; text-align: center; padding: 20px;">Cargando base de datos a la memoria...</div>';
+
+  // Cargar en memoria
+  memoriaBuscador = await obtenerCuentasParaBuscador();
+
+  if (memoriaBuscador.length === 0) {
+    cajaResultados.innerHTML = `
+            <div style="color: #ff9500; text-align: center; padding: 15px; font-size: 0.85rem;">
+                ⚠️ No se han podido cargar las cuentas desde la nube.
+                <br><br>
+                <button onclick="limpiarCacheLupa(); abrirBuscadorGlobal();" style="background: #0072ff; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    🔄 Reintentar Descarga
+                </button>
+            </div>`;
+  } else {
+    cajaResultados.innerHTML = `<div style="color: #a1a1aa; text-align: center; font-size: 0.85rem; padding: 20px;">Escribe un teléfono, correo o cliente (${memoriaBuscador.length} cuentas listas)...</div>`;
+  }
+}
+
+function cerrarBuscadorGlobal() {
+  const modal = document.getElementById("modal-buscador-global");
+  if (modal) modal.style.display = "none";
+}
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") cerrarBuscadorGlobal();
+});
+
+// ⚡ BÚSQUEDA UNIVERSAL INTELIGENTE (IGNORA ESPACIOS Y GUIONES EN TELÉFONOS)
+const inputBuscador = document.getElementById("input-buscador-global");
+if (inputBuscador) {
+  inputBuscador.addEventListener("input", function (e) {
+    const texto = e.target.value.toLowerCase().trim();
+    const textoSoloNumeros = texto.replace(/\D/g, ""); // Filtra dejando solo dígitos
+    const cajaResultados = document.getElementById("resultados-buscador");
+
+    if (texto.length < 3) {
+      cajaResultados.innerHTML =
+        '<div style="color: #a1a1aa; text-align: center; font-size: 0.85rem; padding: 20px;">Escribe al menos 3 caracteres...</div>';
+      return;
+    }
+
+    // 🔥 FILTRO INTELIGENTE
+    const filtrados = memoriaBuscador.filter((cuenta) => {
+      const telBruto = cuenta.telefono ? String(cuenta.telefono) : "";
+      const telSoloNumeros = telBruto.replace(/\D/g, "");
+
+      const cor = cuenta.correo ? String(cuenta.correo).toLowerCase() : "";
+      const nom = cuenta.cliente ? String(cuenta.cliente).toLowerCase() : "";
+
+      const coincideTelefono =
+        textoSoloNumeros.length >= 3 &&
+        telSoloNumeros.includes(textoSoloNumeros);
+      const coincideCorreo = cor.includes(texto);
+      const coincideNombre = nom.includes(texto);
+
+      return coincideTelefono || coincideCorreo || coincideNombre;
+    });
+
+    if (filtrados.length === 0) {
+      cajaResultados.innerHTML =
+        '<div style="color: #ff453a; text-align: center; font-size: 0.85rem; padding: 20px;">No se encontraron cuentas asociadas.</div>';
+      return;
+    }
+
+    // Renderizado de las tarjetas con el Botón de Copiar
+    cajaResultados.innerHTML = filtrados
+      .map((cuenta) => {
+        // Empaquetamos la cuenta de forma segura para no dañar el HTML con símbolos raros en las claves
+        const cuentaCodificada = encodeURIComponent(JSON.stringify(cuenta));
+
+        return `
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 12px 16px; border-radius: 12px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: white; font-weight: 700; font-size: 0.95rem;">${cuenta.correo}</span>
+                    <span style="background: #0072ff; color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; letter-spacing: 0.5px;">${cuenta.plataforma}</span>
+                </div>
+                <div style="color: #a1a1aa; font-size: 0.8rem; display: flex; justify-content: space-between;">
+                    <span>📱 ${cuenta.telefono || "Sin celular"}</span>
+                    <span>👤 ${cuenta.cliente || "Sin cliente"}</span>
+                </div>
+                <div style="color: #30d158; font-size: 0.8rem; font-weight: 500; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span>🔑 ${cuenta.clave}</span>
+                        <span style="color: #a1a1aa; font-size: 0.75rem;">Perfil: ${cuenta.perfil} (PIN: ${cuenta.pin})</span>
+                    </div>
+                    <button onclick="copiarDetallesLupa(this, '${cuentaCodificada}')" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; transition: 0.2s;">
+                        📋 Copiar
+                    </button>
+                </div>
+            </div>
+            `;
+      })
+      .join("");
+  });
+}
+
+// 📋 MOTOR DE COPIADO AL PORTAPAPELES (PLANTILLA EXACTA DE VENTAS)
+window.copiarDetallesLupa = function (boton, cuentaCodificada) {
+  // Desempaquetamos los datos limpios de la cuenta
+  const cuenta = JSON.parse(decodeURIComponent(cuentaCodificada));
+
+  // Configuración de variables según el tipo de plataforma (Netflix, IPTV, EMBY, etc.)
+  const platId = String(cuenta.plataforma || "SERVICIO")
+    .toUpperCase()
+    .trim();
+  const nombreCliente =
+    cuenta.cliente && cuenta.cliente !== "Sin cliente" ? cuenta.cliente : "";
+
+  // 1. INTRODUCCIÓN
+  let intro = `🌟 *¡Hola${nombreCliente ? " " + nombreCliente : ""}!*\n\n`;
+  intro += `Tu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
+
+  // 2. ETIQUETAS DINÁMICAS (IPTV / EMBY / OTROS)
+  let etiquetaUser =
+    platId === "IPTV" || platId === "EMBY" ? "Usuario" : "Correo";
+  let etiquetaPerfil =
+    platId === "IPTV" ? "URL" : platId === "EMBY" ? "Servidor" : "Perfil";
+
+  // 3. CUERPO DEL MENSAJE
+  let cuerpo = `\n\n🎬 *DETALLES DE ${platId.replace(/-/g, " ")}* ✅\n────────────────────\n`;
+
+  if (platId === "NETFLIX") {
+    cuerpo += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+  }
+
+  cuerpo += `👤 *${etiquetaUser}:* ${cuenta.correo}\n🔐 *Contraseña:* ${cuenta.clave}\n`;
+
+  if (
+    platId === "IPTV" ||
+    (cuenta.perfil &&
+      cuenta.perfil !== "" &&
+      cuenta.perfil !== "N/A" &&
+      cuenta.perfil !== "Único / General")
+  ) {
+    cuerpo += `🌐 *${etiquetaPerfil}:* ${cuenta.perfil}\n`;
+  }
+
+  if (platId === "EMBY") {
+    cuerpo += `🔌 *Puerto:* Dejar vacío\n`;
+  }
+
+  if (
+    cuenta.pin &&
+    cuenta.pin !== "" &&
+    cuenta.pin !== "N/A" &&
+    cuenta.pin !== "Sin PIN"
+  ) {
+    cuerpo += `📍 *PIN:* ${cuenta.pin}\n`;
+  }
+
+  cuerpo += `📅 *Vence:* ${cuenta.vencimiento || "30 Días"}\n`;
+
+  if (platId === "NETFLIX") {
+    cuerpo += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/`;
+  }
+
+  // 4. INFORMACIÓN DE SOPORTE Y CIERRE
+  let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
+
+  const mensajeFinalFicha =
+    intro +
+    cuerpo +
+    soporte +
+    `\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
+
+  // 5. COPIAR AL PORTAPAPELES Y ANIMACIÓN DEL BOTÓN
+  navigator.clipboard
+    .writeText(mensajeFinalFicha)
+    .then(() => {
+      const textoOriginal = boton.innerHTML;
+      boton.innerHTML = "✅ Copiado";
+      boton.style.background = "#30d158";
+      boton.style.color = "#000000";
+
+      setTimeout(() => {
+        boton.innerHTML = textoOriginal;
+        boton.style.background = "rgba(255,255,255,0.1)";
+        boton.style.color = "white";
+      }, 2000);
+    })
+    .catch((err) => {
+      console.error("Error al copiar al portapapeles: ", err);
+      alert("Hubo un error al copiar los datos.");
+    });
+};
