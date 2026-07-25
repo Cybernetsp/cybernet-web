@@ -736,6 +736,32 @@
           <span class="mac-tooltip">Vender</span>
         </div>
 
+        <!-- BOTÓN DE BÚSQUEDA RÁPIDA (USANDO LA CLASE NATIVA MAC-DOCK-ICON) -->
+        <div class="mac-dock-icon" onclick="abrirBuscadorGlobal()">
+          <div
+            class="mac-icon-bg"
+            style="
+              background: linear-gradient(180deg, #00c6ff, #0072ff);
+              color: white;
+            "
+          >
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <span class="mac-tooltip">Buscar</span>
+        </div>
+
         <div
           class="mac-dock-icon"
           id="btnLibroSheets"
@@ -11277,6 +11303,101 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- VENTANA FLOTANTE BUSCADOR GLOBAL -->
+    <div
+      id="modal-buscador-global"
+      class="modal-ios"
+      style="
+        display: none;
+        position: fixed;
+        top: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 600px;
+        z-index: 999999;
+        background: rgba(28, 28, 30, 0.65);
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 15px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+      "
+    >
+      <!-- Barra de Búsqueda -->
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 12px;
+          padding: 12px 15px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        "
+      >
+        <svg
+          width="20"
+          height="20"
+          stroke="#a1a1aa"
+          stroke-width="2.5"
+          fill="none"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          id="input-buscador-global"
+          placeholder="Escribe el número, correo o nombre..."
+          autocomplete="off"
+          style="
+            background: transparent;
+            border: none;
+            color: white;
+            width: 100%;
+            margin-left: 12px;
+            font-size: 1.1rem;
+            outline: none;
+            font-weight: 500;
+          "
+        />
+        <button
+          onclick="cerrarBuscadorGlobal()"
+          style="
+            background: transparent;
+            border: none;
+            color: #a1a1aa;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+          "
+        >
+          ✖
+        </button>
+      </div>
+
+      <!-- Lista de Resultados (Renderizado al instante) -->
+      <div
+        id="resultados-buscador"
+        style="
+          margin-top: 15px;
+          max-height: 350px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding-right: 5px;
+        "
+      >
+        <!-- Los resultados se inyectan por JS aquí -->
       </div>
     </div>
 
