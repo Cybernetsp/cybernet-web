@@ -1710,3 +1710,44 @@ body:has(.overlay-ios[style*="display: block"]) [id*="dock"] {
   pointer-events: none !important;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
+/* 🚀 Animación de elevación fluida para el ícono de búsqueda */
+.mac-icon-wrapper {
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1) !important;
+  cursor: pointer;
+}
+
+.mac-icon-wrapper:hover {
+  transform: scale(1.22) translateY(-8px) !important;
+}
+/* =========================================================================
+   ESTILOS OPTIMIZADOS: VENTANA EXTRA GRANDE Y ESPACIOSA
+   ========================================================================= */
+#modal-buscador-global.modal-gigante-activo {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 98vw !important;
+  max-width: 1750px !important; /* 🔥 Ventana mucho más ancha */
+  height: 95vh !important;
+  max-height: 95vh !important; /* 🔥 Aprovecha casi toda la pantalla */
+  background: #0b0b0e !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  z-index: 999999 !important;
+  margin: 0 !important;
+}
+
+/* Oscurecer la barra de búsqueda para que haga contraste */
+#modal-buscador-global.modal-gigante-activo > div:first-child {
+  flex-shrink: 0 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
