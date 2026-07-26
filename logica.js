@@ -11618,190 +11618,543 @@ window.ejecutarDescartarGarantia = function (
   document.body.appendChild(script);
 };
 /* =========================================================================
-   🔍 BUSCADOR GLOBAL A PRUEBA DE ERRORES (0 LATENCIA - SOLO LUPA)
+   📊 MATRIZ VISOR EXCEL GIGANTE (EDICIÓN CON BOTÓN BORRAR PEAGADO AL TEXTO)
    ========================================================================= */
 
 let memoriaBuscador = [];
-const TIEMPO_CACHE_BUSQUEDA = 10 * 60 * 1000; // 10 minutos de memoria
+let plataformaActivaBuscador = "";
+const URL_SCRIPT_CYBERNET =
+  "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
 
-// 🧹 Función para forzar limpieza del caché si hace falta
+function convertirFechaAObjetoLupa(strFecha) {
+  if (!strFecha) return 0;
+  const str = String(strFecha).toLowerCase().trim();
+  const meses = {
+    ene: 0,
+    feb: 1,
+    mar: 2,
+    abr: 3,
+    may: 4,
+    jun: 5,
+    jul: 6,
+    ago: 7,
+    sep: 8,
+    oct: 9,
+    nov: 10,
+    dic: 11,
+  };
+  const match = str.match(/^(\d{1,2})[-/\s]([a-z]{3})/);
+  if (match && meses[match[2]] !== undefined) {
+    return new Date(2026, meses[match[2]], parseInt(match[1], 10)).getTime();
+  }
+  const ts = Date.parse(str);
+  return isNaN(ts) ? 0 : ts;
+}
+
 function limpiarCacheLupa() {
   localStorage.removeItem("cache_inventario_lupa");
-  localStorage.removeItem("cache_inventario_lupa_time");
+  localStorage.removeItem("cache_inventario_lupa_version");
   memoriaBuscador = [];
   console.log("🧹 Caché de la lupa limpiado.");
 }
 
 async function obtenerCuentasParaBuscador() {
-    const cacheGuardado = localStorage.getItem('cache_inventario_lupa');
-    const versionGuardada = localStorage.getItem('cache_inventario_lupa_version') || '';
+  const cacheGuardado = localStorage.getItem("cache_inventario_lupa");
+  const versionGuardada =
+    localStorage.getItem("cache_inventario_lupa_version") || "";
 
-    try {
-        // Consultamos al servidor enviando la versión que tenemos guardada
-        const URL_SCRIPT = `https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec?action=descargarInventarioBuscador&versionCliente=${versionGuardada}`;
+  try {
+    const URL_SCRIPT = `${URL_SCRIPT_CYBERNET}?action=descargarInventarioBuscador&versionCliente=${versionGuardada}`;
+    const response = await fetch(URL_SCRIPT);
+    const textoBruto = await response.text();
+    const jsonLimpio = textoBruto.replace(/^.*?\(/, "").replace(/\)$/, "");
+    const datos = JSON.parse(jsonLimpio);
 
-        const response = await fetch(URL_SCRIPT);
-        const textoBruto = await response.text();
-        const jsonLimpio = textoBruto.replace(/^.*?\(/, '').replace(/\)$/, '');
-        const datos = JSON.parse(jsonLimpio);
+    if (datos.status === "not_modified" && cacheGuardado)
+      return JSON.parse(cacheGuardado);
 
-        // 🟢 NADA HA CAMBIADO EN EL EXCEL: Usar memoria local (Respuesta en milisegundos)
-        if (datos.status === "not_modified" && cacheGuardado) {
-            console.log("⚡ Lupa: Sin cambios en el Excel. Datos cargados desde memoria (0ms).");
-            return JSON.parse(cacheGuardado);
-        }
-
-        // 🔴 HUBO UN CAMBIO O ES LA PRIMERA CARGA: Actualizar datos y guardar la nueva versión
-        if (datos.status === "success" && Array.isArray(datos.data)) {
-            console.log(`🔄 Lupa: Cambio detectado en el libro. Se actualizaron ${datos.data.length} cuentas.`);
-            localStorage.setItem('cache_inventario_lupa', JSON.stringify(datos.data));
-            localStorage.setItem('cache_inventario_lupa_version', datos.version || Date.now().toString());
-            return datos.data;
-        }
-
-        if (cacheGuardado) return JSON.parse(cacheGuardado);
-        return [];
-
-    } catch (error) {
-        console.error("❌ Error verificando actualización de la Lupa:", error);
-        if (cacheGuardado) return JSON.parse(cacheGuardado);
-        return [];
+    if (datos.status === "success" && Array.isArray(datos.data)) {
+      localStorage.setItem("cache_inventario_lupa", JSON.stringify(datos.data));
+      localStorage.setItem(
+        "cache_inventario_lupa_version",
+        datos.version || Date.now().toString(),
+      );
+      return datos.data;
     }
+
+    if (cacheGuardado) return JSON.parse(cacheGuardado);
+    return [];
+  } catch (error) {
+    if (cacheGuardado) return JSON.parse(cacheGuardado);
+    return [];
+  }
+}
+
+// 🎯 FUNCIÓN QUE AJUSTA EL ANCHO DEL INPUT Y PEGA EL BOTÓN "BORRAR" AL TEXTO
+function actualizarPosicionBotonBorrar(input) {
+  if (!input) return;
+  const btnBorrar = document.getElementById("btn-borrar-texto-lupa");
+  const val = input.value;
+
+  if (val && val.trim().length > 0) {
+    // Mide el ancho exacto en píxeles del texto escrito
+    const canvas =
+      actualizarPosicionBotonBorrar.canvas ||
+      (actualizarPosicionBotonBorrar.canvas = document.createElement("canvas"));
+    const context = canvas.getContext("2d");
+    const style = window.getComputedStyle(input);
+    context.font = `${style.fontWeight || "500"} ${style.fontSize || "17.6px"} ${style.fontFamily || "sans-serif"}`;
+
+    const textWidth = context.measureText(val).width;
+
+    // Ajusta el input para que termine justo donde acaba la última letra
+    input.style.setProperty("flex", "0 0 auto", "important");
+    input.style.setProperty("width", textWidth + 14 + "px", "important");
+
+    if (btnBorrar)
+      btnBorrar.style.setProperty("display", "inline-flex", "important");
+  } else {
+    // Si está vacío, ocupa el ancho disponible
+    input.style.setProperty("flex", "1", "important");
+    input.style.setProperty("width", "auto", "important");
+    if (btnBorrar) btnBorrar.style.setProperty("display", "none", "important");
+  }
 }
 
 async function abrirBuscadorGlobal() {
   const modal = document.getElementById("modal-buscador-global");
   if (!modal) return;
-  modal.style.display = "block";
+
+  if (modal.parentNode !== document.body) document.body.appendChild(modal);
+
+  modal.style.display = "flex";
+  modal.classList.add("modal-gigante-activo");
 
   const input = document.getElementById("input-buscador-global");
   if (input) {
+    const parentDiv = input.parentElement;
+    parentDiv.style.cssText =
+      "display: flex !important; align-items: center !important; width: 100% !important; padding: 12px 20px !important; background: #1c1c21 !important; border: 1px solid rgba(255,255,255,0.12) !important; border-radius: 16px !important; margin-bottom: 15px !important; flex-shrink: 0 !important; box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important; position: relative !important;";
+
+    input.style.cssText =
+      "flex: 1 !important; background: transparent !important; border: none !important; color: #ffffff !important; font-size: 1.1rem !important; outline: none !important; margin: 0 8px !important; padding: 6px 0 !important; font-weight: 500 !important;";
+
+    // 🧼 1. BOTÓN "BORRAR" ADAPTATIVO PEAGADO AL TEXTO
+    let btnBorrar = document.getElementById("btn-borrar-texto-lupa");
+    if (!btnBorrar) {
+      btnBorrar = document.createElement("button");
+      btnBorrar.id = "btn-borrar-texto-lupa";
+      btnBorrar.title = "Borrar texto";
+      btnBorrar.innerHTML = `<span style="font-size: 0.7rem; font-weight: 900;">✕</span> Borrar`;
+      btnBorrar.style.cssText =
+        "background: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #a1a1aa !important; padding: 4px 10px !important; border-radius: 20px !important; display: none !important; align-items: center !important; gap: 5px !important; cursor: pointer !important; font-size: 0.75rem !important; font-weight: 700 !important; margin-left: 6px !important; margin-right: 6px !important; transition: all 0.2s ease !important; flex-shrink: 0 !important;";
+
+      btnBorrar.onmouseover = function () {
+        this.style.setProperty(
+          "background",
+          "rgba(255, 69, 58, 0.2)",
+          "important",
+        );
+        this.style.setProperty("color", "#ff453a", "important");
+        this.style.setProperty(
+          "border-color",
+          "rgba(255, 69, 58, 0.4)",
+          "important",
+        );
+      };
+      btnBorrar.onmouseout = function () {
+        this.style.setProperty(
+          "background",
+          "rgba(255, 255, 255, 0.1)",
+          "important",
+        );
+        this.style.setProperty("color", "#a1a1aa", "important");
+        this.style.setProperty(
+          "border-color",
+          "rgba(255, 255, 255, 0.15)",
+          "important",
+        );
+      };
+
+      btnBorrar.onclick = function () {
+        input.value = "";
+        actualizarPosicionBotonBorrar(input);
+        input.focus();
+        if (typeof renderizarFilasTabla === "function") renderizarFilasTabla();
+      };
+
+      input.insertAdjacentElement("afterend", btnBorrar);
+    }
+
+    // 🧼 2. DIV ESPACIADOR PARA EMPUJAR LA X DE CERRAR VENTANA A LA DERECHA
+    let spacer = document.getElementById("spacer-lupa-flex");
+    if (!spacer) {
+      spacer = document.createElement("div");
+      spacer.id = "spacer-lupa-flex";
+      spacer.style.cssText = "flex: 1 !important; min-width: 10px !important;";
+      btnBorrar.insertAdjacentElement("afterend", spacer);
+    }
+
+    // 🧼 3. BOTÓN DE CERRAR MODAL (EXTREMO DERECHO)
+    const closeBtn = parentDiv.querySelector(
+      "button:not(#btn-borrar-texto-lupa)",
+    );
+    if (closeBtn) {
+      closeBtn.innerHTML = "✕";
+      closeBtn.style.cssText =
+        "background: rgba(255,255,255,0.08) !important; border: none !important; color: #a1a1aa !important; width: 36px !important; height: 36px !important; min-width: 36px !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; font-size: 1.15rem !important; transition: all 0.2s ease !important; padding: 0 !important; font-weight: bold !important; flex-shrink: 0 !important;";
+
+      closeBtn.onmouseover = function () {
+        this.style.setProperty("background", "#ff453a", "important");
+        this.style.setProperty("color", "#ffffff", "important");
+        this.style.setProperty("transform", "scale(1.05)", "important");
+      };
+      closeBtn.onmouseout = function () {
+        this.style.setProperty(
+          "background",
+          "rgba(255,255,255,0.08)",
+          "important",
+        );
+        this.style.setProperty("color", "#a1a1aa", "important");
+        this.style.setProperty("transform", "scale(1)", "important");
+      };
+    }
+
     input.value = "";
+    actualizarPosicionBotonBorrar(input);
     input.focus();
   }
 
   const cajaResultados = document.getElementById("resultados-buscador");
-  cajaResultados.innerHTML =
-    '<div style="color: #a1a1aa; text-align: center; padding: 20px;">Cargando base de datos a la memoria...</div>';
-
-  // Cargar en memoria
-  memoriaBuscador = await obtenerCuentasParaBuscador();
+  if (cajaResultados) {
+    cajaResultados.style.cssText =
+      "flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; margin-top: 5px;";
+  }
 
   if (memoriaBuscador.length === 0) {
-    cajaResultados.innerHTML = `
-            <div style="color: #ff9500; text-align: center; padding: 15px; font-size: 0.85rem;">
-                ⚠️ No se han podido cargar las cuentas desde la nube.
-                <br><br>
-                <button onclick="limpiarCacheLupa(); abrirBuscadorGlobal();" style="background: #0072ff; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">
-                    🔄 Reintentar Descarga
-                </button>
+    if (cajaResultados) {
+      cajaResultados.innerHTML = `
+            <div style="color: #30d158; text-align: center; padding: 40px; font-size: 1.2rem; font-weight: 600;">
+                ⚡ Sincronizando inventario maestro...
             </div>`;
-  } else {
-    cajaResultados.innerHTML = `<div style="color: #a1a1aa; text-align: center; font-size: 0.85rem; padding: 20px;">Escribe un teléfono, correo o cliente (${memoriaBuscador.length} cuentas listas)...</div>`;
+    }
+    memoriaBuscador = await obtenerCuentasParaBuscador();
   }
+
+  renderizarMatrizCompleta();
 }
 
 function cerrarBuscadorGlobal() {
   const modal = document.getElementById("modal-buscador-global");
-  if (modal) modal.style.display = "none";
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("modal-gigante-activo");
+  }
 }
 
 document.addEventListener("keydown", function (e) {
   if (e.key === "Escape") cerrarBuscadorGlobal();
 });
 
-// ⚡ BÚSQUEDA UNIVERSAL INTELIGENTE (IGNORA ESPACIOS Y GUIONES EN TELÉFONOS)
-const inputBuscador = document.getElementById("input-buscador-global");
-if (inputBuscador) {
-  inputBuscador.addEventListener("input", function (e) {
-    const texto = e.target.value.toLowerCase().trim();
-    const textoSoloNumeros = texto.replace(/\D/g, ""); // Filtra dejando solo dígitos
-    const cajaResultados = document.getElementById("resultados-buscador");
+window.seleccionarPestañaPlataforma = function (nombrePlat) {
+  plataformaActivaBuscador = nombrePlat;
+  const input = document.getElementById("input-buscador-global");
+  if (input) {
+    input.value = "";
+    actualizarPosicionBotonBorrar(input);
+  }
+  renderizarMatrizCompleta();
+};
 
-    if (texto.length < 3) {
-      cajaResultados.innerHTML =
-        '<div style="color: #a1a1aa; text-align: center; font-size: 0.85rem; padding: 20px;">Escribe al menos 3 caracteres...</div>';
-      return;
+function renderizarMatrizCompleta() {
+  const cajaResultados = document.getElementById("resultados-buscador");
+  if (!cajaResultados) return;
+
+  const plataformasUnicas = [];
+  memoriaBuscador.forEach((item) => {
+    const p = String(item.plataforma || "")
+      .toUpperCase()
+      .trim();
+    if (p && !plataformasUnicas.includes(p)) {
+      plataformasUnicas.push(p);
     }
+  });
 
-    // 🔥 FILTRO INTELIGENTE
-    const filtrados = memoriaBuscador.filter((cuenta) => {
-      const telBruto = cuenta.telefono ? String(cuenta.telefono) : "";
-      const telSoloNumeros = telBruto.replace(/\D/g, "");
+  if (plataformaActivaBuscador === "" && plataformasUnicas.length > 0) {
+    plataformaActivaBuscador = plataformasUnicas[0];
+  }
 
-      const cor = cuenta.correo ? String(cuenta.correo).toLowerCase() : "";
-      const nom = cuenta.cliente ? String(cuenta.cliente).toLowerCase() : "";
+  let htmlBotones = `<div id="contenedor-botones-lupa" style="display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; max-height: 120px; overflow-y: auto;">`;
 
-      const coincideTelefono =
-        textoSoloNumeros.length >= 3 &&
-        telSoloNumeros.includes(textoSoloNumeros);
-      const coincideCorreo = cor.includes(texto);
-      const coincideNombre = nom.includes(texto);
+  plataformasUnicas.forEach((plat) => {
+    const activa = plat === plataformaActivaBuscador;
+    let icono = "📺";
+    if (plat.includes("NETFLIX")) icono = "🔴";
+    if (plat.includes("DISNEY")) icono = "🔵";
+    if (plat.includes("HBO") || plat.includes("MAX")) icono = "🟣";
+    if (plat.includes("AMAZON") || plat.includes("PRIME")) icono = "📦";
+    if (plat.includes("SPOTIFY") || plat.includes("DEEZER")) icono = "🎵";
 
-      return coincideTelefono || coincideCorreo || coincideNombre;
-    });
+    htmlBotones += `
+            <button onclick="seleccionarPestañaPlataforma('${plat}')" class="btn-plat-filtro" data-plat="${plat}" style="
+                background: ${activa ? "#0072ff" : "rgba(255, 255, 255, 0.04)"};
+                color: ${activa ? "#ffffff" : "#a1a1aa"};
+                border: 1px solid ${activa ? "#0072ff" : "rgba(255, 255, 255, 0.1)"};
+                padding: 8px 16px;
+                border-radius: 10px;
+                font-size: 0.82rem;
+                font-weight: 700;
+                cursor: pointer;
+                white-space: nowrap;
+                transition: all 0.2s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            ">
+                <span>${icono}</span>
+                <span>${plat}</span>
+            </button>
+        `;
+  });
+  htmlBotones += `</div>`;
 
-    if (filtrados.length === 0) {
-      cajaResultados.innerHTML =
-        '<div style="color: #ff453a; text-align: center; font-size: 0.85rem; padding: 20px;">No se encontraron cuentas asociadas.</div>';
-      return;
+  let htmlEstructura = `
+    ${htmlBotones}
+    <div id="contenedor-tabla-dinamica" style="flex: 1; min-height: 0; overflow: auto; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; background: #121215;">
+    </div>
+    `;
+
+  cajaResultados.innerHTML = htmlEstructura;
+  renderizarFilasTabla();
+}
+
+function renderizarFilasTabla() {
+  const contenedorTabla = document.getElementById("contenedor-tabla-dinamica");
+  if (!contenedorTabla) return;
+
+  const inputBuscador = document.getElementById("input-buscador-global");
+  const texto = inputBuscador ? inputBuscador.value.toLowerCase().trim() : "";
+  const estaBuscandoGlobal = texto.length >= 2;
+
+  const botones = document.querySelectorAll("#contenedor-botones-lupa button");
+  botones.forEach((btn) => {
+    btn.style.opacity = estaBuscandoGlobal ? "0.3" : "1";
+  });
+
+  const textoLimpioNumerico = texto.replace(/[\s\-\+\(\)]/g, "");
+  const esBusquedaTelefono = /^\d{3,}$/.test(textoLimpioNumerico);
+
+  let filtrados = memoriaBuscador.filter((cuenta) => {
+    const platCuenta = String(cuenta.plataforma || "")
+      .toUpperCase()
+      .trim();
+
+    if (estaBuscandoGlobal) {
+      const cor = String(cuenta.correo || "").toLowerCase();
+      const nom = String(cuenta.cliente || "").toLowerCase();
+      const cla = String(cuenta.clave || "").toLowerCase();
+      const tel = String(cuenta.telefono || "").replace(/\D/g, "");
+
+      if (esBusquedaTelefono) {
+        return tel.includes(textoLimpioNumerico);
+      } else {
+        return (
+          cor.includes(texto) || nom.includes(texto) || cla.includes(texto)
+        );
+      }
+    } else {
+      return platCuenta === plataformaActivaBuscador;
     }
+  });
 
-    // Renderizado de las tarjetas con el Botón de Copiar
-    cajaResultados.innerHTML = filtrados
-      .map((cuenta) => {
-        // Empaquetamos la cuenta de forma segura para no dañar el HTML con símbolos raros en las claves
-        const cuentaCodificada = encodeURIComponent(JSON.stringify(cuenta));
+  filtrados.sort(
+    (a, b) =>
+      convertirFechaAObjetoLupa(b.fechaCompra) -
+      convertirFechaAObjetoLupa(a.fechaCompra),
+  );
 
-        return `
-            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 12px 16px; border-radius: 12px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 6px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: white; font-weight: 700; font-size: 0.95rem;">${cuenta.correo}</span>
-                    <span style="background: #0072ff; color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; letter-spacing: 0.5px;">${cuenta.plataforma}</span>
-                </div>
-                <div style="color: #a1a1aa; font-size: 0.8rem; display: flex; justify-content: space-between;">
-                    <span>📱 ${cuenta.telefono || "Sin celular"}</span>
-                    <span>👤 ${cuenta.cliente || "Sin cliente"}</span>
-                </div>
-                <div style="color: #30d158; font-size: 0.8rem; font-weight: 500; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span>🔑 ${cuenta.clave}</span>
-                        <span style="color: #a1a1aa; font-size: 0.75rem;">Perfil: ${cuenta.perfil} (PIN: ${cuenta.pin})</span>
-                    </div>
-                    <button onclick="copiarDetallesLupa(this, '${cuentaCodificada}')" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; transition: 0.2s;">
-                        📋 Copiar
-                    </button>
-                </div>
-            </div>
+  const incluyeNetflix = filtrados.some((c) =>
+    String(c.plataforma).toUpperCase().includes("NETFLIX"),
+  );
+  const colSpanCount = estaBuscandoGlobal
+    ? incluyeNetflix
+      ? 11
+      : 10
+    : incluyeNetflix
+      ? 10
+      : 9;
+
+  let htmlTabla = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; color: #e4e4e7; text-align: left; white-space: nowrap;">
+            <thead>
+                <tr style="background: #18181b; color: #a1a1aa; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10;">
+                    ${estaBuscandoGlobal ? '<th style="padding: 14px 16px; font-weight: 700; text-align: center;">PLATAFORMA</th>' : ""}
+                    <th style="padding: 14px 16px; font-weight: 700;">PROV</th>
+                    <th style="padding: 14px 16px; font-weight: 700;">FECHA</th>
+                    <th style="padding: 14px 16px; font-weight: 700;">CORREO / USUARIO</th>
+                    <th style="padding: 14px 16px; font-weight: 700;">CONTRASEÑA</th>
+                    <th style="padding: 14px 16px; font-weight: 700;">PERFIL</th>
+                    <th style="padding: 14px 16px; font-weight: 700;">PIN</th>
+                    ${incluyeNetflix ? '<th style="padding: 14px 16px; font-weight: 700; color: #ffd60a;">VENCIMIENTO</th>' : ""}
+                    <th style="padding: 14px 16px; font-weight: 700;">CLIENTE</th>
+                    <th style="padding: 14px 16px; font-weight: 700;">TELÉFONO</th>
+                    <th style="padding: 14px 16px; font-weight: 700; text-align: center;">ACCIÓN</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+  if (filtrados.length === 0) {
+    htmlTabla += `
+            <tr>
+                <td colspan="${colSpanCount}" style="text-align: center; padding: 40px; color: #ff453a; font-weight: 600;">
+                    No se encontraron cuentas para esta búsqueda.
+                </td>
+            </tr>
+        `;
+  } else {
+    let ultimaFechaRenderizada = null;
+
+    filtrados.forEach((cuenta, idx) => {
+      const cuentaCodificada = encodeURIComponent(JSON.stringify(cuenta));
+      const esFilaPar = idx % 2 === 0;
+      const isRowNetflix = String(cuenta.plataforma)
+        .toUpperCase()
+        .includes("NETFLIX");
+
+      const colorFondoFila = cuenta.esCaida
+        ? "rgba(255, 69, 58, 0.15)"
+        : esFilaPar
+          ? "rgba(255, 255, 255, 0.015)"
+          : "transparent";
+
+      let colorPlat = "#0072ff";
+      let bgPlat = "rgba(0, 114, 255, 0.15)";
+      if (isRowNetflix) {
+        colorPlat = "#ff453a";
+        bgPlat = "rgba(255, 69, 58, 0.15)";
+      } else if (cuenta.plataforma.includes("DISNEY")) {
+        colorPlat = "#32ade6";
+        bgPlat = "rgba(50, 173, 230, 0.15)";
+      } else if (cuenta.plataforma.includes("AMAZON")) {
+        colorPlat = "#0a84ff";
+        bgPlat = "rgba(10, 132, 255, 0.15)";
+      } else if (
+        cuenta.plataforma.includes("HBO") ||
+        cuenta.plataforma.includes("MAX")
+      ) {
+        colorPlat = "#bf5af2";
+        bgPlat = "rgba(191, 90, 242, 0.15)";
+      }
+
+      const celdaPlataforma = estaBuscandoGlobal
+        ? `<span style="background: ${bgPlat}; color: ${colorPlat}; padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.5px; border: 1px solid ${bgPlat};">${cuenta.plataforma}</span>`
+        : `<span style="color: #444;">-</span>`;
+
+      const btnCopiar = `<button onclick="copiarDetallesLupa(this, '${cuentaCodificada}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">📋 Copiar</button>`;
+
+      let btnTemp = "";
+      let btnGarantia = "";
+
+      if (!isRowNetflix) {
+        btnTemp = `<button onclick="copiarCuentaTemporalLupa(this, '${cuentaCodificada}')" style="background: rgba(255, 159, 10, 0.1); border: 1px solid rgba(255, 159, 10, 0.2); color: var(--ios-orange); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">⏳ Temp</button>`;
+
+        if (!cuenta.esCaida) {
+          btnGarantia = `<button class="btn-reportar-lupa" onclick="reportarDesdeLupa(this, '${cuenta.plataforma}', '${cuenta.correo}', '${cuenta.clave}', '${cuenta.fechaCompra || "-"}', '${cuenta.proveedor || "-"}')" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); color: var(--ios-red); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">🚨 Reportar</button>`;
+        } else {
+          btnGarantia = `<button onclick="resolverDesdeLupa('${cuenta.filaIndex || ""}', '${cuenta.correo}', '${cuenta.plataforma}')" style="background: rgba(48, 209, 88, 0.1); border: 1px solid rgba(48, 209, 88, 0.2); color: var(--ios-green); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">✅ Resolver</button>`;
+        }
+      }
+
+      const fechaActual = cuenta.fechaCompra || "Fecha Desconocida";
+
+      if (fechaActual !== ultimaFechaRenderizada) {
+        htmlTabla += `
+                    <tr style="background: rgba(10, 132, 255, 0.05);">
+                        <td colspan="${colSpanCount}" style="padding: 8px 16px; border-top: 1px solid rgba(10, 132, 255, 0.2); border-bottom: 1px solid rgba(10, 132, 255, 0.2); color: var(--ios-blue); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
+                            📅 Cuentas del: ${fechaActual}
+                        </td>
+                    </tr>
+                `;
+        ultimaFechaRenderizada = fechaActual;
+      }
+
+      htmlTabla += `
+                <tr data-correo="${cuenta.correo}" data-plat="${cuenta.plataforma}" style="background: ${colorFondoFila}; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.3s ease;">
+                    ${
+                      estaBuscandoGlobal
+                        ? `
+                    <td style="padding: 12px 16px; text-align: center;">
+                        ${celdaPlataforma}
+                    </td>`
+                        : ""
+                    }
+                    <td style="padding: 12px 16px; font-weight: 700; color: #ff9f0a;">
+                        ${cuenta.proveedor || "-"}
+                    </td>
+                    <td style="padding: 12px 16px; font-weight: 700; color: #a1a1aa;">
+                        ${cuenta.fechaCompra || "-"}
+                    </td>
+                    <td style="padding: 12px 16px; font-weight: 600; color: #ffffff;">
+                        ${cuenta.correo || "-"}
+                    </td>
+                    <td style="padding: 12px 16px; color: #30d158; font-family: monospace; font-size: 0.95rem;">
+                        ${cuenta.clave || "-"}
+                    </td>
+                    <td style="padding: 12px 16px; color: #e4e4e7;">
+                        ${cuenta.perfil || "1"}
+                    </td>
+                    <td style="padding: 12px 16px; color: #ffd60a; font-family: monospace;">
+                        ${cuenta.pin || "-"}
+                    </td>
+                    ${incluyeNetflix ? `<td style="padding: 12px 16px; color: #ff9f0a; font-weight: 600;">${isRowNetflix ? cuenta.vencimiento || "-" : "-"}</td>` : ""}
+                    <td style="padding: 12px 16px; color: #e4e4e7;">
+                        ${cuenta.cliente || "-"}
+                    </td>
+                    <td style="padding: 12px 16px; color: #a1a1aa;">
+                        ${cuenta.telefono || "-"}
+                    </td>
+                    <td style="padding: 10px 16px; text-align: center;">
+                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                            ${btnCopiar}
+                            ${btnTemp}
+                            ${btnGarantia}
+                        </div>
+                    </td>
+                </tr>
             `;
-      })
-      .join("");
+    });
+  }
+
+  htmlTabla += `</tbody></table>`;
+  contenedorTabla.innerHTML = htmlTabla;
+}
+
+const inputBuscadorGlobal = document.getElementById("input-buscador-global");
+if (inputBuscadorGlobal) {
+  inputBuscadorGlobal.addEventListener("input", function () {
+    actualizarPosicionBotonBorrar(this);
+    renderizarFilasTabla();
   });
 }
 
-// 📋 MOTOR DE COPIADO AL PORTAPAPELES (PLANTILLA EXACTA DE VENTAS)
+// 7. MOTOR DE COPIADO AL PORTAPAPELES
 window.copiarDetallesLupa = function (boton, cuentaCodificada) {
-  // Desempaquetamos los datos limpios de la cuenta
   const cuenta = JSON.parse(decodeURIComponent(cuentaCodificada));
-
-  // Configuración de variables según el tipo de plataforma (Netflix, IPTV, EMBY, etc.)
   const platId = String(cuenta.plataforma || "SERVICIO")
     .toUpperCase()
     .trim();
   const nombreCliente =
-    cuenta.cliente && cuenta.cliente !== "Sin cliente" ? cuenta.cliente : "";
+    cuenta.cliente && cuenta.cliente !== "Sin cliente" && cuenta.cliente !== "-"
+      ? cuenta.cliente
+      : "";
 
-  // 1. INTRODUCCIÓN
-  let intro = `🌟 *¡Hola${nombreCliente ? " " + nombreCliente : ""}!*\n\n`;
-  intro += `Tu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
-
-  // 2. ETIQUETAS DINÁMICAS (IPTV / EMBY / OTROS)
+  let intro = `🌟 *¡Hola${nombreCliente ? " " + nombreCliente : ""}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
   let etiquetaUser =
     platId === "IPTV" || platId === "EMBY" ? "Usuario" : "Correo";
   let etiquetaPerfil =
     platId === "IPTV" ? "URL" : platId === "EMBY" ? "Servidor" : "Perfil";
 
-  // 3. CUERPO DEL MENSAJE
   let cuerpo = `\n\n🎬 *DETALLES DE ${platId.replace(/-/g, " ")}* ✅\n────────────────────\n`;
 
   if (platId === "NETFLIX") {
@@ -11828,18 +12181,17 @@ window.copiarDetallesLupa = function (boton, cuentaCodificada) {
     cuenta.pin &&
     cuenta.pin !== "" &&
     cuenta.pin !== "N/A" &&
-    cuenta.pin !== "Sin PIN"
+    cuenta.pin !== "Sin PIN" &&
+    cuenta.pin !== "-"
   ) {
     cuerpo += `📍 *PIN:* ${cuenta.pin}\n`;
   }
 
-  cuerpo += `📅 *Vence:* ${cuenta.vencimiento || "30 Días"}\n`;
-
   if (platId === "NETFLIX") {
+    cuerpo += `📅 *Vence:* ${cuenta.vencimiento || "30 Días"}\n`;
     cuerpo += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/`;
   }
 
-  // 4. INFORMACIÓN DE SOPORTE Y CIERRE
   let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
 
   const mensajeFinalFicha =
@@ -11848,23 +12200,462 @@ window.copiarDetallesLupa = function (boton, cuentaCodificada) {
     soporte +
     `\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
-  // 5. COPIAR AL PORTAPAPELES Y ANIMACIÓN DEL BOTÓN
-  navigator.clipboard
-    .writeText(mensajeFinalFicha)
-    .then(() => {
-      const textoOriginal = boton.innerHTML;
-      boton.innerHTML = "✅ Copiado";
-      boton.style.background = "#30d158";
-      boton.style.color = "#000000";
+  navigator.clipboard.writeText(mensajeFinalFicha).then(() => {
+    const textoOriginal = boton.innerHTML;
+    boton.innerHTML = "✅ Copiado";
+    boton.style.setProperty("background", "#30d158", "important");
+    boton.style.setProperty("color", "#000000", "important");
+    boton.style.setProperty("border-color", "transparent", "important");
 
-      setTimeout(() => {
-        boton.innerHTML = textoOriginal;
-        boton.style.background = "rgba(255,255,255,0.1)";
-        boton.style.color = "white";
-      }, 2000);
-    })
-    .catch((err) => {
-      console.error("Error al copiar al portapapeles: ", err);
-      alert("Hubo un error al copiar los datos.");
-    });
+    setTimeout(() => {
+      boton.innerHTML = textoOriginal;
+      boton.style.setProperty(
+        "background",
+        "rgba(255, 255, 255, 0.08)",
+        "important",
+      );
+      boton.style.setProperty("color", "#ffffff", "important");
+      boton.style.setProperty(
+        "border-color",
+        "rgba(255, 255, 255, 0.15)",
+        "important",
+      );
+    }, 2000);
+  });
 };
+
+window.copiarCuentaTemporalLupa = function (boton, cuentaCodificada) {
+  if (typeof haptic === "function") haptic();
+  const cuenta = JSON.parse(decodeURIComponent(cuentaCodificada));
+
+  let perfilTxt =
+    cuenta.perfil && cuenta.perfil !== "N/A" && cuenta.perfil !== ""
+      ? `\n👤 *Perfil:* ${cuenta.perfil}`
+      : "";
+  let pinTxt =
+    cuenta.pin &&
+    cuenta.pin !== "N/A" &&
+    cuenta.pin !== "-" &&
+    cuenta.pin !== ""
+      ? `\n📍 *PIN:* ${cuenta.pin}`
+      : "";
+
+  let mensajeTemporal = `🌟 *¡Hola! Lamentamos los inconvenientes con tu servicio.*\n\nMientras nuestro equipo técnico repara tu cuenta principal, te hemos habilitado un *acceso temporal* para que no pares de disfrutar tu programación favorita 🍿🎬:\n\n📺 *${cuenta.plataforma} (TEMPORAL)*\n────────────────────\n📧 *Correo:* ${cuenta.correo}\n🔐 *Clave:* ${cuenta.clave}${perfilTxt}${pinTxt}\n────────────────────\n_Te avisaremos por este medio apenas tu cuenta original esté solucionada. ¡Gracias por tu paciencia!_ ✨`;
+
+  const textoOriginal = boton.innerHTML;
+
+  navigator.clipboard.writeText(mensajeTemporal).then(() => {
+    boton.innerHTML = "✅ Copiada";
+    boton.style.setProperty("background", "var(--ios-green)", "important");
+    boton.style.setProperty("color", "white", "important");
+    boton.style.setProperty("border-color", "transparent", "important");
+
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Cuenta temporal copiada al portapapeles</span></div>`,
+      );
+    }
+
+    setTimeout(() => {
+      boton.innerHTML = textoOriginal;
+      boton.style.setProperty(
+        "background",
+        "rgba(255, 159, 10, 0.1)",
+        "important",
+      );
+      boton.style.setProperty("color", "var(--ios-orange)", "important");
+      boton.style.setProperty(
+        "border-color",
+        "rgba(255, 159, 10, 0.2)",
+        "important",
+      );
+    }, 2000);
+  });
+};
+
+// =========================================================================
+// 🚨 ACCIÓN DIRECTA DE GARANTÍA: REPORTE EN VIVO Y MULTI-PERFIL
+// =========================================================================
+window.reportarDesdeLupa = function (
+  btn,
+  plat,
+  correo,
+  clave,
+  fechaCompra,
+  proveedor,
+) {
+  if (typeof haptic === "function") haptic();
+
+  let platNorm = plat.toUpperCase();
+  if (platNorm.includes("AMAZON")) platNorm = "AMAZON-PRIME-VIDEO";
+  else if (platNorm.includes("DISNEY") && platNorm.includes("PREMIUM"))
+    platNorm = "DISNEY-PREMIUM";
+  else if (platNorm.includes("DISNEY") && platNorm.includes("ESTANDAR"))
+    platNorm = "DISNEY-ESTANDAR";
+  else if (platNorm.includes("HBO") || platNorm.includes("MAX"))
+    platNorm = "HBO-MAX";
+
+  let mensajeReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platNorm}\n📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n👤 *Proveedor:* ${proveedor}\n📅 *Fecha Compra:* ${fechaCompra}\n💬 *Motivo:* Reporte automático`;
+  navigator.clipboard.writeText(mensajeReporte);
+
+  const filasHermanas = document.querySelectorAll(
+    `tr[data-correo="${correo}"]`,
+  );
+
+  filasHermanas.forEach((filaTR) => {
+    if (
+      filaTR.getAttribute("data-plat").toUpperCase().includes(platNorm) ||
+      platNorm.includes(filaTR.getAttribute("data-plat").toUpperCase())
+    ) {
+      filaTR.style.setProperty(
+        "background",
+        "rgba(255, 69, 58, 0.15)",
+        "important",
+      );
+      filaTR.style.setProperty(
+        "transition",
+        "background 0.3s ease",
+        "important",
+      );
+
+      const btnRep = filaTR.querySelector(".btn-reportar-lupa");
+      if (btnRep) {
+        btnRep.disabled = true;
+        btnRep.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Reportando...`;
+      }
+    }
+  });
+
+  const cbName = "cb_rep_lupa_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      memoriaBuscador.forEach((c) => {
+        if (
+          c.correo === correo &&
+          String(c.plataforma).toUpperCase().includes(platNorm)
+        ) {
+          c.esCaida = true;
+        }
+      });
+      localStorage.setItem(
+        "cache_inventario_lupa",
+        JSON.stringify(memoriaBuscador),
+      );
+
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Cuenta reportada y guardada.</span></div>`,
+        );
+      }
+
+      renderizarFilasTabla();
+    } else {
+      filasHermanas.forEach((filaTR) => {
+        if (
+          filaTR.getAttribute("data-plat").toUpperCase().includes(platNorm) ||
+          platNorm.includes(filaTR.getAttribute("data-plat").toUpperCase())
+        ) {
+          filaTR.style.background = "";
+
+          const btnRep = filaTR.querySelector(".btn-reportar-lupa");
+          if (btnRep) {
+            btnRep.innerHTML = "❌ Error";
+            btnRep.style.setProperty(
+              "background",
+              "var(--ios-red)",
+              "important",
+            );
+            btnRep.style.setProperty("color", "white", "important");
+
+            setTimeout(() => {
+              btnRep.disabled = false;
+              btnRep.innerHTML = "🚨 Reportar";
+              btnRep.style.setProperty(
+                "background",
+                "rgba(255, 69, 58, 0.1)",
+                "important",
+              );
+              btnRep.style.setProperty("color", "var(--ios-red)", "important");
+              btnRep.style.setProperty(
+                "border-color",
+                "rgba(255, 69, 58, 0.2)",
+                "important",
+              );
+            }, 2500);
+          }
+        }
+      });
+
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><span>Error al reportar</span></div>`,
+        );
+      }
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${URL_SCRIPT_CYBERNET}?action=reportarGarantia&plataforma=${encodeURIComponent(platNorm)}&correo=${encodeURIComponent(correo)}&clave=${encodeURIComponent(clave)}&descripcion=Reporte automático desde buscador&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.resolverDesdeLupa = function (filaIndex, correo, plat) {
+  if (typeof haptic === "function") haptic();
+
+  if (!filaIndex || filaIndex === "") {
+    alert(
+      "⚠️ Por favor recarga la memoria de la lupa (F12 -> limpiarCacheLupa()) para obtener el ID de la fila y poder resolverla.",
+    );
+    return;
+  }
+
+  const overlayResolver = document.getElementById("resolverGarantiaOverlay");
+  if (overlayResolver) {
+    overlayResolver.style.setProperty("z-index", "9999999", "important");
+  }
+
+  if (typeof abrirModalResolverGarantia === "function") {
+    abrirModalResolverGarantia(filaIndex, correo, plat);
+  }
+};
+
+/* =========================================================================
+   🛠️ ACTUALIZACIÓN EN VIVO DE "RESOLVER": CAMBIO Y RE-PINTO AL INSTANTE
+   ========================================================================= */
+window.ejecutarResolverGarantia = function (e) {
+  if (e) e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const btnSubmit = document.getElementById("btnSubmitResolver");
+  const fila = document.getElementById("resolverFila").value;
+  const plat = document.getElementById("resolverPlataforma").value;
+  const correoViejo = document.getElementById("resolverCorreoViejo").value;
+  const nuevoCorreo = document.getElementById("resNuevoCorreo").value.trim();
+  const nuevaClave = document.getElementById("resNuevaClave").value.trim();
+
+  btnSubmit.disabled = true;
+  btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Guardando Solución...`;
+
+  let platNorm = plat.toUpperCase().trim();
+
+  const cbName = "cb_resolv_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    btnSubmit.disabled = false;
+    btnSubmit.innerText = "Guardar y Resolver";
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>¡Cuenta resuelta y actualizada al instante!</span></div>`,
+        );
+      }
+
+      memoriaBuscador.forEach((c) => {
+        const cPlat = String(c.plataforma || "")
+          .toUpperCase()
+          .trim();
+        const coincidePlat =
+          cPlat.includes(platNorm) || platNorm.includes(cPlat);
+
+        if (
+          c.correo.toLowerCase() === correoViejo.toLowerCase() &&
+          coincidePlat
+        ) {
+          c.esCaida = false;
+          if (nuevoCorreo !== "") c.correo = nuevoCorreo;
+          if (nuevaClave !== "") c.clave = nuevaClave;
+        }
+      });
+
+      localStorage.setItem(
+        "cache_inventario_lupa",
+        JSON.stringify(memoriaBuscador),
+      );
+
+      if (typeof renderizarFilasTabla === "function") renderizarFilasTabla();
+      if (typeof cerrarModalResolver === "function") cerrarModalResolver();
+      if (typeof cargarGarantias === "function") cargarGarantias();
+    } else {
+      alert(
+        "❌ Error: " + (res ? res.message : "Fallo de conexión al resolver."),
+      );
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${URL_SCRIPT_CYBERNET}?action=resolverGarantia&filaIndex=${encodeURIComponent(fila)}&plataforma=${encodeURIComponent(plat)}&correoViejo=${encodeURIComponent(correoViejo)}&nuevoCorreo=${encodeURIComponent(nuevoCorreo)}&nuevaClave=${encodeURIComponent(nuevaClave)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+/* =========================================================================
+   ⏱️ AUTO-REFRESH EN SEGUNDO PLANO Y AL RECARGAR LA PÁGINA
+   ========================================================================= */
+
+// Función maestra para descargar los datos en silencio
+async function sincronizarLupaSilenciosa(forzarDescarga = false) {
+  // Si forzamos la descarga (ej. al recargar la página), ignoramos la versión anterior
+  const oldVersion = forzarDescarga
+    ? ""
+    : localStorage.getItem("cache_inventario_lupa_version") || "";
+
+  try {
+    const response = await fetch(
+      `${URL_SCRIPT_CYBERNET}?action=descargarInventarioBuscador&versionCliente=${oldVersion}&_ts=${Date.now()}`,
+    );
+    const textoBruto = await response.text();
+    const jsonLimpio = textoBruto.replace(/^.*?\(/, "").replace(/\)$/, "");
+    const datos = JSON.parse(jsonLimpio);
+
+    if (datos.status === "success" && Array.isArray(datos.data)) {
+      localStorage.setItem("cache_inventario_lupa", JSON.stringify(datos.data));
+      localStorage.setItem(
+        "cache_inventario_lupa_version",
+        datos.version || Date.now().toString(),
+      );
+      memoriaBuscador = datos.data;
+
+      const modal = document.getElementById("modal-buscador-global");
+      if (modal && modal.style.display !== "none") {
+        if (typeof renderizarFilasTabla === "function") renderizarFilasTabla();
+      }
+      console.log("🔄 Base de datos de la Lupa sincronizada.");
+    }
+  } catch (error) {
+    console.warn("⚠️ Error silencioso al sincronizar la lupa:", error);
+  }
+}
+
+// 1. EJECUTAR DE INMEDIATO AL RECARGAR LA PÁGINA (Fuerza la descarga)
+window.addEventListener("DOMContentLoaded", () => {
+  sincronizarLupaSilenciosa(true);
+});
+
+// 2. MANTENER EL CICLO CADA 5 MINUTOS (Solo descarga si hay cambios reales)
+setInterval(() => {
+  sincronizarLupaSilenciosa(false);
+}, 300000);
+/* =========================================================================
+   🚑 OBTENER CUENTA TEMPORAL (ORDEN CRONOLÓGICO REAL - CERO ROJAS)
+   ========================================================================= */
+
+// 📅 Función auxiliar para convertir "11-jul", "15-jul", "25-jul" en fechas ordenables
+function convertirFechaAObjeto(strFecha) {
+  if (!strFecha) return 0;
+  const str = String(strFecha).toLowerCase().trim();
+  const meses = {
+    ene: 0,
+    feb: 1,
+    mar: 2,
+    abr: 3,
+    may: 4,
+    jun: 5,
+    jul: 6,
+    ago: 7,
+    sep: 8,
+    oct: 9,
+    nov: 10,
+    dic: 11,
+  };
+
+  // Detecta formato tipo "11-jul" o "15/jul"
+  const match = str.match(/^(\d{1,2})[-/\s]([a-z]{3})/);
+  if (match) {
+    const dia = parseInt(match[1], 10);
+    const mesStr = match[2];
+    if (meses[mesStr] !== undefined) {
+      return new Date(2026, meses[mesStr], dia).getTime();
+    }
+  }
+
+  // Si viene como fecha estándar
+  const timestamp = Date.parse(str);
+  return isNaN(timestamp) ? 0 : timestamp;
+}
+
+async function obtenerCuentaTemporalRapida(plataformaTarget) {
+  if (!memoriaBuscador || memoriaBuscador.length === 0) {
+    memoriaBuscador = await obtenerCuentasParaBuscador();
+  }
+
+  const platNorm = String(plataformaTarget || "")
+    .toUpperCase()
+    .trim();
+
+  // 1. Filtrar solo cuentas sanas (sin rojo/color) con correo de esa plataforma
+  const cuentasSanas = memoriaBuscador.filter((cuenta) => {
+    const platCuenta = String(cuenta.plataforma || "")
+      .toUpperCase()
+      .trim();
+    const esMismaPlat = platCuenta === platNorm;
+    const noEsCaida = !cuenta.esCaida; // 🛡️ Descarta celdas rojas o con color
+    const tieneCorreo = cuenta.correo && cuenta.correo.trim() !== "";
+    return esMismaPlat && noEsCaida && tieneCorreo;
+  });
+
+  if (cuentasSanas.length === 0) {
+    alert(`⚠️ No hay cuentas temporales activas disponibles para ${platNorm}.`);
+    return null;
+  }
+
+  // 2. Extraer fechas únicas y calcular su tiempo real
+  const mapaFechas = {};
+  cuentasSanas.forEach((cuenta) => {
+    const fechaTexto = (cuenta.fechaCompra || "").trim();
+    if (fechaTexto) {
+      if (!mapaFechas[fechaTexto]) {
+        mapaFechas[fechaTexto] = convertirFechaAObjeto(fechaTexto);
+      }
+    }
+  });
+
+  // Ordenar los lotes de fechas de la MÁS ANTIGUA a la MÁS RECIENTE
+  const listaFechasOrdenadas = Object.keys(mapaFechas).sort(
+    (a, b) => mapaFechas[a] - mapaFechas[b],
+  );
+
+  console.log(
+    "📅 Lotes de fechas detectados (de más antiguo a más nuevo):",
+    listaFechasOrdenadas,
+  );
+
+  if (listaFechasOrdenadas.length === 0) {
+    return cuentasSanas[0];
+  }
+
+  // 3. 🎯 RETROCESO DE 2 LOTES:
+  // Si tenemos ['11-jul', '15-jul', '25-jul']:
+  // - Índice 2: '25-jul' (MÁS RECIENTE - Se ignora)
+  // - Índice 1: '15-jul' (1 lote atrás - Se ignora)
+  // - Índice 0: '11-jul' (2 lotes atrás - SE ELIGE ÉSTA)
+  let indiceLote = listaFechasOrdenadas.length - 1;
+
+  if (listaFechasOrdenadas.length >= 3) {
+    indiceLote = listaFechasOrdenadas.length - 3; // Salta 2 lotes hacia atrás
+  } else if (listaFechasOrdenadas.length === 2) {
+    indiceLote = listaFechasOrdenadas.length - 2; // Salta 1 lote hacia atrás si solo hay 2
+  }
+
+  const fechaElegida = listaFechasOrdenadas[indiceLote];
+  console.log(`🎯 Lote seleccionado: "${fechaElegida}"`);
+
+  // 4. Obtener las cuentas del lote de fecha seleccionado
+  const cuentasDelLote = cuentasSanas.filter(
+    (c) => (c.fechaCompra || "").trim() === fechaElegida,
+  );
+
+  // 5. Entregar una cuenta de ese lote antiguo
+  const ctaTemporal = cuentasDelLote[0];
+
+  console.log(`⚡ Cuenta Temporal lista:`, ctaTemporal);
+  return ctaTemporal;
+}
