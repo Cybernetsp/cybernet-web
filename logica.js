@@ -8035,20 +8035,27 @@ window.cerrarNotificacionStock = function () {
   }
 };
 // =========================================================================
-// ⌨️ CONTROL MAESTRO DE NAVEGACIÓN Y ATAJOS (ANTI-AMONTONAMIENTO RECALIBRADO)
+// ⌨️ CONTROL MAESTRO DE NAVEGACIÓN Y ATAJOS (AUTO-CIERRE DEL BUSCADOR)
 // =========================================================================
 
-// 1. Evitar que se amontonen las ventanas principales (Solo aplica a lanzadores oficiales)
+// 1. Cierra automáticamente las ventanas al presionar cualquier botón del Menú o Dock
 document.addEventListener(
   "click",
   function (e) {
-    // 🔒 BLINDAJE ESTRICTO: Solo se activa si el clic viene del Dock o de la Barra Superior
+    // 🔒 Detecta clics en cualquier botón de la Barra Superior o del Dock
     let launcher = e.target.closest(".mac-dock-icon, .mac-menu-item");
 
     if (launcher) {
       let onclickCode = launcher.getAttribute("onclick") || "";
 
-      // 🎯 SINCRO PERFECTA: Mapeo maestro de botones y sus contenedores reales (Overlays)
+      // 🧼 Si se oprime cualquier botón que NO sea la base de datos/buscador, cierra la Lupa de inmediato
+      if (!onclickCode.includes("abrirBuscadorGlobal")) {
+        if (typeof cerrarBuscadorGlobal === "function") {
+          cerrarBuscadorGlobal();
+        }
+      }
+
+      // 🎯 Mapeo maestro de botones y sus ventanas correspondientes (Overlays)
       let mapaPaneles = {
         toggleFinanzasPanel: "finanzasOverlay",
         toggleNetflixManagerPanel: "netflixManagerOverlay",
@@ -8064,10 +8071,11 @@ document.addEventListener(
         toggleRecordatoriosPanel: "recordatoriosOverlay",
         abrirCalculadoraCombos: "comboCalcOverlay",
         abrirTotalNomina: "nominaOverlay",
-        toggleAnaCodesPanel: "anaCodesOverlay", // 🟣 Conectado
-        toggleYopmailPanel: "yopmailOverlay", // 🟡 Conectado
+        toggleAnaCodesPanel: "anaCodesOverlay",
+        toggleYopmailPanel: "yopmailOverlay",
         toggleChayoPanel: "chayoOverlay",
-        toggleGmailPanel: "gmailOverlay", // 🔴 Conectado
+        toggleGmailPanel: "gmailOverlay",
+        toggleInventarioPanel: "inventarioOverlay",
       };
 
       let panelAIgnorar = null;
@@ -8078,7 +8086,7 @@ document.addEventListener(
         }
       }
 
-      // 🛡️ CONDICIONAL DE SEGURIDAD: Cierra cualquier otra app abierta al cambiar de módulo
+      // 🛡️ Cierra cualquier otra ventana abierta al cambiar de opción
       if (panelAIgnorar) {
         document.querySelectorAll(".overlay-ios").forEach((panel) => {
           if (
@@ -8101,9 +8109,12 @@ document.addEventListener(
   true,
 );
 
-// 2. Atajos de Teclado con protección anti-amontonamiento
+// 2. Atajos de Teclado (Tecla ESC cierra todo, incluyendo el buscador)
 document.addEventListener("keydown", function (e) {
   const limpiarPantalla = () => {
+    if (typeof cerrarBuscadorGlobal === "function") {
+      cerrarBuscadorGlobal();
+    }
     document.querySelectorAll(".overlay-ios").forEach((panel) => {
       if (panel.id !== "loginOverlay" && panel.id !== "passwordOverlay") {
         panel.classList.remove("open");
@@ -8114,39 +8125,15 @@ document.addEventListener("keydown", function (e) {
     });
   };
 
-  // 🛑 Tecla ESC: Limpieza total
   if (e.key === "Escape") {
-    // 🛡️ RESTRICCIÓN MÁSTER: Si la ventana de creación de Netflix está abierta, bloqueamos el escape
     const modalCritico = document.getElementById("cuentaGeneradaModalOverlay");
     if (modalCritico && modalCritico.classList.contains("open")) {
       e.preventDefault();
-      return; // Aborta por completo el cierre de la pantalla
+      return;
     }
 
     if (typeof haptic === "function") haptic();
     limpiarPantalla();
-  }
-
-  // 🛒 Alt + V: Abrir Ventas
-  if (e.altKey && (e.key === "v" || e.key === "V")) {
-    e.preventDefault();
-    limpiarPantalla();
-    if (typeof toggleVentasPanel === "function") toggleVentasPanel();
-  }
-
-  // 🔑 Alt + C: Abrir Códigos
-  if (e.altKey && (e.key === "c" || e.key === "C")) {
-    e.preventDefault();
-    limpiarPantalla();
-    if (typeof toggleCodesPanel === "function") toggleCodesPanel();
-  }
-
-  // 🔍 Alt + B: Bóveda de Cuentas
-  if (e.altKey && (e.key === "b" || e.key === "B")) {
-    e.preventDefault();
-    limpiarPantalla();
-    if (typeof toggleSearchAccountPanel === "function")
-      toggleSearchAccountPanel();
   }
 });
 
