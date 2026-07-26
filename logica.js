@@ -11633,61 +11633,40 @@ function limpiarCacheLupa() {
 }
 
 async function obtenerCuentasParaBuscador() {
-  const cacheGuardado = localStorage.getItem("cache_inventario_lupa");
-  const tiempoGuardado = localStorage.getItem("cache_inventario_lupa_time");
-  const ahora = Date.now();
+    const cacheGuardado = localStorage.getItem('cache_inventario_lupa');
+    const versionGuardada = localStorage.getItem('cache_inventario_lupa_version') || '';
 
-  // 1. Usar memoria local instantánea si existe y tiene datos válidos
-  if (
-    cacheGuardado &&
-    tiempoGuardado &&
-    ahora - parseInt(tiempoGuardado) < TIEMPO_CACHE_BUSQUEDA
-  ) {
-    const datosParseados = JSON.parse(cacheGuardado);
-    if (Array.isArray(datosParseados) && datosParseados.length > 0) {
-      console.log(
-        `⚡ Lupa: ${datosParseados.length} cuentas cargadas desde memoria local (0ms)`,
-      );
-      return datosParseados;
+    try {
+        // Consultamos al servidor enviando la versión que tenemos guardada
+        const URL_SCRIPT = `https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec?action=descargarInventarioBuscador&versionCliente=${versionGuardada}`;
+
+        const response = await fetch(URL_SCRIPT);
+        const textoBruto = await response.text();
+        const jsonLimpio = textoBruto.replace(/^.*?\(/, '').replace(/\)$/, '');
+        const datos = JSON.parse(jsonLimpio);
+
+        // 🟢 NADA HA CAMBIADO EN EL EXCEL: Usar memoria local (Respuesta en milisegundos)
+        if (datos.status === "not_modified" && cacheGuardado) {
+            console.log("⚡ Lupa: Sin cambios en el Excel. Datos cargados desde memoria (0ms).");
+            return JSON.parse(cacheGuardado);
+        }
+
+        // 🔴 HUBO UN CAMBIO O ES LA PRIMERA CARGA: Actualizar datos y guardar la nueva versión
+        if (datos.status === "success" && Array.isArray(datos.data)) {
+            console.log(`🔄 Lupa: Cambio detectado en el libro. Se actualizaron ${datos.data.length} cuentas.`);
+            localStorage.setItem('cache_inventario_lupa', JSON.stringify(datos.data));
+            localStorage.setItem('cache_inventario_lupa_version', datos.version || Date.now().toString());
+            return datos.data;
+        }
+
+        if (cacheGuardado) return JSON.parse(cacheGuardado);
+        return [];
+
+    } catch (error) {
+        console.error("❌ Error verificando actualización de la Lupa:", error);
+        if (cacheGuardado) return JSON.parse(cacheGuardado);
+        return [];
     }
-  }
-
-  // 2. Traer datos frescos de Google Sheets
-  console.log("☁️ Lupa: Descargando base de datos desde Google...");
-  try {
-    const URL_SCRIPT =
-      "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec?action=descargarInventarioBuscador";
-
-    const response = await fetch(URL_SCRIPT);
-    const textoBruto = await response.text();
-
-    // Limpiamos la envoltura callbackCiber(...) de tu backend
-    const jsonLimpio = textoBruto.replace(/^.*?\(/, "").replace(/\)$/, "");
-    const datos = JSON.parse(jsonLimpio);
-
-    if (
-      datos.status === "success" &&
-      Array.isArray(datos.data) &&
-      datos.data.length > 0
-    ) {
-      localStorage.setItem("cache_inventario_lupa", JSON.stringify(datos.data));
-      localStorage.setItem("cache_inventario_lupa_time", ahora.toString());
-      console.log(
-        `✅ Lupa: Se descargaron ${datos.data.length} cuentas de Google Sheets.`,
-      );
-      return datos.data;
-    } else {
-      console.warn(
-        "⚠️ Google Sheets devolvió respuesta pero sin datos:",
-        datos,
-      );
-      return [];
-    }
-  } catch (error) {
-    console.error("❌ Error descargando cuentas para la lupa:", error);
-    if (cacheGuardado) return JSON.parse(cacheGuardado);
-    return [];
-  }
 }
 
 async function abrirBuscadorGlobal() {
