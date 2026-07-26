@@ -11618,8 +11618,18 @@ function convertirFechaAObjetoLupa(strFecha) {
   if (!strFecha) return 0;
   const str = String(strFecha).toLowerCase().trim();
   const meses = {
-    ene: 0, feb: 1, mar: 2, abr: 3, may: 4, jun: 5,
-    jul: 6, ago: 7, sep: 8, oct: 9, nov: 10, dic: 11,
+    ene: 0,
+    feb: 1,
+    mar: 2,
+    abr: 3,
+    may: 4,
+    jun: 5,
+    jul: 6,
+    ago: 7,
+    sep: 8,
+    oct: 9,
+    nov: 10,
+    dic: 11,
   };
   const match = str.match(/^(\d{1,2})[-/\s]([a-z]{3})/);
   if (match && meses[match[2]] !== undefined) {
@@ -11645,7 +11655,10 @@ async function obtenerCuentasParaBuscador() {
     const URL_SCRIPT = `${URL_SCRIPT_CYBERNET}?action=descargarInventarioBuscador&versionCliente=${versionGuardada}&_ts=${Date.now()}`;
     const response = await fetch(URL_SCRIPT);
     const textoBruto = await response.text();
-    const jsonLimpio = textoBruto.trim().replace(/^.*?\(/, "").replace(/\)$/, "");
+    const jsonLimpio = textoBruto
+      .trim()
+      .replace(/^.*?\(/, "")
+      .replace(/\)$/, "");
     const datos = JSON.parse(jsonLimpio);
 
     if (datos.status === "not_modified" && cacheGuardado)
@@ -11655,7 +11668,7 @@ async function obtenerCuentasParaBuscador() {
       localStorage.setItem("cache_inventario_lupa", JSON.stringify(datos.data));
       localStorage.setItem(
         "cache_inventario_lupa_version",
-        datos.version || Date.now().toString()
+        datos.version || Date.now().toString(),
       );
       return datos.data;
     }
@@ -11745,7 +11758,7 @@ async function abrirBuscadorGlobal() {
 
     // 🧼 3. BOTÓN DE CERRAR MODAL
     const closeBtn = parentDiv.querySelector(
-      "button:not(#btn-borrar-texto-lupa)"
+      "button:not(#btn-borrar-texto-lupa)",
     );
     if (closeBtn) {
       closeBtn.innerHTML = "✕";
@@ -11814,12 +11827,16 @@ function renderizarMatrizCompleta() {
   memoriaBuscador.forEach((item) => {
     if (item.esCaida && item.correo) {
       correosCaidosUnicos.add(
-        String(item.plataforma || "").toUpperCase().trim() +
+        String(item.plataforma || "")
+          .toUpperCase()
+          .trim() +
           "___" +
-          String(item.correo).toLowerCase().trim()
+          String(item.correo).toLowerCase().trim(),
       );
     }
-    const p = String(item.plataforma || "").toUpperCase().trim();
+    const p = String(item.plataforma || "")
+      .toUpperCase()
+      .trim();
     if (p && !plataformasUnicas.includes(p)) {
       plataformasUnicas.push(p);
     }
@@ -11901,7 +11918,30 @@ function renderizarMatrizCompleta() {
 }
 
 // =========================================================================
-// 📋 RENDERIZADOR DE FILAS (OCULTA 'PROV' EN NETFLIX Y DISNEY PREMIUM)
+// 📋 COPIADO RÁPIDO INDIVIDUAL (CORREO Y CLAVE CON ÍCONO SVG)
+// =========================================================================
+window.copiarDatoAisladoLupa = function (btn, texto) {
+  if (typeof haptic === "function") haptic();
+  if (!texto || texto === "-") return;
+
+  navigator.clipboard.writeText(texto).then(() => {
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Dato copiado al portapapeles</span></div>`,
+      );
+    }
+
+    setTimeout(() => {
+      btn.innerHTML = originalHTML;
+    }, 1500);
+  });
+};
+
+// =========================================================================
+// 📋 RENDERIZADOR DE FILAS (INCLUYE BOTONES SVG PARA COPIAR CORREO / CLAVE)
 // =========================================================================
 function renderizarFilasTabla() {
   const contenedorTabla = document.getElementById("contenedor-tabla-dinamica");
@@ -11919,8 +11959,15 @@ function renderizarFilasTabla() {
   const textoLimpioNumerico = texto.replace(/[\s\-\+\(\)]/g, "");
   const esBusquedaTelefono = /^\d{3,}$/.test(textoLimpioNumerico);
 
+  const userActivo = (sessionStorage.getItem("active_staff") || "")
+    .toUpperCase()
+    .trim();
+  const esCamilo = userActivo === "CAMILO";
+
   let filtrados = memoriaBuscador.filter((cuenta) => {
-    const platCuenta = String(cuenta.plataforma || "").toUpperCase().trim();
+    const platCuenta = String(cuenta.plataforma || "")
+      .toUpperCase()
+      .trim();
 
     if (estaBuscandoGlobal) {
       const cor = String(cuenta.correo || "").toLowerCase();
@@ -11931,7 +11978,9 @@ function renderizarFilasTabla() {
       if (esBusquedaTelefono) {
         return tel.includes(textoLimpioNumerico);
       } else {
-        return cor.includes(texto) || nom.includes(texto) || cla.includes(texto);
+        return (
+          cor.includes(texto) || nom.includes(texto) || cla.includes(texto)
+        );
       }
     } else {
       if (plataformaActivaBuscador === "GARANTIAS") {
@@ -11949,9 +11998,13 @@ function renderizarFilasTabla() {
     const mapaUnicos = new Map();
     filtrados.forEach((c) => {
       const key =
-        String(c.plataforma || "").toUpperCase().trim() +
+        String(c.plataforma || "")
+          .toUpperCase()
+          .trim() +
         "___" +
-        String(c.correo || "").toLowerCase().trim();
+        String(c.correo || "")
+          .toLowerCase()
+          .trim();
       if (!mapaUnicos.has(key)) {
         mapaUnicos.set(key, c);
       }
@@ -11962,21 +12015,23 @@ function renderizarFilasTabla() {
   filtrados.sort(
     (a, b) =>
       convertirFechaAObjetoLupa(b.fechaCompra) -
-      convertirFechaAObjetoLupa(a.fechaCompra)
+      convertirFechaAObjetoLupa(a.fechaCompra),
   );
 
   const incluyeNetflix = filtrados.some((c) =>
-    String(c.plataforma).toUpperCase().includes("NETFLIX")
+    String(c.plataforma).toUpperCase().includes("NETFLIX"),
   );
   const esVistaGlobal = estaBuscandoGlobal;
 
-  // 🚫 DETECTOR: Oculta la columna PROV en Netflix y Disney Premium
-  const platUpperActive = String(plataformaActivaBuscador || "").toUpperCase().trim();
-  const esPlatSinProv = !estaBuscandoGlobal && !esModoGarantias && (
-    platUpperActive.includes("NETFLIX") ||
-    platUpperActive.includes("DISNEY-PREMIUM") ||
-    platUpperActive.includes("DISNEY PREMIUM")
-  );
+  const platUpperActive = String(plataformaActivaBuscador || "")
+    .toUpperCase()
+    .trim();
+  const esPlatSinProv =
+    !estaBuscandoGlobal &&
+    !esModoGarantias &&
+    (platUpperActive.includes("NETFLIX") ||
+      platUpperActive.includes("DISNEY-PREMIUM") ||
+      platUpperActive.includes("DISNEY PREMIUM"));
 
   let colSpanCount = 10;
   let htmlHeaders = "";
@@ -11993,12 +12048,13 @@ function renderizarFilasTabla() {
         `;
   } else {
     colSpanCount = esVistaGlobal
-      ? incluyeNetflix ? 11 : 10
-      : incluyeNetflix ? 10 : 9;
-
-    if (esPlatSinProv) {
-      colSpanCount -= 1;
-    }
+      ? incluyeNetflix
+        ? 11
+        : 10
+      : incluyeNetflix
+        ? 10
+        : 9;
+    if (esPlatSinProv) colSpanCount -= 1;
 
     htmlHeaders = `
             ${esVistaGlobal ? '<th style="padding: 14px 16px; font-weight: 700; text-align: center;">PLATAFORMA</th>' : ""}
@@ -12041,6 +12097,20 @@ function renderizarFilasTabla() {
   } else {
     let ultimaFechaRenderizada = null;
 
+    // Template para el botón SVG de copiado rápido de correo o clave
+    const svgCopyIcon = (dato, titulo) => {
+      if (!dato || dato === "-") return "";
+      const datoLimpio = String(dato).replace(/'/g, "\\'");
+      return `
+        <button onclick="copiarDatoAisladoLupa(this, '${datoLimpio}')" title="${titulo}" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.2s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      `;
+    };
+
     filtrados.forEach((cuenta, idx) => {
       const cuentaCodificada = encodeURIComponent(JSON.stringify(cuenta));
       const esFilaPar = idx % 2 === 0;
@@ -12050,7 +12120,9 @@ function renderizarFilasTabla() {
 
       const colorFondoFila = cuenta.esCaida
         ? "rgba(255, 69, 58, 0.15)"
-        : esFilaPar ? "rgba(255, 255, 255, 0.015)" : "transparent";
+        : esFilaPar
+          ? "rgba(255, 255, 255, 0.015)"
+          : "transparent";
 
       let colorPlat = "#0072ff";
       let bgPlat = "rgba(0, 114, 255, 0.15)";
@@ -12072,19 +12144,44 @@ function renderizarFilasTabla() {
       }
 
       const celdaPlataforma = `<span style="background: ${bgPlat}; color: ${colorPlat}; padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.5px; border: 1px solid ${bgPlat};">${cuenta.plataforma}</span>`;
-
       const fechaActual = cuenta.fechaCompra || "Fecha Desconocida";
 
       if (fechaActual !== ultimaFechaRenderizada) {
+        let btnBorrarFecha = "";
+        if (esCamilo && !esModoGarantias && !estaBuscandoGlobal) {
+          btnBorrarFecha = `
+                <button onclick="borrarCuentasPorFecha(this, '${fechaActual}', '${plataformaActivaBuscador}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: var(--ios-red); padding: 4px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">
+                    🗑️ Borrar Fecha
+                </button>
+            `;
+        }
+
         htmlTabla += `
-                    <tr style="background: rgba(10, 132, 255, 0.05);">
-                        <td colspan="${colSpanCount}" style="padding: 8px 16px; border-top: 1px solid rgba(10, 132, 255, 0.2); border-bottom: 1px solid rgba(10, 132, 255, 0.2); color: var(--ios-blue); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
-                            📅 Cuentas del: ${fechaActual}
-                        </td>
-                    </tr>
-                `;
+            <tr style="background: rgba(10, 132, 255, 0.05);">
+                <td colspan="${colSpanCount}" style="padding: 8px 16px; border-top: 1px solid rgba(10, 132, 255, 0.2); border-bottom: 1px solid rgba(10, 132, 255, 0.2); color: var(--ios-blue); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span>📅 Cuentas del: ${fechaActual}</span>
+                        ${btnBorrarFecha}
+                    </div>
+                </td>
+            </tr>
+        `;
         ultimaFechaRenderizada = fechaActual;
       }
+
+      const celdaCorreoContent = `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+          <span style="overflow: hidden; text-overflow: ellipsis;">${cuenta.correo || "-"}</span>
+          ${svgCopyIcon(cuenta.correo, "Copiar correo")}
+        </div>
+      `;
+
+      const celdaClaveContent = `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+          <span style="overflow: hidden; text-overflow: ellipsis;">${cuenta.clave || "-"}</span>
+          ${svgCopyIcon(cuenta.clave, "Copiar contraseña")}
+        </div>
+      `;
 
       if (esModoGarantias) {
         const btnCopiarReporte = `<button onclick="copiarReporteGarantiaIndividual(this, '${cuenta.plataforma}', '${cuenta.correo}', '${cuenta.clave}', '${cuenta.fechaCompra || "-"}', '${cuenta.proveedor || "-"}')" style="background: rgba(255, 159, 10, 0.12); border: 1px solid rgba(255, 159, 10, 0.25); color: var(--ios-orange); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">📋 Copiar Reporte</button>`;
@@ -12092,21 +12189,11 @@ function renderizarFilasTabla() {
 
         htmlTabla += `
                     <tr data-correo="${cuenta.correo}" data-plat="${cuenta.plataforma}" style="background: ${colorFondoFila}; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.3s ease;">
-                        <td style="padding: 12px 16px; text-align: center;">
-                            ${celdaPlataforma}
-                        </td>
-                        <td style="padding: 12px 16px; font-weight: 700; color: #ff9f0a;">
-                            ${cuenta.proveedor || "-"}
-                        </td>
-                        <td style="padding: 12px 16px; font-weight: 700; color: #a1a1aa;">
-                            ${cuenta.fechaCompra || "-"}
-                        </td>
-                        <td style="padding: 12px 16px; font-weight: 600; color: #ffffff;">
-                            ${cuenta.correo || "-"}
-                        </td>
-                        <td style="padding: 12px 16px; color: #30d158; font-family: monospace; font-size: 0.95rem;">
-                            ${cuenta.clave || "-"}
-                        </td>
+                        <td style="padding: 12px 16px; text-align: center;">${celdaPlataforma}</td>
+                        <td style="padding: 12px 16px; font-weight: 700; color: #ff9f0a;">${cuenta.proveedor || "-"}</td>
+                        <td style="padding: 12px 16px; font-weight: 700; color: #a1a1aa;">${cuenta.fechaCompra || "-"}</td>
+                        <td style="padding: 12px 16px; font-weight: 600; color: #ffffff;">${celdaCorreoContent}</td>
+                        <td style="padding: 12px 16px; color: #30d158; font-family: monospace; font-size: 0.95rem;">${celdaClaveContent}</td>
                         <td style="padding: 10px 16px; text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
                                 ${btnCopiarReporte}
@@ -12117,13 +12204,11 @@ function renderizarFilasTabla() {
                 `;
       } else {
         const btnCopiar = `<button onclick="copiarDetallesLupa(this, '${cuentaCodificada}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">📋 Copiar</button>`;
-
         let btnTemp = "";
         let btnGarantia = "";
 
         if (!isRowNetflix) {
           btnTemp = `<button onclick="copiarCuentaTemporalLupa(this, '${cuentaCodificada}')" style="background: rgba(255, 159, 10, 0.1); border: 1px solid rgba(255, 159, 10, 0.2); color: var(--ios-orange); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">⏳ Temp</button>`;
-
           if (!cuenta.esCaida) {
             btnGarantia = `<button class="btn-reportar-lupa" onclick="reportarDesdeLupa(this, '${cuenta.plataforma}', '${cuenta.correo}', '${cuenta.clave}', '${cuenta.fechaCompra || "-"}', '${cuenta.proveedor || "-"}')" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); color: var(--ios-red); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">🚨 Reportar</button>`;
           } else {
@@ -12134,32 +12219,15 @@ function renderizarFilasTabla() {
         htmlTabla += `
                     <tr data-correo="${cuenta.correo}" data-plat="${cuenta.plataforma}" style="background: ${colorFondoFila}; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.3s ease;">
                         ${esVistaGlobal ? `<td style="padding: 12px 16px; text-align: center;">${celdaPlataforma}</td>` : ""}
-                        ${esPlatSinProv ? "" : `
-                        <td style="padding: 12px 16px; font-weight: 700; color: #ff9f0a;">
-                            ${cuenta.proveedor || "-"}
-                        </td>`}
-                        <td style="padding: 12px 16px; font-weight: 700; color: #a1a1aa;">
-                            ${cuenta.fechaCompra || "-"}
-                        </td>
-                        <td style="padding: 12px 16px; font-weight: 600; color: #ffffff;">
-                            ${cuenta.correo || "-"}
-                        </td>
-                        <td style="padding: 12px 16px; color: #30d158; font-family: monospace; font-size: 0.95rem;">
-                            ${cuenta.clave || "-"}
-                        </td>
-                        <td style="padding: 12px 16px; color: #e4e4e7;">
-                            ${cuenta.perfil || "1"}
-                        </td>
-                        <td style="padding: 12px 16px; color: #ffd60a; font-family: monospace;">
-                            ${cuenta.pin || "-"}
-                        </td>
+                        ${esPlatSinProv ? "" : `<td style="padding: 12px 16px; font-weight: 700; color: #ff9f0a;">${cuenta.proveedor || "-"}</td>`}
+                        <td style="padding: 12px 16px; font-weight: 700; color: #a1a1aa;">${cuenta.fechaCompra || "-"}</td>
+                        <td style="padding: 12px 16px; font-weight: 600; color: #ffffff;">${celdaCorreoContent}</td>
+                        <td style="padding: 12px 16px; color: #30d158; font-family: monospace; font-size: 0.95rem;">${celdaClaveContent}</td>
+                        <td style="padding: 12px 16px; color: #e4e4e7;">${cuenta.perfil || "1"}</td>
+                        <td style="padding: 12px 16px; color: #ffd60a; font-family: monospace;">${cuenta.pin || "-"}</td>
                         ${incluyeNetflix ? `<td style="padding: 12px 16px; color: #ff9f0a; font-weight: 600;">${isRowNetflix ? cuenta.vencimiento || "-" : "-"}</td>` : ""}
-                        <td style="padding: 12px 16px; color: #e4e4e7;">
-                            ${cuenta.cliente || "-"}
-                        </td>
-                        <td style="padding: 12px 16px; color: #a1a1aa;">
-                            ${cuenta.telefono || "-"}
-                        </td>
+                        <td style="padding: 12px 16px; color: #e4e4e7;">${cuenta.cliente || "-"}</td>
+                        <td style="padding: 12px 16px; color: #a1a1aa;">${cuenta.telefono || "-"}</td>
                         <td style="padding: 10px 16px; text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
                                 ${btnCopiar}
@@ -12178,6 +12246,62 @@ function renderizarFilasTabla() {
 }
 
 // =========================================================================
+// 🗑️ LÓGICA PARA EL BOTÓN DE BORRAR FECHA EN LOGICA.JS
+// =========================================================================
+window.borrarCuentasPorFecha = function (btn, fecha, plataforma) {
+  if (typeof haptic === "function") haptic();
+
+  if (
+    !confirm(
+      `⚠️ ATENCIÓN CAMILO ⚠️\n\n¿Estás seguro de que deseas ELIMINAR TODAS las cuentas de ${plataforma} registradas con fecha "${fecha}"?\n\nEsta acción borrará las filas del archivo de Google Sheets y no se puede deshacer.`,
+    )
+  ) {
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<svg class="spin-anim" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Borrando...`;
+
+  const cbName = "cb_delete_date_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      // Actualizamos la memoria local (RAM) eliminando esas cuentas para que desaparezcan de la vista al instante
+      memoriaBuscador = memoriaBuscador.filter(
+        (c) =>
+          !(
+            c.plataforma.toUpperCase() === plataforma.toUpperCase() &&
+            c.fechaCompra === fecha
+          ),
+      );
+      localStorage.setItem(
+        "cache_inventario_lupa",
+        JSON.stringify(memoriaBuscador),
+      );
+
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Se eliminaron ${res.eliminadas} cuentas del sistema.</span></div>`,
+        );
+      }
+      renderizarFilasTabla(); // Re-pinta la tabla sin esas cuentas
+    } else {
+      alert("❌ Error: " + (res ? res.message : "Fallo de conexión."));
+      btn.disabled = false;
+      btn.innerHTML = "🗑️ Borrar Fecha";
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${URL_SCRIPT_CYBERNET}?action=borrarCuentasPorFecha&plataforma=${encodeURIComponent(plataforma)}&fecha=${encodeURIComponent(fecha)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+// =========================================================================
 // 🚨 COPIAR REPORTE DESDE LA PESTAÑA GARANTÍAS (SIN MOTIVO)
 // =========================================================================
 window.copiarReporteGarantiaIndividual = function (
@@ -12186,7 +12310,7 @@ window.copiarReporteGarantiaIndividual = function (
   correo,
   clave,
   fechaCompra,
-  proveedor
+  proveedor,
 ) {
   if (typeof haptic === "function") haptic();
   let platNorm = plat.toUpperCase();
@@ -12209,7 +12333,7 @@ window.copiarReporteGarantiaIndividual = function (
 
     if (typeof triggerToast === "function") {
       triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Reporte copiado al portapapeles</span></div>`
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Reporte copiado al portapapeles</span></div>`,
       );
     }
 
@@ -12218,13 +12342,13 @@ window.copiarReporteGarantiaIndividual = function (
       btn.style.setProperty(
         "background",
         "rgba(255, 159, 10, 0.12)",
-        "important"
+        "important",
       );
       btn.style.setProperty("color", "var(--ios-orange)", "important");
       btn.style.setProperty(
         "border-color",
         "rgba(255, 159, 10, 0.25)",
-        "important"
+        "important",
       );
     }, 2000);
   });
@@ -12239,7 +12363,7 @@ window.reportarDesdeLupa = function (
   correo,
   clave,
   fechaCompra,
-  proveedor
+  proveedor,
 ) {
   if (typeof haptic === "function") haptic();
 
@@ -12256,7 +12380,7 @@ window.reportarDesdeLupa = function (
   navigator.clipboard.writeText(mensajeReporte);
 
   const filasHermanas = document.querySelectorAll(
-    `tr[data-correo="${correo}"]`
+    `tr[data-correo="${correo}"]`,
   );
 
   filasHermanas.forEach((filaTR) => {
@@ -12265,12 +12389,12 @@ window.reportarDesdeLupa = function (
       filaTR.style.setProperty(
         "background",
         "rgba(255, 69, 58, 0.15)",
-        "important"
+        "important",
       );
       filaTR.style.setProperty(
         "transition",
         "background 0.3s ease",
-        "important"
+        "important",
       );
 
       const btnRep = filaTR.querySelector(".btn-reportar-lupa");
@@ -12290,20 +12414,23 @@ window.reportarDesdeLupa = function (
     if (res && res.status === "success") {
       // 🎯 MARCAR COMO CAÍDA TODAS LAS FILAS DE ESE CORREO Y PLATAFORMA
       memoriaBuscador.forEach((c) => {
-        const cPlat = String(c.plataforma || "").toUpperCase().trim();
-        const coincidePlat = cPlat.includes(platNorm) || platNorm.includes(cPlat);
+        const cPlat = String(c.plataforma || "")
+          .toUpperCase()
+          .trim();
+        const coincidePlat =
+          cPlat.includes(platNorm) || platNorm.includes(cPlat);
         if (c.correo.toLowerCase() === correo.toLowerCase() && coincidePlat) {
           c.esCaida = true;
         }
       });
       localStorage.setItem(
         "cache_inventario_lupa",
-        JSON.stringify(memoriaBuscador)
+        JSON.stringify(memoriaBuscador),
       );
 
       if (typeof triggerToast === "function") {
         triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Cuenta reportada y agregada a Garantías.</span></div>`
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Cuenta reportada y agregada a Garantías.</span></div>`,
         );
       }
 
@@ -12313,7 +12440,7 @@ window.reportarDesdeLupa = function (
       renderizarMatrizCompleta();
       if (typeof triggerToast === "function") {
         triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="15" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><span>Error al reportar</span></div>`
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="15" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><span>Error al reportar</span></div>`,
         );
       }
     }
@@ -12407,13 +12534,13 @@ window.copiarDetallesLupa = function (boton, cuentaCodificada) {
       boton.style.setProperty(
         "background",
         "rgba(255, 255, 255, 0.08)",
-        "important"
+        "important",
       );
       boton.style.setProperty("color", "#ffffff", "important");
       boton.style.setProperty(
         "border-color",
         "rgba(255, 255, 255, 0.15)",
-        "important"
+        "important",
       );
     }, 2000);
   });
@@ -12447,7 +12574,7 @@ window.copiarCuentaTemporalLupa = function (boton, cuentaCodificada) {
 
     if (typeof triggerToast === "function") {
       triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Cuenta temporal copiada al portapapeles</span></div>`
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Cuenta temporal copiada al portapapeles</span></div>`,
       );
     }
 
@@ -12456,13 +12583,13 @@ window.copiarCuentaTemporalLupa = function (boton, cuentaCodificada) {
       boton.style.setProperty(
         "background",
         "rgba(255, 159, 10, 0.1)",
-        "important"
+        "important",
       );
       boton.style.setProperty("color", "var(--ios-orange)", "important");
       boton.style.setProperty(
         "border-color",
         "rgba(255, 159, 10, 0.2)",
-        "important"
+        "important",
       );
     }, 2000);
   });
@@ -12473,7 +12600,7 @@ window.resolverDesdeLupa = function (filaIndex, correo, plat) {
 
   if (!filaIndex || filaIndex === "") {
     alert(
-      "⚠️ Por favor recarga la memoria de la lupa (F12 -> limpiarCacheLupa()) para obtener el ID de la fila y poder resolverla."
+      "⚠️ Por favor recarga la memoria de la lupa (F12 -> limpiarCacheLupa()) para obtener el ID de la fila y poder resolverla.",
     );
     return;
   }
@@ -12519,13 +12646,15 @@ window.ejecutarResolverGarantia = function (e) {
     if (res && res.status === "success") {
       if (typeof triggerToast === "function") {
         triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>¡Cuenta resuelta y actualizada al instante!</span></div>`
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>¡Cuenta resuelta y actualizada al instante!</span></div>`,
         );
       }
 
       // 🎯 ACTUALIZACIÓN EN VIVO DE MEMORIA RAM Y CACHÉ
       memoriaBuscador.forEach((c) => {
-        const cPlat = String(c.plataforma || "").toUpperCase().trim();
+        const cPlat = String(c.plataforma || "")
+          .toUpperCase()
+          .trim();
         const coincidePlat =
           cPlat.includes(platNorm) || platNorm.includes(cPlat);
 
@@ -12535,13 +12664,13 @@ window.ejecutarResolverGarantia = function (e) {
         ) {
           c.esCaida = false; // 👈 Quita estado de caída (se borra de la pestaña GARANTÍAS)
           if (nuevoCorreo !== "") c.correo = nuevoCorreo; // 👈 Reemplaza correo en la plataforma original
-          if (nuevaClave !== "") c.clave = nuevaClave;   // 👈 Reemplaza clave en la plataforma original
+          if (nuevaClave !== "") c.clave = nuevaClave; // 👈 Reemplaza clave en la plataforma original
         }
       });
 
       localStorage.setItem(
         "cache_inventario_lupa",
-        JSON.stringify(memoriaBuscador)
+        JSON.stringify(memoriaBuscador),
       );
 
       // ⚡ RE-PINTA COMPLETO PARA REMOVER DE GARANTÍAS Y VER LA NUEVA CUENTA
@@ -12551,7 +12680,7 @@ window.ejecutarResolverGarantia = function (e) {
       if (typeof cargarGarantias === "function") cargarGarantias();
     } else {
       alert(
-        "❌ Error: " + (res ? res.message : "Fallo de conexión al resolver.")
+        "❌ Error: " + (res ? res.message : "Fallo de conexión al resolver."),
       );
     }
   };
@@ -12573,17 +12702,20 @@ async function sincronizarLupaSilenciosa(forzarDescarga = false) {
 
   try {
     const response = await fetch(
-      `${URL_SCRIPT_CYBERNET}?action=descargarInventarioBuscador&versionCliente=${oldVersion}&_ts=${Date.now()}`
+      `${URL_SCRIPT_CYBERNET}?action=descargarInventarioBuscador&versionCliente=${oldVersion}&_ts=${Date.now()}`,
     );
     const textoBruto = await response.text();
-    const jsonLimpio = textoBruto.trim().replace(/^.*?\(/, "").replace(/\)$/, "");
+    const jsonLimpio = textoBruto
+      .trim()
+      .replace(/^.*?\(/, "")
+      .replace(/\)$/, "");
     const datos = JSON.parse(jsonLimpio);
 
     if (datos.status === "success" && Array.isArray(datos.data)) {
       localStorage.setItem("cache_inventario_lupa", JSON.stringify(datos.data));
       localStorage.setItem(
         "cache_inventario_lupa_version",
-        datos.version || Date.now().toString()
+        datos.version || Date.now().toString(),
       );
       memoriaBuscador = datos.data;
 
@@ -12614,8 +12746,18 @@ function convertirFechaAObjeto(strFecha) {
   if (!strFecha) return 0;
   const str = String(strFecha).toLowerCase().trim();
   const meses = {
-    ene: 0, feb: 1, mar: 2, abr: 3, may: 4, jun: 5,
-    jul: 6, ago: 7, sep: 8, oct: 9, nov: 10, dic: 11,
+    ene: 0,
+    feb: 1,
+    mar: 2,
+    abr: 3,
+    may: 4,
+    jun: 5,
+    jul: 6,
+    ago: 7,
+    sep: 8,
+    oct: 9,
+    nov: 10,
+    dic: 11,
   };
 
   const match = str.match(/^(\d{1,2})[-/\s]([a-z]{3})/);
@@ -12666,7 +12808,7 @@ async function obtenerCuentaTemporalRapida(plataformaTarget) {
   });
 
   const listaFechasOrdenadas = Object.keys(mapaFechas).sort(
-    (a, b) => mapaFechas[a] - mapaFechas[b]
+    (a, b) => mapaFechas[a] - mapaFechas[b],
   );
 
   if (listaFechasOrdenadas.length === 0) {
@@ -12683,7 +12825,7 @@ async function obtenerCuentaTemporalRapida(plataformaTarget) {
 
   const fechaElegida = listaFechasOrdenadas[indiceLote];
   const cuentasDelLote = cuentasSanas.filter(
-    (c) => (c.fechaCompra || "").trim() === fechaElegida
+    (c) => (c.fechaCompra || "").trim() === fechaElegida,
   );
 
   return cuentasDelLote[0];
