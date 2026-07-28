@@ -12929,23 +12929,23 @@ function buscarComprobantesDrive() {
 
 // Muestra u oculta la "X" dependiendo de si hay texto
 function toggleClearBtnComprobante() {
-    const input = document.getElementById("filtroTelefonoComprobante");
-    const btn = document.getElementById("btnLimpiarTelefonoComp");
-    if (input.value.length > 0) {
-        btn.style.display = "flex";
-    } else {
-        btn.style.display = "none";
-    }
+  const input = document.getElementById("filtroTelefonoComprobante");
+  const btn = document.getElementById("btnLimpiarTelefonoComp");
+  if (input.value.length > 0) {
+    btn.style.display = "flex";
+  } else {
+    btn.style.display = "none";
+  }
 }
 
 // Borra el número y hace una búsqueda automática para volver a mostrar la fecha
 function limpiarTelefonoComprobante() {
-    if (typeof haptic === 'function') haptic();
-    const input = document.getElementById("filtroTelefonoComprobante");
-    input.value = "";
-    toggleClearBtnComprobante(); // Oculta la "X"
-    input.focus();
-    buscarComprobantesDrive(); // Lanza la búsqueda automática
+  if (typeof haptic === "function") haptic();
+  const input = document.getElementById("filtroTelefonoComprobante");
+  input.value = "";
+  toggleClearBtnComprobante(); // Oculta la "X"
+  input.focus();
+  buscarComprobantesDrive(); // Lanza la búsqueda automática
 }
 
 // =========================================================================
@@ -13067,3 +13067,22 @@ if (imgAmpliada) {
     }
   });
 }
+// =========================================================================
+// 👁️ ABRIR PANEL CÓDIGOS ANA (ESTILO CHAYO)
+// =========================================================================
+window.toggleAnaCodesPanel = function () {
+  if (typeof haptic === "function") haptic();
+
+  const overlay = document.getElementById("anaCodesOverlay");
+  if (overlay) {
+    overlay.classList.toggle("open");
+
+    // Inyectamos la página de TK solo cuando se abre la ventana para que cargue fresquita
+    const iframe = document.getElementById("iframeAnaCodes");
+    if (overlay.classList.contains("open")) {
+      if (iframe && (iframe.src === "about:blank" || iframe.src === "")) {
+        iframe.src = "https://correos.tkdjgz.com/";
+      }
+    }
+  }
+};
