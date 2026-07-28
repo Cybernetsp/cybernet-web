@@ -8076,6 +8076,7 @@ document.addEventListener(
         toggleChayoPanel: "chayoOverlay",
         toggleGmailPanel: "gmailOverlay",
         toggleInventarioPanel: "inventarioOverlay",
+        toggleComprobantesPanel: "comprobantesOverlay",
       };
 
       let panelAIgnorar = null;
@@ -12829,4 +12830,240 @@ async function obtenerCuentaTemporalRapida(plataformaTarget) {
   );
 
   return cuentasDelLote[0];
+}
+
+// =========================================================================
+// 🖼️ MÓDULO VISOR DE COMPROBANTES DE GOOGLE DRIVE
+// =========================================================================
+
+function toggleComprobantesPanel() {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("comprobantesOverlay");
+  overlay.classList.toggle("open");
+
+  if (overlay.classList.contains("open")) {
+    // 1. Establecer SIEMPRE la fecha de hoy al abrir
+    const inputFecha = document.getElementById("filtroFechaComprobante");
+    const inputTelefono = document.getElementById("filtroTelefonoComprobante");
+
+    const hoy = new Date();
+    const yyyy = hoy.getFullYear();
+    const mm = String(hoy.getMonth() + 1).padStart(2, "0");
+    const dd = String(hoy.getDate()).padStart(2, "0");
+    inputFecha.value = `${yyyy}-${mm}-${dd}`;
+
+    // Limpiamos el teléfono por si había algo antes
+    inputTelefono.value = "";
+    inputTelefono.focus();
+
+    // 2. 🔥 LANZAR LA BÚSQUEDA AUTOMÁTICAMENTE 🔥
+    buscarComprobantesDrive();
+  }
+}
+
+function buscarComprobantesDrive() {
+  if (typeof haptic === "function") haptic();
+  const fecha = document.getElementById("filtroFechaComprobante").value;
+  const telefono = document
+    .getElementById("filtroTelefonoComprobante")
+    .value.trim()
+    .replace(/\D/g, "");
+  const grid = document.getElementById("galeriaComprobantesGrid");
+
+  grid.innerHTML = `<div class="empty-log-msg" style="grid-column: 1 / -1; color: var(--ios-green);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg><br>Escaneando Google Drive...</div>`;
+
+  const cbName = "cb_comprobantes_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      const fotos = res.data;
+      if (fotos.length === 0) {
+        grid.innerHTML = `<div class="empty-log-msg" style="grid-column: 1 / -1; color: var(--ios-orange);">No se encontraron comprobantes para estos filtros.</div>`;
+        return;
+      }
+
+      let html = "";
+      fotos.forEach((foto) => {
+        // 🎨 DISEÑO BLINDADO: Altura fija de 250px para garantizar que el texto siempre se vea
+        html += `
+                <div style="background: #1c1c1e; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease; display: flex; flex-direction: column; height: 250px;" 
+                     onmouseover="this.style.transform='scale(1.03)'; this.style.borderColor='rgba(48,209,88,0.5)';" 
+                     onmouseout="this.style.transform='scale(1)'; this.style.borderColor='rgba(255,255,255,0.1)';" 
+                     onclick="abrirVisorImagen('${foto.urlLimpia}', '${foto.nombre}')">
+                    
+                    <!-- IMAGEN (Toma exactamente el espacio sobrante arriba) -->
+                    <div style="flex-grow: 1; width: 100%; background: #000; overflow: hidden;">
+                        <img src="${foto.urlMiniatura}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.95;">
+                    </div>
+                    
+                    <!-- TEXTOS FIJOS E INTOCABLES ABAJO -->
+                    <div style="padding: 12px; display: flex; flex-direction: column; gap: 4px; background: #1c1c1e; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;">
+                        <span style="font-size: 0.75rem; color: #ffffff; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${foto.nombre}">
+                            ${foto.nombre}
+                        </span>
+                        <div style="display: flex; align-items: center; gap: 6px; color: #a1a1aa;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <span style="font-size: 0.7rem; font-weight: 600;">${foto.fechaCracion}</span>
+                        </div>
+                    </div>
+                </div>`;
+      });
+      grid.innerHTML = html;
+    } else {
+      grid.innerHTML = `<div class="empty-log-msg" style="grid-column: 1 / -1; color: var(--ios-red);">Error al buscar en Drive: ${res ? res.message : "Fallo de red"}</div>`;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=buscarComprobantesDrive&fecha=${encodeURIComponent(fecha)}&telefono=${encodeURIComponent(telefono)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+}
+
+// =========================================================================
+// 🧹 FUNCIONES PARA LIMPIAR Y AUTO-BUSCAR EN COMPROBANTES
+// =========================================================================
+
+// Muestra u oculta la "X" dependiendo de si hay texto
+function toggleClearBtnComprobante() {
+    const input = document.getElementById("filtroTelefonoComprobante");
+    const btn = document.getElementById("btnLimpiarTelefonoComp");
+    if (input.value.length > 0) {
+        btn.style.display = "flex";
+    } else {
+        btn.style.display = "none";
+    }
+}
+
+// Borra el número y hace una búsqueda automática para volver a mostrar la fecha
+function limpiarTelefonoComprobante() {
+    if (typeof haptic === 'function') haptic();
+    const input = document.getElementById("filtroTelefonoComprobante");
+    input.value = "";
+    toggleClearBtnComprobante(); // Oculta la "X"
+    input.focus();
+    buscarComprobantesDrive(); // Lanza la búsqueda automática
+}
+
+// =========================================================================
+// 🌌 FUNCIONES DEL VISOR GIGANTE (LIGHTBOX) CON ZOOM AVANZADO
+// =========================================================================
+
+// Variables para controlar el zoom y movimiento
+let currentZoom = 1;
+let isDragging = false;
+let startX = 0,
+  startY = 0;
+let translateX = 0,
+  translateY = 0;
+
+window.abrirVisorImagen = function (urlReal, nombreArchivo) {
+  if (typeof haptic === "function") haptic();
+  const lightbox = document.getElementById("visorImagenLightbox");
+  const imgAmpliada = document.getElementById("imagenAmpliada");
+  const etiqueta = document.getElementById("etiquetaImagenAmpliada");
+
+  // 1. Resetear valores al abrir una nueva imagen
+  currentZoom = 1;
+  translateX = 0;
+  translateY = 0;
+  imgAmpliada.style.transform = `translate(0px, 0px) scale(1)`;
+  imgAmpliada.style.cursor = "zoom-in";
+
+  imgAmpliada.src = urlReal;
+  etiqueta.innerText = nombreArchivo;
+
+  lightbox.style.display = "flex";
+};
+
+window.cerrarVisorImagen = function () {
+  if (typeof haptic === "function") haptic();
+  document.getElementById("visorImagenLightbox").style.display = "none";
+  document.getElementById("imagenAmpliada").src = "";
+};
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") {
+    const lightbox = document.getElementById("visorImagenLightbox");
+    if (lightbox && lightbox.style.display === "flex") {
+      e.preventDefault();
+      cerrarVisorImagen();
+    }
+  }
+});
+
+// =========================================================
+// 🔍 EVENTOS PARA ZOOM, RUEDA Y ARRASTRE
+// =========================================================
+const imgAmpliada = document.getElementById("imagenAmpliada");
+
+if (imgAmpliada) {
+  // 🔥 EL SEGURO ANTI-FANTASMA: Evita que el navegador intente "guardar" o sacar la imagen
+  imgAmpliada.addEventListener("dragstart", function (e) {
+    e.preventDefault();
+  });
+
+  // 1. ZOOM CON LA RUEDA DEL RATÓN (SCROLL)
+  imgAmpliada.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    imgAmpliada.style.transition = "none";
+
+    if (e.deltaY < 0) {
+      currentZoom += 0.15;
+    } else {
+      currentZoom -= 0.15;
+    }
+
+    currentZoom = Math.min(Math.max(0.5, currentZoom), 4);
+    imgAmpliada.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+    imgAmpliada.style.cursor = currentZoom > 1 ? "grab" : "zoom-in";
+  });
+
+  // 2. ZOOM CON DOBLE CLIC
+  imgAmpliada.addEventListener("dblclick", function (e) {
+    imgAmpliada.style.transition =
+      "transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)";
+
+    if (currentZoom > 1) {
+      currentZoom = 1;
+      translateX = 0;
+      translateY = 0;
+    } else {
+      currentZoom = 2.5;
+    }
+
+    imgAmpliada.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+    imgAmpliada.style.cursor = currentZoom > 1 ? "grab" : "zoom-in";
+  });
+
+  // 3. AGARRAR LA IMAGEN (Mousedown)
+  imgAmpliada.addEventListener("mousedown", function (e) {
+    if (currentZoom > 1) {
+      isDragging = true;
+      startX = e.clientX - translateX;
+      startY = e.clientY - translateY;
+      imgAmpliada.style.cursor = "grabbing"; // Manito cerrada
+      imgAmpliada.style.transition = "none"; // Sin lag al mover
+    }
+  });
+
+  // 4. MOVER LA IMAGEN (Mousemove)
+  window.addEventListener("mousemove", function (e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    imgAmpliada.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+  });
+
+  // 5. SOLTAR LA IMAGEN (Mouseup)
+  window.addEventListener("mouseup", function () {
+    if (isDragging) {
+      isDragging = false;
+      imgAmpliada.style.cursor = currentZoom > 1 ? "grab" : "zoom-in"; // Manito abierta
+    }
+  });
 }
