@@ -538,126 +538,128 @@ function ejecutarCreacionVentaLocal(e) {
   if (!confirm(mensajeVenta)) return;
 
   btnSubmit.disabled = true;
-  btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Conectando...`;
 
-  // 🔥 NUEVO: Enviar imagen a Drive y Gmail por POST de forma invisible
+  // 🔥 PASO 2: FUNCIÓN QUE REGISTRA LA VENTA EN EL EXCEL (Se llamará después de la foto)
+  const procesarVentaFinal = function() {
+    btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Registrando Venta...`;
+
+    const callbackName = "cb_venta_" + Date.now();
+    window[callbackName] = function (res) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerText = "Realizar Venta";
+      const scriptNode = document.getElementById("node_" + callbackName);
+      if (scriptNode) scriptNode.remove();
+      delete window[callbackName];
+
+      if (res && res.status === "success") {
+        let bloques = res.bloques || [];
+        let blocks = bloques.sort((a, b) => {
+          if (a.id === "NETFLIX") return -1;
+          if (b.id === "NETFLIX") return 1;
+          return 0;
+        });
+
+        const nombreCliente = nombre !== "" ? nombre : "";
+        let intro = `🌟 *¡Hola ${nombreCliente}!*\n\n`;
+        intro += esR
+          ? `Tu servicio ha sido *RENOVADO* con éxito. Mantienes tus mismos accesos:`
+          : `Tu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
+
+        let cuerpo = "";
+        bloques.forEach((b) => {
+          let etiquetaUser = b.id === "IPTV" || b.id === "EMBY" ? "Usuario" : "Correo";
+          let etiquetaPerfil = b.id === "IPTV" ? "URL" : b.id === "EMBY" ? "Servidor" : "Perfil";
+          let mesesComprados = memoriaMeses[b.id] || "1";
+          let textoMeses = mesesComprados > 1 ? ` (${mesesComprados} Meses)` : "";
+
+          cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n────────────────────\n`;
+          if (b.id === "NETFLIX") cuerpo += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+          cuerpo += `👤 *${etiquetaUser}:* ${b.correo}\n🔐 *Contraseña:* ${b.clave}\n`;
+          if (b.id === "IPTV" || (b.perfil && b.perfil !== "" && b.perfil !== "N/A")) cuerpo += `🌐 *${etiquetaPerfil}:* ${b.perfil}\n`;
+          if (b.id === "EMBY") cuerpo += `🔌 *Puerto:* Dejar vacío\n`;
+          if (b.pin && b.pin !== "") cuerpo += `📍 *PIN:* ${b.pin}\n`;
+          cuerpo += `📅 *Vence:* ${b.venc}\n`;
+          if (b.id === "NETFLIX") cuerpo += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/`;
+        });
+
+        let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
+        const mensajeFinalFicha = intro + cuerpo + soporte + `\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
+
+        let btnSaldo = document.getElementById("btnCopiarSaldoRevendedor");
+        if (res.esRevendedor) {
+          let montoDescontado = res.valorCobrado || 0;
+          let distribuidorNombre = res.nombreRevendedor || telefono;
+          window.textoSaldoRevendedorGlobal = `🔔 *NOTIFICACIÓN DE SALDO CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${distribuidorNombre}\n📉 *Débito por compra:* -$${Math.round(montoDescontado).toLocaleString("es-CO")}\n💰 *Saldo Disponible:* $${Math.round(res.saldoQuedante).toLocaleString("es-CO")}\n────────────────────\n✨ _¡Gracias por tu compra mayorista en Cybernet!_`;
+          if (btnSaldo) btnSaldo.style.display = "flex";
+        } else {
+          window.textoSaldoRevendedorGlobal = "";
+          if (btnSaldo) btnSaldo.style.display = "none";
+        }
+
+        document.getElementById("ventasOverlay").classList.remove("open");
+        document.getElementById("outputTextoVentaFicha").value = mensajeFinalFicha;
+        document.getElementById("ventaGeneradaModalOverlay").classList.add("open");
+
+        document.getElementById("formGenerarVenta").reset();
+        document.getElementById("listaServiciosVentaDinamica").innerHTML = "";
+        contadorFilasVenta = 0;
+        agregarFilaServicioVenta();
+        if (typeof window.limpiarVisorComprobante === "function") window.limpiarVisorComprobante();
+
+        if (res.alertasStock && res.alertasStock.length > 0) {
+          let avisoTexto = "⚠️ ¡ALERTA DE INVENTARIO CRÍTICO! ⚠️\n───────────────────────────\n";
+          res.alertasStock.forEach((a) => {
+            avisoTexto += `🚨 Plataforma: ${a.plat} ➔ ¡Solo quedan ${a.cant} perfiles libres!\n`;
+          });
+          setTimeout(() => { alert(avisoTexto); }, 600);
+        }
+      } else {
+        alert("❌ Error: " + (res ? res.message : "Fallo de comunicación."));
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_" + callbackName;
+    const mesesParam = encodeURIComponent(JSON.stringify(memoriaMeses));
+    script.src = `${GOOGLE_SCRIPT_URL}?action=registrarVentaDirectaV13&nombre=${encodeURIComponent(nombre)}&telefono=${encodeURIComponent(telefono)}&descripcion=${encodeURIComponent(descripcionFinalSheets)}&correoReno=${encodeURIComponent(correoNetflixReno)}&cantidad=${encodeURIComponent(cantidad)}&banco=${encodeURIComponent(banco)}&meses=${mesesParam}&callback=${callbackName}`;
+    document.body.appendChild(script);
+  };
+
+  // 🔥 PASO 1: SUBIR LA FOTO PRIMERO (Si existe)
   if (window.imagenComprobanteActual) {
+    btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:bottom;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Subiendo comprobante...`;
+    
     fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({
         action: "subirComprobanteYEnviarMail",
         imagen: window.imagenComprobanteActual,
         referencia: window.referenciaComprobanteActual,
         cliente: nombre || telefono,
-        telefono: telefono, // 🔥 Añadimos el celular explícitamente aquí
+        telefono: telefono,
         monto: cantidad,
       }),
-    }).catch((e) => console.log("Carga silenciosa a Drive iniciada."));
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.status !== "success") {
+        console.error("Drive Error:", data.message);
+      }
+      // Cuando termina de subir (exitoso o no), pasamos a registrar la venta
+      procesarVentaFinal();
+    })
+    .catch((e) => {
+      console.error("Fallo de red al subir:", e);
+      // Si falla por internet lento, igual registramos la venta para no dejar colgado al cliente
+      procesarVentaFinal();
+    });
+
+  } else {
+    // 🔥 SI NO HAY FOTO: Salta directamente a registrar la venta
+    procesarVentaFinal();
   }
-
-  const callbackName = "cb_venta_" + Date.now();
-  window[callbackName] = function (res) {
-    btnSubmit.disabled = false;
-    btnSubmit.innerText = "Realizar Venta";
-    const scriptNode = document.getElementById("node_" + callbackName);
-    if (scriptNode) scriptNode.remove();
-    delete window[callbackName];
-
-    if (res && res.status === "success") {
-      let bloques = res.bloques || [];
-      let blocks = bloques.sort((a, b) => {
-        if (a.id === "NETFLIX") return -1;
-        if (b.id === "NETFLIX") return 1;
-        return 0;
-      });
-
-      const nombreCliente = nombre !== "" ? nombre : "";
-      let intro = `🌟 *¡Hola ${nombreCliente}!*\n\n`;
-      intro += esR
-        ? `Tu servicio ha sido *RENOVADO* con éxito. Mantienes tus mismos accesos:`
-        : `Tu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
-
-      let cuerpo = "";
-      bloques.forEach((b) => {
-        let etiquetaUser =
-          b.id === "IPTV" || b.id === "EMBY" ? "Usuario" : "Correo";
-        let etiquetaPerfil =
-          b.id === "IPTV" ? "URL" : b.id === "EMBY" ? "Servidor" : "Perfil";
-        let mesesComprados = memoriaMeses[b.id] || "1";
-        let textoMeses = mesesComprados > 1 ? ` (${mesesComprados} Meses)` : "";
-
-        cuerpo += `\n\n🎬 *DETALLES DE ${b.id.replace(/-/g, " ").toUpperCase()}*${textoMeses} ✅\n────────────────────\n`;
-        if (b.id === "NETFLIX")
-          cuerpo += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
-        cuerpo += `👤 *${etiquetaUser}:* ${b.correo}\n🔐 *Contraseña:* ${b.clave}\n`;
-        if (
-          b.id === "IPTV" ||
-          (b.perfil && b.perfil !== "" && b.perfil !== "N/A")
-        )
-          cuerpo += `🌐 *${etiquetaPerfil}:* ${b.perfil}\n`;
-        if (b.id === "EMBY") cuerpo += `🔌 *Puerto:* Dejar vacío\n`;
-        if (b.pin && b.pin !== "") cuerpo += `📍 *PIN:* ${b.pin}\n`;
-        cuerpo += `📅 *Vence:* ${b.venc}\n`;
-        if (b.id === "NETFLIX")
-          cuerpo += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/`;
-      });
-
-      let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
-      const mensajeFinalFicha =
-        intro +
-        cuerpo +
-        soporte +
-        `\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
-
-      let btnSaldo = document.getElementById("btnCopiarSaldoRevendedor");
-      if (res.esRevendedor) {
-        let montoDescontado = res.valorCobrado || 0;
-        let distribuidorNombre = res.nombreRevendedor || telefono;
-        window.textoSaldoRevendedorGlobal = `🔔 *NOTIFICACIÓN DE SALDO CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${distribuidorNombre}\n📉 *Débito por compra:* -$${Math.round(montoDescontado).toLocaleString("es-CO")}\n💰 *Saldo Disponible:* $${Math.round(res.saldoQuedante).toLocaleString("es-CO")}\n────────────────────\n✨ _¡Gracias por tu compra mayorista en Cybernet!_`;
-        if (btnSaldo) btnSaldo.style.display = "flex";
-      } else {
-        window.textoSaldoRevendedorGlobal = "";
-        if (btnSaldo) btnSaldo.style.display = "none";
-      }
-
-      document.getElementById("ventasOverlay").classList.remove("open");
-      document.getElementById("outputTextoVentaFicha").value =
-        mensajeFinalFicha;
-      document
-        .getElementById("ventaGeneradaModalOverlay")
-        .classList.add("open");
-
-      // Resetear a fila 1 limpia
-      document.getElementById("formGenerarVenta").reset();
-      document.getElementById("listaServiciosVentaDinamica").innerHTML = "";
-      contadorFilasVenta = 0;
-      agregarFilaServicioVenta();
-      if (typeof window.limpiarVisorComprobante === "function")
-        window.limpiarVisorComprobante(); // LIMPIA LA IMAGEN DE LA PANTALLA
-
-      if (res.alertasStock && res.alertasStock.length > 0) {
-        let avisoTexto =
-          "⚠️ ¡ALERTA DE INVENTARIO CRÍTICO! ⚠️\n───────────────────────────\n";
-        res.alertasStock.forEach((a) => {
-          avisoTexto += `🚨 Plataforma: ${a.plat} ➔ ¡Solo quedan ${a.cant} perfiles libres!\n`;
-        });
-        setTimeout(() => {
-          alert(avisoTexto);
-        }, 600);
-      }
-    } else {
-      alert("❌ Error: " + (res ? res.message : "Fallo de comunicación."));
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + callbackName;
-  const mesesParam = encodeURIComponent(JSON.stringify(memoriaMeses));
-  script.src = `${GOOGLE_SCRIPT_URL}?action=registrarVentaDirectaV13&nombre=${encodeURIComponent(nombre)}&telefono=${encodeURIComponent(telefono)}&descripcion=${encodeURIComponent(descripcionFinalSheets)}&correoReno=${encodeURIComponent(correoNetflixReno)}&cantidad=${encodeURIComponent(cantidad)}&banco=${encodeURIComponent(banco)}&meses=${mesesParam}&callback=${callbackName}`;
-  document.body.appendChild(script);
-}
+} // <--- Llave de cierre de la función original
 window.toggleCargarPanel = function () {
   const panel = document.getElementById("cargarOverlay");
   if (!panel) return;
