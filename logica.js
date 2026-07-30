@@ -10876,9 +10876,12 @@ document.addEventListener("DOMContentLoaded", () => {
         tessedit_pageseg_mode: "6",
       })
         .then(({ data: { text } }) => {
-          // Limpieza inteligente
-          let txtLimpio = text
-            .toLowerCase()
+          
+          // 🔥 ARREGLO: Texto original en minúsculas SIN reemplazar letras para buscar nombres
+          let txtOriginalLower = text.toLowerCase();
+
+          // Limpieza inteligente (solo para extraer números y montos posteriormente)
+          let txtLimpio = txtOriginalLower
             .replace(/o/g, "0")
             .replace(/s/g, "5");
           window.textoOCRTemp = txtLimpio;
@@ -10889,13 +10892,14 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/[^\d]/g, "");
 
           // 1. FILTRO DE IDENTIDAD DEL NEGOCIO (ESTRICTO - SIN BYPASS)
+          // Usamos txtOriginalLower para que "camilo" no se rompa por "camil0"
           const esSeguro =
-            txtLimpio.includes("camilo") ||
-            txtLimpio.includes("colina") ||
-            txtLimpio.includes("loyo") ||
-            txtLimpio.includes("angelica") ||
-            txtLimpio.includes("mera") ||
-            txtLimpio.includes("arteaga") ||
+            txtOriginalLower.includes("camilo") ||
+            txtOriginalLower.includes("colina") ||
+            txtOriginalLower.includes("loyo") ||
+            txtOriginalLower.includes("angelica") ||
+            txtOriginalLower.includes("mera") ||
+            txtOriginalLower.includes("arteaga") ||
             txtOCRNormalizado.includes("1007416341") ||
             txtOCRNormalizado.includes("3215938767") ||
             txtOCRNormalizado.includes("3015156037");
@@ -10929,8 +10933,8 @@ document.addEventListener("DOMContentLoaded", () => {
             destinoDetectado = "3015156037";
 
           if (
-            txtLimpio.includes("redeban") &&
-            txtLimpio.includes("nequ") &&
+            txtOriginalLower.includes("redeban") &&
+            txtOriginalLower.includes("nequ") &&
             destinoDetectado === "No detectado"
           ) {
             destinoDetectado = "3215938767";
@@ -10940,22 +10944,22 @@ document.addEventListener("DOMContentLoaded", () => {
           let bancoDetectado = "Bre-B";
           
           if (
-            txtLimpio.includes("nequi") ||
-            txtLimpio.includes("nequ")
+            txtOriginalLower.includes("nequi") ||
+            txtOriginalLower.includes("nequ")
           )
             bancoDetectado = "Nequi";
             
-          if (txtLimpio.includes("daviplata")) bancoDetectado = "Daviplata";
+          if (txtOriginalLower.includes("daviplata")) bancoDetectado = "Daviplata";
           
           if (
-            txtLimpio.includes("bancolombia") ||
-            txtLimpio.includes("ahorros libreton") ||
-            txtLimpio.includes("avvillas") ||
-            txtLimpio.includes("redeban") ||
-            txtLimpio.includes("llave") ||
-            txtLimpio.includes("documento") ||
-            txtLimpio.includes("bre-b") ||
-            txtLimpio.includes("breb")
+            txtOriginalLower.includes("bancolombia") ||
+            txtOriginalLower.includes("ahorros libreton") ||
+            txtOriginalLower.includes("avvillas") ||
+            txtOriginalLower.includes("redeban") ||
+            txtOriginalLower.includes("llave") ||
+            txtOriginalLower.includes("documento") ||
+            txtOriginalLower.includes("bre-b") ||
+            txtOriginalLower.includes("breb")
           )
             bancoDetectado = "Bre-B";
 
