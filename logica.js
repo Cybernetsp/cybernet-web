@@ -11907,6 +11907,17 @@ function renderizarMatrizCompleta() {
 
   let htmlBotones = `<div id="contenedor-botones-lupa" style="display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; max-height: 120px; overflow-y: auto;">`;
 
+  // 🔥 NUEVO: BOTÓN DE REFRESCO SILENCIOSO (PRIMERO EN LA FILA) 🔥
+  htmlBotones += `
+      <button onclick="forzarRefrescoLupaSilencioso()" title="Refrescar base de datos" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #e1e1e6; padding: 6px 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s ease;">
+          <svg id="icon-refresh-lupa" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          
+      </button>
+  `;
+
   // 🚨 1. BOTÓN ESPECIAL DE GARANTÍAS
   const esGarantiaActiva = plataformaActivaBuscador === "GARANTIAS";
   htmlBotones += `
@@ -13049,3 +13060,55 @@ function actualizarVisibilidadDock() {
     }, 1000); // Esperamos 1 segundo a que termine la animación de cierre de la ventana
   }
 }
+window.forzarRefrescoLupaSilencioso = function () {
+  if (typeof haptic === "function") haptic();
+
+  const btnIcon = document.getElementById("icon-refresh-lupa");
+
+  // 1. Animación visual (el SVG gira y se pinta de azul)
+  if (btnIcon) {
+    btnIcon.classList.add("spin-anim");
+    btnIcon.style.color = "var(--ios-blue)";
+  }
+
+  console.log("⚡ Forzando actualización silenciosa de la Lupa...");
+
+  // 2. Petición directa a Google Apps Script
+  const cbName = "cb_lupa_manual_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    // Detenemos la animación
+    if (btnIcon) {
+      btnIcon.classList.remove("spin-anim");
+      btnIcon.style.color = "#e1e1e6";
+    }
+
+    if (res && res.status === "success") {
+      // 🔥 Actualizamos TU memoria real
+      memoriaBuscador = res.data;
+
+      // Leemos lo que haya escrito el usuario para que no se le borre
+      let textoActual = "";
+      const inputBuscador = document.getElementById("input-buscador-global");
+      if (inputBuscador) {
+        textoActual = inputBuscador.value;
+      }
+
+      // 🔥 Redibujamos instantáneamente llamando a TU función
+      if (typeof renderizarFilasTabla === "function") {
+        renderizarFilasTabla();
+      }
+      console.log("✅ Actualización manual y silenciosa completada.");
+    } else {
+      console.error("❌ Fallo en la actualización de la base de datos.");
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=descargarInventarioBuscador&versionCliente=&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
