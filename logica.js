@@ -8378,11 +8378,11 @@ window.calcularPreciosSistemaCotizador = function () {
 
       if (val === "NETFLIX") {
         tieneNetflix = true;
-        if (pantallas === 1) costoNetflixCalculado = 14500;
-        else if (pantallas === 2) costoNetflixCalculado = 26000;
-        else if (pantallas === 3) costoNetflixCalculado = 36000;
-        else if (pantallas === 4) costoNetflixCalculado = 46000;
-        else if (pantallas >= 5) costoNetflixCalculado = 55000;
+        if (pantallas === 1) costoNetflixCalculado = 15000;
+        else if (pantallas === 2) costoNetflixCalculado = 27000;
+        else if (pantallas === 3) costoNetflixCalculado = 37000;
+        else if (pantallas === 4) costoNetflixCalculado = 47000;
+        else if (pantallas >= 5) costoNetflixCalculado = 56000;
       } else {
         if (mapValores[val]) {
           for (let i = 0; i < pantallas; i++) {
@@ -10876,7 +10876,6 @@ document.addEventListener("DOMContentLoaded", () => {
         tessedit_pageseg_mode: "6",
       })
         .then(({ data: { text } }) => {
-          
           // 🔥 ARREGLO: Texto original en minúsculas SIN reemplazar letras para buscar nombres
           let txtOriginalLower = text.toLowerCase();
 
@@ -10906,7 +10905,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (!esSeguro) {
             alert(
-              "❌ COMPROBANTE RECHAZADO:\n\nEl sistema no detectó tu nombre (Camilo / Angelica) ni los números autorizados en este comprobante.\n\nSe ha bloqueado la subida de este pago."
+              "❌ COMPROBANTE RECHAZADO:\n\nEl sistema no detectó tu nombre (Camilo / Angelica) ni los números autorizados en este comprobante.\n\nSe ha bloqueado la subida de este pago.",
             );
             window.limpiarVisorComprobante();
             return; // Bloquea y aborta el proceso
@@ -10942,15 +10941,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // 4. DETECTAR BANCO
           let bancoDetectado = "Bre-B";
-          
+
           if (
             txtOriginalLower.includes("nequi") ||
             txtOriginalLower.includes("nequ")
           )
             bancoDetectado = "Nequi";
-            
-          if (txtOriginalLower.includes("daviplata")) bancoDetectado = "Daviplata";
-          
+
+          if (txtOriginalLower.includes("daviplata"))
+            bancoDetectado = "Daviplata";
+
           if (
             txtOriginalLower.includes("bancolombia") ||
             txtOriginalLower.includes("ahorros libreton") ||
@@ -12906,4 +12906,146 @@ window.toggleAnaCodesPanel = function () {
       }
     }
   }
+  // =========================================================================
+  // ♻️ MOTOR DE SINCRONIZACIÓN INTELIGENTE EN SEGUNDO PLANO (LUPA / CACHÉ)
+  // =========================================================================
+
+  // 1. Variable para evitar descargas dobles (Cooldown de 1 minuto mínimo)
+  window.ultimaSincroBaseDatos = 0;
+
+  // 2. Función para saber si el usuario está ocupado en algo crítico
+  function usuarioEstaOcupado() {
+    const modalesCriticos = [
+      "ventasOverlay",
+      "cargarOverlay",
+      "cambioCuentaOverlay",
+      "resolverGarantiaOverlay",
+      "editVencOverlay",
+      "prestamoModalOverlay",
+      "editShiftModalOverlay",
+      "garantiasOverlay",
+      "comboCalcOverlay",
+      "nominaOverlay",
+    ];
+
+    // Devuelve 'true' si CUALQUIERA de estos modales está abierto
+    return modalesCriticos.some((id) => {
+      const modal = document.getElementById(id);
+      return modal && modal.classList.contains("open");
+    });
+  }
+
+  // 3. Función maestra que descarga el caché silenciosamente
+  window.sincronizarBaseDatosFondo = function () {
+    // Si no hay nadie logueado, cancelamos
+    if (!sessionStorage.getItem("active_staff")) return;
+
+    // Si está ocupado en una ventana crítica de escritura (ventas, cargar, etc), posponemos
+    if (usuarioEstaOcupado()) return;
+
+    // Escudo Cooldown: Mínimo 1 minuto entre descargas
+    let ahora = Date.now();
+    if (ahora - window.ultimaSincroBaseDatos < 60000) return;
+
+    window.ultimaSincroBaseDatos = ahora;
+    console.log("♻️ Actualizando caché de la Lupa en segundo plano...");
+
+    // Llamada silenciosa al backend mediante JSONP
+    const cbName = "cb_lupa_fondo_" + Date.now();
+    window[cbName] = function (res) {
+      const scriptNode = document.getElementById("node_" + cbName);
+      if (scriptNode) scriptNode.remove();
+      delete window[cbName];
+
+      if (res && res.status === "success") {
+        console.log("✅ Caché de la Lupa actualizado silenciosamente.");
+
+        // 1. Guardamos la nueva data en la memoria global que use tu Lupa
+        // (Revisa si tu variable se llama window.inventarioGlobalLupa o window.currentSearchStock)
+        window.inventarioGlobalLupa = res.data;
+
+        // 2. Si la ventana de la Lupa está ABIERTA, actualizamos la lista SILENCIOSAMENTE
+        const modalLupa = document.getElementById("modal-buscador-global");
+
+        if (modalLupa && modalLupa.style.display === "flex") {
+          // Leemos lo que el usuario está escribiendo en ese momento para no interrumpirlo
+          let textoActual = "";
+          const inputBuscador = document.getElementById(
+            "input-buscador-global",
+          );
+          if (inputBuscador) {
+            textoActual = inputBuscador.value;
+          }
+
+          // Redibujamos la lista de resultados en silencio, aplicando el filtro que ya estaba escrito.
+          // (Reemplaza "renderizarResultadosLupa" por el nombre de tu función que pinta las tarjetitas)
+          if (typeof renderizarResultadosLupa === "function") {
+            renderizarResultadosLupa(textoActual);
+          }
+        }
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_" + cbName;
+
+    // IMPORTANTE: Al llamar directamente la URL sin tocar el HTML, NUNCA saldrá el letrero de "⚡ Sincronizando..."
+    script.src = `${GOOGLE_SCRIPT_URL}?action=descargarInventarioBuscador&versionCliente=&callback=${cbName}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+  };
+
+  // 4. El bucle que intenta ejecutarse cada 10 minutos (600,000 milisegundos)
+  setInterval(window.sincronizarBaseDatosFondo, 600000);
 };
+function actualizarVisibilidadDock() {
+  // 🔍 Escaneo robusto: Busca si hay modales con la clase 'open' O que tengan display activo
+  const algunModalAbierto = Array.from(
+    document.querySelectorAll(".overlay-ios"),
+  ).some((modal) => {
+    return (
+      modal.classList.contains("open") ||
+      (modal.style.display && modal.style.display !== "none")
+    );
+  });
+
+  const dockWrapper = document.querySelector(".macos-dock-wrapper");
+  if (!dockWrapper) return;
+
+  if (algunModalAbierto) {
+    // 🔒 CASO: Ventana abierta -> Desactivación física y reubicación total fuera de la pantalla
+    document.body.style.overflow = "hidden";
+    dockWrapper.style.setProperty("opacity", "0", "important");
+    dockWrapper.style.setProperty("pointer-events", "none", "important");
+    dockWrapper.style.setProperty("visibility", "hidden", "important");
+    dockWrapper.style.setProperty(
+      "transform",
+      "translateY(120px)",
+      "important",
+    );
+    dockWrapper.style.setProperty(
+      "transition",
+      "all 0.22s cubic-bezier(0.16, 1, 0.3, 1)",
+      "important",
+    );
+  } else {
+    // 🏠 CASO: Escritorio limpio -> El Dock regresa flotando a su posición original con sus clics
+    document.body.style.overflow = "";
+    dockWrapper.style.setProperty("opacity", "1", "important");
+    dockWrapper.style.setProperty("pointer-events", "auto", "important");
+    dockWrapper.style.setProperty("visibility", "visible", "important");
+    dockWrapper.style.setProperty("transform", "translateY(0)", "important");
+    dockWrapper.style.setProperty(
+      "transition",
+      "all 0.22s cubic-bezier(0.16, 1, 0.3, 1)",
+      "important",
+    );
+
+    // 🔥 NUEVO: Como se acaba de cerrar la ventana y el escritorio está libre,
+    // aprovechamos para forzar la actualización del caché de la Lupa.
+    setTimeout(() => {
+      if (typeof window.sincronizarBaseDatosFondo === "function") {
+        window.sincronizarBaseDatosFondo();
+      }
+    }, 1000); // Esperamos 1 segundo a que termine la animación de cierre de la ventana
+  }
+}
