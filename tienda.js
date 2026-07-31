@@ -97,7 +97,7 @@ const PROMOS_RELAMPAGO = [
   },
 ];
 
-const PRECIOS_NETFLIX = { 1: 14500, 2: 26000, 3: 36000, 4: 46000, 5: 55000 };
+const PRECIOS_NETFLIX = { 1: 1500, 2: 27000, 3: 37000, 4: 47000, 5: 56000 };
 
 function triggerToast(msgText) {
   const toast = document.getElementById("appleToast");
@@ -201,7 +201,7 @@ function simularPrecioCart(tempCart, meses) {
       }
     } else {
       if (regularCount === 0) {
-        precioBase = 14500;
+        precioBase = 15000;
         nombreC = "Solo Netflix (Básico)";
       } else if (regularCount === 1) {
         precioBase = 20000;
