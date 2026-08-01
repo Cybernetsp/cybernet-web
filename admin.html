@@ -21,9 +21,6 @@
 
     <link rel="stylesheet" href="global.css?v=1.0.1" />
 
-    <!-- Motor de IA para leer texto en imágenes -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
-
     <style>
       /* ==========================================================================
          🔥 TOAST NOTIFICACIONES SUPERIOR DERECHA V2 (INVENTARIO CRÍTICO)
@@ -1075,154 +1072,7 @@
       </div>
     </div>
 
-    <div class="overlay-ios" id="editVencOverlay" style="z-index: 13000">
-      <div
-        class="modal-ios"
-        style="
-          max-width: 400px;
-          width: 90%;
-          padding: 32px 24px;
-          border-radius: 32px;
-        "
-        onclick="event.stopPropagation()"
-      >
-        <div
-          style="
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 24px;
-          "
-        >
-          <div
-            style="
-              background: rgba(10, 132, 255, 0.15);
-              color: var(--ios-blue);
-              padding: 12px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              margin-bottom: 16px;
-              border: 1px solid rgba(10, 132, 255, 0.2);
-            "
-          >
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-              ></path>
-              <path
-                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-              ></path>
-            </svg>
-          </div>
-          <h3
-            class="card-title"
-            style="
-              color: var(--text-primary);
-              font-size: 1.25rem;
-              font-weight: 800;
-              margin: 0 0 6px 0;
-              letter-spacing: -0.3px;
-              justify-content: center;
-            "
-          >
-            Editar Tiempo
-          </h3>
-          <p
-            class="text-secondary"
-            style="
-              font-size: 0.85rem;
-              text-align: center;
-              margin: 0;
-              line-height: 1.4;
-            "
-          >
-            Corrige los meses o la fecha de vencimiento de esta cuenta.
-          </p>
-        </div>
-
-        <form
-          class="flex-col"
-          style="gap: 20px"
-          onsubmit="window.ejecutarEdicionVencimiento(event)"
-        >
-          <input type="hidden" id="editVencPlataforma" />
-          <input type="hidden" id="editVencCorreo" />
-
-          <div style="display: flex; flex-direction: column; gap: 12px">
-            <input
-              type="text"
-              id="editVencDisplay"
-              class="input-ios"
-              disabled
-              style="
-                opacity: 0.7;
-                margin-bottom: 0;
-                text-align: center;
-                font-size: 0.85rem;
-                background: rgba(0, 0, 0, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.05);
-                border-radius: 18px;
-                padding: 14px 20px;
-              "
-            />
-            <input
-              type="text"
-              id="editVencNuevo"
-              class="input-ios"
-              placeholder="Ej: 2 Meses ó 28DEAGOSTO"
-              required
-              style="
-                margin-bottom: 0;
-                font-weight: 800;
-                color: var(--ios-blue);
-                text-align: center;
-                border-radius: 18px;
-                padding: 14px 20px;
-              "
-            />
-          </div>
-
-          <div class="flex-col" style="gap: 12px">
-            <button
-              type="submit"
-              id="btnSubmitEditVenc"
-              class="btn-ios btn-primary w-100"
-              style="padding: 16px; font-size: 1rem; border-radius: 50px"
-            >
-              Guardar Corrección
-            </button>
-            <button
-              type="button"
-              class="btn-ios btn-secondary w-100"
-              style="
-                padding: 16px;
-                font-size: 0.95rem;
-                border-radius: 50px;
-                color: var(--ios-red);
-              "
-              onclick="
-                document
-                  .getElementById('editVencOverlay')
-                  .classList.remove('open')
-              "
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    
 
     <div class="overlay-ios" id="searchAccountOverlay">
       <div
@@ -1973,199 +1823,7 @@
       </div>
     </div>
 
-    <div class="overlay-ios" id="addHoursOverlay" style="z-index: 16000">
-      <div
-        class="modal-ios"
-        onclick="event.stopPropagation()"
-        style="
-          max-width: 420px;
-          width: 90%;
-          padding: 32px 24px;
-          border-radius: 32px;
-        "
-      >
-        <div
-          style="
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 24px;
-          "
-        >
-          <div
-            style="
-              background: rgba(48, 209, 88, 0.15);
-              color: var(--ios-green);
-              padding: 12px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              margin-bottom: 16px;
-              border: 1px solid rgba(48, 209, 88, 0.2);
-            "
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M12 5v14M5 12h14"></path>
-            </svg>
-          </div>
-          <h3
-            class="card-title"
-            style="
-              color: var(--text-primary);
-              font-size: 1.25rem;
-              font-weight: 800;
-              margin: 0 0 6px 0;
-              letter-spacing: -0.3px;
-            "
-          >
-            Ingresar Tiempo Extra
-          </h3>
-          <p
-            class="text-secondary"
-            style="
-              font-size: 0.85rem;
-              text-align: center;
-              margin: 0;
-              line-height: 1.4;
-            "
-          >
-            Registra las horas extras de forma manual directamente en la base
-            contable de turnos.
-          </p>
-        </div>
-
-        <form
-          class="flex-col"
-          style="gap: 16px; text-align: left"
-          onsubmit="
-            event.preventDefault();
-            ejecutarGuardadoHorasManual();
-          "
-        >
-          <div class="flex-col" style="gap: 4px; margin-bottom: 0">
-            <label
-              class="text-secondary"
-              style="
-                font-size: 0.72rem;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                padding-left: 4px;
-              "
-              >Trabajador Seleccionado</label
-            >
-            <input
-              type="text"
-              id="inputVendedorShift"
-              class="input-ios"
-              placeholder="Vendedor"
-              disabled
-              style="
-                opacity: 0.7;
-                background: rgba(0, 0, 0, 0.4) !important;
-                padding: 12px 16px;
-                border-radius: 12px;
-                margin-bottom: 0;
-              "
-            />
-          </div>
-
-          <div class="flex-col" style="gap: 4px; margin-bottom: 0">
-            <label
-              class="text-secondary"
-              style="
-                font-size: 0.72rem;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                padding-left: 4px;
-              "
-              >Tiempo Trabajado (HH:MM:SS)</label
-            >
-            <input
-              type="text"
-              id="inputHorasShift"
-              class="input-ios"
-              placeholder="Ejemplo: 04:30:00"
-              style="
-                background: rgba(0, 0, 0, 0.3) !important;
-                padding: 12px 16px;
-                border-radius: 12px;
-                font-weight: 800;
-                color: var(--ios-green);
-                margin-bottom: 0;
-              "
-              required
-            />
-          </div>
-
-          <div class="flex-col" style="gap: 4px; margin-bottom: 0">
-            <label
-              class="text-secondary"
-              style="
-                font-size: 0.72rem;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                padding-left: 4px;
-              "
-              >Fecha Correspondiente</label
-            >
-            <input
-              type="date"
-              id="inputFechaShift"
-              class="input-ios"
-              style="
-                background: rgba(0, 0, 0, 0.3) !important;
-                padding: 11px 16px;
-                border-radius: 12px;
-                margin-bottom: 0;
-              "
-              required
-            />
-          </div>
-
-          <div class="flex-col" style="gap: 12px; margin-top: 10px">
-            <button
-              type="submit"
-              id="btnGuardarShiftManual"
-              class="btn-ios btn-success w-100"
-              style="
-                padding: 16px;
-                font-size: 1rem;
-                border-radius: 50px;
-                font-weight: 800;
-              "
-            >
-              Guardar Horas en Sheets
-            </button>
-            <button
-              type="button"
-              class="btn-ios btn-secondary w-100"
-              style="
-                padding: 16px;
-                font-size: 0.95rem;
-                border-radius: 50px;
-                color: var(--ios-red);
-              "
-              onclick="toggleFormularioHoras()"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    
 
     <div class="overlay-ios" id="editShiftModalOverlay" style="z-index: 13000">
       <div
@@ -2344,22 +2002,22 @@
 
     <div class="overlay-ios" id="ventasOverlay" style="z-index: 15000">
       <div
-        class="sheet-ios"
-        onclick="event.stopPropagation()"
-        style="
-          max-width: 950px;
-          height: 85vh;
-          max-height: 800px;
-          display: flex;
-          flex-direction: column;
-          padding: 0;
-          border-radius: 24px;
-          overflow: hidden;
-          background: #0b0b0d;
-          border: 1px solid rgba(10, 132, 255, 0.2);
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-        "
-      >
+  class="sheet-ios"
+  onclick="event.stopPropagation()"
+  style="
+    max-width: 550px; /* 👈 AQUÍ: Cambiado de 950px a 550px */
+    height: auto;     /* 👈 Opcional: 'auto' para que no quede espacio vacío abajo */
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border-radius: 24px;
+    overflow: hidden;
+    background: #0b0b0d;
+    border: 1px solid rgba(10, 132, 255, 0.2);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  "
+>
         <div
           class="sheet-header"
           style="
@@ -2435,17 +2093,16 @@
         >
           <!-- LADO IZQUIERDO: FORMULARIO NORMAL -->
           <form
-            id="formGenerarVenta"
-            onsubmit="ejecutarCreacionVentaLocal(event)"
-            autocomplete="off"
-            style="
-              flex: 1.2;
-              display: flex;
-              flex-direction: column;
-              overflow: hidden;
-              border-right: 1px solid rgba(255, 255, 255, 0.05);
-            "
-          >
+  id="formGenerarVenta"
+  onsubmit="ejecutarCreacionVentaLocal(event)"
+  autocomplete="off"
+  style="
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  "
+>
             <div
               style="
                 overflow-y: auto;
@@ -2786,109 +2443,7 @@
             </div>
           </form>
 
-          <!-- LADO DERECHO: ZONA DE ESCÁNER DE COMPROBANTES -->
-          <div
-            style="
-              flex: 0.8;
-              display: flex;
-              flex-direction: column;
-              padding: 24px;
-              background: rgba(255, 255, 255, 0.02);
-            "
-          >
-            <span
-              style="
-                font-size: 0.8rem;
-                font-weight: 800;
-                color: var(--text-primary);
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                margin-bottom: 15px;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-              "
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--ios-purple)"
-                stroke-width="2.5"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21 15 16 10 5 21"></polyline>
-              </svg>
-              Escáner de Comprobante
-            </span>
-
-            <div
-              id="escaner-comprobantes"
-              style="
-                flex-grow: 1;
-                border: 2px dashed rgba(255, 255, 255, 0.2);
-                border-radius: 20px;
-                background: rgba(0, 0, 0, 0.3);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 15px;
-                transition: all 0.3s ease;
-                text-align: center;
-                padding: 20px;
-              "
-            >
-              <div
-                id="escaner-icono"
-                style="
-                  background: rgba(191, 90, 242, 0.15);
-                  color: var(--ios-purple);
-                  padding: 16px;
-                  border-radius: 50%;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                "
-              >
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-              </div>
-              <div
-                id="escaner-texto"
-                style="
-                  color: var(--text-secondary);
-                  font-size: 0.9rem;
-                  line-height: 1.5;
-                "
-              >
-                Haz clic aquí y pega <b>(Ctrl + V)</b><br />o arrastra la imagen
-                del pago.<br />
-                <span
-                  style="
-                    font-size: 0.75rem;
-                    opacity: 0.7;
-                    display: block;
-                    margin-top: 8px;
-                  "
-                  >La IA autocompletará el valor y lo subirá a Google
-                  Drive.</span
-                >
-              </div>
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>
