@@ -12009,7 +12009,7 @@ window.copiarDatoAisladoLupa = function (btn, texto) {
 };
 
 // =========================================================================
-// 📋 RENDERIZADOR DE FILAS (INCLUYE BOTONES SVG PARA COPIAR CORREO / CLAVE)
+// 📋 RENDERIZADOR DE FILAS (INCLUYE BOTONES SVG PARA COPIAR CORREO / CLAVE Y BORRAR TELÉFONO)
 // =========================================================================
 function renderizarFilasTabla() {
   const contenedorTabla = document.getElementById("contenedor-tabla-dinamica");
@@ -12165,7 +12165,6 @@ function renderizarFilasTabla() {
   } else {
     let ultimaFechaRenderizada = null;
 
-    // Template para el botón SVG de copiado rápido de correo o clave
     const svgCopyIcon = (dato, titulo) => {
       if (!dato || dato === "-") return "";
       const datoLimpio = String(dato).replace(/'/g, "\\'");
@@ -12251,6 +12250,26 @@ function renderizarFilasTabla() {
         </div>
       `;
 
+      // 🔥 NUEVO BLOQUE: CELDA TELÉFONO CON PAPELERA DE BORRADO 🔥
+      let celdaTelefonoContent = `<span class="texto-telefono">${cuenta.telefono || "-"}</span>`;
+      if (
+        cuenta.telefono &&
+        cuenta.telefono.trim() !== "" &&
+        cuenta.telefono.trim() !== "-"
+      ) {
+        celdaTelefonoContent = `
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <span class="texto-telefono" style="font-family: monospace;">${cuenta.telefono}</span>
+                <button class="btn-borrar-tel" onclick="borrarTelefonoCelda('${cuenta.plataforma}', '${cuenta.filaIndex}', this)" title="Borrar número (Liberar Perfil)" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ios-red); transition: all 0.2s ease;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+          `;
+      }
+
       if (esModoGarantias) {
         const btnCopiarReporte = `<button onclick="copiarReporteGarantiaIndividual(this, '${cuenta.plataforma}', '${cuenta.correo}', '${cuenta.clave}', '${cuenta.fechaCompra || "-"}', '${cuenta.proveedor || "-"}')" style="background: rgba(255, 159, 10, 0.12); border: 1px solid rgba(255, 159, 10, 0.25); color: var(--ios-orange); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">📋 Copiar Reporte</button>`;
         const btnResolver = `<button onclick="resolverDesdeLupa('${cuenta.filaIndex || ""}', '${cuenta.correo}', '${cuenta.plataforma}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: var(--ios-green); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">✅ Resolver</button>`;
@@ -12295,7 +12314,7 @@ function renderizarFilasTabla() {
                         <td style="padding: 12px 16px; color: #ffd60a; font-family: monospace;">${cuenta.pin || "-"}</td>
                         ${incluyeNetflix ? `<td style="padding: 12px 16px; color: #ff9f0a; font-weight: 600;">${isRowNetflix ? cuenta.vencimiento || "-" : "-"}</td>` : ""}
                         <td style="padding: 12px 16px; color: #e4e4e7;">${cuenta.cliente || "-"}</td>
-                        <td style="padding: 12px 16px; color: #a1a1aa;">${cuenta.telefono || "-"}</td>
+                        <td style="padding: 12px 16px; color: #a1a1aa;">${celdaTelefonoContent}</td>
                         <td style="padding: 10px 16px; text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
                                 ${btnCopiar}
@@ -12312,6 +12331,85 @@ function renderizarFilasTabla() {
   htmlTabla += `</tbody></table>`;
   contenedorTabla.innerHTML = htmlTabla;
 }
+
+// =========================================================================
+// 🗑️ FUNCIÓN PARA BORRAR NÚMERO DE TELÉFONO DESDE LA TABLA (SEGUNDO PLANO)
+// =========================================================================
+window.borrarTelefonoCelda = function (plataforma, filaIndex, btnElement) {
+  // 1️⃣ PRIMERA CONFIRMACIÓN
+  let msj1 = `¿Estás seguro de borrar el teléfono de esta fila en ${plataforma}?`;
+  if (plataforma.toUpperCase() === "NETFLIX") {
+    msj1 += `\n\n⚠️ ADVERTENCIA: Al ser NETFLIX, también se borrará la Fecha de última venta y el Valor para liberar el perfil por completo.`;
+  }
+
+  if (!confirm(msj1)) return;
+
+  // 2️⃣ SEGUNDA CONFIRMACIÓN DE SEGURIDAD
+  let msj2 = `🚨 ÚLTIMA CONFIRMACIÓN 🚨\n\n¿Realmente deseas vaciar los datos del cliente en la fila ${filaIndex} de ${plataforma}?\nEsta acción es irreversible en la base de datos.`;
+  if (!confirm(msj2)) return;
+
+  if (typeof haptic === "function") haptic();
+
+  // Guardar HTML original y poner el spinner animado de carga en la papelera
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_borrar_tel_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      // ÉXITO: Limpiar la celda visualmente sin recargar ni cerrar la ventana
+      const tdContenedor = btnElement.closest("td") || btnElement.parentElement;
+      if (tdContenedor) {
+        const spanTexto = tdContenedor.querySelector(".texto-telefono");
+        if (spanTexto) spanTexto.innerText = "-";
+      }
+      // Desaparecer el botón de la papelera
+      btnElement.remove();
+
+      // Modificamos la memoria local (RAM) para que el cambio sea permanente en esta sesión sin recargar
+      let cuentaModificada = memoriaBuscador.find(
+        (c) => c.plataforma === plataforma && c.filaIndex == filaIndex,
+      );
+      if (cuentaModificada) {
+        cuentaModificada.telefono = "";
+        if (plataforma.toUpperCase() === "NETFLIX") {
+          cuentaModificada.fechaCompra = ""; // Limpiamos la fecha en memoria
+        }
+        localStorage.setItem(
+          "cache_inventario_lupa",
+          JSON.stringify(memoriaBuscador),
+        );
+      }
+
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg> <span>Número borrado, perfil liberado.</span></div>`,
+        );
+      }
+
+      // ⚡ SINCRONIZACIÓN EN SEGUNDO PLANO: Le decimos a la lupa que descargue los datos frescos en silencio
+      if (typeof sincronizarLupaSilenciosa === "function") {
+        sincronizarLupaSilenciosa(true);
+      }
+    } else {
+      alert(
+        "❌ Error: " + (res ? res.message : "Fallo de red al intentar borrar."),
+      );
+      btnElement.innerHTML = originalHTML;
+      btnElement.disabled = false;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=borrarTelefonoCelda&plataforma=${encodeURIComponent(plataforma)}&filaIndex=${encodeURIComponent(filaIndex)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
 
 // =========================================================================
 // 🗑️ LÓGICA PARA EL BOTÓN DE BORRAR FECHA EN LOGICA.JS
