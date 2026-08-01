@@ -12009,7 +12009,7 @@ window.copiarDatoAisladoLupa = function (btn, texto) {
 };
 
 // =========================================================================
-// 📋 RENDERIZADOR DE FILAS (INCLUYE BOTONES SVG PARA COPIAR CORREO / CLAVE Y BORRAR TELÉFONO)
+// 📋 RENDERIZADOR DE FILAS (CON BOTONES DE COPIAR, BORRAR, AGREGAR Y EDITAR)
 // =========================================================================
 function renderizarFilasTabla() {
   const contenedorTabla = document.getElementById("contenedor-tabla-dinamica");
@@ -12179,7 +12179,11 @@ function renderizarFilasTabla() {
     };
 
     filtrados.forEach((cuenta, idx) => {
-      const cuentaCodificada = encodeURIComponent(JSON.stringify(cuenta));
+      // 🚨 BLINDAJE CONTRA ERRORES: Reemplazar comillas simples para evitar que rompan los botones
+      const cuentaCodificada = encodeURIComponent(
+        JSON.stringify(cuenta),
+      ).replace(/'/g, "%27");
+
       const esFilaPar = idx % 2 === 0;
       const isRowNetflix = String(cuenta.plataforma)
         .toUpperCase()
@@ -12250,22 +12254,49 @@ function renderizarFilasTabla() {
         </div>
       `;
 
-      // 🔥 NUEVO BLOQUE: CELDA TELÉFONO CON PAPELERA DE BORRADO 🔥
-      let celdaTelefonoContent = `<span class="texto-telefono">${cuenta.telefono || "-"}</span>`;
-      if (
-        cuenta.telefono &&
-        cuenta.telefono.trim() !== "" &&
-        cuenta.telefono.trim() !== "-"
-      ) {
+      // 🔥 CELDA TELÉFONO Y BOTONES 🔥
+      let telLimpio = (cuenta.telefono || "").trim();
+      let celdaTelefonoContent = "";
+
+      // Botón Lápiz Azul (Solo se mostrará si ya hay teléfono)
+      const btnEditHTML = `
+        <button onclick="abrirModalEditar('${cuenta.plataforma}', '${cuenta.filaIndex}', this, '${cuentaCodificada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ios-blue); transition: all 0.2s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+        </button>
+      `;
+
+      if (telLimpio !== "" && telLimpio !== "-") {
+        // Si YA TIENE un número: Mostramos Lápiz + Papelera
         celdaTelefonoContent = `
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                 <span class="texto-telefono" style="font-family: monospace;">${cuenta.telefono}</span>
-                <button class="btn-borrar-tel" onclick="borrarTelefonoCelda('${cuenta.plataforma}', '${cuenta.filaIndex}', this)" title="Borrar número (Liberar Perfil)" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ios-red); transition: all 0.2s ease;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                </button>
+                <div style="display: flex; gap: 4px;">
+                    ${btnEditHTML}
+                    <button class="btn-borrar-tel" onclick="borrarTelefonoCelda('${cuenta.plataforma}', '${cuenta.filaIndex}', this)" title="Borrar número (Liberar Perfil)" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ios-red); transition: all 0.2s ease;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+          `;
+      } else {
+        // Si NO TIENE número: Mostramos Solo el botón "+"
+        celdaTelefonoContent = `
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <span class="texto-telefono" style="font-family: monospace; color: var(--text-secondary);">-</span>
+                <div style="display: flex; gap: 4px;">
+                    <button class="btn-agregar-tel" onclick="agregarTelefonoCelda('${cuenta.plataforma}', '${cuenta.filaIndex}', this)" title="Asignar Teléfono Rápido" style="background: rgba(48, 209, 88, 0.1); border: 1px solid rgba(48, 209, 88, 0.2); border-radius: 6px; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ios-green); transition: all 0.2s ease;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
           `;
       }
@@ -12333,24 +12364,300 @@ function renderizarFilasTabla() {
 }
 
 // =========================================================================
+// ➕ FUNCIÓN RÁPIDA: AGREGAR SOLO NÚMERO
+// =========================================================================
+window.agregarTelefonoCelda = function (plataforma, filaIndex, btnElement) {
+  if (typeof haptic === "function") haptic();
+
+  let nuevoTelefono = prompt(
+    `Ingresa el número de celular para asignarlo en ${plataforma}:`,
+  );
+  if (!nuevoTelefono || nuevoTelefono.trim() === "") return;
+
+  nuevoTelefono = nuevoTelefono.trim();
+
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_add_tel_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      let cuentaModificada = memoriaBuscador.find(
+        (c) => c.plataforma === plataforma && c.filaIndex == filaIndex,
+      );
+      if (cuentaModificada) {
+        cuentaModificada.telefono = nuevoTelefono;
+        localStorage.setItem(
+          "cache_inventario_lupa",
+          JSON.stringify(memoriaBuscador),
+        );
+      }
+      if (typeof triggerToast === "function")
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><span>Teléfono agregado.</span></div>`,
+        );
+
+      renderizarFilasTabla();
+      if (typeof sincronizarLupaSilenciosa === "function")
+        sincronizarLupaSilenciosa(true);
+    } else {
+      alert(
+        "❌ Error: " +
+          (res ? res.message : "Fallo de red al intentar agregar."),
+      );
+      btnElement.innerHTML = originalHTML;
+      btnElement.disabled = false;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=agregarTelefonoCelda&plataforma=${encodeURIComponent(plataforma)}&filaIndex=${encodeURIComponent(filaIndex)}&telefono=${encodeURIComponent(nuevoTelefono)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+// =========================================================================
+// ✏️ VENTANA EMERGENTE (MODAL BLINDADO) PARA EDITAR DATOS
+// =========================================================================
+window.abrirModalEditar = function (
+  plataforma,
+  filaIndex,
+  btnElement,
+  cuentaCodificada,
+) {
+  try {
+    if (typeof haptic === "function") haptic();
+
+    // Extraer los datos seguros de la fila
+    const cuenta = JSON.parse(decodeURIComponent(cuentaCodificada));
+    const esNetflix = plataforma.toUpperCase().includes("NETFLIX");
+
+    // Borrar modal anterior si quedó atascado
+    let existing = document.getElementById("cyber-modal-edit");
+    if (existing) existing.remove();
+
+    // Fondo oscuro del modal
+    const overlay = document.createElement("div");
+    overlay.id = "cyber-modal-edit";
+    overlay.style.cssText =
+      "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.75); z-index: 999999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); font-family: sans-serif;";
+
+    // Construir la estructura visual del formulario
+    let htmlForm = `
+            <div style="background: #18181b; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; width: 90%; max-width: 350px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); color: #fff; position: relative;">
+                <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.1rem; color: #0a84ff; display:flex; align-items:center; gap:8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> 
+                    Editar Datos
+                </h3>
+                
+                <label style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: #a1a1aa; font-weight: bold;">TELÉFONO:</label>
+                <input type="text" id="edit-tel" style="width: 100%; box-sizing: border-box; background: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; outline: none;">
+
+                <label style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: #a1a1aa; font-weight: bold;">NOMBRE DEL CLIENTE (Opcional):</label>
+                <input type="text" id="edit-cliente" placeholder="Ej: Juan Perez" style="width: 100%; box-sizing: border-box; background: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; outline: none;">
+        `;
+
+    if (esNetflix) {
+      htmlForm += `
+                <label style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: #a1a1aa; font-weight: bold;">FECHA DE PAGO:</label>
+                <input type="text" id="edit-fecha" placeholder="Ej: 1-ago" style="width: 100%; box-sizing: border-box; background: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; outline: none;">
+
+                <label style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: #a1a1aa; font-weight: bold;">VALOR PAGADO:</label>
+                <input type="text" id="edit-valor" placeholder="Ej: $20.000" style="width: 100%; box-sizing: border-box; background: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; outline: none;">
+
+                <label style="display: block; margin-bottom: 6px; font-size: 0.8rem; color: #a1a1aa; font-weight: bold;">MÉTODO DE PAGO:</label>
+                <select id="edit-pago" style="width: 100%; box-sizing: border-box; background: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; outline: none; cursor:pointer;">
+                    <option value="">Seleccione uno...</option>
+                    <option value="Nequi">Nequi</option>
+                    <option value="Daviplata">Daviplata</option>
+                    <option value="Bancolombia">Bancolombia</option>
+                    <option value="Bre-B">Bre-B</option>
+                    <option value="Dale">Dale</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            `;
+    }
+
+    htmlForm += `
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px;">
+                    <button id="btn-cancel-edit" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e4e4e7; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.2s;">Cancelar</button>
+                    <button id="btn-save-edit" style="background: #0a84ff; border: none; color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: opacity 0.2s;">Guardar Datos</button>
+                </div>
+            </div>
+        `;
+
+    overlay.innerHTML = htmlForm;
+    document.body.appendChild(overlay);
+
+    // 🛡️ Asignar valores por JavaScript a las casillas
+    document.getElementById("edit-tel").value = cuenta.telefono || "";
+    document.getElementById("edit-cliente").value =
+      cuenta.cliente && cuenta.cliente !== "-" ? cuenta.cliente : "";
+
+    if (esNetflix) {
+      document.getElementById("edit-fecha").value =
+        cuenta.fechaCompra && cuenta.fechaCompra !== "-"
+          ? cuenta.fechaCompra
+          : "";
+
+      // Llenar Valor Pagado
+      document.getElementById("edit-valor").value =
+        cuenta.valor && cuenta.valor !== "-" ? cuenta.valor : "";
+
+      // Llenar Método de Pago
+      const selectPago = document.getElementById("edit-pago");
+      // Intenta buscar como 'pago' o como 'banco' (dependiendo de cómo se llame tu columna en el JSON)
+      const pagoGuardado = (cuenta.pago || cuenta.banco || "").trim();
+
+      if (pagoGuardado && pagoGuardado !== "-") {
+        let existeOpcion = Array.from(selectPago.options).some(
+          (opt) => opt.value.toLowerCase() === pagoGuardado.toLowerCase(),
+        );
+
+        // Si el método de pago que está en el sheet no está en la lista por defecto, lo creamos
+        if (!existeOpcion) {
+          const nuevaOpcion = document.createElement("option");
+          nuevaOpcion.value = pagoGuardado;
+          nuevaOpcion.text = pagoGuardado;
+          selectPago.add(nuevaOpcion);
+        }
+        selectPago.value = Array.from(selectPago.options).find(
+          (opt) => opt.value.toLowerCase() === pagoGuardado.toLowerCase(),
+        ).value;
+      }
+    }
+
+    // Acciones de los botones
+    document.getElementById("btn-cancel-edit").onclick = () => overlay.remove();
+
+    document.getElementById("btn-save-edit").onclick = () => {
+      const nuevoTelf = document.getElementById("edit-tel").value.trim();
+      const nuevoCliente = document.getElementById("edit-cliente").value.trim();
+      let nuevaFecha = "",
+        nuevoValor = "",
+        nuevoPago = "";
+
+      if (esNetflix) {
+        nuevaFecha = document.getElementById("edit-fecha").value.trim();
+        nuevoValor = document.getElementById("edit-valor").value.trim();
+        nuevoPago = document.getElementById("edit-pago").value.trim();
+      }
+
+      if (nuevoTelf === "") {
+        alert("⚠️ El teléfono es obligatorio.");
+        return;
+      }
+
+      overlay.remove();
+      ejecutarGuardadoEdicion(
+        plataforma,
+        filaIndex,
+        btnElement,
+        nuevoTelf,
+        nuevoCliente,
+        nuevaFecha,
+        nuevoValor,
+        nuevoPago,
+      );
+    };
+  } catch (error) {
+    alert("❌ Ocurrió un error al intentar abrir la ventana de edición.");
+    console.error(error);
+  }
+};
+
+// =========================================================================
+// 🚀 FUNCIÓN INTERNA: ENVÍA LOS DATOS EDITADOS A GOOGLE SHEETS
+// =========================================================================
+window.ejecutarGuardadoEdicion = function (
+  plataforma,
+  filaIndex,
+  btnElement,
+  telf,
+  cliente,
+  fecha,
+  valor,
+  pago,
+) {
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_edit_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      let cMod = memoriaBuscador.find(
+        (c) => c.plataforma === plataforma && c.filaIndex == filaIndex,
+      );
+      if (cMod) {
+        cMod.telefono = telf;
+        cMod.cliente = cliente !== "" ? cliente : "-";
+
+        if (plataforma.toUpperCase().includes("NETFLIX")) {
+          if (fecha !== "") cMod.fechaCompra = fecha;
+          cMod.valor = valor;
+          cMod.pago = pago;
+          cMod.banco = pago; // Actualizamos ambas por si acaso
+        }
+
+        localStorage.setItem(
+          "cache_inventario_lupa",
+          JSON.stringify(memoriaBuscador),
+        );
+      }
+      if (typeof triggerToast === "function")
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-blue);"><span>Datos actualizados correctamente.</span></div>`,
+        );
+
+      renderizarFilasTabla();
+      if (typeof sincronizarLupaSilenciosa === "function")
+        sincronizarLupaSilenciosa(true);
+    } else {
+      alert("❌ Error: " + (res ? res.message : "Fallo de red."));
+      btnElement.innerHTML = originalHTML;
+      btnElement.disabled = false;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+
+  let baseSrc = `${GOOGLE_SCRIPT_URL}?action=editarDatosCelda&plataforma=${encodeURIComponent(plataforma)}&filaIndex=${encodeURIComponent(filaIndex)}&telefono=${encodeURIComponent(telf)}&cliente=${encodeURIComponent(cliente)}`;
+
+  if (plataforma.toUpperCase().includes("NETFLIX")) {
+    baseSrc += `&fecha=${encodeURIComponent(fecha)}&valor=${encodeURIComponent(valor)}&pago=${encodeURIComponent(pago)}`;
+  }
+
+  script.src = baseSrc + `&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+// =========================================================================
 // 🗑️ FUNCIÓN PARA BORRAR NÚMERO DE TELÉFONO DESDE LA TABLA (SEGUNDO PLANO)
 // =========================================================================
 window.borrarTelefonoCelda = function (plataforma, filaIndex, btnElement) {
-  // 1️⃣ PRIMERA CONFIRMACIÓN
   let msj1 = `¿Estás seguro de borrar el teléfono de esta fila en ${plataforma}?`;
   if (plataforma.toUpperCase() === "NETFLIX") {
-    msj1 += `\n\n⚠️ ADVERTENCIA: Al ser NETFLIX, también se borrará la Fecha de última venta y el Valor para liberar el perfil por completo.`;
+    msj1 += `\n\n⚠️ ADVERTENCIA: Al ser NETFLIX, también se borrará la Fecha, Nombre, Vencimiento, Valor y Banco.`;
   }
-
   if (!confirm(msj1)) return;
 
-  // 2️⃣ SEGUNDA CONFIRMACIÓN DE SEGURIDAD
   let msj2 = `🚨 ÚLTIMA CONFIRMACIÓN 🚨\n\n¿Realmente deseas vaciar los datos del cliente en la fila ${filaIndex} de ${plataforma}?\nEsta acción es irreversible en la base de datos.`;
   if (!confirm(msj2)) return;
 
   if (typeof haptic === "function") haptic();
 
-  // Guardar HTML original y poner el spinner animado de carga en la papelera
   const originalHTML = btnElement.innerHTML;
   btnElement.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>`;
   btnElement.disabled = true;
@@ -12362,23 +12669,17 @@ window.borrarTelefonoCelda = function (plataforma, filaIndex, btnElement) {
     delete window[cbName];
 
     if (res && res.status === "success") {
-      // ÉXITO: Limpiar la celda visualmente sin recargar ni cerrar la ventana
-      const tdContenedor = btnElement.closest("td") || btnElement.parentElement;
-      if (tdContenedor) {
-        const spanTexto = tdContenedor.querySelector(".texto-telefono");
-        if (spanTexto) spanTexto.innerText = "-";
-      }
-      // Desaparecer el botón de la papelera
-      btnElement.remove();
-
-      // Modificamos la memoria local (RAM) para que el cambio sea permanente en esta sesión sin recargar
       let cuentaModificada = memoriaBuscador.find(
         (c) => c.plataforma === plataforma && c.filaIndex == filaIndex,
       );
       if (cuentaModificada) {
         cuentaModificada.telefono = "";
+        cuentaModificada.cliente = "-";
         if (plataforma.toUpperCase() === "NETFLIX") {
-          cuentaModificada.fechaCompra = ""; // Limpiamos la fecha en memoria
+          cuentaModificada.fechaCompra = "";
+          cuentaModificada.valor = "";
+          cuentaModificada.pago = "";
+          cuentaModificada.banco = "";
         }
         localStorage.setItem(
           "cache_inventario_lupa",
@@ -12392,10 +12693,9 @@ window.borrarTelefonoCelda = function (plataforma, filaIndex, btnElement) {
         );
       }
 
-      // ⚡ SINCRONIZACIÓN EN SEGUNDO PLANO: Le decimos a la lupa que descargue los datos frescos en silencio
-      if (typeof sincronizarLupaSilenciosa === "function") {
+      renderizarFilasTabla();
+      if (typeof sincronizarLupaSilenciosa === "function")
         sincronizarLupaSilenciosa(true);
-      }
     } else {
       alert(
         "❌ Error: " + (res ? res.message : "Fallo de red al intentar borrar."),
@@ -12410,7 +12710,6 @@ window.borrarTelefonoCelda = function (plataforma, filaIndex, btnElement) {
   script.src = `${GOOGLE_SCRIPT_URL}?action=borrarTelefonoCelda&plataforma=${encodeURIComponent(plataforma)}&filaIndex=${encodeURIComponent(filaIndex)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
-
 // =========================================================================
 // 🗑️ LÓGICA PARA EL BOTÓN DE BORRAR FECHA EN LOGICA.JS
 // =========================================================================
@@ -13208,5 +13507,69 @@ window.forzarRefrescoLupaSilencioso = function () {
   const script = document.createElement("script");
   script.id = "node_" + cbName;
   script.src = `${GOOGLE_SCRIPT_URL}?action=descargarInventarioBuscador&versionCliente=&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+// =========================================================================
+// ➕ FUNCIÓN PARA AGREGAR NÚMERO DE TELÉFONO DESDE LA TABLA (SEGUNDO PLANO)
+// =========================================================================
+window.agregarTelefonoCelda = function (plataforma, filaIndex, btnElement) {
+  if (typeof haptic === "function") haptic();
+
+  let nuevoTelefono = prompt(
+    `Ingresa el número de celular para asignarlo en ${plataforma}:`,
+  );
+  if (!nuevoTelefono || nuevoTelefono.trim() === "") return;
+
+  nuevoTelefono = nuevoTelefono.trim();
+
+  // Guardar HTML original y poner el spinner animado
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_add_tel_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      // Modificamos la memoria local (RAM) para repintar instantáneamente
+      let cuentaModificada = memoriaBuscador.find(
+        (c) => c.plataforma === plataforma && c.filaIndex == filaIndex,
+      );
+      if (cuentaModificada) {
+        cuentaModificada.telefono = nuevoTelefono;
+        localStorage.setItem(
+          "cache_inventario_lupa",
+          JSON.stringify(memoriaBuscador),
+        );
+      }
+
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg> <span>Teléfono agregado con éxito.</span></div>`,
+        );
+      }
+
+      // Repintar la tabla para mostrar el número y la papelera
+      if (typeof renderizarFilasTabla === "function") renderizarFilasTabla();
+
+      // Sincronizar en segundo plano
+      if (typeof sincronizarLupaSilenciosa === "function")
+        sincronizarLupaSilenciosa(true);
+    } else {
+      alert(
+        "❌ Error: " +
+          (res ? res.message : "Fallo de red al intentar agregar."),
+      );
+      btnElement.innerHTML = originalHTML;
+      btnElement.disabled = false;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=agregarTelefonoCelda&plataforma=${encodeURIComponent(plataforma)}&filaIndex=${encodeURIComponent(filaIndex)}&telefono=${encodeURIComponent(nuevoTelefono)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
