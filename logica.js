@@ -13573,3 +13573,726 @@ window.agregarTelefonoCelda = function (plataforma, filaIndex, btnElement) {
   script.src = `${GOOGLE_SCRIPT_URL}?action=agregarTelefonoCelda&plataforma=${encodeURIComponent(plataforma)}&filaIndex=${encodeURIComponent(filaIndex)}&telefono=${encodeURIComponent(nuevoTelefono)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
+
+// =========================================================================
+// 🛡️ ESTADO GLOBAL (SUSPENDIDAS Y NEYOP)
+// =========================================================================
+window.vistaModalDb = "PINESMES";
+let memoriaSuspendidas = [];
+let memoriaNeyop = [];
+
+// =========================================================================
+// 🔄 INTERCAMBIO DE VISTAS Y REFRESCO EN VIVO
+// =========================================================================
+window.toggleSuspendidasPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const panel = document.getElementById("suspendidasOverlay");
+  if (!panel) return;
+
+  if (panel.classList.contains("open")) {
+    panel.classList.remove("open");
+  } else {
+    document
+      .querySelectorAll(".overlay-ios")
+      .forEach((o) => o.classList.remove("open"));
+    panel.classList.add("open");
+
+    // Verifica en qué pestaña estás y carga sus datos si están vacíos
+    if (window.vistaModalDb === "NEYOP") {
+      if (memoriaNeyop.length === 0) cargarNeyop();
+      else renderizarTablaNeyop();
+    } else {
+      if (memoriaSuspendidas.length === 0) cargarSuspendidas();
+      else renderizarTablaSuspendidas();
+    }
+  }
+};
+
+window.cambiarVistaModalDb = function (vista) {
+  window.vistaModalDb = vista;
+  const btnNeyop = document.getElementById("btnVistaNeyop");
+  const btnSusp = document.getElementById("btnVistaSuspendidas");
+  const grupoPines = document.getElementById("grupoBotonesPinesMes");
+  const grupoNeyop = document.getElementById("grupoBotonesNeyop");
+  const titulo = document.getElementById("tituloModalSuspendidas");
+
+  borrarBusquedaSuspendidas();
+
+  if (vista === "NEYOP") {
+    if (btnNeyop) btnNeyop.style.display = "none";
+    if (btnSusp) btnSusp.style.display = "flex";
+    if (grupoPines) grupoPines.style.display = "none";
+    if (grupoNeyop) grupoNeyop.style.display = "flex";
+    if (titulo) titulo.innerHTML = "Base de Datos: NEYOP";
+
+    if (memoriaNeyop.length === 0) cargarNeyop();
+    else renderizarTablaNeyop();
+  } else {
+    if (btnNeyop) btnNeyop.style.display = "flex";
+    if (btnSusp) btnSusp.style.display = "none";
+    if (grupoPines) grupoPines.style.display = "flex";
+    if (grupoNeyop) grupoNeyop.style.display = "none";
+    if (titulo) titulo.innerHTML = "Base de Datos: Suspendidas";
+
+    if (memoriaSuspendidas.length === 0) cargarSuspendidas();
+    else renderizarTablaSuspendidas();
+  }
+};
+
+window.refrescarVistaActualModal = function () {
+  if (typeof haptic === "function") haptic();
+  if (window.vistaModalDb === "NEYOP") {
+    cargarNeyop(true); // El 'true' fuerza la recarga en vivo de la caché
+  } else {
+    cargarSuspendidas(true);
+  }
+};
+
+// =========================================================================
+// 🔍 LÓGICA DE BÚSQUEDA COMPARTIDA
+// =========================================================================
+window.manejarInputBusquedaSuspendidas = function () {
+  const input = document.getElementById("inputBuscarSuspendidas");
+  const btnBorrar = document.getElementById("btnBorrarBusquedaSuspendidas");
+
+  if (input && btnBorrar) {
+    if (input.value.length > 0) {
+      btnBorrar.style.display = "block";
+    } else {
+      btnBorrar.style.display = "none";
+    }
+  }
+
+  if (window.vistaModalDb === "NEYOP") {
+    if (typeof renderizarTablaNeyop === "function") renderizarTablaNeyop();
+  } else {
+    if (typeof renderizarTablaSuspendidas === "function")
+      renderizarTablaSuspendidas();
+  }
+};
+
+window.borrarBusquedaSuspendidas = function () {
+  if (typeof haptic === "function") haptic();
+  const input = document.getElementById("inputBuscarSuspendidas");
+  const btnBorrar = document.getElementById("btnBorrarBusquedaSuspendidas");
+
+  if (input) {
+    input.value = "";
+    input.focus();
+  }
+  if (btnBorrar) btnBorrar.style.display = "none";
+
+  if (window.vistaModalDb === "NEYOP") {
+    if (typeof renderizarTablaNeyop === "function") renderizarTablaNeyop();
+  } else {
+    if (typeof renderizarTablaSuspendidas === "function")
+      renderizarTablaSuspendidas();
+  }
+};
+
+// =========================================================================
+// 🟣 DESCARGA Y RENDERIZADO EXCLUSIVO DE SUSPENDIDAS (PINESMES)
+// =========================================================================
+window.cargarSuspendidas = function (forzar = false) {
+  const contenedor = document.getElementById("contenedorTablaSuspendidas");
+  const iconRefrescar = document.getElementById("iconRefrescarSuspendidas");
+  if (!contenedor) return;
+
+  if (forzar && iconRefrescar) {
+    iconRefrescar.classList.add("spin-anim");
+  } else if (!forzar && memoriaSuspendidas.length === 0) {
+    contenedor.innerHTML = `
+            <div style="padding: 60px; text-align: center; color: #8e8e93;">
+                <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+                <h3 style="margin-top: 15px; font-size: 1rem;">Descargando Base de Datos...</h3>
+            </div>
+        `;
+  }
+
+  const cbName = "cb_susp_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (iconRefrescar) iconRefrescar.classList.remove("spin-anim");
+
+    if (res && res.status === "success") {
+      memoriaSuspendidas = res.data;
+      if (window.vistaModalDb === "PINESMES") renderizarTablaSuspendidas();
+
+      if (forzar && typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg> <span>Base de datos actualizada en vivo.</span></div>`,
+        );
+      }
+    } else {
+      if (window.vistaModalDb === "PINESMES") {
+        contenedor.innerHTML = `<div style="color:#ff453a; text-align:center; padding:40px; font-weight:bold;">❌ Error de conexión: ${res ? res.message : "Desconocido"}</div>`;
+      }
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDatosPinesMes&forzar=${forzar}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.renderizarTablaSuspendidas = function () {
+  const contenedor = document.getElementById("contenedorTablaSuspendidas");
+  const inputBuscador = document.getElementById("inputBuscarSuspendidas");
+  if (!contenedor) return;
+
+  const texto = inputBuscador ? inputBuscador.value.toLowerCase().trim() : "";
+
+  let filtrados = memoriaSuspendidas;
+  if (texto.length >= 2) {
+    filtrados = memoriaSuspendidas.filter(
+      (c) =>
+        (c.correo || "").toLowerCase().includes(texto) ||
+        (c.pin || "").toLowerCase().includes(texto) ||
+        (c.clave || "").toLowerCase().includes(texto),
+    );
+  }
+
+  const hoyObj = new Date();
+  const mesesAbrev = [
+    "ene",
+    "feb",
+    "mar",
+    "abr",
+    "may",
+    "jun",
+    "jul",
+    "ago",
+    "sep",
+    "oct",
+    "nov",
+    "dic",
+  ];
+  const fechaHoyCorta = hoyObj.getDate() + "-" + mesesAbrev[hoyObj.getMonth()];
+
+  if (typeof convertirFechaAObjetoLupa === "function") {
+    filtrados.sort((a, b) => {
+      let fA = a.fechaActivacion
+        ? convertirFechaAObjetoLupa(a.fechaActivacion)
+        : Date.now();
+      let fB = b.fechaActivacion
+        ? convertirFechaAObjetoLupa(b.fechaActivacion)
+        : Date.now();
+      return fB - fA;
+    });
+  }
+
+  let htmlTabla = `
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85rem; color: #e4e4e7; text-align: left; white-space: nowrap;">
+            <thead>
+                <tr>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; letter-spacing: 0.5px;">CORREO</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; letter-spacing: 0.5px;">CONTRASEÑA</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #8e8e93; letter-spacing: 0.5px;">PIN REC.</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #bf5af2; letter-spacing: 0.5px;">RECARGA</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; letter-spacing: 0.5px;">ACTIVACIÓN</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #ff453a; letter-spacing: 0.5px; text-align:center;">VENCIMIENTO</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; letter-spacing: 0.5px;">CREADOR</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+  if (filtrados.length === 0) {
+    htmlTabla += `<tr><td colspan="7" style="text-align:center; padding:40px; color:#ff453a; font-weight:bold;">No se encontraron resultados en la base de datos.</td></tr>`;
+  } else {
+    let ultimaFechaRenderizada = null;
+    const pendientesIndices = filtrados
+      .filter((c) => !c.fechaActivacion || c.fechaActivacion === "")
+      .map((c) => c.filaIndex)
+      .join(",");
+
+    filtrados.forEach((cuenta, idx) => {
+      const esFilaPar = idx % 2 === 0;
+      const colorFondoFila = esFilaPar
+        ? "rgba(255, 255, 255, 0.015)"
+        : "transparent";
+
+      const noTieneFecha =
+        !cuenta.fechaActivacion || cuenta.fechaActivacion === "";
+      const fechaGrupo = noTieneFecha
+        ? `⏳ PENDIENTES (Hoy: ${fechaHoyCorta})`
+        : cuenta.fechaActivacion;
+
+      if (fechaGrupo !== ultimaFechaRenderizada) {
+        let botonActivarTodas = "";
+        if (noTieneFecha && pendientesIndices !== "") {
+          botonActivarTodas = `<button onclick="window.activarMultiplesCuentasSuspendidas('${pendientesIndices}', this)" class="btn-ios btn-success" style="padding: 6px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0; box-shadow: 0 4px 10px rgba(48, 209, 88, 0.25); display: flex; align-items: center; justify-content: center; gap: 6px; font-weight:800; margin: 0 auto; white-space: nowrap;">🚀 Activar Todas</button>`;
+        }
+
+        htmlTabla += `
+                    <tr style="background: rgba(142, 142, 147, 0.08);">
+                        <td colspan="5" style="padding: 8px 16px; border-top: 1px solid rgba(142, 142, 147, 0.15); border-bottom: 1px solid rgba(142, 142, 147, 0.15); color: #a1a1aa; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
+                            📅 Cuentas del: ${fechaGrupo}
+                        </td>
+                        <td style="padding: 8px 16px; border-top: 1px solid rgba(142, 142, 147, 0.15); border-bottom: 1px solid rgba(142, 142, 147, 0.15); text-align: center;">
+                            ${botonActivarTodas}
+                        </td>
+                        <td style="padding: 8px 16px; border-top: 1px solid rgba(142, 142, 147, 0.15); border-bottom: 1px solid rgba(142, 142, 147, 0.15);"></td>
+                    </tr>
+                `;
+        ultimaFechaRenderizada = fechaGrupo;
+      }
+
+      const svgCopy = (dato, titulo) => {
+        if (!dato || dato === "-") return "";
+        const datoLimpio = String(dato).replace(/'/g, "\\'");
+        return `
+                    <button onclick="copiarDatoAisladoLupa(this, '${datoLimpio}')" title="${titulo}" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.2s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                `;
+      };
+
+      let textoActivacion = noTieneFecha
+        ? `<span style="color:var(--ios-blue); font-style:italic;">${fechaHoyCorta}</span>`
+        : cuenta.fechaActivacion;
+      let botonOTextoVencimiento = cuenta.fechaVencimiento || "-";
+
+      if (noTieneFecha) {
+        botonOTextoVencimiento = `<button onclick="window.activarCuentaSuspendida('${cuenta.filaIndex}', this)" class="btn-ios btn-success" style="padding: 6px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0; box-shadow: 0 4px 10px rgba(48, 209, 88, 0.25); display: flex; align-items: center; justify-content: center; gap: 6px; font-weight:800; margin: 0 auto;">
+                    🚀 Activar
+                </button>`;
+      }
+
+      htmlTabla += `
+                <tr style="background: ${colorFondoFila}; transition: background 0.3s ease;">
+                    <td style="padding: 12px 16px; font-weight: 600; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                            <span>${cuenta.correo || "-"}</span>
+                            ${svgCopy(cuenta.correo, "Copiar correo")}
+                        </div>
+                    </td>
+                    <td style="padding: 12px 16px; color: #30d158; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                            <span>${cuenta.clave || "-"}</span>
+                            ${svgCopy(cuenta.clave, "Copiar contraseña")}
+                        </div>
+                    </td>
+                    <td style="padding: 12px 16px; color: #8e8e93; font-family: monospace; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                            <span>${cuenta.pin || "-"}</span>
+                            ${svgCopy(cuenta.pin, "Copiar PIN")}
+                        </div>
+                    </td>
+                    <td style="padding: 12px 16px; color: #bf5af2; font-weight:800; border-bottom: 1px solid rgba(255,255,255,0.03);">${cuenta.recarga || "-"}</td>
+                    <td style="padding: 12px 16px; color: #a1a1aa; border-bottom: 1px solid rgba(255,255,255,0.03);">${textoActivacion}</td>
+                    <td style="padding: 8px 16px; color: #ff453a; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center;">${botonOTextoVencimiento}</td>
+                    <td style="padding: 12px 16px; color: #a1a1aa; border-bottom: 1px solid rgba(255,255,255,0.03);">${cuenta.creador || "-"}</td>
+                </tr>
+            `;
+    });
+  }
+
+  htmlTabla += `</tbody></table>`;
+  contenedor.innerHTML = htmlTabla;
+};
+
+// =========================================================================
+// 🟣 DESCARGA Y RENDERIZADO EXCLUSIVO DE NEYOP
+// =========================================================================
+window.cargarNeyop = function (forzar = false) {
+  const contenedor = document.getElementById("contenedorTablaSuspendidas");
+  const iconRefrescar = document.getElementById("iconRefrescarSuspendidas");
+  if (!contenedor) return;
+
+  if (forzar && iconRefrescar) {
+    iconRefrescar.classList.add("spin-anim");
+  } else if (!forzar && memoriaNeyop.length === 0) {
+    contenedor.innerHTML = `
+            <div style="padding: 60px; text-align: center; color: #ff9f0a;">
+                <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+                <h3 style="margin-top: 15px; font-size: 1rem;">Conectando a NEYOP...</h3>
+            </div>
+        `;
+  }
+
+  const cbName = "cb_neyop_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (iconRefrescar) iconRefrescar.classList.remove("spin-anim");
+
+    if (res && res.status === "success") {
+      memoriaNeyop = res.data;
+      if (window.vistaModalDb === "NEYOP") renderizarTablaNeyop();
+
+      if (forzar && typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg> <span>NEYOP actualizado en vivo.</span></div>`,
+        );
+      }
+    } else {
+      if (window.vistaModalDb === "NEYOP") {
+        contenedor.innerHTML = `<div style="color:#ff453a; text-align:center; padding:40px; font-weight:bold;">❌ Error de conexión: ${res ? res.message : "Desconocido"}</div>`;
+      }
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDatosNeyop&forzar=${forzar}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+// =========================================================================
+// 🟣 RENDERIZADO EXCLUSIVO DE NEYOP (CON BOTÓN LISTO Y FILA NARANJA)
+// =========================================================================
+window.renderizarTablaNeyop = function () {
+  const contenedor = document.getElementById("contenedorTablaSuspendidas");
+  const inputBuscador = document.getElementById("inputBuscarSuspendidas");
+  if (!contenedor) return;
+
+  const texto = inputBuscador ? inputBuscador.value.toLowerCase().trim() : "";
+
+  let filtrados = memoriaNeyop;
+  if (texto.length >= 2) {
+    filtrados = memoriaNeyop.filter(
+      (c) =>
+        (c.yopmail || "").toLowerCase().includes(texto) ||
+        (c.correo || "").toLowerCase().includes(texto) ||
+        (c.claveVieja || "").toLowerCase().includes(texto) ||
+        (c.claveNueva || "").toLowerCase().includes(texto),
+    );
+  }
+
+  // ORDEN INTELIGENTE: Llenos arriba, Vacíos abajo
+  filtrados.sort((a, b) => {
+    let tieneCorreoA =
+      a.correo && a.correo.trim() !== "" && a.correo.trim() !== "-" ? 1 : 0;
+    let tieneCorreoB =
+      b.correo && b.correo.trim() !== "" && b.correo.trim() !== "-" ? 1 : 0;
+    return tieneCorreoB - tieneCorreoA;
+  });
+
+  let htmlTabla = `
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85rem; color: #e4e4e7; text-align: left; white-space: nowrap;">
+            <thead>
+                <tr>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #ff9f0a; letter-spacing: 0.5px;">YOPMAIL</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; letter-spacing: 0.5px;">CORREO / CUENTA</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; letter-spacing: 0.5px;">CLAVE VIEJA</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #30d158; letter-spacing: 0.5px;">CLAVE NUEVA</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #ff9f0a; letter-spacing: 0.5px; text-align: center;">ACCIÓN</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+  if (filtrados.length === 0) {
+    htmlTabla += `<tr><td colspan="5" style="text-align:center; padding:40px; color:#ff453a; font-weight:bold;">No se encontraron resultados en la base de datos de NEYOP.</td></tr>`;
+  } else {
+    filtrados.forEach((cuenta, idx) => {
+      // 🔥 LÓGICA DE COLOR (Pinta la fila de naranja si está lista)
+      const estaListo = cuenta.estado === "LISTO";
+      const esFilaPar = idx % 2 === 0;
+
+      let colorFondoFila = esFilaPar
+        ? "rgba(255, 255, 255, 0.015)"
+        : "transparent";
+      let colorPrimario = "#ff9f0a"; // Naranja Yopmail normal
+      let colorBlanco = "#ffffff";
+      let colorVerde = "#30d158";
+
+      if (estaListo) {
+        colorFondoFila = "rgba(255, 159, 10, 0.15)"; // Fila Naranja transparente
+        colorPrimario = "#ffb74d";
+        colorBlanco = "#ffb74d";
+        colorVerde = "#ffb74d";
+      }
+
+      const svgCopy = (dato, titulo) => {
+        if (!dato || dato === "-") return "";
+        const datoLimpio = String(dato).replace(/'/g, "\\'");
+        return `
+                    <button onclick="copiarDatoAisladoLupa(this, '${datoLimpio}')" title="${titulo}" style="background: transparent; border: none; color: ${estaListo ? "#ffb74d" : "#71717a"}; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.2s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='${estaListo ? "#ffb74d" : "#71717a"}'">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                `;
+      };
+
+      let botonAccion = "";
+      if (estaListo) {
+        botonAccion = `<span style="color: #ff9f0a; font-weight: 800; display:flex; align-items:center; justify-content: center; gap:4px; font-size: 0.8rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Completado
+                </span>`;
+      } else if (cuenta.correo && cuenta.correo.trim() !== "") {
+        botonAccion = `<button onclick="window.marcarListoNeyop('${cuenta.filaIndex}', this)" class="btn-ios" style="padding: 8px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0 auto; background: #ff9f0a; color: white; border: none; font-weight:800; display:flex; align-items:center; gap:6px; box-shadow: 0 4px 10px rgba(255, 159, 10, 0.3);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Listo
+                </button>`;
+      }
+
+      htmlTabla += `
+                <tr style="background: ${colorFondoFila}; transition: background 0.3s ease;">
+                    <td style="padding: 12px 16px; font-weight: 600; color: ${colorPrimario}; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                            <span>${cuenta.yopmail || "-"}</span>
+                            ${svgCopy(cuenta.yopmail, "Copiar Yopmail")}
+                        </div>
+                    </td>
+                    <td style="padding: 12px 16px; font-weight: 600; color: ${colorBlanco}; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                            <span>${cuenta.correo || "-"}</span>
+                            ${svgCopy(cuenta.correo, "Copiar Correo")}
+                        </div>
+                    </td>
+                    <td style="padding: 12px 16px; color: ${estaListo ? colorBlanco : "#a1a1aa"}; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                            <span>${cuenta.claveVieja || "-"}</span>
+                            ${svgCopy(cuenta.claveVieja, "Copiar Clave Vieja")}
+                        </div>
+                    </td>
+                    <td style="padding: 12px 16px; color: ${colorVerde}; font-family: monospace; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                            <span>${cuenta.claveNueva || "-"}</span>
+                            ${svgCopy(cuenta.claveNueva, "Copiar Clave Nueva")}
+                        </div>
+                    </td>
+                    <td style="padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center;">
+                        ${botonAccion}
+                    </td>
+                </tr>
+            `;
+    });
+  }
+
+  htmlTabla += `</tbody></table>`;
+  contenedor.innerHTML = htmlTabla;
+};
+
+// =========================================================================
+// 🚀 NUEVA FUNCIÓN: BOTÓN "LISTO" (NEYOP)
+// =========================================================================
+window.marcarListoNeyop = function (filaIndex, btnElement) {
+  if (typeof haptic === "function") haptic();
+
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> ...`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_listo_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function")
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ Fila completada y pintada.</div>`,
+        );
+      cargarNeyop(true); // Recarga la tabla en vivo para mostrar el naranja
+    } else {
+      alert("❌ Error: " + (res ? res.message : "Fallo de red"));
+      btnElement.innerHTML = originalHTML;
+      btnElement.disabled = false;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=marcarNeyopListo&filaIndex=${filaIndex}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+// =========================================================================
+// 🚀 ACCIONES GLOBALES: TRANSFERIR, GENERAR, ACTIVAR, EXTRAER
+// =========================================================================
+
+window.ejecutarFlujoPinesSuspendidas = function (btnElement) {
+  if (typeof haptic === "function") haptic();
+
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Procesando...`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_pines_flujo_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    btnElement.innerHTML = originalHTML;
+    btnElement.disabled = false;
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function")
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ ${res.message}</div>`,
+        );
+      cargarSuspendidas(true);
+    } else {
+      alert(
+        "❌ Error procesando pines: " +
+          (res ? res.message : "Fallo de conexión"),
+      );
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=procesarPinesSuspendidas&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.ejecutarTransferirRecarga = function (btnElement) {
+  if (typeof haptic === "function") haptic();
+
+  // 🔥 MENSAJE ACTUALIZADO PARA QUE COINCIDA CON LA NUEVA LÓGICA
+  if (
+    !confirm(
+      "¿Transferir a NEYOP las recargas PENDIENTES marcadas con '1'? (Se autogenerarán Yopmails si faltan espacios vacíos)",
+    )
+  )
+    return;
+
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Transfiriendo...`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_transfer_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    btnElement.innerHTML = originalHTML;
+    btnElement.disabled = false;
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function")
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ ${res.message}</div>`,
+        );
+      cargarNeyop(true); // Recargar la tabla en vivo
+    } else {
+      alert("❌ Error: " + (res ? res.message : "Fallo de conexión"));
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=transferirRecargasANeyop&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.ejecutarGenerarNeyop = function (btnElement) {
+  if (typeof haptic === "function") haptic();
+
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Generando...`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_gen_neyop_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    btnElement.innerHTML = originalHTML;
+    btnElement.disabled = false;
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function")
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ ${res.message}</div>`,
+        );
+      cargarNeyop(true);
+    } else {
+      alert("❌ Error: " + (res ? res.message : "Fallo de conexión"));
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=generarNeyopMasivo&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.activarMultiplesCuentasSuspendidas = function (indices, btnElement) {
+  if (typeof haptic === "function") haptic();
+
+  const count = indices.split(",").length;
+  if (
+    !confirm(
+      `¿Estás seguro de activar las ${count} cuentas mostradas al mismo tiempo?`,
+    )
+  )
+    return;
+
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Calculando...`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_act_multi_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function")
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ ${res.message}</div>`,
+        );
+      cargarSuspendidas(true);
+    } else {
+      alert("❌ Error: " + (res ? res.message : "Fallo de red"));
+      btnElement.innerHTML = originalHTML;
+      btnElement.disabled = false;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=activarMultiplesPinesMes&filas=${indices}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.activarCuentaSuspendida = function (filaIndex, btnElement) {
+  if (typeof haptic === "function") haptic();
+
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Calculando...`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_activacion_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function")
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ Cuenta activada.</div>`,
+        );
+      cargarSuspendidas(true);
+    } else {
+      alert("❌ Error: " + (res ? res.message : "Fallo de red"));
+      btnElement.innerHTML = originalHTML;
+      btnElement.disabled = false;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=activarCuentaPinesMes&filaIndex=${filaIndex}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
