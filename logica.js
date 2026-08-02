@@ -12993,6 +12993,27 @@ window.renderizarTablaSuspendidas = function () {
                     🚀 Activar
                 </button>`;
       }
+      // 🔥 NUEVO: Lógica dinámica para la columna PIN
+      let celdaPinContent = "";
+      if (cuenta.pin && cuenta.pin.trim() !== "" && cuenta.pin !== "-") {
+        // Si ya hay PIN, mostramos el número y el botón de copiar
+        celdaPinContent = `
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                <span>${cuenta.pin}</span>
+                ${svgCopy(cuenta.pin, "Copiar PIN")}
+            </div>`;
+      } else {
+        // Si no hay PIN, mostramos el botón de buscar individualmente
+        celdaPinContent = `
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <button onclick="window.extraerPinIndividual('${cuenta.correo}', this)" class="btn-ios" style="padding: 4px 8px; font-size: 0.7rem; border-radius: 6px; margin: 0; background: rgba(10, 132, 255, 0.1); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.2); font-weight:700; display:flex; align-items:center; gap:4px; transition: all 0.2s;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+                    </svg>
+                    PIN
+                </button>
+            </div>`;
+      }
 
       htmlTabla += `
                 <tr style="background: ${colorFondoFila}; transition: background 0.3s ease;">
@@ -13009,11 +13030,8 @@ window.renderizarTablaSuspendidas = function () {
                         </div>
                     </td>
                     <td style="padding: 12px 16px; color: #8e8e93; font-family: monospace; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.03);">
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
-                            <span>${cuenta.pin || "-"}</span>
-                            ${svgCopy(cuenta.pin, "Copiar PIN")}
-                        </div>
-                    </td>
+    ${celdaPinContent}
+</td>
                     <td style="padding: 12px 16px; color: #bf5af2; font-weight:800; border-bottom: 1px solid rgba(255,255,255,0.03);">${cuenta.recarga || "-"}</td>
                     <td style="padding: 12px 16px; color: #a1a1aa; border-bottom: 1px solid rgba(255,255,255,0.03);">${textoActivacion}</td>
                     <td style="padding: 8px 16px; color: #ff453a; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center;">${botonOTextoVencimiento}</td>
@@ -13422,5 +13440,41 @@ window.activarCuentaSuspendida = function (filaIndex, btnElement) {
   const script = document.createElement("script");
   script.id = "node_" + cbName;
   script.src = `${GOOGLE_SCRIPT_URL}?action=activarCuentaPinesMes&filaIndex=${filaIndex}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+window.extraerPinIndividual = function (correo, btnElement) {
+  if (typeof haptic === "function") haptic();
+
+  // 🔥 NUEVO: Atrapamos el nombre del usuario logueado en Cybernet
+  const userActivo = sessionStorage.getItem("active_staff") || localStorage.getItem("cyber_saved_staff") || "Desconocido";
+
+  const originalHTML = btnElement.innerHTML;
+  btnElement.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Buscando...`;
+  btnElement.disabled = true;
+
+  const cbName = "cb_pin_ind_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg> <span>PIN asignado por ${userActivo}</span></div>`
+        );
+      }
+      window.cargarSuspendidas(true); 
+    } else {
+      alert("❌ Error: " + (res ? res.message : "Fallo de conexión."));
+      btnElement.innerHTML = originalHTML;
+      btnElement.disabled = false;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  // 🔥 Le pasamos el parámetro '&user=' a Google Sheets
+  script.src = `${GOOGLE_SCRIPT_URL}?action=procesarPinIndividualSuspendidas&correo=${encodeURIComponent(correo)}&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
