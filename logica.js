@@ -11238,7 +11238,7 @@ function renderizarFilasTabla() {
             <th style="padding: 14px 16px; font-weight: 700; text-align: center;">PLATAFORMA</th>
             <th style="padding: 14px 16px; font-weight: 700;">PROV</th>
             <th style="padding: 14px 16px; font-weight: 700;">FECHA</th>
-            <th style="padding: 14px 16px; font-weight: 700;">CORREO / USUARIO</th>
+            <th style="padding: 14px 16px; font-weight: 700; width: 1%; white-space: nowrap;">CORREO / USUARIO</th>
             <th style="padding: 14px 16px; font-weight: 700;">CONTRASEÑA</th>
             <th style="padding: 14px 16px; font-weight: 700; text-align: center;">ACCIÓN</th>
         `;
@@ -11256,7 +11256,7 @@ function renderizarFilasTabla() {
             ${esVistaGlobal ? '<th style="padding: 14px 16px; font-weight: 700; text-align: center;">PLATAFORMA</th>' : ""}
             ${esPlatSinProv ? "" : '<th style="padding: 14px 16px; font-weight: 700;">PROV</th>'}
             <th style="padding: 14px 16px; font-weight: 700;">FECHA</th>
-            <th style="padding: 14px 16px; font-weight: 700;">CORREO / USUARIO</th>
+            <th style="padding: 14px 16px; font-weight: 700; width: 1%; white-space: nowrap;">CORREO / USUARIO</th>
             <th style="padding: 14px 16px; font-weight: 700;">CONTRASEÑA</th>
             <th style="padding: 14px 16px; font-weight: 700;">PERFIL</th>
             <th style="padding: 14px 16px; font-weight: 700;">PIN</th>
@@ -11307,7 +11307,6 @@ function renderizarFilasTabla() {
     };
 
     filtrados.forEach((cuenta, idx) => {
-      // 🚨 BLINDAJE CONTRA ERRORES: Reemplazar comillas simples para evitar que rompan los botones
       const cuentaCodificada = encodeURIComponent(
         JSON.stringify(cuenta),
       ).replace(/'/g, "%27");
@@ -11368,16 +11367,29 @@ function renderizarFilasTabla() {
         ultimaFechaRenderizada = fechaActual;
       }
 
+      // 🔥 LÓGICA INTELIGENTE DE ANCHO DE COLUMNA 🔥
+      // Si el texto NO tiene un arroba, permitimos que salte de línea para que no estire la tabla
+      const correoLimpio = cuenta.correo || "-";
+      const tieneArroba = correoLimpio.includes("@");
+      
+      const estiloDivCorreo = tieneArroba 
+          ? "display: flex; align-items: center; justify-content: flex-start; gap: 8px; width: max-content;"
+          : "display: flex; align-items: center; justify-content: flex-start; gap: 8px; white-space: normal; line-height: 1.3;";
+
+      const estiloTdCorreo = tieneArroba
+          ? "padding: 12px 16px; font-weight: 600; color: #ffffff; width: 1%; white-space: nowrap;"
+          : "padding: 12px 16px; font-weight: 600; color: #ffffff; white-space: normal; min-width: 250px; max-width: 300px; word-wrap: break-word;";
+
       const celdaCorreoContent = `
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
-          <span style="overflow: hidden; text-overflow: ellipsis;">${cuenta.correo || "-"}</span>
+        <div style="${estiloDivCorreo}">
+          <span>${correoLimpio}</span>
           ${svgCopyIcon(cuenta.correo, "Copiar correo")}
         </div>
       `;
 
       const celdaClaveContent = `
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
-          <span style="overflow: hidden; text-overflow: ellipsis;">${cuenta.clave || "-"}</span>
+        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; width: max-content;">
+          <span>${cuenta.clave || "-"}</span>
           ${svgCopyIcon(cuenta.clave, "Copiar contraseña")}
         </div>
       `;
@@ -11386,7 +11398,6 @@ function renderizarFilasTabla() {
       let telLimpio = (cuenta.telefono || "").trim();
       let celdaTelefonoContent = "";
 
-      // Botón Lápiz Azul (Solo se mostrará si ya hay teléfono)
       const btnEditHTML = `
         <button onclick="abrirModalEditar('${cuenta.plataforma}', '${cuenta.filaIndex}', this, '${cuentaCodificada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ios-blue); transition: all 0.2s ease;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -11397,7 +11408,6 @@ function renderizarFilasTabla() {
       `;
 
       if (telLimpio !== "" && telLimpio !== "-") {
-        // Si YA TIENE un número: Mostramos Lápiz + Papelera
         celdaTelefonoContent = `
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                 <span class="texto-telefono" style="font-family: monospace;">${cuenta.telefono}</span>
@@ -11413,7 +11423,6 @@ function renderizarFilasTabla() {
             </div>
           `;
       } else {
-        // Si NO TIENE número: Mostramos Solo el botón "+"
         celdaTelefonoContent = `
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                 <span class="texto-telefono" style="font-family: monospace; color: var(--text-secondary);">-</span>
@@ -11438,7 +11447,7 @@ function renderizarFilasTabla() {
                         <td style="padding: 12px 16px; text-align: center;">${celdaPlataforma}</td>
                         <td style="padding: 12px 16px; font-weight: 700; color: #ff9f0a;">${cuenta.proveedor || "-"}</td>
                         <td style="padding: 12px 16px; font-weight: 700; color: #a1a1aa;">${cuenta.fechaCompra || "-"}</td>
-                        <td style="padding: 12px 16px; font-weight: 600; color: #ffffff;">${celdaCorreoContent}</td>
+                        <td style="${estiloTdCorreo}">${celdaCorreoContent}</td>
                         <td style="padding: 12px 16px; color: #30d158; font-family: monospace; font-size: 0.95rem;">${celdaClaveContent}</td>
                         <td style="padding: 10px 16px; text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
@@ -11467,7 +11476,7 @@ function renderizarFilasTabla() {
                         ${esVistaGlobal ? `<td style="padding: 12px 16px; text-align: center;">${celdaPlataforma}</td>` : ""}
                         ${esPlatSinProv ? "" : `<td style="padding: 12px 16px; font-weight: 700; color: #ff9f0a;">${cuenta.proveedor || "-"}</td>`}
                         <td style="padding: 12px 16px; font-weight: 700; color: #a1a1aa;">${cuenta.fechaCompra || "-"}</td>
-                        <td style="padding: 12px 16px; font-weight: 600; color: #ffffff;">${celdaCorreoContent}</td>
+                        <td style="${estiloTdCorreo}">${celdaCorreoContent}</td>
                         <td style="padding: 12px 16px; color: #30d158; font-family: monospace; font-size: 0.95rem;">${celdaClaveContent}</td>
                         <td style="padding: 12px 16px; color: #e4e4e7;">${cuenta.perfil || "1"}</td>
                         <td style="padding: 12px 16px; color: #ffd60a; font-family: monospace;">${cuenta.pin || "-"}</td>
@@ -13446,7 +13455,10 @@ window.extraerPinIndividual = function (correo, btnElement) {
   if (typeof haptic === "function") haptic();
 
   // 🔥 NUEVO: Atrapamos el nombre del usuario logueado en Cybernet
-  const userActivo = sessionStorage.getItem("active_staff") || localStorage.getItem("cyber_saved_staff") || "Desconocido";
+  const userActivo =
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "Desconocido";
 
   const originalHTML = btnElement.innerHTML;
   btnElement.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Buscando...`;
@@ -13461,10 +13473,10 @@ window.extraerPinIndividual = function (correo, btnElement) {
     if (res && res.status === "success") {
       if (typeof triggerToast === "function") {
         triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg> <span>PIN asignado por ${userActivo}</span></div>`
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg> <span>PIN asignado por ${userActivo}</span></div>`,
         );
       }
-      window.cargarSuspendidas(true); 
+      window.cargarSuspendidas(true);
     } else {
       alert("❌ Error: " + (res ? res.message : "Fallo de conexión."));
       btnElement.innerHTML = originalHTML;
