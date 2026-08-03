@@ -1751,3 +1751,17 @@ body:has(.overlay-ios[style*="display: block"]) [id*="dock"] {
   border-radius: 12px !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
+/* 🔥 FIX: Ocultar la barra de scroll blanca en las tablas de la Lupa */
+.sheet-ios div[style*="overflow-x: auto"]::-webkit-scrollbar,
+.mac-right-panel div[style*="overflow-x: auto"]::-webkit-scrollbar,
+table::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar {
+    height: 0px !important;
+    display: none !important;
+}
+
+/* En caso de que uses Firefox */
+.sheet-ios div[style*="overflow-x: auto"],
+table {
+    scrollbar-width: none !important;
+}
