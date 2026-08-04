@@ -7859,42 +7859,6 @@ function renderGrid(filtro = "") {
 }
 let ultimoAvisoStock = 0;
 
-function verificarStockCritico(data) {
-  if (!sessionStorage.getItem("active_staff")) return;
-
-  let ahora = Date.now();
-  if (ahora - ultimoAvisoStock < 600000) return;
-
-  const umbrales = {
-    NETFLIX: { limite: 2, accion: "Cortar o crear" },
-    AMAZON: { limite: 5, accion: "Comprar" },
-    HBOMAX: { limite: 5, accion: "Comprar" },
-    DISNEYPREMIUM: { limite: 1, accion: "Crear" },
-    DISNEYESTANDAR: { limite: 1, accion: "Comprar" },
-    CRUNCHYROLL: { limite: 1, accion: "Comprar" },
-    PLEX: { limite: 1, accion: "Comprar" },
-    APPLETV: { limite: 1, accion: "Comprar" },
-  };
-
-  let itemsCriticos = [];
-
-  data.forEach((item) => {
-    let config = umbrales[item.plat];
-    if (config && item.libres <= config.limite) {
-      itemsCriticos.push({
-        plat: item.plat,
-        cant: item.libres,
-        accion: config.accion,
-      });
-    }
-  });
-
-  if (itemsCriticos.length > 0) {
-    ultimoAvisoStock = ahora;
-    mostrarAlertaInventarioToast(itemsCriticos);
-  }
-}
-
 function mostrarAlertaInventarioToast(listaPlataformas) {
   const toastCenter = document.getElementById("cyber-toast-center");
   if (!toastCenter) return;
@@ -9190,38 +9154,6 @@ window.ejecutarBusquedaCorreoInterno = function () {
     iframe.style.opacity = "1";
     if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
   }, 1000);
-};
-
-// =========================================================================
-// 🟣 MOTOR AVANZADO: EXTRACCIÓN NATIVA CÓDIGOS ANA (TKDJGZ)
-// =========================================================================
-
-window.correosExtraidosNativos = [];
-
-window.toggleAnaCodesPanel = function () {
-  if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("anaCodesOverlay");
-  if (overlay) {
-    overlay.classList.toggle("open");
-
-    if (overlay.classList.contains("open")) {
-      // Devolver a la pantalla de espera
-      document.getElementById("contenedorNativoCorreos").innerHTML = `
-        <div style="margin: auto; color: var(--text-secondary); text-align: center;">
-           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--ios-purple)" stroke-width="2" style="margin-bottom: 15px; opacity: 0.7;">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              <line x1="11" y1="8" x2="11" y2="14"></line>
-              <line x1="8" y1="11" x2="14" y2="11"></line>
-           </svg>
-           <br><span style="font-weight: 600;">Los correos aparecerán aquí</span>
-        </div>`;
-      document.getElementById("inputBuscadorCorreos").value = "";
-      setTimeout(() => {
-        document.getElementById("inputBuscadorCorreos").focus();
-      }, 150);
-    }
-  }
 };
 
 // =========================================================================
@@ -10996,13 +10928,28 @@ window.seleccionarPestañaPlataforma = function (nombrePlat) {
     input.value = "";
     actualizarPosicionBotonBorrar(input);
   }
-  renderizarMatrizCompleta();
+
+  // Si tocó la pestaña de ventas y aún no hay datos, los descargamos
+  if (
+    nombrePlat === "REGISTRO_VENTAS" &&
+    (!window.registroVentasData || window.registroVentasData.length === 0)
+  ) {
+    renderizarMatrizCompleta();
+    cargarVentasLupa();
+  } else {
+    renderizarMatrizCompleta();
+  }
 };
 
+// Variable global para guardar el mes elegido sin que se reinicie
+if (typeof window.mesFiltroRegistroVentas === "undefined") {
+  window.mesFiltroRegistroVentas = new Date().getMonth();
+}
+
 // =========================================================================
-// 📊 RENDERIZADOR DE MATRIZ Y PESTAÑAS (INCLUYE PESTAÑA DE GARANTÍAS)
+// 📊 RENDERIZADOR DE MATRIZ Y PESTAÑAS (INCLUYE GARANTÍAS Y VENTAS)
 // =========================================================================
-function renderizarMatrizCompleta() {
+window.renderizarMatrizCompleta = function () {
   const cajaResultados = document.getElementById("resultados-buscador");
   if (!cajaResultados) return;
 
@@ -11033,44 +10980,38 @@ function renderizarMatrizCompleta() {
     plataformaActivaBuscador = plataformasUnicas[0];
   }
 
-  let htmlBotones = `<div id="contenedor-botones-lupa" style="display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; max-height: 120px; overflow-y: auto;">`;
+  // Contenedor de botones limpio y alineado
+  let htmlBotones = `<div id="contenedor-botones-lupa" style="display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; max-height: 140px; overflow-y: auto; align-items: center;">`;
 
-  // 🔥 NUEVO: BOTÓN DE REFRESCO SILENCIOSO (PRIMERO EN LA FILA) 🔥
+  // BOTÓN DE REFRESCO SILENCIOSO
   htmlBotones += `
       <button onclick="forzarRefrescoLupaSilencioso()" title="Refrescar base de datos" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #e1e1e6; padding: 6px 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s ease;">
           <svg id="icon-refresh-lupa" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="23 4 23 10 17 10"></polyline>
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
           </svg>
-          
       </button>
   `;
 
-  // 🚨 1. BOTÓN ESPECIAL DE GARANTÍAS
+  // 🚨 BOTÓN ESPECIAL DE GARANTÍAS
   const esGarantiaActiva = plataformaActivaBuscador === "GARANTIAS";
   htmlBotones += `
-        <button onclick="seleccionarPestañaPlataforma('GARANTIAS')" class="btn-plat-filtro" data-plat="GARANTIAS" style="
-            background: ${esGarantiaActiva ? "#ff453a" : "rgba(255, 69, 58, 0.12)"};
-            color: ${esGarantiaActiva ? "#ffffff" : "#ff453a"};
-            border: 1px solid ${esGarantiaActiva ? "#ff453a" : "rgba(255, 69, 58, 0.3)"};
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 0.82rem;
-            font-weight: 800;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: ${esGarantiaActiva ? "0 0 12px rgba(255,69,58,0.5)" : "none"};
-        ">
+        <button onclick="seleccionarPestañaPlataforma('GARANTIAS')" class="btn-plat-filtro" data-plat="GARANTIAS" style="background: ${esGarantiaActiva ? "#ff453a" : "rgba(255, 69, 58, 0.12)"}; color: ${esGarantiaActiva ? "#ffffff" : "#ff453a"}; border: 1px solid ${esGarantiaActiva ? "#ff453a" : "rgba(255, 69, 58, 0.3)"}; padding: 8px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px; box-shadow: ${esGarantiaActiva ? "0 0 12px rgba(255,69,58,0.5)" : "none"};">
             <span>🚨</span>
             <span>GARANTÍAS ${totalGarantiasPendientes > 0 ? `(${totalGarantiasPendientes})` : ""}</span>
         </button>
     `;
 
-  // 📺 2. PESTAÑAS DE PLATAFORMAS REGULARES
+  // 💰 BOTÓN ESPECIAL DE REGISTRO DE VENTAS (Solo el botón, sin selectores extra)
+  const esVentasActiva = plataformaActivaBuscador === "REGISTRO_VENTAS";
+  htmlBotones += `
+        <button onclick="seleccionarPestañaPlataforma('REGISTRO_VENTAS')" class="btn-plat-filtro" data-plat="REGISTRO_VENTAS" style="background: ${esVentasActiva ? "#30d158" : "rgba(48, 209, 88, 0.12)"}; color: ${esVentasActiva ? "#ffffff" : "#30d158"}; border: 1px solid ${esVentasActiva ? "#30d158" : "rgba(48, 209, 88, 0.3)"}; padding: 8px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px; box-shadow: ${esVentasActiva ? "0 0 12px rgba(48,209,88,0.5)" : "none"};">
+            <span>💰</span>
+            <span>REGISTRO VENTAS</span>
+        </button>
+    `;
+
+  // 📺 PESTAÑAS DE PLATAFORMAS REGULARES
   plataformasUnicas.forEach((plat) => {
     const activa = plat === plataformaActivaBuscador;
     let icono = "📺";
@@ -11081,21 +11022,7 @@ function renderizarMatrizCompleta() {
     if (plat.includes("SPOTIFY") || plat.includes("DEEZER")) icono = "🎵";
 
     htmlBotones += `
-            <button onclick="seleccionarPestañaPlataforma('${plat}')" class="btn-plat-filtro" data-plat="${plat}" style="
-                background: ${activa ? "#0072ff" : "rgba(255, 255, 255, 0.04)"};
-                color: ${activa ? "#ffffff" : "#a1a1aa"};
-                border: 1px solid ${activa ? "#0072ff" : "rgba(255, 255, 255, 0.1)"};
-                padding: 8px 16px;
-                border-radius: 10px;
-                font-size: 0.82rem;
-                font-weight: 700;
-                cursor: pointer;
-                white-space: nowrap;
-                transition: all 0.2s ease;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-            ">
+            <button onclick="seleccionarPestañaPlataforma('${plat}')" class="btn-plat-filtro" data-plat="${plat}" style="background: ${activa ? "#0072ff" : "rgba(255, 255, 255, 0.04)"}; color: ${activa ? "#ffffff" : "#a1a1aa"}; border: 1px solid ${activa ? "#0072ff" : "rgba(255, 255, 255, 0.1)"}; padding: 8px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;">
                 <span>${icono}</span>
                 <span>${plat}</span>
             </button>
@@ -11111,35 +11038,12 @@ function renderizarMatrizCompleta() {
 
   cajaResultados.innerHTML = htmlEstructura;
   renderizarFilasTabla();
-}
-
-// =========================================================================
-// 📋 COPIADO RÁPIDO INDIVIDUAL (CORREO Y CLAVE CON ÍCONO SVG)
-// =========================================================================
-window.copiarDatoAisladoLupa = function (btn, texto) {
-  if (typeof haptic === "function") haptic();
-  if (!texto || texto === "-") return;
-
-  navigator.clipboard.writeText(texto).then(() => {
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-
-    if (typeof triggerToast === "function") {
-      triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Dato copiado al portapapeles</span></div>`,
-      );
-    }
-
-    setTimeout(() => {
-      btn.innerHTML = originalHTML;
-    }, 1500);
-  });
 };
 
 // =========================================================================
-// 📋 RENDERIZADOR DE FILAS (CON BOTONES DE COPIAR, BORRAR, AGREGAR Y EDITAR)
+// 📋 RENDERIZADOR DE FILAS (CON BOTONES, LÁPIZ Y REGISTRO DE VENTAS)
 // =========================================================================
-function renderizarFilasTabla() {
+window.renderizarFilasTabla = function () {
   const contenedorTabla = document.getElementById("contenedor-tabla-dinamica");
   if (!contenedorTabla) return;
 
@@ -11147,6 +11051,137 @@ function renderizarFilasTabla() {
   const texto = inputBuscador ? inputBuscador.value.toLowerCase().trim() : "";
   const estaBuscandoGlobal = texto.length >= 2;
 
+  const userActivo = (sessionStorage.getItem("active_staff") || "")
+    .toUpperCase()
+    .trim();
+  const esCamilo = userActivo === "CAMILO";
+
+  // 🔥 1. INTERCEPTOR SI ESTAMOS EN LA PESTAÑA "REGISTRO_VENTAS" 🔥
+  if (plataformaActivaBuscador === "REGISTRO_VENTAS") {
+    let mesElegido =
+      window.mesFiltroRegistroVentas !== undefined
+        ? window.mesFiltroRegistroVentas
+        : new Date().getMonth();
+    const anioActual = new Date().getFullYear();
+
+    let filtradosVentas = (window.registroVentasData || []).filter((row) => {
+      if (texto !== "") {
+        // 🔍 MODO BÚSQUEDA GLOBAL: Ignora el mes y busca en toda la historia de ventas
+        const cliente = String(row[1] || "").toLowerCase();
+        const telefono = String(row[2] || "").replace(/\D/g, "");
+        const plat = String(row[3] || "").toLowerCase();
+        const queryTel = texto.replace(/\D/g, "");
+
+        if (queryTel !== "" && telefono.includes(queryTel)) return true;
+        if (cliente.includes(texto) || plat.includes(texto)) return true;
+        return false;
+      } else {
+        // 📅 MODO NORMAL: Muestra solo las ventas del mes elegido
+        const fechaStr = row[0];
+        if (!fechaStr) return false;
+
+        const partesSpace = String(fechaStr).split(" ");
+        const partes = partesSpace[0].split("/");
+
+        if (partes.length === 3) {
+          const mesFila = parseInt(partes[1], 10) - 1;
+          const anioFila = parseInt(partes[2], 10);
+          return mesFila === mesElegido && anioFila === anioActual;
+        }
+        return false;
+      }
+    });
+
+    filtradosVentas.reverse();
+
+    // Construir las opciones del selector de meses
+    let opcionesMes = "";
+    const mesesNombres = [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ];
+    mesesNombres.forEach((m, idx) => {
+      opcionesMes += `<option value="${idx}" ${idx === mesElegido ? "selected" : ""}>${m}</option>`;
+    });
+
+    // Tabla 100% limpia. El selector de mes está ahora dentro de la columna FECHA
+    let htmlTabla = `
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; color: #e4e4e7; text-align: left; white-space: nowrap;">
+              <thead>
+                  <tr style="background: #18181b; color: #a1a1aa; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10;">
+                      <th style="padding: 10px 16px; font-weight: 800; letter-spacing:0.5px;">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                              FECHA
+                              <select class="input-ios" style="margin: 0; padding: 4px 8px; border-radius: 6px; font-weight: 700; background: rgba(48, 209, 88, 0.1) !important; color: var(--ios-green); border: 1px solid rgba(48, 209, 88, 0.3); font-size: 0.75rem; cursor: pointer; outline: none;" onchange="window.mesFiltroRegistroVentas = parseInt(this.value, 10); renderizarFilasTabla();">
+                                  ${opcionesMes}
+                              </select>
+                          </div>
+                      </th>
+                      <th style="padding: 14px 16px; font-weight: 800; letter-spacing:0.5px;">CLIENTE / TELÉFONO</th>
+                      <th style="padding: 14px 16px; font-weight: 800; letter-spacing:0.5px;">PLATAFORMAS</th>
+                      <th style="padding: 14px 16px; font-weight: 800; letter-spacing:0.5px; color:#30d158;">PAGO</th>
+                      <th style="padding: 14px 16px; font-weight: 800; letter-spacing:0.5px;">MÉTODO</th>
+                      <th style="padding: 14px 16px; font-weight: 800; letter-spacing:0.5px;">TIPO</th>
+                      ${esCamilo ? '<th style="padding: 14px 16px; font-weight: 800; text-align:center;">ACCIÓN</th>' : ""}
+                  </tr>
+              </thead>
+              <tbody>
+      `;
+
+    if (filtradosVentas.length === 0) {
+      htmlTabla += `<tr><td colspan="${esCamilo ? 7 : 6}" style="text-align: center; padding: 40px; color: var(--text-secondary); font-weight: 600;">No hay ventas registradas que coincidan.</td></tr>`;
+    } else {
+      filtradosVentas.forEach((row, idx) => {
+        const colorFondoFila =
+          idx % 2 === 0 ? "rgba(255, 255, 255, 0.015)" : "transparent";
+        let montoStr = String(row[4] || "0").replace(/\D/g, "");
+        let montoNum = parseFloat(montoStr) || 0;
+
+        let botonBorrar = esCamilo
+          ? `
+                  <td style="padding: 10px 16px; text-align:center; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                      <button onclick="eliminarVentaDesdeRegistro(this, ${row[7]})" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); color: var(--ios-red); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">Borrar</button>
+                  </td>
+              `
+          : "";
+
+        htmlTabla += `
+                  <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;" onmouseover="this.style.background='rgba(48, 209, 88, 0.05)'" onmouseout="this.style.background='${colorFondoFila}'">
+                      <td style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-secondary); font-family: monospace;">${row[0]}</td>
+                      <td style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                          <div style="font-weight: 800; color: var(--text-primary); font-size: 0.9rem;">${row[1]}</div>
+                          <div style="font-family: monospace; font-size: 0.75rem; color: var(--text-secondary);">${row[2]}</div>
+                      </td>
+                      <td style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--ios-blue); font-weight: 700; white-space: normal; min-width: 200px;">${row[3]}</td>
+                      <td style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--ios-green); font-weight: 800; font-family: monospace; font-size:1rem;">$${montoNum.toLocaleString("es-CO")}</td>
+                      <td style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-secondary); font-weight: 600;">${row[5]}</td>
+                      <td style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                          <span style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; color: var(--text-primary);">${row[6]}</span>
+                      </td>
+                      ${botonBorrar}
+                  </tr>
+              `;
+      });
+    }
+
+    htmlTabla += `</tbody></table>`;
+    contenedorTabla.innerHTML = htmlTabla;
+    return;
+  }
+
+  // -----------------------------------------------------------
+  // 2. LÓGICA ORIGINAL PARA INVENTARIO REGULAR DE CUENTAS
+  // -----------------------------------------------------------
   const botones = document.querySelectorAll("#contenedor-botones-lupa button");
   botones.forEach((btn) => {
     btn.style.opacity = estaBuscandoGlobal ? "0.3" : "1";
@@ -11154,11 +11189,6 @@ function renderizarFilasTabla() {
 
   const textoLimpioNumerico = texto.replace(/[\s\-\+\(\)]/g, "");
   const esBusquedaTelefono = /^\d{3,}$/.test(textoLimpioNumerico);
-
-  const userActivo = (sessionStorage.getItem("active_staff") || "")
-    .toUpperCase()
-    .trim();
-  const esCamilo = userActivo === "CAMILO";
 
   let filtrados = memoriaBuscador.filter((cuenta) => {
     const platCuenta = String(cuenta.plataforma || "")
@@ -11217,8 +11247,6 @@ function renderizarFilasTabla() {
   const incluyeNetflix = filtrados.some((c) =>
     String(c.plataforma).toUpperCase().includes("NETFLIX"),
   );
-  const esVistaGlobal = estaBuscandoGlobal;
-
   const platUpperActive = String(plataformaActivaBuscador || "")
     .toUpperCase()
     .trim();
@@ -11228,6 +11256,7 @@ function renderizarFilasTabla() {
     (platUpperActive.includes("NETFLIX") ||
       platUpperActive.includes("DISNEY-PREMIUM") ||
       platUpperActive.includes("DISNEY PREMIUM"));
+  const esVistaGlobal = estaBuscandoGlobal;
 
   let colSpanCount = 10;
   let htmlHeaders = "";
@@ -11282,7 +11311,6 @@ function renderizarFilasTabla() {
       plataformaActivaBuscador === "GARANTIAS"
         ? "🎉 ¡Excelente! No hay cuentas en garantía pendientes."
         : "No se encontraron cuentas para esta búsqueda.";
-
     htmlTabla += `
             <tr>
                 <td colspan="${colSpanCount}" style="text-align: center; padding: 40px; color: ${plataformaActivaBuscador === "GARANTIAS" ? "#30d158" : "#ff453a"}; font-weight: 600;">
@@ -11298,10 +11326,7 @@ function renderizarFilasTabla() {
       const datoLimpio = String(dato).replace(/'/g, "\\'");
       return `
         <button onclick="copiarDatoAisladoLupa(this, '${datoLimpio}')" title="${titulo}" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.2s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
         </button>
       `;
     };
@@ -11310,20 +11335,18 @@ function renderizarFilasTabla() {
       const cuentaCodificada = encodeURIComponent(
         JSON.stringify(cuenta),
       ).replace(/'/g, "%27");
-
       const esFilaPar = idx % 2 === 0;
       const isRowNetflix = String(cuenta.plataforma)
         .toUpperCase()
         .includes("NETFLIX");
-
       const colorFondoFila = cuenta.esCaida
         ? "rgba(255, 69, 58, 0.15)"
         : esFilaPar
           ? "rgba(255, 255, 255, 0.015)"
           : "transparent";
 
-      let colorPlat = "#0072ff";
-      let bgPlat = "rgba(0, 114, 255, 0.15)";
+      let colorPlat = "#0072ff",
+        bgPlat = "rgba(0, 114, 255, 0.15)";
       if (isRowNetflix) {
         colorPlat = "#ff453a";
         bgPlat = "rgba(255, 69, 58, 0.15)";
@@ -11367,28 +11390,27 @@ function renderizarFilasTabla() {
         ultimaFechaRenderizada = fechaActual;
       }
 
-      // 🔥 LÓGICA INTELIGENTE DE ANCHO DE COLUMNA 🔥
-      // Si el texto NO tiene un arroba, permitimos que salte de línea para que no estire la tabla
+      // 🔥 LÓGICA INTELIGENTE DE ANCHO DE COLUMNA Y SALTOS DE LÍNEA 🔥
       const correoLimpio = cuenta.correo || "-";
-      const tieneArroba = correoLimpio.includes("@");
-      
-      const estiloDivCorreo = tieneArroba 
-          ? "display: flex; align-items: center; justify-content: flex-start; gap: 8px; width: max-content;"
-          : "display: flex; align-items: center; justify-content: flex-start; gap: 8px; white-space: normal; line-height: 1.3;";
+      const esTextoLargo = !correoLimpio.includes("@");
 
-      const estiloTdCorreo = tieneArroba
-          ? "padding: 12px 16px; font-weight: 600; color: #ffffff; width: 1%; white-space: nowrap;"
-          : "padding: 12px 16px; font-weight: 600; color: #ffffff; white-space: normal; min-width: 250px; max-width: 300px; word-wrap: break-word;";
+      const estiloContenedorCorreo = esTextoLargo
+        ? "display: flex; align-items: center; justify-content: flex-start; gap: 8px; white-space: normal; line-height: 1.3;"
+        : "display: flex; align-items: center; justify-content: flex-start; gap: 8px;";
+
+      const estiloTdCorreo = esTextoLargo
+        ? "padding: 12px 16px; font-weight: 600; color: #ffffff; white-space: normal; min-width: 250px; max-width: 350px; word-wrap: break-word;"
+        : "padding: 12px 16px; font-weight: 600; color: #ffffff; width: 1%; white-space: nowrap;";
 
       const celdaCorreoContent = `
-        <div style="${estiloDivCorreo}">
+        <div style="${estiloContenedorCorreo}">
           <span>${correoLimpio}</span>
           ${svgCopyIcon(cuenta.correo, "Copiar correo")}
         </div>
       `;
 
       const celdaClaveContent = `
-        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; width: max-content;">
+        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
           <span>${cuenta.clave || "-"}</span>
           ${svgCopyIcon(cuenta.clave, "Copiar contraseña")}
         </div>
@@ -11498,7 +11520,108 @@ function renderizarFilasTabla() {
 
   htmlTabla += `</tbody></table>`;
   contenedorTabla.innerHTML = htmlTabla;
-}
+};
+
+// =========================================================================
+// 📊 FUNCIONES AUXILIARES DE DESCARGA Y ELIMINACIÓN DE REGISTRO DE VENTAS
+// =========================================================================
+window.cargarVentasLupa = function (forzar = false) {
+  if (typeof haptic === "function" && forzar) haptic();
+  const contenedorTabla = document.getElementById("contenedor-tabla-dinamica");
+  if (!contenedorTabla) return;
+
+  contenedorTabla.innerHTML = `
+        <div style="text-align:center; padding:60px; color:var(--text-secondary);">
+            <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+            <br><br><span style="font-weight:800; font-size:1.1rem; color:#30d158;">Sincronizando Base de Ventas...</span>
+        </div>`;
+
+  const cbName = "cb_reg_ventas_" + Date.now();
+  window[cbName] = function (res) {
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      window.registroVentasData = res.data;
+      renderizarFilasTabla(); // Pinta la tabla de ventas
+      if (forzar && typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg> <span>Base de ventas actualizada.</span></div>`,
+        );
+      }
+    } else {
+      contenedorTabla.innerHTML = `<div style="text-align:center; padding:50px; color:#ff453a; font-weight:bold;">❌ Error al cargar los registros</div>`;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerRegistroVentas&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.eliminarVentaDesdeRegistro = function (btn, filaIndex) {
+  if (
+    !confirm(
+      "⚠️ ATENCIÓN\n¿Estás seguro de que deseas ELIMINAR esta venta?\n\nLa fila se borrará permanentemente del 'REGISTRO DE VENTAS'.",
+    )
+  )
+    return;
+
+  if (typeof haptic === "function") haptic();
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle></svg>`;
+  btn.disabled = true;
+
+  const cbName = "cb_del_reg_" + Date.now();
+  window[cbName] = function (res) {
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> <span>Venta eliminada del registro.</span></div>`,
+        );
+      }
+      window.cargarVentasLupa(false);
+    } else {
+      alert("❌ Error: " + (res ? res.message : "Fallo de conexión."));
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=eliminarVentaPorFila&filaIndex=${encodeURIComponent(filaIndex)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+// =========================================================================
+// 📋 COPIADO RÁPIDO INDIVIDUAL (CORREO Y CLAVE CON ÍCONO SVG)
+// =========================================================================
+window.copiarDatoAisladoLupa = function (btn, texto) {
+  if (typeof haptic === "function") haptic();
+  if (!texto || texto === "-") return;
+
+  navigator.clipboard.writeText(texto).then(() => {
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Dato copiado al portapapeles</span></div>`,
+      );
+    }
+
+    setTimeout(() => {
+      btn.innerHTML = originalHTML;
+    }, 1500);
+  });
+};
 
 // =========================================================================
 // ➕ FUNCIÓN RÁPIDA: AGREGAR SOLO NÚMERO
@@ -12293,45 +12416,6 @@ window.ejecutarResolverGarantia = function (e) {
   document.body.appendChild(script);
 };
 
-/* =========================================================================
-   ⏱️ AUTO-REFRESH EN SEGUNDO PLANO Y AL RECARGAR LA PÁGINA
-   ========================================================================= */
-
-async function sincronizarLupaSilenciosa(forzarDescarga = false) {
-  const oldVersion = forzarDescarga
-    ? ""
-    : localStorage.getItem("cache_inventario_lupa_version") || "";
-
-  try {
-    const response = await fetch(
-      `${URL_SCRIPT_CYBERNET}?action=descargarInventarioBuscador&versionCliente=${oldVersion}&_ts=${Date.now()}`,
-    );
-    const textoBruto = await response.text();
-    const jsonLimpio = textoBruto
-      .trim()
-      .replace(/^.*?\(/, "")
-      .replace(/\)$/, "");
-    const datos = JSON.parse(jsonLimpio);
-
-    if (datos.status === "success" && Array.isArray(datos.data)) {
-      localStorage.setItem("cache_inventario_lupa", JSON.stringify(datos.data));
-      localStorage.setItem(
-        "cache_inventario_lupa_version",
-        datos.version || Date.now().toString(),
-      );
-      memoriaBuscador = datos.data;
-
-      const modal = document.getElementById("modal-buscador-global");
-      if (modal && modal.style.display !== "none") {
-        if (typeof renderizarFilasTabla === "function") renderizarFilasTabla();
-      }
-      console.log("🔄 Base de datos de la Lupa sincronizada.");
-    }
-  } catch (error) {
-    console.warn("⚠️ Error silencioso al sincronizar la lupa:", error);
-  }
-}
-
 window.addEventListener("DOMContentLoaded", () => {
   sincronizarLupaSilenciosa(true);
 });
@@ -12451,97 +12535,151 @@ window.toggleAnaCodesPanel = function () {
       }
     }
   }
-  // =========================================================================
-  // ♻️ MOTOR DE SINCRONIZACIÓN INTELIGENTE EN SEGUNDO PLANO (LUPA / CACHÉ)
-  // =========================================================================
+};
 
-  // 1. Variable para evitar descargas dobles (Cooldown de 1 minuto mínimo)
-  window.ultimaSincroBaseDatos = 0;
+// =========================================================================
+// ♻️ MOTOR DE SINCRONIZACIÓN INTELIGENTE (CACHÉ BAJO DEMANDA)
+// =========================================================================
+window.ultimaSincroBaseDatos = 0;
 
-  // 2. Función para saber si el usuario está ocupado en algo crítico
-  function usuarioEstaOcupado() {
-    const modalesCriticos = [
-      "ventasOverlay",
-      "cargarOverlay",
-      "cambioCuentaOverlay",
-      "resolverGarantiaOverlay",
-      "editVencOverlay",
-      "prestamoModalOverlay",
-      "editShiftModalOverlay",
-      "garantiasOverlay",
-      "comboCalcOverlay",
-      "nominaOverlay",
-    ];
+function usuarioEstaOcupado() {
+  const modalesCriticos = [
+    "ventasOverlay",
+    "cargarOverlay",
+    "cambioCuentaOverlay",
+    "resolverGarantiaOverlay",
+    "editVencOverlay",
+    "prestamoModalOverlay",
+    "editShiftModalOverlay",
+    "garantiasOverlay",
+    "comboCalcOverlay",
+    "nominaOverlay",
+  ];
+  return modalesCriticos.some((id) => {
+    const modal = document.getElementById(id);
+    return modal && modal.classList.contains("open");
+  });
+}
 
-    // Devuelve 'true' si CUALQUIERA de estos modales está abierto
-    return modalesCriticos.some((id) => {
-      const modal = document.getElementById(id);
-      return modal && modal.classList.contains("open");
-    });
+// 🔥 DESCARGA EN SEGUNDO PLANO (SOLO AL INICIO O AL ABRIR LUPA)
+window.sincronizarBaseDatosFondo = function (forzarInmediato = false) {
+  if (!sessionStorage.getItem("active_staff")) return;
+  if (!forzarInmediato && usuarioEstaOcupado()) return;
+
+  // Escudo anti-spam de 10 segundos para no saturar a Google
+  let ahora = Date.now();
+  if (ahora - window.ultimaSincroBaseDatos < 10000) return;
+  window.ultimaSincroBaseDatos = ahora;
+
+  console.log("♻️ Descargando caché maestro bajo demanda...");
+
+  const cbName = "cb_lupa_fondo_" + Date.now();
+  window[cbName] = function (res) {
+    const scriptNode = document.getElementById("node_" + cbName);
+    if (scriptNode) scriptNode.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      console.log("✅ Caché de la Lupa actualizado silenciosamente.");
+      memoriaBuscador = res.data;
+      localStorage.setItem("cache_inventario_lupa", JSON.stringify(res.data));
+
+      // Si la lupa está abierta, redibuja suavemente (excepto en Ventas para no borrar info que estés digitando)
+      const modalLupa = document.getElementById("modal-buscador-global");
+      if (
+        modalLupa &&
+        modalLupa.style.display === "flex" &&
+        plataformaActivaBuscador !== "REGISTRO_VENTAS"
+      ) {
+        if (typeof renderizarFilasTabla === "function") renderizarFilasTabla();
+      }
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=descargarInventarioBuscador&versionCliente=&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+// 1️⃣ Solo cargar una vez al iniciar la página (espera 3 segs para no trabar el login)
+window.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => window.sincronizarBaseDatosFondo(true), 3000);
+});
+
+// 🔥 BOTÓN MANUAL DE LA LUPA (REFRESCA AL INSTANTE Y ACTUALIZA UI) 🔥
+window.forzarRefrescoLupaSilencioso = function () {
+  if (typeof haptic === "function") haptic();
+
+  const btnIcon = document.getElementById("icon-refresh-lupa");
+  if (btnIcon) {
+    btnIcon.classList.add("spin-anim");
+    btnIcon.style.color = "var(--ios-blue)";
   }
 
-  // 3. Función maestra que descarga el caché silenciosamente
-  window.sincronizarBaseDatosFondo = function () {
-    // Si no hay nadie logueado, cancelamos
-    if (!sessionStorage.getItem("active_staff")) return;
+  console.log("⚡ Forzando descarga manual de la Base de Datos...");
 
-    // Si está ocupado en una ventana crítica de escritura (ventas, cargar, etc), posponemos
-    if (usuarioEstaOcupado()) return;
-
-    // Escudo Cooldown: Mínimo 1 minuto entre descargas
-    let ahora = Date.now();
-    if (ahora - window.ultimaSincroBaseDatos < 60000) return;
-
-    window.ultimaSincroBaseDatos = ahora;
-    console.log("♻️ Actualizando caché de la Lupa en segundo plano...");
-
-    // Llamada silenciosa al backend mediante JSONP
-    const cbName = "cb_lupa_fondo_" + Date.now();
+  // 👉 CASO A: SI ESTÁ EN LA PESTAÑA "REGISTRO_VENTAS" -> ACTUALIZA VENTAS
+  if (plataformaActivaBuscador === "REGISTRO_VENTAS") {
+    const cbName = "cb_reg_ventas_man_" + Date.now();
     window[cbName] = function (res) {
+      if (btnIcon) {
+        btnIcon.classList.remove("spin-anim");
+        btnIcon.style.color = "#e1e1e6";
+      }
+      const node = document.getElementById("node_" + cbName);
+      if (node) node.remove();
+      delete window[cbName];
+
+      if (res && res.status === "success") {
+        window.registroVentasData = res.data;
+        if (typeof renderizarFilasTabla === "function") renderizarFilasTabla();
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg> <span>Base de ventas actualizada al instante.</span></div>`,
+          );
+        }
+      } else {
+        alert("❌ Error al actualizar ventas.");
+      }
+    };
+    const script = document.createElement("script");
+    script.id = "node_" + cbName;
+    script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerRegistroVentas&callback=${cbName}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+  }
+  // 👉 CASO B: SI ESTÁ EN CUALQUIER OTRA PESTAÑA -> ACTUALIZA INVENTARIO NORMAL
+  else {
+    const cbName = "cb_lupa_manual_" + Date.now();
+    window[cbName] = function (res) {
+      if (btnIcon) {
+        btnIcon.classList.remove("spin-anim");
+        btnIcon.style.color = "#e1e1e6";
+      }
       const scriptNode = document.getElementById("node_" + cbName);
       if (scriptNode) scriptNode.remove();
       delete window[cbName];
 
       if (res && res.status === "success") {
-        console.log("✅ Caché de la Lupa actualizado silenciosamente.");
-
-        // 1. Guardamos la nueva data en la memoria global que use tu Lupa
-        // (Revisa si tu variable se llama window.inventarioGlobalLupa o window.currentSearchStock)
-        window.inventarioGlobalLupa = res.data;
-
-        // 2. Si la ventana de la Lupa está ABIERTA, actualizamos la lista SILENCIOSAMENTE
-        const modalLupa = document.getElementById("modal-buscador-global");
-
-        if (modalLupa && modalLupa.style.display === "flex") {
-          // Leemos lo que el usuario está escribiendo en ese momento para no interrumpirlo
-          let textoActual = "";
-          const inputBuscador = document.getElementById(
-            "input-buscador-global",
+        memoriaBuscador = res.data;
+        localStorage.setItem("cache_inventario_lupa", JSON.stringify(res.data));
+        if (typeof renderizarFilasTabla === "function") renderizarFilasTabla();
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg> <span>Inventario actualizado al instante.</span></div>`,
           );
-          if (inputBuscador) {
-            textoActual = inputBuscador.value;
-          }
-
-          // Redibujamos la lista de resultados en silencio, aplicando el filtro que ya estaba escrito.
-          // (Reemplaza "renderizarResultadosLupa" por el nombre de tu función que pinta las tarjetitas)
-          if (typeof renderizarResultadosLupa === "function") {
-            renderizarResultadosLupa(textoActual);
-          }
         }
+      } else {
+        alert("❌ Error al actualizar inventario.");
       }
     };
-
     const script = document.createElement("script");
     script.id = "node_" + cbName;
-
-    // IMPORTANTE: Al llamar directamente la URL sin tocar el HTML, NUNCA saldrá el letrero de "⚡ Sincronizando..."
     script.src = `${GOOGLE_SCRIPT_URL}?action=descargarInventarioBuscador&versionCliente=&callback=${cbName}&_ts=${Date.now()}`;
     document.body.appendChild(script);
-  };
-
-  // 4. El bucle que intenta ejecutarse cada 10 minutos (600,000 milisegundos)
-  setInterval(window.sincronizarBaseDatosFondo, 600000);
+  }
 };
+
 function actualizarVisibilidadDock() {
   // 🔍 Escaneo robusto: Busca si hay modales con la clase 'open' O que tengan display activo
   const algunModalAbierto = Array.from(
@@ -12594,58 +12732,7 @@ function actualizarVisibilidadDock() {
     }, 1000); // Esperamos 1 segundo a que termine la animación de cierre de la ventana
   }
 }
-window.forzarRefrescoLupaSilencioso = function () {
-  if (typeof haptic === "function") haptic();
 
-  const btnIcon = document.getElementById("icon-refresh-lupa");
-
-  // 1. Animación visual (el SVG gira y se pinta de azul)
-  if (btnIcon) {
-    btnIcon.classList.add("spin-anim");
-    btnIcon.style.color = "var(--ios-blue)";
-  }
-
-  console.log("⚡ Forzando actualización silenciosa de la Lupa...");
-
-  // 2. Petición directa a Google Apps Script
-  const cbName = "cb_lupa_manual_" + Date.now();
-  window[cbName] = function (res) {
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
-
-    // Detenemos la animación
-    if (btnIcon) {
-      btnIcon.classList.remove("spin-anim");
-      btnIcon.style.color = "#e1e1e6";
-    }
-
-    if (res && res.status === "success") {
-      // 🔥 Actualizamos TU memoria real
-      memoriaBuscador = res.data;
-
-      // Leemos lo que haya escrito el usuario para que no se le borre
-      let textoActual = "";
-      const inputBuscador = document.getElementById("input-buscador-global");
-      if (inputBuscador) {
-        textoActual = inputBuscador.value;
-      }
-
-      // 🔥 Redibujamos instantáneamente llamando a TU función
-      if (typeof renderizarFilasTabla === "function") {
-        renderizarFilasTabla();
-      }
-      console.log("✅ Actualización manual y silenciosa completada.");
-    } else {
-      console.error("❌ Fallo en la actualización de la base de datos.");
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=descargarInventarioBuscador&versionCliente=&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
-};
 // =========================================================================
 // ➕ FUNCIÓN PARA AGREGAR NÚMERO DE TELÉFONO DESDE LA TABLA (SEGUNDO PLANO)
 // =========================================================================
