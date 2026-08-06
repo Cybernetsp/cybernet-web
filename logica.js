@@ -13094,17 +13094,17 @@ window.renderizarTablaSuspendidas = function () {
 
   let filtrados = memoriaSuspendidas;
   if (texto.length >= 2) {
-    // 🔥 FILTRO INTELIGENTE: Limpiamos los números para poder buscar el teléfono sin importar los espacios
+    // 🔥 CORRECCIÓN: Solo busca en los teléfonos si lo que se escribió NO es un correo
     let textoLimpioNum = texto.replace(/\D/g, "");
+    let esPosibleTelefono = textoLimpioNum.length >= 4 && !texto.includes("@");
 
     filtrados = memoriaSuspendidas.filter(
       (c) =>
         (c.correo || "").toLowerCase().includes(texto) ||
         (c.pin || "").toLowerCase().includes(texto) ||
         (c.clave || "").toLowerCase().includes(texto) ||
-        (textoLimpioNum !== "" &&
-          (c.telefono || "").includes(textoLimpioNum)) || // Busca por número de celular
-        (c.cliente || "").toLowerCase().includes(texto), // Busca por nombre del cliente
+        (c.cliente || "").toLowerCase().includes(texto) ||
+        (esPosibleTelefono && (c.telefono || "").includes(textoLimpioNum)),
     );
   }
 
