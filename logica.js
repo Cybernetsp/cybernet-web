@@ -13094,11 +13094,17 @@ window.renderizarTablaSuspendidas = function () {
 
   let filtrados = memoriaSuspendidas;
   if (texto.length >= 2) {
+    // 🔥 FILTRO INTELIGENTE: Limpiamos los números para poder buscar el teléfono sin importar los espacios
+    let textoLimpioNum = texto.replace(/\D/g, "");
+
     filtrados = memoriaSuspendidas.filter(
       (c) =>
         (c.correo || "").toLowerCase().includes(texto) ||
         (c.pin || "").toLowerCase().includes(texto) ||
-        (c.clave || "").toLowerCase().includes(texto),
+        (c.clave || "").toLowerCase().includes(texto) ||
+        (textoLimpioNum !== "" &&
+          (c.telefono || "").includes(textoLimpioNum)) || // Busca por número de celular
+        (c.cliente || "").toLowerCase().includes(texto), // Busca por nombre del cliente
     );
   }
 
@@ -13212,12 +13218,10 @@ window.renderizarTablaSuspendidas = function () {
 
       if (noTieneFecha) {
         if (esRecarga1) {
-          // Recarga 1: Oculto por defecto (display: none). Aparece cuando se le da clic a "Verificar"
           botonOTextoVencimiento = `<button id="btnActivar_${cuenta.filaIndex}" onclick="window.activarCuentaSuspendida('${cuenta.filaIndex}', this)" class="btn-ios btn-success" style="display: none; padding: 6px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0; box-shadow: 0 4px 10px rgba(48, 209, 88, 0.25); align-items: center; justify-content: center; gap: 6px; font-weight:800; margin: 0 auto; transition: all 0.3s ease;">
                         🚀 Activar
                     </button>`;
         } else {
-          // Recarga 2+: Totalmente libre y visible
           botonOTextoVencimiento = `<button id="btnActivar_${cuenta.filaIndex}" onclick="window.activarCuentaSuspendida('${cuenta.filaIndex}', this)" class="btn-ios btn-success" style="display: flex; padding: 6px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0; box-shadow: 0 4px 10px rgba(48, 209, 88, 0.25); align-items: center; justify-content: center; gap: 6px; font-weight:800; margin: 0 auto; transition: all 0.3s ease;">
                         🚀 Activar
                     </button>`;
@@ -13243,12 +13247,10 @@ window.renderizarTablaSuspendidas = function () {
             </div>`;
       }
 
-      // 🔥 Lógica de Botón Copiar Correo y Celda Verificar:
       let botonCopiaCorreo = "";
       let celdaVerificarContent = "";
 
       if (esRecarga1) {
-        // Es Recarga 1: Botón de copiado que dispara el Radar
         botonCopiaCorreo = `<button onclick="window.copiarCorreoYBuscarVerificacion(this, '${String(cuenta.correo).replace(/'/g, "\\'")}', '${cuenta.filaIndex}')" title="Copiar correo e iniciar verificación" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.2s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'">
                                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -13256,7 +13258,6 @@ window.renderizarTablaSuspendidas = function () {
                                   </svg>
                               </button>`;
 
-        // Leer el estado de la memoria para pintar la celda
         if (estadoRadar && estadoRadar.status === "encontrado") {
           celdaVerificarContent = `<a id="btnVerificar_${cuenta.filaIndex}" href="${estadoRadar.link}" target="_blank" class="btn-ios btn-success" style="display: inline-flex; padding: 6px 14px; font-size: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 800; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease; margin: 0 auto; border-color: transparent;" onclick="document.getElementById('btnActivar_${cuenta.filaIndex}').style.display='flex';">✉️ Verificar</a>`;
         } else if (estadoRadar && estadoRadar.status === "buscando") {
@@ -13265,7 +13266,6 @@ window.renderizarTablaSuspendidas = function () {
           celdaVerificarContent = `<a id="btnVerificar_${cuenta.filaIndex}" class="btn-ios" style="display: none; padding: 6px 14px; font-size: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 800; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease; margin: 0 auto;"></a>`;
         }
       } else {
-        // Es Recarga 2+: Botón de copiado normal
         botonCopiaCorreo = svgCopy(cuenta.correo, "Copiar correo");
         celdaVerificarContent = `<span style="color: var(--text-secondary); display: block; text-align: center;">-</span>`;
       }
