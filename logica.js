@@ -12806,29 +12806,34 @@ let memoriaSuspendidas = [];
 let memoriaNeyop = [];
 
 // =========================================================================
-// 🔄 INTERCAMBIO DE VISTAS Y REFRESCO EN VIVO
+// 🚪 ABRIR PANEL DE SUSPENDIDAS Y AUTO-ACTUALIZAR EN SEGUNDO PLANO
 // =========================================================================
 window.toggleSuspendidasPanel = function () {
   if (typeof haptic === "function") haptic();
-  const panel = document.getElementById("suspendidasOverlay");
-  if (!panel) return;
 
-  if (panel.classList.contains("open")) {
-    panel.classList.remove("open");
-  } else {
-    document
-      .querySelectorAll(".overlay-ios")
-      .forEach((o) => o.classList.remove("open"));
-    panel.classList.add("open");
+  const overlay = document.getElementById("suspendidasOverlay");
+  if (!overlay) return;
 
-    // Verifica en qué pestaña estás y carga sus datos si están vacíos
-    if (window.vistaModalDb === "NEYOP") {
-      if (memoriaNeyop.length === 0) cargarNeyop();
-      else renderizarTablaNeyop();
-    } else {
-      if (memoriaSuspendidas.length === 0) cargarSuspendidas();
-      else renderizarTablaSuspendidas();
+  overlay.classList.toggle("open");
+
+  if (overlay.classList.contains("open")) {
+    // 🔊 Sonido de apertura
+    if (typeof window.CyberSonidos !== "undefined")
+      window.CyberSonidos.play("abrir");
+
+    // 1. Aseguramos que la vista por defecto sea la de PINESMES
+    window.vistaModalDb = "PINESMES";
+
+    // 2. 🔥 MAGIA AQUÍ: Disparamos la actualización en segundo plano.
+    // Al enviarle "true", el sistema sabe que NO debe borrar la pantalla,
+    // solo hace girar el icono de refrescar y actualiza los datos silenciosamente.
+    if (typeof window.cargarSuspendidas === "function") {
+      window.cargarSuspendidas(true);
     }
+  } else {
+    // 🔊 Sonido de cierre
+    if (typeof window.CyberSonidos !== "undefined")
+      window.CyberSonidos.play("cerrar");
   }
 };
 
