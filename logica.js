@@ -12963,6 +12963,128 @@ window.cargarSuspendidas = function (forzar = false) {
   document.body.appendChild(script);
 };
 
+// =========================================================================
+// 📡 RADAR DE VERIFICACIÓN PARA CUENTAS SUSPENDIDAS (CON MEMORIA DE ESTADO)
+// =========================================================================
+window.estadoRadarSuspendidas = window.estadoRadarSuspendidas || {};
+window.radaresSuspendidas = window.radaresSuspendidas || {};
+
+window.copiarCorreoYBuscarVerificacion = function (btn, correo, filaIndex) {
+  if (typeof haptic === "function") haptic();
+
+  // 1. COPIADO SEGURO (Conserva el HTML original del ícono para que no desaparezca)
+  const originalHTML = btn.innerHTML;
+
+  navigator.clipboard
+    .writeText(correo)
+    .then(() => {
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+      setTimeout(() => {
+        btn.innerHTML = originalHTML; // Restaura el ícono original intacto
+      }, 1500);
+    })
+    .catch((err) => {
+      const txt = document.createElement("textarea");
+      txt.value = correo;
+      document.body.appendChild(txt);
+      txt.select();
+      document.execCommand("copy");
+      txt.remove();
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+      setTimeout(() => {
+        btn.innerHTML = originalHTML;
+      }, 1500);
+    });
+
+  // 2. DISPARA EL RADAR
+  window.iniciarRadarSuspendidas(correo, filaIndex);
+};
+
+window.iniciarRadarSuspendidas = function (correoTarget, filaIndex) {
+  // Guardamos el estado global para que sobreviva a las recargas de la tabla
+  window.estadoRadarSuspendidas[filaIndex] = { status: "buscando" };
+
+  const btnVerificar = document.getElementById(`btnVerificar_${filaIndex}`);
+  const btnActivar = document.getElementById(`btnActivar_${filaIndex}`);
+
+  if (btnVerificar) {
+    btnVerificar.style.display = "inline-flex";
+    // Estado buscando con contorno verde
+    btnVerificar.style.background = "rgba(48, 209, 88, 0.15)";
+    btnVerificar.style.color = "var(--ios-green)";
+    btnVerificar.style.border = "1px solid rgba(48, 209, 88, 0.3)";
+    btnVerificar.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Buscando...`;
+    btnVerificar.removeAttribute("href");
+    btnVerificar.removeAttribute("target");
+    btnVerificar.onclick = null;
+  }
+
+  // Mantenemos oculto el botón de activar
+  if (btnActivar) {
+    btnActivar.style.display = "none";
+  }
+
+  if (window.radaresSuspendidas[filaIndex]) {
+    clearInterval(window.radaresSuspendidas[filaIndex]);
+  }
+
+  window.radaresSuspendidas[filaIndex] = setInterval(function () {
+    const cbRadarName = "cb_radar_susp_" + filaIndex + "_" + Date.now();
+
+    window[cbRadarName] = function (res) {
+      const node = document.getElementById("node_" + cbRadarName);
+      if (node) node.remove();
+      delete window[cbRadarName];
+
+      if (res && res.status === "success" && res.link) {
+        clearInterval(window.radaresSuspendidas[filaIndex]);
+
+        // Se encontró el link: Actualizamos el estado global
+        window.estadoRadarSuspendidas[filaIndex] = {
+          status: "encontrado",
+          link: res.link,
+        };
+
+        if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+
+        const currentBtnVerificar = document.getElementById(
+          `btnVerificar_${filaIndex}`,
+        );
+        const currentBtnActivar = document.getElementById(
+          `btnActivar_${filaIndex}`,
+        );
+
+        if (currentBtnVerificar) {
+          currentBtnVerificar.href = res.link;
+          currentBtnVerificar.target = "_blank";
+          currentBtnVerificar.className = "btn-ios btn-success"; // Pasa a ser verde sólido
+          currentBtnVerificar.style.background = "";
+          currentBtnVerificar.style.color = "";
+          currentBtnVerificar.style.borderColor = "transparent";
+          currentBtnVerificar.style.padding = "6px 14px";
+          currentBtnVerificar.innerHTML = `✉️ Verificar`;
+
+          currentBtnVerificar.onclick = function () {
+            if (currentBtnActivar) {
+              // Aparece mágicamente el botón de Activar
+              currentBtnActivar.style.display = "flex";
+              if (typeof haptic === "function") haptic();
+            }
+          };
+        }
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_" + cbRadarName;
+    script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerLinkVerificacion&correo=${encodeURIComponent(correoTarget)}&callback=${cbRadarName}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+  }, 4000);
+};
+
+// =========================================================================
+// 🟣 TABLA DE RENDERIZADO (RECARGA 1 CON RADAR / RECARGA 2+ DIRECTA)
+// =========================================================================
 window.renderizarTablaSuspendidas = function () {
   const contenedor = document.getElementById("contenedorTablaSuspendidas");
   const inputBuscador = document.getElementById("inputBuscarSuspendidas");
@@ -13020,13 +13142,14 @@ window.renderizarTablaSuspendidas = function () {
                     <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; letter-spacing: 0.5px;">ACTIVACIÓN</th>
                     <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #ff453a; letter-spacing: 0.5px; text-align:center;">VENCIMIENTO</th>
                     <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; letter-spacing: 0.5px;">CREADOR</th>
+                    <th style="padding: 14px 16px; font-weight: 800; background: #18181b; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1); color: #30d158; letter-spacing: 0.5px; text-align:center;">VERIFICAR</th>
                 </tr>
             </thead>
             <tbody>
     `;
 
   if (filtrados.length === 0) {
-    htmlTabla += `<tr><td colspan="7" style="text-align:center; padding:40px; color:#ff453a; font-weight:bold;">No se encontraron resultados en la base de datos.</td></tr>`;
+    htmlTabla += `<tr><td colspan="8" style="text-align:center; padding:40px; color:#ff453a; font-weight:bold;">No se encontraron resultados en la base de datos.</td></tr>`;
   } else {
     let ultimaFechaRenderizada = null;
     const pendientesIndices = filtrados
@@ -13046,6 +13169,9 @@ window.renderizarTablaSuspendidas = function () {
         ? `⏳ PENDIENTES (Hoy: ${fechaHoyCorta})`
         : cuenta.fechaActivacion;
 
+      const esRecarga1 = String(cuenta.recarga || "").trim() === "1";
+      const estadoRadar = window.estadoRadarSuspendidas[cuenta.filaIndex];
+
       if (fechaGrupo !== ultimaFechaRenderizada) {
         let botonActivarTodas = "";
         if (noTieneFecha && pendientesIndices !== "") {
@@ -13054,7 +13180,7 @@ window.renderizarTablaSuspendidas = function () {
 
         htmlTabla += `
                     <tr style="background: rgba(142, 142, 147, 0.08);">
-                        <td colspan="5" style="padding: 8px 16px; border-top: 1px solid rgba(142, 142, 147, 0.15); border-bottom: 1px solid rgba(142, 142, 147, 0.15); color: #a1a1aa; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
+                        <td colspan="6" style="padding: 8px 16px; border-top: 1px solid rgba(142, 142, 147, 0.15); border-bottom: 1px solid rgba(142, 142, 147, 0.15); color: #a1a1aa; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
                             📅 Cuentas del: ${fechaGrupo}
                         </td>
                         <td style="padding: 8px 16px; border-top: 1px solid rgba(142, 142, 147, 0.15); border-bottom: 1px solid rgba(142, 142, 147, 0.15); text-align: center;">
@@ -13085,21 +13211,27 @@ window.renderizarTablaSuspendidas = function () {
       let botonOTextoVencimiento = cuenta.fechaVencimiento || "-";
 
       if (noTieneFecha) {
-        botonOTextoVencimiento = `<button onclick="window.activarCuentaSuspendida('${cuenta.filaIndex}', this)" class="btn-ios btn-success" style="padding: 6px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0; box-shadow: 0 4px 10px rgba(48, 209, 88, 0.25); display: flex; align-items: center; justify-content: center; gap: 6px; font-weight:800; margin: 0 auto;">
-                    🚀 Activar
-                </button>`;
+        if (esRecarga1) {
+          // Recarga 1: Oculto por defecto (display: none). Aparece cuando se le da clic a "Verificar"
+          botonOTextoVencimiento = `<button id="btnActivar_${cuenta.filaIndex}" onclick="window.activarCuentaSuspendida('${cuenta.filaIndex}', this)" class="btn-ios btn-success" style="display: none; padding: 6px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0; box-shadow: 0 4px 10px rgba(48, 209, 88, 0.25); align-items: center; justify-content: center; gap: 6px; font-weight:800; margin: 0 auto; transition: all 0.3s ease;">
+                        🚀 Activar
+                    </button>`;
+        } else {
+          // Recarga 2+: Totalmente libre y visible
+          botonOTextoVencimiento = `<button id="btnActivar_${cuenta.filaIndex}" onclick="window.activarCuentaSuspendida('${cuenta.filaIndex}', this)" class="btn-ios btn-success" style="display: flex; padding: 6px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0; box-shadow: 0 4px 10px rgba(48, 209, 88, 0.25); align-items: center; justify-content: center; gap: 6px; font-weight:800; margin: 0 auto; transition: all 0.3s ease;">
+                        🚀 Activar
+                    </button>`;
+        }
       }
-      // 🔥 NUEVO: Lógica dinámica para la columna PIN
+
       let celdaPinContent = "";
       if (cuenta.pin && cuenta.pin.trim() !== "" && cuenta.pin !== "-") {
-        // Si ya hay PIN, mostramos el número y el botón de copiar
         celdaPinContent = `
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
                 <span>${cuenta.pin}</span>
                 ${svgCopy(cuenta.pin, "Copiar PIN")}
             </div>`;
       } else {
-        // Si no hay PIN, mostramos el botón de buscar individualmente
         celdaPinContent = `
             <div style="display: flex; align-items: center; justify-content: center;">
                 <button onclick="window.extraerPinIndividual('${cuenta.correo}', this)" class="btn-ios" style="padding: 4px 8px; font-size: 0.7rem; border-radius: 6px; margin: 0; background: rgba(10, 132, 255, 0.1); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.2); font-weight:700; display:flex; align-items:center; gap:4px; transition: all 0.2s;">
@@ -13111,12 +13243,39 @@ window.renderizarTablaSuspendidas = function () {
             </div>`;
       }
 
+      // 🔥 Lógica de Botón Copiar Correo y Celda Verificar:
+      let botonCopiaCorreo = "";
+      let celdaVerificarContent = "";
+
+      if (esRecarga1) {
+        // Es Recarga 1: Botón de copiado que dispara el Radar
+        botonCopiaCorreo = `<button onclick="window.copiarCorreoYBuscarVerificacion(this, '${String(cuenta.correo).replace(/'/g, "\\'")}', '${cuenta.filaIndex}')" title="Copiar correo e iniciar verificación" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.2s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'">
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                  </svg>
+                              </button>`;
+
+        // Leer el estado de la memoria para pintar la celda
+        if (estadoRadar && estadoRadar.status === "encontrado") {
+          celdaVerificarContent = `<a id="btnVerificar_${cuenta.filaIndex}" href="${estadoRadar.link}" target="_blank" class="btn-ios btn-success" style="display: inline-flex; padding: 6px 14px; font-size: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 800; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease; margin: 0 auto; border-color: transparent;" onclick="document.getElementById('btnActivar_${cuenta.filaIndex}').style.display='flex';">✉️ Verificar</a>`;
+        } else if (estadoRadar && estadoRadar.status === "buscando") {
+          celdaVerificarContent = `<a id="btnVerificar_${cuenta.filaIndex}" class="btn-ios" style="display: inline-flex; padding: 6px 14px; font-size: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 800; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease; margin: 0 auto; background: rgba(48, 209, 88, 0.15); color: var(--ios-green); border: 1px solid rgba(48, 209, 88, 0.3);"><svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Buscando...</a>`;
+        } else {
+          celdaVerificarContent = `<a id="btnVerificar_${cuenta.filaIndex}" class="btn-ios" style="display: none; padding: 6px 14px; font-size: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 800; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease; margin: 0 auto;"></a>`;
+        }
+      } else {
+        // Es Recarga 2+: Botón de copiado normal
+        botonCopiaCorreo = svgCopy(cuenta.correo, "Copiar correo");
+        celdaVerificarContent = `<span style="color: var(--text-secondary); display: block; text-align: center;">-</span>`;
+      }
+
       htmlTabla += `
                 <tr style="background: ${colorFondoFila}; transition: background 0.3s ease;">
                     <td style="padding: 12px 16px; font-weight: 600; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.03);">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
                             <span>${cuenta.correo || "-"}</span>
-                            ${svgCopy(cuenta.correo, "Copiar correo")}
+                            ${botonCopiaCorreo}
                         </div>
                     </td>
                     <td style="padding: 12px 16px; color: #30d158; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.03);">
@@ -13126,12 +13285,16 @@ window.renderizarTablaSuspendidas = function () {
                         </div>
                     </td>
                     <td style="padding: 12px 16px; color: #8e8e93; font-family: monospace; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.03);">
-    ${celdaPinContent}
-</td>
+                        ${celdaPinContent}
+                    </td>
                     <td style="padding: 12px 16px; color: #bf5af2; font-weight:800; border-bottom: 1px solid rgba(255,255,255,0.03);">${cuenta.recarga || "-"}</td>
                     <td style="padding: 12px 16px; color: #a1a1aa; border-bottom: 1px solid rgba(255,255,255,0.03);">${textoActivacion}</td>
                     <td style="padding: 8px 16px; color: #ff453a; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center;">${botonOTextoVencimiento}</td>
                     <td style="padding: 12px 16px; color: #a1a1aa; border-bottom: 1px solid rgba(255,255,255,0.03);">${cuenta.creador || "-"}</td>
+                    
+                    <td style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center;">
+                        ${celdaVerificarContent}
+                    </td>
                 </tr>
             `;
     });
