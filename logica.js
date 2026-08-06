@@ -13094,7 +13094,6 @@ window.renderizarTablaSuspendidas = function () {
 
   let filtrados = memoriaSuspendidas;
   if (texto.length >= 2) {
-    // 🔥 CORRECCIÓN: Solo busca en los teléfonos si lo que se escribió NO es un correo
     let textoLimpioNum = texto.replace(/\D/g, "");
     let esPosibleTelefono = textoLimpioNum.length >= 4 && !texto.includes("@");
 
@@ -13250,7 +13249,8 @@ window.renderizarTablaSuspendidas = function () {
       let botonCopiaCorreo = "";
       let celdaVerificarContent = "";
 
-      if (esRecarga1) {
+      // 🔥 CAMBIO CLAVE: Solo mostramos el radar si es Recarga 1 Y está Pendiente (noTieneFecha)
+      if (esRecarga1 && noTieneFecha) {
         botonCopiaCorreo = `<button onclick="window.copiarCorreoYBuscarVerificacion(this, '${String(cuenta.correo).replace(/'/g, "\\'")}', '${cuenta.filaIndex}')" title="Copiar correo e iniciar verificación" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.2s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'">
                                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -13266,6 +13266,7 @@ window.renderizarTablaSuspendidas = function () {
           celdaVerificarContent = `<a id="btnVerificar_${cuenta.filaIndex}" class="btn-ios" style="display: none; padding: 6px 14px; font-size: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 800; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease; margin: 0 auto;"></a>`;
         }
       } else {
+        // Es Recarga 2+ O LA CUENTA YA FUE ACTIVADA
         botonCopiaCorreo = svgCopy(cuenta.correo, "Copiar correo");
         celdaVerificarContent = `<span style="color: var(--text-secondary); display: block; text-align: center;">-</span>`;
       }
