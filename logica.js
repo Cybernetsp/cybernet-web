@@ -13083,6 +13083,43 @@ window.iniciarRadarSuspendidas = function (correoTarget, filaIndex) {
 };
 
 // =========================================================================
+// 🚀 NUEVO: CONTROL DINÁMICO DEL BOTÓN "ACTIVAR TODAS"
+// =========================================================================
+window.ejecutarActivarTodasDinamico = function (btn) {
+  if (typeof haptic === "function") haptic();
+  let idsValidos = [];
+
+  // Escaneamos todos los botones individuales de "Activar" que existan en la tabla
+  let botonesActivar = document.querySelectorAll('[id^="btnActivar_"]');
+
+  botonesActivar.forEach((b) => {
+    // Si el botón está VISIBLE (no tiene display: none), significa que:
+    // 1. Es una Recarga 2+ (siempre visible)
+    // 2. O es una Recarga 1 que YA fue verificada por el radar
+    if (b.style.display !== "none") {
+      let idFila = b.id.split("_")[1];
+      idsValidos.push(idFila);
+    }
+  });
+
+  if (idsValidos.length === 0) {
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-orange);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> <span>No hay cuentas verificadas o listas para activar.</span></div>`,
+      );
+    } else {
+      alert("No hay cuentas verificadas o de Recarga 2+ listas para activar.");
+    }
+    return;
+  }
+
+  // Ejecutamos la activación en lote original pasándole SOLO los IDs que pasaron el filtro
+  if (typeof window.activarMultiplesCuentasSuspendidas === "function") {
+    window.activarMultiplesCuentasSuspendidas(idsValidos.join(","), btn);
+  }
+};
+
+// =========================================================================
 // 🟣 TABLA DE RENDERIZADO (RECARGA 1 CON RADAR / RECARGA 2+ DIRECTA)
 // =========================================================================
 window.renderizarTablaSuspendidas = function () {
@@ -13157,10 +13194,6 @@ window.renderizarTablaSuspendidas = function () {
     htmlTabla += `<tr><td colspan="8" style="text-align:center; padding:40px; color:#ff453a; font-weight:bold;">No se encontraron resultados en la base de datos.</td></tr>`;
   } else {
     let ultimaFechaRenderizada = null;
-    const pendientesIndices = filtrados
-      .filter((c) => !c.fechaActivacion || c.fechaActivacion === "")
-      .map((c) => c.filaIndex)
-      .join(",");
 
     filtrados.forEach((cuenta, idx) => {
       const esFilaPar = idx % 2 === 0;
@@ -13179,8 +13212,9 @@ window.renderizarTablaSuspendidas = function () {
 
       if (fechaGrupo !== ultimaFechaRenderizada) {
         let botonActivarTodas = "";
-        if (noTieneFecha && pendientesIndices !== "") {
-          botonActivarTodas = `<button onclick="window.activarMultiplesCuentasSuspendidas('${pendientesIndices}', this)" class="btn-ios btn-success" style="padding: 6px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0; box-shadow: 0 4px 10px rgba(48, 209, 88, 0.25); display: flex; align-items: center; justify-content: center; gap: 6px; font-weight:800; margin: 0 auto; white-space: nowrap;">🚀 Activar Todas</button>`;
+        if (noTieneFecha) {
+          // 🔥 AQUÍ SE LLAMA A LA NUEVA FUNCIÓN DINÁMICA 🔥
+          botonActivarTodas = `<button onclick="window.ejecutarActivarTodasDinamico(this)" class="btn-ios btn-success" style="padding: 6px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0; box-shadow: 0 4px 10px rgba(48, 209, 88, 0.25); display: flex; align-items: center; justify-content: center; gap: 6px; font-weight:800; margin: 0 auto; white-space: nowrap;">🚀 Activar Todas</button>`;
         }
 
         htmlTabla += `
@@ -13249,7 +13283,6 @@ window.renderizarTablaSuspendidas = function () {
       let botonCopiaCorreo = "";
       let celdaVerificarContent = "";
 
-      // 🔥 CAMBIO CLAVE: Solo mostramos el radar si es Recarga 1 Y está Pendiente (noTieneFecha)
       if (esRecarga1 && noTieneFecha) {
         botonCopiaCorreo = `<button onclick="window.copiarCorreoYBuscarVerificacion(this, '${String(cuenta.correo).replace(/'/g, "\\'")}', '${cuenta.filaIndex}')" title="Copiar correo e iniciar verificación" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.2s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'">
                                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -13266,7 +13299,6 @@ window.renderizarTablaSuspendidas = function () {
           celdaVerificarContent = `<a id="btnVerificar_${cuenta.filaIndex}" class="btn-ios" style="display: none; padding: 6px 14px; font-size: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 800; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease; margin: 0 auto;"></a>`;
         }
       } else {
-        // Es Recarga 2+ O LA CUENTA YA FUE ACTIVADA
         botonCopiaCorreo = svgCopy(cuenta.correo, "Copiar correo");
         celdaVerificarContent = `<span style="color: var(--text-secondary); display: block; text-align: center;">-</span>`;
       }
