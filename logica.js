@@ -7394,6 +7394,9 @@ function renderDashboard() {
   let pM = 30,
     pNom = 16,
     pNeg = 54;
+  let ratioAhorro = 0.7, 
+    ratioOtros = 0.3; // Valores por defecto (70/30)
+
   const m = document.getElementById("appleMonthSelect")
     ? document.getElementById("appleMonthSelect").value
     : "";
@@ -7403,35 +7406,44 @@ function renderDashboard() {
 
   if (m === "MAYO") {
     if (dia !== "TODOS" && parseInt(dia) <= 15) {
-      pM = 30;
-      pNom = 15;
-      pNeg = 55;
+      pM = 30; pNom = 15; pNeg = 55;
     } else if (dia === "TODOS") {
-      pM = 29;
-      pNom = 16;
-      pNeg = 55;
+      pM = 29; pNom = 16; pNeg = 55;
+    }
+  } else if (["JULIO"].includes(m)) {
+    pM = 30; pNeg = 54; pNom = 16;
+  } else if (m === "AGOSTO") {
+    // 🗓️ LÓGICA DE AGOSTO: A partir del día 9 cambian las reglas
+    if (dia !== "TODOS" && parseInt(dia) < 9) {
+      pM = 30; pNeg = 54; pNom = 16;
+      ratioAhorro = 0.7; ratioOtros = 0.3;
+    } else {
+      pM = 28; pNeg = 55; pNom = 17;
+      ratioAhorro = 0.5; ratioOtros = 0.5;
     }
   } else if (
-    [
-      "JULIO",
-      "AGOSTO",
-      "SEPTIEMBRE",
-      "OCTUBRE",
-      "NOVIEMBRE",
-      "DICIEMBRE",
-    ].includes(m)
+    ["SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"].includes(m)
   ) {
-    pM = 30;
-    pNeg = 54;
-    pNom = 16;
+    // 🗓️ REGLA NUEVA FIJA: Meses posteriores a agosto
+    pM = 28; pNeg = 55; pNom = 17;
+    ratioAhorro = 0.5; ratioOtros = 0.5;
   }
 
+  // Actualizar porcentajes principales en HTML
   if (document.getElementById("lblPorcMio"))
     document.getElementById("lblPorcMio").innerText = pM;
   if (document.getElementById("lblPorcNegocio"))
     document.getElementById("lblPorcNegocio").innerText = pNeg;
   if (document.getElementById("lblPorcNomina"))
     document.getElementById("lblPorcNomina").innerText = pNom;
+
+  // Actualizar textos de Ahorro y Otros en HTML
+  if (document.getElementById("lblTextoAhorro")) {
+    document.getElementById("lblTextoAhorro").innerText = `↳ Ahorro (${Math.round(ratioAhorro * 100)}%)`;
+  }
+  if (document.getElementById("lblTextoOtros")) {
+    document.getElementById("lblTextoOtros").innerText = `↳ Otros / Libre (${Math.round(ratioOtros * 100)}%)`;
+  }
 
   let base = ventasBrutasReales;
 
@@ -7456,8 +7468,8 @@ function renderDashboard() {
   // 💰 CÁLCULOS CUADRO 2: MI GANANCIA, AHORRO Y TOTAL (+ JEISSON)
   let miGananciaNeta =
     Math.round(base * (pM / 100)) + (sumaIngresoExtra - sumaJeisson);
-  let ahorro70 = Math.round(miGananciaNeta * 0.7);
-  let otros30 = miGananciaNeta - ahorro70; // Previene desfases de centavos por redondeo
+  let ahorroCalculado = Math.round(miGananciaNeta * ratioAhorro);
+  let otrosCalculado = miGananciaNeta - ahorroCalculado; // Previene desfases de centavos por redondeo
 
   if (document.getElementById("valProyMio")) {
     document.getElementById("valProyMio").innerText =
@@ -7465,11 +7477,11 @@ function renderDashboard() {
   }
   if (document.getElementById("valGananciaAhorro")) {
     document.getElementById("valGananciaAhorro").innerText =
-      formatMoneda(ahorro70);
+      formatMoneda(ahorroCalculado);
   }
   if (document.getElementById("valGananciaOtros")) {
     document.getElementById("valGananciaOtros").innerText =
-      formatMoneda(otros30);
+      formatMoneda(otrosCalculado);
   }
 
   currentMiGananciaBruta = miGananciaNeta + sumaJeisson;
