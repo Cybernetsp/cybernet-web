@@ -339,28 +339,25 @@ const listaPlataformasVenta = [
 
 // Memoria global temporal para las ventas flash
 window.stockVentasPrecargado = null;
+window.distribuidoresPrecargados = null; // 🔥 NUEVO: Memoria para saldos
 let contadorFilasVenta = 0;
 
 function toggleVentasPanel() {
-  // Opcional: mantenemos solo la vibración táctil para móviles
   if (navigator.vibrate) navigator.vibrate(10);
 
   const overlay = document.getElementById("ventasOverlay");
   overlay.classList.toggle("open");
 
   if (overlay.classList.contains("open")) {
-    // 🔊 NUEVO: Reproducir sonido de apertura
     if (typeof window.CyberSonidos !== "undefined")
       window.CyberSonidos.play("abrir");
 
-    // Lógica original de reseteo del formulario
     document.getElementById("formGenerarVenta").reset();
     document.getElementById("listaServiciosVentaDinamica").innerHTML = "";
     contadorFilasVenta = 0;
     window.ultimoMesesSeleccionado = "1";
-    window.cuentasNetflixClienteActivo = []; // 🧹 Limpieza de memoria
+    window.cuentasNetflixClienteActivo = [];
 
-    // Agrega la primera fila obligatoria
     agregarFilaServicioVenta();
 
     setTimeout(() => document.getElementById("ventaTelefono").focus(), 150);
@@ -371,65 +368,79 @@ function toggleVentasPanel() {
       optNomina.value = "NÓMINA: " + staffActivo.toUpperCase();
     }
 
-    // 🔒 BLOQUEAR EL BOTÓN MIENTRAS SE DESCARGA LA BASE DE DATOS
+    // 🔒 BLOQUEAR EL BOTÓN MIENTRAS SE DESCARGA LA BASE DE DATOS Y SALDOS
     const btnSubmit = document.getElementById("btnSubmitVentaV2");
     if (btnSubmit) {
       btnSubmit.disabled = true;
       btnSubmit.style.opacity = "0.5";
       btnSubmit.style.cursor = "not-allowed";
-      btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Sincronizando BD...`;
+      btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Sincronizando BD y Saldos...`;
     }
 
-    // 🔥 NUEVO: INICIAMOS LA PRE-CARGA SILENCIOSA 🔥
+    // 🔥 INICIAMOS LA PRE-CARGA SILENCIOSA DUAL 🔥
     preCargarInventarioVentas();
   } else {
-    // 🔊 NUEVO: Reproducir sonido de cierre cuando el panel se oculta
     if (typeof window.CyberSonidos !== "undefined")
       window.CyberSonidos.play("cerrar");
   }
 }
 
-// 🔥 NUEVA FUNCIÓN: Descarga el stock al abrir el panel y libera el botón
+// 🔥 NUEVA FUNCIÓN DUAL: Descarga el stock y los saldos al abrir el panel
 function preCargarInventarioVentas() {
-  const cbName = "cb_prefetch_" + Date.now();
-  window[cbName] = function (res) {
-    const btnSubmit = document.getElementById("btnSubmitVentaV2");
+  let inventarioListo = false;
+  let distrisListos = false;
 
-    if (res && res.status === "success") {
-      // Guardamos el inventario en la RAM del navegador
-      window.stockVentasPrecargado = res.data;
-
-      // Lanzamos la notificación superior
+  function comprobarDesbloqueoBoton() {
+    if (inventarioListo && distrisListos) {
+      const btnSubmit = document.getElementById("btnSubmitVentaV2");
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.style.opacity = "1";
+        btnSubmit.style.cursor = "pointer";
+        btnSubmit.innerHTML = "Realizar Venta";
+      }
       if (typeof triggerToast === "function") {
         triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Base de datos sincronizada. Lista para venta flash.</span></div>`,
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Base de datos y saldos listos.</span></div>`,
         );
       }
     }
+  }
 
-    // 🟢 DESBLOQUEAR EL BOTÓN DE VENTA (Se habilita sí o sí para no dejar trabado al vendedor)
-    if (btnSubmit) {
-      btnSubmit.disabled = false;
-      btnSubmit.style.opacity = "1";
-      btnSubmit.style.cursor = "pointer";
-      btnSubmit.innerHTML = "Realizar Venta";
-    }
-
-    // Limpieza del script inyectado
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
+  // 1. Descargar Inventario
+  const cbInv = "cb_prefetch_inv_" + Date.now();
+  window[cbInv] = function (res) {
+    if (res && res.status === "success")
+      window.stockVentasPrecargado = res.data;
+    inventarioListo = true;
+    comprobarDesbloqueoBoton();
+    const node = document.getElementById("node_" + cbInv);
+    if (node) node.remove();
+    delete window[cbInv];
   };
+  const scriptInv = document.createElement("script");
+  scriptInv.id = "node_" + cbInv;
+  scriptInv.src = `${GOOGLE_SCRIPT_URL}?action=descargarInventarioBuscador&versionCliente=0&callback=${cbInv}&_ts=${Date.now()}`;
+  document.body.appendChild(scriptInv);
 
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  // Reutilizamos la ruta del buscador global que es la más optimizada y trae todo el inventario
-  script.src = `${GOOGLE_SCRIPT_URL}?action=descargarInventarioBuscador&versionCliente=0&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
+  // 2. Descargar Distribuidores
+  const cbDist = "cb_prefetch_dist_" + Date.now();
+  window[cbDist] = function (res) {
+    if (res && res.status === "success")
+      window.distribuidoresPrecargados = res.data;
+    distrisListos = true;
+    comprobarDesbloqueoBoton();
+    const node = document.getElementById("node_" + cbDist);
+    if (node) node.remove();
+    delete window[cbDist];
+  };
+  const scriptDist = document.createElement("script");
+  scriptDist.id = "node_" + cbDist;
+  scriptDist.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDistribuidores&callback=${cbDist}&_ts=${Date.now()}`;
+  document.body.appendChild(scriptDist);
 }
 
 function sincronizarMesesVenta(selectElement, idFilaOrigen) {
-  // Lógica inteligente: Si tocas el primer mes, todos los demás heredan
   const container = document.getElementById("listaServiciosVentaDinamica");
   const primeraFila = container.querySelector(".vta-row-item");
 
@@ -442,14 +453,11 @@ function sincronizarMesesVenta(selectElement, idFilaOrigen) {
   }
 }
 
-// Interceptor del Modal para escribir en la fila correcta
 function seleccionarCuentaModalNet(correo, perfil, cliente) {
   if (typeof haptic === "function") haptic();
-
   if (window.targetInputRenoDinamico) {
     window.targetInputRenoDinamico.value = correo + " | Perfil: " + perfil;
   }
-
   const inputNombre = document.getElementById("ventaNombre");
   if (inputNombre && inputNombre.value.trim() === "" && cliente !== "N/A") {
     inputNombre.value = cliente;
@@ -490,8 +498,7 @@ function ejecutarCreacionVentaLocal(e) {
   let bloquesFlash = [];
   let asignacionesFlashBackend = {};
 
-  // 🛡️ REGLA DE ORO: Si pagan con Saldo o Nómina, apagamos la Venta Flash.
-  // Necesitamos que Sheets calcule el Saldo exacto que le queda al distribuidor.
+  // 🛡️ REGLA DE ORO: Si pagan con Saldo o Nómina, apagamos la Venta Flash
   if (
     banco === "Saldo Distribuidor" ||
     banco.toUpperCase().includes("NÓMINA")
@@ -506,7 +513,7 @@ function ejecutarCreacionVentaLocal(e) {
 
       if (idPlat === "SALDO") {
         esRecargaSaldoPura = true;
-        ventaFlashPosible = false; // Las recargas de saldo van por la ruta clásica
+        ventaFlashPosible = false;
         bonoElegidoGlobal = fila.querySelector(".select-bono-vta").value;
         plataformasAdquiridas = true;
       } else {
@@ -527,7 +534,7 @@ function ejecutarCreacionVentaLocal(e) {
         let prefixSheets = esRenovacionActiva ? "RENO: " : "";
         if (esRenovacionActiva) {
           esR = true;
-          ventaFlashPosible = false; // Las renovaciones van por la ruta clásica
+          ventaFlashPosible = false;
         }
 
         if (idPlat === "NETFLIX" && esRenovacionActiva) {
@@ -557,7 +564,7 @@ function ejecutarCreacionVentaLocal(e) {
         // =========================================================================
         if (ventaFlashPosible) {
           if (!window.stockVentasPrecargado) {
-            ventaFlashPosible = false; // El caché falló, abortamos flash
+            ventaFlashPosible = false;
           } else {
             let libresPlataforma = window.stockVentasPrecargado.filter(
               (c) =>
@@ -622,7 +629,7 @@ function ejecutarCreacionVentaLocal(e) {
               asignacionesFlashBackend[platNombreScript] =
                 cuentaEncontrada[0].correo;
             } else {
-              ventaFlashPosible = false; // Nos quedamos sin stock en la RAM
+              ventaFlashPosible = false;
             }
           }
         }
@@ -638,7 +645,7 @@ function ejecutarCreacionVentaLocal(e) {
   const btnSubmit = document.getElementById("btnSubmitVentaV2");
 
   // =========================================================================
-  // 💼 CASO A: RECARGA DE SALDO DISTRIBUIDOR (Ruta Clásica)
+  // 💼 CASO A: RECARGA DE SALDO DISTRIBUIDOR
   // =========================================================================
   if (esRecargaSaldoPura) {
     let avisoRecarga = `❓ ¿CONFIRMAR INYECCIÓN DE SALDO? 💼\n\n👤 Distribuidor: ${nombre || telefono}\n🏦 Cuenta Origen: ${banco}\n💰 Monto Recarga: $${cantidad.toLocaleString("es-CO")}\n🎁 Bono Aplicado: ${bonoElegidoGlobal}%\n\n¿Estás seguro de que los datos son correctos?`;
@@ -695,7 +702,6 @@ function ejecutarCreacionVentaLocal(e) {
   if (ventaFlashPosible && bloquesFlash.length > 0) {
     if (typeof haptic === "function") haptic();
 
-    // 1. DIBUJAR LA FICHA COMERCIAL INSTANTÁNEA
     let nombreCliente = nombre !== "" ? nombre : "";
     let intro = `🌟 *¡Hola ${nombreCliente}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:`;
     let cuerpo = "";
@@ -732,7 +738,8 @@ function ejecutarCreacionVentaLocal(e) {
     });
 
     let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
-    const mensajeFinalFicha =
+
+    let mensajeFinalFicha =
       intro +
       cuerpo +
       soporte +
@@ -742,7 +749,6 @@ function ejecutarCreacionVentaLocal(e) {
     window.textoSaldoRevendedorGlobal = "";
     if (btnSaldo) btnSaldo.style.display = "none";
 
-    // Mostramos la ventana de éxito de inmediato
     document.getElementById("ventasOverlay").classList.remove("open");
     document.getElementById("outputTextoVentaFicha").value = mensajeFinalFicha;
     document.getElementById("ventaGeneradaModalOverlay").classList.add("open");
@@ -752,7 +758,6 @@ function ejecutarCreacionVentaLocal(e) {
     contadorFilasVenta = 0;
     agregarFilaServicioVenta();
 
-    // 2. SINCRONIZACIÓN FANTASMA CON GOOGLE SHEETS
     const callbackName = "cb_venta_ghost_" + Date.now();
     window[callbackName] = function (res) {
       const scriptNode = document.getElementById("node_" + callbackName);
@@ -762,8 +767,7 @@ function ejecutarCreacionVentaLocal(e) {
       if (res && res.status === "error") {
         alert(
           "🚨 ERROR GRAVE EN SEGUNDO PLANO 🚨\nLa ficha se generó, pero Sheets falló al guardar los datos:\n\n" +
-            res.message +
-            "\n\nPor favor, ingresa los datos manualmente en el Excel para no perder la venta.",
+            res.message,
         );
       }
 
@@ -806,7 +810,7 @@ function ejecutarCreacionVentaLocal(e) {
     document.body.appendChild(script);
   }
   // 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢
-  // RUTA 2: RUTA CLÁSICA (Espera Backend)
+  // RUTA 2: RUTA CLÁSICA (Espera Backend, ej: para renovaciones o saldos)
   // 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢 🐢
   else {
     btnSubmit.disabled = true;
@@ -819,6 +823,14 @@ function ejecutarCreacionVentaLocal(e) {
       const scriptNode = document.getElementById("node_" + callbackName);
       if (scriptNode) scriptNode.remove();
       delete window[callbackName];
+
+      if (res && res.status === "error") {
+        alert(
+          "🚨 ERROR GRAVE EN SEGUNDO PLANO 🚨\nLa ficha se generó, pero Sheets falló al guardar los datos:\n\n" +
+            res.message,
+        );
+        return;
+      }
 
       if (res && res.status === "success") {
         let bloques = res.bloques || [];
@@ -861,16 +873,20 @@ function ejecutarCreacionVentaLocal(e) {
         });
 
         let soporte = `\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.`;
-        const mensajeFinalFicha =
+
+        // 🧼 Ficha limpia de saldos
+        let mensajeFinalFicha =
           intro +
           cuerpo +
           soporte +
           `\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
+        // 🔥 Botón Naranja de Notificación Mayorista Exclusivo
         let btnSaldo = document.getElementById("btnCopiarSaldoRevendedor");
         if (res.esRevendedor) {
           let montoDescontado = res.valorCobrado || 0;
           let distribuidorNombre = res.nombreRevendedor || telefono;
+
           window.textoSaldoRevendedorGlobal = `🔔 *NOTIFICACIÓN DE SALDO CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${distribuidorNombre}\n📉 *Débito por compra:* -$${Math.round(montoDescontado).toLocaleString("es-CO")}\n💰 *Saldo Disponible:* $${Math.round(res.saldoQuedante).toLocaleString("es-CO")}\n────────────────────\n✨ _¡Gracias por tu compra mayorista en Cybernet!_`;
           if (btnSaldo) btnSaldo.style.display = "flex";
         } else {
@@ -902,7 +918,11 @@ function ejecutarCreacionVentaLocal(e) {
     const script = document.createElement("script");
     script.id = "node_" + callbackName;
     const mesesParam = encodeURIComponent(JSON.stringify(memoriaMeses));
-    script.src = `${GOOGLE_SCRIPT_URL}?action=registrarVentaDirectaV13&nombre=${encodeURIComponent(nombre)}&telefono=${encodeURIComponent(telefono)}&descripcion=${encodeURIComponent(descripcionFinalSheets)}&correoReno=${encodeURIComponent(correoNetflixReno)}&cantidad=${encodeURIComponent(cantidad)}&banco=${encodeURIComponent(banco)}&meses=${mesesParam}&callback=${callbackName}&_ts=${Date.now()}`;
+    const asignacionParam = encodeURIComponent(
+      JSON.stringify(asignacionesFlashBackend),
+    );
+
+    script.src = `${GOOGLE_SCRIPT_URL}?action=registrarVentaDirectaV13&nombre=${encodeURIComponent(nombre)}&telefono=${encodeURIComponent(telefono)}&descripcion=${encodeURIComponent(descripcionFinalSheets)}&correoReno=${encodeURIComponent(correoNetflixReno)}&cantidad=${encodeURIComponent(cantidad)}&banco=${encodeURIComponent(banco)}&meses=${mesesParam}&asignacionFlash=${asignacionParam}&callback=${callbackName}&_ts=${Date.now()}`;
     document.body.appendChild(script);
   }
 }
