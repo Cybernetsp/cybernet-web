@@ -449,7 +449,6 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
 
   actualizarSaldoUI();
 
-  // 🔥 Muestra un estado de carga mientras trae los precios de Sheets
   const shopContainer = document.getElementById("shopCatalogContainer");
   if (shopContainer) {
     shopContainer.innerHTML = `
@@ -459,7 +458,7 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
       </div>`;
   }
 
-  // Llamamos a la nueva función que trae los precios en vivo y luego renderiza
+  // Carga precios y almacena en caché local
   cargarPreciosEnTienda();
 
   cargarDatosFinancierosYAlertas(telefono);
