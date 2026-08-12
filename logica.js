@@ -10682,39 +10682,48 @@ window.guardarCuentaConfirmadaNetflix = function (
 const APP_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 
+// =========================================================================
+// 💸 WIDGET PAGOS BRE-B (CORREGIDO Y BLINDADO)
+// =========================================================================
 function cargarPagosBreB() {
   const script = document.createElement("script");
   const callbackName =
     "jsonpCallbackBreB_" + Math.round(100000 * Math.random());
-  const fechaSeleccionada = document.getElementById("breb-fecha").value;
+  
+  const inputFecha = document.getElementById("breb-fecha");
+  const fechaSeleccionada = inputFecha ? inputFecha.value : "";
 
   const contenedor = document.getElementById("breb-lista");
-  contenedor.innerHTML = `<div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; padding: 40px 0;">Buscando pagos...</div>`;
+  if (contenedor) {
+    contenedor.innerHTML = `<div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; padding: 40px 0;">Buscando pagos...</div>`;
+  }
 
-  // 🔥 NUEVO: SEGURO ANTI-CUELGUES (Si tarda más de 12 segundos, cancela)
+  // ⏱️ SEGURO ANTI-CUELGUES (12 segundos)
   const seguroDeTiempo = setTimeout(() => {
     if (window[callbackName]) {
-      contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Google no responde.<br>Presiona actualizar de nuevo.</div>`;
+      if (contenedor) {
+        contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Google no responde.<br>Presiona actualizar de nuevo.</div>`;
+      }
       const icono = document.getElementById("icon-refresh-breb");
       if (icono) icono.classList.remove("spin-breb-anim");
 
-      // Limpiamos la basura para que no se trabe la página
       delete window[callbackName];
       if (document.body.contains(script)) document.body.removeChild(script);
     }
-  }, 12000); // 12000 milisegundos = 12 segundos
+  }, 12000);
 
   window[callbackName] = function (data) {
-    clearTimeout(seguroDeTiempo); // Si Google responde rápido, cancelamos la alarma de 12 segundos
-    contenedor.innerHTML = "";
+    clearTimeout(seguroDeTiempo);
+    if (contenedor) contenedor.innerHTML = "";
 
     const icono = document.getElementById("icon-refresh-breb");
     if (icono) icono.classList.remove("spin-breb-anim");
 
-    if (data.status === "success") {
-      if (data.data.length > 0) {
+    if (data && data.status === "success") {
+      if (data.data && data.data.length > 0) {
         data.data.forEach((pago) => {
-          contenedor.innerHTML += `
+          if (contenedor) {
+            contenedor.innerHTML += `
               <div class="breb-card">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <span style="color: #30d158; font-weight: 800; font-size: 17px;">+$${pago.monto}</span>
@@ -10728,21 +10737,27 @@ function cargarPagosBreB() {
                 </div>
               </div>
             `;
+          }
         });
       } else {
-        contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 12px; padding: 30px 0;">No se detectaron pagos en esta fecha.</div>`;
+        if (contenedor) {
+          contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 12px; padding: 30px 0;">No se detectaron pagos en esta fecha.</div>`;
+        }
       }
     } else {
-      contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Error de red:<br>${data.message}</div>`;
+      if (contenedor) {
+        contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">Error de red:<br>${data ? data.message : "Sin respuesta"}</div>`;
+      }
     }
 
     if (document.body.contains(script)) document.body.removeChild(script);
     delete window[callbackName];
   };
 
+  // 🔥 URL CORREGIDA USANDO LA VARIABLE GLOBAL DEL PROYECTO
   const urlFinal = fechaSeleccionada
-    ? `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&fechaBusqueda=${fechaSeleccionada}&callback=${callbackName}`
-    : `${APP_SCRIPT_URL_BREB}?action=obtenerPagosBreB&callback=${callbackName}`;
+    ? `${GOOGLE_SCRIPT_URL}?action=obtenerPagosBreB&fechaBusqueda=${encodeURIComponent(fechaSeleccionada)}&callback=${callbackName}`
+    : `${GOOGLE_SCRIPT_URL}?action=obtenerPagosBreB&callback=${callbackName}`;
 
   script.src = urlFinal;
   document.body.appendChild(script);
