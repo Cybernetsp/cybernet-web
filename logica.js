@@ -2669,14 +2669,16 @@ function cerrarModalVentaGenerada() {
   document.getElementById("ventaGeneradaModalOverlay").classList.remove("open");
 }
 
-// 🔄 FUNCIÓN PRINCIPAL DE GARANTÍAS (ACTUALIZA EL DOCK Y EL BANNER MAC)
+// 🔄 FUNCIÓN PRINCIPAL DE GARANTÍAS (ACTUALIZA EL DOCK Y EL BANNER MAC) BLINDADA
 function actualizarBadgeGarantias() {
-  const oldScript = document.getElementById("cyber_badge_garantias_node");
-  if (oldScript) oldScript.remove();
-
-  window.procesarBadgeGarantias = function (res) {
-    const scriptNode = document.getElementById("cyber_badge_garantias_node");
+  // Creamos un nombre de callback único e irrepetible
+  const cbName = "cb_badge_gar_" + Date.now() + Math.floor(Math.random() * 1000);
+  
+  window[cbName] = function (res) {
+    // Limpieza de memoria instantánea
+    const scriptNode = document.getElementById("node_" + cbName);
     if (scriptNode) scriptNode.remove();
+    delete window[cbName];
 
     let badge = document.getElementById("badgeGarantiasCount");
 
@@ -2695,17 +2697,15 @@ function actualizarBadgeGarantias() {
       }
 
       // 2. Dispara el Banner Mac flotante con el desglose por plataforma
-      mostrarAlertaGarantiasMac(data);
+      if (typeof mostrarAlertaGarantiasMac === "function") {
+        mostrarAlertaGarantiasMac(data);
+      }
     }
-    delete window.procesarBadgeGarantias;
   };
 
   const scriptElement = document.createElement("script");
-  scriptElement.id = "cyber_badge_garantias_node";
-  scriptElement.src =
-    GOOGLE_SCRIPT_URL +
-    "?action=obtenerGarantias&callback=procesarBadgeGarantias&_ts=" +
-    Date.now();
+  scriptElement.id = "node_" + cbName;
+  scriptElement.src = `${GOOGLE_SCRIPT_URL}?action=obtenerGarantias&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(scriptElement);
 }
 
