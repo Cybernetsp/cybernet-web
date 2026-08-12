@@ -39,7 +39,7 @@
   });
 })();
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
+  "https://script.google.com/macros/s/AKfycbxHtiUBm_EAUYkbcj7r7rP7rCxCI8dQg17eZOjM8cNM4Xp3gUumbGvUFLLQBdBWYWe-/exec";
 
 let timerInterval = null;
 let autoRefreshCodesInterval = null;
@@ -5460,7 +5460,7 @@ function ejecutarAutoPulsoTiempo() {
   sessionStorage.setItem("cyber_last_sync_time", ahora);
 
   fetch(
-    "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec",
+    "https://script.google.com/macros/s/AKfycbxHtiUBm_EAUYkbcj7r7rP7rCxCI8dQg17eZOjM8cNM4Xp3gUumbGvUFLLQBdBWYWe-/exec",
     {
       method: "POST",
       mode: "no-cors",
@@ -5508,7 +5508,7 @@ function ejecutarCierreSesionDefinitivo() {
       "Vendedor";
 
     fetch(
-      "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec",
+      "https://script.google.com/macros/s/AKfycbxHtiUBm_EAUYkbcj7r7rP7rCxCI8dQg17eZOjM8cNM4Xp3gUumbGvUFLLQBdBWYWe-/exec",
       {
         method: "POST",
         mode: "no-cors",
@@ -10691,7 +10691,7 @@ window.guardarCuentaConfirmadaNetflix = function (
 };
 // Variable con la URL de tu script (Asegúrate de que sea la URL de tu nueva implementación)
 const APP_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
+  "https://script.google.com/macros/s/AKfycbxHtiUBm_EAUYkbcj7r7rP7rCxCI8dQg17eZOjM8cNM4Xp3gUumbGvUFLLQBdBWYWe-/exec";
 
 function cargarPagosBreB() {
   const script = document.createElement("script");
@@ -11044,7 +11044,7 @@ window.ejecutarDescartarGarantia = function (
 let memoriaBuscador = [];
 let plataformaActivaBuscador = "";
 const URL_SCRIPT_CYBERNET =
-  "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
+  "https://script.google.com/macros/s/AKfycbxHtiUBm_EAUYkbcj7r7rP7rCxCI8dQg17eZOjM8cNM4Xp3gUumbGvUFLLQBdBWYWe-/exec";
 
 function convertirFechaAObjetoLupa(strFecha) {
   if (!strFecha) return 0;
