@@ -1019,7 +1019,7 @@ function actualizarCarritoUI() {
 }
 
 // =========================================================================
-// 🛒 PROCESAR COMPRA (CON ESCUDO INTEGRAL DE 1 MINUTO - ANTI-DUPLICADOS)
+// 🛒 PROCESAR COMPRA MAYORISTA (DIRECTO Y SIN AVISOS DE DEMORA)
 // =========================================================================
 function procesarCompraDistribuidor() {
   haptic();
@@ -1079,13 +1079,17 @@ function procesarCompraDistribuidor() {
     }
 
     bloquearScroll();
-
-    // 🔒 Apagar el botón inmediatamente para congelar doble-clics
     btn.disabled = true;
-    btn.innerHTML = `<span class="spin-anim" style="display:inline-block; margin-right:8px;">⏳</span>Despachando...`;
+    btn.innerHTML = `<span class="spin-anim" style="display:inline-block; margin-right:8px;">⏳</span>Procesando venta...`;
 
     const cbCheckout = "cb_chk_" + Date.now();
+
+    // Callback único: Recibe la respuesta de Google y abre el cuadro de la venta directamente
     window[cbCheckout] = function (res) {
+      const scriptNode = document.getElementById("node_" + cbCheckout);
+      if (scriptNode) scriptNode.remove();
+      delete window[cbCheckout];
+
       btn.disabled = false;
       btn.innerHTML = "CONFIRMAR COMPRA";
       actualizarCarritoUI();
@@ -1170,40 +1174,31 @@ function procesarCompraDistribuidor() {
         actualizarSaldoUI();
         cargarStockEnTienda();
         cargarDatosFinancierosYAlertas(telefonoDistribuidor);
-
-        if (res.bloques && res.bloques.length > 0) {
-          const searchInput = document.getElementById("inputCasilleroSearch");
-          if (searchInput) searchInput.value = res.bloques[0].correo;
-        }
       } else {
         desbloquearScroll();
-        triggerToast("❌ Error: " + (res ? res.message : "Fallo de red."));
+        triggerToast(
+          "❌ Error: " + (res ? res.message : "Fallo al procesar la venta."),
+        );
       }
     };
 
-    let mapaParametros = {
+    // Petición directa sin temporizadores que la cancelen
+    const scriptElement = document.createElement("script");
+    scriptElement.id = "node_" + cbCheckout;
+
+    let queryParams = new URLSearchParams({
       action: "registrarVentaDistriB2B",
       nombre: nombreParaSheets,
       telefono: telefonoDistribuidor,
       descripcion: descripcionLote,
       correoReno: correoRenoGlobal,
       cantidad: totalCost,
-    };
+      callback: cbCheckout,
+      _ts: Date.now(),
+    });
 
-    // 🔥 MODIFICACIÓN SOLICITADA: Escudo de tiempo extendido a 1 minuto exacto (60,000 ms)
-    ejecutarPeticionConTimeout(
-      GOOGLE_SCRIPT_URL,
-      mapaParametros,
-      cbCheckout,
-      60000,
-      () => {
-        btn.disabled = false;
-        btn.innerHTML = "CONFIRMAR COMPRA";
-        alert(
-          "⚠️ El servidor está demorando más de lo normal. Por favor, revisa tu 'Historial' o el 'Buscador de Cuentas' en un minuto para verificar si la cuenta se alcanzó a emitir.",
-        );
-      },
-    );
+    scriptElement.src = `${GOOGLE_SCRIPT_URL}?${queryParams.toString()}`;
+    document.body.appendChild(scriptElement);
   }, 50);
 }
 
