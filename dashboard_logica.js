@@ -285,8 +285,7 @@ function cargarPagosBreB() {
   if (buscador) buscador.value = "";
 
   // ⚠️ Consulta a PHP (Reemplaza la lógica de Google Sheets)
-  fetch(
-    "[https://api.cybernetsp.com/obtener_pagos_breb.php](https://api.cybernetsp.com/obtener_pagos_breb.php)",
+  fetch("https://api.cybernetsp.com/obtener_pagos_breb.php",
   ) // Necesitarás crear este archivo PHP que consulte los pagos
     .then((res) => res.json())
     .then((data) => {
@@ -433,8 +432,7 @@ window.guardarEdicionMySQL = function (e) {
     document.getElementById("editMySQLNumero").value.trim(),
   );
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -504,9 +502,7 @@ function cargarPlantillasDesdeSheets() {
       '<div class="empty-log-msg" style="grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">Sincronizando mensajes desde MySQL...</div>';
   }
 
-  fetch(
-    "[https://api.cybernetsp.com/obtener_plantillas.php](https://api.cybernetsp.com/obtener_plantillas.php)",
-  )
+  fetch("https://api.cybernetsp.com/obtener_plantillas.php")
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -997,9 +993,7 @@ function cargarBandejaCodigosMySQL() {
   contenedor.innerHTML =
     '<div style="text-align: center; color: var(--ios-orange); padding: 20px;">Buscando códigos en Gmail...</div>';
 
-  fetch(
-    "[https://api.cybernetsp.com/obtener_codigos.php](https://api.cybernetsp.com/obtener_codigos.php)",
-  )
+  fetch("https://api.cybernetsp.com/obtener_codigos.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1058,9 +1052,7 @@ window.cargarBandejaCodigosMySQL = function () {
     '<div style="text-align: center; color: var(--ios-orange); padding: 40px;"><svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg><br><span style="font-weight: 600;">Sincronizando bandeja de Gmail...</span></div>';
 
   // Llamamos al archivo PHP que creamos antes
-  fetch(
-    "[https://api.cybernetsp.com/obtener_codigos.php](https://api.cybernetsp.com/obtener_codigos.php)",
-  )
+  fetch("https://api.cybernetsp.com/obtener_codigos.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1336,9 +1328,7 @@ function cargarInventarioStockMySQL() {
   contenedor.innerHTML =
     '<div style="grid-column: 1 / -1; text-align: center; color: var(--ios-blue); padding: 30px;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg><br><span style="margin-top:8px; display:inline-block; font-weight:600;">Consultando inventario en MySQL...</span></div>';
 
-  fetch(
-    "[https://api.cybernetsp.com/obtener_inventario_stock.php](https://api.cybernetsp.com/obtener_inventario_stock.php)",
-  )
+  fetch("https://api.cybernetsp.com/obtener_inventario_stock.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1413,9 +1403,7 @@ function cambiarEstadoPlataformaMySQL(idPlataforma, inputElem) {
   formData.append("plataforma", idPlataforma);
   formData.append("activo", nuevoEstado);
 
-  fetch(
-    "[https://api.cybernetsp.com/guardar_estado_plataforma.php](https://api.cybernetsp.com/guardar_estado_plataforma.php)",
-    {
+  fetch("https://api.cybernetsp.com/guardar_estado_plataforma.php", {
       method: "POST",
       body: formData,
     },
@@ -1507,8 +1495,7 @@ window.ejecutarAdelantoDesdeShift = function (e) {
   formData.append("empleado", empleado);
   formData.append("monto", montoLimpio);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -1561,8 +1548,7 @@ function cargarHorasDesdeMySQL(silencioso = false) {
   const formData = new FormData();
   formData.append("accion", "obtener_control_horas");
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -1738,9 +1724,7 @@ window.ejecutarGuardadoHorasManual = function (event) {
   formData.append("horas", horas);
   formData.append("fecha", fecha);
 
-  fetch(
-    "[https://api.cybernetsp.com/guardar_horas_manual.php](https://api.cybernetsp.com/guardar_horas_manual.php)",
-    {
+  fetch("https://api.cybernetsp.com/guardar_horas_manual.php", {
       method: "POST",
       body: formData,
     },
@@ -1800,9 +1784,7 @@ function cargarNominaMySQL() {
   contenedor.innerHTML =
     '<div class="empty-log-msg" style="background: rgba(0, 0, 0, 0.2); border-radius: 20px; padding: 40px; text-align: center; color: var(--ios-green);">Calculando nómina desde MySQL...</div>';
 
-  fetch(
-    "[https://api.cybernetsp.com/obtener_nomina.php](https://api.cybernetsp.com/obtener_nomina.php)",
-  )
+  fetch("https://api.cybernetsp.com/obtener_nomina.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1881,9 +1863,7 @@ window.cargarUsuariosSelects = function () {
   const selectVend = document.getElementById("inputVendedorShift");
   const selectAde = document.getElementById("adeEmpleado");
 
-  fetch(
-    "[https://api.cybernetsp.com/obtener_usuarios.php](https://api.cybernetsp.com/obtener_usuarios.php)",
-  )
+  fetch("https://api.cybernetsp.com/obtener_usuarios.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success" && res.data.length > 0) {
@@ -2248,9 +2228,7 @@ window.cargarDistribuidores = function () {
     </tr>
   `;
 
-  fetch(
-    "[https://api.cybernetsp.com/obtener_distribuidores.php](https://api.cybernetsp.com/obtener_distribuidores.php)",
-  )
+  fetch("https://api.cybernetsp.com/obtener_distribuidores.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -3147,8 +3125,7 @@ window.guardarNuevoRegistroMySQL = function (e) {
   formData.append("tabla", plataforma);
   formData.append("bloque_cuentas", bloque);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -3209,8 +3186,7 @@ window.eliminarRegistroMySQL = function (id, correoEscapado = "") {
   formData.append("id", id);
   formData.append("correo", correo);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -3251,8 +3227,7 @@ window.eliminarFechaMySQL = function (diaEscapado) {
   formData.append("tabla", window.tablaMySQLActual);
   formData.append("dia_valor", diaValor);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -3317,8 +3292,7 @@ window.marcarComoGarantia = function (
   formData.append("proveedor", prov);
   formData.append("fecha_compra", dia);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -3403,8 +3377,7 @@ window.guardarResolucionMySQL = function (e) {
   formData.append("correo_nuevo", correoNuevo);
   formData.append("clave_nueva", claveNueva);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -3491,8 +3464,7 @@ window.cargarStockParaPanelVentas = function () {
   const formData = new FormData();
   formData.append("accion", "obtener_stock_plataformas");
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -3815,8 +3787,7 @@ window.ejecutarVentaFinal = function (e) {
     formData.append("medio_pago", medioPago);
     formData.append("servicios_json", JSON.stringify(servicios));
 
-    fetch(
-      "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    fetch("https://api.cybernetsp.com/acciones_mysql.php",
       {
         method: "POST",
         body: formData,
@@ -4062,8 +4033,7 @@ window.buscarHistorialNetflixEnVenta = function (telefono) {
     formData.append("accion", "buscar_renovacion_netflix");
     formData.append("tel", telLimpio);
 
-    fetch(
-      "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    fetch("https://api.cybernetsp.com/acciones_mysql.php",
       {
         method: "POST",
         body: formData,
@@ -4133,8 +4103,7 @@ window.alCambiarTipoVenta = function (idFila) {
     formData.append("accion", "buscar_renovacion_netflix");
     formData.append("tel", telNum);
 
-    fetch(
-      "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    fetch("https://api.cybernetsp.com/acciones_mysql.php",
       {
         method: "POST",
         body: formData,
@@ -4523,8 +4492,7 @@ function cargarDashboardFinanzas() {
   formData.append("mes", mes);
   formData.append("dia", dia);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -4575,8 +4543,7 @@ function cargarDashboardFinanzas() {
   formData.append("mes", mes);
   formData.append("dia", dia);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -4687,8 +4654,7 @@ function cargarRentabilidadPlataformas() {
   formData.append("accion", "obtener_rentabilidad_plataformas");
   formData.append("mes", mes);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -4789,8 +4755,7 @@ function guardarTransaccion(e) {
   formData.append("monto", montoRaw);
   formData.append("detalle", detalleVal);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -4849,8 +4814,7 @@ window.guardarDeudaEnSheets = window.guardarDeudaEnMySQL = function () {
   formData.append("monto", monto);
   formData.append("tipo", tipo);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -5033,8 +4997,7 @@ window.cargarCortesOperativosNetflix = function () {
   const formData = new FormData();
   formData.append("accion", "obtener_cortes_netflix");
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -5170,8 +5133,7 @@ window.procesarCorteNetflix = function (
   formData.append("correo", correo);
   formData.append("clave_nueva", claveNueva);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -5453,8 +5415,7 @@ window.crearCuentaNetflixAlias = function () {
   formData.append("correo", correoFinal);
   formData.append("clave", clave.trim());
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -6002,8 +5963,7 @@ function cargarStockSelectCargas() {
   const formData = new FormData();
   formData.append("accion", "obtener_stock_plataformas");
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -6080,8 +6040,7 @@ function ejecutarCargaLote(e) {
   formData.append("proveedor", proveedorFinal);
   formData.append("bloque_cuentas", bloqueCuentas);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -6303,8 +6262,7 @@ function ejecutarCargaLote(e) {
   formData.append("proveedor", proveedorFinal);
   formData.append("bloque_cuentas", bloqueCuentas);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     {
       method: "POST",
       body: formData,
@@ -7382,8 +7340,7 @@ function startShiftTimer() {
   formData.append("accion", "iniciar_turno");
   formData.append("vendedor", activeUser);
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     { method: "POST", body: formData },
   )
     .then((res) => res.json())
@@ -7442,8 +7399,7 @@ function ejecutarAutoPulsoTiempo(tiempoTexto) {
   formData.append("vendedor", activeUser);
   formData.append("tiempo_trabajado", tiempoTexto || "00:00:00");
 
-  fetch(
-    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+  fetch("https://api.cybernetsp.com/acciones_mysql.php",
     { method: "POST", body: formData },
   )
     .then((res) => res.json())
@@ -7477,8 +7433,7 @@ function cerrarSesionStaff() {
     formData.append("vendedor", usuarioActivo);
     formData.append("tiempo_trabajado", tiempoFinal);
 
-    fetch(
-      "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    fetch("https://api.cybernetsp.com/acciones_mysql.php",
       { method: "POST", body: formData },
     )
       .then((res) => res.json())
