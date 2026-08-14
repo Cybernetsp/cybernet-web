@@ -332,105 +332,127 @@ function cargarPagosBreB() {
 }
 
 /* ==========================================================================
-   ✏️ ABRIR MODAL EDITAR (HABILITA EDICIÓN Y CARGA CAMPOS DE PAGO)
+   ✏️ ABRIR MODAL EDITAR (CON CONTROL DE ERRORES Y CAMPOS DE PAGO)
    ========================================================================== */
 window.abrirModalEditarMySQL = function (filaEscapada) {
-  if (typeof haptic === "function") haptic();
-  const fila = JSON.parse(decodeURIComponent(filaEscapada));
+  try {
+    if (typeof haptic === "function") haptic();
+    const fila = JSON.parse(decodeURIComponent(filaEscapada));
 
-  const iCorreo = document.getElementById("editMySQLCorreo");
-  const iClave = document.getElementById("editMySQLClave");
-  const iPerfil = document.getElementById("editMySQLPerfil");
-  const iPin = document.getElementById("editMySQLPin");
-  const iVenc = document.getElementById("editMySQLVencimiento");
-  const iNombre = document.getElementById("editMySQLNombre");
-  const iNumero = document.getElementById("editMySQLNumero");
+    const iCorreo = document.getElementById("editMySQLCorreo");
+    const iClave = document.getElementById("editMySQLClave");
+    const iPerfil = document.getElementById("editMySQLPerfil");
+    const iPin = document.getElementById("editMySQLPin");
+    const iVenc = document.getElementById("editMySQLVencimiento");
+    const iNombre = document.getElementById("editMySQLNombre");
+    const iNumero = document.getElementById("editMySQLNumero");
+    const iId = document.getElementById("editMySQLId");
 
-  document.getElementById("editMySQLId").value = fila.id;
+    if (iId) iId.value = fila.id || "";
 
-  let idCorreoAnterior = document.getElementById("editMySQLCorreoAnterior");
-  if (!idCorreoAnterior) {
-    idCorreoAnterior = document.createElement("input");
-    idCorreoAnterior.type = "hidden";
-    idCorreoAnterior.id = "editMySQLCorreoAnterior";
-    const form =
-      document.getElementById("formEditarMySQL") ||
-      document.querySelector("#modalEditarMySQL form");
-    if (form) form.appendChild(idCorreoAnterior);
-  }
-  idCorreoAnterior.value = fila.correo || fila.usuario || "";
-
-  iCorreo.value = fila.correo || fila.usuario || "";
-  iClave.value = fila.clave || fila.contrasena || "";
-  iPerfil.value = fila.perfil || "";
-  iPin.value = fila.pin || "";
-  iVenc.value = fila.vencimiento || "";
-  iNombre.value = fila.nombre || fila.cliente || "";
-  iNumero.value = fila.numero || fila.telefono || "";
-
-  // 🛠️ CREAR CAMPOS DINÁMICOS DE PAGO EN EL MODAL SI NO EXISTEN AÚN
-  let contenedorCamposPago = document.getElementById(
-    "editMySQLExtraPagoFields",
-  );
-  if (!contenedorCamposPago) {
-    contenedorCamposPago = document.createElement("div");
-    contenedorCamposPago.id = "editMySQLExtraPagoFields";
-    contenedorCamposPago.style.cssText =
-      "display: flex; flex-direction: column; gap: 10px; margin-top: 10px;";
-    contenedorCamposPago.innerHTML = `
-      <div style="display: flex; gap: 10px;">
-        <div style="flex: 1;">
-          <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">F. PAGO</label>
-          <input type="text" id="editMySQLFechaPago" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: 14-ago" />
-        </div>
-        <div style="flex: 1;">
-          <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">VALOR</label>
-          <input type="text" id="editMySQLValor" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: $15.000" />
-        </div>
-      </div>
-      <div>
-        <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">MÉTODO / BANCO</label>
-        <input type="text" id="editMySQLPago" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: Bre-B, Nequi, Saldo Distri" />
-      </div>
-    `;
-    const form =
-      document.getElementById("formEditarMySQL") ||
-      document.querySelector("#modalEditarMySQL form");
-    if (form) {
-      const btnGuardar =
-        form.querySelector("button[type='submit']") || form.lastElementChild;
-      form.insertBefore(contenedorCamposPago, btnGuardar);
+    // Guardar correo anterior en input oculto
+    let idCorreoAnterior = document.getElementById("editMySQLCorreoAnterior");
+    if (!idCorreoAnterior) {
+      idCorreoAnterior = document.createElement("input");
+      idCorreoAnterior.type = "hidden";
+      idCorreoAnterior.id = "editMySQLCorreoAnterior";
+      const targetForm =
+        document.getElementById("formEditarMySQL") ||
+        document.querySelector("#modalEditarMySQL form") ||
+        document.querySelector("#modalEditarMySQL .modal-ios") ||
+        document.getElementById("modalEditarMySQL");
+      if (targetForm) targetForm.appendChild(idCorreoAnterior);
     }
+    if (idCorreoAnterior) idCorreoAnterior.value = fila.correo || fila.usuario || "";
+
+    if (iCorreo) iCorreo.value = fila.correo || fila.usuario || "";
+    if (iClave) iClave.value = fila.clave || fila.contrasena || "";
+    if (iPerfil) iPerfil.value = fila.perfil || "";
+    if (iPin) iPin.value = fila.pin || "";
+    if (iVenc) iVenc.value = fila.vencimiento || "";
+    if (iNombre) iNombre.value = fila.nombre || fila.cliente || "";
+    if (iNumero) iNumero.value = fila.numero || fila.telefono || "";
+
+    // 🛠️ Crear campos dinámicos de pago si aún no existen en el modal
+    let contenedorCamposPago = document.getElementById("editMySQLExtraPagoFields");
+    if (!contenedorCamposPago) {
+      contenedorCamposPago = document.createElement("div");
+      contenedorCamposPago.id = "editMySQLExtraPagoFields";
+      contenedorCamposPago.style.cssText = "display: flex; flex-direction: column; gap: 10px; margin-top: 10px; margin-bottom: 10px;";
+      contenedorCamposPago.innerHTML = `
+        <div style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">F. PAGO</label>
+            <input type="text" id="editMySQLFechaPago" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: 14-ago" />
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">VALOR</label>
+            <input type="text" id="editMySQLValor" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: $15.000" />
+          </div>
+        </div>
+        <div>
+          <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">MÉTODO / BANCO</label>
+          <input type="text" id="editMySQLPago" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: Bre-B, Nequi, Saldo Distri" />
+        </div>
+      `;
+
+      const formTarget =
+        document.getElementById("formEditarMySQL") ||
+        document.querySelector("#modalEditarMySQL form") ||
+        document.querySelector("#modalEditarMySQL .modal-ios") ||
+        document.getElementById("modalEditarMySQL");
+
+      if (formTarget) {
+        const btnGuardar = formTarget.querySelector("button[type='submit']") || formTarget.querySelector("button") || formTarget.lastElementChild;
+        if (btnGuardar && btnGuardar.parentNode === formTarget) {
+          formTarget.insertBefore(contenedorCamposPago, btnGuardar);
+        } else {
+          formTarget.appendChild(contenedorCamposPago);
+        }
+      }
+    }
+
+    // Cargar valores de pago de forma segura (con verificación de existencia)
+    const elFechaPago = document.getElementById("editMySQLFechaPago");
+    const elValor = document.getElementById("editMySQLValor");
+    const elPago = document.getElementById("editMySQLPago");
+
+    if (elFechaPago) elFechaPago.value = fila.fecha || "";
+    if (elValor) elValor.value = fila.valor || "";
+    if (elPago) elPago.value = fila.pago || "";
+
+    // Mostrar los campos extra solo en las tablas que corresponden
+    if (contenedorCamposPago) {
+      const tablaActual = (window.tablaMySQLActual || "").toLowerCase();
+      if (tablaActual === "netflix" || tablaActual === "registro_ventas") {
+        contenedorCamposPago.style.display = "flex";
+      } else {
+        contenedorCamposPago.style.display = "none";
+      }
+    }
+
+    const inputs = [iCorreo, iClave, iPerfil, iPin, iVenc, iNombre, iNumero];
+    inputs.forEach((inp) => {
+      if (inp) {
+        inp.readOnly = false;
+        inp.style.opacity = "1";
+        inp.style.cursor = "text";
+      }
+    });
+
+    const modal = document.getElementById("modalEditarMySQL");
+    if (modal) {
+      modal.style.display = "flex";
+      modal.classList.add("open");
+    }
+  } catch (err) {
+    console.error("Error al abrir modal de edición:", err);
+    alert("❌ Ocurrió un error al abrir el modal: " + err.message);
   }
-
-  // Cargar valores de pago
-  document.getElementById("editMySQLFechaPago").value = fila.fecha || "";
-  document.getElementById("editMySQLValor").value = fila.valor || "";
-  document.getElementById("editMySQLPago").value = fila.pago || "";
-
-  // Mostrar los campos de pago solo en tablas que los utilicen
-  if (
-    window.tablaMySQLActual === "netflix" ||
-    window.tablaMySQLActual === "registro_ventas"
-  ) {
-    contenedorCamposPago.style.display = "flex";
-  } else {
-    contenedorCamposPago.style.display = "none";
-  }
-
-  const inputs = [iCorreo, iClave, iPerfil, iPin, iVenc, iNombre, iNumero];
-  inputs.forEach((inp) => {
-    inp.readOnly = false;
-    inp.style.opacity = "1";
-    inp.style.cursor = "text";
-  });
-
-  const modal = document.getElementById("modalEditarMySQL");
-  if (modal) modal.style.display = "flex";
 };
 
 /* ==========================================================================
-   💾 GUARDAR EDICIÓN (ENVÍA TAMBIÉN FECHA, VALOR Y MÉTODO A MYSQL)
+   💾 GUARDAR EDICIÓN (ENVÍA CORREO ANTERIOR, CAMPOS Y DATOS DE PAGO)
    ========================================================================== */
 window.guardarEdicionMySQL = function (e) {
   if (e) e.preventDefault();
@@ -441,10 +463,7 @@ window.guardarEdicionMySQL = function (e) {
     document.querySelector("#modalEditarMySQL button[type='submit']");
   if (btn) btn.disabled = true;
 
-  const correoAnteriorInput = document.getElementById(
-    "editMySQLCorreoAnterior",
-  );
-
+  const correoAnteriorInput = document.getElementById("editMySQLCorreoAnterior");
   const iFechaPago = document.getElementById("editMySQLFechaPago");
   const iValor = document.getElementById("editMySQLValor");
   const iPago = document.getElementById("editMySQLPago");
@@ -453,37 +472,16 @@ window.guardarEdicionMySQL = function (e) {
   formData.append("accion", "editar");
   formData.append("tabla", window.tablaMySQLActual);
   formData.append("id", document.getElementById("editMySQLId").value);
-  formData.append(
-    "correo_anterior",
-    correoAnteriorInput ? correoAnteriorInput.value : "",
-  );
-  formData.append(
-    "correo",
-    document.getElementById("editMySQLCorreo").value.trim(),
-  );
-  formData.append(
-    "clave",
-    document.getElementById("editMySQLClave").value.trim(),
-  );
-  formData.append(
-    "perfil",
-    document.getElementById("editMySQLPerfil").value.trim(),
-  );
+  formData.append("correo_anterior", correoAnteriorInput ? correoAnteriorInput.value : "");
+  formData.append("correo", document.getElementById("editMySQLCorreo").value.trim());
+  formData.append("clave", document.getElementById("editMySQLClave").value.trim());
+  formData.append("perfil", document.getElementById("editMySQLPerfil").value.trim());
   formData.append("pin", document.getElementById("editMySQLPin").value.trim());
-  formData.append(
-    "vencimiento",
-    document.getElementById("editMySQLVencimiento").value.trim(),
-  );
-  formData.append(
-    "nombre",
-    document.getElementById("editMySQLNombre").value.trim(),
-  );
-  formData.append(
-    "numero",
-    document.getElementById("editMySQLNumero").value.trim(),
-  );
+  formData.append("vencimiento", document.getElementById("editMySQLVencimiento").value.trim());
+  formData.append("nombre", document.getElementById("editMySQLNombre").value.trim());
+  formData.append("numero", document.getElementById("editMySQLNumero").value.trim());
 
-  // 📌 Nuevos datos de pago agregados a FormData
+  // Enviar campos de pago adicionales
   formData.append("fecha", iFechaPago ? iFechaPago.value.trim() : "");
   formData.append("valor", iValor ? iValor.value.trim() : "");
   formData.append("pago", iPago ? iPago.value.trim() : "");
@@ -497,11 +495,14 @@ window.guardarEdicionMySQL = function (e) {
       if (btn) btn.disabled = false;
       if (data.status === "success") {
         const modal = document.getElementById("modalEditarMySQL");
-        if (modal) modal.style.display = "none";
+        if (modal) {
+          modal.style.display = "none";
+          modal.classList.remove("open");
+        }
         cargarDatosMySQL();
         if (typeof triggerToast === "function") {
           triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${data.message}</span></div>`,
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${data.message}</span></div>`
           );
         }
       } else {
@@ -2892,7 +2893,7 @@ window.cargarDatosMySQL = function () {
             let platReporte = fila.plataforma ? fila.plataforma : platFormat;
             let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platReporte}\n📧 *Correo:* ${correoVal}\n🔑 *Clave:* ${claveVal}\n👤 *Proveedor:* ${provVal}\n📅 *Fecha Compra:* ${diaVal}`;
             let safeReporte = encodeURIComponent(textoReporte);
-            let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
+            let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila)).replace(/'/g, "%27");
 
             // ==========================================
             // CELDAS ESTILIZADAS NATIVAS
