@@ -5798,54 +5798,63 @@ window.cambiarCuentaMalaAlias = function () {
   document.body.appendChild(script);
 };
 
-// 6. CONFIRMAR GUARDADO FINAL EN GOOGLE SHEETS
-window.guardarCuentaConfirmadaNetflix = function (
-  btn,
-  contenidoOriginal,
-  datosCuenta,
-) {
+// 6. CONFIRMAR GUARDADO FINAL EN MYSQL (LUEGO DE PROCESAR ALIAS Y RADAR EN SHEETS)
+window.guardarCuentaConfirmadaNetflix = function (btn, contenidoOriginal, datosCuenta) {
   btn.disabled = true;
   btn.style.pointerEvents = "none";
-  btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Guardando en Sheets...`;
+  btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Guardando en MySQL...`;
 
-  const cbName = "cb_save_cta_" + Date.now();
-  window[cbName] = function (res) {
-    btn.disabled = false;
-    btn.style.pointerEvents = "auto";
-    btn.innerHTML = "¡Guardado con Éxito!";
-    btn.style.background = "var(--ios-green)";
+  const formData = new FormData();
+  formData.append("accion", "confirmar_guardado_netflix");
+  formData.append("tabla", "netflix");
+  formData.append("correo", datosCuenta.correo);
+  formData.append("clave", datosCuenta.clave);
 
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      btn.disabled = false;
+      btn.style.pointerEvents = "auto";
 
-    if (res && res.status === "success") {
-      localStorage.removeItem("cyber_netflix_alias_pendiente");
-      const modal =
-        document.getElementById("cuentaGeneradaModalOverlay") ||
-        document.getElementById("cuentaGeneratedModalOverlay");
-      if (modal) modal.classList.remove("open");
+      if (res && res.status === "success") {
+        btn.innerHTML = "¡Guardado con Éxito!";
+        btn.style.background = "var(--ios-green)";
 
-      if (typeof triggerToast === "function") {
-        triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg> <span>Cuenta inyectada al maestro.</span></div>`,
-        );
+        // Limpiamos la memoria local de la cuenta pendiente de alias
+        localStorage.removeItem("cyber_netflix_alias_pendiente");
+
+        // Cierra el modal de la cuenta generada
+        const modal =
+          document.getElementById("cuentaGeneradaModalOverlay") ||
+          document.getElementById("cuentaGeneratedModalOverlay");
+        if (modal) modal.classList.remove("open");
+
+        // Toast de confirmación
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg> <span>Cuenta inyectada en MySQL con sus 5 perfiles.</span></div>`
+          );
+        }
+
+        // Recarga la tabla de MySQL en pantalla
+        if (typeof cargarDatosMySQL === "function") cargarDatosMySQL();
+      } else {
+        alert("❌ Error al guardar en MySQL: " + (res ? res.message : "Fallo de comunicación."));
+        btn.innerHTML = contenidoOriginal;
+        btn.style.background = "";
       }
-    } else {
-      alert(
-        "❌ Error al guardar en Sheets: " +
-          (res ? res.message : "Fallo de comunicación."),
-      );
+    })
+    .catch((err) => {
+      console.error(err);
+      btn.disabled = false;
+      btn.style.pointerEvents = "auto";
       btn.innerHTML = contenidoOriginal;
       btn.style.background = "";
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  const urlParams = `?action=confirmarGuardadoNetflix&correo=${encodeURIComponent(datosCuenta.correo)}&clave=${encodeURIComponent(datosCuenta.clave)}&callback=${cbName}&_ts=${Date.now()}`;
-  script.src = GOOGLE_SCRIPT_URL + urlParams;
-  document.body.appendChild(script);
+      alert("❌ Error de comunicación con el servidor MySQL.");
+    });
 };
 
 // 6. CONSTRUCTOR DINÁMICO DEL MODAL EN CASO DE NO EXISTIR
