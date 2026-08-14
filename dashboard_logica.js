@@ -332,7 +332,7 @@ function cargarPagosBreB() {
 }
 
 /* ==========================================================================
-   ✏️ ABRIR MODAL EDITAR (HABILITA EDICIÓN Y GUARDA CORREO ANTERIOR)
+   ✏️ ABRIR MODAL EDITAR (HABILITA EDICIÓN Y CARGA CAMPOS DE PAGO)
    ========================================================================== */
 window.abrirModalEditarMySQL = function (filaEscapada) {
   if (typeof haptic === "function") haptic();
@@ -348,7 +348,6 @@ window.abrirModalEditarMySQL = function (filaEscapada) {
 
   document.getElementById("editMySQLId").value = fila.id;
 
-  // Guardamos el correo original de la fila en un input oculto para saber qué cuentas actualizar masivamente
   let idCorreoAnterior = document.getElementById("editMySQLCorreoAnterior");
   if (!idCorreoAnterior) {
     idCorreoAnterior = document.createElement("input");
@@ -369,7 +368,56 @@ window.abrirModalEditarMySQL = function (filaEscapada) {
   iNombre.value = fila.nombre || fila.cliente || "";
   iNumero.value = fila.numero || fila.telefono || "";
 
-  // 🔥 TODOS LOS CAMPOS QUEDAN TOTALMENTE HABILITADOS PARA EL SUPERADMIN
+  // 🛠️ CREAR CAMPOS DINÁMICOS DE PAGO EN EL MODAL SI NO EXISTEN AÚN
+  let contenedorCamposPago = document.getElementById(
+    "editMySQLExtraPagoFields",
+  );
+  if (!contenedorCamposPago) {
+    contenedorCamposPago = document.createElement("div");
+    contenedorCamposPago.id = "editMySQLExtraPagoFields";
+    contenedorCamposPago.style.cssText =
+      "display: flex; flex-direction: column; gap: 10px; margin-top: 10px;";
+    contenedorCamposPago.innerHTML = `
+      <div style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+          <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">F. PAGO</label>
+          <input type="text" id="editMySQLFechaPago" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: 14-ago" />
+        </div>
+        <div style="flex: 1;">
+          <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">VALOR</label>
+          <input type="text" id="editMySQLValor" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: $15.000" />
+        </div>
+      </div>
+      <div>
+        <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">MÉTODO / BANCO</label>
+        <input type="text" id="editMySQLPago" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: Bre-B, Nequi, Saldo Distri" />
+      </div>
+    `;
+    const form =
+      document.getElementById("formEditarMySQL") ||
+      document.querySelector("#modalEditarMySQL form");
+    if (form) {
+      const btnGuardar =
+        form.querySelector("button[type='submit']") || form.lastElementChild;
+      form.insertBefore(contenedorCamposPago, btnGuardar);
+    }
+  }
+
+  // Cargar valores de pago
+  document.getElementById("editMySQLFechaPago").value = fila.fecha || "";
+  document.getElementById("editMySQLValor").value = fila.valor || "";
+  document.getElementById("editMySQLPago").value = fila.pago || "";
+
+  // Mostrar los campos de pago solo en tablas que los utilicen
+  if (
+    window.tablaMySQLActual === "netflix" ||
+    window.tablaMySQLActual === "registro_ventas"
+  ) {
+    contenedorCamposPago.style.display = "flex";
+  } else {
+    contenedorCamposPago.style.display = "none";
+  }
+
   const inputs = [iCorreo, iClave, iPerfil, iPin, iVenc, iNombre, iNumero];
   inputs.forEach((inp) => {
     inp.readOnly = false;
@@ -382,7 +430,7 @@ window.abrirModalEditarMySQL = function (filaEscapada) {
 };
 
 /* ==========================================================================
-   💾 GUARDAR EDICIÓN (ENVÍA CORREO ANTERIOR PARA EDICIÓN EN CASCADA)
+   💾 GUARDAR EDICIÓN (ENVÍA TAMBIÉN FECHA, VALOR Y MÉTODO A MYSQL)
    ========================================================================== */
 window.guardarEdicionMySQL = function (e) {
   if (e) e.preventDefault();
@@ -396,6 +444,10 @@ window.guardarEdicionMySQL = function (e) {
   const correoAnteriorInput = document.getElementById(
     "editMySQLCorreoAnterior",
   );
+
+  const iFechaPago = document.getElementById("editMySQLFechaPago");
+  const iValor = document.getElementById("editMySQLValor");
+  const iPago = document.getElementById("editMySQLPago");
 
   const formData = new FormData();
   formData.append("accion", "editar");
@@ -431,6 +483,11 @@ window.guardarEdicionMySQL = function (e) {
     document.getElementById("editMySQLNumero").value.trim(),
   );
 
+  // 📌 Nuevos datos de pago agregados a FormData
+  formData.append("fecha", iFechaPago ? iFechaPago.value.trim() : "");
+  formData.append("valor", iValor ? iValor.value.trim() : "");
+  formData.append("pago", iPago ? iPago.value.trim() : "");
+
   fetch("https://api.cybernetsp.com/acciones_mysql.php", {
     method: "POST",
     body: formData,
@@ -457,6 +514,7 @@ window.guardarEdicionMySQL = function (e) {
       alert("❌ Error al guardar edición.");
     });
 };
+
 // Cierre automático de menús al presionar escape
 document.addEventListener("keydown", function (e) {
   if (e.key === "Escape") {
@@ -2607,7 +2665,7 @@ window.cargarDatosMySQL = function () {
         border-spacing: 0 !important;
         table-layout: fixed !important;
         width: 100% !important;
-        min-width: 1100px !important;
+        min-width: 1350px !important; /* 👈 Aumentado para dar espacio suficiente a todas las columnas */
         background-color: #111216 !important;
       }
     `;
@@ -2653,16 +2711,16 @@ window.cargarDatosMySQL = function () {
       <tr>
         <th style="${thBase} width: 5%; color: #a1a1aa;">DÍA</th>
         <th style="${thBase} width: 17%; color: #a1a1aa;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 10%; color: #a1a1aa;">CONTRASEÑA</th>
-        <th style="${thBase} width: 5%; color: #a1a1aa; text-align: center;">PERFIL</th>
-        <th style="${thBase} width: 5%; color: #a1a1aa; text-align: center;">PIN</th>
+        <th style="${thBase} width: 9%; color: #a1a1aa;">CONTRASEÑA</th>
+        <th style="${thBase} width: 4%; color: #a1a1aa; text-align: center;">PERFIL</th>
+        <th style="${thBase} width: 4%; color: #a1a1aa; text-align: center;">PIN</th>
         <th style="${thBase} width: 10%; color: #ff9500;">VENCIMIENTO</th>
-        <th style="${thBase} width: 11%; color: #a1a1aa;">CLIENTE</th>
+        <th style="${thBase} width: 10%; color: #a1a1aa;">CLIENTE</th>
         <th style="${thBase} width: 9%; color: #a1a1aa;">TELÉFONO</th>
-        <th style="${thBase} width: 8%; color: #a1a1aa;">F. PAGO</th>
+        <th style="${thBase} width: 6%; color: #a1a1aa;">F. PAGO</th>
         <th style="${thBase} width: 7%; color: #30d158;">VALOR</th>
-        <th style="${thBase} width: 7%; color: #bf5af2;">MÉTODO</th>
-        <th style="${thBase} width: 6%; color: #a1a1aa; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        <th style="${thBase} width: 10%; color: #bf5af2;">MÉTODO</th> <!-- 👈 Aumentado a 10% -->
+        <th style="${thBase} width: 9%; color: #a1a1aa; text-align: right; padding-right: 10px;">ACCIÓN</th> <!-- 👈 Aumentado a 9% -->
       </tr>
     `;
   } else {
@@ -2888,26 +2946,26 @@ window.cargarDatosMySQL = function () {
 
             if (esNetflix) {
               html += `
-    <tr class="tr-mysql-row ${isCaida ? "tr-caida" : ""}" style="${styleExtra}">
-      <td style="${tdBase} color: #a1a1aa; font-weight: 600;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${diaVal}</span></td>
-      <td style="${tdBase}">${celdaCorreo}</td>
-      <td style="${tdBase}">${celdaClave}</td>
-      <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 700;">${perfilVal}</td>
-      <td style="${tdBase} text-align: center; color: #a1a1aa;">${pinVal}</td>
-      <td style="${tdBase}">${celdaVencimiento}</td>
-      <td style="${tdBase} color: #a1a1aa;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${clienteVal}">${clienteVal}</span></td>
-      <td style="${tdBase}">${celdaTelefonoContent}</td>
-      <td style="${tdBase} color: #a1a1aa; font-family: monospace;">${fechaPagoVal}</td>
-      <td style="${tdBase} color: #30d158; font-weight: 800; font-family: monospace;">${valorVal}</td>
-      <td style="${tdBase} color: #bf5af2; font-weight: 700;">${pagoVal}</td>
-      <td style="${tdBase} text-align: right; padding-right: 15px;">
-        <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
-          ${botonesEdicionIzquierda}
-          ${botonCopiar}
-        </div>
-      </td>
-    </tr>
-  `;
+        <tr class="tr-mysql-row ${isCaida ? "tr-caida" : ""}" style="${styleExtra}">
+          <td style="${tdBase} color: #a1a1aa; font-weight: 600;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${diaVal}</span></td>
+          <td style="${tdBase}">${celdaCorreo}</td>
+          <td style="${tdBase}">${celdaClave}</td>
+          <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 700;">${perfilVal}</td>
+          <td style="${tdBase} text-align: center; color: #a1a1aa;">${pinVal}</td>
+          <td style="${tdBase}">${celdaVencimiento}</td>
+          <td style="${tdBase} color: #a1a1aa;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${clienteVal}">${clienteVal}</span></td>
+          <td style="${tdBase}">${celdaTelefonoContent}</td>
+          <td style="${tdBase} color: #a1a1aa; font-family: monospace;">${fechaPagoVal}</td>
+          <td style="${tdBase} color: #30d158; font-weight: 800; font-family: monospace;">${valorVal}</td>
+          <td style="${tdBase} color: #bf5af2; font-weight: 700;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${pagoVal}">${pagoVal}</span></td>
+          <td style="${tdBase} text-align: right; padding-right: 10px;">
+            <div style="display: flex; gap: 4px; justify-content: flex-end; align-items: center; min-width: 110px;">
+              ${botonesEdicionIzquierda}
+              ${botonCopiar}
+            </div>
+          </td>
+        </tr>
+      `;
             } else if (!esVentas && !esGarantias) {
               let botonTemp = !isCaida
                 ? `<button onclick="generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">⏳ Temp</button>`
