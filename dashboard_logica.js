@@ -2651,15 +2651,18 @@ window.cargarDatosMySQL = function () {
   } else if (esNetflix) {
     thead.innerHTML = `
       <tr>
-        <th style="${thBase} width: 6%; color: #a1a1aa;">FECHA</th>
-        <th style="${thBase} width: 20%; color: #a1a1aa;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 12%; color: #a1a1aa;">CONTRASEÑA</th>
-        <th style="${thBase} width: 6%; color: #a1a1aa; text-align: center;">PERFIL</th>
+        <th style="${thBase} width: 5%; color: #a1a1aa;">DÍA</th>
+        <th style="${thBase} width: 17%; color: #a1a1aa;">CORREO / USUARIO</th>
+        <th style="${thBase} width: 10%; color: #a1a1aa;">CONTRASEÑA</th>
+        <th style="${thBase} width: 5%; color: #a1a1aa; text-align: center;">PERFIL</th>
         <th style="${thBase} width: 5%; color: #a1a1aa; text-align: center;">PIN</th>
-        <th style="${thBase} width: 12%; color: #ff9500;">VENCIMIENTO</th>
-        <th style="${thBase} width: 13%; color: #a1a1aa;">CLIENTE</th>
-        <th style="${thBase} width: 10%; color: #a1a1aa;">TELÉFONO</th>
-        <th style="${thBase} width: 16%; color: #a1a1aa; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        <th style="${thBase} width: 10%; color: #ff9500;">VENCIMIENTO</th>
+        <th style="${thBase} width: 11%; color: #a1a1aa;">CLIENTE</th>
+        <th style="${thBase} width: 9%; color: #a1a1aa;">TELÉFONO</th>
+        <th style="${thBase} width: 8%; color: #a1a1aa;">F. PAGO</th>
+        <th style="${thBase} width: 7%; color: #30d158;">VALOR</th>
+        <th style="${thBase} width: 7%; color: #bf5af2;">MÉTODO</th>
+        <th style="${thBase} width: 6%; color: #a1a1aa; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   } else {
@@ -2747,6 +2750,11 @@ window.cargarDatosMySQL = function () {
                   ? fila.cliente
                   : "-";
             let numeroVal = fila.numero || fila.telefono || "-";
+
+            // 👈 ¡AQUÍ VAN LAS 3 LÍNEAS!
+            let fechaPagoVal = fila.fecha || "-";
+            let valorVal = fila.valor || "-";
+            let pagoVal = fila.pago || "-";
 
             let isCaida = fila.estado === "caida" || fila.es_caida == 1;
 
@@ -2880,23 +2888,26 @@ window.cargarDatosMySQL = function () {
 
             if (esNetflix) {
               html += `
-                <tr class="tr-mysql-row ${isCaida ? "tr-caida" : ""}" style="${styleExtra}">
-                  <td style="${tdBase} color: #a1a1aa; font-weight: 600;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${diaVal}</span></td>
-                  <td style="${tdBase}">${celdaCorreo}</td>
-                  <td style="${tdBase}">${celdaClave}</td>
-                  <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 700;">${perfilVal}</td>
-                  <td style="${tdBase} text-align: center; color: #a1a1aa;">${pinVal}</td>
-                  <td style="${tdBase}">${celdaVencimiento}</td>
-                  <td style="${tdBase} color: #a1a1aa;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${clienteVal}">${clienteVal}</span></td>
-                  <td style="${tdBase}">${celdaTelefonoContent}</td>
-                  <td style="${tdBase} text-align: right; padding-right: 15px;">
-                    <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
-                      ${botonesEdicionIzquierda}
-                      ${botonCopiar}
-                    </div>
-                  </td>
-                </tr>
-              `;
+    <tr class="tr-mysql-row ${isCaida ? "tr-caida" : ""}" style="${styleExtra}">
+      <td style="${tdBase} color: #a1a1aa; font-weight: 600;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${diaVal}</span></td>
+      <td style="${tdBase}">${celdaCorreo}</td>
+      <td style="${tdBase}">${celdaClave}</td>
+      <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 700;">${perfilVal}</td>
+      <td style="${tdBase} text-align: center; color: #a1a1aa;">${pinVal}</td>
+      <td style="${tdBase}">${celdaVencimiento}</td>
+      <td style="${tdBase} color: #a1a1aa;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${clienteVal}">${clienteVal}</span></td>
+      <td style="${tdBase}">${celdaTelefonoContent}</td>
+      <td style="${tdBase} color: #a1a1aa; font-family: monospace;">${fechaPagoVal}</td>
+      <td style="${tdBase} color: #30d158; font-weight: 800; font-family: monospace;">${valorVal}</td>
+      <td style="${tdBase} color: #bf5af2; font-weight: 700;">${pagoVal}</td>
+      <td style="${tdBase} text-align: right; padding-right: 15px;">
+        <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
+          ${botonesEdicionIzquierda}
+          ${botonCopiar}
+        </div>
+      </td>
+    </tr>
+  `;
             } else if (!esVentas && !esGarantias) {
               let botonTemp = !isCaida
                 ? `<button onclick="generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">⏳ Temp</button>`
