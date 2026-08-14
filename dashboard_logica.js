@@ -2625,7 +2625,7 @@ window.filtrarMySQL = function () {
 };
 
 /* ==========================================================================
-   🗄️ RENDERIZADO VISUAL ESTILO CYBERNET (FONDO Y TONOS EXACTOS A LA IMAGEN)
+   🗄️ RENDERIZADO VISUAL ESTILO CYBERNET (CON BOTÓN HOY PARA SUPERADMIN)
    ========================================================================== */
 
 window.cargarDatosMySQL = function () {
@@ -2639,7 +2639,7 @@ window.cargarDatosMySQL = function () {
     tableNode.parentElement.style.overflowX = "auto";
   }
 
-  // 🛡️ INYECCIÓN DE ESTILOS: PALETA DE COLORES EXACTA A LA IMAGEN DE REFERENCIA
+  // 🛡️ INYECCIÓN DE ESTILOS: PALETA DE COLORES EXACTA
   if (!document.getElementById("css-sticky-hover-mysql")) {
     const styleSticky = document.createElement("style");
     styleSticky.id = "css-sticky-hover-mysql";
@@ -2671,7 +2671,7 @@ window.cargarDatosMySQL = function () {
         border-spacing: 0 !important;
         table-layout: fixed !important;
         width: 100% !important;
-        min-width: 1350px !important; /* 👈 Aumentado para dar espacio suficiente a todas las columnas */
+        min-width: 1350px !important;
         background-color: #111216 !important;
       }
     `;
@@ -2687,7 +2687,7 @@ window.cargarDatosMySQL = function () {
   const esNetflix = tablaActualLower === "netflix";
 
   // ==========================================
-  // 1. ENCABEZADOS CON ANCHOS (%) ESTRICTOS
+  // 1. ENCABEZADOS CON ANCHOS ESTRICTOS
   // ==========================================
   if (esVentas) {
     thead.innerHTML = `
@@ -2725,8 +2725,8 @@ window.cargarDatosMySQL = function () {
         <th style="${thBase} width: 9%; color: #a1a1aa;">TELÉFONO</th>
         <th style="${thBase} width: 6%; color: #a1a1aa;">F. PAGO</th>
         <th style="${thBase} width: 7%; color: #30d158;">VALOR</th>
-        <th style="${thBase} width: 10%; color: #bf5af2;">MÉTODO</th> <!-- 👈 Aumentado a 10% -->
-        <th style="${thBase} width: 9%; color: #a1a1aa; text-align: right; padding-right: 10px;">ACCIÓN</th> <!-- 👈 Aumentado a 9% -->
+        <th style="${thBase} width: 10%; color: #bf5af2;">MÉTODO</th>
+        <th style="${thBase} width: 9%; color: #a1a1aa; text-align: right; padding-right: 10px;">ACCIÓN</th>
       </tr>
     `;
   } else {
@@ -2760,7 +2760,7 @@ window.cargarDatosMySQL = function () {
   `;
 
   fetch(
-    `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
+    `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`
   )
     .then((res) => res.json())
     .then((data) => {
@@ -2784,7 +2784,17 @@ window.cargarDatosMySQL = function () {
             `;
           };
 
-          const esSuperAdmin = true;
+          // 🔒 VERIFICACIÓN DE ROL SUPERADMIN
+          const usuarioActivoObj = JSON.parse(
+            sessionStorage.getItem("usuario_activo") || "{}"
+          );
+          const usuarioNombre = (
+            usuarioActivoObj.nombre ||
+            sessionStorage.getItem("active_staff") ||
+            ""
+          ).toUpperCase();
+          const esSuperAdmin =
+            usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
 
           dataOrdenada.forEach((fila) => {
             let diaVal = fila.dia || fila.fecha || "-";
@@ -2809,13 +2819,12 @@ window.cargarDatosMySQL = function () {
               fila.nombre.trim() !== ""
                 ? fila.nombre
                 : fila.cliente &&
-                    fila.cliente !== "Sin Nombre" &&
-                    fila.cliente.trim() !== ""
+                  fila.cliente !== "Sin Nombre" &&
+                  fila.cliente.trim() !== ""
                   ? fila.cliente
                   : "-";
             let numeroVal = fila.numero || fila.telefono || "-";
 
-            // 👈 ¡AQUÍ VAN LAS 3 LÍNEAS!
             let fechaPagoVal = fila.fecha || "-";
             let valorVal = fila.valor || "-";
             let pagoVal = fila.pago || "-";
@@ -2823,7 +2832,7 @@ window.cargarDatosMySQL = function () {
             let isCaida = fila.estado === "caida" || fila.es_caida == 1;
 
             // ==========================================
-            // BANNER DIVISOR AZUL POR FECHA (EXACTO A LA CAPTURA)
+            // BANNER DIVISOR AZUL POR FECHA
             // ==========================================
             if (
               !esVentas &&
@@ -2942,6 +2951,11 @@ window.cargarDatosMySQL = function () {
 
             let botonCopiar = `<button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">📋 Copiar</button>`;
 
+            // 🟢 BOTÓN "📅 HOY" EXCLUSIVO PARA SUPERADMIN / CAMILO
+            let botonPasarHoy = esSuperAdmin
+              ? `<button onclick="pasarRegistroAHoyMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Pasar a hoy" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">📅 Hoy</button>`
+              : "";
+
             // ==========================================
             // RENDER DE FILAS
             // ==========================================
@@ -2952,26 +2966,27 @@ window.cargarDatosMySQL = function () {
 
             if (esNetflix) {
               html += `
-        <tr class="tr-mysql-row ${isCaida ? "tr-caida" : ""}" style="${styleExtra}">
-          <td style="${tdBase} color: #a1a1aa; font-weight: 600;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${diaVal}</span></td>
-          <td style="${tdBase}">${celdaCorreo}</td>
-          <td style="${tdBase}">${celdaClave}</td>
-          <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 700;">${perfilVal}</td>
-          <td style="${tdBase} text-align: center; color: #a1a1aa;">${pinVal}</td>
-          <td style="${tdBase}">${celdaVencimiento}</td>
-          <td style="${tdBase} color: #a1a1aa;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${clienteVal}">${clienteVal}</span></td>
-          <td style="${tdBase}">${celdaTelefonoContent}</td>
-          <td style="${tdBase} color: #a1a1aa; font-family: monospace;">${fechaPagoVal}</td>
-          <td style="${tdBase} color: #30d158; font-weight: 800; font-family: monospace;">${valorVal}</td>
-          <td style="${tdBase} color: #bf5af2; font-weight: 700;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${pagoVal}">${pagoVal}</span></td>
-          <td style="${tdBase} text-align: right; padding-right: 10px;">
-            <div style="display: flex; gap: 4px; justify-content: flex-end; align-items: center; min-width: 110px;">
-              ${botonesEdicionIzquierda}
-              ${botonCopiar}
-            </div>
-          </td>
-        </tr>
-      `;
+                <tr class="tr-mysql-row ${isCaida ? "tr-caida" : ""}" style="${styleExtra}">
+                  <td style="${tdBase} color: #a1a1aa; font-weight: 600;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${diaVal}</span></td>
+                  <td style="${tdBase}">${celdaCorreo}</td>
+                  <td style="${tdBase}">${celdaClave}</td>
+                  <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 700;">${perfilVal}</td>
+                  <td style="${tdBase} text-align: center; color: #a1a1aa;">${pinVal}</td>
+                  <td style="${tdBase}">${celdaVencimiento}</td>
+                  <td style="${tdBase} color: #a1a1aa;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${clienteVal}">${clienteVal}</span></td>
+                  <td style="${tdBase}">${celdaTelefonoContent}</td>
+                  <td style="${tdBase} color: #a1a1aa; font-family: monospace;">${fechaPagoVal}</td>
+                  <td style="${tdBase} color: #30d158; font-weight: 800; font-family: monospace;">${valorVal}</td>
+                  <td style="${tdBase} color: #bf5af2; font-weight: 700;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${pagoVal}">${pagoVal}</span></td>
+                  <td style="${tdBase} text-align: right; padding-right: 10px;">
+                    <div style="display: flex; gap: 4px; justify-content: flex-end; align-items: center; min-width: 110px;">
+                      ${botonesEdicionIzquierda}
+                      ${botonCopiar}
+                      ${botonPasarHoy}
+                    </div>
+                  </td>
+                </tr>
+              `;
             } else if (!esVentas && !esGarantias) {
               let botonTemp = !isCaida
                 ? `<button onclick="generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">⏳ Temp</button>`
@@ -2995,6 +3010,7 @@ window.cargarDatosMySQL = function () {
                     <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
                       ${botonesEdicionIzquierda}
                       ${botonCopiar}
+                      ${botonPasarHoy}
                       ${botonTemp}
                       ${botonEstado}
                     </div>
@@ -7481,3 +7497,38 @@ function cerrarSesionStaff() {
       });
   }
 }
+/* =========================================================================
+   📅 MOVER REGISTRO/CUENTA AL DÍA DE HOY (SUPERADMIN)
+   ========================================================================= */
+window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
+  if (typeof haptic === "function") haptic();
+  const correo = correoEscapado ? decodeURIComponent(correoEscapado) : "";
+
+  const formData = new FormData();
+  formData.append("accion", "pasar_a_hoy");
+  formData.append("tabla", window.tablaMySQLActual);
+  formData.append("id", id);
+  formData.append("correo", correo);
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "success") {
+        cargarDatosMySQL(); // Refresca la tabla inmediatamente
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${data.message}</span></div>`
+          );
+        }
+      } else {
+        alert("❌ Error: " + data.message);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("❌ Error de comunicación al mover la fecha.");
+    });
+};
