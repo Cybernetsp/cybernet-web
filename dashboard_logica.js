@@ -332,7 +332,7 @@ function cargarPagosBreB() {
 }
 
 /* ==========================================================================
-   ✏️ ABRIR MODAL EDITAR (CON CONTROL DE ERRORES Y CAMPOS DE PAGO)
+   ✏️ ABRIR MODAL EDITAR (DISEÑO OPTIMIZADO Y BOTONES AL FINAL)
    ========================================================================== */
 window.abrirModalEditarMySQL = function (filaEscapada) {
   try {
@@ -373,14 +373,14 @@ window.abrirModalEditarMySQL = function (filaEscapada) {
     if (iNombre) iNombre.value = fila.nombre || fila.cliente || "";
     if (iNumero) iNumero.value = fila.numero || fila.telefono || "";
 
-    // 🛠️ Crear campos dinámicos de pago si aún no existen en el modal
+    // 🛠️ Crear o reubicar contenedor de campos de pago
     let contenedorCamposPago = document.getElementById("editMySQLExtraPagoFields");
     if (!contenedorCamposPago) {
       contenedorCamposPago = document.createElement("div");
       contenedorCamposPago.id = "editMySQLExtraPagoFields";
-      contenedorCamposPago.style.cssText = "display: flex; flex-direction: column; gap: 10px; margin-top: 10px; margin-bottom: 10px;";
+      contenedorCamposPago.style.cssText = "display: flex; flex-direction: column; gap: 10px; margin-top: 10px; margin-bottom: 12px; width: 100%;";
       contenedorCamposPago.innerHTML = `
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px; width: 100%;">
           <div style="flex: 1;">
             <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">F. PAGO</label>
             <input type="text" id="editMySQLFechaPago" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: 14-ago" />
@@ -390,29 +390,36 @@ window.abrirModalEditarMySQL = function (filaEscapada) {
             <input type="text" id="editMySQLValor" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: $15.000" />
           </div>
         </div>
-        <div>
+        <div style="width: 100%;">
           <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">MÉTODO / BANCO</label>
           <input type="text" id="editMySQLPago" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: Bre-B, Nequi, Saldo Distri" />
         </div>
       `;
+    }
 
-      const formTarget =
-        document.getElementById("formEditarMySQL") ||
-        document.querySelector("#modalEditarMySQL form") ||
-        document.querySelector("#modalEditarMySQL .modal-ios") ||
-        document.getElementById("modalEditarMySQL");
+    // 📍 UBICACIÓN ESTRICTA: Insertar SIEMPRE por encima de los botones de acción
+    const formTarget =
+      document.getElementById("formEditarMySQL") ||
+      document.querySelector("#modalEditarMySQL form") ||
+      document.querySelector("#modalEditarMySQL .modal-ios") ||
+      document.getElementById("modalEditarMySQL");
 
-      if (formTarget) {
-        const btnGuardar = formTarget.querySelector("button[type='submit']") || formTarget.querySelector("button") || formTarget.lastElementChild;
-        if (btnGuardar && btnGuardar.parentNode === formTarget) {
-          formTarget.insertBefore(contenedorCamposPago, btnGuardar);
-        } else {
-          formTarget.appendChild(contenedorCamposPago);
-        }
+    if (formTarget) {
+      // Buscar el contenedor de los botones o el botón submit/cancelar
+      const btnSubmit = document.getElementById("btnGuardarEditarMySQL") || formTarget.querySelector("button[type='submit']");
+      let filaBotones = btnSubmit ? btnSubmit.parentElement : null;
+
+      // Si el botón está metido dentro de un div con 'Cancelar'
+      if (filaBotones && filaBotones !== formTarget && filaBotones.contains(btnSubmit)) {
+        formTarget.insertBefore(contenedorCamposPago, filaBotones);
+      } else if (btnSubmit) {
+        formTarget.insertBefore(contenedorCamposPago, btnSubmit);
+      } else {
+        formTarget.appendChild(contenedorCamposPago);
       }
     }
 
-    // Cargar valores de pago de forma segura (con verificación de existencia)
+    // Cargar datos
     const elFechaPago = document.getElementById("editMySQLFechaPago");
     const elValor = document.getElementById("editMySQLValor");
     const elPago = document.getElementById("editMySQLPago");
@@ -421,14 +428,12 @@ window.abrirModalEditarMySQL = function (filaEscapada) {
     if (elValor) elValor.value = fila.valor || "";
     if (elPago) elPago.value = fila.pago || "";
 
-    // Mostrar los campos extra solo en las tablas que corresponden
-    if (contenedorCamposPago) {
-      const tablaActual = (window.tablaMySQLActual || "").toLowerCase();
-      if (tablaActual === "netflix" || tablaActual === "registro_ventas") {
-        contenedorCamposPago.style.display = "flex";
-      } else {
-        contenedorCamposPago.style.display = "none";
-      }
+    // Mostrar los campos solo en las tablas que los necesitan
+    const tablaActual = (window.tablaMySQLActual || "").toLowerCase();
+    if (tablaActual === "netflix" || tablaActual === "registro_ventas") {
+      contenedorCamposPago.style.display = "flex";
+    } else {
+      contenedorCamposPago.style.display = "none";
     }
 
     const inputs = [iCorreo, iClave, iPerfil, iPin, iVenc, iNombre, iNumero];
@@ -447,7 +452,7 @@ window.abrirModalEditarMySQL = function (filaEscapada) {
     }
   } catch (err) {
     console.error("Error al abrir modal de edición:", err);
-    alert("❌ Ocurrió un error al abrir el modal: " + err.message);
+    alert("❌ Error al abrir modal: " + err.message);
   }
 };
 
