@@ -22,7 +22,7 @@ document.getElementById("formLogin").addEventListener("submit", function (e) {
   formData.append("correo", correo);
   formData.append("clave", clave);
 
-  fetch("autenticar.php", {
+  fetch("https://api.cybernetsp.com/autenticar.php", {
   method: "POST",
   body: formData,
 })
