@@ -2,7 +2,8 @@
    🚀 CYBERNET OS - NÚCLEO LÓGICO (VERSIÓN MySQL / PHP)
    ========================================================================== */
 // 🔗 URL OFICIAL DE GOOGLE APPS SCRIPT PARA PINESMES Y NEYOP
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
+const GOOGLE_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 // 1. INTERCEPTOR DE SESIÓN Y ARRANQUE DEL SISTEMA
 (function () {
   const usuarioActivoObj = JSON.parse(
@@ -284,7 +285,9 @@ function cargarPagosBreB() {
   if (buscador) buscador.value = "";
 
   // ⚠️ Consulta a PHP (Reemplaza la lógica de Google Sheets)
-  fetch("obtener_pagos_breb.php") // Necesitarás crear este archivo PHP que consulte los pagos
+  fetch(
+    "[https://api.cybernetsp.com/obtener_pagos_breb.php](https://api.cybernetsp.com/obtener_pagos_breb.php)",
+  ) // Necesitarás crear este archivo PHP que consulte los pagos
     .then((res) => res.json())
     .then((data) => {
       const icono = document.getElementById("icon-refresh-breb");
@@ -430,10 +433,13 @@ window.guardarEdicionMySQL = function (e) {
     document.getElementById("editMySQLNumero").value.trim(),
   );
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((data) => {
       if (btn) btn.disabled = false;
@@ -498,7 +504,9 @@ function cargarPlantillasDesdeSheets() {
       '<div class="empty-log-msg" style="grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">Sincronizando mensajes desde MySQL...</div>';
   }
 
-  fetch("obtener_plantillas.php")
+  fetch(
+    "[https://api.cybernetsp.com/obtener_plantillas.php](https://api.cybernetsp.com/obtener_plantillas.php)",
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -989,7 +997,9 @@ function cargarBandejaCodigosMySQL() {
   contenedor.innerHTML =
     '<div style="text-align: center; color: var(--ios-orange); padding: 20px;">Buscando códigos en Gmail...</div>';
 
-  fetch("obtener_codigos.php")
+  fetch(
+    "[https://api.cybernetsp.com/obtener_codigos.php](https://api.cybernetsp.com/obtener_codigos.php)",
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1048,7 +1058,9 @@ window.cargarBandejaCodigosMySQL = function () {
     '<div style="text-align: center; color: var(--ios-orange); padding: 40px;"><svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg><br><span style="font-weight: 600;">Sincronizando bandeja de Gmail...</span></div>';
 
   // Llamamos al archivo PHP que creamos antes
-  fetch("obtener_codigos.php")
+  fetch(
+    "[https://api.cybernetsp.com/obtener_codigos.php](https://api.cybernetsp.com/obtener_codigos.php)",
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1324,7 +1336,9 @@ function cargarInventarioStockMySQL() {
   contenedor.innerHTML =
     '<div style="grid-column: 1 / -1; text-align: center; color: var(--ios-blue); padding: 30px;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg><br><span style="margin-top:8px; display:inline-block; font-weight:600;">Consultando inventario en MySQL...</span></div>';
 
-  fetch("obtener_inventario_stock.php")
+  fetch(
+    "[https://api.cybernetsp.com/obtener_inventario_stock.php](https://api.cybernetsp.com/obtener_inventario_stock.php)",
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1399,10 +1413,13 @@ function cambiarEstadoPlataformaMySQL(idPlataforma, inputElem) {
   formData.append("plataforma", idPlataforma);
   formData.append("activo", nuevoEstado);
 
-  fetch("guardar_estado_plataforma.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/guardar_estado_plataforma.php](https://api.cybernetsp.com/guardar_estado_plataforma.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((data) => {
       if (data.status === "success") {
@@ -1471,7 +1488,7 @@ window.ejecutarAdelantoDesdeShift = function (e) {
 
   const empleado = document.getElementById("adeEmpleado").value;
   const montoRaw = document.getElementById("adeMonto").value;
-  
+
   // 🧼 Extrae únicamente dígitos numéricos ("$ 10.000" -> 10000)
   const montoLimpio = parseInt(montoRaw.replace(/\D/g, ""), 10) || 0;
 
@@ -1490,10 +1507,13 @@ window.ejecutarAdelantoDesdeShift = function (e) {
   formData.append("empleado", empleado);
   formData.append("monto", montoLimpio);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((data) => {
       btn.innerHTML = originalText;
@@ -1541,12 +1561,15 @@ function cargarHorasDesdeMySQL(silencioso = false) {
   const formData = new FormData();
   formData.append("accion", "obtener_control_horas");
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData
-  })
-    .then(res => res.text())
-    .then(text => {
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
+    .then((res) => res.text())
+    .then((text) => {
       let res;
       try {
         res = JSON.parse(text);
@@ -1559,14 +1582,17 @@ function cargarHorasDesdeMySQL(silencioso = false) {
       }
 
       if (res && res.status === "success") {
-        window.currentHorasStock = (res.data || []).map(item => ({
+        window.currentHorasStock = (res.data || []).map((item) => ({
           id: item.id,
           vendedor: item.vendedor || item.usuario || "ASISTENTE",
-          fecha: item.fecha || (item.hora_inicio ? item.hora_inicio.split(" ")[0] : "-"),
+          fecha:
+            item.fecha ||
+            (item.hora_inicio ? item.hora_inicio.split(" ")[0] : "-"),
           tiempo: item.tiempo_trabajado || item.horas || "00:00:00",
-          pagoTurno: item.total !== undefined ? item.total : (item.pago_turno || "0"),
+          pagoTurno:
+            item.total !== undefined ? item.total : item.pago_turno || "0",
           estado: item.estado || "CERRADO",
-          filaIndex: item.id
+          filaIndex: item.id,
         }));
 
         let query = document.getElementById("searchShiftsInput")
@@ -1586,7 +1612,7 @@ function cargarHorasDesdeMySQL(silencioso = false) {
         container.innerHTML = `<div style="text-align:center; padding:40px; color:#ff453a;">❌ Error: ${res ? res.message : "Fallo de consulta"}</div>`;
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       container.innerHTML = `<div style="text-align:center; padding:40px; color:#ff453a;">❌ Error de conexión con acciones_mysql.php.</div>`;
     });
@@ -1598,7 +1624,7 @@ function renderizarHorasEnPantallaMySQL(filtro = "") {
 
   const data = window.currentHorasStock || [];
 
-  let filtrados = data.filter(item => {
+  let filtrados = data.filter((item) => {
     if (!filtro) return true;
     return (
       (item.vendedor || "").toLowerCase().includes(filtro) ||
@@ -1617,7 +1643,7 @@ function renderizarHorasEnPantallaMySQL(filtro = "") {
 
   let html = `<div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">`;
 
-  filtrados.forEach(turno => {
+  filtrados.forEach((turno) => {
     const esActivo = turno.estado === "ACTIVO";
     const colorEstado = esActivo ? "#30d158" : "#a1a1aa";
     const textoEstado = esActivo ? "🟢 EN CURSO" : "🔴 CERRADO";
@@ -1712,10 +1738,13 @@ window.ejecutarGuardadoHorasManual = function (event) {
   formData.append("horas", horas);
   formData.append("fecha", fecha);
 
-  fetch("guardar_horas_manual.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/guardar_horas_manual.php](https://api.cybernetsp.com/guardar_horas_manual.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((data) => {
       if (data.status === "success") {
@@ -1742,8 +1771,6 @@ window.toggleModalAdelanto = function (show) {
     document.getElementById("formAdelantoShift").reset();
   }
 };
-
-
 
 // 3. Abrir/Cerrar y Cargar Resumen de Nómina
 window.abrirTotalNomina = function () {
@@ -1773,7 +1800,9 @@ function cargarNominaMySQL() {
   contenedor.innerHTML =
     '<div class="empty-log-msg" style="background: rgba(0, 0, 0, 0.2); border-radius: 20px; padding: 40px; text-align: center; color: var(--ios-green);">Calculando nómina desde MySQL...</div>';
 
-  fetch("obtener_nomina.php")
+  fetch(
+    "[https://api.cybernetsp.com/obtener_nomina.php](https://api.cybernetsp.com/obtener_nomina.php)",
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1852,7 +1881,9 @@ window.cargarUsuariosSelects = function () {
   const selectVend = document.getElementById("inputVendedorShift");
   const selectAde = document.getElementById("adeEmpleado");
 
-  fetch("obtener_usuarios.php")
+  fetch(
+    "[https://api.cybernetsp.com/obtener_usuarios.php](https://api.cybernetsp.com/obtener_usuarios.php)",
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success" && res.data.length > 0) {
@@ -2217,7 +2248,9 @@ window.cargarDistribuidores = function () {
     </tr>
   `;
 
-  fetch("obtener_distribuidores.php")
+  fetch(
+    "[https://api.cybernetsp.com/obtener_distribuidores.php](https://api.cybernetsp.com/obtener_distribuidores.php)",
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -3114,10 +3147,13 @@ window.guardarNuevoRegistroMySQL = function (e) {
   formData.append("tabla", plataforma);
   formData.append("bloque_cuentas", bloque);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((data) => {
       btn.disabled = false;
@@ -3173,10 +3209,13 @@ window.eliminarRegistroMySQL = function (id, correoEscapado = "") {
   formData.append("id", id);
   formData.append("correo", correo);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((data) => {
       if (data.status === "success") {
@@ -3212,10 +3251,13 @@ window.eliminarFechaMySQL = function (diaEscapado) {
   formData.append("tabla", window.tablaMySQLActual);
   formData.append("dia_valor", diaValor);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((data) => {
       if (data.status === "success") {
@@ -3275,10 +3317,13 @@ window.marcarComoGarantia = function (
   formData.append("proveedor", prov);
   formData.append("fecha_compra", dia);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then(async (res) => {
       const text = await res.text();
       try {
@@ -3358,10 +3403,13 @@ window.guardarResolucionMySQL = function (e) {
   formData.append("correo_nuevo", correoNuevo);
   formData.append("clave_nueva", claveNueva);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then(async (res) => {
       const text = await res.text();
       try {
@@ -3443,10 +3491,13 @@ window.cargarStockParaPanelVentas = function () {
   const formData = new FormData();
   formData.append("accion", "obtener_stock_plataformas");
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((data) => {
       if (data.status === "success" && data.stock) {
@@ -3764,10 +3815,13 @@ window.ejecutarVentaFinal = function (e) {
     formData.append("medio_pago", medioPago);
     formData.append("servicios_json", JSON.stringify(servicios));
 
-    fetch("acciones_mysql.php", {
-      method: "POST",
-      body: formData,
-    })
+    fetch(
+      "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+      {
+        method: "POST",
+        body: formData,
+      },
+    )
       .then((res) => res.text())
       .then((text) => {
         let data;
@@ -4008,10 +4062,13 @@ window.buscarHistorialNetflixEnVenta = function (telefono) {
     formData.append("accion", "buscar_renovacion_netflix");
     formData.append("tel", telLimpio);
 
-    fetch("acciones_mysql.php", {
-      method: "POST",
-      body: formData,
-    })
+    fetch(
+      "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+      {
+        method: "POST",
+        body: formData,
+      },
+    )
       .then((res) => res.json())
       .then((res) => {
         window.cuentasNetflixClienteActivo = [];
@@ -4076,10 +4133,13 @@ window.alCambiarTipoVenta = function (idFila) {
     formData.append("accion", "buscar_renovacion_netflix");
     formData.append("tel", telNum);
 
-    fetch("acciones_mysql.php", {
-      method: "POST",
-      body: formData,
-    })
+    fetch(
+      "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+      {
+        method: "POST",
+        body: formData,
+      },
+    )
       .then((res) => res.text())
       .then((text) => {
         let res;
@@ -4463,10 +4523,13 @@ function cargarDashboardFinanzas() {
   formData.append("mes", mes);
   formData.append("dia", dia);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -4512,10 +4575,13 @@ function cargarDashboardFinanzas() {
   formData.append("mes", mes);
   formData.append("dia", dia);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.text())
     .then((text) => {
       let res;
@@ -4621,10 +4687,13 @@ function cargarRentabilidadPlataformas() {
   formData.append("accion", "obtener_rentabilidad_plataformas");
   formData.append("mes", mes);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -4720,10 +4789,13 @@ function guardarTransaccion(e) {
   formData.append("monto", montoRaw);
   formData.append("detalle", detalleVal);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((res) => {
       window.isWorkingFinanzas = false;
@@ -4777,10 +4849,13 @@ window.guardarDeudaEnSheets = window.guardarDeudaEnMySQL = function () {
   formData.append("monto", monto);
   formData.append("tipo", tipo);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((res) => {
       if (btn) {
@@ -4958,10 +5033,13 @@ window.cargarCortesOperativosNetflix = function () {
   const formData = new FormData();
   formData.append("accion", "obtener_cortes_netflix");
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -5092,10 +5170,13 @@ window.procesarCorteNetflix = function (
   formData.append("correo", correo);
   formData.append("clave_nueva", claveNueva);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.text())
     .then((text) => {
       let res;
@@ -5372,10 +5453,13 @@ window.crearCuentaNetflixAlias = function () {
   formData.append("correo", correoFinal);
   formData.append("clave", clave.trim());
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -5918,10 +6002,13 @@ function cargarStockSelectCargas() {
   const formData = new FormData();
   formData.append("accion", "obtener_stock_plataformas");
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((res) => {
       let stock = res && res.status === "success" ? res.stock || {} : {};
@@ -5993,10 +6080,13 @@ function ejecutarCargaLote(e) {
   formData.append("proveedor", proveedorFinal);
   formData.append("bloque_cuentas", bloqueCuentas);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((res) => {
       btnSubmit.disabled = false;
@@ -6213,10 +6303,13 @@ function ejecutarCargaLote(e) {
   formData.append("proveedor", proveedorFinal);
   formData.append("bloque_cuentas", bloqueCuentas);
 
-  fetch("acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
     .then((res) => res.json())
     .then((res) => {
       btnSubmit.disabled = false;
@@ -6293,8 +6386,6 @@ window.toggleSuspendidasPanel = function () {
       window.CyberSonidos.play("cerrar");
   }
 };
-
-
 
 window.refrescarVistaActualModal = function () {
   if (typeof haptic === "function") haptic();
@@ -6557,8 +6648,18 @@ window.renderizarTablaSuspendidas = function () {
 
   const hoyObj = new Date();
   const mesesAbrev = [
-    "ene", "feb", "mar", "abr", "may", "jun",
-    "jul", "ago", "sep", "oct", "nov", "dic"
+    "ene",
+    "feb",
+    "mar",
+    "abr",
+    "may",
+    "jun",
+    "jul",
+    "ago",
+    "sep",
+    "oct",
+    "nov",
+    "dic",
   ];
   const fechaHoyCorta = hoyObj.getDate() + "-" + mesesAbrev[hoyObj.getMonth()];
 
@@ -6737,8 +6838,6 @@ window.renderizarTablaSuspendidas = function () {
   contenedor.innerHTML = htmlTabla;
 };
 
-
-
 /* ==========================================================================
    🟣 INTERCAMBIO DE VISTAS Y RENDERIZADO DE NEYOP (GOOGLE SHEETS)
    ========================================================================== */
@@ -6794,7 +6893,10 @@ window.cargarNeyop = function (forzar = false) {
 
   if (forzar && iconRefrescar) {
     iconRefrescar.classList.add("spin-anim");
-  } else if (!forzar && (!window.memoriaNeyop || window.memoriaNeyop.length === 0)) {
+  } else if (
+    !forzar &&
+    (!window.memoriaNeyop || window.memoriaNeyop.length === 0)
+  ) {
     container.innerHTML = `
       <div style="padding: 60px; text-align: center; color: #ff9f0a;">
         <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
@@ -6846,16 +6948,22 @@ window.renderizarTablaNeyop = function () {
       return (
         (item.yopmail || "").toLowerCase().includes(texto) ||
         (item.correo || "").toLowerCase().includes(texto) ||
-        (item.claveVieja || item.clave_vieja || "").toLowerCase().includes(texto) ||
-        (item.claveNueva || item.clave_nueva || "").toLowerCase().includes(texto)
+        (item.claveVieja || item.clave_vieja || "")
+          .toLowerCase()
+          .includes(texto) ||
+        (item.claveNueva || item.clave_nueva || "")
+          .toLowerCase()
+          .includes(texto)
       );
     });
   }
 
   // Cuentas con correo registrado arriba, vacías abajo
   filtrados.sort((a, b) => {
-    let tieneCorreoA = a.correo && a.correo.trim() !== "" && a.correo.trim() !== "-" ? 1 : 0;
-    let tieneCorreoB = b.correo && b.correo.trim() !== "" && b.correo.trim() !== "-" ? 1 : 0;
+    let tieneCorreoA =
+      a.correo && a.correo.trim() !== "" && a.correo.trim() !== "-" ? 1 : 0;
+    let tieneCorreoB =
+      b.correo && b.correo.trim() !== "" && b.correo.trim() !== "-" ? 1 : 0;
     return tieneCorreoB - tieneCorreoA;
   });
 
@@ -6878,7 +6986,9 @@ window.renderizarTablaNeyop = function () {
       const estaListo = (cuenta.estado || "").toUpperCase() === "LISTO";
       const esFilaPar = idx % 2 === 0;
 
-      let colorFondoFila = esFilaPar ? "rgba(255, 255, 255, 0.015)" : "transparent";
+      let colorFondoFila = esFilaPar
+        ? "rgba(255, 255, 255, 0.015)"
+        : "transparent";
       let colorPrimario = "#ff9f0a";
       let colorBlanco = "#ffffff";
       let colorVerde = "#30d158";
@@ -6915,7 +7025,11 @@ window.renderizarTablaNeyop = function () {
         botonAccion = `<span style="color: #ff9f0a; font-weight: 800; display:flex; align-items:center; justify-content: center; gap:4px; font-size: 0.8rem;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Completado
         </span>`;
-      } else if (cuenta.correo && cuenta.correo.trim() !== "" && cuenta.correo.trim() !== "-") {
+      } else if (
+        cuenta.correo &&
+        cuenta.correo.trim() !== "" &&
+        cuenta.correo.trim() !== "-"
+      ) {
         botonAccion = `<button onclick="window.marcarListoNeyop('${cuenta.filaIndex || cuenta.id}', this)" class="btn-ios" style="padding: 8px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0 auto; background: #ff9f0a; color: white; border: none; font-weight:800; display:flex; align-items:center; gap:6px; box-shadow: 0 4px 10px rgba(255, 159, 10, 0.3);">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Listo
         </button>`;
@@ -6975,7 +7089,9 @@ window.marcarListoNeyop = function (filaIndex, btnElement) {
 
     if (res && res.status === "success") {
       if (typeof triggerToast === "function")
-        triggerToast(`<div style="color:var(--ios-green);">✅ Fila completada y pintada.</div>`);
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ Fila completada y pintada.</div>`,
+        );
       cargarNeyop(true);
     } else {
       alert("❌ Error: " + (res ? res.message : "Fallo de red"));
@@ -7009,10 +7125,15 @@ window.ejecutarFlujoPinesSuspendidas = function (btnElement) {
 
     if (res && res.status === "success") {
       if (typeof triggerToast === "function")
-        triggerToast(`<div style="color:var(--ios-green);">✅ ${res.message}</div>`);
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ ${res.message}</div>`,
+        );
       cargarSuspendidas(true);
     } else {
-      alert("❌ Error procesando pines: " + (res ? res.message : "Fallo de conexión"));
+      alert(
+        "❌ Error procesando pines: " +
+          (res ? res.message : "Fallo de conexión"),
+      );
     }
   };
 
@@ -7025,7 +7146,11 @@ window.ejecutarFlujoPinesSuspendidas = function (btnElement) {
 window.ejecutarTransferirRecarga = function (btnElement) {
   if (typeof haptic === "function") haptic();
 
-  if (!confirm("¿Transferir a NEYOP las recargas PENDIENTES marcadas con '1'? (Se autogenerarán Yopmails si faltan espacios vacíos)"))
+  if (
+    !confirm(
+      "¿Transferir a NEYOP las recargas PENDIENTES marcadas con '1'? (Se autogenerarán Yopmails si faltan espacios vacíos)",
+    )
+  )
     return;
 
   const originalHTML = btnElement.innerHTML;
@@ -7043,7 +7168,9 @@ window.ejecutarTransferirRecarga = function (btnElement) {
 
     if (res && res.status === "success") {
       if (typeof triggerToast === "function")
-        triggerToast(`<div style="color:var(--ios-green);">✅ ${res.message}</div>`);
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ ${res.message}</div>`,
+        );
       cargarNeyop(true);
     } else {
       alert("❌ Error: " + (res ? res.message : "Fallo de conexión"));
@@ -7060,7 +7187,11 @@ window.activarMultiplesCuentasSuspendidas = function (indices, btnElement) {
   if (typeof haptic === "function") haptic();
 
   const count = indices.split(",").length;
-  if (!confirm(`¿Estás seguro de activar las ${count} cuentas mostradas al mismo tiempo?`))
+  if (
+    !confirm(
+      `¿Estás seguro de activar las ${count} cuentas mostradas al mismo tiempo?`,
+    )
+  )
     return;
 
   const originalHTML = btnElement.innerHTML;
@@ -7075,7 +7206,9 @@ window.activarMultiplesCuentasSuspendidas = function (indices, btnElement) {
 
     if (res && res.status === "success") {
       if (typeof triggerToast === "function")
-        triggerToast(`<div style="color:var(--ios-green);">✅ ${res.message}</div>`);
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ ${res.message}</div>`,
+        );
       cargarSuspendidas(true);
     } else {
       alert("❌ Error: " + (res ? res.message : "Fallo de red"));
@@ -7105,7 +7238,9 @@ window.activarCuentaSuspendida = function (filaIndex, btnElement) {
 
     if (res && res.status === "success") {
       if (typeof triggerToast === "function")
-        triggerToast(`<div style="color:var(--ios-green);">✅ Cuenta activada.</div>`);
+        triggerToast(
+          `<div style="color:var(--ios-green);">✅ Cuenta activada.</div>`,
+        );
       cargarSuspendidas(true);
     } else {
       alert("❌ Error: " + (res ? res.message : "Fallo de red"));
@@ -7158,7 +7293,6 @@ window.extraerPinIndividual = function (correo, btnElement) {
   document.body.appendChild(script);
 };
 
-
 /* ==========================================================================
    📋 MOTOR DE COPIADO UNIVERSAL (FUNCIONA EN HTTP, HTTPS, IP LOCAL Y LOCALHOST)
    ========================================================================== */
@@ -7194,7 +7328,8 @@ window.copiarDatoCargaIndividual = function (btn, textoEsc) {
 
   // 3. Intento 1: API Moderna (Solo funciona en HTTPS / Localhost)
   if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(texto)
+    navigator.clipboard
+      .writeText(texto)
       .then(animarExito)
       .catch(() => copiarFallback(texto, animarExito));
   } else {
@@ -7217,7 +7352,7 @@ function copiarFallback(texto, callbackExito) {
   textarea.style.left = "-9999px";
   textarea.setAttribute("readonly", "");
   document.body.appendChild(textarea);
-  
+
   textarea.focus();
   textarea.select();
 
@@ -7234,8 +7369,6 @@ function copiarFallback(texto, callbackExito) {
   document.body.removeChild(textarea);
 }
 
-
-
 /* ==========================================================================
    ⏱️ CONTROL Y REGISTRO DE TURNOS DE ASISTENTES EN MYSQL
    ========================================================================== */
@@ -7249,23 +7382,30 @@ function startShiftTimer() {
   formData.append("accion", "iniciar_turno");
   formData.append("vendedor", activeUser);
 
-  fetch("acciones_mysql.php", { method: "POST", body: formData })
-    .then(res => res.json())
-    .then(res => {
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    { method: "POST", body: formData },
+  )
+    .then((res) => res.json())
+    .then((res) => {
       if (res && res.status === "success") {
         let segsPrevios = res.segundos_transcurridos || 0;
-        sessionStorage.setItem("cyber_shift_start_time", Date.now() - (segsPrevios * 1000));
+        sessionStorage.setItem(
+          "cyber_shift_start_time",
+          Date.now() - segsPrevios * 1000,
+        );
         sessionStorage.setItem("cyber_last_sync_time", Date.now());
       }
     })
-    .catch(err => console.error("Error al iniciar turno en MySQL:", err));
+    .catch((err) => console.error("Error al iniciar turno en MySQL:", err));
 
   if (timerInterval) clearInterval(timerInterval);
 
   timerInterval = setInterval(function () {
     if (isTimerPaused) return;
 
-    let startTime = parseInt(sessionStorage.getItem("cyber_shift_start_time")) || Date.now();
+    let startTime =
+      parseInt(sessionStorage.getItem("cyber_shift_start_time")) || Date.now();
     let totalMs = Date.now() - startTime;
 
     let totalSeconds = Math.floor(totalMs / 1000);
@@ -7282,7 +7422,9 @@ function startShiftTimer() {
     if (stElement) stElement.innerText = tiempoTexto;
 
     // Enviar pulso de guardado a MySQL cada 5 minutos
-    let lastSync = parseInt(sessionStorage.getItem("cyber_last_sync_time"), 10) || Date.now();
+    let lastSync =
+      parseInt(sessionStorage.getItem("cyber_last_sync_time"), 10) ||
+      Date.now();
     if (Date.now() - lastSync >= 300000) {
       ejecutarAutoPulsoTiempo(tiempoTexto);
     }
@@ -7300,12 +7442,15 @@ function ejecutarAutoPulsoTiempo(tiempoTexto) {
   formData.append("vendedor", activeUser);
   formData.append("tiempo_trabajado", tiempoTexto || "00:00:00");
 
-  fetch("acciones_mysql.php", { method: "POST", body: formData })
-    .then(res => res.json())
-    .then(res => {
+  fetch(
+    "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+    { method: "POST", body: formData },
+  )
+    .then((res) => res.json())
+    .then((res) => {
       console.log("✅ Tiempo del asistente actualizado en MySQL:", tiempoTexto);
     })
-    .catch(err => console.error("Error al enviar pulso a MySQL:", err));
+    .catch((err) => console.error("Error al enviar pulso a MySQL:", err));
 }
 
 function cerrarSesionStaff() {
@@ -7319,7 +7464,11 @@ function cerrarSesionStaff() {
     return;
   }
 
-  if (confirm("¿Estás seguro de que deseas cerrar tu sesión y finalizar tu turno de hoy?")) {
+  if (
+    confirm(
+      "¿Estás seguro de que deseas cerrar tu sesión y finalizar tu turno de hoy?",
+    )
+  ) {
     let timerEl = document.getElementById("shiftTimer");
     let tiempoFinal = timerEl ? timerEl.innerText : "00:00:00";
 
@@ -7328,8 +7477,11 @@ function cerrarSesionStaff() {
     formData.append("vendedor", usuarioActivo);
     formData.append("tiempo_trabajado", tiempoFinal);
 
-    fetch("acciones_mysql.php", { method: "POST", body: formData })
-      .then(res => res.json())
+    fetch(
+      "[https://api.cybernetsp.com/acciones_mysql.php](https://api.cybernetsp.com/acciones_mysql.php)",
+      { method: "POST", body: formData },
+    )
+      .then((res) => res.json())
       .then(() => {
         sessionStorage.clear();
         localStorage.removeItem("cyber_saved_staff");
