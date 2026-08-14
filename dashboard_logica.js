@@ -7498,7 +7498,7 @@ function cerrarSesionStaff() {
   }
 }
 /* =========================================================================
-   📅 MOVER REGISTRO/CUENTA AL DÍA DE HOY (SUPERADMIN)
+   📅 MOVER TODOS LOS PERFILES DE LA CUENTA AL DÍA DE HOY
    ========================================================================= */
 window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
   if (typeof haptic === "function") haptic();
@@ -7517,7 +7517,7 @@ window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
     .then((res) => res.json())
     .then((data) => {
       if (data.status === "success") {
-        cargarDatosMySQL(); // Refresca la tabla inmediatamente
+        cargarDatosMySQL(); // Refresca la tabla en vivo
         if (typeof triggerToast === "function") {
           triggerToast(
             `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${data.message}</span></div>`
