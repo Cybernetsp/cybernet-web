@@ -1,0 +1,1879 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto,
+    sans-serif;
+}
+
+body {
+  background-color: #0b0b0d;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+}
+
+.login-card {
+  background: #1c1c1e;
+  border: 1px solid #2c2c2e;
+  border-radius: 24px;
+  padding: 35px 30px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.login-card h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.subtitulo {
+  font-size: 0.85rem;
+  color: #a1a1aa;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.grupo-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.grupo-input label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #a1a1aa;
+  text-transform: uppercase;
+}
+
+.grupo-input input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #2c2c2e;
+  background: rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.grupo-input input:focus {
+  border-color: #0a84ff;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 50px;
+  border: none;
+  background: #0a84ff;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+  margin-top: 10px;
+}
+
+button:hover {
+  background: #0077e6;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.mensaje-error {
+  display: none;
+  background: rgba(255, 69, 58, 0.15);
+  border: 1px solid rgba(255, 69, 58, 0.3);
+  color: #ff453a;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 15px;
+}
+/* =========================================================================
+    🍎 CYBERNET OS - macOS EDITION (SONOMA / SEQUOIA DESIGN SYSTEM)
+    Optimizado para Renderizado GPU, Glassmorphism y Fluidez Nativa
+    ========================================================================= */
+
+/* --- 1. CONFIGURACIÓN DE VARIABLES Y TEMAS (APPLE SYSTEM COLORS) --- */
+:root {
+  /* Colores Nativos de Apple (Dark Mode) */
+  --mac-blue: #0a84ff;
+  --mac-green: #30d158;
+  --mac-red: #ff453a;
+  --mac-orange: #ff9f0a;
+  --mac-yellow: #ffd60a;
+  --mac-purple: #bf5af2;
+
+  /* Transiciones Fluidas Apple */
+  --transition-fluid:
+    transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease,
+    background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* 🌑 ENTORNO OSCURO SOLIDO (Gris y Carbón Premium - Sin Transparencias) */
+[data-theme="dark"],
+:root {
+  color-scheme: dark;
+  --page-bg: #0b0b0d;
+
+  /* Materiales Sólidos Mate (Se eliminó el rgba translúcido para evitar solapamientos) */
+  --window-bg: #1c1c1e; /* Gris oscuro de ventana Mac */
+  --card-bg: #2c2c2e; /* Gris tarjeta Mac */
+  --card-hover: #3a3a3c; /* Gris interactivo */
+  --glass-bg: #111112; /* Negro carbón sólido */
+
+  /* Textos y Bordes */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(235, 235, 245, 0.6);
+  --glass-border: 1px solid #3a3a3c;
+  --glass-border-light: 1px solid #2c2c2e;
+
+  /* Controles (Inputs / Botones) */
+  --input-bg: rgba(0, 0, 0, 0.4);
+  --input-focus: rgba(0, 0, 0, 0.6);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+}
+
+/* --- 2. MAQUETACIÓN BASE Y TIPOGRAFÍA --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================================================
+   🌌 RECALIBRACIÓN ENTORNO: macOS MIDNIGHT AURA GRADIENT (PREMIUM TECH)
+   ========================================================================= */
+body {
+  /* Gradiente líquido difuminado estilo Apple con velo oscuro integrado */
+  background:
+    linear-gradient(rgba(11, 11, 13, 0.6), rgba(11, 11, 13, 0.82)),
+    url("wallpaper.jpg") no-repeat center center fixed !important;
+  background-size: cover !important;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden; /* Mantiene el escritorio de Cybernet OS fijo como un sistema real */
+}
+
+/* Scrollbars estilo macOS (Píldoras flotantes) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* --- 3. BARRA DE MENÚ SUPERIOR (macOS TOP BAR) --- */
+.macos-top-bar {
+  height: 28px;
+  background: #111112; /* Sólido sin transparencias */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  color: #fff;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999999;
+  border-bottom: var(--glass-border-light);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+}
+.mac-menu-left,
+.mac-menu-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.mac-menu-item {
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: background 0.1s;
+}
+.mac-menu-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* --- 4. DOCK MAGNÉTICO INFERIOR --- */
+.macos-dock {
+  background: #1c1c1e;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: var(--glass-border-light);
+  border-radius: 24px;
+  padding: 10px 12px; /* 👈 Un poco más de espacio interno */
+  display: flex;
+  gap: 12px; /* 👈 Separación perfecta entre íconos */
+  align-items: center; /* 👈 Alinea la rayita divisora */
+  pointer-events: auto;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.mac-icon-bg {
+  width: 52px; /* 👈 Tamaño exacto al de la foto */
+  height: 52px;
+  border-radius: 14px; /* 👈 La curva Squircle de Apple */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 👈 Sombra suave, sin borde blanco */
+  transition: all 0.2s ease;
+}
+.macos-dock {
+  background: #1c1c1e; /* Sólido */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: var(--glass-border-light);
+  border-radius: 24px;
+  padding: 8px 10px;
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.mac-dock-icon {
+  position: relative;
+  cursor: pointer;
+  transition: var(--transition-fluid);
+}
+.mac-dock-icon:hover {
+  transform: scale(1.25);
+  z-index: 10;
+  margin: 0 10px;
+}
+.mac-icon-bg {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px; /* 🔥 EL SECRETO: 14px de curva en lugar de 50% */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2); /* Sutil brillo superior tipo Apple */
+}
+
+.mac-tooltip {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 30, 30, 0.85);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.mac-dock-icon:hover .mac-tooltip {
+  opacity: 1;
+}
+
+/* --- 5. ESCRITORIO DIVIDIDO (FINDER STYLE) --- */
+.mac-desktop-workspace {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 40px 20px 80px 20px;
+  z-index: 10;
+  width: 100%;
+}
+.mac-split-container {
+  display: flex;
+  width: 100%;
+  max-width: 1000px;
+  height: 70vh;
+  min-height: 550px;
+  background: var(--window-bg);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: var(--glass-border);
+  border-radius: 24px; /* Redondeado corporativo */
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.mac-left-panel {
+  flex: 0 0 320px;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: var(--glass-border);
+  padding: 40px 20px;
+}
+.mac-right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  gap: 20px;
+}
+
+/* Buscador Spotlight */
+.mac-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+.mac-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+.mac-search-input {
+  width: 100%;
+  padding: 14px 16px 14px 45px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #fff;
+  background: var(--input-bg);
+  border: var(--glass-border-light);
+  border-radius: 12px;
+  outline: none;
+  transition: var(--transition-fluid);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+.mac-search-input:focus {
+  border-color: var(--mac-blue);
+  background: var(--input-focus);
+  box-shadow:
+    0 0 0 3px rgba(10, 132, 255, 0.25),
+    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* --- 6. GESTIÓN DE VENTANAS macOS --- */
+.overlay-ios {
+  background: transparent !important;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+.overlay-ios.open {
+  display: flex;
+  pointer-events: auto;
+}
+
+.sheet-ios,
+.modal-ios {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  background: var(--window-bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: var(--glass-border) !important;
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+  border-radius: 20px !important; /* Ventanas de aplicaciones con curva suave */
+  pointer-events: auto;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+}
+.sheet-ios {
+  width: 95%;
+  max-width: 800px;
+  height: 85vh;
+  padding: 20px;
+}
+.modal-ios {
+  width: 90%;
+  max-width: 420px;
+  padding: 24px;
+  text-align: center;
+}
+
+/* Barra Arrastrable Mac */
+.mac-window-header {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: var(--glass-border-light);
+  cursor: grab;
+  flex-shrink: 0;
+  background: #111112;
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+}
+.mac-window-header:active {
+  cursor: grabbing;
+}
+.mac-window-controls {
+  display: flex;
+  gap: 8px;
+  margin-right: 15px;
+}
+.mac-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.mac-dot.red {
+  background: #ff5f56;
+  border: 1px solid #e0443e;
+}
+.mac-dot.yellow {
+  background: #ffbd2e;
+  border: 1px solid #dea123;
+}
+.mac-dot.green {
+  background: #27c93f;
+  border: 1px solid #1aab29;
+}
+
+.mac-window-title {
+  flex-grow: 1;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #d1d1d6;
+  margin-right: 50px;
+}
+
+/* Botón "X" universal moderno */
+.btn-close-circle {
+  display: flex !important;
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-secondary) !important;
+  border: var(--glass-border-light) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.1rem !important;
+  cursor: pointer !important;
+  z-index: 9999 !important;
+  transition: var(--transition-fluid) !important;
+}
+.btn-close-circle:hover {
+  background: var(--mac-red) !important;
+  color: white !important;
+  border-color: var(--mac-red) !important;
+  transform: scale(1.08) !important;
+}
+
+/* --- 7. COMPONENTES INTERNOS (CARDS, INPUTS, BOTONES) --- */
+.card-ios {
+  background: var(--card-bg) !important;
+  border: var(--glass-border-light) !important;
+  border-radius: 16px !important; /* Tarjetas internas más redondeadas */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: var(--transition-fluid);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+.card-ios:hover {
+  background: var(--card-hover) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.input-ios {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px !important; /* Cajas de texto más suaves */
+  border: var(--glass-border-light) !important;
+  background: var(--input-bg) !important;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  outline: none;
+  transition: var(--transition-fluid);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.input-ios:focus {
+  background: var(--input-focus) !important;
+  border-color: var(--mac-blue) !important;
+  box-shadow:
+    0 0 0 2px rgba(10, 132, 255, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+select.input-ios {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  background-size: 14px !important;
+  cursor: pointer;
+}
+
+.btn-ios {
+  padding: 10px 18px;
+  border-radius: 12px !important; /* Botones unificados redondos */
+  font-size: 0.9rem;
+  font-weight: 700 !important;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: auto !important;
+  min-height: 38px !important;
+  align-self: center; /* 🛡️ ANTI-ESTIRAMIENTO flexbox */
+  transition: var(--transition-fluid);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+.btn-ios:active {
+  transform: scale(0.96);
+}
+.btn-primary {
+  background: var(--text-primary) !important;
+  color: #000 !important;
+}
+.btn-success {
+  background: var(--mac-green) !important;
+  color: #ffffff !important;
+}
+.btn-danger {
+  background: var(--mac-red) !important;
+  color: #ffffff !important;
+}
+.btn-secondary {
+  background: #2c2c2e !important;
+  border: var(--glass-border-light) !important;
+  color: var(--text-primary) !important;
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Badges */
+.badge-ios {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: var(--glass-border-light);
+  padding: 4px 10px;
+  border-radius: 8px !important;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge-blue {
+  color: var(--mac-blue);
+  background: rgba(10, 132, 255, 0.15);
+  border-color: rgba(10, 132, 255, 0.2);
+}
+.badge-green {
+  color: var(--mac-green);
+  background: rgba(48, 209, 88, 0.15);
+  border-color: rgba(48, 209, 88, 0.2);
+}
+.badge-danger {
+  color: var(--mac-red);
+  background: rgba(255, 69, 58, 0.15);
+  border-color: rgba(255, 69, 58, 0.2);
+}
+
+/* --- 8. ISLA DINÁMICA & NOTIFICACIONES --- */
+.cyber-notification-center {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 2000000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  width: 100%;
+  max-width: 320px;
+}
+.cyber-notification {
+  pointer-events: auto;
+  background: #1c1c1e; /* Sólido */
+  backdrop-filter: none !important;
+  border: var(--glass-border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  color: white;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateX(50px) scale(0.95);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cyber-notification.show {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+.cyber-notif-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: var(--glass-border-light);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.cyber-notif-body {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.apple-notification-toast {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.6);
+  background: #000;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 30px;
+  width: 60px;
+  height: 25px;
+  opacity: 0;
+  visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+  z-index: 999999;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  white-space: nowrap;
+  transition:
+    transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+    min-height 0.4s ease,
+    opacity 0.25s ease,
+    padding 0.3s ease;
+}
+.apple-notification-toast.island-active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) scale(1);
+  width: 320px;
+  min-height: 46px;
+  height: auto;
+  padding: 12px 18px;
+  border-radius: 22px;
+  white-space: normal;
+}
+
+/* Efecto Apple Pay */
+.apple-pay-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: none !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999999;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.apple-pay-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.apple-pay-circle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 4px solid rgba(48, 209, 88, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111112;
+  transform: scale(0.8);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.apple-pay-overlay.active .apple-pay-circle {
+  transform: scale(1);
+}
+.checkmark-svg {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation:
+    drawCheck 0.45s 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+    scaleCheck 0.3s 0.15s ease-in-out;
+}
+@keyframes drawCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes scaleCheck {
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Spinner Mac */
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.spin-anim {
+  animation: spin 1s linear infinite;
+}
+
+/* --- 9. TABLAS (FINANZAS Y REGISTROS) --- */
+.distris-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.distris-table th,
+.distris-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: var(--glass-border-light);
+}
+.distris-table th {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  position: sticky;
+  top: 0;
+  background: #111112;
+  backdrop-filter: none !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#modalRegistroVentas table {
+  white-space: nowrap !important;
+  min-width: 950px !important;
+}
+#modalRegistroVentas div[style*="overflow-x: auto"] {
+  width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 12px;
+}
+#modalRegistroVentas div[style*="overflow-x: auto"]::-webkit-scrollbar {
+  height: 8px;
+}
+#modalRegistroVentas div[style*="overflow-x: auto"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+/* --- 10. RESPONSIVE Y MODO CELULAR --- */
+@media (max-width: 768px) {
+  body {
+    overflow-y: auto;
+  }
+  .macos-top-bar {
+    display: none;
+  }
+  .mac-desktop-workspace {
+    padding: 20px 15px 100px 15px;
+    height: auto;
+  }
+  .mac-split-container {
+    flex-direction: column;
+    height: auto;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .mac-left-panel {
+    flex: none;
+    width: 100%;
+    border-right: none;
+    border-bottom: var(--glass-border-light);
+    padding: 20px;
+  }
+  .mac-right-panel {
+    padding: 20px;
+  }
+
+  /* Comportamiento del Modal en Celular */
+  .sheet-ios {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 16px 16px 0 0 !important;
+    height: 90vh;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  }
+  .overlay-ios.open .sheet-ios {
+    transform: translateY(0) !important;
+  }
+
+  #codesOverlay .sheet-ios,
+  #shiftsOverlay .sheet-ios,
+  #inventarioOverlay .sheet-ios {
+    left: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    animation: none !important;
+  }
+
+  .macos-dock-wrapper {
+    bottom: 20px;
+  }
+  .macos-dock {
+    width: auto !important;
+    min-width: 140px;
+    height: 50px;
+    padding: 0 20px !important;
+    border-radius: 30px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+  }
+
+  .macos-dock > *:not(.mobile-menu-trigger) {
+    display: none !important;
+  }
+  .mobile-menu-trigger {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .macos-dock.mobile-expanded {
+    width: calc(100% - 40px) !important;
+    height: auto !important;
+    min-height: 200px !important;
+    border-radius: 20px !important;
+    padding: 20px !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+  }
+  .macos-dock.mobile-expanded .mobile-menu-trigger {
+    display: none !important;
+  }
+  .macos-dock.mobile-expanded > *:not(.mobile-menu-trigger) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: var(--glass-border-light) !important;
+    border-radius: 12px !important;
+    padding: 10px !important;
+    height: 75px !important;
+    width: 100% !important;
+  }
+}
+
+/* --- 11. UTILIDADES EXTRAS (Flexbox y Spacing) --- */
+.flex-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.flex-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.text-center {
+  text-align: center;
+}
+.mt-1 {
+  margin-top: 10px;
+}
+.mb-1 {
+  margin-bottom: 12px;
+}
+.w-100 {
+  width: 100%;
+}
+.saldo-verde {
+  color: var(--mac-green);
+  font-weight: 600;
+  font-family: monospace;
+}
+.saldo-rojo {
+  color: var(--mac-red);
+  font-weight: 600;
+  font-family: monospace;
+}
+.empty-log-msg {
+  text-align: center;
+  padding: 36px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+/* =========================================================================
+    🛠️ PARCHE DE CORRECCIÓN: ESTRUCTURAS INTERNAS Y GRÁFICAS (FINANZAS Y TURNOS)
+    ========================================================================= */
+
+/* 1. Cabecera protegida con margen preventivo contra colisiones */
+.sheet-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+  padding-bottom: 12px !important;
+  border-bottom: var(--glass-border-light) !important;
+  width: 100%;
+  padding-right: 40px !important; /* Espacio preventivo para aislar el botón X */
+}
+
+/* 2. Anclaje seguro absoluto de la X para liberar los textos */
+.btn-close-circle {
+  position: absolute !important;
+  top: 20px !important;
+  right: 20px !important;
+  flex-shrink: 0 !important;
+  z-index: 10 !important;
+}
+
+/* 3. Restaurar la Gráfica Financiera */
+.chart-layout-box {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.apple-ring-svg {
+  transform: rotate(-90deg);
+  width: 100px !important;
+  height: 100px !important;
+  flex-shrink: 0;
+}
+.ring-bg {
+  fill: none !important;
+  stroke: rgba(255, 255, 255, 0.05) !important;
+  stroke-width: 10;
+}
+.ring-fill-ingresos {
+  fill: none !important;
+  stroke: var(--mac-blue) !important;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+.ring-fill-gastos {
+  fill: none !important;
+  stroke: var(--mac-red) !important;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+/* 4. Estructuras bento de cuadrículas */
+.executive-panoramic-hub {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 20px;
+  width: 100%;
+}
+.bento-horizontal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+.dist-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+.workspace-action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 20px;
+  width: 100%;
+}
+
+.bar-chart-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bar-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.bar-track {
+  width: 100%;
+  height: 6px;
+  background: #09090a;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.main-price-lbl {
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  margin: 10px 0;
+}
+.status-pill-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mac-green);
+}
+
+/* 5. Restaurar los filtros (Selectores de meses y fechas) */
+.filter-wrapper-ios {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 20px;
+}
+.filter-group-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  flex: 1;
+}
+.pod-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--input-bg);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: var(--glass-border-light);
+}
+
+/* Bordes Superiores Corporativos Planos */
+.distribution-hub-panel {
+  border-top: 3px solid var(--mac-blue) !important;
+  border-radius: 12px !important;
+}
+.debt-hub-panel {
+  border-top: 3px solid var(--mac-orange) !important;
+  border-radius: 12px !important;
+}
+
+/* =========================================================================
+    🚀 ANIMACIÓN: PANELES DESPLEGABLES DESDE EL MENÚ SUPERIOR (TOP BAR)
+    ========================================================================= */
+#codesOverlay .sheet-ios,
+#shiftsOverlay .sheet-ios,
+#inventarioOverlay .sheet-ios,
+#promoOverlay .sheet-ios,
+#recordatoriosOverlay .sheet-ios {
+  top: 40px !important;
+  left: 90px !important;
+  transform: none !important;
+  margin: 0 !important;
+  animation: macMenuDropDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+    forwards !important;
+}
+
+@media (max-width: 768px) {
+  #codesOverlay .sheet-ios,
+  #shiftsOverlay .sheet-ios,
+  #inventarioOverlay .sheet-ios,
+  #promoOverlay .sheet-ios,
+  #recordatoriosOverlay .sheet-ios {
+    left: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  }
+}
+
+/* =========================================================================
+    🍏 RECALIBRADO DE CORRECCIÓN: MAC CORNER RADIUS & WINDOW MANAGER
+    ========================================================================= */
+.mac-split-container {
+  border-radius: 24px !important;
+}
+.sheet-ios,
+.modal-ios {
+  border-radius: 20px !important;
+}
+.mac-window-header {
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+}
+.card-ios,
+.stat-card {
+  border-radius: 16px !important;
+}
+.input-ios,
+select.input-ios,
+textarea.input-ios {
+  border-radius: 12px !important;
+}
+
+#finanzasOverlay .sheet-ios {
+  height: calc(100vh - 70px) !important;
+  max-height: 840px !important;
+  top: calc(50% + 14px) !important;
+}
+.sheet-ios {
+  max-height: calc(100vh - 60px) !important;
+}
+
+/* =========================================================================
+    🚀 ANIMACIÓN: PANELES DESPLEGABLES DESDE EL MENÚ SUPERIOR (TOP BAR) V2
+    ========================================================================= */
+#codesOverlay .sheet-ios,
+#shiftsOverlay .sheet-ios,
+#inventarioOverlay .sheet-ios,
+#promoOverlay .sheet-ios,
+#recordatoriosOverlay .sheet-ios,
+#distrisOverlay .sheet-ios {
+  top: 40px !important;
+  left: 16px !important;
+  transform: none !important;
+  margin: 0 !important;
+  animation: macMenuDropDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+    forwards !important;
+}
+
+@media (max-width: 768px) {
+  #codesOverlay .sheet-ios,
+  #shiftsOverlay .sheet-ios,
+  #inventarioOverlay .sheet-ios,
+  #promoOverlay .sheet-ios,
+  #recordatoriosOverlay .sheet-ios,
+  #distrisOverlay .sheet-ios {
+    left: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  }
+}
+
+/* =========================================================================
+    🏎️ ACCELERACIÓN Y FLUIDEZ EN REJILLAS INTERNAS (MODO COMPACTO SEGURO)
+    ========================================================================= */
+
+/* 🛡️ FIX TALLER NETFLIX: Fuerza a que los botones sticky de navegación interna no se estiren verticalmente */
+#netflixPanelCortes div[style*="position: sticky"] {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+#netflixPanelCortes div[style*="position: sticky"] button {
+  flex: 1 !important;
+  height: 38px !important;
+  align-self: center !important;
+}
+
+/* Forzar que los formularios y botones de confirmación ocupen bloques limpios y simétricos */
+#formFinanzas button,
+#formGenerarVenta button[type="submit"],
+#formReportar button,
+#formCargarCuentas button,
+#btnProcesarCambio {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: inline-flex !important;
+}
+
+/* Evitar el estiramiento vertical de cualquier botón dentro de las ventanas flexbox */
+.sheet-ios button,
+.modal-ios button {
+  align-self: center !important;
+  height: fit-content !important;
+}
+/* =========================================================================
+   📦 PARCHE DE ALINEACIÓN: GRID DE PLANTILLAS CYBERNET (FINDER VIEW)
+   ========================================================================= */
+
+/* 1. Aseguramos que el panel derecho ruede suavemente si hay muchas plantillas */
+.mac-right-panel {
+  overflow-y: auto !important;
+}
+
+/* 2. Convertimos el contenedor en una rejilla elástica estilo Mac */
+.mac-filtered-cards {
+  display: grid !important;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(260px, 1fr)
+  ) !important; /* 👈 Se adapta a 1, 2 o más columnas según el espacio */
+  gap: 16px !important; /* 👈 El separador clave para que dejen de pegarse y respirar */
+  width: 100% !important;
+  padding-top: 4px;
+  padding-bottom: 40px !important; /* Margen de cortesía al final del scroll */
+}
+
+/* 3. Estilizado interior para que el título y el botón de copiar tengan simetría */
+.mac-filtered-cards .card-ios {
+  min-height: 130px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  text-align: left !important;
+  padding: 16px !important;
+  margin-bottom: 0 !important; /* Eliminamos residuos de margen antiguo */
+}
+
+/* Forzamos a que el botón interno de copiar ocupe el ancho correcto de la tarjeta */
+.mac-filtered-cards .card-ios button,
+.mac-filtered-cards .card-ios .btn-ios {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-top: auto !important;
+}
+/* =========================================================================
+    🔒 BLINDAJE DEL DOCK: FILA HORIZONTAL ÚNICA E INMUNE
+    ========================================================================= */
+.macos-dock {
+  flex-wrap: nowrap !important; /* 🔥 Prohíbe terminantemente que los iconos salten de línea */
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+/* =========================================================================
+    HN RECALIBRADO DE NOTIFICACIONES: DESPEJAR MENÚ SUPERIOR (CLEAR TOP BAR)
+    ========================================================================= */
+
+/* 1. Forzar a la Isla Dinámica / Toast central a bajar y flotar libre */
+.apple-notification-toast {
+  top: 38px !important; /* 28px de la barra superior + 10px de aire estético */
+}
+
+/* 2. Forzar al bloque lateral de alertas (Inventario / Turnos) a despejar el menú */
+.cyber-notification-center {
+  top: 38px !important;
+}
+/* ==========================================================================
+    📱 SYSTEMA DE WIDGETS BENTO (ESTILO IPADOS MAESTRO)
+    ========================================================================== */
+.ipad-bento-container {
+  display: grid !important;
+  grid-template-columns: repeat(12, 1fr) !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+/* Proporciones de Widgets iPadOS */
+.bento-w-12 {
+  grid-column: span 12 !important;
+}
+.bento-w-8 {
+  grid-column: span 8 !important;
+}
+.bento-w-7 {
+  grid-column: span 7 !important;
+}
+.bento-w-6 {
+  grid-column: span 6 !important;
+}
+.bento-w-5 {
+  grid-column: span 5 !important;
+}
+.bento-w-4 {
+  grid-column: span 4 !important;
+}
+.bento-w-3 {
+  grid-column: span 3 !important;
+}
+
+/* Estilo Base para las Tarjetas tipo Widget */
+.widget-ipad {
+  background: #1c1c1e !important; /* Gris oscuro mate original de Apple */
+  border: 1px solid #2c2c2e !important;
+  border-radius: 20px !important; /* Curva fluida y nativa de iPadOS */
+  padding: 22px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease !important;
+}
+
+.widget-ipad:hover {
+  background: #2c2c2e !important;
+  border-color: #3a3a3c !important;
+}
+
+/* 📱 Ruptura responsiva extrema para Celular (Media Query integrada) */
+@media (max-width: 1024px) {
+  .ipad-bento-container {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .bento-w-12,
+  .bento-w-8,
+  .bento-w-7,
+  .bento-w-6,
+  .bento-w-5,
+  .bento-w-4,
+  .bento-w-3 {
+    grid-column: span 12 !important;
+  }
+}
+/* ==========================================================================
+    🛠️ PARCHE: ESTILO OSCURO PARA MENÚS DESPLEGABLES (SELECT OPTIONS)
+    ========================================================================== */
+select.input-ios {
+  color-scheme: dark !important; /* 👈 Fuerza al motor del navegador a usar modo oscuro */
+}
+
+select.input-ios option {
+  background-color: #1c1c1e !important; /* Fondo gris oscuro premium Apple */
+  color: #ffffff !important; /* Texto blanco */
+  font-weight: 600 !important;
+  padding: 12px !important; /* Un poco más de aire entre opciones */
+}
+
+/* Color especial para la opción deshabilitada (placeholder) */
+select.input-ios option:disabled {
+  color: #8e8e93 !important;
+}
+
+/* ==========================================================================
+    🎯 RECALIBRACIÓN: BANDEJA DE CÓDIGOS CENTRADA EN ESCRITORIO
+    ========================================================================== */
+@media (min-width: 769px) {
+  #codesOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Inyectamos una animación elástica de brote central estilo iPadOS */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+
+/* Animación nativa Apple de brote central con escalado elástico */
+@keyframes applePopIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+/* ==========================================================================
+    🔒 CAPAS DE SUPERPOSICIÓN: HERRAMIENTAS MÁSTER DE PERSONAL
+    ========================================================================== */
+#addHoursOverlay {
+  z-index: 16000 !important;
+}
+#nominaOverlay {
+  z-index: 17000 !important;
+}
+#adelantoShiftOverlay {
+  z-index: 17000 !important;
+}
+/* ==========================================================================
+    🎯 RECALIBRACIÓN: VENTANA DE PERSONAL CENTRADA EN ESCRITORIO
+    ========================================================================== */
+@media (min-width: 769px) {
+  #shiftsOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Reutiliza la animación premium de brote central estilo iPadOS */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+/* ==========================================================================
+    🚫 BLOQUEO RADICAL ANTI-CLICS: DOCK INERTE CUANDO HAY MODALES ACTIVOS
+    ========================================================================== */
+body:has(.overlay-ios.open) [class*="dock"],
+body:has(.overlay-ios.open) [id*="dock"],
+body:has(.overlay-ios[style*="display: flex"]) [class*="dock"],
+body:has(.overlay-ios[style*="display: flex"]) [id*="dock"],
+body:has(.overlay-ios[style*="display: block"]) [class*="dock"],
+body:has(.overlay-ios[style*="display: block"]) [id*="dock"] {
+  pointer-events: none !important; /* 👈 Los clics pasan de largo como si no existiera */
+  visibility: hidden !important; /* 👈 Lo remueve por completo del mapa interactivo */
+  opacity: 0 !important;
+}
+/* ==========================================================================
+    🎯 RECALIBRACIÓN: VENTANA DE PROMOCIONES CENTRADA EN ESCRITORIO
+    ========================================================================== */
+@media (min-width: 769px) {
+  #promoOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Reutiliza la animación premium de brote central estilo iPadOS */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+/* ==========================================================================
+    🎯 RECALIBRACIÓN: VENTANA DE RECORDATORIOS CENTRADA EN ESCRITORIO
+    ========================================================================== */
+@media (min-width: 769px) {
+  #recordatoriosOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Dispara la animación elástica de brote central estilo iPadOS */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+/* ==========================================================================
+    🎯 RECALIBRACIÓN: BÓVEDA CHAYO ULTRA-SIZE CENTRADA EN ESCRITORIO
+    ========================================================================== */
+@media (min-width: 769px) {
+  #chayoOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Aplica el sutil efecto brote elástico de Apple */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+/* ==========================================================================
+   🎯 RECALIBRACIÓN: VENTANA DE DISTRIBUIDORES CENTRADA EN ESCRITORIO
+   ========================================================================== */
+@media (min-width: 769px) {
+  #distrisOverlay .sheet-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    /* Dispara la animación elástica de brote central estilo iPadOS */
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+
+/* ==========================================================================
+   🔒 CYBERNET OS LAYER MANAGER: CONTROL DE CAPAS Y VENTANAS AL FRENTE
+   ========================================================================== */
+
+/* 1️⃣ CAPA DE SUB-MODALS (Ventanas de edición, Lápiz, filtros y resultados) 
+   Forzamos a que se posicionen por encima de las apps principales (15000) */
+#editShiftModalOverlay,
+#resultadoCortesOverlay,
+#modalRenovacionFlotante {
+  z-index: 18000 !important;
+}
+
+/* 2️⃣ CAPA DE CASOS DE ÉXITO (La ficha comercial que sale al terminar una operación)
+   Debe estar arriba incluso de las ventanas de edición por si se abren en paralelo */
+#ventaGeneradaModalOverlay {
+  z-index: 18500 !important;
+}
+
+/* 3️⃣ CAPA ULTRA-PROFUNDA (Lectores de contenido individual/HTML plano)
+   Garantiza que leer un correo específico tape cualquier otra ventana abierta */
+#modalLectorCorreo,
+#modalLectorCorreoGlobal {
+  z-index: 19000 !important;
+}
+
+/* 4️⃣ REAJUSTE DE ANIMACIÓN SEGURO PARA LAS NUEVAS VENTANAS SECUNDARIAS
+   Asegura que el Lápiz y los resultados del corte también usen el pop elástico de Apple */
+@media (min-width: 769px) {
+  #editShiftModalOverlay .sheet-ios,
+  #resultadoCortesOverlay .sheet-ios,
+  #ventaGeneradaModalOverlay .sheet-ios,
+  #modalRenovacionFlotante .modal-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+/* 1️⃣ CAPA DE SUB-MODALS (Ventanas de edición, Lápiz, filtros, resolver garantías y resultados) 
+   Forzamos a que se posicionen por encima de las apps principales (15000) */
+#editShiftModalOverlay,
+#resultadoCortesOverlay,
+#modalRenovacionFlotante,
+#resolverGarantiaOverlay {
+  z-index: 18000 !important;
+}
+/* 4️⃣ REAJUSTE DE ANIMACIÓN SEGURO PARA LAS NUEVAS VENTANAS SECUNDARIAS
+   Asegura que el Lápiz, resolver garantías y los resultados usen el pop elástico de Apple */
+@media (min-width: 769px) {
+  #editShiftModalOverlay .sheet-ios,
+  #resultadoCortesOverlay .sheet-ios,
+  #ventaGeneradaModalOverlay .sheet-ios,
+  #modalRenovacionFlotante .modal-ios,
+  #resolverGarantiaOverlay .modal-ios {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+
+/* =========================================================================
+   🌍 PARCHE UNIVERSAL DE RESPONSIVIDAD (MÓVILES, TABLETS Y ESCRITORIOS)
+   ========================================================================= */
+
+/* 1. FLUIDEZ EN CAJAS FLEXIBLES (Evita el amontonamiento horizontal) */
+.flex-row,
+.flex-row-between {
+  flex-wrap: wrap !important;
+}
+
+/* Hacer que cualquier contenedor con "display: flex" inline permita saltos de línea en móviles */
+@media (max-width: 768px) {
+  div[style*="display: flex"]:not(.macos-dock):not(.mac-menu-left):not(
+      .mac-window-header
+    ) {
+    flex-wrap: wrap !important;
+  }
+
+  /* 2. FORZAR COLUMNAS AL 100% EN CELULARES */
+  div[style*="flex: 1"],
+  div[style*="flex: 2"],
+  div[style*="flex: 1.2"],
+  .balance-hero-section,
+  .chart-layout-box {
+    flex: none !important;
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* 3. INPUTS Y SELECTS A ANCHO COMPLETO */
+  .input-ios,
+  select.input-ios,
+  .btn-ios {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 4. RECALIBRACIÓN DE MODALES PARA MÓVILES (Uso de 'svh' para evitar cortes de pantalla) */
+  .sheet-ios,
+  .modal-ios {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 90svh !important; /* 'svh' respeta la barra de direcciones de Safari/Chrome */
+    max-height: 90svh !important;
+    border-radius: 24px 24px 0 0 !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  }
+
+  .overlay-ios.open .sheet-ios,
+  .overlay-ios.open .modal-ios {
+    transform: translateY(0) !important;
+  }
+
+  /* 5. PROTECCIÓN PARA TABLAS Y CONTENEDORES LARGOS */
+  table {
+    min-width: 100% !important; /* Permite que la tabla se deslice sin romper la tarjeta */
+  }
+
+  .card-ios,
+  .widget-ipad {
+    overflow-x: auto !important; /* Si algo adentro es muy ancho, permite scroll interno */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 6. CORRECCIÓN DEL DOCK EN MÓVILES PARA QUE NO TAPE EL CONTENIDO */
+  body,
+  main,
+  #mainWorkspace {
+    padding-bottom: 120px !important;
+  }
+}
+
+/* =========================================================================
+   📱 RESPONSIVIDAD PARA TABLETS (PANTALLAS MEDIANAS: 769px - 1024px)
+   ========================================================================= */
+@media (min-width: 769px) and (max-width: 1100px) {
+  /* El diseño Bento se pasa a 2 columnas en vez de amontonar 3 o 4 */
+  .ipad-bento-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Todas las clases bento toman 1 columna entera en iPad vertical */
+  .bento-w-12,
+  .bento-w-8,
+  .bento-w-7,
+  .bento-w-6,
+  .bento-w-5,
+  .bento-w-4,
+  .bento-w-3 {
+    grid-column: span 2 !important;
+  }
+
+  /* Modales al 90% de la pantalla para no verse estirados ni muy pequeños */
+  .sheet-ios {
+    width: 90% !important;
+    max-width: 90% !important;
+  }
+}
+
+/* 7. PREVENCIÓN UNIVERSAL DE DESBORDAMIENTO DE TEXTO (Cuentas, correos largos, etc.) */
+* {
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+/* =========================================================================
+   🔍 BUSCADOR ESTÁTICO Y SCROLL INDEPENDIENTE (CYBERNET OS)
+   ========================================================================= */
+
+.mac-right-panel {
+  /* Quitamos el scroll del panel completo */
+  overflow: hidden !important;
+}
+
+.mac-search-wrapper {
+  /* El buscador no se encoje y se mantiene siempre visible */
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  z-index: 10;
+}
+
+#grid-container.mac-filtered-cards {
+  /* Le damos el scroll EXCLUSIVAMENTE a la cuadrícula de plantillas */
+  flex-grow: 1;
+  overflow-y: auto !important;
+  align-content: flex-start; /* Evita que las tarjetas se estiren si hay pocas */
+  padding-right: 8px; /* Espacio para la barrita de scroll */
+  padding-bottom: 30px !important;
+}
+/* =========================================================================
+   📭 CENTRADO PERFECTO PARA EL AVISO DE "NO SE ENCONTRARON PLANTILLAS"
+   ========================================================================= */
+
+.mac-empty-state {
+  flex-direction: column; /* Coloca el icono arriba y el texto abajo */
+  align-items: center; /* Lo centra horizontalmente */
+  justify-content: center; /* Lo centra verticalmente */
+  text-align: center;
+  flex-grow: 1; /* Obliga al contenedor a estirarse en todo el espacio vacío */
+  color: var(
+    --text-secondary
+  ); /* Un color gris sutil para que no resalte tanto */
+  gap: 15px; /* Espacio entre el icono y el texto */
+  min-height: 250px; /* Altura mínima de seguridad */
+}
+
+.mac-empty-state svg {
+  opacity: 0.4; /* Hace que el icono se vea semi-transparente y elegante */
+  width: 48px;
+  height: 48px;
+}
+
+.mac-empty-state span {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* 🍏 SCROLLBAR ULTRA-FINO ESTILO macOS EN RENTABILIDAD Y MOVIMIENTOS */
+.cyber-custom-scroll::-webkit-scrollbar {
+  width: 5px !important;
+}
+
+.cyber-custom-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.cyber-custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 10px !important;
+}
+
+.cyber-custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--mac-purple) !important;
+}
+
+/* 🔴 BADGE CONTADOR DE GARANTÍAS EN EL DOCK */
+.dock-badge-counter {
+  position: absolute !important;
+  top: -6px !important;
+  right: -6px !important;
+  background: #ff3b30 !important; /* Rojo vivo estilo Apple */
+  color: #ffffff !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  padding: 0 5px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.6) !important;
+  border: 2px solid #1c1c1e !important;
+  z-index: 25 !important;
+  pointer-events: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+/* 🚀 Animación de elevación fluida para el ícono de búsqueda */
+.mac-icon-wrapper {
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1) !important;
+  cursor: pointer;
+}
+
+.mac-icon-wrapper:hover {
+  transform: scale(1.22) translateY(-8px) !important;
+}
+/* =========================================================================
+   ESTILOS OPTIMIZADOS: VENTANA EXTRA GRANDE Y ESPACIOSA
+   ========================================================================= */
+#modal-buscador-global.modal-gigante-activo {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 98vw !important;
+  max-width: 1750px !important; /* 🔥 Ventana mucho más ancha */
+  height: 95vh !important;
+  max-height: 95vh !important; /* 🔥 Aprovecha casi toda la pantalla */
+  background: #0b0b0e !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  z-index: 999999 !important;
+  margin: 0 !important;
+}
+
+/* Oscurecer la barra de búsqueda para que haga contraste */
+#modal-buscador-global.modal-gigante-activo > div:first-child {
+  flex-shrink: 0 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+/* 🔥 FIX: Ocultar la barra de scroll blanca en las tablas de la Lupa */
+.sheet-ios div[style*="overflow-x: auto"]::-webkit-scrollbar,
+.mac-right-panel div[style*="overflow-x: auto"]::-webkit-scrollbar,
+table::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar {
+    height: 0px !important;
+    display: none !important;
+}
+
+/* En caso de que uses Firefox */
+.sheet-ios div[style*="overflow-x: auto"],
+table {
+    scrollbar-width: none !important;
+}
