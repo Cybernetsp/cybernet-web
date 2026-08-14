@@ -2,8 +2,7 @@
    🚀 CYBERNET OS - NÚCLEO LÓGICO (VERSIÓN MySQL / PHP)
    ========================================================================== */
 // 🔗 URL OFICIAL DE GOOGLE APPS SCRIPT PARA PINESMES Y NEYOP
-const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 // 1. INTERCEPTOR DE SESIÓN Y ARRANQUE DEL SISTEMA
 (function () {
   const usuarioActivoObj = JSON.parse(
@@ -285,7 +284,7 @@ function cargarPagosBreB() {
   if (buscador) buscador.value = "";
 
   // ⚠️ Consulta a PHP (Reemplaza la lógica de Google Sheets)
-  fetch("https://api.cybernetsp.com/obtener_pagos_breb.php") // Necesitarás crear este archivo PHP que consulte los pagos
+  fetch("obtener_pagos_breb.php") // Necesitarás crear este archivo PHP que consulte los pagos
     .then((res) => res.json())
     .then((data) => {
       const icono = document.getElementById("icon-refresh-breb");
@@ -332,142 +331,57 @@ function cargarPagosBreB() {
 }
 
 /* ==========================================================================
-   ✏️ ABRIR MODAL EDITAR (DISEÑO OPTIMIZADO Y BOTONES AL FINAL)
+   ✏️ ABRIR MODAL EDITAR (HABILITA EDICIÓN Y GUARDA CORREO ANTERIOR)
    ========================================================================== */
 window.abrirModalEditarMySQL = function (filaEscapada) {
-  try {
-    if (typeof haptic === "function") haptic();
-    const fila = JSON.parse(decodeURIComponent(filaEscapada));
+  if (typeof haptic === "function") haptic();
+  const fila = JSON.parse(decodeURIComponent(filaEscapada));
 
-    const iCorreo = document.getElementById("editMySQLCorreo");
-    const iClave = document.getElementById("editMySQLClave");
-    const iPerfil = document.getElementById("editMySQLPerfil");
-    const iPin = document.getElementById("editMySQLPin");
-    const iVenc = document.getElementById("editMySQLVencimiento");
-    const iNombre = document.getElementById("editMySQLNombre");
-    const iNumero = document.getElementById("editMySQLNumero");
-    const iId = document.getElementById("editMySQLId");
+  const iCorreo = document.getElementById("editMySQLCorreo");
+  const iClave = document.getElementById("editMySQLClave");
+  const iPerfil = document.getElementById("editMySQLPerfil");
+  const iPin = document.getElementById("editMySQLPin");
+  const iVenc = document.getElementById("editMySQLVencimiento");
+  const iNombre = document.getElementById("editMySQLNombre");
+  const iNumero = document.getElementById("editMySQLNumero");
 
-    if (iId) iId.value = fila.id || "";
+  document.getElementById("editMySQLId").value = fila.id;
 
-    // Guardar correo anterior en input oculto
-    let idCorreoAnterior = document.getElementById("editMySQLCorreoAnterior");
-    if (!idCorreoAnterior) {
-      idCorreoAnterior = document.createElement("input");
-      idCorreoAnterior.type = "hidden";
-      idCorreoAnterior.id = "editMySQLCorreoAnterior";
-      const targetForm =
-        document.getElementById("formEditarMySQL") ||
-        document.querySelector("#modalEditarMySQL form") ||
-        document.querySelector("#modalEditarMySQL .modal-ios") ||
-        document.getElementById("modalEditarMySQL");
-      if (targetForm) targetForm.appendChild(idCorreoAnterior);
-    }
-    if (idCorreoAnterior)
-      idCorreoAnterior.value = fila.correo || fila.usuario || "";
-
-    if (iCorreo) iCorreo.value = fila.correo || fila.usuario || "";
-    if (iClave) iClave.value = fila.clave || fila.contrasena || "";
-    if (iPerfil) iPerfil.value = fila.perfil || "";
-    if (iPin) iPin.value = fila.pin || "";
-    if (iVenc) iVenc.value = fila.vencimiento || "";
-    if (iNombre) iNombre.value = fila.nombre || fila.cliente || "";
-    if (iNumero) iNumero.value = fila.numero || fila.telefono || "";
-
-    // 🛠️ Crear o reubicar contenedor de campos de pago
-    let contenedorCamposPago = document.getElementById(
-      "editMySQLExtraPagoFields",
-    );
-    if (!contenedorCamposPago) {
-      contenedorCamposPago = document.createElement("div");
-      contenedorCamposPago.id = "editMySQLExtraPagoFields";
-      contenedorCamposPago.style.cssText =
-        "display: flex; flex-direction: column; gap: 10px; margin-top: 10px; margin-bottom: 12px; width: 100%;";
-      contenedorCamposPago.innerHTML = `
-        <div style="display: flex; gap: 10px; width: 100%;">
-          <div style="flex: 1;">
-            <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">F. PAGO</label>
-            <input type="text" id="editMySQLFechaPago" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: 14-ago" />
-          </div>
-          <div style="flex: 1;">
-            <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">VALOR</label>
-            <input type="text" id="editMySQLValor" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: $15.000" />
-          </div>
-        </div>
-        <div style="width: 100%;">
-          <label style="font-size: 0.72rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 4px;">MÉTODO / BANCO</label>
-          <input type="text" id="editMySQLPago" class="input-ios" style="width: 100%; box-sizing: border-box;" placeholder="Ej: Bre-B, Nequi, Saldo Distri" />
-        </div>
-      `;
-    }
-
-    // 📍 UBICACIÓN ESTRICTA: Insertar SIEMPRE por encima de los botones de acción
-    const formTarget =
+  // Guardamos el correo original de la fila en un input oculto para saber qué cuentas actualizar masivamente
+  let idCorreoAnterior = document.getElementById("editMySQLCorreoAnterior");
+  if (!idCorreoAnterior) {
+    idCorreoAnterior = document.createElement("input");
+    idCorreoAnterior.type = "hidden";
+    idCorreoAnterior.id = "editMySQLCorreoAnterior";
+    const form =
       document.getElementById("formEditarMySQL") ||
-      document.querySelector("#modalEditarMySQL form") ||
-      document.querySelector("#modalEditarMySQL .modal-ios") ||
-      document.getElementById("modalEditarMySQL");
-
-    if (formTarget) {
-      // Buscar el contenedor de los botones o el botón submit/cancelar
-      const btnSubmit =
-        document.getElementById("btnGuardarEditarMySQL") ||
-        formTarget.querySelector("button[type='submit']");
-      let filaBotones = btnSubmit ? btnSubmit.parentElement : null;
-
-      // Si el botón está metido dentro de un div con 'Cancelar'
-      if (
-        filaBotones &&
-        filaBotones !== formTarget &&
-        filaBotones.contains(btnSubmit)
-      ) {
-        formTarget.insertBefore(contenedorCamposPago, filaBotones);
-      } else if (btnSubmit) {
-        formTarget.insertBefore(contenedorCamposPago, btnSubmit);
-      } else {
-        formTarget.appendChild(contenedorCamposPago);
-      }
-    }
-
-    // Cargar datos
-    const elFechaPago = document.getElementById("editMySQLFechaPago");
-    const elValor = document.getElementById("editMySQLValor");
-    const elPago = document.getElementById("editMySQLPago");
-
-    if (elFechaPago) elFechaPago.value = fila.fecha || "";
-    if (elValor) elValor.value = fila.valor || "";
-    if (elPago) elPago.value = fila.pago || "";
-
-    // Mostrar los campos solo en las tablas que los necesitan
-    const tablaActual = (window.tablaMySQLActual || "").toLowerCase();
-    if (tablaActual === "netflix" || tablaActual === "registro_ventas") {
-      contenedorCamposPago.style.display = "flex";
-    } else {
-      contenedorCamposPago.style.display = "none";
-    }
-
-    const inputs = [iCorreo, iClave, iPerfil, iPin, iVenc, iNombre, iNumero];
-    inputs.forEach((inp) => {
-      if (inp) {
-        inp.readOnly = false;
-        inp.style.opacity = "1";
-        inp.style.cursor = "text";
-      }
-    });
-
-    const modal = document.getElementById("modalEditarMySQL");
-    if (modal) {
-      modal.style.display = "flex";
-      modal.classList.add("open");
-    }
-  } catch (err) {
-    console.error("Error al abrir modal de edición:", err);
-    alert("❌ Error al abrir modal: " + err.message);
+      document.querySelector("#modalEditarMySQL form");
+    if (form) form.appendChild(idCorreoAnterior);
   }
+  idCorreoAnterior.value = fila.correo || fila.usuario || "";
+
+  iCorreo.value = fila.correo || fila.usuario || "";
+  iClave.value = fila.clave || fila.contrasena || "";
+  iPerfil.value = fila.perfil || "";
+  iPin.value = fila.pin || "";
+  iVenc.value = fila.vencimiento || "";
+  iNombre.value = fila.nombre || fila.cliente || "";
+  iNumero.value = fila.numero || fila.telefono || "";
+
+  // 🔥 TODOS LOS CAMPOS QUEDAN TOTALMENTE HABILITADOS PARA EL SUPERADMIN
+  const inputs = [iCorreo, iClave, iPerfil, iPin, iVenc, iNombre, iNumero];
+  inputs.forEach((inp) => {
+    inp.readOnly = false;
+    inp.style.opacity = "1";
+    inp.style.cursor = "text";
+  });
+
+  const modal = document.getElementById("modalEditarMySQL");
+  if (modal) modal.style.display = "flex";
 };
 
 /* ==========================================================================
-   💾 GUARDAR EDICIÓN (ENVÍA CORREO ANTERIOR, CAMPOS Y DATOS DE PAGO)
+   💾 GUARDAR EDICIÓN (ENVÍA CORREO ANTERIOR PARA EDICIÓN EN CASCADA)
    ========================================================================== */
 window.guardarEdicionMySQL = function (e) {
   if (e) e.preventDefault();
@@ -481,9 +395,6 @@ window.guardarEdicionMySQL = function (e) {
   const correoAnteriorInput = document.getElementById(
     "editMySQLCorreoAnterior",
   );
-  const iFechaPago = document.getElementById("editMySQLFechaPago");
-  const iValor = document.getElementById("editMySQLValor");
-  const iPago = document.getElementById("editMySQLPago");
 
   const formData = new FormData();
   formData.append("accion", "editar");
@@ -519,12 +430,7 @@ window.guardarEdicionMySQL = function (e) {
     document.getElementById("editMySQLNumero").value.trim(),
   );
 
-  // Enviar campos de pago adicionales
-  formData.append("fecha", iFechaPago ? iFechaPago.value.trim() : "");
-  formData.append("valor", iValor ? iValor.value.trim() : "");
-  formData.append("pago", iPago ? iPago.value.trim() : "");
-
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -533,10 +439,7 @@ window.guardarEdicionMySQL = function (e) {
       if (btn) btn.disabled = false;
       if (data.status === "success") {
         const modal = document.getElementById("modalEditarMySQL");
-        if (modal) {
-          modal.style.display = "none";
-          modal.classList.remove("open");
-        }
+        if (modal) modal.style.display = "none";
         cargarDatosMySQL();
         if (typeof triggerToast === "function") {
           triggerToast(
@@ -553,7 +456,6 @@ window.guardarEdicionMySQL = function (e) {
       alert("❌ Error al guardar edición.");
     });
 };
-
 // Cierre automático de menús al presionar escape
 document.addEventListener("keydown", function (e) {
   if (e.key === "Escape") {
@@ -596,7 +498,7 @@ function cargarPlantillasDesdeSheets() {
       '<div class="empty-log-msg" style="grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">Sincronizando mensajes desde MySQL...</div>';
   }
 
-  fetch("https://api.cybernetsp.com/obtener_plantillas.php")
+  fetch("obtener_plantillas.php")
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -1087,7 +989,7 @@ function cargarBandejaCodigosMySQL() {
   contenedor.innerHTML =
     '<div style="text-align: center; color: var(--ios-orange); padding: 20px;">Buscando códigos en Gmail...</div>';
 
-  fetch("https://api.cybernetsp.com/obtener_codigos.php")
+  fetch("obtener_codigos.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1146,7 +1048,7 @@ window.cargarBandejaCodigosMySQL = function () {
     '<div style="text-align: center; color: var(--ios-orange); padding: 40px;"><svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg><br><span style="font-weight: 600;">Sincronizando bandeja de Gmail...</span></div>';
 
   // Llamamos al archivo PHP que creamos antes
-  fetch("https://api.cybernetsp.com/obtener_codigos.php")
+  fetch("obtener_codigos.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1422,7 +1324,7 @@ function cargarInventarioStockMySQL() {
   contenedor.innerHTML =
     '<div style="grid-column: 1 / -1; text-align: center; color: var(--ios-blue); padding: 30px;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg><br><span style="margin-top:8px; display:inline-block; font-weight:600;">Consultando inventario en MySQL...</span></div>';
 
-  fetch("https://api.cybernetsp.com/obtener_inventario_stock.php")
+  fetch("obtener_inventario_stock.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1497,7 +1399,7 @@ function cambiarEstadoPlataformaMySQL(idPlataforma, inputElem) {
   formData.append("plataforma", idPlataforma);
   formData.append("activo", nuevoEstado);
 
-  fetch("https://api.cybernetsp.com/guardar_estado_plataforma.php", {
+  fetch("guardar_estado_plataforma.php", {
     method: "POST",
     body: formData,
   })
@@ -1569,7 +1471,7 @@ window.ejecutarAdelantoDesdeShift = function (e) {
 
   const empleado = document.getElementById("adeEmpleado").value;
   const montoRaw = document.getElementById("adeMonto").value;
-
+  
   // 🧼 Extrae únicamente dígitos numéricos ("$ 10.000" -> 10000)
   const montoLimpio = parseInt(montoRaw.replace(/\D/g, ""), 10) || 0;
 
@@ -1588,7 +1490,7 @@ window.ejecutarAdelantoDesdeShift = function (e) {
   formData.append("empleado", empleado);
   formData.append("monto", montoLimpio);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -1639,12 +1541,12 @@ function cargarHorasDesdeMySQL(silencioso = false) {
   const formData = new FormData();
   formData.append("accion", "obtener_control_horas");
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
-    body: formData,
+    body: formData
   })
-    .then((res) => res.text())
-    .then((text) => {
+    .then(res => res.text())
+    .then(text => {
       let res;
       try {
         res = JSON.parse(text);
@@ -1657,17 +1559,14 @@ function cargarHorasDesdeMySQL(silencioso = false) {
       }
 
       if (res && res.status === "success") {
-        window.currentHorasStock = (res.data || []).map((item) => ({
+        window.currentHorasStock = (res.data || []).map(item => ({
           id: item.id,
           vendedor: item.vendedor || item.usuario || "ASISTENTE",
-          fecha:
-            item.fecha ||
-            (item.hora_inicio ? item.hora_inicio.split(" ")[0] : "-"),
+          fecha: item.fecha || (item.hora_inicio ? item.hora_inicio.split(" ")[0] : "-"),
           tiempo: item.tiempo_trabajado || item.horas || "00:00:00",
-          pagoTurno:
-            item.total !== undefined ? item.total : item.pago_turno || "0",
+          pagoTurno: item.total !== undefined ? item.total : (item.pago_turno || "0"),
           estado: item.estado || "CERRADO",
-          filaIndex: item.id,
+          filaIndex: item.id
         }));
 
         let query = document.getElementById("searchShiftsInput")
@@ -1687,7 +1586,7 @@ function cargarHorasDesdeMySQL(silencioso = false) {
         container.innerHTML = `<div style="text-align:center; padding:40px; color:#ff453a;">❌ Error: ${res ? res.message : "Fallo de consulta"}</div>`;
       }
     })
-    .catch((err) => {
+    .catch(err => {
       console.error(err);
       container.innerHTML = `<div style="text-align:center; padding:40px; color:#ff453a;">❌ Error de conexión con acciones_mysql.php.</div>`;
     });
@@ -1699,7 +1598,7 @@ function renderizarHorasEnPantallaMySQL(filtro = "") {
 
   const data = window.currentHorasStock || [];
 
-  let filtrados = data.filter((item) => {
+  let filtrados = data.filter(item => {
     if (!filtro) return true;
     return (
       (item.vendedor || "").toLowerCase().includes(filtro) ||
@@ -1718,7 +1617,7 @@ function renderizarHorasEnPantallaMySQL(filtro = "") {
 
   let html = `<div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">`;
 
-  filtrados.forEach((turno) => {
+  filtrados.forEach(turno => {
     const esActivo = turno.estado === "ACTIVO";
     const colorEstado = esActivo ? "#30d158" : "#a1a1aa";
     const textoEstado = esActivo ? "🟢 EN CURSO" : "🔴 CERRADO";
@@ -1813,7 +1712,7 @@ window.ejecutarGuardadoHorasManual = function (event) {
   formData.append("horas", horas);
   formData.append("fecha", fecha);
 
-  fetch("https://api.cybernetsp.com/guardar_horas_manual.php", {
+  fetch("guardar_horas_manual.php", {
     method: "POST",
     body: formData,
   })
@@ -1844,6 +1743,8 @@ window.toggleModalAdelanto = function (show) {
   }
 };
 
+
+
 // 3. Abrir/Cerrar y Cargar Resumen de Nómina
 window.abrirTotalNomina = function () {
   if (typeof haptic === "function") haptic();
@@ -1872,7 +1773,7 @@ function cargarNominaMySQL() {
   contenedor.innerHTML =
     '<div class="empty-log-msg" style="background: rgba(0, 0, 0, 0.2); border-radius: 20px; padding: 40px; text-align: center; color: var(--ios-green);">Calculando nómina desde MySQL...</div>';
 
-  fetch("https://api.cybernetsp.com/obtener_nomina.php")
+  fetch("obtener_nomina.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -1951,7 +1852,7 @@ window.cargarUsuariosSelects = function () {
   const selectVend = document.getElementById("inputVendedorShift");
   const selectAde = document.getElementById("adeEmpleado");
 
-  fetch("https://api.cybernetsp.com/obtener_usuarios.php")
+  fetch("obtener_usuarios.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success" && res.data.length > 0) {
@@ -2093,9 +1994,7 @@ function ejecutarConsultaRecordatorios(
     `;
   }
 
-  fetch(
-    `https://api.cybernetsp.com/obtener_recordatorios.php?periodo=${periodo}&linea=${lineaWA}`,
-  )
+  fetch(`obtener_recordatorios.php?periodo=${periodo}&linea=${lineaWA}`)
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -2318,7 +2217,7 @@ window.cargarDistribuidores = function () {
     </tr>
   `;
 
-  fetch("https://api.cybernetsp.com/obtener_distribuidores.php")
+  fetch("obtener_distribuidores.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -2501,9 +2400,7 @@ window.ejecutarBusquedaGmailEspecifica = function () {
       </div>`;
   }
 
-  fetch(
-    `https://api.cybernetsp.com/obtener_correos_gmail.php?correo=${encodeURIComponent(correoBuscar)}`,
-  )
+  fetch(`obtener_correos_gmail.php?correo=${encodeURIComponent(correoBuscar)}`)
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -2658,7 +2555,7 @@ window.filtrarMySQL = function () {
 };
 
 /* ==========================================================================
-   🗄️ RENDERIZADO VISUAL ESTILO CYBERNET (CON BOTÓN HOY PARA SUPERADMIN)
+   🗄️ RENDERIZADO VISUAL ESTILO CYBERNET (FONDO Y TONOS EXACTOS A LA IMAGEN)
    ========================================================================== */
 
 window.cargarDatosMySQL = function () {
@@ -2672,7 +2569,7 @@ window.cargarDatosMySQL = function () {
     tableNode.parentElement.style.overflowX = "auto";
   }
 
-  // 🛡️ INYECCIÓN DE ESTILOS: PALETA DE COLORES EXACTA
+  // 🛡️ INYECCIÓN DE ESTILOS: PALETA DE COLORES EXACTA A LA IMAGEN DE REFERENCIA
   if (!document.getElementById("css-sticky-hover-mysql")) {
     const styleSticky = document.createElement("style");
     styleSticky.id = "css-sticky-hover-mysql";
@@ -2704,7 +2601,7 @@ window.cargarDatosMySQL = function () {
         border-spacing: 0 !important;
         table-layout: fixed !important;
         width: 100% !important;
-        min-width: 1350px !important;
+        min-width: 1100px !important;
         background-color: #111216 !important;
       }
     `;
@@ -2720,7 +2617,7 @@ window.cargarDatosMySQL = function () {
   const esNetflix = tablaActualLower === "netflix";
 
   // ==========================================
-  // 1. ENCABEZADOS CON ANCHOS ESTRICTOS
+  // 1. ENCABEZADOS CON ANCHOS (%) ESTRICTOS
   // ==========================================
   if (esVentas) {
     thead.innerHTML = `
@@ -2748,18 +2645,15 @@ window.cargarDatosMySQL = function () {
   } else if (esNetflix) {
     thead.innerHTML = `
       <tr>
-        <th style="${thBase} width: 5%; color: #a1a1aa;">DÍA</th>
-        <th style="${thBase} width: 17%; color: #a1a1aa;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 9%; color: #a1a1aa;">CONTRASEÑA</th>
-        <th style="${thBase} width: 4%; color: #a1a1aa; text-align: center;">PERFIL</th>
-        <th style="${thBase} width: 4%; color: #a1a1aa; text-align: center;">PIN</th>
-        <th style="${thBase} width: 10%; color: #ff9500;">VENCIMIENTO</th>
-        <th style="${thBase} width: 10%; color: #a1a1aa;">CLIENTE</th>
-        <th style="${thBase} width: 9%; color: #a1a1aa;">TELÉFONO</th>
-        <th style="${thBase} width: 6%; color: #a1a1aa;">F. PAGO</th>
-        <th style="${thBase} width: 7%; color: #30d158;">VALOR</th>
-        <th style="${thBase} width: 10%; color: #bf5af2;">MÉTODO</th>
-        <th style="${thBase} width: 9%; color: #a1a1aa; text-align: right; padding-right: 10px;">ACCIÓN</th>
+        <th style="${thBase} width: 6%; color: #a1a1aa;">FECHA</th>
+        <th style="${thBase} width: 20%; color: #a1a1aa;">CORREO / USUARIO</th>
+        <th style="${thBase} width: 12%; color: #a1a1aa;">CONTRASEÑA</th>
+        <th style="${thBase} width: 6%; color: #a1a1aa; text-align: center;">PERFIL</th>
+        <th style="${thBase} width: 5%; color: #a1a1aa; text-align: center;">PIN</th>
+        <th style="${thBase} width: 12%; color: #ff9500;">VENCIMIENTO</th>
+        <th style="${thBase} width: 13%; color: #a1a1aa;">CLIENTE</th>
+        <th style="${thBase} width: 10%; color: #a1a1aa;">TELÉFONO</th>
+        <th style="${thBase} width: 16%; color: #a1a1aa; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   } else {
@@ -2793,7 +2687,7 @@ window.cargarDatosMySQL = function () {
   `;
 
   fetch(
-    `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
+    `obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
   )
     .then((res) => res.json())
     .then((data) => {
@@ -2817,17 +2711,7 @@ window.cargarDatosMySQL = function () {
             `;
           };
 
-          // 🔒 VERIFICACIÓN DE ROL SUPERADMIN
-          const usuarioActivoObj = JSON.parse(
-            sessionStorage.getItem("usuario_activo") || "{}",
-          );
-          const usuarioNombre = (
-            usuarioActivoObj.nombre ||
-            sessionStorage.getItem("active_staff") ||
-            ""
-          ).toUpperCase();
-          const esSuperAdmin =
-            usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
+          const esSuperAdmin = true;
 
           dataOrdenada.forEach((fila) => {
             let diaVal = fila.dia || fila.fecha || "-";
@@ -2858,14 +2742,10 @@ window.cargarDatosMySQL = function () {
                   : "-";
             let numeroVal = fila.numero || fila.telefono || "-";
 
-            let fechaPagoVal = fila.fecha || "-";
-            let valorVal = fila.valor || "-";
-            let pagoVal = fila.pago || "-";
-
             let isCaida = fila.estado === "caida" || fila.es_caida == 1;
 
             // ==========================================
-            // BANNER DIVISOR AZUL POR FECHA
+            // BANNER DIVISOR AZUL POR FECHA (EXACTO A LA CAPTURA)
             // ==========================================
             if (
               !esVentas &&
@@ -2940,9 +2820,7 @@ window.cargarDatosMySQL = function () {
             let platReporte = fila.plataforma ? fila.plataforma : platFormat;
             let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platReporte}\n📧 *Correo:* ${correoVal}\n🔑 *Clave:* ${claveVal}\n👤 *Proveedor:* ${provVal}\n📅 *Fecha Compra:* ${diaVal}`;
             let safeReporte = encodeURIComponent(textoReporte);
-            let filaJsonEscapada = encodeURIComponent(
-              JSON.stringify(fila),
-            ).replace(/'/g, "%27");
+            let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
 
             // ==========================================
             // CELDAS ESTILIZADAS NATIVAS
@@ -2986,11 +2864,6 @@ window.cargarDatosMySQL = function () {
 
             let botonCopiar = `<button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">📋 Copiar</button>`;
 
-            // 🟢 BOTÓN "📅 HOY" EXCLUSIVO PARA SUPERADMIN / CAMILO
-            let botonPasarHoy = esSuperAdmin
-              ? `<button onclick="pasarRegistroAHoyMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Pasar a hoy" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">📅 Hoy</button>`
-              : "";
-
             // ==========================================
             // RENDER DE FILAS
             // ==========================================
@@ -3010,14 +2883,10 @@ window.cargarDatosMySQL = function () {
                   <td style="${tdBase}">${celdaVencimiento}</td>
                   <td style="${tdBase} color: #a1a1aa;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${clienteVal}">${clienteVal}</span></td>
                   <td style="${tdBase}">${celdaTelefonoContent}</td>
-                  <td style="${tdBase} color: #a1a1aa; font-family: monospace;">${fechaPagoVal}</td>
-                  <td style="${tdBase} color: #30d158; font-weight: 800; font-family: monospace;">${valorVal}</td>
-                  <td style="${tdBase} color: #bf5af2; font-weight: 700;"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${pagoVal}">${pagoVal}</span></td>
-                  <td style="${tdBase} text-align: right; padding-right: 10px;">
-                    <div style="display: flex; gap: 4px; justify-content: flex-end; align-items: center; min-width: 110px;">
+                  <td style="${tdBase} text-align: right; padding-right: 15px;">
+                    <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
                       ${botonesEdicionIzquierda}
                       ${botonCopiar}
-                      ${botonPasarHoy}
                     </div>
                   </td>
                 </tr>
@@ -3045,7 +2914,6 @@ window.cargarDatosMySQL = function () {
                     <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
                       ${botonesEdicionIzquierda}
                       ${botonCopiar}
-                      ${botonPasarHoy}
                       ${botonTemp}
                       ${botonEstado}
                     </div>
@@ -3136,7 +3004,8 @@ window.copiarTextoUnico = function (btn, textoEscapado) {
 window.generarTemp = function (btn, id) {
   if (typeof haptic === "function") haptic();
 
-  const urlPHP = `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}`;
+  const urlPHP = `obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}`;
+
   fetch(urlPHP)
     .then((res) => res.json())
     .then((data) => {
@@ -3245,7 +3114,7 @@ window.guardarNuevoRegistroMySQL = function (e) {
   formData.append("tabla", plataforma);
   formData.append("bloque_cuentas", bloque);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -3304,7 +3173,7 @@ window.eliminarRegistroMySQL = function (id, correoEscapado = "") {
   formData.append("id", id);
   formData.append("correo", correo);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -3343,7 +3212,7 @@ window.eliminarFechaMySQL = function (diaEscapado) {
   formData.append("tabla", window.tablaMySQLActual);
   formData.append("dia_valor", diaValor);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -3406,7 +3275,7 @@ window.marcarComoGarantia = function (
   formData.append("proveedor", prov);
   formData.append("fecha_compra", dia);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -3489,7 +3358,7 @@ window.guardarResolucionMySQL = function (e) {
   formData.append("correo_nuevo", correoNuevo);
   formData.append("clave_nueva", claveNueva);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -3574,7 +3443,7 @@ window.cargarStockParaPanelVentas = function () {
   const formData = new FormData();
   formData.append("accion", "obtener_stock_plataformas");
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -3895,7 +3764,7 @@ window.ejecutarVentaFinal = function (e) {
     formData.append("medio_pago", medioPago);
     formData.append("servicios_json", JSON.stringify(servicios));
 
-    fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    fetch("acciones_mysql.php", {
       method: "POST",
       body: formData,
     })
@@ -4139,7 +4008,7 @@ window.buscarHistorialNetflixEnVenta = function (telefono) {
     formData.append("accion", "buscar_renovacion_netflix");
     formData.append("tel", telLimpio);
 
-    fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    fetch("acciones_mysql.php", {
       method: "POST",
       body: formData,
     })
@@ -4207,7 +4076,7 @@ window.alCambiarTipoVenta = function (idFila) {
     formData.append("accion", "buscar_renovacion_netflix");
     formData.append("tel", telNum);
 
-    fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    fetch("acciones_mysql.php", {
       method: "POST",
       body: formData,
     })
@@ -4594,7 +4463,7 @@ function cargarDashboardFinanzas() {
   formData.append("mes", mes);
   formData.append("dia", dia);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -4643,7 +4512,7 @@ function cargarDashboardFinanzas() {
   formData.append("mes", mes);
   formData.append("dia", dia);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -4752,7 +4621,7 @@ function cargarRentabilidadPlataformas() {
   formData.append("accion", "obtener_rentabilidad_plataformas");
   formData.append("mes", mes);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -4851,7 +4720,7 @@ function guardarTransaccion(e) {
   formData.append("monto", montoRaw);
   formData.append("detalle", detalleVal);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -4908,7 +4777,7 @@ window.guardarDeudaEnSheets = window.guardarDeudaEnMySQL = function () {
   formData.append("monto", monto);
   formData.append("tipo", tipo);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -5089,7 +4958,7 @@ window.cargarCortesOperativosNetflix = function () {
   const formData = new FormData();
   formData.append("accion", "obtener_cortes_netflix");
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -5223,7 +5092,7 @@ window.procesarCorteNetflix = function (
   formData.append("correo", correo);
   formData.append("clave_nueva", claveNueva);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -5471,7 +5340,105 @@ window.copiarTodosLosNumerosCorte = function (btn, todosEscapados) {
   });
 };
 
+// 5. CREAR CUENTA DE NETFLIX (USAR ALIAS)
+window.crearCuentaNetflixAlias = function () {
+  if (typeof haptic === "function") haptic();
 
+  const correoBase = prompt(
+    "Ingresa el correo base para crear el Alias:\n(Ej: durmal05y@outlook.com)",
+  );
+  if (!correoBase || !correoBase.trim()) return;
+
+  const aliasNumero = prompt(
+    "Ingresa el identificador/número de alias:\n(Ej: 1, 2, 3 o 'septiembre')",
+    "1",
+  );
+  if (!aliasNumero) return;
+
+  let correoFinal = correoBase.trim();
+  if (correoBase.includes("@")) {
+    const partes = correoBase.trim().split("@");
+    correoFinal = `${partes[0]}+${aliasNumero.trim()}@${partes[1]}`;
+  }
+
+  const clave = prompt(
+    `Ingresa la contraseña para:\n${correoFinal}`,
+    "fuego41@@",
+  );
+  if (!clave) return;
+
+  const formData = new FormData();
+  formData.append("accion", "crear_cuenta_netflix_alias");
+  formData.append("correo", correoFinal);
+  formData.append("clave", clave.trim());
+
+  fetch("acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success") {
+        alert(
+          `✅ Cuenta creada con éxito:\n\nCorreo: ${correoFinal}\nClave: ${clave}`,
+        );
+        if (typeof cargarDatosMySQL === "function") cargarDatosMySQL();
+        window.cargarCortesOperativosNetflix();
+      } else {
+        alert(
+          "❌ Error: " + (res ? res.message : "No se pudo crear la cuenta."),
+        );
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("❌ Error de comunicación al crear cuenta.");
+    });
+};
+
+// 6. CONSTRUCTOR DINÁMICO DEL MODAL EN CASO DE NO EXISTIR
+window.crearModalNetflixManagerHTML = function () {
+  if (document.getElementById("netflixManagerOverlay")) return;
+
+  const modalHtml = `
+    <div class="overlay-ios" id="netflixManagerOverlay" style="display: none; z-index: 16000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); align-items: center; justify-content: center;">
+      <div class="sheet-ios" onclick="event.stopPropagation()" style="max-width: 520px; width: 92%; max-height: 88vh; background: #111115; border: 1px solid rgba(229, 9, 20, 0.3); border-radius: 28px; padding: 22px; box-shadow: 0 30px 70px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 16px; overflow: hidden; margin: auto;">
+        
+        <!-- ENCABEZADO -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; flex-shrink: 0;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="background: rgba(229, 9, 20, 0.15); border: 1px solid rgba(229, 9, 20, 0.3); color: #e50914; padding: 8px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+            </div>
+            <h3 style="margin: 0; color: #e50914; font-size: 1.25rem; font-weight: 800;">Cortes Operativos</h3>
+          </div>
+          <button type="button" onclick="toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">✕</button>
+        </div>
+
+        <!-- BOTONES SUPERIORES -->
+        <div style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
+          <button onclick="window.crearCuentaNetflixAlias()" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 13px; border-radius: 14px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Crear cuenta de Netflix (Usar Alias)
+          </button>
+
+          <button onclick="window.cargarCortesOperativosNetflix()" style="width: 100%; background: rgba(255, 255, 255, 0.06); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.12); padding: 12px; border-radius: 14px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            Refrescar Escaneo de Cortes
+          </button>
+        </div>
+
+        <!-- ÁREA DE SCROLL DE TARJETAS DE CORTE -->
+        <div id="listaCortesOperativosNetflix" style="flex: 1; overflow-y: auto; padding-right: 2px;" class="cyber-custom-scroll">
+          <div style="text-align: center; color: #a1a1aa; padding: 30px;">Cargando cortes...</div>
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+};
 
 /* ==========================================================================
    🧮 CEREBRO DEL COTIZADOR AUTOMÁTICO DE COMBOS CYBERNET (ALGORITMO MAX-BASE)
@@ -5951,7 +5918,7 @@ function cargarStockSelectCargas() {
   const formData = new FormData();
   formData.append("accion", "obtener_stock_plataformas");
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -6026,7 +5993,7 @@ function ejecutarCargaLote(e) {
   formData.append("proveedor", proveedorFinal);
   formData.append("bloque_cuentas", bloqueCuentas);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -6246,7 +6213,7 @@ function ejecutarCargaLote(e) {
   formData.append("proveedor", proveedorFinal);
   formData.append("bloque_cuentas", bloqueCuentas);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+  fetch("acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -6326,6 +6293,8 @@ window.toggleSuspendidasPanel = function () {
       window.CyberSonidos.play("cerrar");
   }
 };
+
+
 
 window.refrescarVistaActualModal = function () {
   if (typeof haptic === "function") haptic();
@@ -6588,18 +6557,8 @@ window.renderizarTablaSuspendidas = function () {
 
   const hoyObj = new Date();
   const mesesAbrev = [
-    "ene",
-    "feb",
-    "mar",
-    "abr",
-    "may",
-    "jun",
-    "jul",
-    "ago",
-    "sep",
-    "oct",
-    "nov",
-    "dic",
+    "ene", "feb", "mar", "abr", "may", "jun",
+    "jul", "ago", "sep", "oct", "nov", "dic"
   ];
   const fechaHoyCorta = hoyObj.getDate() + "-" + mesesAbrev[hoyObj.getMonth()];
 
@@ -6778,6 +6737,8 @@ window.renderizarTablaSuspendidas = function () {
   contenedor.innerHTML = htmlTabla;
 };
 
+
+
 /* ==========================================================================
    🟣 INTERCAMBIO DE VISTAS Y RENDERIZADO DE NEYOP (GOOGLE SHEETS)
    ========================================================================== */
@@ -6833,10 +6794,7 @@ window.cargarNeyop = function (forzar = false) {
 
   if (forzar && iconRefrescar) {
     iconRefrescar.classList.add("spin-anim");
-  } else if (
-    !forzar &&
-    (!window.memoriaNeyop || window.memoriaNeyop.length === 0)
-  ) {
+  } else if (!forzar && (!window.memoriaNeyop || window.memoriaNeyop.length === 0)) {
     container.innerHTML = `
       <div style="padding: 60px; text-align: center; color: #ff9f0a;">
         <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
@@ -6888,22 +6846,16 @@ window.renderizarTablaNeyop = function () {
       return (
         (item.yopmail || "").toLowerCase().includes(texto) ||
         (item.correo || "").toLowerCase().includes(texto) ||
-        (item.claveVieja || item.clave_vieja || "")
-          .toLowerCase()
-          .includes(texto) ||
-        (item.claveNueva || item.clave_nueva || "")
-          .toLowerCase()
-          .includes(texto)
+        (item.claveVieja || item.clave_vieja || "").toLowerCase().includes(texto) ||
+        (item.claveNueva || item.clave_nueva || "").toLowerCase().includes(texto)
       );
     });
   }
 
   // Cuentas con correo registrado arriba, vacías abajo
   filtrados.sort((a, b) => {
-    let tieneCorreoA =
-      a.correo && a.correo.trim() !== "" && a.correo.trim() !== "-" ? 1 : 0;
-    let tieneCorreoB =
-      b.correo && b.correo.trim() !== "" && b.correo.trim() !== "-" ? 1 : 0;
+    let tieneCorreoA = a.correo && a.correo.trim() !== "" && a.correo.trim() !== "-" ? 1 : 0;
+    let tieneCorreoB = b.correo && b.correo.trim() !== "" && b.correo.trim() !== "-" ? 1 : 0;
     return tieneCorreoB - tieneCorreoA;
   });
 
@@ -6926,9 +6878,7 @@ window.renderizarTablaNeyop = function () {
       const estaListo = (cuenta.estado || "").toUpperCase() === "LISTO";
       const esFilaPar = idx % 2 === 0;
 
-      let colorFondoFila = esFilaPar
-        ? "rgba(255, 255, 255, 0.015)"
-        : "transparent";
+      let colorFondoFila = esFilaPar ? "rgba(255, 255, 255, 0.015)" : "transparent";
       let colorPrimario = "#ff9f0a";
       let colorBlanco = "#ffffff";
       let colorVerde = "#30d158";
@@ -6965,11 +6915,7 @@ window.renderizarTablaNeyop = function () {
         botonAccion = `<span style="color: #ff9f0a; font-weight: 800; display:flex; align-items:center; justify-content: center; gap:4px; font-size: 0.8rem;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Completado
         </span>`;
-      } else if (
-        cuenta.correo &&
-        cuenta.correo.trim() !== "" &&
-        cuenta.correo.trim() !== "-"
-      ) {
+      } else if (cuenta.correo && cuenta.correo.trim() !== "" && cuenta.correo.trim() !== "-") {
         botonAccion = `<button onclick="window.marcarListoNeyop('${cuenta.filaIndex || cuenta.id}', this)" class="btn-ios" style="padding: 8px 14px; font-size: 0.75rem; border-radius: 8px; margin: 0 auto; background: #ff9f0a; color: white; border: none; font-weight:800; display:flex; align-items:center; gap:6px; box-shadow: 0 4px 10px rgba(255, 159, 10, 0.3);">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Listo
         </button>`;
@@ -7029,9 +6975,7 @@ window.marcarListoNeyop = function (filaIndex, btnElement) {
 
     if (res && res.status === "success") {
       if (typeof triggerToast === "function")
-        triggerToast(
-          `<div style="color:var(--ios-green);">✅ Fila completada y pintada.</div>`,
-        );
+        triggerToast(`<div style="color:var(--ios-green);">✅ Fila completada y pintada.</div>`);
       cargarNeyop(true);
     } else {
       alert("❌ Error: " + (res ? res.message : "Fallo de red"));
@@ -7065,15 +7009,10 @@ window.ejecutarFlujoPinesSuspendidas = function (btnElement) {
 
     if (res && res.status === "success") {
       if (typeof triggerToast === "function")
-        triggerToast(
-          `<div style="color:var(--ios-green);">✅ ${res.message}</div>`,
-        );
+        triggerToast(`<div style="color:var(--ios-green);">✅ ${res.message}</div>`);
       cargarSuspendidas(true);
     } else {
-      alert(
-        "❌ Error procesando pines: " +
-          (res ? res.message : "Fallo de conexión"),
-      );
+      alert("❌ Error procesando pines: " + (res ? res.message : "Fallo de conexión"));
     }
   };
 
@@ -7086,11 +7025,7 @@ window.ejecutarFlujoPinesSuspendidas = function (btnElement) {
 window.ejecutarTransferirRecarga = function (btnElement) {
   if (typeof haptic === "function") haptic();
 
-  if (
-    !confirm(
-      "¿Transferir a NEYOP las recargas PENDIENTES marcadas con '1'? (Se autogenerarán Yopmails si faltan espacios vacíos)",
-    )
-  )
+  if (!confirm("¿Transferir a NEYOP las recargas PENDIENTES marcadas con '1'? (Se autogenerarán Yopmails si faltan espacios vacíos)"))
     return;
 
   const originalHTML = btnElement.innerHTML;
@@ -7108,9 +7043,7 @@ window.ejecutarTransferirRecarga = function (btnElement) {
 
     if (res && res.status === "success") {
       if (typeof triggerToast === "function")
-        triggerToast(
-          `<div style="color:var(--ios-green);">✅ ${res.message}</div>`,
-        );
+        triggerToast(`<div style="color:var(--ios-green);">✅ ${res.message}</div>`);
       cargarNeyop(true);
     } else {
       alert("❌ Error: " + (res ? res.message : "Fallo de conexión"));
@@ -7127,11 +7060,7 @@ window.activarMultiplesCuentasSuspendidas = function (indices, btnElement) {
   if (typeof haptic === "function") haptic();
 
   const count = indices.split(",").length;
-  if (
-    !confirm(
-      `¿Estás seguro de activar las ${count} cuentas mostradas al mismo tiempo?`,
-    )
-  )
+  if (!confirm(`¿Estás seguro de activar las ${count} cuentas mostradas al mismo tiempo?`))
     return;
 
   const originalHTML = btnElement.innerHTML;
@@ -7146,9 +7075,7 @@ window.activarMultiplesCuentasSuspendidas = function (indices, btnElement) {
 
     if (res && res.status === "success") {
       if (typeof triggerToast === "function")
-        triggerToast(
-          `<div style="color:var(--ios-green);">✅ ${res.message}</div>`,
-        );
+        triggerToast(`<div style="color:var(--ios-green);">✅ ${res.message}</div>`);
       cargarSuspendidas(true);
     } else {
       alert("❌ Error: " + (res ? res.message : "Fallo de red"));
@@ -7178,9 +7105,7 @@ window.activarCuentaSuspendida = function (filaIndex, btnElement) {
 
     if (res && res.status === "success") {
       if (typeof triggerToast === "function")
-        triggerToast(
-          `<div style="color:var(--ios-green);">✅ Cuenta activada.</div>`,
-        );
+        triggerToast(`<div style="color:var(--ios-green);">✅ Cuenta activada.</div>`);
       cargarSuspendidas(true);
     } else {
       alert("❌ Error: " + (res ? res.message : "Fallo de red"));
@@ -7233,6 +7158,7 @@ window.extraerPinIndividual = function (correo, btnElement) {
   document.body.appendChild(script);
 };
 
+
 /* ==========================================================================
    📋 MOTOR DE COPIADO UNIVERSAL (FUNCIONA EN HTTP, HTTPS, IP LOCAL Y LOCALHOST)
    ========================================================================== */
@@ -7268,8 +7194,7 @@ window.copiarDatoCargaIndividual = function (btn, textoEsc) {
 
   // 3. Intento 1: API Moderna (Solo funciona en HTTPS / Localhost)
   if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard
-      .writeText(texto)
+    navigator.clipboard.writeText(texto)
       .then(animarExito)
       .catch(() => copiarFallback(texto, animarExito));
   } else {
@@ -7292,7 +7217,7 @@ function copiarFallback(texto, callbackExito) {
   textarea.style.left = "-9999px";
   textarea.setAttribute("readonly", "");
   document.body.appendChild(textarea);
-
+  
   textarea.focus();
   textarea.select();
 
@@ -7309,6 +7234,8 @@ function copiarFallback(texto, callbackExito) {
   document.body.removeChild(textarea);
 }
 
+
+
 /* ==========================================================================
    ⏱️ CONTROL Y REGISTRO DE TURNOS DE ASISTENTES EN MYSQL
    ========================================================================== */
@@ -7322,30 +7249,23 @@ function startShiftTimer() {
   formData.append("accion", "iniciar_turno");
   formData.append("vendedor", activeUser);
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((res) => {
+  fetch("acciones_mysql.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(res => {
       if (res && res.status === "success") {
         let segsPrevios = res.segundos_transcurridos || 0;
-        sessionStorage.setItem(
-          "cyber_shift_start_time",
-          Date.now() - segsPrevios * 1000,
-        );
+        sessionStorage.setItem("cyber_shift_start_time", Date.now() - (segsPrevios * 1000));
         sessionStorage.setItem("cyber_last_sync_time", Date.now());
       }
     })
-    .catch((err) => console.error("Error al iniciar turno en MySQL:", err));
+    .catch(err => console.error("Error al iniciar turno en MySQL:", err));
 
   if (timerInterval) clearInterval(timerInterval);
 
   timerInterval = setInterval(function () {
     if (isTimerPaused) return;
 
-    let startTime =
-      parseInt(sessionStorage.getItem("cyber_shift_start_time")) || Date.now();
+    let startTime = parseInt(sessionStorage.getItem("cyber_shift_start_time")) || Date.now();
     let totalMs = Date.now() - startTime;
 
     let totalSeconds = Math.floor(totalMs / 1000);
@@ -7362,9 +7282,7 @@ function startShiftTimer() {
     if (stElement) stElement.innerText = tiempoTexto;
 
     // Enviar pulso de guardado a MySQL cada 5 minutos
-    let lastSync =
-      parseInt(sessionStorage.getItem("cyber_last_sync_time"), 10) ||
-      Date.now();
+    let lastSync = parseInt(sessionStorage.getItem("cyber_last_sync_time"), 10) || Date.now();
     if (Date.now() - lastSync >= 300000) {
       ejecutarAutoPulsoTiempo(tiempoTexto);
     }
@@ -7382,15 +7300,12 @@ function ejecutarAutoPulsoTiempo(tiempoTexto) {
   formData.append("vendedor", activeUser);
   formData.append("tiempo_trabajado", tiempoTexto || "00:00:00");
 
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((res) => {
+  fetch("acciones_mysql.php", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(res => {
       console.log("✅ Tiempo del asistente actualizado en MySQL:", tiempoTexto);
     })
-    .catch((err) => console.error("Error al enviar pulso a MySQL:", err));
+    .catch(err => console.error("Error al enviar pulso a MySQL:", err));
 }
 
 function cerrarSesionStaff() {
@@ -7404,11 +7319,7 @@ function cerrarSesionStaff() {
     return;
   }
 
-  if (
-    confirm(
-      "¿Estás seguro de que deseas cerrar tu sesión y finalizar tu turno de hoy?",
-    )
-  ) {
+  if (confirm("¿Estás seguro de que deseas cerrar tu sesión y finalizar tu turno de hoy?")) {
     let timerEl = document.getElementById("shiftTimer");
     let tiempoFinal = timerEl ? timerEl.innerText : "00:00:00";
 
@@ -7417,11 +7328,8 @@ function cerrarSesionStaff() {
     formData.append("vendedor", usuarioActivo);
     formData.append("tiempo_trabajado", tiempoFinal);
 
-    fetch("https://api.cybernetsp.com/acciones_mysql.php", {
-      method: "POST",
-      body: formData,
-    })
-      .then((res) => res.json())
+    fetch("acciones_mysql.php", { method: "POST", body: formData })
+      .then(res => res.json())
       .then(() => {
         sessionStorage.clear();
         localStorage.removeItem("cyber_saved_staff");
@@ -7434,38 +7342,3 @@ function cerrarSesionStaff() {
       });
   }
 }
-/* =========================================================================
-   📅 MOVER TODOS LOS PERFILES DE LA CUENTA AL DÍA DE HOY
-   ========================================================================= */
-window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
-  if (typeof haptic === "function") haptic();
-  const correo = correoEscapado ? decodeURIComponent(correoEscapado) : "";
-
-  const formData = new FormData();
-  formData.append("accion", "pasar_a_hoy");
-  formData.append("tabla", window.tablaMySQLActual);
-  formData.append("id", id);
-  formData.append("correo", correo);
-
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.status === "success") {
-        cargarDatosMySQL(); // Refresca la tabla en vivo
-        if (typeof triggerToast === "function") {
-          triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${data.message}</span></div>`,
-          );
-        }
-      } else {
-        alert("❌ Error: " + data.message);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      alert("❌ Error de comunicación al mover la fecha.");
-    });
-};
