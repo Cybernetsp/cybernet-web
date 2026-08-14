@@ -5472,19 +5472,22 @@ window.copiarTodosLosNumerosCorte = function (btn, todosEscapados) {
 };
 
 /* =========================================================================
-   🍿 CREACIÓN Y GESTIÓN DE CUENTAS NETFLIX ALIAS (SHEETS + GUARDADO EN MYSQL)
+   🍿 CREACIÓN Y GESTIÓN DE CUENTAS NETFLIX ALIAS
+   (PROCESAMIENTO EN GOOGLE SHEETS + GUARDADO FINAL EN MYSQL)
    ========================================================================= */
+
+if (typeof GOOGLE_SCRIPT_URL === "undefined") {
+  var GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxk_T98sS1lL5lbXVq_XKOpB6ZCNQ1DSCgPhc_a6vmE_ai16YbSYO_eHkmeu0ZjM5aq/exec";
+}
 
 window.pinOcultoActual = "";
 
-// 1. INICIAR CREACIÓN
-window.crearCuentaNetflixAlias = window.iniciarCreacionNetflixAlias = function (
-  btn,
-) {
+// 1. FUNCIÓN PRINCIPAL DE ENTRADA
+window.crearCuentaNetflixAlias = window.iniciarCreacionNetflixAlias = function (btn) {
   if (typeof haptic === "function") haptic();
 
-  btn = btn || document.getElementById("btnCrearAliasNetflix");
-  const contenidoOriginal = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span style="white-space:nowrap;">Crear cuenta de Netflix (Usar Alias)</span>`;
+  btn = btn || document.getElementById("btnCrearAliasNetflix") || document.querySelector("#netflixManagerOverlay button");
+  const contenidoOriginal = btn ? btn.innerHTML : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span style="white-space:nowrap;">Crear cuenta de Netflix (Usar Alias)</span>`;
 
   let pendienteGuardada = localStorage.getItem("cyber_netflix_alias_pendiente");
 
@@ -5498,7 +5501,22 @@ window.crearCuentaNetflixAlias = window.iniciarCreacionNetflixAlias = function (
     }
 
     const cbCheck = "cb_check_alias_" + Date.now();
+
+    // ⏱️ RELOJ DE RESCATE (12s): Si Google Sheets no responde, restablece el botón
+    const timerCheck = setTimeout(() => {
+      delete window[cbCheck];
+      const node = document.getElementById("node_" + cbCheck);
+      if (node) node.remove();
+      if (btn) {
+        btn.style.pointerEvents = "auto";
+        btn.innerHTML = contenidoOriginal;
+      }
+      localStorage.removeItem("cyber_netflix_alias_pendiente");
+      window.ejecutarGeneracionNuevaCuentaAlias(btn, contenidoOriginal);
+    }, 12000);
+
     window[cbCheck] = function (res) {
+      clearTimeout(timerCheck);
       const node = document.getElementById("node_" + cbCheck);
       if (node) node.remove();
       delete window[cbCheck];
@@ -5508,9 +5526,7 @@ window.crearCuentaNetflixAlias = window.iniciarCreacionNetflixAlias = function (
           btn.style.pointerEvents = "auto";
           btn.innerHTML = contenidoOriginal;
         }
-        alert(
-          "⚠️ Se ha detectado una cuenta previamente generada sin guardar.\n\nSe recuperará para finalizar el proceso.",
-        );
+        alert("⚠️ Se ha detectado una cuenta previamente generada que NO fue guardada.\n\nEl sistema la recuperará para que finalices el proceso.");
         window.pinOcultoActual = d.pinRefacil;
         window.restaurarInterfazAliasGenerada(d, btn);
       } else {
@@ -5526,16 +5542,13 @@ window.crearCuentaNetflixAlias = window.iniciarCreacionNetflixAlias = function (
     return;
   }
 
+  // SI NO HAY NADA PENDIENTE, CREA UNA NUEVA
   window.ejecutarGeneracionNuevaCuentaAlias(btn, contenidoOriginal);
 };
 
-// 2. SOLICITAR ALIAS Y PIN A GOOGLE APPS SCRIPT
+// 2. EJECUTAR GENERACIÓN EN GOOGLE APPS SCRIPT
 window.ejecutarGeneracionNuevaCuentaAlias = function (btn, contenidoOriginal) {
-  if (
-    !confirm(
-      "❓ ¿Estás seguro de CREAR UNA CUENTA NUEVA de Netflix?\n\nEl sistema tomará un PIN de REFACIL y un correo de ALIAS.",
-    )
-  ) {
+  if (!confirm("❓ ¿Estás seguro de que deseas CREAR UNA CUENTA NUEVA de Netflix?\n\nEl sistema tomará un PIN de REFACIL y un correo de ALIAS.")) {
     if (btn) {
       btn.style.pointerEvents = "auto";
       btn.innerHTML = contenidoOriginal;
@@ -5543,35 +5556,45 @@ window.ejecutarGeneracionNuevaCuentaAlias = function (btn, contenidoOriginal) {
     return;
   }
 
-  // Protegido con white-space:nowrap para evitar deformaciones
   if (btn) {
     btn.style.pointerEvents = "none";
     btn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="white-space:nowrap; font-weight:800;">Generando credenciales...</span>`;
   }
 
-  const radarContenedor = document.getElementById(
-    "radarVerificacionContenedor",
-  );
+  // Reseteo visual del modal de resultado
+  const radarContenedor = document.getElementById("radarVerificacionContenedor");
   const radarSpinner = document.getElementById("radarVerificacionSpinner");
   const btnVerify = document.getElementById("btnLinkVerificarGmail");
   const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
   const btnMala = document.getElementById("btnCuentaMalaAlias");
 
-  if (radarContenedor)
-    radarContenedor.style.setProperty("display", "flex", "important");
+  if (radarContenedor) radarContenedor.style.setProperty("display", "flex", "important");
   if (radarSpinner) {
     radarSpinner.style.setProperty("display", "flex", "important");
-    radarSpinner.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="white-space:nowrap;">Esperando correo de Netflix...</span>`;
+    radarSpinner.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="white-space:nowrap;">Esperando correo '¡Ya casi terminas!' en Gmail...</span>`;
   }
   if (btnVerify) btnVerify.style.setProperty("display", "none", "important");
   if (btnGuardar) btnGuardar.style.setProperty("display", "none", "important");
   if (btnMala) btnMala.style.display = "block";
 
-  if (window.verificationLinkInterval)
-    clearInterval(window.verificationLinkInterval);
+  if (window.verificationLinkInterval) clearInterval(window.verificationLinkInterval);
 
   const cbName = "cb_alias_cta_" + Date.now();
+
+  // 🛡️ TIMEOUT DE SEGURIDAD (15 SEGUNDOS): EVITA QUE EL BOTÓN QUEDE TRABADO SI FALLA GOOGLE
+  const timerSeguridad = setTimeout(() => {
+    delete window[cbName];
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    if (btn) {
+      btn.style.pointerEvents = "auto";
+      btn.innerHTML = contenidoOriginal;
+    }
+    alert("⚠️ Tiempo de espera agotado al conectar con Google Sheets. Intenta nuevamente.");
+  }, 15000);
+
   window[cbName] = function (res) {
+    clearTimeout(timerSeguridad);
     if (btn) {
       btn.style.pointerEvents = "auto";
       btn.innerHTML = contenidoOriginal;
@@ -5587,10 +5610,7 @@ window.ejecutarGeneracionNuevaCuentaAlias = function (btn, contenidoOriginal) {
       localStorage.setItem("cyber_netflix_alias_pendiente", JSON.stringify(d));
       window.restaurarInterfazAliasGenerada(d, btn);
     } else {
-      alert(
-        "❌ Error: " +
-          (res ? res.message : "Fallo de comunicación con Google Sheets."),
-      );
+      alert("❌ Error: " + (res ? res.message : "Fallo de respuesta del servidor."));
     }
   };
 
@@ -5601,7 +5621,7 @@ window.ejecutarGeneracionNuevaCuentaAlias = function (btn, contenidoOriginal) {
   document.body.appendChild(script);
 };
 
-// 3. MOSTRAR INTERFAZ Y DETALLES DE LA CUENTA
+// 3. RESTAURAR Y MOSTRAR DATOS EN INTERFAZ
 window.restaurarInterfazAliasGenerada = function (d, btnOrigen) {
   const elCorreo = document.getElementById("displayCtaCorreo");
   const elClave = document.getElementById("displayCtaClave");
@@ -5614,9 +5634,7 @@ window.restaurarInterfazAliasGenerada = function (d, btnOrigen) {
     elPin.style.color = "var(--ios-orange)";
   }
 
-  const radarContenedor = document.getElementById(
-    "radarVerificacionContenedor",
-  );
+  const radarContenedor = document.getElementById("radarVerificacionContenedor");
   const radarSpinner = document.getElementById("radarVerificacionSpinner");
   const btnVerify = document.getElementById("btnLinkVerificarGmail");
   const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
@@ -5629,26 +5647,19 @@ window.restaurarInterfazAliasGenerada = function (d, btnOrigen) {
   }
   if (radarSpinner) {
     radarSpinner.style.setProperty("display", "flex", "important");
-    radarSpinner.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="white-space:nowrap;">Esperando correo de Netflix...</span>`;
+    radarSpinner.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="white-space:nowrap;">Esperando correo '¡Ya casi terminas!' en Gmail...</span>`;
   }
   if (btnVerify) btnVerify.style.setProperty("display", "none", "important");
   if (btnGuardar) {
     btnGuardar.style.setProperty("display", "none", "important");
     btnGuardar.onclick = function () {
-      let datosFrescos =
-        JSON.parse(localStorage.getItem("cyber_netflix_alias_pendiente")) || d;
-      guardarCuentaConfirmadaNetflix(
-        btnGuardar,
-        "Guardar en Inventario Maestro",
-        datosFrescos,
-      );
+      let datosFrescos = JSON.parse(localStorage.getItem("cyber_netflix_alias_pendiente")) || d;
+      guardarCuentaConfirmadaNetflix(btnGuardar, "Guardar en Inventario Maestro", datosFrescos);
     };
   }
   if (btnMala) btnMala.style.display = "block";
 
-  const modal =
-    document.getElementById("cuentaGeneradaModalOverlay") ||
-    document.getElementById("cuentaGeneratedModalOverlay");
+  const modal = document.getElementById("cuentaGeneradaModalOverlay") || document.getElementById("cuentaGeneratedModalOverlay");
   if (modal) modal.classList.add("open");
 
   window.lanzarRadarEspiaAlias(d.correo);
@@ -5656,8 +5667,7 @@ window.restaurarInterfazAliasGenerada = function (d, btnOrigen) {
 
 // 4. RADAR ESPIA DE GMAIL
 window.lanzarRadarEspiaAlias = function (correoTarget) {
-  if (window.verificationLinkInterval)
-    clearInterval(window.verificationLinkInterval);
+  if (window.verificationLinkInterval) clearInterval(window.verificationLinkInterval);
 
   window.verificationLinkInterval = setInterval(function () {
     const cbRadarName = "cb_radar_alias_" + Date.now();
@@ -5670,15 +5680,13 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
       if (res && res.status === "success") {
         if (res.yaCasiTerminas || res.linkVerificacion) {
           const pinEl = document.getElementById("displayCtaPinRecarga");
-          const radarSpinner = document.getElementById(
-            "radarVerificacionSpinner",
-          );
+          const radarSpinner = document.getElementById("radarVerificacionSpinner");
           if (pinEl && pinEl.innerText !== window.pinOcultoActual) {
             if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
             pinEl.innerText = window.pinOcultoActual;
             pinEl.style.color = "var(--ios-green)";
             if (radarSpinner) {
-              radarSpinner.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="white-space:nowrap;">PIN Revelado. Esperando link...</span>`;
+              radarSpinner.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="white-space:nowrap;">PIN Revelado. Esperando link de verificación...</span>`;
             }
           }
         }
@@ -5687,28 +5695,20 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
           clearInterval(window.verificationLinkInterval);
           if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
 
-          const radarSpinner = document.getElementById(
-            "radarVerificacionSpinner",
-          );
+          const radarSpinner = document.getElementById("radarVerificacionSpinner");
           const btnLink = document.getElementById("btnLinkVerificarGmail");
           const btnMala = document.getElementById("btnCuentaMalaAlias");
-          const radarContenedor = document.getElementById(
-            "radarVerificacionContenedor",
-          );
+          const radarContenedor = document.getElementById("radarVerificacionContenedor");
 
-          if (radarSpinner)
-            radarSpinner.style.setProperty("display", "none", "important");
+          if (radarSpinner) radarSpinner.style.setProperty("display", "none", "important");
           if (btnLink) {
             btnLink.href = res.linkVerificacion;
             btnLink.innerHTML = "✉️ Verificar Correo en Netflix";
             btnLink.style.setProperty("display", "inline-flex", "important");
             btnLink.onclick = function () {
               if (typeof haptic === "function") haptic();
-              const btnGuardar = document.getElementById(
-                "btnGuardarMaestroNetflix",
-              );
-              if (btnGuardar)
-                btnGuardar.style.setProperty("display", "block", "important");
+              const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
+              if (btnGuardar) btnGuardar.style.setProperty("display", "block", "important");
               if (btnMala) btnMala.style.display = "none";
             };
           }
@@ -5730,20 +5730,14 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
 
 // 5. CAMBIAR CUENTA MALA EN ALIAS
 window.cambiarCuentaMalaAlias = function () {
-  if (
-    !confirm(
-      "⚠️ ¿Estás seguro de descartar esta cuenta?\n\nSe marcará en ROJO en ALIAS, se eliminará de PINESMES y te daremos otra.",
-    )
-  )
-    return;
+  if (!confirm("⚠️ ¿Estás seguro de que esta cuenta no sirve?\n\nSe marcará en ROJO en ALIAS, se borrará de PINESMES y te entregaremos una nueva.")) return;
 
   const correoEl = document.getElementById("displayCtaCorreo");
   let correoMalo = correoEl ? correoEl.innerText : "";
   const btnMala = document.getElementById("btnCuentaMalaAlias");
   if (btnMala) {
     btnMala.disabled = true;
-    btnMala.innerHTML =
-      "<span style='white-space:nowrap;'>Descartando...</span>";
+    btnMala.innerHTML = "<span style='white-space:nowrap;'>Descartando...</span>";
   }
 
   const cbName = "cb_mala_" + Date.now();
@@ -5766,8 +5760,7 @@ window.cambiarCuentaMalaAlias = function () {
       const claveEl = document.getElementById("displayCtaClave");
       if (claveEl) claveEl.innerText = res.claveNueva;
 
-      if (window.verificationLinkInterval)
-        clearInterval(window.verificationLinkInterval);
+      if (window.verificationLinkInterval) clearInterval(window.verificationLinkInterval);
       const pinEl = document.getElementById("displayCtaPinRecarga");
       if (pinEl) {
         pinEl.innerText = "Oculto (Esperando a Netflix...)";
@@ -5781,9 +5774,7 @@ window.cambiarCuentaMalaAlias = function () {
 
       window.lanzarRadarEspiaAlias(res.correoNuevo);
     } else {
-      alert(
-        "❌ Error: " + (res ? res.message : "No se pudo cambiar la cuenta."),
-      );
+      alert("❌ Error: " + (res ? res.message : "No se pudo cambiar la cuenta."));
     }
   };
 
@@ -5795,11 +5786,7 @@ window.cambiarCuentaMalaAlias = function () {
 };
 
 // 6. CONFIRMAR GUARDADO FINAL EN MYSQL
-window.guardarCuentaConfirmadaNetflix = function (
-  btn,
-  contenidoOriginal,
-  datosCuenta,
-) {
+window.guardarCuentaConfirmadaNetflix = function (btn, contenidoOriginal, datosCuenta) {
   btn.disabled = true;
   btn.style.pointerEvents = "none";
   btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> <span style="white-space:nowrap;">Guardando en MySQL...</span>`;
@@ -5825,23 +5812,16 @@ window.guardarCuentaConfirmadaNetflix = function (
 
         localStorage.removeItem("cyber_netflix_alias_pendiente");
 
-        const modal =
-          document.getElementById("cuentaGeneradaModalOverlay") ||
-          document.getElementById("cuentaGeneratedModalOverlay");
+        const modal = document.getElementById("cuentaGeneradaModalOverlay") || document.getElementById("cuentaGeneratedModalOverlay");
         if (modal) modal.classList.remove("open");
 
         if (typeof triggerToast === "function") {
-          triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg> <span>Cuenta inyectada en MySQL con sus 5 perfiles.</span></div>`,
-          );
+          triggerToast(`<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg> <span>Cuenta inyectada en MySQL con sus 5 perfiles.</span></div>`);
         }
 
         if (typeof cargarDatosMySQL === "function") cargarDatosMySQL();
       } else {
-        alert(
-          "❌ Error al guardar en MySQL: " +
-            (res ? res.message : "Fallo de respuesta."),
-        );
+        alert("❌ Error al guardar en MySQL: " + (res ? res.message : "Fallo de respuesta."));
         btn.innerHTML = contenidoOriginal;
         btn.style.background = "";
       }
@@ -5855,6 +5835,17 @@ window.guardarCuentaConfirmadaNetflix = function (
       alert("❌ Error de comunicación con el servidor MySQL.");
     });
 };
+
+
+
+
+
+
+
+
+
+
+
 
 // 6. CONSTRUCTOR DINÁMICO DEL MODAL EN CASO DE NO EXISTIR
 window.crearModalNetflixManagerHTML = function () {
