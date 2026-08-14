@@ -22,10 +22,10 @@ document.getElementById("formLogin").addEventListener("submit", function (e) {
   formData.append("correo", correo);
   formData.append("clave", clave);
 
-  fetch("https://api.cybernetsp.com/autenticar.php", {
-    method: "POST",
-    body: formData,
-  })
+  fetch("autenticar.php", {
+  method: "POST",
+  body: formData,
+})
     .then((res) => res.json())
     .then((data) => {
       btnIngresar.disabled = false;
