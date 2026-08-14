@@ -2005,7 +2005,7 @@ function ejecutarConsultaRecordatorios(
     `;
   }
 
-  fetch(`obtener_recordatorios.php?periodo=${periodo}&linea=${lineaWA}`)
+  fetch(`https://api.cybernetsp.com/obtener_recordatorios.php?periodo=${periodo}&linea=${lineaWA}`)
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
@@ -2411,7 +2411,7 @@ window.ejecutarBusquedaGmailEspecifica = function () {
       </div>`;
   }
 
-  fetch(`obtener_correos_gmail.php?correo=${encodeURIComponent(correoBuscar)}`)
+  fetch(`https://api.cybernetsp.com/obtener_correos_gmail.php?correo=${encodeURIComponent(correoBuscar)}`)
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -2698,8 +2698,8 @@ window.cargarDatosMySQL = function () {
   `;
 
   fetch(
-    `obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
-  )
+  `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
+)
     .then((res) => res.json())
     .then((data) => {
       if (data.status === "success") {
@@ -3015,8 +3015,7 @@ window.copiarTextoUnico = function (btn, textoEscapado) {
 window.generarTemp = function (btn, id) {
   if (typeof haptic === "function") haptic();
 
-  const urlPHP = `obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}`;
-
+  const urlPHP = `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}`;
   fetch(urlPHP)
     .then((res) => res.json())
     .then((data) => {
