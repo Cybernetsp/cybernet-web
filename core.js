@@ -11,20 +11,26 @@ const GOOGLE_SCRIPT_URL =
   const usuarioActivoObj = JSON.parse(
     sessionStorage.getItem("usuario_activo") || "null",
   );
-  const user = usuarioActivoObj ? usuarioActivoObj.nombre.toUpperCase() : null;
-  const rol = usuarioActivoObj ? usuarioActivoObj.rol : null;
+
+  // Soporta tanto 'usuario_activo' como 'active_staff' o 'cyber_saved_staff'
+  const sessionStaff = sessionStorage.getItem("active_staff");
+  const localStaff = localStorage.getItem("cyber_saved_staff");
+
+  const user = usuarioActivoObj
+    ? usuarioActivoObj.nombre.toUpperCase()
+    : sessionStaff || localStaff || null;
+
+  const rol = usuarioActivoObj ? usuarioActivoObj.rol : "asistente";
 
   window.addEventListener("DOMContentLoaded", () => {
     let savedTheme = localStorage.getItem("cyber_theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
 
-    // Si no hay sesión válida en memoria, expulsar al Login
     if (!user) {
-      window.location.href = "login.html"; // O index.html, según como se llame tu login
+      window.location.href = "login.html";
       return;
     }
 
-    // Iniciar entorno
     entrarAlSistema(user, rol);
   });
 })();
