@@ -27,7 +27,6 @@ window.toggleNetflixManagerPanel = function () {
   }
 };
 
-// 🔴 RENDERIZADO PREMIUM DE TARJETAS DE CORTE
 window.cargarCortesOperativosNetflix = function () {
   const container = document.getElementById("listaCortesOperativosNetflix");
   const btnCrearAlias = document.getElementById("btnCrearAliasHeader");
@@ -35,7 +34,6 @@ window.cargarCortesOperativosNetflix = function () {
 
   if (btnCrearAlias) btnCrearAlias.style.display = "none";
 
-  // Estado de Carga (Spinning)
   container.innerHTML = `
     <div style="text-align: center; padding: 45px 20px; color: #e50914; display: flex; flex-direction: column; align-items: center; gap: 12px;">
       <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -104,18 +102,18 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     let idCuenta = cuenta.id || "";
 
     html += `
-      <div class="card-ios" style="background: #18181b; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden; margin-bottom: 16px;">
+      <div style="background: #2a2a2e; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; position: relative; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
           
           <!-- Efecto Glow Rojo Superior -->
-          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #e50914, transparent); box-shadow: 0 0 15px #e50914; opacity: 0.8;"></div>
+          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #ff3b30, transparent); box-shadow: 0 0 12px #ff3b30; opacity: 0.7;"></div>
 
           <!-- Correo (Clickeable) -->
           <div 
             onclick="copiarTextoLigero('${correo}', this, 'correo')"
             title="Clic para copiar"
-            style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; padding-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);"
+            style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; padding-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);"
           >
-              <div style="width: 8px; height: 8px; border-radius: 50%; background: #e50914; box-shadow: 0 0 8px #e50914;"></div>
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; box-shadow: 0 0 6px #ff3b30;"></div>
               <span style="font-family: monospace; font-weight: 800; color: #ffffff; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${correo}</span>
           </div>
 
@@ -126,40 +124,35 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
               <div 
                 onclick="copiarTextoLigero('${claveVieja}', this, 'clave')"
                 title="Clic para copiar"
-                style="flex: 1; background: #111115; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; border: 1px solid transparent; transition: background 0.2s;"
-                onmouseover="this.style.background='rgba(255,255,255,0.03)'" 
-                onmouseout="this.style.background='#111115'"
+                style="flex: 1; background: #161618; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; gap: 4px; cursor: pointer;"
               >
                   <span style="font-size: 0.65rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CLAVE VENCIDA</span>
-                  <span style="font-family: monospace; color: #e50914; font-weight: 700; font-size: 0.95rem; text-decoration: line-through;">${claveVieja}</span>
+                  <span style="font-family: monospace; color: #ff3b30; font-weight: 700; font-size: 0.95rem; text-decoration: line-through;">${claveVieja}</span>
               </div>
 
               <!-- Nueva Clave (Clickeable) -->
               <div 
                 onclick="copiarTextoLigero('${claveNueva}', this, 'clave')"
                 title="Clic para copiar"
-                style="flex: 1.2; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.3); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: background 0.2s;"
-                onmouseover="this.style.background='rgba(48, 209, 88, 0.15)'" 
-                onmouseout="this.style.background='rgba(48, 209, 88, 0.08)'"
+                style="flex: 1.2; background: #2f3631; border: 1px solid rgba(48, 209, 88, 0.4); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; gap: 4px; cursor: pointer;"
               >
                   <span style="font-size: 0.65rem; color: #30d158; font-weight: 800; text-transform: uppercase;">NUEVA CLAVE TV</span>
-                  <span style="font-family: monospace; color: #ffffff; font-weight: 900; font-size: 1.1rem;">${claveNueva}</span>
+                  <span style="font-family: monospace; color: #ffffff; font-weight: 800; font-size: 1.1rem;">${claveNueva}</span>
               </div>
           </div>
 
           <!-- Perfiles y Botón Acción -->
           <div style="display: flex; flex-direction: column; gap: 14px;">
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 800; color: #e50914; background: rgba(229, 9, 20, 0.12); padding: 8px 16px; border-radius: 12px; width: fit-content; border: 1px solid rgba(229, 9, 20, 0.25);">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; color: #ff3b30; background: rgba(255, 59, 48, 0.1); padding: 8px 16px; border-radius: 8px; width: fit-content; border: 1px solid rgba(255, 59, 48, 0.2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
                   </svg>
                   Perfiles a cortar: ${perfiles}
               </div>
               
-              <button onclick="window.ejecutarProcesoCorteExterno('${idCuenta}', '${correo}', '${claveNueva}', this)" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3); transition: transform 0.1s;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  Procesar Corte y Subir a Hoy
+              <button onclick="window.ejecutarProcesoCorteExterno('${idCuenta}', '${correo}', '${claveNueva}', this)" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s;">
+                  ✓ Procesar Corte y Subir a Hoy
               </button>
           </div>
       </div>`;
@@ -184,16 +177,9 @@ window.copiarTextoLigero = function (texto, elemento, tipo) {
     spanValor.innerText = "✓ Copiado";
     spanValor.style.color = "#30d158";
 
-    // Pequeño resplandor al contenedor
-    const oldBg = elemento.style.background;
-    elemento.style.background = "rgba(48, 209, 88, 0.1)";
-    elemento.style.borderColor = "rgba(48, 209, 88, 0.4)";
-
     setTimeout(() => {
       spanValor.innerText = originalText;
       spanValor.style.color = originalColor;
-      elemento.style.background = oldBg;
-      elemento.style.borderColor = "";
     }, 1200);
   });
 };
@@ -216,28 +202,28 @@ window.generarClaveTVAleatoria = function () {
   return `${palabra}${num}@@`;
 };
 
-// Generación de Modal HTML
+// Generación de Modal HTML (Diseño Ajustado a la Imagen)
 window.crearModalNetflixManagerHTML = function () {
   if (document.getElementById("netflixManagerOverlay")) return;
 
   const modalHtml = `
     <div class="overlay-ios" id="netflixManagerOverlay" style="display: none; z-index: 16000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
-      <div class="sheet-ios" onclick="event.stopPropagation()" style="max-width: 480px; width: 92%; max-height: 88vh; background: #111115; border: 1px solid rgba(255,255,255,0.08); border-radius: 26px; padding: 22px; box-shadow: 0 30px 70px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 16px; overflow: hidden; margin: auto;">
+      <div class="sheet-ios" onclick="event.stopPropagation()" style="max-width: 480px; width: 92%; max-height: 88vh; background: #1a1a1c; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 22px; box-shadow: 0 30px 70px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 16px; overflow: hidden; margin: auto;">
         
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; flex-shrink: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 14px; flex-shrink: 0;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <div style="color: #e50914; display: flex; align-items: center; justify-content: center;">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
             </div>
             <h3 style="margin: 0; color: #e50914; font-size: 1.15rem; font-weight: 800;">Cortes Operativos</h3>
           </div>
-          <button type="button" onclick="window.toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">✕</button>
+          <button type="button" onclick="window.toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">✕</button>
         </div>
 
         <div style="display: flex; flex-direction: column; flex-shrink: 0;">
           <!-- Botón de crear alias (Oculto por defecto, se muestra si no hay cortes) -->
           <button id="btnCrearAliasHeader" onclick="window.crearCuentaNetflixAliasExterna()" style="display: none; width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
             Crear cuenta de Netflix (Usar Alias)
           </button>
         </div>
