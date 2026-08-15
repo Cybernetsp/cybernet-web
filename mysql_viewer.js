@@ -2,7 +2,7 @@ window.tablaMySQLActual = "netflix";
 let searchTimeoutMySQL = null;
 
 // =========================================================================
-// 👁️ APERTURA Y CONTROL DEL PANEL MYSQL (RESTAURADO)
+// 👁️ APERTURA Y CONTROL DEL PANEL MYSQL
 // =========================================================================
 window.toggleMysqlPanel = function () {
   if (typeof haptic === "function") haptic();
@@ -19,7 +19,6 @@ window.toggleMysqlPanel = function () {
     overlay.style.setProperty("align-items", "center", "important");
     overlay.style.setProperty("justify-content", "center", "important");
 
-    // Verificar si es superadmin para habilitar el botón de agregar
     const usuarioActivoObj = JSON.parse(
       sessionStorage.getItem("usuario_activo") || "{}",
     );
@@ -90,11 +89,9 @@ function cargarDatosMySQL() {
   const esNetflix = window.tablaMySQLActual.toLowerCase() === "netflix";
   const totalColumnas = esNetflix ? 12 : 10;
 
-  // Estilo base para celdas de encabezado
   const thBase =
     "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;";
 
-  // 1. DIBUJAR ENCABEZADOS DE COLUMNA CON ANCHOS EN PORCENTAJE
   if (esNetflix) {
     thead.innerHTML = `
       <tr>
@@ -147,7 +144,7 @@ function cargarDatosMySQL() {
   `;
 
   fetch(
-    `obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
+    `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
   )
     .then((res) => res.json())
     .then((data) => {
@@ -180,13 +177,11 @@ function cargarDatosMySQL() {
             let valorVal = fila.valor || "-";
             let pagoVal = fila.pago || "-";
 
-            // COLOR DE FONDO TIPO ZEBRA
             const esFilaPar = idx % 2 === 0;
             const colorFondoFila = esFilaPar
               ? "rgba(255, 255, 255, 0.015)"
               : "transparent";
 
-            // 2. AGRUPACIÓN POR FECHA ESTILO MAC
             if (diaVal !== fechaGrupoActual && diaVal !== "-") {
               fechaGrupoActual = diaVal;
 
@@ -211,7 +206,6 @@ function cargarDatosMySQL() {
               `;
             }
 
-            // ARMADO DEL TEXTO A COPIAR Y JSON
             let textoCopiarFicha = `📺 ${window.tablaMySQLActual.toUpperCase()}\n📧 Correo: ${correoVal}\n🔑 Clave: ${claveVal}\n👤 Perfil: ${perfilVal}\n📍 PIN: ${pinVal}`;
             if (esNetflix) {
               textoCopiarFicha += `\n📅 Vence: ${vencVal}`;
@@ -222,7 +216,6 @@ function cargarDatosMySQL() {
             let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
             let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
 
-            // ESTRUCTURA DE LA CELDA DE CORREO Y CLAVE
             let celdaCorreo =
               correoVal !== "-"
                 ? `<div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; overflow: hidden;">
@@ -239,7 +232,6 @@ function cargarDatosMySQL() {
                  </div>`
                 : '<span style="color: #a1a1aa;">-</span>';
 
-            // BOTONES DE ACCIÓN (Lápiz, Papelera, Copiar)
             let botonesAccion = `<button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">📋 Copiar</button>`;
 
             if (esSuperAdmin) {
@@ -330,7 +322,7 @@ function eliminarFechaMySQL(diaEscapado) {
   formData.append("tabla", window.tablaMySQLActual);
   formData.append("dia_valor", diaValor);
 
-  fetch("acciones_mysql.php", {
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -384,7 +376,7 @@ function guardarNuevoRegistroMySQL(e) {
   formData.append("tabla", plataforma);
   formData.append("bloque_cuentas", bloque);
 
-  fetch("acciones_mysql.php", {
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -466,7 +458,7 @@ function guardarEdicionMySQL(e) {
   formData.append("nombre", document.getElementById("editMySQLNombre").value);
   formData.append("numero", document.getElementById("editMySQLNumero").value);
 
-  fetch("acciones_mysql.php", {
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
@@ -501,7 +493,7 @@ function eliminarRegistroMySQL(id) {
   formData.append("tabla", window.tablaMySQLActual);
   formData.append("id", id);
 
-  fetch("acciones_mysql.php", {
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
     method: "POST",
     body: formData,
   })
