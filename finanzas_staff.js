@@ -663,7 +663,7 @@ window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
 };
 
 /* ==========================================================================
-   💳 SALDO DE DISTRIBUIDORES (RENDERIZADO FLEXBOX CON SVG DERECHO)
+   💳 SALDO DE DISTRIBUIDORES (ESTILO PREMIUM TARJETAS CON BORDE)
    ========================================================================== */
 const oldToggleDistrisPanel = window.toggleDistrisPanel;
 window.toggleDistrisPanel = function () {
@@ -703,7 +703,7 @@ window.cargarDistribuidores = function () {
       if (res.status === "success") {
         let data = res.data || [];
         if (data.length === 0) {
-          container.innerHTML = `<div style="text-align: center; padding: 30px; color: #a1a1aa;">No hay distribuidores registrados.</div>`;
+          container.innerHTML = `<div style="text-align: center; padding: 30px; color: #a1a1aa; background: rgba(255,255,255,0.02); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.08);">No hay distribuidores registrados.</div>`;
           return;
         }
 
@@ -730,6 +730,14 @@ window.cargarDistribuidores = function () {
           let saldoFormateado =
             "$" + Math.round(saldoClean).toLocaleString("es-CO");
           let colorSaldo = saldoClean > 0 ? "#30d158" : "#ff453a";
+          let bgBadgeSaldo =
+            saldoClean > 0
+              ? "rgba(48, 209, 88, 0.12)"
+              : "rgba(255, 69, 58, 0.12)";
+          let borderBadgeSaldo =
+            saldoClean > 0
+              ? "rgba(48, 209, 88, 0.25)"
+              : "rgba(255, 69, 58, 0.25)";
 
           let nombreReal =
             distri.nombre &&
@@ -744,32 +752,43 @@ window.cargarDistribuidores = function () {
             "-"
           ).trim();
           let nombreLimpio = nombreReal !== "" ? nombreReal : telefonoReal;
+          let inicial = nombreLimpio.charAt(0).toUpperCase();
 
           html += `
-            <div class="distri-row-item" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.2s ease;">
-              <!-- LADO IZQUIERDO: NOMBRE Y TELÉFONO -->
-              <div style="display: flex; flex-direction: column; gap: 3px; overflow: hidden; flex: 1;">
-                <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreLimpio}</div>
-                <div style="font-size: 0.78rem; color: #a1a1aa; font-family: monospace; display: flex; align-items: center; gap: 4px;">
-                  <span>📱 ${telefonoReal}</span>
+            <div class="distri-row-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(10, 132, 255, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
+              
+              <!-- LADO IZQUIERDO: AVATAR Y NOMBRE/TELÉFONO -->
+              <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); color: #0a84ff; font-weight: 900; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  ${inicial}
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden;">
+                  <span style="font-weight: 800; font-size: 0.92rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreLimpio}</span>
+                  <span style="font-size: 0.75rem; color: #a1a1aa; font-family: monospace; display: flex; align-items: center; gap: 4px;">
+                    📱 ${telefonoReal}
+                  </span>
                 </div>
               </div>
 
-              <!-- LADO DERECHO: SALDO Y BOTÓN SVG DE COPIAR -->
+              <!-- LADO DERECHO: SALDO RESALTADO Y BOTÓN DE COPIADO SVG -->
               <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                <span style="font-size: 1.15rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.5px;">${saldoFormateado}</span>
+                <div style="background: ${bgBadgeSaldo}; border: 1px solid ${borderBadgeSaldo}; padding: 6px 12px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                  <span style="font-size: 1.05rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.3px;">${saldoFormateado}</span>
+                </div>
+
                 <button type="button" 
                         onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')" 
                         title="Copiar reporte de saldo"
-                        style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 8px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
-                        onmouseover="this.style.background='rgba(10, 132, 255, 0.25)'" 
-                        onmouseout="this.style.background='rgba(10, 132, 255, 0.15)'">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
+                        onmouseover="this.style.background='rgba(10, 132, 255, 0.28)';" 
+                        onmouseout="this.style.background='rgba(10, 132, 255, 0.15)';">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                   </svg>
                 </button>
               </div>
+
             </div>`;
         });
         container.innerHTML = html;
@@ -793,10 +812,10 @@ window.copiarSaldoDistri = function (btn, nombre, saldoFormateado) {
   const textoWhatsApp = `🔔 *NOTIFICACIÓN DE SALDO CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${nombreDisplay}\n💰 *Saldo Disponible:* ${saldoFormateado}\n────────────────────\n✨ _¡Gracias por tu confianza y preferencia!_`;
 
   navigator.clipboard.writeText(textoWhatsApp).then(() => {
-    let originalHTML = btn.innerHTML;
-    let originalBg = btn.style.background;
+    let oldHtml = btn.innerHTML;
+    let oldBg = btn.style.background;
 
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
     btn.style.setProperty("background", "rgba(48, 209, 88, 0.2)", "important");
 
     if (typeof triggerToast === "function") {
@@ -806,8 +825,8 @@ window.copiarSaldoDistri = function (btn, nombre, saldoFormateado) {
     }
 
     setTimeout(() => {
-      btn.innerHTML = originalHTML;
-      btn.style.background = originalBg;
+      btn.innerHTML = oldHtml;
+      btn.style.background = oldBg;
     }, 1500);
   });
 };
