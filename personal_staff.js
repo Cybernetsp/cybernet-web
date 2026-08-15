@@ -1,22 +1,19 @@
 /* ==========================================================================
-   👥 CYBERNET OS - MÓDULO CONTROL DE PERSONAL / CALENDARIO GOOGLE SHEETS
+   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL (SIN APPSCRIPT)
    ========================================================================== */
 
-// URL Central de tu Google Apps Script
-if (typeof GOOGLE_SCRIPT_URL === "undefined") {
-  var GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
-}
+window.URL_OBTENER_HORAS = "obtener_horas.php";
+window.URL_MODIFICAR_TURNO = "modificar_turno.php";
 
 window.currentHorasStock = [];
 
-// Filtros por defecto del Calendario
+// Filtros globales del calendario
 window.filtroMesTurnos = new Date().getMonth();
 window.filtroAnioTurnos = new Date().getFullYear();
 window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
 
-// 👁️ APERTURA Y CONTROL DEL PANEL
+// 👁️ ABRIR / CERRAR PANEL
 window.toggleShiftsPanel = function () {
   try {
     if (typeof haptic === "function") haptic();
@@ -24,7 +21,7 @@ window.toggleShiftsPanel = function () {
 
   const overlay = document.getElementById("shiftsOverlay");
   if (!overlay) {
-    alert("⚠️ Error: No se encontró el modal #shiftsOverlay en el HTML.");
+    alert("⚠️ Error: No se encontró el modal #shiftsOverlay en la página.");
     return;
   }
 
@@ -45,76 +42,73 @@ window.toggleShiftsPanel = function () {
     overlay.style.setProperty("align-items", "center", "important");
     overlay.style.setProperty("justify-content", "center", "important");
 
-    window.cargarHorasDesdeSheets();
+    window.cargarHorasDesdeMySQL();
   }
 };
 
-// 🔄 OBTENER REGISTROS DE HORAS DESDE GOOGLE APPS SCRIPT (JSONP)
-window.cargarHorasDesdeSheets = function () {
+// 🔄 CARGAR DATOS DESDE PHP MYSQL
+window.cargarHorasDesdeMySQL = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
 
   container.innerHTML = `
-    <div style="text-align:center; padding:40px; color:#0a84ff;">
+    <div style="text-align:center; padding:45px; color:#0a84ff;">
       <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
         <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-        <span style="font-weight:700; font-size:0.9rem;">Sincronizando turnos desde Google Sheets...</span>
+        <span style="font-weight:700; font-size:0.9rem;">Cargando calendario desde MySQL...</span>
       </div>
     </div>`;
 
-  const oldScript = document.getElementById("node_get_horas_script");
-  if (oldScript) oldScript.remove();
-
-  const cbName = "cb_get_horas_" + Date.now();
-  window[cbName] = function (res) {
-    const scriptNode = document.getElementById("node_get_horas_script");
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
-
-    if (res && res.status === "success") {
-      window.currentHorasStock = res.data || [];
-      window.renderizarHorasEnPantalla();
-    } else {
-      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error: ${res ? res.message : "Fallo al consultar la base de datos."}</div>`;
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_get_horas_script";
-  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerHoras&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
+  fetch(window.URL_OBTENER_HORAS)
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error("Respuesta inválida del servidor PHP.");
+      }
+    })
+    .then((res) => {
+      if (res && res.status === "success") {
+        window.currentHorasStock = res.data || [];
+        window.renderizarHorasEnPantalla();
+      } else {
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Error consultando MySQL."}</div>`;
+      }
+    })
+    .catch((err) => {
+      console.error("Error cargando turnos:", err);
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${err.message}</div>`;
+    });
 };
 
-// 📅 HELPER PARSEADOR DE FECHA DE SHEETS ("DD/MM/YYYY hh:mm a" o "DD/MM/YYYY")
+// 📅 PARSEADOR DE FECHA ROBUSTO
 function parsearFechaTurno(fechaRaw) {
   if (!fechaRaw) return new Date();
   if (fechaRaw instanceof Date) return fechaRaw;
 
-  let str = String(fechaRaw).trim().split(" ")[0]; // Extrae solo la parte DD/MM/YYYY
+  let str = String(fechaRaw).trim().split(" ")[0];
   let parts = str.includes("/") ? str.split("/") : str.split("-");
 
   if (parts.length === 3) {
-    // Formato DD/MM/YYYY
-    if (parts[0].length <= 2 && parts[2].length === 4) {
+    if (parts[0].length === 4) {
       return new Date(
-        parseInt(parts[2], 10),
-        parseInt(parts[1], 10) - 1,
         parseInt(parts[0], 10),
+        parseInt(parts[1], 10) - 1,
+        parseInt(parts[2], 10),
       );
-    }
-    // Formato YYYY-MM-DD
-    else if (parts[0].length === 4) {
+    } else {
       return new Date(
-        parseInt(parts[0], 10),
-        parseInt(parts[1], 10) - 1,
         parseInt(parts[2], 10),
+        parseInt(parts[1], 10) - 1,
+        parseInt(parts[0], 10),
       );
     }
   }
   return new Date();
 }
 
-// 🗓️ CONTROLES DEL CALENDARIO
+// 🗓️ ACCIONES DE FILTRO DEL CALENDARIO
 window.cambiarMesTurnos = function (mesIndex) {
   try {
     if (typeof haptic === "function") haptic();
@@ -139,7 +133,7 @@ window.cambiarAsistenteAdmin = function (vendedor) {
   window.renderizarHorasEnPantalla();
 };
 
-// 🎨 RENDERIZADOR CALENDARIO TIPO IPADOS CON PRIVACIDAD Y EDICIÓN SUPERADMIN
+// 🎨 RENDERIZADOR CALENDARIO CON PRIVACIDAD Y MODIFICACIÓN
 window.renderizarHorasEnPantalla = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -176,29 +170,19 @@ window.renderizarHorasEnPantalla = function () {
   ];
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-  // 1. Detección de asistentes disponibles en los datos
+  // 1. FILTRADO DE PRIVACIDAD POR USUARIO
   let todosLosRegistros = window.currentHorasStock;
   let asistentesDisponibles = new Set();
 
   todosLosRegistros.forEach((item) => {
-    let v = (item.vendedor || "STAFF")
-      .toUpperCase()
-      .replace(" (INGRESO MANUAL)", "")
-      .trim();
-    if (v === "PABLO") v = "MANUP";
+    let v = (item.vendedor || "STAFF").toUpperCase().trim();
     if (v) asistentesDisponibles.add(v);
   });
 
   let listaAsistentes = Array.from(asistentesDisponibles).sort();
 
-  // 2. Filtrar datos según el rol y selección
   let datosFiltrados = todosLosRegistros.filter((item) => {
-    let vendedorItem = (item.vendedor || "STAFF")
-      .toUpperCase()
-      .replace(" (INGRESO MANUAL)", "")
-      .trim();
-    if (vendedorItem === "PABLO") vendedorItem = "MANUP";
-
+    let vendedorItem = (item.vendedor || "STAFF").toUpperCase().trim();
     let d = parsearFechaTurno(item.fecha);
 
     if (d.getMonth() !== dMes || d.getFullYear() !== dAnio) return false;
@@ -206,10 +190,11 @@ window.renderizarHorasEnPantalla = function () {
     if (esQ1 && dia > 15) return false;
     if (!esQ1 && dia <= 15) return false;
 
-    // PRIVACIDAD: Si no es Camilo, fuerza filtrado único por su nombre
     if (!esSuperAdmin) {
+      // Asistente normal: SOLO VE SUS PROPIOS REGISTROS
       return vendedorItem === activeStaff;
     } else {
+      // Superadmin CAMILO: Puede ver todos o filtrar
       if (window.asistenteSeleccionadoAdmin !== "TODOS") {
         return vendedorItem === window.asistenteSeleccionadoAdmin;
       }
@@ -217,7 +202,7 @@ window.renderizarHorasEnPantalla = function () {
     }
   });
 
-  // 3. Barra de Controles
+  // 2. BARRA DE CONTROLES
   let opcionesMes = mesesNombres
     .map(
       (m, idx) =>
@@ -251,22 +236,17 @@ window.renderizarHorasEnPantalla = function () {
         <select class="input-ios" style="margin:0; padding:10px 14px; border-radius:12px; font-weight:800; font-size:0.85rem; color:#ffffff; background:#18181c; border:1px solid rgba(255,255,255,0.15);" onchange="cambiarMesTurnos(this.value)">
           ${opcionesMes}
         </select>
-        <button class="btn-ios" style="padding: 10px 14px; border-radius: 12px; font-size: 0.82rem; font-weight: 800; ${btnQ1Style}" onclick="cambiarQuincenaTurnos(1)">Q1 (1-15)</button>
-        <button class="btn-ios" style="padding: 10px 14px; border-radius: 12px; font-size: 0.82rem; font-weight: 800; ${btnQ2Style}" onclick="cambiarQuincenaTurnos(2)">Q2 (16-Fin)</button>
+        <button class="btn-ios" type="button" style="padding: 10px 14px; border-radius: 12px; font-size: 0.82rem; font-weight: 800; ${btnQ1Style}" onclick="cambiarQuincenaTurnos(1)">Q1 (1-15)</button>
+        <button class="btn-ios" type="button" style="padding: 10px 14px; border-radius: 12px; font-size: 0.82rem; font-weight: 800; ${btnQ2Style}" onclick="cambiarQuincenaTurnos(2)">Q2 (16-Fin)</button>
       </div>
       ${selectorAsistentesAdmin}
     </div>`;
 
-  // 4. Agrupar Registros por Asistente y Día
+  // 3. AGRUPAR REGISTROS POR ASISTENTE Y DÍA
   let mapaAsistentes = {};
 
   datosFiltrados.forEach((item) => {
-    let asist = (item.vendedor || "STAFF")
-      .toUpperCase()
-      .replace(" (INGRESO MANUAL)", "")
-      .trim();
-    if (asist === "PABLO") asist = "MANUP";
-
+    let asist = (item.vendedor || "STAFF").toUpperCase().trim();
     let d = parsearFechaTurno(item.fecha);
     let diaNum = d.getDate();
 
@@ -288,14 +268,14 @@ window.renderizarHorasEnPantalla = function () {
       htmlControles +
       `
       <div style="text-align:center; padding:40px; color:#a1a1aa; font-weight:600; background:rgba(255,255,255,0.02); border-radius:18px; border:1px dashed rgba(255,255,255,0.08);">
-        📌 No se encontraron turnos registrados para este periodo.
+        📌 No hay turnos o registros para este periodo.
       </div>`;
     return;
   }
 
   let htmlCuerpo = htmlControles;
 
-  // 5. Construir Calendario para cada Asistente
+  // 4. CONSTRUCCIÓN DEL CALENDARIO POR ASISTENTE
   asistentesAMostrar.forEach((asistente) => {
     let turnosPorDia = mapaAsistentes[asistente] || {};
     let totalPagoAsistente = 0;
@@ -318,46 +298,42 @@ window.renderizarHorasEnPantalla = function () {
     for (let dia = inicioDia; dia <= finDia; dia++) {
       let registrosDia = turnosPorDia[dia] || [];
       let tieneTurno = registrosDia.length > 0;
+
       let htmlRegistros = "";
 
       registrosDia.forEach((reg) => {
-        let pagoNum =
-          parseFloat(String(reg.pagoTurno || "0").replace(/[^0-9.-]/g, "")) ||
-          0;
-        totalPagoAsistente += pagoNum;
+        let totalMonto = parseFloat(reg.total) || 0;
+        totalPagoAsistente += totalMonto;
 
-        let tiempoStr = String(reg.tiempo || "00:00:00").trim();
-        let esTiempoValido = tiempoStr !== "00:00:00" && tiempoStr !== "";
-
-        if (esTiempoValido) {
-          let p = tiempoStr.split(":");
+        let tStr = reg.tiempo_trabajado || "00:00:00";
+        if (tStr !== "00:00:00") {
+          let p = tStr.split(":");
           if (p.length >= 2) {
             totalHorasSegundos +=
               (parseInt(p[0], 10) || 0) * 3600 + (parseInt(p[1], 10) || 0) * 60;
           }
         }
 
-        let esDescuento = pagoNum < 0;
+        let esDescuento = totalMonto < 0;
         let colorMonto = esDescuento ? "#ff453a" : "#30d158";
-        let textoEtiquetaTiempo = esTiempoValido
-          ? tiempoStr
-          : esDescuento
-            ? "Adelanto/Desc"
-            : "Turno";
+        let signoMonto = esDescuento ? "-$" : "$";
+        let valorAbsolutoFormateado = Math.abs(
+          Math.round(totalMonto),
+        ).toLocaleString("es-CO");
 
-        // BOTÓN MODIFICAR EXCLUSIVO SUPERADMIN (CAMILO)
+        // BOTÓN MODIFICAR EXCLUSIVO PARA SUPERADMIN (CAMILO)
         let btnEditarSuperAdmin = "";
         if (esSuperAdmin) {
           btnEditarSuperAdmin = `
-            <button type="button" onclick="window.modificarTurnoSuperAdmin('${reg.filaIndex || ""}', '${asistente}', '${reg.fecha}', '${tiempoStr}')" title="Modificar Turno (Superadmin)" style="background: rgba(10, 132, 255, 0.2); border: 1px solid rgba(10, 132, 255, 0.4); color: #0a84ff; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 4px;">
+            <button type="button" onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}', '${reg.total}')" title="Modificar Turno" style="background: rgba(10, 132, 255, 0.2); border: 1px solid rgba(10, 132, 255, 0.4); color: #0a84ff; padding: 3px 8px; border-radius: 6px; font-size: 0.68rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; margin-top: 4px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(10, 132, 255, 0.4)'" onmouseout="this.style.background='rgba(10, 132, 255, 0.2)'">
               ✏️ Modificar
             </button>`;
         }
 
         htmlRegistros += `
           <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 4px;">
-            <span style="font-size: 0.72rem; font-weight: 800; color: #0a84ff; font-family: monospace;">${textoEtiquetaTiempo}</span>
-            <span style="font-size: 0.75rem; font-weight: 900; color: ${colorMonto}; font-family: monospace;">$${Math.round(pagoNum).toLocaleString("es-CO")}</span>
+            <span style="font-size: 0.72rem; font-weight: 800; color: #0a84ff; font-family: monospace;">${reg.tiempo_trabajado !== "00:00:00" ? reg.tiempo_trabajado : esDescuento ? "Adelanto" : "Turno"}</span>
+            <span style="font-size: 0.78rem; font-weight: 900; color: ${colorMonto}; font-family: monospace;">${signoMonto}${valorAbsolutoFormateado}</span>
             ${btnEditarSuperAdmin}
           </div>`;
       });
@@ -370,7 +346,7 @@ window.renderizarHorasEnPantalla = function () {
         : "1px solid rgba(255, 255, 255, 0.05)";
 
       celdasCalendario += `
-        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 74px; box-sizing: border-box;">
+        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 78px; box-sizing: border-box;">
           <span style="font-size: 0.75rem; font-weight: 800; color: ${tieneTurno ? "#ffffff" : "#71717a"}; align-self: flex-start;">${dia}</span>
           ${htmlRegistros}
         </div>`;
@@ -417,12 +393,13 @@ window.renderizarHorasEnPantalla = function () {
   container.innerHTML = htmlCuerpo;
 };
 
-// ✏️ EDICIÓN VÍA APPS SCRIPT PARA SUPERADMIN
+// ✏️ MODIFICACIÓN VÍA PHP/MYSQL (SOLO SUPERADMIN CAMILO)
 window.modificarTurnoSuperAdmin = function (
-  filaIndex,
+  idTurno,
   vendedor,
   fecha,
   tiempoActual,
+  totalActual,
 ) {
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
@@ -433,48 +410,61 @@ window.modificarTurnoSuperAdmin = function (
     .trim();
   if (activeStaff !== "CAMILO") {
     alert(
-      "⛔ Acceso Denegado: Solo el Superadmin (CAMILO) puede modificar turnos.",
+      "⛔ Acceso Denegado: Solo el Superadmin (CAMILO) tiene permisos para modificar turnos.",
     );
     return;
   }
 
-  if (typeof haptic === "function") haptic();
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
 
-  let nuevasHoras = prompt(
-    `[SUPERADMIN] Modificar tiempo trabajado para ${vendedor} (${fecha}):\nFormato: HH:MM:SS`,
-    tiempoActual || "08:00:00",
+  let nuevoTiempo = prompt(
+    `[SUPERADMIN] Modificar tiempo para ${vendedor} (${fecha}):\nFormato: HH:MM:SS`,
+    tiempoActual,
   );
-  if (!nuevasHoras || nuevasHoras.trim() === "") return;
+  if (nuevoTiempo === null) return;
 
-  nuevasHoras = nuevasHoras.trim();
+  let nuevoTotal = prompt(
+    `[SUPERADMIN] Modificar total a pagar ($) para ${vendedor} (${fecha}):`,
+    totalActual,
+  );
+  if (nuevoTotal === null) return;
 
-  const cbName = "cb_edit_shift_" + Date.now();
-  window[cbName] = function (res) {
-    const scriptNode = document.getElementById("node_" + cbName);
-    if (scriptNode) scriptNode.remove();
-    delete window[cbName];
+  nuevoTotal = parseFloat(nuevoTotal) || 0;
 
-    if (res && res.status === "success") {
-      if (typeof triggerToast === "function") {
-        triggerToast(
-          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Turno modificado correctamente</span></div>`,
-        );
+  // Modificación local en memoria
+  let registroLocal = window.currentHorasStock.find(
+    (r) => String(r.id) === String(idTurno),
+  );
+  if (registroLocal) {
+    registroLocal.tiempo_trabajado = nuevoTiempo;
+    registroLocal.total = nuevoTotal;
+    window.renderizarHorasEnPantalla();
+  }
+
+  // Envío POST a modificar_turno.php
+  fetch(window.URL_MODIFICAR_TURNO, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo)}&total=${encodeURIComponent(nuevoTotal)}`,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success") {
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Turno actualizado en MySQL</span></div>`,
+          );
+        }
+        window.cargarHorasDesdeMySQL();
+      } else {
+        alert("⚠️ Atencion: No se pudo guardar la modificación en MySQL.");
       }
-      window.cargarHorasDesdeSheets();
-    } else {
-      alert(
-        "❌ Error: " +
-          (res
-            ? res.message
-            : "Fallo al actualizar el turno en Google Sheets."),
-      );
-    }
-  };
-
-  const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${GOOGLE_SCRIPT_URL}?action=editarTurnoGlobal&filas=${encodeURIComponent(filaIndex)}&vendedor=${encodeURIComponent(vendedor)}&fecha=${encodeURIComponent(fecha)}&nuevasHoras=${encodeURIComponent(nuevasHoras)}&callback=${cbName}&_ts=${Date.now()}`;
-  document.body.appendChild(script);
+    })
+    .catch((err) => {
+      console.error("Error al actualizar turno:", err);
+    });
 };
 
 // 🔍 FILTRO DE BÚSQUEDA
