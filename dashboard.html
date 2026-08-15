@@ -7260,12 +7260,13 @@
         </div>
       </div>
     </div>
-    <!-- 🔴 MODAL: BUZÓN GMAIL (OPTIMIZADO Y CENTRADO EN PANTALLA) -->
+
+    <!-- 📧 MODAL OPTIMIZADO: BANDEJA GMAIL / CÓDIGOS -->
     <div
       class="overlay-ios"
       id="gmailOverlay"
       style="
-        z-index: 15500;
+        z-index: 15000;
         display: none;
         position: fixed !important;
         top: 0 !important;
@@ -7274,9 +7275,9 @@
         height: 100vh !important;
         align-items: center !important;
         justify-content: center !important;
-        background: rgba(0, 0, 0, 0.6) !important;
-        backdrop-filter: blur(12px) !important;
-        -webkit-backdrop-filter: blur(12px) !important;
+        background: rgba(0, 0, 0, 0.82) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
         margin: 0 !important;
       "
     >
@@ -7284,62 +7285,48 @@
         class="sheet-ios"
         onclick="event.stopPropagation()"
         style="
-          max-width: 850px;
-          width: 90%;
-          height: 82vh;
-          max-height: 750px;
+          max-width: 1100px !important;
+          width: 95%;
+          max-height: 88vh !important;
           display: flex;
           flex-direction: column;
           padding: 0;
-          border-radius: 24px;
+          border-radius: 26px;
           overflow: hidden;
-          background: #0b0b0d;
-          box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
-          border: 1px solid rgba(234, 67, 53, 0.25);
-          margin: auto !important;
-          position: relative !important;
-          top: auto !important;
-          left: auto !important;
-          right: auto !important;
-          bottom: auto !important;
-          transform: none !important;
+          background: #141418;
+          border: 1px solid rgba(234, 67, 53, 0.35);
+          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9);
+          margin: auto;
         "
       >
-        <!-- CABECERA -->
+        <!-- ENCABEZADO FIJO -->
         <div
           class="sheet-header"
           style="
             padding: 18px 24px;
-            background: #111112;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: #18181c;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
             margin: 0 !important;
             z-index: 10;
+            flex-shrink: 0;
           "
         >
-          <h3
-            class="card-title"
-            style="
-              color: #ea4335;
-              font-size: 1.15rem;
-              font-weight: 800;
-              margin: 0;
-              display: flex;
-              align-items: center;
-              gap: 10px;
-            "
-          >
+          <div style="display: flex; align-items: center; gap: 12px">
             <div
               style="
-                background: rgba(234, 67, 53, 0.15);
-                padding: 8px;
+                width: 40px;
+                height: 40px;
                 border-radius: 12px;
+                background: rgba(234, 67, 53, 0.15);
+                border: 1px solid rgba(234, 67, 53, 0.3);
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border: 1px solid rgba(234, 67, 53, 0.2);
+                color: #ea4335;
+                flex-shrink: 0;
               "
             >
               <svg
@@ -7348,7 +7335,9 @@
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2.5"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
               >
                 <path
                   d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
@@ -7356,27 +7345,115 @@
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </div>
-            Buzón de Mensajes Gmail
-          </h3>
+            <div style="display: flex; flex-direction: column">
+              <h3
+                style="
+                  margin: 0;
+                  color: #ffffff;
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  letter-spacing: -0.3px;
+                "
+              >
+                Bandeja Gmail / Códigos
+              </h3>
+              <span style="font-size: 0.72rem; color: #a1a1aa; font-weight: 600"
+                >Consulta de códigos de verificación e inicios de sesión</span
+              >
+            </div>
+          </div>
+          <button
+            class="btn-close-circle"
+            style="
+              background: rgba(255, 255, 255, 0.08);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              color: #a1a1aa;
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 0.85rem;
+              margin: 0;
+            "
+            onclick="toggleGmailPanel()"
+          >
+            ✕
+          </button>
+        </div>
 
-          <div style="display: flex; align-items: center; gap: 10px">
-            <button
-              class="btn-ios btn-secondary"
+        <!-- CONTENEDOR INTERNO -->
+        <div
+          class="cyber-custom-scroll"
+          style="
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background: transparent;
+          "
+        >
+          <!-- BARRA DE BÚSQUEDA Y BOTÓN REFRESCAR -->
+          <div style="display: flex; gap: 10px; width: 100%">
+            <div
               style="
-                padding: 8px 14px;
-                font-size: 0.82rem;
-                border-radius: 50px;
-                background: rgba(234, 67, 53, 0.1);
+                flex: 1;
+                display: flex;
+                align-items: center;
+                background: rgba(0, 0, 0, 0.4);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 0 14px;
+              "
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#a1a1aa"
+                stroke-width="2.5"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                id="inputSearchGmail"
+                placeholder="Buscar por correo, servicio o código..."
+                oninput="filtrarGmail()"
+                style="
+                  width: 100%;
+                  background: transparent !important;
+                  border: none !important;
+                  color: #ffffff;
+                  padding: 12px 10px;
+                  font-size: 0.88rem;
+                  outline: none;
+                "
+              />
+            </div>
+            <button
+              class="btn-ios"
+              style="
+                background: rgba(234, 67, 53, 0.15);
+                border: 1px solid rgba(234, 67, 53, 0.3);
                 color: #ea4335;
-                border: 1px solid rgba(234, 67, 53, 0.2);
+                padding: 10px 18px;
+                border-radius: 12px;
+                font-weight: 800;
+                font-size: 0.85rem;
+                cursor: pointer;
                 display: flex;
                 align-items: center;
                 gap: 6px;
-                font-weight: 700;
-                margin: 0;
-                cursor: pointer;
+                white-space: nowrap;
               "
-              onclick="ejecutarBusquedaGmailEspecifica()"
+              onclick="cargarDatosGmail()"
             >
               <svg
                 width="14"
@@ -7386,202 +7463,31 @@
                 stroke="currentColor"
                 stroke-width="2.5"
               >
-                <polyline points="23 4 23 10 17 10"></polyline>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
               </svg>
               Refrescar
             </button>
-            <button
-              class="btn-close-circle"
-              style="position: static !important; margin: 0"
-              onclick="toggleGmailPanel()"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-
-        <!-- CONTENIDO PRINCIPAL -->
-        <div
-          style="
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            overflow: hidden;
-            padding: 20px 24px;
-            gap: 16px;
-            background: transparent;
-          "
-        >
-          <!-- BARRA DE BÚSQUEDA -->
-          <div style="display: flex; gap: 10px; width: 100%">
-            <input
-              type="text"
-              id="inputBuscadorGmailReal"
-              class="input-ios"
-              placeholder="Escribe el correo completo a escanear (Ej: cuenta@gmail.com)..."
-              style="
-                margin: 0;
-                flex: 1;
-                border-radius: 14px;
-                padding: 12px 16px;
-                font-family: monospace;
-                font-size: 0.92rem;
-                background: rgba(0, 0, 0, 0.3) !important;
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                color: #ffffff;
-              "
-              onkeypress="
-                if (event.key === 'Enter') ejecutarBusquedaGmailEspecifica();
-              "
-              autocomplete="off"
-            />
-            <button
-              class="btn-ios btn-primary"
-              style="
-                margin: 0;
-                padding: 12px 22px;
-                border-radius: 14px;
-                font-weight: 800;
-                background: #ea4335 !important;
-                color: white !important;
-                box-shadow: 0 4px 15px rgba(234, 67, 53, 0.3);
-                cursor: pointer;
-              "
-              onclick="ejecutarBusquedaGmailEspecifica()"
-            >
-              Buscar
-            </button>
           </div>
 
-          <!-- ÁREA DE RESULTADOS CON SCROLL -->
+          <!-- CONTENEDOR DE LISTA / MESA DE MENSAJES -->
           <div
-            id="gmailScrollArea"
+            id="contenedorGmailMensajes"
             style="
-              overflow-y: auto;
-              flex-grow: 1;
               display: flex;
               flex-direction: column;
-              padding: 12px;
-              background: rgba(255, 255, 255, 0.015);
-              border-radius: 16px;
-              border: 1px solid rgba(255, 255, 255, 0.05);
-            "
-          >
-            <div
-              style="
-                margin: auto;
-                color: var(--text-secondary);
-                text-align: center;
-                padding: 40px 20px;
-              "
-            >
-              <svg
-                width="42"
-                height="42"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#ea4335"
-                stroke-width="1.8"
-                style="margin-bottom: 12px; opacity: 0.6"
-              >
-                <path
-                  d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-                ></path>
-                <polyline points="22,6 12,13 2,6"></polyline>
-              </svg>
-              <br />
-              <span style="font-weight: 600; font-size: 0.9rem"
-                >Ingresa un correo arriba para escanear su bandeja</span
-              >
-            </div>
-          </div>
-        </div>
-
-        <!-- SUB-MODAL LECTOR DE CORREO -->
-        <div
-          id="modalLectorCorreoGlobal"
-          style="
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 15600;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            box-sizing: border-box;
-          "
-        >
-          <div
-            class="sheet-ios"
-            style="
-              max-width: 780px;
+              gap: 10px;
               width: 100%;
-              height: 85vh;
-              display: flex;
-              flex-direction: column;
-              background: #ffffff;
-              border-radius: 20px;
-              overflow: hidden;
-              position: relative;
-              margin: auto;
-              box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             "
-            onclick="event.stopPropagation()"
           >
-            <div
-              style="
-                background: #f1f1f1;
-                padding: 12px 20px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid #ddd;
-              "
-            >
-              <h3
-                style="
-                  color: #000;
-                  margin: 0;
-                  font-size: 1.05rem;
-                  font-weight: 800;
-                "
-              >
-                Lector de Correo
-              </h3>
-              <button
-                onclick="cerrarLectorCorreoGlobal()"
-                style="
-                  background: #e0e0e0;
-                  border: none;
-                  width: 30px;
-                  height: 30px;
-                  border-radius: 50%;
-                  font-weight: bold;
-                  cursor: pointer;
-                  color: #000;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                "
-              >
-                ✕
-              </button>
+            <div style="text-align: center; padding: 40px; color: #a1a1aa">
+              Haz clic en Refrescar para consultar la bandeja de entrada.
             </div>
-            <div
-              id="cuerpoLectorCorreoGlobal"
-              style="padding: 20px; overflow-y: auto; flex-grow: 1; color: #000"
-            ></div>
           </div>
         </div>
       </div>
     </div>
+
     <!-- 🟢 MODAL: VENTA REGISTRADA (RESULTADO Y FICHA) -->
     <div
       class="overlay-ios"
