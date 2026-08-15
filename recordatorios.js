@@ -205,7 +205,7 @@ window.renderizarCanalRecordatorios = function (canal) {
           ${item.user && item.user !== "CLIENTE CYBERNET" ? `<span style="font-size: 0.72rem; color: #a1a1aa; font-family: monospace;">${item.tel}</span>` : ""}
         </div>
 
-        <!-- Botón SVG de Copiado Directo -->
+        <!-- Botón SVG de Copiado Directo (Único que tacha esta fila) -->
         <button type="button" 
                 onclick="window.copiarMensajeRecordatorio(this, '${msjEscapado}')" 
                 title="Copiar mensaje de recordatorio"
@@ -225,7 +225,7 @@ window.renderizarCanalRecordatorios = function (canal) {
 };
 
 // =========================================================================
-// 📋 COPIADO INDIVIDUAL CON TACHADO DE FILA
+// 📋 COPIADO INDIVIDUAL CON TACHADO EXCLUSIVO DE ESA FILA
 // =========================================================================
 window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
   if (typeof haptic === "function") haptic();
@@ -238,7 +238,7 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
     btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
     btn.style.setProperty("background", "rgba(48, 209, 88, 0.2)", "important");
 
-    // 🎯 TACHADO Y ATENUADO DE LA FILA COPIADA
+    // 🎯 TACHADO Y ATENUADO SOLAMENTE DE LA FILA DONDE SE HIZO CLIC
     const pillParent = btn.closest(".pill-recordatorio-item");
     if (pillParent) {
       pillParent.style.opacity = "0.45";
@@ -260,7 +260,7 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
 };
 
 // =========================================================================
-// 📋 COPIAR BLOQUE CON ENUMERACIÓN (1. wa.me/57...) Y TACHADO EN BLOQUE
+// 📋 COPIAR BLOQUE CON ENUMERACIÓN "1. wa.me/57..." SIN TACHAR FILAS
 // =========================================================================
 window.copiarBloqueRecordatorio = function (
   canal,
@@ -278,7 +278,7 @@ window.copiarBloqueRecordatorio = function (
 
   const subLista = dataList.slice(inicioIdx, finIdx);
 
-  // 🎯 ENUMERACIÓN "1. wa.me/57..."
+  // 🎯 FORMATO ENUMERADO: 1. wa.me/57XXXXXXXXXX
   const textoEnlaces = subLista
     .map((item, idx) => {
       let telRaw = String(item.tel || "").replace(/\D/g, "");
@@ -309,22 +309,6 @@ window.copiarBloqueRecordatorio = function (
         );
         btnElement.style.setProperty("color", "#ffffff", "important");
       }, 1500);
-    }
-
-    // 🎯 TACHAR TODAS LAS FILAS DE ESTE BLOQUE
-    const esW1 = canal === "W1";
-    const contenedor = document.getElementById(
-      esW1 ? "listaIndividualW1" : "listaIndividualW2",
-    );
-    if (contenedor) {
-      const pills = contenedor.querySelectorAll(".pill-recordatorio-item");
-      for (let i = inicioIdx; i < finIdx && i < pills.length; i++) {
-        if (pills[i]) {
-          pills[i].style.opacity = "0.45";
-          pills[i].style.textDecoration = "line-through";
-          pills[i].style.filter = "grayscale(0.6)";
-        }
-      }
     }
 
     if (typeof triggerToast === "function") {
