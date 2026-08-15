@@ -1,10 +1,56 @@
-window.tablaMySQLActual = 'netflix';
+window.tablaMySQLActual = "netflix";
 let searchTimeoutMySQL = null;
 
+// =========================================================================
+// 👁️ APERTURA Y CONTROL DEL PANEL MYSQL (RESTAURADO)
+// =========================================================================
+window.toggleMysqlPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("mysqlOverlay");
+  if (!overlay) return;
+
+  if (overlay.classList.contains("open") || overlay.style.display === "flex") {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
+  } else {
+    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
+    overlay.classList.add("open");
+    overlay.style.setProperty("display", "flex", "important");
+    overlay.style.setProperty("align-items", "center", "important");
+    overlay.style.setProperty("justify-content", "center", "important");
+
+    // Verificar si es superadmin para habilitar el botón de agregar
+    const usuarioActivoObj = JSON.parse(
+      sessionStorage.getItem("usuario_activo") || "{}",
+    );
+    const usuarioNombre = (
+      usuarioActivoObj.nombre ||
+      sessionStorage.getItem("active_staff") ||
+      ""
+    ).toUpperCase();
+    const esSuperAdmin =
+      usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
+
+    const btnAdd = document.getElementById("btnAgregarMySQL");
+    if (btnAdd) {
+      btnAdd.style.display = esSuperAdmin ? "inline-flex" : "none";
+    }
+
+    cargarDatosMySQL();
+  }
+};
+
 // Evaluar sesión y rol del usuario
-const usuarioActivoObj = JSON.parse(sessionStorage.getItem("usuario_activo") || "{}");
-const usuarioNombre = (usuarioActivoObj.nombre || sessionStorage.getItem("active_staff") || "").toUpperCase();
-const esSuperAdmin = (usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO");
+const usuarioActivoObj = JSON.parse(
+  sessionStorage.getItem("usuario_activo") || "{}",
+);
+const usuarioNombre = (
+  usuarioActivoObj.nombre ||
+  sessionStorage.getItem("active_staff") ||
+  ""
+).toUpperCase();
+const esSuperAdmin =
+  usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
 
 document.addEventListener("DOMContentLoaded", () => {
   if (esSuperAdmin) {
@@ -13,14 +59,15 @@ document.addEventListener("DOMContentLoaded", () => {
       btnAdd.style.display = "inline-flex";
     }
   }
-  cargarDatosMySQL();
 });
 
 function cambiarTablaMySQL(nombreTabla, btnElement) {
   if (typeof haptic === "function") haptic();
   window.tablaMySQLActual = nombreTabla;
 
-  document.querySelectorAll(".mysql-tab-btn").forEach(b => b.classList.remove("active"));
+  document
+    .querySelectorAll(".mysql-tab-btn")
+    .forEach((b) => b.classList.remove("active"));
   if (btnElement) {
     btnElement.classList.add("active");
   }
@@ -40,11 +87,12 @@ function cargarDatosMySQL() {
   const tbody = document.getElementById("tablaMySQLCuerpo");
   if (!tbody || !thead) return;
 
-  const esNetflix = (window.tablaMySQLActual.toLowerCase() === 'netflix');
+  const esNetflix = window.tablaMySQLActual.toLowerCase() === "netflix";
   const totalColumnas = esNetflix ? 12 : 10;
 
   // Estilo base para celdas de encabezado
-  const thBase = "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;";
+  const thBase =
+    "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;";
 
   // 1. DIBUJAR ENCABEZADOS DE COLUMNA CON ANCHOS EN PORCENTAJE
   if (esNetflix) {
@@ -98,11 +146,13 @@ function cargarDatosMySQL() {
     </tr>
   `;
 
-  fetch(`obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === 'success') {
-        let html = '';
+  fetch(
+    `obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "success") {
+        let html = "";
         if (!data.data || data.data.length === 0) {
           html = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--ios-red); font-weight: 600;">No se encontraron registros en esta tabla.</td></tr>`;
         } else {
@@ -117,28 +167,30 @@ function cargarDatosMySQL() {
           };
 
           data.data.forEach((fila, idx) => {
-            let diaVal       = fila.dia || fila.fecha || '-';
-            let provVal      = fila.proveedor || '-';
-            let correoVal    = fila.correo || fila.usuario || '-';
-            let claveVal     = fila.clave || fila.contrasena || '-';
-            let perfilVal    = fila.perfil || '-';
-            let pinVal       = fila.pin || '-';
-            let vencVal      = fila.vencimiento || '-';
-            let clienteVal   = fila.nombre || fila.cliente || '-';
-            let numeroVal    = fila.numero || fila.telefono || '-';
-            let fechaPagoVal = fila.fecha || '-';
-            let valorVal     = fila.valor || '-';
-            let pagoVal      = fila.pago || '-';
+            let diaVal = fila.dia || fila.fecha || "-";
+            let provVal = fila.proveedor || "-";
+            let correoVal = fila.correo || fila.usuario || "-";
+            let claveVal = fila.clave || fila.contrasena || "-";
+            let perfilVal = fila.perfil || "-";
+            let pinVal = fila.pin || "-";
+            let vencVal = fila.vencimiento || "-";
+            let clienteVal = fila.nombre || fila.cliente || "-";
+            let numeroVal = fila.numero || fila.telefono || "-";
+            let fechaPagoVal = fila.fecha || "-";
+            let valorVal = fila.valor || "-";
+            let pagoVal = fila.pago || "-";
 
             // COLOR DE FONDO TIPO ZEBRA
             const esFilaPar = idx % 2 === 0;
-            const colorFondoFila = esFilaPar ? "rgba(255, 255, 255, 0.015)" : "transparent";
+            const colorFondoFila = esFilaPar
+              ? "rgba(255, 255, 255, 0.015)"
+              : "transparent";
 
             // 2. AGRUPACIÓN POR FECHA ESTILO MAC
-            if (diaVal !== fechaGrupoActual && diaVal !== '-') {
+            if (diaVal !== fechaGrupoActual && diaVal !== "-") {
               fechaGrupoActual = diaVal;
 
-              let btnBorrarFecha = '';
+              let btnBorrarFecha = "";
               if (esSuperAdmin) {
                 btnBorrarFecha = `
                   <button onclick="eliminarFechaMySQL('${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 4px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">
@@ -163,7 +215,7 @@ function cargarDatosMySQL() {
             let textoCopiarFicha = `📺 ${window.tablaMySQLActual.toUpperCase()}\n📧 Correo: ${correoVal}\n🔑 Clave: ${claveVal}\n👤 Perfil: ${perfilVal}\n📍 PIN: ${pinVal}`;
             if (esNetflix) {
               textoCopiarFicha += `\n📅 Vence: ${vencVal}`;
-            } else if (provVal !== '-') {
+            } else if (provVal !== "-") {
               textoCopiarFicha = `📺 ${window.tablaMySQLActual.toUpperCase()}\n👤 Proveedor: ${provVal}\n📧 Correo: ${correoVal}\n🔑 Clave: ${claveVal}\n👤 Perfil: ${perfilVal}\n📍 PIN: ${pinVal}\n📅 Vence: ${vencVal}`;
             }
 
@@ -171,19 +223,21 @@ function cargarDatosMySQL() {
             let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
 
             // ESTRUCTURA DE LA CELDA DE CORREO Y CLAVE
-            let celdaCorreo = correoVal !== '-' 
-              ? `<div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; overflow: hidden;">
+            let celdaCorreo =
+              correoVal !== "-"
+                ? `<div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; overflow: hidden;">
                    <span style="color: #0a84ff; font-family: monospace; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${correoVal}">${correoVal}</span>
-                   ${svgCopyIcon(encodeURIComponent(correoVal), 'Copiar correo')}
+                   ${svgCopyIcon(encodeURIComponent(correoVal), "Copiar correo")}
                  </div>`
-              : '<span style="color: #a1a1aa;">-</span>';
+                : '<span style="color: #a1a1aa;">-</span>';
 
-            let celdaClave = claveVal !== '-' 
-              ? `<div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; overflow: hidden;">
+            let celdaClave =
+              claveVal !== "-"
+                ? `<div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; overflow: hidden;">
                    <span style="color: #30d158; font-family: monospace; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${claveVal}">${claveVal}</span>
-                   ${svgCopyIcon(encodeURIComponent(claveVal), 'Copiar contraseña')}
+                   ${svgCopyIcon(encodeURIComponent(claveVal), "Copiar contraseña")}
                  </div>`
-              : '<span style="color: #a1a1aa;">-</span>';
+                : '<span style="color: #a1a1aa;">-</span>';
 
             // BOTONES DE ACCIÓN (Lápiz, Papelera, Copiar)
             let botonesAccion = `<button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">📋 Copiar</button>`;
@@ -248,13 +302,13 @@ function cargarDatosMySQL() {
           });
         }
         tbody.innerHTML = html;
-      } else if (data.status === 'empty') {
+      } else if (data.status === "empty") {
         tbody.innerHTML = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--text-secondary);">${data.message}</td></tr>`;
       } else {
         tbody.innerHTML = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--ios-red); font-weight: 600;">Error: ${data.message}</td></tr>`;
       }
     })
-    .catch(err => {
+    .catch((err) => {
       tbody.innerHTML = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--ios-red); font-weight: 600;">❌ Error de conexión al consultar MySQL.</td></tr>`;
       console.error(err);
     });
@@ -262,8 +316,13 @@ function cargarDatosMySQL() {
 
 function eliminarFechaMySQL(diaEscapado) {
   const diaValor = decodeURIComponent(diaEscapado);
-  if (!confirm(`⚠️ ¿Estás seguro de que deseas eliminar TODOS los registros del día '${diaValor}' en la tabla '${window.tablaMySQLActual}'?`)) return;
-  
+  if (
+    !confirm(
+      `⚠️ ¿Estás seguro de que deseas eliminar TODOS los registros del día '${diaValor}' en la tabla '${window.tablaMySQLActual}'?`,
+    )
+  )
+    return;
+
   if (typeof haptic === "function") haptic();
 
   const formData = new FormData();
@@ -273,17 +332,17 @@ function eliminarFechaMySQL(diaEscapado) {
 
   fetch("acciones_mysql.php", {
     method: "POST",
-    body: formData
+    body: formData,
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === "success") {
-      cargarDatosMySQL();
-    } else {
-      alert("❌ " + data.message);
-    }
-  })
-  .catch(err => alert("❌ Error al procesar la eliminación por fecha."));
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "success") {
+        cargarDatosMySQL();
+      } else {
+        alert("❌ " + data.message);
+      }
+    })
+    .catch((err) => alert("❌ Error al procesar la eliminación por fecha."));
 }
 
 function abrirModalAgregarMySQL() {
@@ -327,45 +386,54 @@ function guardarNuevoRegistroMySQL(e) {
 
   fetch("acciones_mysql.php", {
     method: "POST",
-    body: formData
+    body: formData,
   })
-  .then(res => res.json())
-  .then(data => {
-    btn.disabled = false;
-    btn.innerText = "Subir a MySQL";
+    .then((res) => res.json())
+    .then((data) => {
+      btn.disabled = false;
+      btn.innerText = "Subir a MySQL";
 
-    if (data.status === "success") {
-      cerrarModalAgregarMySQL();
-      if (plataforma.toLowerCase() === window.tablaMySQLActual.toLowerCase()) {
-        cargarDatosMySQL();
+      if (data.status === "success") {
+        cerrarModalAgregarMySQL();
+        if (
+          plataforma.toLowerCase() === window.tablaMySQLActual.toLowerCase()
+        ) {
+          cargarDatosMySQL();
+        } else {
+          window.tablaMySQLActual = plataforma;
+          document
+            .querySelectorAll(".mysql-tab-btn")
+            .forEach((b) => b.classList.remove("active"));
+          cargarDatosMySQL();
+        }
       } else {
-        window.tablaMySQLActual = plataforma;
-        document.querySelectorAll(".mysql-tab-btn").forEach(b => b.classList.remove("active"));
-        cargarDatosMySQL();
+        alert("❌ " + data.message);
       }
-    } else {
-      alert("❌ " + data.message);
-    }
-  })
-  .catch(err => {
-    btn.disabled = false;
-    btn.innerText = "Subir a MySQL";
-    alert("❌ Error al conectar con el servidor.");
-  });
+    })
+    .catch((err) => {
+      btn.disabled = false;
+      btn.innerText = "Subir a MySQL";
+      alert("❌ Error al conectar con el servidor.");
+    });
 }
 
 function abrirModalEditarMySQL(filaEscapada) {
   if (typeof haptic === "function") haptic();
   const fila = JSON.parse(decodeURIComponent(filaEscapada));
 
-  document.getElementById("editMySQLId").value          = fila.id;
-  document.getElementById("editMySQLCorreo").value      = fila.correo || fila.usuario || '';
-  document.getElementById("editMySQLClave").value       = fila.clave || fila.contrasena || '';
-  document.getElementById("editMySQLPerfil").value      = fila.perfil || '';
-  document.getElementById("editMySQLPin").value         = fila.pin || '';
-  document.getElementById("editMySQLVencimiento").value = fila.vencimiento || '';
-  document.getElementById("editMySQLNombre").value      = fila.nombre || fila.cliente || '';
-  document.getElementById("editMySQLNumero").value      = fila.numero || fila.telefono || '';
+  document.getElementById("editMySQLId").value = fila.id;
+  document.getElementById("editMySQLCorreo").value =
+    fila.correo || fila.usuario || "";
+  document.getElementById("editMySQLClave").value =
+    fila.clave || fila.contrasena || "";
+  document.getElementById("editMySQLPerfil").value = fila.perfil || "";
+  document.getElementById("editMySQLPin").value = fila.pin || "";
+  document.getElementById("editMySQLVencimiento").value =
+    fila.vencimiento || "";
+  document.getElementById("editMySQLNombre").value =
+    fila.nombre || fila.cliente || "";
+  document.getElementById("editMySQLNumero").value =
+    fila.numero || fila.telefono || "";
 
   document.getElementById("modalEditarMySQL").style.display = "flex";
 }
@@ -391,35 +459,41 @@ function guardarEdicionMySQL(e) {
   formData.append("clave", document.getElementById("editMySQLClave").value);
   formData.append("perfil", document.getElementById("editMySQLPerfil").value);
   formData.append("pin", document.getElementById("editMySQLPin").value);
-  formData.append("vencimiento", document.getElementById("editMySQLVencimiento").value);
+  formData.append(
+    "vencimiento",
+    document.getElementById("editMySQLVencimiento").value,
+  );
   formData.append("nombre", document.getElementById("editMySQLNombre").value);
   formData.append("numero", document.getElementById("editMySQLNumero").value);
 
   fetch("acciones_mysql.php", {
     method: "POST",
-    body: formData
+    body: formData,
   })
-  .then(res => res.json())
-  .then(data => {
-    btn.disabled = false;
-    btn.innerText = "Guardar";
+    .then((res) => res.json())
+    .then((data) => {
+      btn.disabled = false;
+      btn.innerText = "Guardar";
 
-    if (data.status === "success") {
-      cerrarModalEditarMySQL();
-      cargarDatosMySQL();
-    } else {
-      alert("❌ " + data.message);
-    }
-  })
-  .catch(err => {
-    btn.disabled = false;
-    btn.innerText = "Guardar";
-    alert("❌ Error al actualizar el registro.");
-  });
+      if (data.status === "success") {
+        cerrarModalEditarMySQL();
+        cargarDatosMySQL();
+      } else {
+        alert("❌ " + data.message);
+      }
+    })
+    .catch((err) => {
+      btn.disabled = false;
+      btn.innerText = "Guardar";
+      alert("❌ Error al actualizar el registro.");
+    });
 }
 
 function eliminarRegistroMySQL(id) {
-  if (!confirm("⚠️ ¿Estás seguro de que deseas eliminar este registro de MySQL?")) return;
+  if (
+    !confirm("⚠️ ¿Estás seguro de que deseas eliminar este registro de MySQL?")
+  )
+    return;
   if (typeof haptic === "function") haptic();
 
   const formData = new FormData();
@@ -429,17 +503,17 @@ function eliminarRegistroMySQL(id) {
 
   fetch("acciones_mysql.php", {
     method: "POST",
-    body: formData
+    body: formData,
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === "success") {
-      cargarDatosMySQL();
-    } else {
-      alert("❌ " + data.message);
-    }
-  })
-  .catch(err => alert("❌ Error al eliminar el registro."));
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "success") {
+        cargarDatosMySQL();
+      } else {
+        alert("❌ " + data.message);
+      }
+    })
+    .catch((err) => alert("❌ Error al eliminar el registro."));
 }
 
 function copiarTextoUnico(btn, textoEscapado) {
@@ -449,7 +523,7 @@ function copiarTextoUnico(btn, textoEscapado) {
   navigator.clipboard.writeText(texto).then(() => {
     const originalHTML = btn.innerHTML;
     btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-    
+
     setTimeout(() => {
       btn.innerHTML = originalHTML;
     }, 1500);
