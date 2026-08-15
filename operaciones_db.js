@@ -91,6 +91,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     return;
   }
 
+  // Ocultar botón de crear si hay cuentas pendientes
   if (btnCrearAlias) btnCrearAlias.style.display = "none";
 
   let html = "";
@@ -124,7 +125,9 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
               <div 
                 onclick="copiarTextoLigero('${claveVieja}', this, 'clave')"
                 title="Clic para copiar"
-                style="flex: 1; background: #161618; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; gap: 4px; cursor: pointer;"
+                style="flex: 1; background: #161618; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; gap: 4px; cursor: pointer; border: 1px solid transparent; transition: background 0.2s;"
+                onmouseover="this.style.background='rgba(255,255,255,0.03)'" 
+                onmouseout="this.style.background='#161618'"
               >
                   <span style="font-size: 0.65rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CLAVE VENCIDA</span>
                   <span style="font-family: monospace; color: #ff3b30; font-weight: 700; font-size: 0.95rem; text-decoration: line-through;">${claveVieja}</span>
@@ -134,7 +137,9 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
               <div 
                 onclick="copiarTextoLigero('${claveNueva}', this, 'clave')"
                 title="Clic para copiar"
-                style="flex: 1.2; background: #2f3631; border: 1px solid rgba(48, 209, 88, 0.4); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; gap: 4px; cursor: pointer;"
+                style="flex: 1.2; background: #2f3631; border: 1px solid rgba(48, 209, 88, 0.4); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; gap: 4px; cursor: pointer; transition: background 0.2s;"
+                onmouseover="this.style.background='rgba(48, 209, 88, 0.15)'" 
+                onmouseout="this.style.background='#2f3631'"
               >
                   <span style="font-size: 0.65rem; color: #30d158; font-weight: 800; text-transform: uppercase;">NUEVA CLAVE TV</span>
                   <span style="font-family: monospace; color: #ffffff; font-weight: 800; font-size: 1.1rem;">${claveNueva}</span>
@@ -161,7 +166,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
   container.innerHTML = html;
 };
 
-// Función para copiar con efecto visual en el mismo texto
+// Función auxiliar visual de copiado
 window.copiarTextoLigero = function (texto, elemento, tipo) {
   if (typeof haptic === "function") haptic();
 
@@ -177,9 +182,16 @@ window.copiarTextoLigero = function (texto, elemento, tipo) {
     spanValor.innerText = "✓ Copiado";
     spanValor.style.color = "#30d158";
 
+    // Pequeño resplandor al contenedor
+    const oldBg = elemento.style.background;
+    elemento.style.background = "rgba(48, 209, 88, 0.1)";
+    elemento.style.borderColor = "rgba(48, 209, 88, 0.4)";
+
     setTimeout(() => {
       spanValor.innerText = originalText;
       spanValor.style.color = originalColor;
+      elemento.style.background = oldBg;
+      elemento.style.borderColor = "";
     }, 1200);
   });
 };
