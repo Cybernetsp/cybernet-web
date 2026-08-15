@@ -1,9 +1,10 @@
 /* ==========================================================================
-   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL
+   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL (FINAL Y CORREGIDO)
    ========================================================================== */
 
-window.URL_OBTENER_HORAS = "obtener_horas.php";
-window.URL_MODIFICAR_TURNO = "modificar_turno.php";
+window.URL_OBTENER_HORAS = "https://api.cybernetsp.com/obtener_horas.php";
+window.URL_MODIFICAR_TURNO = "https://api.cybernetsp.com/modificar_turno.php";
+window.URL_ELIMINAR_TURNO = "https://api.cybernetsp.com/eliminar_turno.php";
 
 window.currentHorasStock = [];
 
@@ -46,8 +47,6 @@ window.toggleShiftsPanel = function () {
   }
 };
 
-window.URL_API_HORAS = "https://api.cybernetsp.com/obtener_horas.php"; // 👈 Asegúrate que esta URL sea correcta
-
 window.cargarHorasDesdeMySQL = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -60,18 +59,17 @@ window.cargarHorasDesdeMySQL = function () {
       </div>
     </div>`;
 
-  fetch(window.URL_API_HORAS)
+  fetch(window.URL_OBTENER_HORAS)
     .then(async (res) => {
-      const text = await res.text(); // Leemos el texto crudo primero
+      const text = await res.text();
       try {
-        return JSON.parse(text); // Intentamos convertirlo
+        return JSON.parse(text);
       } catch (e) {
-        // 🔥 SI FALLA, RETORNA EL TEXTO BASURA PARA VER QUÉ IMPRIMIÓ PHP
         console.error("Respuesta basura de PHP:", text);
         return {
           status: "error",
           message:
-            "Formato inválido de PHP: <br><span style='color:white; font-family:monospace; background:rgba(0,0,0,0.5); padding:4px; display:block; margin-top:8px;'>" +
+            "Formato inválido de PHP: <br><span style='color:white; font-family:monospace; background:rgba(0,0,0,0.5); padding:4px; display:block; margin-top:8px; font-size:12px;'>" +
             text.substring(0, 150) +
             "...</span>",
         };
@@ -80,7 +78,7 @@ window.cargarHorasDesdeMySQL = function () {
     .then((res) => {
       if (res && res.status === "success") {
         window.currentHorasStock = res.data || [];
-        window.renderizarHorasEnPantalla(); // Llama a la función del calendario iPadOS que te pasé antes
+        window.renderizarHorasEnPantalla();
       } else {
         container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Fallo al consultar la base de datos."}</div>`;
       }
@@ -96,7 +94,6 @@ function parsearFechaTurno(fechaRaw) {
   if (!fechaRaw) return new Date();
   if (fechaRaw instanceof Date) return fechaRaw;
 
-  // Extrae únicamente el bloque de fecha ignorando la hora
   let str = String(fechaRaw).trim().split(" ")[0];
   let parts = str.includes("/") ? str.split("/") : str.split("-");
 
@@ -274,8 +271,7 @@ window.renderizarHorasEnPantalla = function () {
   if (asistentesAMostrar.length === 0) {
     container.innerHTML =
       htmlControles +
-      `
-      <div style="text-align:center; padding:40px; color:#a1a1aa; font-weight:600; background:rgba(255,255,255,0.02); border-radius:18px; border:1px dashed rgba(255,255,255,0.08);">
+      `<div style="text-align:center; padding:40px; color:#a1a1aa; font-weight:600; background:rgba(255,255,255,0.02); border-radius:18px; border:1px dashed rgba(255,255,255,0.08);">
         📌 No hay turnos o registros para este periodo.
       </div>`;
     return;
@@ -306,45 +302,96 @@ window.renderizarHorasEnPantalla = function () {
     for (let dia = inicioDia; dia <= finDia; dia++) {
       let registrosDia = turnosPorDia[dia] || [];
       let tieneTurno = registrosDia.length > 0;
-
       let htmlRegistros = "";
+
+      // Variables para unificar adelantos
+      let sumaAdelantos = 0;
+      let idsAdelantosArray = [];
+
+      let turnosPuros = [];
+      let adelantosPuros = [];
 
       registrosDia.forEach((reg) => {
         let totalMonto = parseFloat(reg.total) || 0;
         totalPagoAsistente += totalMonto;
 
-        let tStr = reg.tiempo_trabajado || "00:00:00";
-        if (tStr !== "00:00:00") {
-          let p = tStr.split(":");
-          if (p.length >= 2) {
-            totalHorasSegundos +=
-              (parseInt(p[0], 10) || 0) * 3600 + (parseInt(p[1], 10) || 0) * 60;
+        let tipoBadge = reg.estado || "Completado";
+        let esDescuento =
+          totalMonto < 0 || tipoBadge.toUpperCase().includes("ADELANTO");
+
+        if (esDescuento) {
+          adelantosPuros.push(reg);
+          sumaAdelantos += totalMonto;
+          idsAdelantosArray.push(reg.id);
+        } else {
+          turnosPuros.push(reg);
+          let tStr = reg.tiempo_trabajado || "00:00:00";
+          if (tStr !== "00:00:00") {
+            let p = tStr.split(":");
+            if (p.length >= 2) {
+              totalHorasSegundos +=
+                (parseInt(p[0], 10) || 0) * 3600 +
+                (parseInt(p[1], 10) || 0) * 60;
+            }
           }
         }
+      });
 
-        let esDescuento = totalMonto < 0;
-        let colorMonto = esDescuento ? "#ff453a" : "#30d158";
-        let signoMonto = esDescuento ? "-$" : "$";
+      // RENDERIZAR TURNOS NORMALES
+      turnosPuros.forEach((reg) => {
         let valorAbsolutoFormateado = Math.abs(
-          Math.round(totalMonto),
+          Math.round(reg.total),
         ).toLocaleString("es-CO");
 
-        // BOTÓN EDITAR EXCLUSIVO PARA SUPERADMIN (CAMILO)
-        let btnEditarSuperAdmin = "";
+        // Botones SVG Limpios para CAMILO
+        let btnSuperAdmin = "";
         if (esSuperAdmin) {
-          btnEditarSuperAdmin = `
-            <button type="button" onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}', '${reg.total}')" title="Modificar Turno" style="background: rgba(10, 132, 255, 0.2); border: 1px solid rgba(10, 132, 255, 0.4); color: #0a84ff; padding: 3px 8px; border-radius: 6px; font-size: 0.68rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; margin-top: 4px; transition: all 0.2s ease;">
-              ✏️ Modificar
-            </button>`;
+          btnSuperAdmin = `
+            <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
+              <svg onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <svg onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </div>`;
         }
 
         htmlRegistros += `
           <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 4px;">
-            <span style="font-size: 0.72rem; font-weight: 800; color: #0a84ff; font-family: monospace;">${reg.tiempo_trabajado !== "00:00:00" ? reg.tiempo_trabajado : esDescuento ? "Adelanto" : "Turno"}</span>
-            <span style="font-size: 0.78rem; font-weight: 900; color: ${colorMonto}; font-family: monospace;">${signoMonto}${valorAbsolutoFormateado}</span>
-            ${btnEditarSuperAdmin}
+            <span style="font-size: 0.75rem; font-weight: 800; color: #0a84ff; font-family: monospace;">${reg.tiempo_trabajado !== "00:00:00" ? reg.tiempo_trabajado : "Turno"}</span>
+            <span style="font-size: 0.8rem; font-weight: 900; color: #30d158; font-family: monospace;">$${valorAbsolutoFormateado}</span>
+            ${btnSuperAdmin}
           </div>`;
       });
+
+      // RENDERIZAR ADELANTOS UNIFICADOS
+      if (adelantosPuros.length > 0) {
+        let valorUnificadoMonto = Math.abs(
+          Math.round(sumaAdelantos),
+        ).toLocaleString("es-CO");
+        let idUnificadosStr = idsAdelantosArray.join(",");
+
+        let botonBorrarAdelantos = "";
+        if (esSuperAdmin) {
+          botonBorrarAdelantos = `
+            <div style="display:flex; justify-content:center; margin-top:4px;">
+              <svg onclick="window.eliminarMultiplesTurnosSuperAdmin('${idUnificadosStr}')" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </div>`;
+        }
+
+        htmlRegistros += `
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255, 69, 58, 0.3);">
+            <span style="font-size: 0.65rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelanto Total</span>
+            <span style="font-size: 0.78rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${valorUnificadoMonto}</span>
+            ${botonBorrarAdelantos}
+          </div>`;
+      }
 
       let bgCelda = tieneTurno
         ? "rgba(255, 255, 255, 0.04)"
@@ -354,7 +401,7 @@ window.renderizarHorasEnPantalla = function () {
         : "1px solid rgba(255, 255, 255, 0.05)";
 
       celdasCalendario += `
-        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 78px; box-sizing: border-box;">
+        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 80px; box-sizing: border-box;">
           <span style="font-size: 0.75rem; font-weight: 800; color: ${tieneTurno ? "#ffffff" : "#71717a"}; align-self: flex-start;">${dia}</span>
           ${htmlRegistros}
         </div>`;
@@ -365,6 +412,7 @@ window.renderizarHorasEnPantalla = function () {
     let tiempoFormateadoTotal = `${String(tHoras).padStart(2, "0")}h ${String(tMins).padStart(2, "0")}m`;
     let pagoFormateadoTotal =
       "$" + Math.round(totalPagoAsistente).toLocaleString("es-CO");
+    let colorNetoTotal = totalPagoAsistente < 0 ? "#ff453a" : "#30d158";
 
     htmlCuerpo += `
       <div class="card-ios" style="padding: 20px; margin-bottom: 20px; border-radius: 24px; background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08);">
@@ -385,7 +433,7 @@ window.renderizarHorasEnPantalla = function () {
             </div>
             <div>
               <span style="display: block; font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">Total Pago</span>
-              <span style="font-weight: 900; color: #30d158; font-size: 1.1rem; font-family: monospace;">${pagoFormateadoTotal}</span>
+              <span style="font-weight: 900; color: ${colorNetoTotal}; font-size: 1.1rem; font-family: monospace;">${pagoFormateadoTotal}</span>
             </div>
           </div>
         </div>
@@ -401,49 +449,121 @@ window.renderizarHorasEnPantalla = function () {
   container.innerHTML = htmlCuerpo;
 };
 
-window.modificarTurnoSuperAdmin = function (idTurno, vendedor, fecha, tiempoActual) {
-  const activeStaff = (sessionStorage.getItem("active_staff") || localStorage.getItem("cyber_saved_staff") || "").toUpperCase().trim();
+// ✏️ MODIFICACIÓN DE TIEMPO (SUPERADMIN CAMILO)
+window.modificarTurnoSuperAdmin = function (
+  idTurno,
+  vendedor,
+  fecha,
+  tiempoActual,
+) {
+  const activeStaff = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    ""
+  )
+    .toUpperCase()
+    .trim();
   if (activeStaff !== "CAMILO") {
-    alert("⛔ Acceso Denegado: Solo el Superadmin (CAMILO) tiene permisos para modificar turnos.");
+    alert(
+      "⛔ Acceso Denegado: Solo el Superadmin (CAMILO) tiene permisos para modificar turnos.",
+    );
     return;
   }
 
-  try { if (typeof haptic === "function") haptic(); } catch (e) {}
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
 
-  let nuevoTiempo = prompt(`[SUPERADMIN] Modificar tiempo para ${vendedor} (${fecha}):\nPuedes ingresar horas simples (ej: 3) o formato completo (ej: 03:00:00)`, tiempoActual);
+  let nuevoTiempo = prompt(
+    `[SUPERADMIN] Modificar tiempo para ${vendedor} (${fecha}):\nPuedes ingresar horas simples (ej: 3) o formato completo (ej: 03:00:00)`,
+    tiempoActual,
+  );
   if (nuevoTiempo === null || nuevoTiempo.trim() === "") return;
 
-  // Ruta explícita
-  const urlModificar = "https://api.cybernetsp.com/modificar_turno.php";
-
-  fetch(urlModificar, {
+  // Llama a PHP (que ya está programado para calcular el dinero en el servidor si envias tiempo)
+  fetch(window.URL_MODIFICAR_TURNO, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo.trim())}`
+    body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo.trim())}`,
   })
     .then(async (res) => {
       const text = await res.text();
       try {
         return JSON.parse(text);
       } catch (e) {
-        console.error("Respuesta fallida cruda:", text);
-        alert(`❌ Error crítico en PHP:\nEl servidor no devolvió JSON válido. Revisa la consola (F12).`);
-        throw new Error("Formato inválido.");
+        throw new Error("Respuesta inválida del servidor PHP.");
       }
     })
     .then((res) => {
       if (res && res.status === "success") {
-        if (typeof triggerToast === "function") {
-          triggerToast(`<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Cálculo aplicado: $${Math.round(res.total_calculado).toLocaleString("es-CO")}</span></div>`);
-        }
-        window.cargarHorasDesdeMySQL(); // Recarga la cuadrícula automáticamente
+        if (typeof triggerToast === "function")
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Turno guardado y recalculado</span></div>`,
+          );
+        window.cargarHorasDesdeMySQL();
       } else {
-        alert("⚠️ Error en MySQL: " + (res ? res.message : "Desconocido."));
+        alert("⚠️ Error: " + (res ? res.message : "Desconocido."));
       }
     })
-    .catch((err) => {
-      console.error("Error al actualizar turno:", err);
-    });
+    .catch((err) => alert("❌ " + err.message));
+};
+
+// 🗑️ ELIMINACIÓN DE TURNO (SUPERADMIN CAMILO)
+window.eliminarTurnoSuperAdmin = function (idTurno) {
+  if (
+    !confirm(
+      "⚠️ ¿Estás seguro de eliminar este turno? Esta acción es irreversible.",
+    )
+  )
+    return;
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  fetch(window.URL_ELIMINAR_TURNO, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `id=${encodeURIComponent(idTurno)}`,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success") {
+        if (typeof triggerToast === "function")
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span>Turno eliminado</span></div>`,
+          );
+        window.cargarHorasDesdeMySQL();
+      } else {
+        alert("Error al eliminar: " + res.message);
+      }
+    })
+    .catch((err) => console.error("Error al eliminar:", err));
+};
+
+// 🗑️ ELIMINAR TODOS LOS ADELANTOS UNIFICADOS DE UN DÍA (SUPERADMIN CAMILO)
+window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
+  if (!confirm("⚠️ ¿Estás seguro de eliminar TODOS los adelantos de este día?"))
+    return;
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  let idsArray = idsStr.split(",");
+  let peticiones = idsArray.map((id) =>
+    fetch(window.URL_ELIMINAR_TURNO, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `id=${encodeURIComponent(id)}`,
+    }).then((res) => res.json()),
+  );
+
+  Promise.all(peticiones).then((resultados) => {
+    if (typeof triggerToast === "function")
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span>Adelantos eliminados</span></div>`,
+      );
+    window.cargarHorasDesdeMySQL();
+  });
 };
 
 // 🔍 FILTRO DE BÚSQUEDA
