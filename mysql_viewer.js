@@ -725,7 +725,7 @@ function guardarNuevoRegistroMySQL(e) {
     });
 }
 
-// 🌟 CARGA DE DATOS EN EL MODAL COMPACTO DE EDICIÓN (BLOQUEO DE CORREO SI NO ES SUPERADMIN)
+// 🌟 CARGA DE DATOS EN EL MODAL COMPACTO DE EDICIÓN
 function abrirModalEditarMySQL(filaEscapada) {
   if (typeof haptic === "function") haptic();
   const fila = JSON.parse(decodeURIComponent(filaEscapada));
@@ -755,13 +755,12 @@ function abrirModalEditarMySQL(filaEscapada) {
 
   if (iId) iId.value = fila.id || "";
   if (iCorreo) {
-    iCorreo.value = fila.correo || fila.usuario || "";
+    const correoActual = fila.correo || fila.usuario || "";
+    iCorreo.value = correoActual;
+    iCorreo.dataset.correoAnterior = correoActual; // Guardar referencia del correo antes de editar
     iCorreo.readOnly = !esSuperAdminLocal;
     iCorreo.style.opacity = esSuperAdminLocal ? "1" : "0.6";
     iCorreo.style.cursor = esSuperAdminLocal ? "text" : "not-allowed";
-    iCorreo.title = esSuperAdminLocal
-      ? ""
-      : "Solo administradores pueden cambiar el correo";
   }
   if (iClave) iClave.value = fila.clave || fila.contrasena || "";
   if (iPerfil) iPerfil.value = fila.perfil || "";
@@ -769,7 +768,7 @@ function abrirModalEditarMySQL(filaEscapada) {
   if (iVenc) iVenc.value = fila.vencimiento || "";
   if (iNombre) iNombre.value = fila.nombre || fila.cliente || "";
   if (iNumero) iNumero.value = fila.numero || fila.telefono || "";
-  if (iFechaPago) iFechaPago.value = fila.fecha || "";
+  if (iFechaPago) iFechaPago.value = fila.fecha || fila.dia || "";
   if (iValor)
     iValor.value =
       fila.pago_total || fila.valor || fila.monto_cobrado || fila.monto || "";
@@ -779,12 +778,6 @@ function abrirModalEditarMySQL(filaEscapada) {
 
   const modal = document.getElementById("modalEditarMySQL");
   if (modal) modal.style.display = "flex";
-}
-
-function cerrarModalEditarMySQL() {
-  if (typeof haptic === "function") haptic();
-  const modal = document.getElementById("modalEditarMySQL");
-  if (modal) modal.style.display = "none";
 }
 
 function guardarEdicionMySQL(e) {
@@ -797,6 +790,7 @@ function guardarEdicionMySQL(e) {
     btn.innerText = "Guardando...";
   }
 
+  const iCorreo = document.getElementById("editMySQLCorreo");
   const iFechaPago = document.getElementById("editMySQLFechaPago");
   const iValor = document.getElementById("editMySQLValor");
   const iPago = document.getElementById("editMySQLPago");
@@ -806,9 +800,10 @@ function guardarEdicionMySQL(e) {
   formData.append("tabla", window.tablaMySQLActual);
   formData.append("id", document.getElementById("editMySQLId").value);
   formData.append(
-    "correo",
-    document.getElementById("editMySQLCorreo").value.trim(),
+    "correo_anterior",
+    iCorreo ? iCorreo.dataset.correoAnterior || "" : "",
   );
+  formData.append("correo", iCorreo ? iCorreo.value.trim() : "");
   formData.append(
     "clave",
     document.getElementById("editMySQLClave").value.trim(),
@@ -864,6 +859,12 @@ function guardarEdicionMySQL(e) {
       }
       alert("❌ Error al actualizar el registro.");
     });
+}
+
+function cerrarModalEditarMySQL() {
+  if (typeof haptic === "function") haptic();
+  const modal = document.getElementById("modalEditarMySQL");
+  if (modal) modal.style.display = "none";
 }
 
 function eliminarRegistroMySQL(id) {
