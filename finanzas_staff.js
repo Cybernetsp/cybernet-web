@@ -876,3 +876,43 @@ window.confirmarOperacionPrestamoModal = function (e) {
     guardarDeudaEnSheets();
   }
 };
+// Parche de renderizado limpio para Historial de Movimientos
+window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
+  const contenedor =
+    document.querySelector("#historialMovimientosContainer") ||
+    document.querySelector(".historial-movimientos-list") ||
+    document.querySelector("#contenedorMovimientos");
+
+  if (!contenedor) return;
+
+  if (!listaMovimientos || listaMovimientos.length === 0) {
+    contenedor.innerHTML = `
+      <div style="text-align: center; color: #8e8e93; padding: 25px 10px; font-size: 0.9rem; font-weight: 600;">
+        📭 Sin movimientos registrados en esta fecha.
+      </div>`;
+    return;
+  }
+
+  let html = `<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">`;
+
+  listaMovimientos.forEach((mov) => {
+    const esIngreso = mov.tipo === "INGRESO";
+    const colorMonto = esIngreso ? "#30d158" : "#ff453a";
+    const signo = esIngreso ? "+" : "-";
+    const montoFmt = "$" + Number(mov.monto).toLocaleString("es-CO");
+
+    html += `
+      <div style="background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.06);">
+        <div>
+          <div style="font-weight: 700; color: #ffffff; font-size: 0.88rem;">${mov.categoria}</div>
+          <div style="font-size: 0.78rem; color: #a1a1aa;">${mov.detalle || "Sin descripción"} • <span style="color: #71717a;">${mov.fecha}</span></div>
+        </div>
+        <div style="font-weight: 800; font-size: 0.95rem; color: ${colorMonto};">
+          ${signo}${montoFmt}
+        </div>
+      </div>`;
+  });
+
+  html += `</div>`;
+  contenedor.innerHTML = html;
+};
