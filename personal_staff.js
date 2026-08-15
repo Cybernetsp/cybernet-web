@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO DE BARRA SUPERIOR CON PERSISTENCIA
+// 2. CRONÓMETRO DE BARRA SUPERIOR (CON GUARDADO EN X)
 // ==========================================
 let secCronometroTotal = 0;
 let secParaGuardar = 0;
@@ -93,12 +93,12 @@ const TIEMPO_MAX_INACTIVIDAD = 25 * 60 * 1000; // 25 Minutos en ms
 function limpiarCacheShift() {
   localStorage.removeItem("cyber_shift_vendedor");
   localStorage.removeItem("cyber_shift_active");
-  localStorage.removeItem("cyber_shift_start_ts");
+  localStorage.removeItem("cyber_shift_last_close_ts");
   localStorage.removeItem("cyber_shift_accumulated");
   localStorage.removeItem("cyber_shift_unsaved_sec");
 }
 
-// 🔥 RESTAURACIÓN DE TIEMPO TRAS RECARGA DE PÁGINA
+// 🔥 DETECCIÓN E INICIO / RESTAURACIÓN TRAS RECARGA O CIERRE EN X
 window.verificarEIniciarTurnoAuto = function () {
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
@@ -119,34 +119,28 @@ window.verificarEIniciarTurnoAuto = function () {
       localStorage.getItem("cyber_shift_accumulated") || "0",
       10,
     );
-    let unsaved = parseInt(
-      localStorage.getItem("cyber_shift_unsaved_sec") || "0",
-      10,
-    );
-    let startTs = parseInt(
-      localStorage.getItem("cyber_shift_start_ts") || Date.now(),
+    let lastCloseTs = parseInt(
+      localStorage.getItem("cyber_shift_last_close_ts") || "0",
       10,
     );
 
-    if (activeState === "true") {
-      let diffSec = Math.floor((Date.now() - startTs) / 1000);
+    let diffSec =
+      lastCloseTs > 0 ? Math.floor((Date.now() - lastCloseTs) / 1000) : 0;
+
+    // Si fue un refresco rápido (F5 / menos de 15 segundos)
+    if (activeState === "true" && lastCloseTs > 0 && diffSec < 15) {
       secCronometroTotal = accum + diffSec;
-      secParaGuardar = unsaved + diffSec;
     } else {
+      // Si la ventana estuvo cerrada por la X, el tiempo previo ya se envió a MySQL mediante SendBeacon
       secCronometroTotal = accum;
-      secParaGuardar = unsaved;
     }
-
-    const lbl = document.getElementById("shiftTimer");
-    if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
-
-    if (activeState === "true") {
-      iniciarTurnoTracker(true);
-    }
+    secParaGuardar = 0;
   } else {
-    // Si cambió de usuario o es primera vez
-    iniciarTurnoTracker(true);
+    secCronometroTotal = 0;
+    secParaGuardar = 0;
   }
+
+  iniciarTurnoTracker(true);
 };
 
 window.toggleTrackerShift = function () {
@@ -187,8 +181,7 @@ function iniciarTurnoTracker(esAuto = false) {
   pausadoPorInactividad = false;
 
   localStorage.setItem("cyber_shift_active", "true");
-  localStorage.setItem("cyber_shift_start_ts", Date.now());
-  localStorage.setItem("cyber_shift_accumulated", secCronometroTotal);
+  localStorage.setItem("cyber_shift_vendedor", activeStaff);
 
   const dot = document.getElementById("ledConexion");
   if (dot) {
@@ -202,14 +195,13 @@ function iniciarTurnoTracker(esAuto = false) {
     secCronometroTotal++;
     secParaGuardar++;
 
-    // Guardar estado en memoria local para sobrevivir a reloads
     localStorage.setItem("cyber_shift_accumulated", secCronometroTotal);
     localStorage.setItem("cyber_shift_unsaved_sec", secParaGuardar);
 
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // Guardado en MySQL cada 5 minutos (300 s)
+    // Respaldo periódico en MySQL cada 5 minutos (300 s)
     if (secParaGuardar >= 300) {
       enviarTiempoTrackerAMySQL(
         activeStaff,
@@ -268,7 +260,7 @@ function detenerTurnoTracker(porInactividad = false) {
     pausadoPorInactividad = true;
     if (typeof triggerToast === "function")
       triggerToast(
-        `<div style="color:var(--ios-orange);">⏸ Turno pausado por 25m de inactividad.</div>`,
+        `<div style="color:var(--ios-orange);">⏸ Turno pausado tras 25m de inactividad.</div>`,
       );
   } else {
     pausadoPorInactividad = false;
@@ -331,7 +323,7 @@ function detenerDetectorInactividad() {
   clearTimeout(inactividadTimer);
 }
 
-// 🚪 CERRAR SESIÓN STAFF CON GUARDADO FINAL Y LIMPIEZA
+// 🚪 CERRAR SESIÓN STAFF FORMAL
 window.cerrarSesionStaff = function () {
   try {
     if (typeof haptic === "function") haptic();
@@ -372,7 +364,8 @@ window.cerrarSesionStaff = function () {
   }
 };
 
-window.addEventListener("beforeunload", function () {
+// 🚨 RESPALDO INSTANTÁNEO EN MYSQL SI SE PRESIONA LA 'X' O SE CIERRA LA PESTAÑA
+function guardarEmergenciaAlCerrarVentana() {
   if (turnoActivo && secParaGuardar > 0) {
     const activeStaff = (
       sessionStorage.getItem("active_staff") ||
@@ -381,11 +374,29 @@ window.addEventListener("beforeunload", function () {
     )
       .toUpperCase()
       .trim();
-    const fd = new URLSearchParams();
-    fd.append("vendedor", activeStaff);
-    fd.append("tiempo", formatoSegundosTracker(secParaGuardar));
-    fd.append("fecha", "hoy");
-    navigator.sendBeacon(window.URL_GUARDAR_HORAS_MANUAL, fd);
+    if (activeStaff && activeStaff !== "STAFF" && activeStaff !== "CAMILO") {
+      const fd = new URLSearchParams();
+      fd.append("vendedor", activeStaff);
+      fd.append("tiempo", formatoSegundosTracker(secParaGuardar));
+      fd.append("fecha", "hoy");
+
+      // Transmisión inmediata garantizada al destruir el proceso del navegador
+      navigator.sendBeacon(window.URL_GUARDAR_HORAS_MANUAL, fd);
+
+      // Guardar timestamps de referencia para cuando reabra
+      localStorage.setItem("cyber_shift_accumulated", secCronometroTotal);
+      localStorage.setItem("cyber_shift_unsaved_sec", "0");
+      localStorage.setItem("cyber_shift_last_close_ts", Date.now());
+      secParaGuardar = 0;
+    }
+  }
+}
+
+window.addEventListener("pagehide", guardarEmergenciaAlCerrarVentana);
+window.addEventListener("beforeunload", guardarEmergenciaAlCerrarVentana);
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "hidden") {
+    guardarEmergenciaAlCerrarVentana();
   }
 });
 
