@@ -401,7 +401,6 @@ window.renderizarHorasEnPantalla = function () {
   container.innerHTML = htmlCuerpo;
 };
 
-// ✏️ MODIFICACIÓN VÍA PHP/MYSQL (SOLO SUPERADMIN CAMILO)
 window.modificarTurnoSuperAdmin = function (
   idTurno,
   vendedor,
@@ -427,45 +426,44 @@ window.modificarTurnoSuperAdmin = function (
   } catch (e) {}
 
   let nuevoTiempo = prompt(
-    `[SUPERADMIN] Modificar tiempo para ${vendedor} (${fecha}):\nFormato: HH:MM:SS`,
+    `[SUPERADMIN] Modificar tiempo para ${vendedor} (${fecha}):\nPuedes ingresar horas simples (ej: 3) o formato completo (ej: 03:00:00)`,
     tiempoActual,
   );
   if (nuevoTiempo === null || nuevoTiempo.trim() === "") return;
 
-  // Actualización local temporal (mientras el server procesa)
-  let registroLocal = window.currentHorasStock.find(
-    (r) => String(r.id) === String(idTurno),
-  );
-  if (registroLocal) {
-    registroLocal.tiempo_trabajado = nuevoTiempo;
-    registroLocal.total = 0; // Se repintará el valor real al recargar desde la BD
-    window.renderizarHorasEnPantalla();
-  }
-
-  // Envío POST: Al mandar total=0, el PHP detecta y recalcula el monto correcto.
+  // Petición de actualización directa a MySQL
   fetch(window.URL_MODIFICAR_TURNO, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo)}&total=0`,
+    body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo.trim())}`,
   })
-    .then((res) => res.json())
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error(
+          "Respuesta de servidor no válida: " + text.substring(0, 100),
+        );
+      }
+    })
     .then((res) => {
       if (res && res.status === "success") {
         if (typeof triggerToast === "function") {
           triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Turno actualizado y recalculado</span></div>`,
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Turno guardado y recalculado en MySQL ($${Math.round(res.total_calculado).toLocaleString("es-CO")})</span></div>`,
           );
         }
-        window.cargarHorasDesdeMySQL(); // 🔥 Recarga para obtener el monto recién calculado
+        window.cargarHorasDesdeMySQL(); // Recarga la información directa de la BD
       } else {
         alert(
-          "⚠️ Atención: No se pudo guardar la modificación en MySQL.\n" +
-            (res ? res.message : ""),
+          "⚠️ Error en MySQL: " + (res ? res.message : "Fallo al guardar."),
         );
       }
     })
     .catch((err) => {
       console.error("Error al actualizar turno:", err);
+      alert("❌ " + err.message);
     });
 };
 
