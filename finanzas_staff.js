@@ -3,9 +3,36 @@
    ========================================================================== */
 
 /* ==========================================================================
+   📈 MÓDULO PRINCIPAL DE FINANZAS Y CAJA REAL
+   ========================================================================== */
+
+// 🚪 FUNCIÓN DISPARADORA PARA ABRIR Y CERRAR EL PANEL DE FINANZAS
+window.toggleFinanzasPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("finanzasOverlay");
+  if (!overlay) {
+    console.error("❌ No se encontró el modal #finanzasOverlay en el HTML.");
+    return;
+  }
+
+  if (overlay.classList.contains("open") || overlay.style.display === "flex") {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
+  } else {
+    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
+    overlay.classList.add("open");
+    overlay.style.setProperty("display", "flex", "important");
+    overlay.style.setProperty("align-items", "center", "important");
+    overlay.style.setProperty("justify-content", "center", "important");
+
+    window.construirSelectores();
+    window.actualizarFiltrosUI();
+  }
+};
+
+/* ==========================================================================
    📦 CONTROL DE INVENTARIO / SWITCHES DE PLATAFORMAS
    ========================================================================== */
-const oldToggleInventarioPanel = window.toggleInventarioPanel;
 window.toggleInventarioPanel = function () {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("inventarioOverlay");
@@ -17,9 +44,9 @@ window.toggleInventarioPanel = function () {
   } else {
     if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
     overlay.classList.add("open");
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
+    overlay.style.setProperty("display", "flex", "important");
+    overlay.style.setProperty("align-items", "center", "important");
+    overlay.style.setProperty("justify-content", "center", "important");
     window.cargarInventarioStockMySQL();
   }
 };
@@ -134,9 +161,8 @@ window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
 };
 
 /* ==========================================================================
-   💳 SALDO DE DISTRIBUIDORES (ESTILO PREMIUM TARJETAS CON BORDE)
+   💳 SALDO DE DISTRIBUIDORES
    ========================================================================== */
-const oldToggleDistrisPanel = window.toggleDistrisPanel;
 window.toggleDistrisPanel = function () {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("distrisOverlay");
@@ -228,7 +254,6 @@ window.cargarDistribuidores = function () {
           html += `
             <div class="distri-row-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(10, 132, 255, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
               
-              <!-- LADO IZQUIERDO: AVATAR Y NOMBRE/TELÉFONO -->
               <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1;">
                 <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); color: #0a84ff; font-weight: 900; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   ${inicial}
@@ -241,7 +266,6 @@ window.cargarDistribuidores = function () {
                 </div>
               </div>
 
-              <!-- LADO DERECHO: SALDO RESALTADO Y BOTÓN DE COPIADO SVG -->
               <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
                 <div style="background: ${bgBadgeSaldo}; border: 1px solid ${borderBadgeSaldo}; padding: 6px 12px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                   <span style="font-size: 1.05rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.3px;">${saldoFormateado}</span>
