@@ -1,26 +1,19 @@
 /* ==========================================================================
-   📧 CYBERNET OS - MÓDULO GMAIL / CONSULTA EN TIEMPO REAL (gmail_viewer.js)
+   📧 CYBERNET OS - MÓDULO GMAIL / CONSULTA DE MENSAJES (gmail_viewer.js)
    ========================================================================== */
 
 window.memoriaGmailDatos = [];
 window.APPS_SCRIPT_DIRECT_URL =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 
-// 👁️ APERTURA Y CONTROL ROBUSTO DEL PANEL DE GMAIL
+// 👁️ APERTURA Y CONTROL DEL PANEL DE GMAIL
 window.toggleGmailPanel = function () {
   try {
     if (typeof haptic === "function") haptic();
   } catch (e) {}
 
   const overlay = document.getElementById("gmailOverlay");
-
-  if (!overlay) {
-    console.error("❌ No se encontró el modal #gmailOverlay en la página.");
-    alert(
-      "⚠️ Error: No se encontró el contenedor #gmailOverlay en el HTML. Verifica haber pegado el modal de Gmail en dashboard.html",
-    );
-    return;
-  }
+  if (!overlay) return;
 
   const estaAbierto =
     overlay.classList.contains("open") || overlay.style.display === "flex";
@@ -49,7 +42,7 @@ window.toggleGmailPanel = function () {
   }
 };
 
-// 🔄 CONSULTA DIRECTA CON TIMEOUT DE SEGURIDAD (MÁXIMO 10 SEGUNDOS)
+// 🔄 CONSULTA DIRECTA CON TIEMPO DE ESPERA
 window.cargarDatosGmail = function () {
   try {
     if (typeof haptic === "function") haptic();
@@ -70,7 +63,6 @@ window.cargarDatosGmail = function () {
     return;
   }
 
-  // Carga visual
   contenedor.innerHTML = `
     <div style="text-align: center; padding: 45px; color: #ea4335;">
       <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
@@ -82,7 +74,6 @@ window.cargarDatosGmail = function () {
   const cbName = "cb_gmail_" + Date.now();
   let yaRespondio = false;
 
-  // Temporizador de corte (10 segundos)
   const timerTimeout = setTimeout(() => {
     if (!yaRespondio) {
       yaRespondio = true;
@@ -92,12 +83,11 @@ window.cargarDatosGmail = function () {
 
       contenedor.innerHTML = `
         <div style="text-align: center; padding: 35px 20px; color: #a1a1aa; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 18px; border: 1px dashed rgba(255, 255, 255, 0.08);">
-          📭 No se encontraron correos recientes o notificaciones para <b>${correoVal}</b> en la última hora.
+          📭 No se encontraron mensajes recientes para <b>${correoVal}</b>.
         </div>`;
     }
-  }, 10000);
+  }, 12000);
 
-  // Callback JSONP dinámico
   window[cbName] = function (res) {
     if (yaRespondio) return;
     yaRespondio = true;
@@ -113,7 +103,7 @@ window.cargarDatosGmail = function () {
     } else {
       contenedor.innerHTML = `
         <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
-          ❌ ${res ? res.message || "No se encontraron mensajes para este correo." : "Error de respuesta del servidor."}
+          ❌ ${res ? res.message || "No se encontraron mensajes para este correo." : "Error al obtener respuesta."}
         </div>`;
     }
   };
@@ -124,7 +114,7 @@ window.cargarDatosGmail = function () {
   document.body.appendChild(script);
 };
 
-// 🎨 RENDERIZADO DE MENSAJES
+// 🎨 RENDERIZADO DE MENSAJES Y EXTRACCIÓN DE CÓDIGOS/LINKS
 window.renderizarListaGmail = function (correoBuscado = "") {
   const contenedor = document.getElementById("contenedorGmailMensajes");
   if (!contenedor) return;
@@ -134,7 +124,7 @@ window.renderizarListaGmail = function (correoBuscado = "") {
   if (!datos || datos.length === 0) {
     contenedor.innerHTML = `
       <div style="text-align: center; padding: 40px 20px; color: #a1a1aa; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 18px; border: 1px dashed rgba(255, 255, 255, 0.08);">
-        📭 No hay correos o códigos recientes para <b>${correoBuscado}</b>.
+        📭 No hay correos o códigos registrados para <b>${correoBuscado}</b>.
       </div>`;
     return;
   }
@@ -151,6 +141,7 @@ window.renderizarListaGmail = function (correoBuscado = "") {
     let enlaceExtraido = "";
     let textoBuscar = fragmento + " " + cuerpoHtml;
 
+    // Extracción de código numérico (4 a 8 dígitos)
     let matchCod =
       textoBuscar.match(/(?:c[oó]digo|code|verification)[:\s]*([0-9]{4,8})/i) ||
       textoBuscar.match(/\b([0-9]{4,8})\b/);
@@ -161,6 +152,7 @@ window.renderizarListaGmail = function (correoBuscado = "") {
       }
     }
 
+    // Extracción de enlace
     let matchLink =
       cuerpoHtml.match(/href="(https:\/\/[^"]+)"/i) ||
       textoBuscar.match(/(https:\/\/[^\s"<]+)/i);
@@ -179,7 +171,7 @@ window.renderizarListaGmail = function (correoBuscado = "") {
     let textoEscapado = encodeURIComponent(textoCopiar);
 
     html += `
-      <div class="gmail-card-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s ease;">
+      <div class="gmail-card-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.04)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)';">
         
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
@@ -218,7 +210,7 @@ window.renderizarListaGmail = function (correoBuscado = "") {
                 : ""
             }
 
-            <button type="button" onclick="window.copiarContenidoGmail(this, '${textoEscapado}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 7px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <button type="button" onclick="window.copiarContenidoGmail(this, '${textoEscapado}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 7px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               Copiar
             </button>
