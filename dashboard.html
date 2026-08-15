@@ -6958,7 +6958,8 @@
         </div>
       </div>
     </div>
-    <!-- 💳 MODAL: SALDO DE DISTRIBUIDORES (CENTRADO EN LA MITAD) -->
+
+    <!-- 💳 MODAL OPTIMIZADO: SALDO DE DISTRIBUIDORES -->
     <div
       class="overlay-ios"
       id="distrisOverlay"
@@ -6972,8 +6973,9 @@
         height: 100vh !important;
         align-items: center !important;
         justify-content: center !important;
-        background: rgba(0, 0, 0, 0.6) !important;
-        backdrop-filter: blur(10px) !important;
+        background: rgba(0, 0, 0, 0.82) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
         margin: 0 !important;
       "
     >
@@ -6981,229 +6983,256 @@
         class="sheet-ios"
         onclick="event.stopPropagation()"
         style="
-          max-width: 600px;
-          width: 90%;
-          height: auto !important;
+          max-width: 620px !important;
+          width: 92%;
           max-height: 85vh !important;
           display: flex;
           flex-direction: column;
           padding: 0;
-          border-radius: 24px;
+          border-radius: 26px;
           overflow: hidden;
-          background: #0b0b0d;
-          margin: 0 !important;
-          position: relative !important;
-          top: auto !important;
-          left: auto !important;
-          right: auto !important;
-          bottom: auto !important;
-          transform: none !important;
+          background: #141418;
+          border: 1px solid rgba(10, 132, 255, 0.3);
+          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9);
+          margin: auto;
         "
       >
+        <!-- ENCABEZADO FIJO -->
         <div
           class="sheet-header"
           style="
-            padding: 20px 24px;
-            background: #111112;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 18px 24px;
+            background: #18181c;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin: 0 !important;
             z-index: 10;
+            flex-shrink: 0;
           "
         >
-          <h3
-            class="card-title"
-            style="
-              color: var(--ios-blue);
-              font-size: 1.15rem;
-              font-weight: 800;
-              letter-spacing: -0.3px;
-              gap: 8px;
-              margin: 0;
-              display: flex;
-              align-items: center;
-            "
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+          <div style="display: flex; align-items: center; gap: 12px">
+            <div
+              style="
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                background: rgba(10, 132, 255, 0.15);
+                border: 1px solid rgba(10, 132, 255, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #0a84ff;
+                flex-shrink: 0;
+              "
             >
-              <rect
-                x="2"
-                y="7"
+              <svg
                 width="20"
-                height="14"
-                rx="3"
-                fill="#0A84FF"
-                fill-opacity="0.2"
-                stroke="#0A84FF"
-              />
-              <path
-                d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"
-                stroke="#0A84FF"
-              />
-            </svg>
-            Saldo de Distribuidores
-          </h3>
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="7" width="20" height="14" rx="3" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+              </svg>
+            </div>
+            <div style="display: flex; flex-direction: column">
+              <h3
+                style="
+                  margin: 0;
+                  color: #ffffff;
+                  font-size: 1.15rem;
+                  font-weight: 800;
+                  letter-spacing: -0.3px;
+                "
+              >
+                Saldo de Distribuidores
+              </h3>
+              <span style="font-size: 0.72rem; color: #a1a1aa; font-weight: 600"
+                >Consulta y notificación de balances en tiempo real</span
+              >
+            </div>
+          </div>
           <button
             class="btn-close-circle"
-            style="position: static !important; margin: 0"
+            style="
+              background: rgba(255, 255, 255, 0.08);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              color: #a1a1aa;
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 0.85rem;
+              margin: 0;
+            "
             onclick="toggleDistrisPanel()"
           >
             ✕
           </button>
         </div>
 
+        <!-- CONTENEDOR CON SCROLL -->
         <div
-          class="flex-col"
+          class="flex-col cyber-custom-scroll"
           style="
             overflow-y: auto;
             flex-grow: 1;
-            padding: 24px;
-            gap: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
             background: transparent;
-            max-height: calc(85vh - 65px);
           "
         >
-          <div class="flex-col" style="gap: 12px">
-            <input
-              type="text"
-              id="searchTablaDistris"
-              class="input-ios"
-              placeholder="Buscar distribuidor o celular..."
-              oninput="filtrarTablaRevendedores()"
+          <!-- BARRA DE BÚSQUEDA Y BOTÓN REFRESCAR -->
+          <div style="display: flex; gap: 10px; width: 100%">
+            <div
               style="
-                padding: 14px 18px;
-                font-size: 0.95rem;
-                border-radius: 14px;
-                margin-bottom: 0;
-                background: rgba(0, 0, 0, 0.3) !important;
-              "
-            />
-            <button
-              class="btn-ios btn-secondary w-100"
-              style="
-                font-size: 0.9rem;
-                padding: 12px;
-                border-radius: 14px;
-                font-weight: 700;
+                flex: 1;
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                gap: 6px;
+                background: rgba(0, 0, 0, 0.4);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 0 14px;
               "
-              onclick="cargarDistribuidores()"
             >
               <svg
                 width="16"
                 height="16"
                 viewBox="0 0 24 24"
                 fill="none"
+                stroke="#a1a1aa"
+                stroke-width="2.5"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                id="searchTablaDistris"
+                placeholder="Buscar distribuidor o celular..."
+                oninput="filtrarTablaRevendedores()"
+                style="
+                  width: 100%;
+                  background: transparent !important;
+                  border: none !important;
+                  color: #ffffff;
+                  padding: 12px 10px;
+                  font-size: 0.88rem;
+                  outline: none;
+                "
+              />
+            </div>
+            <button
+              class="btn-ios"
+              style="
+                background: rgba(10, 132, 255, 0.15);
+                border: 1px solid rgba(10, 132, 255, 0.3);
+                color: #0a84ff;
+                padding: 10px 18px;
+                border-radius: 12px;
+                font-weight: 800;
+                font-size: 0.85rem;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                white-space: nowrap;
+              "
+              onclick="cargarDistribuidores()"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
                 stroke="currentColor"
                 stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
               >
-                <path
-                  d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
-                ></path>
-                <path d="M3 3v5h5"></path>
+                <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
               </svg>
-              Refrescar Base de Datos
+              Refrescar
             </button>
           </div>
 
+          <!-- TABLA DE DISTRIBUIDORES -->
           <div
-            class="card-ios"
             style="
-              padding: 0;
-              margin-bottom: 0;
-              display: flex;
-              flex-direction: column;
-              flex-grow: 1;
+              border-radius: 16px;
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              background: rgba(0, 0, 0, 0.3);
               overflow: hidden;
-              border-radius: 18px;
-              border: 1px solid rgba(255, 255, 255, 0.06);
-              background: rgba(255, 255, 255, 0.015);
             "
           >
-            <div
+            <table
               style="
                 width: 100%;
-                overflow-x: auto;
-                flex-grow: 1;
-                display: flex;
-                flex-direction: column;
+                border-collapse: collapse;
+                font-size: 0.88rem;
+                text-align: left;
               "
             >
-              <table
-                class="distris-table"
-                style="
-                  width: 100%;
-                  border-collapse: collapse;
-                  font-size: 0.88rem;
-                  text-align: left;
-                "
-              >
-                <thead>
-                  <tr
+              <thead>
+                <tr
+                  style="
+                    background: rgba(255, 255, 255, 0.03);
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                  "
+                >
+                  <th
                     style="
-                      background: rgba(0, 0, 0, 0.4);
-                      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                      padding: 12px 18px;
+                      font-weight: 800;
+                      color: #a1a1aa;
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                      font-size: 0.72rem;
                     "
                   >
-                    <th
-                      style="
-                        padding: 14px 18px;
-                        font-weight: 700;
-                        color: var(--text-secondary);
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                        font-size: 0.75rem;
-                      "
-                    >
-                      Revendedor / Teléfono
-                    </th>
-                    <th
-                      style="
-                        padding: 14px 18px;
-                        font-weight: 700;
-                        color: var(--text-secondary);
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                        font-size: 0.75rem;
-                        text-align: right;
-                      "
-                    >
-                      Balance Activo
-                    </th>
-                  </tr>
-                </thead>
-                <tbody id="tablaDistribuidores">
-                  <tr>
-                    <td
-                      colspan="2"
-                      style="
-                        text-align: center;
-                        padding: 40px;
-                        color: var(--text-secondary);
-                        font-weight: 500;
-                      "
-                    >
-                      Haz clic en Refrescar para consultar el saldo.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                    REVENDEDOR / TELÉFONO
+                  </th>
+                  <th
+                    style="
+                      padding: 12px 18px;
+                      font-weight: 800;
+                      color: #a1a1aa;
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                      font-size: 0.72rem;
+                      text-align: right;
+                    "
+                  >
+                    BALANCE ACTIVO
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tablaDistribuidores">
+                <tr>
+                  <td
+                    colspan="2"
+                    style="
+                      text-align: center;
+                      padding: 40px;
+                      color: #a1a1aa;
+                      font-weight: 500;
+                    "
+                  >
+                    Haz clic en Refrescar para consultar los saldos.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
