@@ -17,7 +17,6 @@ window.iniciarRelojTurno = window.startShiftTimer = function () {
     sessionStorage.setItem("cyber_shift_start_time", Date.now());
   }
 
-  // Registrar o recuperar turno activo desde MySQL al iniciar
   if (activeUser) {
     const formData = new FormData();
     formData.append("accion", "iniciar_turno");
@@ -33,7 +32,7 @@ window.iniciarRelojTurno = window.startShiftTimer = function () {
           let segsPrevios = res.segundos_transcurridos || 0;
           sessionStorage.setItem(
             "cyber_shift_start_time",
-            Date.now() - segsPrevios * 1000,
+            Date.now() - segsPrevios * 1000
           );
           sessionStorage.setItem("cyber_last_sync_time", Date.now());
         }
@@ -63,7 +62,6 @@ window.iniciarRelojTurno = window.startShiftTimer = function () {
     let stElement = document.getElementById("shiftTimer");
     if (stElement) stElement.innerText = tiempoTexto;
 
-    // Enviar pulso de guardado a MySQL cada 5 minutos
     let lastSync =
       parseInt(sessionStorage.getItem("cyber_last_sync_time"), 10) ||
       Date.now();
@@ -113,7 +111,7 @@ window.cerrarSesionStaff = function () {
 
   if (
     confirm(
-      "¿Estás seguro de que deseas cerrar tu sesión y finalizar tu turno de hoy?",
+      "¿Estás seguro de que deseas cerrar tu sesión y finalizar tu turno de hoy?"
     )
   ) {
     let timerEl = document.getElementById("shiftTimer");
@@ -142,388 +140,23 @@ window.cerrarSesionStaff = function () {
 };
 
 /* ==========================================================================
-   👥 CONTROL DE HORAS, ADELANTOS Y NÓMINA (MYSQL)
+   👥 PUENTES AL MÓDULO DE CALENDARIO Y NÓMINA BENTO (personal_staff.js)
    ========================================================================== */
-window.currentHorasStock = [];
-
-const oldToggleShiftsPanel = window.toggleShiftsPanel;
-window.toggleShiftsPanel = function () {
-  if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("shiftsOverlay");
-  if (!overlay) return;
-
-  if (overlay.classList.contains("open") || overlay.style.display === "flex") {
-    overlay.classList.remove("open");
-    overlay.style.display = "none";
-  } else {
-    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
-    overlay.classList.add("open");
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
-    window.cargarHorasDesdeMySQL();
+window.cargarHorasDesdeMySQL = function () {
+  if (typeof window.cargarHorasDirectasPHP === "function") {
+    window.cargarHorasDirectasPHP();
   }
 };
 
 window.forzarRefrescoDeHoras = function () {
   if (typeof haptic === "function") haptic();
-  window.cargarHorasDesdeMySQL(true);
-};
-
-window.cargarHorasDesdeMySQL = function (silencioso = false) {
-  const container = document.getElementById("shiftsScrollArea");
-  if (!container) return;
-
-  if (!silencioso) {
-    container.innerHTML = `
-      <div style="text-align:center; padding:40px; color:#a1a1aa; font-weight:600;">
-        <svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg>
-        <br>Cargando registros desde control_horas...
-      </div>`;
-  }
-
-  const ts = Date.now();
-  fetch(`https://api.cybernetsp.com/obtener_horas.php?nocache=${ts}`)
-    .then((res) => res.json())
-    .then((res) => {
-      if (res && res.status === "success") {
-        window.currentHorasStock = (res.data || []).map((item) => ({
-          id: item.id,
-          vendedor: item.vendedor || item.usuario || "ASISTENTE",
-          fecha:
-            item.fecha ||
-            (item.hora_inicio ? item.hora_inicio.split(" ")[0] : "-"),
-          tiempo: item.tiempo_trabajado || item.horas || "00:00:00",
-          pagoTurno:
-            item.total !== undefined ? item.total : item.pago_turno || "0",
-          estado: item.estado || "CERRADO",
-          horaInicio: item.hora_salida || "-",
-          filaIndex: item.id,
-        }));
-
-        let query = document.getElementById("searchShiftsInput")
-          ? document.getElementById("searchShiftsInput").value.toLowerCase()
-          : "";
-        window.renderizarHorasEnPantallaMySQL(query);
-
-        if (silencioso && typeof triggerToast === "function") {
-          triggerToast("✅ control_horas sincronizado");
-        }
-      } else {
-        container.innerHTML = `<div style="text-align:center; padding:40px; color:#ff453a;">❌ Error: ${res ? res.message : "Fallo de consulta"}</div>`;
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      container.innerHTML = `<div style="text-align:center; padding:40px; color:#ff453a;">❌ Error de conexión con obtener_horas.php</div>`;
-    });
-};
-
-window.renderizarHorasEnPantallaMySQL = function (filtro = "") {
-  const container = document.getElementById("shiftsScrollArea");
-  if (!container) return;
-
-  const data = window.currentHorasStock || [];
-  let filtrados = data.filter((item) => {
-    if (!filtro) return true;
-    return (
-      (item.vendedor || "").toLowerCase().includes(filtro) ||
-      (item.fecha || "").toLowerCase().includes(filtro) ||
-      (item.estado || "").toLowerCase().includes(filtro)
-    );
-  });
-
-  if (filtrados.length === 0) {
-    container.innerHTML = `<div style="text-align:center; padding:40px; color:#a1a1aa; font-weight:600;">No hay registros en control_horas.</div>`;
-    return;
-  }
-
-  let html = `<div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">`;
-
-  filtrados.forEach((turno) => {
-    const esActivo = turno.estado === "ACTIVO";
-    const colorEstado = esActivo ? "#30d158" : "#a1a1aa";
-    const textoEstado = esActivo ? "🟢 EN CURSO" : "🔴 CERRADO";
-
-    html += `
-      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-        <div style="display: flex; flex-direction: column; gap: 2px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <b style="color: #ffffff; font-size: 1rem; text-transform: uppercase;">${turno.vendedor}</b>
-            <span style="font-size: 0.72rem; font-weight: 800; color: ${colorEstado}; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 6px;">${textoEstado}</span>
-          </div>
-          <span style="font-size: 0.78rem; color: #a1a1aa;">📅 Fecha: <b style="color: #ffffff;">${turno.fecha}</b></span>
-        </div>
-
-        <div style="display: flex; gap: 16px; align-items: center;">
-          <div style="display: flex; flex-direction: column; text-align: right;">
-            <span style="font-size: 0.68rem; color: #a1a1aa; text-transform: uppercase; font-weight: 700;">Tiempo Trabajado</span>
-            <span style="font-size: 1.1rem; font-weight: 900; color: #0a84ff; font-family: monospace;">${turno.tiempo}</span>
-          </div>
-          <div style="display: flex; flex-direction: column; text-align: right; border-left: 1px solid rgba(255,255,255,0.08); padding-left: 14px;">
-            <span style="font-size: 0.68rem; color: #a1a1aa; text-transform: uppercase; font-weight: 700;">Inicio</span>
-            <span style="font-size: 0.82rem; font-weight: 700; color: #ffffff; font-family: monospace;">${turno.horaInicio.split(" ")[1] || turno.horaInicio}</span>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-
-  html += `</div>`;
-  container.innerHTML = html;
-};
-
-window.filtrarHorasInternas = function () {
-  const query = document
-    .getElementById("searchShiftsInput")
-    .value.toLowerCase()
-    .trim();
-  window.renderizarHorasEnPantallaMySQL(query);
-};
-
-window.toggleFormularioHoras = function () {
-  if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("addHoursOverlay");
-  if (!overlay) return;
-
-  if (overlay.style.display === "flex") {
-    overlay.style.display = "none";
-  } else {
-    overlay.style.display = "flex";
-    window.cargarUsuariosSelects();
-
-    const inputFecha = document.getElementById("inputFechaShift");
-    if (inputFecha && !inputFecha.value) {
-      inputFecha.value = new Date().toISOString().split("T")[0];
-    }
-  }
-};
-
-window.ejecutarGuardadoHorasManual = function (event) {
-  if (event) event.preventDefault();
-  if (typeof haptic === "function") haptic();
-
-  const vendedor = document.getElementById("inputVendedorShift").value.trim();
-  const horas = document.getElementById("inputHorasShift").value.trim();
-  const fecha = document.getElementById("inputFechaShift").value.trim();
-
-  const formData = new FormData();
-  formData.append("vendedor", vendedor);
-  formData.append("horas", horas);
-  formData.append("fecha", fecha);
-
-  fetch("https://api.cybernetsp.com/guardar_horas_manual.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.status === "success") {
-        if (typeof triggerToast === "function")
-          triggerToast("✅ " + data.message);
-        document.getElementById("inputHorasShift").value = "";
-        window.toggleFormularioHoras();
-        window.forzarRefrescoDeHoras();
-      } else {
-        alert("Error: " + data.message);
-      }
-    })
-    .catch((err) => console.error(err));
-};
-
-window.toggleModalAdelanto = function (show) {
-  if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("adelantoShiftOverlay");
-  if (!overlay) return;
-
-  overlay.style.display = show ? "flex" : "none";
-  if (show) {
-    window.cargarUsuariosSelects();
-  } else {
-    const form = document.getElementById("formAdelantoShift");
-    if (form) form.reset();
-  }
-};
-
-window.ejecutarAdelantoDesdeShift = function (e) {
-  if (e) e.preventDefault();
-  if (typeof haptic === "function") haptic();
-
-  const empleado = document.getElementById("adeEmpleado").value;
-  const montoRaw = document.getElementById("adeMonto").value;
-  const montoLimpio = parseInt(montoRaw.replace(/\D/g, ""), 10) || 0;
-
-  if (!empleado || montoLimpio <= 0) {
-    alert("⚠️ Por favor ingresa un monto válido.");
-    return;
-  }
-
-  const btn = document.getElementById("btnSubmitAdeShift");
-  const originalText = btn.innerHTML;
-  btn.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> Aplicando...`;
-  btn.disabled = true;
-
-  const formData = new FormData();
-  formData.append("accion", "guardar_adelanto");
-  formData.append("empleado", empleado);
-  formData.append("monto", montoLimpio);
-
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-
-      if (data.status === "success") {
-        if (typeof triggerToast === "function")
-          triggerToast(`💸 ${data.message}`);
-        window.toggleModalAdelanto(false);
-        window.forzarRefrescoDeHoras();
-      } else {
-        alert("❌ Error: " + data.message);
-      }
-    })
-    .catch((err) => {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-      console.error(err);
-      alert("❌ Error de comunicación con MySQL.");
-    });
-};
-
-window.abrirTotalNomina = function () {
-  if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("nominaOverlay");
-  if (overlay) {
-    overlay.style.display = "flex";
-    window.cargarNominaMySQL();
-  }
-};
-
-window.cerrarTotalNomina = function () {
-  if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("nominaOverlay");
-  if (overlay) overlay.style.display = "none";
-};
-
-window.refrescarTotalNominaEnVivo = function () {
-  if (typeof haptic === "function") haptic();
-  window.cargarNominaMySQL();
+  window.cargarHorasDesdeMySQL();
 };
 
 window.cargarNominaMySQL = function () {
-  const contenedor = document.getElementById("nominaContentArea");
-  if (!contenedor) return;
-
-  contenedor.innerHTML =
-    '<div class="empty-log-msg" style="background: rgba(0, 0, 0, 0.2); border-radius: 20px; padding: 40px; text-align: center; color: var(--ios-green);">Calculando nómina desde MySQL...</div>';
-
-  fetch("https://api.cybernetsp.com/obtener_nomina.php")
-    .then((res) => res.json())
-    .then((res) => {
-      if (res.status === "success") {
-        if (res.data.length === 0) {
-          contenedor.innerHTML =
-            '<div class="empty-log-msg" style="text-align:center; padding:30px;">No hay registros de sueldos aún.</div>';
-          return;
-        }
-
-        let html =
-          '<div style="display: flex; flex-direction: column; gap: 12px;">';
-        res.data.forEach((item) => {
-          const ganadoFmt = new Intl.NumberFormat("es-CO", {
-            style: "currency",
-            currency: "COP",
-            maximumFractionDigits: 0,
-          }).format(item.ganado);
-          const descFmt = new Intl.NumberFormat("es-CO", {
-            style: "currency",
-            currency: "COP",
-            maximumFractionDigits: 0,
-          }).format(item.descontado);
-          const netoFmt = new Intl.NumberFormat("es-CO", {
-            style: "currency",
-            currency: "COP",
-            maximumFractionDigits: 0,
-          }).format(item.neto);
-
-          html += `
-            <div class="card-ios" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); padding: 18px 22px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <span style="font-weight: 800; font-size: 1.05rem; color: #ffffff; display: block;">${item.empleado}</span>
-                <span style="font-size: 0.78rem; color: var(--text-secondary);">Ganado: <b style="color: #30d158;">${ganadoFmt}</b> | Adelantos: <b style="color: #ff453a;">-${descFmt}</b></span>
-              </div>
-              <div style="text-align: right;">
-                <span style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; display: block; font-weight: 700;">Neto a Pagar</span>
-                <span style="font-size: 1.25rem; font-weight: 800; color: ${item.neto >= 0 ? "#30d158" : "#ff453a"}; font-family: monospace;">${netoFmt}</span>
-              </div>
-            </div>`;
-        });
-        html += "</div>";
-        contenedor.innerHTML = html;
-      } else {
-        contenedor.innerHTML = `<div style="text-align:center; color: var(--ios-red); padding: 20px;">Error: ${res.message}</div>`;
-      }
-    })
-    .catch((err) => {
-      contenedor.innerHTML =
-        '<div style="text-align:center; color: var(--ios-red); padding: 20px;">❌ Error de conexión (obtener_nomina.php).</div>';
-      console.error(err);
-    });
-};
-
-window.formatearMontoEnVivoCOP = function (input) {
-  let val = input.value.replace(/\D/g, "");
-  if (val) {
-    input.value = new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      maximumFractionDigits: 0,
-    }).format(val);
-  } else {
-    input.value = "";
+  if (typeof window.refrescarTotalNominaEnVivo === "function") {
+    window.refrescarTotalNominaEnVivo();
   }
-};
-
-window.cargarUsuariosSelects = function () {
-  const selectVend = document.getElementById("inputVendedorShift");
-  const selectAde = document.getElementById("adeEmpleado");
-
-  fetch("https://api.cybernetsp.com/obtener_usuarios.php")
-    .then((res) => res.json())
-    .then((res) => {
-      if (res.status === "success" && res.data.length > 0) {
-        let optionsHtml =
-          '<option value="" disabled selected>Selecciona trabajador...</option>';
-        res.data.forEach((nombre) => {
-          optionsHtml += `<option value="${nombre}">${nombre}</option>`;
-        });
-
-        if (selectVend) selectVend.innerHTML = optionsHtml;
-        if (selectAde) selectAde.innerHTML = optionsHtml;
-
-        const usuarioActivoObj = JSON.parse(
-          sessionStorage.getItem("usuario_activo") || "null",
-        );
-        if (usuarioActivoObj && selectVend) {
-          selectVend.value = usuarioActivoObj.nombre.toUpperCase();
-        }
-      } else {
-        let errHtml = `<option value="" disabled selected>❌ ${res.message || "Sin usuarios"}</option>`;
-        if (selectVend) selectVend.innerHTML = errHtml;
-        if (selectAde) selectAde.innerHTML = errHtml;
-      }
-    })
-    .catch((err) => {
-      console.error("Error al cargar usuarios de MySQL:", err);
-      let errHtml =
-        '<option value="" disabled selected>❌ Error al conectar con obtener_usuarios.php</option>';
-      if (selectVend) selectVend.innerHTML = errHtml;
-      if (selectAde) selectAde.innerHTML = errHtml;
-    });
 };
 
 /* ==========================================================================
@@ -553,7 +186,7 @@ window.cargarInventarioStockMySQL = function () {
   if (!contenedor) return;
 
   const usuarioActivoObj = JSON.parse(
-    sessionStorage.getItem("usuario_activo") || "null",
+    sessionStorage.getItem("usuario_activo") || "null"
   );
   const user = usuarioActivoObj ? usuarioActivoObj.nombre.toUpperCase() : null;
   const rol = usuarioActivoObj ? usuarioActivoObj.rol : null;
@@ -601,7 +234,7 @@ window.cargarInventarioStockMySQL = function () {
 
 window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
   const usuarioActivoObj = JSON.parse(
-    sessionStorage.getItem("usuario_activo") || "null",
+    sessionStorage.getItem("usuario_activo") || "null"
   );
   const user = usuarioActivoObj ? usuarioActivoObj.nombre.toUpperCase() : null;
   const rol = usuarioActivoObj ? usuarioActivoObj.rol : null;
@@ -611,7 +244,7 @@ window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
     inputElem.checked = !inputElem.checked;
     if (typeof triggerToast === "function")
       triggerToast(
-        "⛔ Solo el administrador Camilo puede modificar las plataformas.",
+        "⛔ Solo el administrador Camilo puede modificar las plataformas."
       );
     return;
   }
@@ -658,7 +291,7 @@ window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
 };
 
 /* ==========================================================================
-   💳 SALDO DE DISTRIBUIDORES (ESTILO PREMIUM TARJETAS CON BORDE)
+   💳 SALDO DE DISTRIBUIDORES
    ========================================================================== */
 const oldToggleDistrisPanel = window.toggleDistrisPanel;
 window.toggleDistrisPanel = function () {
@@ -752,7 +385,6 @@ window.cargarDistribuidores = function () {
           html += `
             <div class="distri-row-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(10, 132, 255, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
               
-              <!-- LADO IZQUIERDO: AVATAR Y NOMBRE/TELÉFONO -->
               <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1;">
                 <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); color: #0a84ff; font-weight: 900; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   ${inicial}
@@ -765,7 +397,6 @@ window.cargarDistribuidores = function () {
                 </div>
               </div>
 
-              <!-- LADO DERECHO: SALDO RESALTADO Y BOTÓN DE COPIADO SVG -->
               <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
                 <div style="background: ${bgBadgeSaldo}; border: 1px solid ${borderBadgeSaldo}; padding: 6px 12px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                   <span style="font-size: 1.05rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.3px;">${saldoFormateado}</span>
@@ -815,7 +446,7 @@ window.copiarSaldoDistri = function (btn, nombre, saldoFormateado) {
 
     if (typeof triggerToast === "function") {
       triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Reporte de saldo copiado</span></div>`,
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Reporte de saldo copiado</span></div>`
       );
     }
 
@@ -831,7 +462,7 @@ window.filtrarTablaRevendedores = function () {
     .toLowerCase()
     .trim();
   const filas = document.querySelectorAll(
-    "#tablaDistribuidores .distri-row-item",
+    "#tablaDistribuidores .distri-row-item"
   );
   filas.forEach((row) => {
     row.style.display = row.innerText.toLowerCase().includes(query)
@@ -841,7 +472,7 @@ window.filtrarTablaRevendedores = function () {
 };
 
 /* ==========================================================================
-   📈 MÓDULO FINANCIERO BENTO, BALANCE Y RENTABILIDAD
+   📈 MÓDULO FINANCIERO BENTO
    ========================================================================== */
 window.globalFinanzasData = window.globalFinanzasData || null;
 window.activePeriod = window.activePeriod || "mes";
@@ -1049,7 +680,7 @@ window.cargarRentabilidadPlataformas = function () {
           let color =
             r.gananciaNeta < 0 ? "var(--ios-red)" : colors[idx % colors.length];
           let pctBar = Math.round(
-            (Math.abs(r.gananciaNeta) / maxGanancia) * 100,
+            (Math.abs(r.gananciaNeta) / maxGanancia) * 100
           );
 
           html += `
@@ -1133,7 +764,7 @@ window.guardarTransaccion = function (e) {
       } else {
         alert(
           "Error: " +
-            (res ? res.message : "No se pudo guardar la transacción."),
+            (res ? res.message : "No se pudo guardar la transacción.")
         );
       }
     })
@@ -1181,13 +812,13 @@ window.guardarDeudaEnSheets = window.guardarDeudaEnMySQL = function () {
       if (res && res.status === "success") {
         if (typeof triggerToast === "function") {
           triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Deuda guardada en MySQL</span></div>`,
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Deuda guardada en MySQL</span></div>`
           );
         }
       } else {
         alert(
           "❌ Error: " +
-            (res ? res.message : "Fallo de conexión al guardar la deuda."),
+            (res ? res.message : "Fallo de conexión al guardar la deuda.")
         );
       }
     })
@@ -1219,13 +850,13 @@ window.renderDashboard = function () {
 
   if (document.getElementById("val_ingresos"))
     document.getElementById("val_ingresos").innerText = formatMoneda(
-      d.ingresos,
+      d.ingresos
     );
   if (document.getElementById("val_gastos"))
     document.getElementById("val_gastos").innerText = formatMoneda(d.gastos);
   if (document.getElementById("val_inversiones"))
     document.getElementById("val_inversiones").innerText = formatMoneda(
-      d.inversiones,
+      d.inversiones
     );
   if (document.getElementById("val_nomina"))
     document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
@@ -1267,7 +898,7 @@ window.renderDashboard = function () {
     document.getElementById("valDeudaTotal")
   ) {
     document.getElementById("valDeudaTotal").value = parseFloat(
-      window.globalFinanzasData.deudaActual || 0,
+      window.globalFinanzasData.deudaActual || 0
     ).toLocaleString("es-CO");
   }
   if (
@@ -1278,8 +909,9 @@ window.renderDashboard = function () {
       window.globalFinanzasData.tipoDeudaActual;
   }
 };
+
 /* ==========================================================================
-   💳 CONTROL DE DEUDA MUTUA (MODAL Y RETIROS)
+   💳 CONTROL DE DEUDA MUTUA
    ========================================================================== */
 window.modoOperacionModalActual = "prestamo";
 
