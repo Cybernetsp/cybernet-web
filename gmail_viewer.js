@@ -1,5 +1,5 @@
 /* ==========================================================================
-   📧 CYBERNET OS - MÓDULO GMAIL / CONSULTA DE CÓDIGOS (gmail_viewer.js)
+   📧 CYBERNET OS - MÓDULO GMAIL / CONSULTA DE MENSAJES (gmail_viewer.js)
    ========================================================================== */
 
 window.memoriaGmailDatos = [];
@@ -23,101 +23,144 @@ window.toggleGmailPanel = function () {
     overlay.style.setProperty("align-items", "center", "important");
     overlay.style.setProperty("justify-content", "center", "important");
 
-    window.cargarDatosGmail();
+    const inputSearch = document.getElementById("inputSearchGmail");
+    if (inputSearch && inputSearch.value.trim() !== "") {
+      window.cargarDatosGmail();
+    } else if (inputSearch) {
+      setTimeout(() => inputSearch.focus(), 150);
+    }
   }
 };
 
-// 🔄 CONSULTA A LA API DE GMAIL / CÓDIGOS
+// 🔄 CONSULTA A LA API DE GMAIL CON PARÁMETRO OBLIGATORIO 'CORREO'
 window.cargarDatosGmail = function () {
   if (typeof haptic === "function") haptic();
   const contenedor = document.getElementById("contenedorGmailMensajes");
+  const inputSearch = document.getElementById("inputSearchGmail");
   if (!contenedor) return;
 
+  const correoVal = inputSearch ? inputSearch.value.trim() : "";
+
+  if (!correoVal) {
+    contenedor.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; color: #ff9f0a; font-weight: 600; background: rgba(255, 159, 10, 0.05); border-radius: 18px; border: 1px dashed rgba(255, 159, 10, 0.25);">
+        ⚠️ Por favor ingresa un correo electrónico en la casilla de búsqueda arriba.
+      </div>`;
+    if (inputSearch) inputSearch.focus();
+    return;
+  }
+
   contenedor.innerHTML = `
-    <div style="text-align: center; padding: 40px; color: #ea4335;">
+    <div style="text-align: center; padding: 45px; color: #ea4335;">
       <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
-        <svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-        <span style="font-weight: 700; font-size: 0.88rem;">Consultando mensajes recientes...</span>
+        <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+        <span style="font-weight: 700; font-size: 0.9rem;">Escaneando bandeja para ${correoVal}...</span>
       </div>
     </div>`;
 
-  fetch("https://api.cybernetsp.com/obtener_gmail.php")
+  fetch(
+    `https://api.cybernetsp.com/obtener_gmail.php?correo=${encodeURIComponent(correoVal)}`,
+  )
     .then((res) => res.json())
     .then((res) => {
-      if (res && res.status === "success") {
-        window.memoriaGmailDatos = res.data || [];
-        window.renderizarListaGmail();
+      if (
+        res &&
+        (res.status === "success" ||
+          Array.isArray(res.data) ||
+          Array.isArray(res.mensajes) ||
+          Array.isArray(res))
+      ) {
+        let lista = res.data || res.mensajes || (Array.isArray(res) ? res : []);
+        window.memoriaGmailDatos = lista;
+        window.renderizarListaGmail(correoVal);
       } else {
-        contenedor.innerHTML = `<div style="text-align: center; padding: 30px; color: #ff453a; font-weight: 700;">Error: ${res ? res.message : "No se obtuvieron registros."}</div>`;
+        contenedor.innerHTML = `
+          <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
+            ❌ ${res ? res.message || "No se encontraron mensajes para este correo." : "Respuesta no válida del servidor."}
+          </div>`;
       }
     })
     .catch((err) => {
       console.error("Error al consultar Gmail:", err);
-      contenedor.innerHTML = `<div style="text-align: center; padding: 30px; color: #ff453a; font-weight: 700;">❌ Error de conexión al consultar el servidor Gmail.</div>`;
+      contenedor.innerHTML = `
+        <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
+          ❌ Error de comunicación con el servidor. Verifica tu conexión.
+        </div>`;
     });
 };
 
 // 🎨 RENDERIZADO DE LA LISTA DE MENSAJES
-window.renderizarListaGmail = function () {
+window.renderizarListaGmail = function (correoBuscado = "") {
   const contenedor = document.getElementById("contenedorGmailMensajes");
-  const inputSearch = document.getElementById("inputSearchGmail");
-  const query = inputSearch ? inputSearch.value.toLowerCase().trim() : "";
-
   if (!contenedor) return;
 
   let datos = window.memoriaGmailDatos;
 
-  if (query !== "") {
-    datos = datos.filter((item) => {
-      return (
-        (item.correo || "").toLowerCase().includes(query) ||
-        (item.asunto || "").toLowerCase().includes(query) ||
-        (item.codigo || "").toLowerCase().includes(query) ||
-        (item.servicio || "").toLowerCase().includes(query)
-      );
-    });
-  }
-
-  if (datos.length === 0) {
-    contenedor.innerHTML = `<div style="text-align: center; padding: 35px 20px; color: #a1a1aa; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 16px; border: 1px dashed rgba(255, 255, 255, 0.08);">No se encontraron mensajes o códigos recientes.</div>`;
+  if (!datos || datos.length === 0) {
+    contenedor.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; color: #a1a1aa; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 18px; border: 1px dashed rgba(255, 255, 255, 0.08);">
+        📭 No hay mensajes o notificaciones recientes para <b>${correoBuscado}</b>.
+      </div>`;
     return;
   }
 
   let html = "";
   datos.forEach((item) => {
-    let codigo = item.codigo || item.code || "-";
-    let correo = item.correo || item.email || "-";
+    let remitente = item.remitente || item.de || item.from || "Google / Apps";
     let asunto = item.asunto || item.subject || "Sin asunto";
-    let fecha = item.fecha || item.date || "-";
-    let servicio = (item.servicio || "GMAIL").toUpperCase();
+    let fecha = item.fecha || item.date || "Reciente";
+    let mensajeTexto =
+      item.cuerpo || item.snippet || item.mensaje || item.link || "";
+    let enlaceDirecto = item.link || item.enlace || item.url || "";
 
-    let codigoEscapado = encodeURIComponent(codigo);
+    let mensajeEscapado = encodeURIComponent(mensajeTexto || asunto);
 
     html += `
-      <div class="gmail-card-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(234, 67, 53, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
+      <div class="gmail-card-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(234, 67, 53, 0.35)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
         
-        <!-- DETALLES DEL CORREO -->
-        <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex: 1;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="background: rgba(234, 67, 53, 0.15); border: 1px solid rgba(234, 67, 53, 0.3); color: #ea4335; font-weight: 800; font-size: 0.68rem; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">${servicio}</span>
-            <span style="color: #ffffff; font-weight: 800; font-size: 0.9rem; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${correo}</span>
+        <!-- Encabezado del mensaje -->
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+            <span style="background: rgba(234, 67, 53, 0.15); border: 1px solid rgba(234, 67, 53, 0.3); color: #ea4335; font-weight: 800; font-size: 0.72rem; padding: 3px 10px; border-radius: 8px; text-transform: uppercase;">
+              ${remitente}
+            </span>
+            <span style="color: #ffffff; font-weight: 800; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${asunto}
+            </span>
           </div>
-          <span style="color: #a1a1aa; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${asunto}</span>
-          <span style="color: #71717a; font-size: 0.72rem;">📅 ${fecha}</span>
+          <span style="color: #a1a1aa; font-size: 0.75rem; font-family: monospace; flex-shrink: 0;">
+            ${fecha}
+          </span>
         </div>
 
-        <!-- CÓDIGO DESTACADO Y BOTÓN DE COPIADO -->
-        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+        <!-- Cuerpo del mensaje -->
+        ${
+          mensajeTexto
+            ? `
+          <div style="background: rgba(0, 0, 0, 0.35); padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.82rem; color: #e4e4e7; line-height: 1.4; word-break: break-word;">
+            ${mensajeTexto}
+          </div>
+        `
+            : ""
+        }
+
+        <!-- Botones de Acción SVG -->
+        <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
           ${
-            codigo !== "-"
-              ? `<div style="background: rgba(48, 209, 88, 0.12); border: 1px solid rgba(48, 209, 88, 0.3); padding: 6px 14px; border-radius: 10px;">
-                  <span style="font-size: 1.1rem; font-weight: 900; color: #30d158; font-family: monospace; letter-spacing: 1px;">${codigo}</span>
-                </div>
-                <button type="button" onclick="window.copiarCodigoGmail(this, '${codigoEscapado}')" title="Copiar código" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 8px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </button>`
-              : `<span style="color: #71717a; font-size: 0.8rem;">Sin código</span>`
+            enlaceDirecto
+              ? `
+            <a href="${enlaceDirecto}" target="_blank" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 7px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              Abrir Enlace
+            </a>
+          `
+              : ""
           }
+
+          <button type="button" onclick="window.copiarContenidoGmail(this, '${mensajeEscapado}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 7px 12px; border-radius: 10px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copiar
+          </button>
         </div>
 
       </div>`;
@@ -126,30 +169,27 @@ window.renderizarListaGmail = function () {
   contenedor.innerHTML = html;
 };
 
-// 📋 COPIAR CÓDIGO
-window.copiarCodigoGmail = function (btn, codigoEscapado) {
+// 📋 COPIAR CONTENIDO
+window.copiarContenidoGmail = function (btn, textoEscapado) {
   if (typeof haptic === "function") haptic();
-  const codigo = decodeURIComponent(codigoEscapado);
+  const texto = decodeURIComponent(textoEscapado);
 
-  navigator.clipboard.writeText(codigo).then(() => {
+  navigator.clipboard.writeText(texto).then(() => {
     let oldHtml = btn.innerHTML;
-    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Copiado`;
     btn.style.background = "rgba(48, 209, 88, 0.2)";
+    btn.style.color = "#30d158";
 
     if (typeof triggerToast === "function") {
       triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Código copiado al portapapeles</span></div>`
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Contenido copiado al portapapeles</span></div>`,
       );
     }
 
     setTimeout(() => {
       btn.innerHTML = oldHtml;
-      btn.style.background = "rgba(10, 132, 255, 0.15)";
+      btn.style.background = "rgba(255, 255, 255, 0.08)";
+      btn.style.color = "#ffffff";
     }, 1500);
   });
-};
-
-// 🔍 FILTRO DE BÚSQUEDA
-window.filtrarGmail = function () {
-  window.renderizarListaGmail();
 };
