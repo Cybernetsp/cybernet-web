@@ -1233,9 +1233,20 @@ window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
 };
 
 // =========================================================================
-// ➕ VENTANA MODAL Y GUARDADO DE REGISTRO ÚNICO DE NETFLIX (ESTÉTICA FIEL A IMG 2)
+// 💸 FORMATEADOR EN VIVO DE PESOS COLOMBIANOS (COP)
 // =========================================================================
+window.formatearMontoCOP = function (input) {
+  let num = input.value.replace(/\D/g, "");
+  if (!num) {
+    input.value = "";
+    return;
+  }
+  input.value = "$" + parseInt(num, 10).toLocaleString("es-CO");
+};
 
+// =========================================================================
+// ➕ VENTANA MODAL DE REGISTRO ÚNICO (SIN GUIONES Y CON FORMATO COP)
+// =========================================================================
 window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
   if (typeof haptic === "function") haptic();
   const fechaContable = decodeURIComponent(fechaEscapada);
@@ -1299,7 +1310,7 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
             </div>
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">PIN</label>
-              <input type="text" id="addNetPinUnico" value="-" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
+              <input type="text" id="addNetPinUnico" value="" placeholder="" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
             </div>
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">VENCIMIENTO</label>
@@ -1315,7 +1326,7 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
             </div>
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">TELÉFONO</label>
-              <input type="text" id="addNetTelefonoUnico" value="-" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
+              <input type="text" id="addNetTelefonoUnico" value="" placeholder="" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
             </div>
           </div>
 
@@ -1327,12 +1338,12 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
             </div>
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">VALOR</label>
-              <input type="text" id="addNetValorUnico" value="-" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
+              <input type="text" id="addNetValorUnico" value="" placeholder="" oninput="window.formatearMontoCOP(this)" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #30d158; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; font-weight: bold; outline: none;">
             </div>
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">MÉTODO PAGO</label>
               <select id="addNetMetodoPagoUnico" style="width: 100%; height: 38px; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 8px 10px; border-radius: 10px; font-size: 0.85rem; outline: none; cursor: pointer;">
-                <option value="-">-</option>
+                <option value="">-</option>
                 <option value="Nequi">Nequi</option>
                 <option value="Daviplata">Daviplata</option>
                 <option value="Bancolombia">Bancolombia</option>
@@ -1388,7 +1399,7 @@ window.guardarRegistroUnicoMySQL = function (e, fechaContable) {
   btn.innerText = "Guardando...";
 
   const formData = new FormData();
-  formData.append("accion", "confirmar_guardado_netflix");
+  formData.append("accion", "agregar_registro_unico_netflix");
   formData.append("correo", correo);
   formData.append("clave", clave);
   formData.append("perfil", perfil);
@@ -1399,7 +1410,6 @@ window.guardarRegistroUnicoMySQL = function (e, fechaContable) {
   formData.append("fecha", fechaPago);
   formData.append("valor", valor);
   formData.append("pago", metodoPago);
-  formData.append("cantidad_perfiles", "1"); // Forzar la inyección de 1 solo perfil
 
   fetch("https://api.cybernetsp.com/acciones_mysql.php", {
     method: "POST",
