@@ -103,7 +103,7 @@ function formatearFechaCorta(fStr) {
   return fechaPart;
 }
 
-// 💵 FORMATEADOR DE MONEDA AUTOMÁTICO (Ej: 15000 -> $15.000)
+// 💵 FORMATEADOR DE MONEDA AUTOMÁTICO
 function formatearMontoMoneda(vStr) {
   if (!vStr || vStr === "-") return "-";
   let str = String(vStr).trim();
@@ -260,8 +260,9 @@ function cargarDatosMySQL() {
             let numeroVal = fila.numero || fila.telefono || "-";
             let fechaPagoVal = fila.fecha || "-";
 
-            // 💰 CAPTURA MULTI-CAMPO DE PAGO/VALOR
+            // 💰 CAPTURA DE PAGO DE REGISTRO VENTAS INCLUYENDO 'pago_total'
             let valorValRaw =
+              fila.pago_total ||
               fila.valor ||
               fila.monto_cobrado ||
               fila.monto ||
@@ -272,13 +273,13 @@ function cargarDatosMySQL() {
               "-";
             let valorVal = formatearMontoMoneda(valorValRaw);
 
-            // 🏦 CAPTURA MULTI-CAMPO DE MÉTODO DE PAGO
+            // 🏦 CAPTURA DE MÉTODO/BANCO DE VENTAS
             let pagoVal =
-              fila.pago ||
               fila.metodo ||
+              fila.banco ||
+              fila.pago ||
               fila.medio_pago ||
               fila.metodo_pago ||
-              fila.banco ||
               "-";
 
             let isCaida = fila.estado === "caida" || fila.es_caida == 1;
@@ -450,7 +451,7 @@ function cargarDatosMySQL() {
               `;
             }
             // ─────────────────────────────────────────────────────────────
-            // 2. VISTA REGISTRO VENTAS (CORREGIDO FECHA Y MONTO)
+            // 2. VISTA REGISTRO VENTAS (PAGO_TOTAL + METODO OBLIGATORIOS)
             // ─────────────────────────────────────────────────────────────
             else if (esVentas) {
               let platVta =
@@ -732,8 +733,11 @@ function abrirModalEditarMySQL(filaEscapada) {
   if (iNumero) iNumero.value = fila.numero || fila.telefono || "";
   if (iFechaPago) iFechaPago.value = fila.fecha || "";
   if (iValor)
-    iValor.value = fila.valor || fila.monto_cobrado || fila.monto || "";
-  if (iPago) iPago.value = fila.pago || fila.metodo || fila.medio_pago || "";
+    iValor.value =
+      fila.pago_total || fila.valor || fila.monto_cobrado || fila.monto || "";
+  if (iPago)
+    iPago.value =
+      fila.pago || fila.metodo || fila.banco || fila.medio_pago || "";
 
   const modal = document.getElementById("modalEditarMySQL");
   if (modal) modal.style.display = "flex";
