@@ -39,7 +39,7 @@ window.toggleRecordatoriosPanel = function () {
 };
 
 // =========================================================================
-// 🔄 CONSULTA A PHP (WHATSAPP 1)
+// 🔄 CONSULTA AUTO-SINCRONIZADA A PHP (WHATSAPP 1)
 // =========================================================================
 window.sincronizarW1 = function () {
   const selectPeriodo = document.getElementById("periodoW1");
@@ -78,13 +78,13 @@ window.sincronizarW1 = function () {
       console.error("Error en W1:", err);
       if (contador) contador.innerText = "Error";
       if (listaContenedor) {
-        listaContenedor.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #ff453a; font-weight: 700;">Error de conexión al servidor MySQL.</div>`;
+        listaContenedor.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #ff453a; font-weight: 700;">Error de conexión al servidor.</div>`;
       }
     });
 };
 
 // =========================================================================
-// 🔄 CONSULTA A PHP (WHATSAPP 2)
+// 🔄 CONSULTA AUTO-SINCRONIZADA A PHP (WHATSAPP 2)
 // =========================================================================
 window.sincronizarW2 = function () {
   const selectPeriodo = document.getElementById("periodoW2");
@@ -123,13 +123,13 @@ window.sincronizarW2 = function () {
       console.error("Error en W2:", err);
       if (contador) contador.innerText = "Error";
       if (listaContenedor) {
-        listaContenedor.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #ff453a; font-weight: 700;">Error de conexión al servidor MySQL.</div>`;
+        listaContenedor.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #ff453a; font-weight: 700;">Error de conexión al servidor.</div>`;
       }
     });
 };
 
 // =========================================================================
-// 🎨 RENDERIZADO TIPO IMG 3 (PÍLDORAS NUMERADAS Y BLOQUES DE MÁX 20)
+// 🎨 RENDERIZADO TIPO IMG 3 (PÍLDORAS NUMERADAS Y BLOQUES ENUMERADOS DE MÁX 20)
 // =========================================================================
 window.renderizarCanalRecordatorios = function (canal) {
   const esW1 = canal === "W1";
@@ -154,31 +154,35 @@ window.renderizarCanalRecordatorios = function (canal) {
     return;
   }
 
-  // 1. GENERACIÓN DE BOTONES POR BLOQUES (MÁXIMO 20 POR BOTÓN)
+  // 1. GENERACIÓN DE BOTONES POR BLOQUES ENUMERADOS (MÁXIMO 20 POR BOTÓN)
   if (bloquesContenedor) {
     let htmlBloques = "";
     const tamanoBloque = 20;
     const totalItems = listaData.length;
 
     for (let i = 0; i < totalItems; i += tamanoBloque) {
+      const numBloque = Math.floor(i / tamanoBloque) + 1;
       const inicio = i + 1;
       const fin = Math.min(i + tamanoBloque, totalItems);
 
       htmlBloques += `
         <button type="button" 
-                onclick="window.copiarBloqueRecordatorio('${canal}', ${i}, ${fin})" 
-                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; padding: 9px 12px; border-radius: 10px; font-weight: 800; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;"
-                onmouseover="this.style.background='rgba(255,255,255,0.1)'"
-                onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          Bloque (${inicio}-${fin})
+                onclick="window.copiarBloqueRecordatorio('${canal}', ${i}, ${fin}, this)" 
+                style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; padding: 9px 12px; border-radius: 12px; font-weight: 800; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"
+                onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.25)';"
+                onmouseout="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='rgba(255,255,255,0.12)';">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Bloque ${numBloque} (${inicio}-${fin})
         </button>`;
     }
 
     bloquesContenedor.innerHTML = htmlBloques;
   }
 
-  // 2. RENDERIZAR TARJETAS EN PÍLDORA NUMERADA (DISEÑO TIPO IMAGEN 3)
+  // 2. RENDERIZAR TARJETAS EN PÍLDORA NUMERADA (ESTILO IMAGEN 3 EXACTO)
   let htmlCards = "";
   listaData.forEach((item, idx) => {
     const msjEscapado = encodeURIComponent(item.mensaje || "");
@@ -186,14 +190,14 @@ window.renderizarCanalRecordatorios = function (canal) {
       item.user && item.user !== "CLIENTE CYBERNET" ? item.user : item.tel;
 
     htmlCards += `
-      <div class="pill-recordatorio-item" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s ease;">
+      <div class="pill-recordatorio-item" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.055)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)';">
         
         <!-- Índice Numerado -->
-        <div style="width: 26px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: #a1a1aa; font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <div style="width: 28px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: #a1a1aa; font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
           ${idx + 1}
         </div>
 
-        <!-- Identificador / Número -->
+        <!-- Identificador / Teléfono -->
         <div style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
           <span style="font-weight: 800; font-size: 0.88rem; color: #ffffff; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
             ${nombreOIdentificador}
@@ -221,7 +225,7 @@ window.renderizarCanalRecordatorios = function (canal) {
 };
 
 // =========================================================================
-// 📋 COPIADO INDIVIDUAL Y BLOQUES DE MÁXIMO 20 NÚMEROS
+// 📋 COPIADO INDIVIDUAL
 // =========================================================================
 window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
   if (typeof haptic === "function") haptic();
@@ -232,7 +236,7 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
     let oldBg = btn.style.background;
 
     btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-    btn.style.background = "rgba(48, 209, 88, 0.2)";
+    btn.style.setProperty("background", "rgba(48, 209, 88, 0.2)", "important");
 
     if (typeof triggerToast === "function") {
       triggerToast(
@@ -247,7 +251,15 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
   });
 };
 
-window.copiarBloqueRecordatorio = function (canal, inicioIdx, finIdx) {
+// =========================================================================
+// 📋 COPIAR BLOQUE EXCLUSIVAMENTE CON FORMATO wa.me/57XXXXXXXXXX
+// =========================================================================
+window.copiarBloqueRecordatorio = function (
+  canal,
+  inicioIdx,
+  finIdx,
+  btnElement,
+) {
   if (typeof haptic === "function") haptic();
 
   const dataList =
@@ -257,17 +269,43 @@ window.copiarBloqueRecordatorio = function (canal, inicioIdx, finIdx) {
   if (!dataList || dataList.length === 0) return;
 
   const subLista = dataList.slice(inicioIdx, finIdx);
-  const textoNumeros = subLista
-    .map(
-      (item, idx) =>
-        `${idx + 1}. https://wa.me/${item.tel}?text=${encodeURIComponent(item.mensaje || "")}`,
-    )
-    .join("\n\n");
 
-  navigator.clipboard.writeText(textoNumeros).then(() => {
+  // Formatear numéricamente solo a wa.me/57XXXXXXXXXX sin parámetros ni textos
+  const textoEnlaces = subLista
+    .map((item) => {
+      let telRaw = String(item.tel || "").replace(/\D/g, "");
+      if (telRaw.length === 10) {
+        telRaw = "57" + telRaw;
+      }
+      return `wa.me/${telRaw}`;
+    })
+    .join("\n");
+
+  navigator.clipboard.writeText(textoEnlaces).then(() => {
+    if (btnElement) {
+      let oldHtml = btnElement.innerHTML;
+      btnElement.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Copiados!`;
+      btnElement.style.setProperty(
+        "background",
+        "rgba(48, 209, 88, 0.2)",
+        "important",
+      );
+      btnElement.style.setProperty("color", "#30d158", "important");
+
+      setTimeout(() => {
+        btnElement.innerHTML = oldHtml;
+        btnElement.style.setProperty(
+          "background",
+          "rgba(255, 255, 255, 0.04)",
+          "important",
+        );
+        btnElement.style.setProperty("color", "#ffffff", "important");
+      }, 1500);
+    }
+
     if (typeof triggerToast === "function") {
       triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Bloque (${inicioIdx + 1}-${finIdx}) copiado (${subLista.length} enlaces)</span></div>`,
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Bloque copiado (${subLista.length} enlaces wa.me/57...)</span></div>`,
       );
     }
   });
