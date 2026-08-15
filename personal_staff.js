@@ -2,15 +2,15 @@
    👥 CYBERNET OS - MÓDULO DE PERSONAL, NÓMINA Y CALENDARIO MYSQL
    ========================================================================== */
 
+// 🌐 RUTAS ABSOLUTAS A LA BASE DE DATOS MYSQL
 window.URL_OBTENER_HORAS = "https://api.cybernetsp.com/obtener_horas.php";
 window.URL_MODIFICAR_TURNO = "https://api.cybernetsp.com/modificar_turno.php";
 window.URL_ELIMINAR_TURNO = "https://api.cybernetsp.com/eliminar_turno.php";
 window.URL_GUARDAR_ADELANTO = "https://api.cybernetsp.com/guardar_adelanto.php";
 window.URL_GUARDAR_HORAS_MANUAL =
   "https://api.cybernetsp.com/guardar_horas_manual.php";
-window.URL_OBTENER_USUARIOS = "obtener_usuarios.php";
+window.URL_OBTENER_USUARIOS = "https://api.cybernetsp.com/obtener_usuarios.php"; // ¡Ruta Corregida!
 
-// Lista base de personal registrado en Cybernet
 window.ASISTENTES_BASE = [
   "ANGELICA",
   "KATHERINE",
@@ -19,17 +19,15 @@ window.ASISTENTES_BASE = [
   "MANUP",
   "PABLO",
 ];
-
 window.currentHorasStock = [];
 window.usuariosCache = [];
 
-// Filtros globales del calendario
 window.filtroMesTurnos = new Date().getMonth();
 window.filtroAnioTurnos = new Date().getFullYear();
 window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
 
-// 🌐 OBTENER LISTA COMPLETA DE ASISTENTES (BASE + MYSQL)
+// OBTENER LISTA COMPLETA
 function obtenerTodosLosAsistentes() {
   let setAsistentes = new Set(window.ASISTENTES_BASE);
   if (Array.isArray(window.usuariosCache)) {
@@ -47,7 +45,7 @@ function obtenerTodosLosAsistentes() {
   return Array.from(setAsistentes).sort();
 }
 
-// VERIFICAR SUPERADMIN (CAMILO)
+// VERIFICAR SUPERADMIN
 function verificarSiEsSuperAdmin() {
   let user =
     sessionStorage.getItem("active_staff") ||
@@ -56,7 +54,7 @@ function verificarSiEsSuperAdmin() {
   return user.toUpperCase().trim() === "CAMILO";
 }
 
-// 🔄 CARGAR USUARIOS DESDE MYSQL
+// 🔄 CARGAR USUARIOS DESDE MYSQL (NEQUI/TELÉFONOS)
 window.cargarUsuariosBaseMySQL = async function () {
   try {
     let res = await fetch(window.URL_OBTENER_USUARIOS);
@@ -68,7 +66,7 @@ window.cargarUsuariosBaseMySQL = async function () {
       }
     }
   } catch (e) {
-    console.error("Error cargando usuarios desde MySQL:", e);
+    console.error("Error cargando usuarios (Nequi) desde MySQL:", e);
   }
 };
 
@@ -77,17 +75,10 @@ window.toggleShiftsPanel = function () {
   try {
     if (typeof haptic === "function") haptic();
   } catch (e) {}
-
   const overlay = document.getElementById("shiftsOverlay");
-  if (!overlay) {
-    alert("⚠️ Error: No se encontró el modal #shiftsOverlay en la página.");
-    return;
-  }
+  if (!overlay) return;
 
-  const estaAbierto =
-    overlay.classList.contains("open") || overlay.style.display === "flex";
-
-  if (estaAbierto) {
+  if (overlay.classList.contains("open") || overlay.style.display === "flex") {
     overlay.classList.remove("open");
     overlay.style.display = "none";
   } else {
@@ -101,7 +92,6 @@ window.toggleShiftsPanel = function () {
     overlay.style.setProperty("align-items", "center", "important");
     overlay.style.setProperty("justify-content", "center", "important");
 
-    // Mostrar/ocultar botones exclusivos para CAMILO
     const esSuperAdmin = verificarSiEsSuperAdmin();
     const btnAde = document.getElementById("btnAdelantoCamilo");
     const btnNom = document.getElementById("btnNominaCamilo");
@@ -127,8 +117,8 @@ window.cargarHorasDesdeMySQL = function () {
   container.innerHTML = `
     <div style="text-align:center; padding:45px; color:#0a84ff;">
       <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
-        <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-        <span style="font-weight:700; font-size:0.9rem;">Sincronizando calendario con MySQL...</span>
+        <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg>
+        <span style="font-weight:700; font-size:0.9rem;">Sincronizando con MySQL...</span>
       </div>
     </div>`;
 
@@ -138,14 +128,7 @@ window.cargarHorasDesdeMySQL = function () {
       try {
         return JSON.parse(text);
       } catch (e) {
-        console.error("Respuesta basura de PHP:", text);
-        return {
-          status: "error",
-          message:
-            "Formato inválido de PHP: <br><span style='color:white; font-family:monospace; background:rgba(0,0,0,0.5); padding:4px; display:block; margin-top:8px; font-size:12px;'>" +
-            text.substring(0, 150) +
-            "...</span>",
-        };
+        throw new Error("Formato inválido de PHP");
       }
     })
     .then((res) => {
@@ -153,42 +136,36 @@ window.cargarHorasDesdeMySQL = function () {
         window.currentHorasStock = res.data || [];
         window.renderizarHorasEnPantalla();
       } else {
-        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Fallo al consultar la base de datos."}</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Fallo de BD"}</div>`;
       }
     })
     .catch((err) => {
-      console.error("Error al cargar horas:", err);
-      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error de Red: ${err.message}</div>`;
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error de Red</div>`;
     });
 };
 
-// 📅 PARSEADOR DE FECHAS
 function parsearFechaTurno(fechaRaw) {
   if (!fechaRaw) return new Date();
   if (fechaRaw instanceof Date) return fechaRaw;
-
   let str = String(fechaRaw).trim().split(" ")[0];
   let parts = str.includes("/") ? str.split("/") : str.split("-");
-
   if (parts.length === 3) {
-    if (parts[0].length === 4) {
+    if (parts[0].length === 4)
       return new Date(
         parseInt(parts[0], 10),
         parseInt(parts[1], 10) - 1,
         parseInt(parts[2], 10),
       );
-    } else {
+    else
       return new Date(
         parseInt(parts[2], 10),
         parseInt(parts[1], 10) - 1,
         parseInt(parts[0], 10),
       );
-    }
   }
   return new Date();
 }
 
-// 🗓️ FILTROS DE VISTA
 window.cambiarMesTurnos = function (mesIndex) {
   try {
     if (typeof haptic === "function") haptic();
@@ -213,7 +190,7 @@ window.cambiarAsistenteAdmin = function (vendedor) {
   window.renderizarHorasEnPantalla();
 };
 
-// 🎨 RENDERIZADOR PRINCIPAL DE CALENDARIO
+// 🎨 RENDERIZADOR PRINCIPAL CALENDARIO
 window.renderizarHorasEnPantalla = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -233,7 +210,6 @@ window.renderizarHorasEnPantalla = function () {
 
   const inicioDia = esQ1 ? 1 : 16;
   const finDia = esQ1 ? 15 : new Date(dAnio, dMes + 1, 0).getDate();
-
   const mesesNombres = [
     "Enero",
     "Febrero",
@@ -250,11 +226,9 @@ window.renderizarHorasEnPantalla = function () {
   ];
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-  // 1. OBTENER LISTA COMPLETA DE ASISTENTES
   let listaTodosAsistentes = obtenerTodosLosAsistentes();
-
-  // Filtrar registros por fecha
   let todosLosRegistros = window.currentHorasStock;
+
   let datosFiltrados = todosLosRegistros.filter((item) => {
     let vendedorItem = (item.vendedor || "STAFF").toUpperCase().trim();
     let d = parsearFechaTurno(item.fecha);
@@ -264,35 +238,27 @@ window.renderizarHorasEnPantalla = function () {
     if (esQ1 && dia > 15) return false;
     if (!esQ1 && dia <= 15) return false;
 
-    if (!esSuperAdmin) {
-      return vendedorItem === activeStaff;
-    } else {
-      if (window.asistenteSeleccionadoAdmin !== "TODOS") {
-        return vendedorItem === window.asistenteSeleccionadoAdmin;
-      }
-      return true;
-    }
+    if (!esSuperAdmin) return vendedorItem === activeStaff;
+    else
+      return (
+        window.asistenteSeleccionadoAdmin === "TODOS" ||
+        vendedorItem === window.asistenteSeleccionadoAdmin
+      );
   });
 
-  // 2. DESPLEGABLE DE CONTROLES SUPERADMIN
   let opcionesMes = mesesNombres
     .map(
       (m, idx) =>
         `<option value="${idx}" ${idx === dMes ? "selected" : ""}>${m} ${dAnio}</option>`,
     )
     .join("");
-
   let selectorAsistentesAdmin = "";
   if (esSuperAdmin) {
     let optsAsistentes = `<option value="TODOS" ${window.asistenteSeleccionadoAdmin === "TODOS" ? "selected" : ""}>👥 Todos los Asistentes</option>`;
     listaTodosAsistentes.forEach((asist) => {
       optsAsistentes += `<option value="${asist}" ${window.asistenteSeleccionadoAdmin === asist ? "selected" : ""}>👤 ${asist}</option>`;
     });
-
-    selectorAsistentesAdmin = `
-      <select class="input-ios" style="margin:0; padding:10px 14px; border-radius:12px; font-weight:800; font-size:0.85rem; color:#0a84ff; background:#18181c; border:1px solid rgba(10,132,255,0.3);" onchange="cambiarAsistenteAdmin(this.value)">
-        ${optsAsistentes}
-      </select>`;
+    selectorAsistentesAdmin = `<select class="input-ios" style="margin:0; padding:10px 14px; border-radius:12px; font-weight:800; font-size:0.85rem; color:#0a84ff; background:#18181c; border:1px solid rgba(10,132,255,0.3);" onchange="cambiarAsistenteAdmin(this.value)">${optsAsistentes}</select>`;
   }
 
   let btnQ1Style = esQ1
@@ -305,37 +271,30 @@ window.renderizarHorasEnPantalla = function () {
   let htmlControles = `
     <div style="background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08); padding: 14px; border-radius: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 18px;">
       <div style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1;">
-        <select class="input-ios" style="margin:0; padding:10px 14px; border-radius:12px; font-weight:800; font-size:0.85rem; color:#ffffff; background:#18181c; border:1px solid rgba(255,255,255,0.15);" onchange="cambiarMesTurnos(this.value)">
-          ${opcionesMes}
-        </select>
+        <select class="input-ios" style="margin:0; padding:10px 14px; border-radius:12px; font-weight:800; font-size:0.85rem; color:#ffffff; background:#18181c; border:1px solid rgba(255,255,255,0.15);" onchange="cambiarMesTurnos(this.value)">${opcionesMes}</select>
         <button class="btn-ios" type="button" style="padding: 10px 14px; border-radius: 12px; font-size: 0.82rem; font-weight: 800; ${btnQ1Style}" onclick="cambiarQuincenaTurnos(1)">Q1 (1-15)</button>
         <button class="btn-ios" type="button" style="padding: 10px 14px; border-radius: 12px; font-size: 0.82rem; font-weight: 800; ${btnQ2Style}" onclick="cambiarQuincenaTurnos(2)">Q2 (16-Fin)</button>
       </div>
       ${selectorAsistentesAdmin}
     </div>`;
 
-  // 3. AGRUPAR REGISTROS
   let mapaAsistentes = {};
-
   datosFiltrados.forEach((item) => {
     let asist = (item.vendedor || "STAFF").toUpperCase().trim();
     let d = parsearFechaTurno(item.fecha);
     let diaNum = d.getDate();
-
     if (!mapaAsistentes[asist]) mapaAsistentes[asist] = {};
     if (!mapaAsistentes[asist][diaNum]) mapaAsistentes[asist][diaNum] = [];
-
     mapaAsistentes[asist][diaNum].push(item);
   });
 
   let asistentesAMostrar = [];
-
   if (!esSuperAdmin) {
     asistentesAMostrar = [activeStaff];
   } else {
-    if (window.asistenteSeleccionadoAdmin !== "TODOS") {
+    if (window.asistenteSeleccionadoAdmin !== "TODOS")
       asistentesAMostrar = [window.asistenteSeleccionadoAdmin];
-    } else {
+    else {
       let conRegistros = Object.keys(mapaAsistentes);
       asistentesAMostrar =
         conRegistros.length > 0 ? conRegistros : listaTodosAsistentes;
@@ -344,7 +303,6 @@ window.renderizarHorasEnPantalla = function () {
 
   let htmlCuerpo = htmlControles;
 
-  // 4. GENERAR TARJETAS DE CALENDARIO
   asistentesAMostrar.forEach((asistente) => {
     let turnosPorDia = mapaAsistentes[asistente] || {};
     let totalPagoAsistente = 0;
@@ -360,25 +318,21 @@ window.renderizarHorasEnPantalla = function () {
       )
       .join("");
 
-    for (let o = 0; o < offsetDias; o++) {
+    for (let o = 0; o < offsetDias; o++)
       celdasCalendario += `<div style="background: transparent;"></div>`;
-    }
 
     for (let dia = inicioDia; dia <= finDia; dia++) {
       let registrosDia = turnosPorDia[dia] || [];
       let tieneTurno = registrosDia.length > 0;
       let htmlRegistros = "";
-
       let sumaAdelantos = 0;
       let idsAdelantosArray = [];
-
       let turnosPuros = [];
       let adelantosPuros = [];
 
       registrosDia.forEach((reg) => {
         let totalMonto = parseFloat(reg.total) || 0;
         totalPagoAsistente += totalMonto;
-
         let tipoBadge = reg.estado || "Completado";
         let esDescuento =
           totalMonto < 0 || tipoBadge.toUpperCase().includes("ADELANTO");
@@ -392,36 +346,27 @@ window.renderizarHorasEnPantalla = function () {
           let tStr = reg.tiempo_trabajado || "00:00:00";
           if (tStr !== "00:00:00") {
             let p = tStr.split(":");
-            if (p.length >= 2) {
+            if (p.length >= 2)
               totalHorasSegundos +=
                 (parseInt(p[0], 10) || 0) * 3600 +
                 (parseInt(p[1], 10) || 0) * 60;
-            }
           }
         }
       });
 
-      // RENDERIZAR TURNOS NORMALES CON BOTONES BLINDADOS
       turnosPuros.forEach((reg) => {
         let valorAbsolutoFormateado = Math.abs(
           Math.round(reg.total),
         ).toLocaleString("es-CO");
-
         let btnSuperAdmin = "";
         if (esSuperAdmin) {
           btnSuperAdmin = `
-            <div style="display: flex !important; justify-content: center !important; align-items: center !important; gap: 6px !important; margin-top: 6px !important; width: 100% !important; opacity: 1 !important; visibility: visible !important;">
-              <button type="button" onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" title="Modificar Turno" style="background: rgba(10, 132, 255, 0.25) !important; border: 1px solid #0a84ff !important; border-radius: 8px !important; padding: 4px 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; transition: all 0.2s ease !important; opacity: 1 !important; visibility: visible !important;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#0a84ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
+            <div style="display: flex !important; justify-content: center !important; align-items: center !important; gap: 6px !important; margin-top: 6px !important; width: 100% !important;">
+              <button type="button" onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" style="background: rgba(10, 132, 255, 0.25) !important; border: 1px solid #0a84ff !important; border-radius: 8px !important; padding: 4px 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#0a84ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
               </button>
-              <button type="button" onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" title="Eliminar Turno" style="background: rgba(255, 69, 58, 0.25) !important; border: 1px solid #ff453a !important; border-radius: 8px !important; padding: 4px 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; transition: all 0.2s ease !important; opacity: 1 !important; visibility: visible !important;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
+              <button type="button" onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" style="background: rgba(255, 69, 58, 0.25) !important; border: 1px solid #ff453a !important; border-radius: 8px !important; padding: 4px 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
             </div>`;
         }
@@ -434,29 +379,23 @@ window.renderizarHorasEnPantalla = function () {
           </div>`;
       });
 
-      // RENDERIZAR ADELANTOS UNIFICADOS CON BOTONES BLINDADOS
       if (adelantosPuros.length > 0) {
         let valorUnificadoMonto = Math.abs(
           Math.round(sumaAdelantos),
         ).toLocaleString("es-CO");
-        let idUnificadosStr = idsAdelantosArray.join(",");
-
         let botonBorrarAdelantos = "";
         if (esSuperAdmin) {
           botonBorrarAdelantos = `
-            <div style="display: flex !important; justify-content: center !important; align-items: center !important; margin-top: 4px !important; width: 100% !important; opacity: 1 !important; visibility: visible !important;">
-              <button type="button" onclick="window.eliminarMultiplesTurnosSuperAdmin('${idUnificadosStr}')" title="Eliminar Adelantos" style="background: rgba(255, 69, 58, 0.25) !important; border: 1px solid #ff453a !important; border-radius: 8px !important; padding: 4px 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; transition: all 0.2s ease !important; opacity: 1 !important; visibility: visible !important;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
+            <div style="display: flex !important; justify-content: center !important; margin-top: 4px !important; width: 100% !important;">
+              <button type="button" onclick="window.eliminarMultiplesTurnosSuperAdmin('${idsAdelantosArray.join(",")}')" style="background: rgba(255, 69, 58, 0.25) !important; border: 1px solid #ff453a !important; border-radius: 8px !important; padding: 4px 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
             </div>`;
         }
 
         htmlRegistros += `
           <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(255, 69, 58, 0.3);">
-            <span style="font-size: 0.65rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelanto Total</span>
+            <span style="font-size: 0.65rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelanto</span>
             <span style="font-size: 0.78rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${valorUnificadoMonto}</span>
             ${botonBorrarAdelantos}
           </div>`;
@@ -470,7 +409,7 @@ window.renderizarHorasEnPantalla = function () {
         : "1px solid rgba(255, 255, 255, 0.05)";
 
       celdasCalendario += `
-        <div style="background: ${bgCelda} !important; border: ${borderCelda} !important; border-radius: 12px !important; padding: 6px !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; min-height: 115px !important; box-sizing: border-box !important; overflow: visible !important; position: relative !important;">
+        <div style="background: ${bgCelda} !important; border: ${borderCelda} !important; border-radius: 12px !important; padding: 6px !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; min-height: 115px !important; box-sizing: border-box !important; position: relative !important;">
           <span style="font-size: 0.75rem !important; font-weight: 800 !important; color: ${tieneTurno ? "#ffffff" : "#71717a"} !important; align-self: flex-start !important; margin-bottom: 4px !important;">${dia}</span>
           ${htmlRegistros}
         </div>`;
@@ -506,7 +445,6 @@ window.renderizarHorasEnPantalla = function () {
             </div>
           </div>
         </div>
-
         <div style="width: 100%; overflow-x: auto; padding-bottom: 10px;">
           <div style="min-width: 440px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
             ${celdasCalendario}
@@ -518,19 +456,17 @@ window.renderizarHorasEnPantalla = function () {
   container.innerHTML = htmlCuerpo;
 };
 
-// ➕ ABRIR FORMULARIO DE INGRESAR HORAS
+// ==========================================
+// MÓDULO: MODIFICAR / ELIMINAR / AGREGAR / ADELANTO
+// ==========================================
 window.toggleFormularioHoras = function () {
   try {
     if (typeof haptic === "function") haptic();
   } catch (e) {}
-
   const overlay = document.getElementById("addHoursOverlay");
   if (!overlay) return;
 
-  const estaAbierto =
-    overlay.classList.contains("open") || overlay.style.display === "flex";
-
-  if (estaAbierto) {
+  if (overlay.classList.contains("open") || overlay.style.display === "flex") {
     overlay.classList.remove("open");
     overlay.style.display = "none";
   } else {
@@ -541,10 +477,9 @@ window.toggleFormularioHoras = function () {
 
     const selectVendedor = document.getElementById("inputVendedorShift");
     if (selectVendedor) {
-      let lista = obtenerTodosLosAsistentes();
       let opts =
         '<option value="" disabled selected>Selecciona un asistente...</option>';
-      lista.forEach((asist) => {
+      obtenerTodosLosAsistentes().forEach((asist) => {
         opts += `<option value="${asist}">${asist}</option>`;
       });
       selectVendedor.innerHTML = opts;
@@ -552,12 +487,10 @@ window.toggleFormularioHoras = function () {
   }
 };
 
-// 💵 ABRIR FORMULARIO DE ADELANTO
 window.toggleModalAdelanto = function (abrir) {
   try {
     if (typeof haptic === "function") haptic();
   } catch (e) {}
-
   const overlay = document.getElementById("adelantoShiftOverlay");
   if (!overlay) return;
 
@@ -569,10 +502,9 @@ window.toggleModalAdelanto = function (abrir) {
 
     const selectAde = document.getElementById("adeEmpleado");
     if (selectAde) {
-      let lista = obtenerTodosLosAsistentes();
       let opts =
         '<option value="" disabled selected>Selecciona un asistente...</option>';
-      lista.forEach((asist) => {
+      obtenerTodosLosAsistentes().forEach((asist) => {
         opts += `<option value="${asist}">${asist}</option>`;
       });
       selectAde.innerHTML = opts;
@@ -583,11 +515,8 @@ window.toggleModalAdelanto = function (abrir) {
   }
 };
 
-// 💸 EJECUTAR REGISTRO DE ADELANTO EN MYSQL
 window.ejecutarAdelantoDesdeShift = function (e) {
   if (e) e.preventDefault();
-  if (typeof haptic === "function") haptic();
-
   const empleado = document.getElementById("adeEmpleado")
     ? document.getElementById("adeEmpleado").value
     : "";
@@ -602,7 +531,7 @@ window.ejecutarAdelantoDesdeShift = function (e) {
   }
 
   const btn = document.getElementById("btnSubmitAdeShift");
-  const originalText = btn ? btn.innerHTML : "Aplicar y Descontar";
+  const originalText = btn ? btn.innerHTML : "Aplicar";
   if (btn) {
     btn.disabled = true;
     btn.innerHTML = "Procesando...";
@@ -618,9 +547,7 @@ window.ejecutarAdelantoDesdeShift = function (e) {
       try {
         return JSON.parse(text);
       } catch (err) {
-        throw new Error(
-          "Respuesta inválida del servidor PHP: " + text.substring(0, 100),
-        );
+        throw new Error("Error del servidor: " + text.substring(0, 100));
       }
     })
     .then((res) => {
@@ -628,20 +555,15 @@ window.ejecutarAdelantoDesdeShift = function (e) {
         btn.disabled = false;
         btn.innerHTML = originalText;
       }
-
       if (res && res.status === "success") {
-        if (typeof triggerToast === "function") {
+        if (typeof triggerToast === "function")
           triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Adelanto aplicado a ${empleado}</span></div>`,
+            `<div style="color:var(--ios-green);">✅ Adelanto aplicado a ${empleado}</div>`,
           );
-        }
         window.toggleModalAdelanto(false);
         window.cargarHorasDesdeMySQL();
       } else {
-        alert(
-          "❌ Error: " +
-            (res ? res.message : "No se pudo guardar el adelanto."),
-        );
+        alert("❌ Error: " + (res ? res.message : "Fallo guardando"));
       }
     })
     .catch((err) => {
@@ -649,15 +571,12 @@ window.ejecutarAdelantoDesdeShift = function (e) {
         btn.disabled = false;
         btn.innerHTML = originalText;
       }
-      alert("❌ Error al procesar el adelanto: " + err.message);
+      alert("❌ Error: " + err.message);
     });
 };
 
-// ➕ EJECUTAR REGISTRO DE HORAS MANUAL EN MYSQL
 window.ejecutarGuardadoHorasManual = function (e) {
   if (e) e.preventDefault();
-  if (typeof haptic === "function") haptic();
-
   const vendedor = document.getElementById("inputVendedorShift")
     ? document.getElementById("inputVendedorShift").value
     : "";
@@ -669,12 +588,12 @@ window.ejecutarGuardadoHorasManual = function (e) {
     : "";
 
   if (!vendedor || !tiempo || !fecha) {
-    alert("⚠️ Completa todos los campos obligatorios.");
+    alert("⚠️ Completa los campos.");
     return;
   }
 
   const btn = document.getElementById("btnGuardarShiftManual");
-  const originalText = btn ? btn.innerHTML : "Guardar Horas";
+  const originalText = btn ? btn.innerHTML : "Guardar";
   if (btn) {
     btn.disabled = true;
     btn.innerHTML = "Guardando...";
@@ -690,9 +609,7 @@ window.ejecutarGuardadoHorasManual = function (e) {
       try {
         return JSON.parse(text);
       } catch (err) {
-        throw new Error(
-          "Respuesta inválida del servidor PHP: " + text.substring(0, 100),
-        );
+        throw new Error("Error del servidor: " + text.substring(0, 100));
       }
     })
     .then((res) => {
@@ -700,20 +617,15 @@ window.ejecutarGuardadoHorasManual = function (e) {
         btn.disabled = false;
         btn.innerHTML = originalText;
       }
-
       if (res && res.status === "success") {
-        if (typeof triggerToast === "function") {
+        if (typeof triggerToast === "function")
           triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Horas guardadas correctamente</span></div>`,
+            `<div style="color:var(--ios-green);">✅ Horas guardadas</div>`,
           );
-        }
         window.toggleFormularioHoras();
         window.cargarHorasDesdeMySQL();
       } else {
-        alert(
-          "❌ Error: " +
-            (res ? res.message : "No se pudieron guardar las horas."),
-        );
+        alert("❌ Error: " + (res ? res.message : "Fallo"));
       }
     })
     .catch((err) => {
@@ -721,11 +633,10 @@ window.ejecutarGuardadoHorasManual = function (e) {
         btn.disabled = false;
         btn.innerHTML = originalText;
       }
-      alert("❌ Error de red al guardar horas: " + err.message);
+      alert("❌ Error: " + err.message);
     });
 };
 
-// ✏️ MODIFICAR TURNO (CAMILO)
 window.modificarTurnoSuperAdmin = function (
   idTurno,
   vendedor,
@@ -733,18 +644,11 @@ window.modificarTurnoSuperAdmin = function (
   tiempoActual,
 ) {
   if (!verificarSiEsSuperAdmin()) {
-    alert(
-      "⛔ Acceso Denegado: Solo el Superadmin tiene permisos para modificar turnos.",
-    );
+    alert("⛔ Acceso Denegado");
     return;
   }
-
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
-
   let nuevoTiempo = prompt(
-    `[SUPERADMIN] Modificar tiempo para ${vendedor} (${fecha}):\nPuedes ingresar horas simples (ej: 3) o formato completo (ej: 03:00:00)`,
+    `[SUPERADMIN] Modificar tiempo para ${vendedor} (${fecha}):`,
     tiempoActual,
   );
   if (nuevoTiempo === null || nuevoTiempo.trim() === "") return;
@@ -759,38 +663,27 @@ window.modificarTurnoSuperAdmin = function (
       try {
         return JSON.parse(text);
       } catch (e) {
-        throw new Error("Respuesta inválida del servidor PHP.");
+        throw new Error("Error del servidor");
       }
     })
     .then((res) => {
       if (res && res.status === "success") {
         if (typeof triggerToast === "function")
           triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Turno guardado y recalculado</span></div>`,
+            `<div style="color:var(--ios-green);">✅ Turno guardado</div>`,
           );
         window.cargarHorasDesdeMySQL();
-      } else {
-        alert("⚠️ Error: " + (res ? res.message : "Desconocido."));
-      }
+      } else alert("⚠️ Error: " + (res ? res.message : ""));
     })
     .catch((err) => alert("❌ " + err.message));
 };
 
-// 🗑️ ELIMINAR TURNO (CAMILO)
 window.eliminarTurnoSuperAdmin = function (idTurno) {
-  if (!verificarSiEsSuperAdmin()) return;
-
   if (
-    !confirm(
-      "⚠️ ¿Estás seguro de eliminar este turno? Esta acción es irreversible.",
-    )
+    !verificarSiEsSuperAdmin() ||
+    !confirm("⚠️ ¿Estás seguro de eliminar este turno?")
   )
     return;
-
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
-
   fetch(window.URL_ELIMINAR_TURNO, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -798,30 +691,16 @@ window.eliminarTurnoSuperAdmin = function (idTurno) {
   })
     .then((res) => res.json())
     .then((res) => {
-      if (res && res.status === "success") {
-        if (typeof triggerToast === "function")
-          triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span>Turno eliminado</span></div>`,
-          );
-        window.cargarHorasDesdeMySQL();
-      } else {
-        alert("Error al eliminar: " + res.message);
-      }
-    })
-    .catch((err) => console.error("Error al eliminar:", err));
+      if (res && res.status === "success") window.cargarHorasDesdeMySQL();
+    });
 };
 
-// 🗑️ ELIMINAR MÚLTIPLES ADELANTOS (CAMILO)
 window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
-  if (!verificarSiEsSuperAdmin()) return;
-
-  if (!confirm("⚠️ ¿Estás seguro de eliminar TODOS los adelantos de este día?"))
+  if (
+    !verificarSiEsSuperAdmin() ||
+    !confirm("⚠️ ¿Estás seguro de eliminar TODOS los adelantos de este día?")
+  )
     return;
-
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
-
   let idsArray = idsStr.split(",");
   let peticiones = idsArray.map((id) =>
     fetch(window.URL_ELIMINAR_TURNO, {
@@ -830,62 +709,23 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
       body: `id=${encodeURIComponent(id)}`,
     }).then((res) => res.json()),
   );
-
-  Promise.all(peticiones).then(() => {
-    if (typeof triggerToast === "function")
-      triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span>Adelantos eliminados</span></div>`,
-      );
-    window.cargarHorasDesdeMySQL();
-  });
+  Promise.all(peticiones).then(() => window.cargarHorasDesdeMySQL());
 };
 
-// 📊 MÓDULO NÓMINA EMPRESARIAL MYSQL
-window.URL_OBTENER_USUARIOS = "obtener_usuarios.php";
-window.usuariosCache = [];
-
-window.cargarUsuariosBaseMySQL = async function () {
-  try {
-    let res = await fetch(window.URL_OBTENER_USUARIOS);
-    let data = await res.json();
-    if (data && data.status === "success") {
-      window.usuariosCache = data.data_completa || [];
-      if (Array.isArray(data.data) && data.data.length > 0) {
-        window.ASISTENTES_BASE = data.data;
-      }
-    }
-  } catch (e) {
-    console.error("Error cargando usuarios desde MySQL:", e);
-  }
-};
-
+// ==========================================
+// 📊 MÓDULO NÓMINA (BENTO GLASS)
+// ==========================================
 window.abrirTotalNomina = function () {
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
-
   const overlay = document.getElementById("nominaOverlay");
   if (!overlay) return;
-
   overlay.classList.add("open");
   overlay.style.setProperty("display", "flex", "important");
   overlay.style.setProperty("align-items", "center", "important");
   overlay.style.setProperty("justify-content", "center", "important");
-  overlay.style.setProperty("background", "rgba(0, 0, 0, 0.8)", "important");
-  overlay.style.setProperty("backdrop-filter", "blur(16px)", "important");
-  overlay.style.setProperty(
-    "-webkit-backdrop-filter",
-    "blur(16px)",
-    "important",
-  );
-
   window.refrescarTotalNominaEnVivo();
 };
 
 window.cerrarTotalNomina = function () {
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
   const overlay = document.getElementById("nominaOverlay");
   if (overlay) {
     overlay.classList.remove("open");
@@ -895,38 +735,29 @@ window.cerrarTotalNomina = function () {
 
 window.refrescarTotalNominaEnVivo = async function (btn) {
   if (btn) {
-    try {
-      if (typeof haptic === "function") haptic();
-    } catch (e) {}
     btn.disabled = true;
     btn.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Calculando...`;
   }
 
   const container = document.getElementById("nominaContentArea");
   if (container) {
-    container.innerHTML = `
-      <div style="text-align:center; padding:45px; color:#30d158;">
-        <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
-          <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-          <span style="font-weight:700; font-size:0.9rem;">Sincronizando nómina con MySQL...</span>
-        </div>
-      </div>`;
+    container.innerHTML = `<div style="text-align:center; padding:45px; color:#30d158;">Calculando Nómina desde BD...</div>`;
   }
 
+  // Asegurar que la caché de Nequis/Teléfonos está llena
   if (window.usuariosCache.length === 0) {
     await window.cargarUsuariosBaseMySQL();
   }
 
-  if (!window.currentHorasStock || window.currentHorasStock.length === 0) {
-    try {
-      let res = await fetch(window.URL_OBTENER_HORAS);
-      let data = await res.json();
-      if (data && data.status === "success") {
-        window.currentHorasStock = data.data || [];
-      }
-    } catch (e) {
-      console.error("Error leyendo turnos para nómina:", e);
+  // Siempre forzar lectura de MySQL para NÓMINA para estar seguros
+  try {
+    let res = await fetch(window.URL_OBTENER_HORAS);
+    let data = await res.json();
+    if (data && data.status === "success") {
+      window.currentHorasStock = data.data || [];
     }
+  } catch (e) {
+    console.error("Error leyendo turnos para nómina:", e);
   }
 
   if (btn) {
@@ -954,21 +785,7 @@ window.renderizarTotalNomina = function () {
   const dAnio = window.filtroAnioTurnos;
   const esQ1 = window.filtroQuincenaTurnos === 1;
 
-  const mesesNombres = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
-  ];
-
+  // Cruzar la lista de teléfonos/Nequi de MySQL
   let mapaTelefonos = {};
   window.usuariosCache.forEach((u) => {
     let nom = (u.nombre || "").toUpperCase().trim();
@@ -979,6 +796,7 @@ window.renderizarTotalNomina = function () {
   let todosLosRegistros = window.currentHorasStock || [];
   let mapaNomina = {};
 
+  // Buscar, Sumar y Restar en la Base de Datos
   todosLosRegistros.forEach((item) => {
     let d = parsearFechaTurno(item.fecha);
     if (d.getMonth() !== dMes || d.getFullYear() !== dAnio) return;
@@ -1012,7 +830,6 @@ window.renderizarTotalNomina = function () {
   let totalGlobalGanado = 0;
   let totalGlobalDescontado = 0;
   let totalGlobalNeto = 0;
-
   let htmlFilas = "";
 
   listaProcesar.forEach((asistente) => {
@@ -1029,13 +846,13 @@ window.renderizarTotalNomina = function () {
     totalGlobalDescontado += descontado;
     totalGlobalNeto += neto;
 
-    let telefonoNum = mapaTelefonos[asistente] || "Sin registrar";
+    let telefonoNum = mapaTelefonos[asistente] || "Sin Nequi";
     let colorNeto = neto < 0 ? "#ff453a" : "#30d158";
 
     let btnCopiarTel = "";
-    if (telefonoNum !== "Sin registrar") {
+    if (telefonoNum !== "Sin Nequi") {
       btnCopiarTel = `
-        <button onclick="copiarDatoAisladoLupa(this, '${telefonoNum}')" title="Copiar Nequi / Teléfono" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 3px 7px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; font-family: monospace;">
+        <button onclick="navigator.clipboard.writeText('${telefonoNum}'); this.style.color='#30d158'; setTimeout(()=>this.style.color='#0a84ff', 1000);" title="Copiar Nequi" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 3px 7px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; font-family: monospace; transition: 0.2s;">
           <span>${telefonoNum}</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
         </button>`;
@@ -1043,26 +860,27 @@ window.renderizarTotalNomina = function () {
       btnCopiarTel = `<span style="font-size:0.75rem; color:#71717a;">Sin Nequi</span>`;
     }
 
+    // TABLA FIX: Anchos definidos para que no se esconda ninguna columna
     htmlFilas += `
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-        <td style="padding: 14px 16px;">
+        <td style="padding: 14px 10px; width: 35%;">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 0.95rem; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
               ${asistente.charAt(0)}
             </div>
             <div style="display: flex; flex-direction: column; gap: 2px;">
-              <span style="font-weight: 800; color: #ffffff; font-size: 0.95rem;">${asistente}</span>
+              <span style="font-weight: 800; color: #ffffff; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">${asistente}</span>
               ${btnCopiarTel}
             </div>
           </div>
         </td>
-        <td style="padding: 14px 16px; font-family: monospace; font-weight: 700; color: #30d158; font-size: 0.95rem;">
+        <td style="padding: 14px 10px; font-family: monospace; font-weight: 700; color: #30d158; font-size: 0.9rem; width: 22%;">
           +$${Math.round(ganado).toLocaleString("es-CO")}
         </td>
-        <td style="padding: 14px 16px; font-family: monospace; font-weight: 700; color: #ff453a; font-size: 0.95rem;">
+        <td style="padding: 14px 10px; font-family: monospace; font-weight: 700; color: #ff453a; font-size: 0.9rem; width: 22%;">
           -$${Math.round(descontado).toLocaleString("es-CO")}
         </td>
-        <td style="padding: 14px 16px; font-family: monospace; font-weight: 900; color: ${colorNeto}; font-size: 1.1rem; text-align: right;">
+        <td style="padding: 14px 10px; font-family: monospace; font-weight: 900; color: ${colorNeto}; font-size: 1rem; text-align: right; width: 21%;">
           $${Math.round(neto).toLocaleString("es-CO")}
         </td>
       </tr>`;
@@ -1073,33 +891,33 @@ window.renderizarTotalNomina = function () {
     htmlResumenGlobal = `
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
         <div style="background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px;">
-          <span style="font-size: 0.68rem; font-weight: 800; color: #30d158; text-transform: uppercase;">Total Bruto (+)</span>
-          <span style="font-size: 1.15rem; font-weight: 900; color: #30d158; font-family: monospace;">$${Math.round(totalGlobalGanado).toLocaleString("es-CO")}</span>
+          <span style="font-size: 0.65rem; font-weight: 800; color: #30d158; text-transform: uppercase;">Total Bruto (+)</span>
+          <span style="font-size: 1.1rem; font-weight: 900; color: #30d158; font-family: monospace;">$${Math.round(totalGlobalGanado).toLocaleString("es-CO")}</span>
         </div>
         <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.2); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px;">
-          <span style="font-size: 0.68rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelantos (-)</span>
-          <span style="font-size: 1.15rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${Math.round(totalGlobalDescontado).toLocaleString("es-CO")}</span>
+          <span style="font-size: 0.65rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelantos (-)</span>
+          <span style="font-size: 1.1rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${Math.round(totalGlobalDescontado).toLocaleString("es-CO")}</span>
         </div>
         <div style="background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.3); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px;">
-          <span style="font-size: 0.68rem; font-weight: 800; color: #0a84ff; text-transform: uppercase;">Neto A Pagar</span>
-          <span style="font-size: 1.25rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${Math.round(totalGlobalNeto).toLocaleString("es-CO")}</span>
+          <span style="font-size: 0.65rem; font-weight: 800; color: #0a84ff; text-transform: uppercase;">Neto A Pagar</span>
+          <span style="font-size: 1.2rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${Math.round(totalGlobalNeto).toLocaleString("es-CO")}</span>
         </div>
       </div>`;
   }
 
+  // FIX TABLA: Se obliga a usar el ancho de la pantalla correctamente `table-layout: fixed;`
   let htmlFinal = `
     <div style="display: flex; flex-direction: column; width: 100%;">
       ${htmlResumenGlobal}
-
       <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; overflow: hidden; width: 100%;">
-        <div style="width: 100%; overflow-x: auto;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; color: #ffffff; text-align: left; white-space: nowrap;">
+        <div style="width: 100%; overflow-x: hidden;">
+          <table style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 0.85rem; color: #ffffff; text-align: left;">
             <thead>
               <tr style="background: #16161b; color: #a1a1aa; border-bottom: 1px solid rgba(255,255,255,0.08);">
-                <th style="padding: 12px 16px; font-weight: 800; font-size: 0.75rem; text-transform: uppercase;">ASISTENTE / NEQUI</th>
-                <th style="padding: 12px 16px; font-weight: 800; font-size: 0.75rem; text-transform: uppercase;">GANADO (+)</th>
-                <th style="padding: 12px 16px; font-weight: 800; font-size: 0.75rem; text-transform: uppercase;">ADELANTOS (-)</th>
-                <th style="padding: 12px 16px; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; text-align: right;">SUELDO NETO</th>
+                <th style="padding: 10px 8px; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; width: 35%;">ASISTENTE</th>
+                <th style="padding: 10px 8px; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; width: 22%;">GANADO</th>
+                <th style="padding: 10px 8px; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; width: 22%;">ADELANTO</th>
+                <th style="padding: 10px 8px; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; text-align: right; width: 21%;">NETO</th>
               </tr>
             </thead>
             <tbody>
@@ -1113,12 +931,11 @@ window.renderizarTotalNomina = function () {
   container.innerHTML = htmlFinal;
 };
 
-// 🔍 FILTRO DE BÚSQUEDA
+// FILTRO DE BÚSQUEDA
 window.filtrarHorasInternas = function () {
   window.renderizarHorasEnPantalla();
 };
 
-// Cargar usuarios de MySQL al cargar el documento
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(window.cargarUsuariosBaseMySQL, 1500);
 });
