@@ -6429,9 +6429,7 @@
       </div>
     </div>
 
-    <!-- ==========================================
-     📊 MODAL 3: TOTAL NÓMINA
-     ========================================== -->
+    <!-- 📊 MODAL: TOTAL NÓMINA BENTO GLASS -->
     <div
       class="overlay-ios"
       id="nominaOverlay"
@@ -6456,20 +6454,21 @@
         class="sheet-ios"
         onclick="event.stopPropagation()"
         style="
-          max-width: 650px;
-          width: 90%;
-          height: 85vh;
-          max-height: 800px;
+          max-width: 720px;
+          width: 92%;
+          height: auto !important;
+          max-height: 85vh !important;
           display: flex;
           flex-direction: column;
           padding: 24px;
           border-radius: 28px;
           margin: auto;
           background: #0b0b0d;
-          border: 1px solid rgba(48, 209, 88, 0.25);
-          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.95);
+          border: 1px solid rgba(48, 209, 88, 0.3);
+          box-shadow: 0 35px 80px rgba(0, 0, 0, 0.95);
         "
       >
+        <!-- CABECERA -->
         <div
           class="sheet-header"
           style="
@@ -6488,7 +6487,7 @@
               font-weight: 800;
               display: flex;
               align-items: center;
-              gap: 8px;
+              gap: 10px;
               margin: 0;
             "
           >
@@ -6501,7 +6500,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border: 1px solid rgba(48, 209, 88, 0.2);
+                border: 1px solid rgba(48, 209, 88, 0.25);
               "
             >
               <svg
@@ -6518,7 +6517,7 @@
             </div>
             Resumen de Nómina
           </h3>
-          <div style="gap: 12px; display: flex; align-items: center">
+          <div style="gap: 10px; display: flex; align-items: center">
             <button
               type="button"
               class="btn-ios btn-secondary"
@@ -6527,8 +6526,12 @@
                 font-size: 0.85rem;
                 border-radius: 50px;
                 cursor: pointer;
+                font-weight: 700;
+                background: rgba(255, 255, 255, 0.08);
+                color: #fff;
+                border: 1px solid rgba(255, 255, 255, 0.12);
               "
-              onclick="abrirTotalNomina()"
+              onclick="refrescarTotalNominaEnVivo(this)"
             >
               Refrescar
             </button>
@@ -6543,6 +6546,7 @@
           </div>
         </div>
 
+        <!-- CONTENIDO -->
         <div
           style="
             overflow-y: auto;
@@ -6550,7 +6554,7 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            padding-bottom: 20px;
+            padding-bottom: 10px;
           "
         >
           <div id="nominaContentArea">
@@ -6564,7 +6568,7 @@
                 font-weight: 600;
               "
             >
-              Cargando métricas de nómina...
+              Calculando nómina...
             </div>
           </div>
         </div>
