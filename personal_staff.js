@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO DE BARRA SUPERIOR (AUTO-GUARDADO Y PAUSA POR INACTIVIDAD)
+// 2. CRONÓMETRO Y CONTROL DE SESIÓN STAFF
 // ==========================================
 let secCronometroTotal = 0;
 let secParaGuardar = 0;
@@ -84,7 +84,48 @@ let turnoActivo = false;
 
 let inactividadTimer = null;
 let pausadoPorInactividad = false;
-const TIEMPO_MAX_INACTIVIDAD = 25 * 60 * 1000; // 25 Minutos en ms
+const TIEMPO_MAX_INACTIVIDAD = 25 * 60 * 1000; // 25 Minutos
+
+// 🚪 CERRAR SESIÓN STAFF CON GUARDADO AUTOMÁTICO EN BD
+window.cerrarSesionStaff = function () {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  let usuarioActivo = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "STAFF"
+  )
+    .toUpperCase()
+    .trim();
+
+  // Si es Camilo (Admin), cierra directo
+  if (usuarioActivo === "CAMILO") {
+    if (turnoActivo) detenerTurnoTracker(false);
+    sessionStorage.clear();
+    localStorage.removeItem("cyber_saved_staff");
+    location.reload();
+    return;
+  }
+
+  // Confirmación para Asistentes
+  if (
+    confirm(
+      "⚠️ ¿Estás seguro de que deseas cerrar sesión y finalizar tu turno?",
+    )
+  ) {
+    if (turnoActivo) {
+      detenerTurnoTracker(false); // Guarda segundos pendientes en MySQL
+    }
+
+    setTimeout(() => {
+      sessionStorage.clear();
+      localStorage.removeItem("cyber_saved_staff");
+      location.reload();
+    }, 350);
+  }
+};
 
 window.toggleTrackerShift = function () {
   if (turnoActivo) detenerTurnoTracker(false);
@@ -122,7 +163,6 @@ function iniciarTurnoTracker() {
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // Respaldo automático en MySQL cada 5 minutos
     if (secParaGuardar >= 300) {
       enviarTiempoTrackerAMySQL(
         activeStaff,
@@ -165,7 +205,7 @@ function detenerTurnoTracker(porInactividad = false) {
     enviarTiempoTrackerAMySQL(
       activeStaff,
       formatoSegundosTracker(secParaGuardar),
-      porInactividad ? "Inactividad 25m" : "Pausa Manual",
+      porInactividad ? "Inactividad 25m" : "Pausa/Cierre",
     );
     secParaGuardar = 0;
   }
@@ -210,7 +250,7 @@ function formatoSegundosTracker(totalSeg) {
 
 function resetInactividad() {
   if (pausadoPorInactividad && !turnoActivo) {
-    iniciarTurnoTracker(); // Reanuda al mover el mouse o tocar pantalla
+    iniciarTurnoTracker();
   }
 
   clearTimeout(inactividadTimer);
@@ -505,7 +545,6 @@ window.renderizarHorasEnPantalla = function () {
       let sumaAdelantos = 0;
       let idsAdelantosArray = [];
       let turnosPuros = [];
-      let adelantosPuros = [];
 
       registrosDia.forEach((reg) => {
         let totalMonto = parseFloat(reg.total) || 0;
@@ -515,7 +554,6 @@ window.renderizarHorasEnPantalla = function () {
           totalMonto < 0 || tipoBadge.toUpperCase().includes("ADELANTO");
 
         if (esDescuento) {
-          adelantosPuros.push(reg);
           sumaAdelantos += totalMonto;
           idsAdelantosArray.push(reg.id);
         } else {
@@ -556,7 +594,7 @@ window.renderizarHorasEnPantalla = function () {
           </div>`;
       });
 
-      if (adelantosPuros.length > 0) {
+      if (sumaAdelantos < 0) {
         let valorUnificadoMonto = Math.abs(
           Math.round(sumaAdelantos),
         ).toLocaleString("es-CO");
@@ -955,8 +993,8 @@ window.renderizarTotalNomina = function () {
       descontado: 0,
       neto: 0,
     };
-    let ganado = datosUser.ganado;
-    let descontado = datosUser.descontado;
+    let ganado = Math.round(datosUser.ganado);
+    let descontado = Math.round(datosUser.descontado);
     let neto = ganado - descontado;
 
     totalGlobalGanado += ganado;
@@ -991,16 +1029,16 @@ window.renderizarTotalNomina = function () {
         <div style="display: flex; flex-direction: row; justify-content: flex-end; align-items: center; gap: 20px; flex: 1; min-width: 160px;">
           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
             <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Turnos (+)</span>
-            <span style="font-family: monospace; font-weight: 700; color: #30d158; font-size: 0.95rem;">+$${Math.round(ganado).toLocaleString("es-CO")}</span>
+            <span style="font-family: monospace; font-weight: 700; color: #30d158; font-size: 0.95rem;">+$${ganado.toLocaleString("es-CO")}</span>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
             <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Adelantos (-)</span>
-            <span style="font-family: monospace; font-weight: 700; color: #ff453a; font-size: 0.95rem;">-$${Math.round(descontado).toLocaleString("es-CO")}</span>
+            <span style="font-family: monospace; font-weight: 700; color: #ff453a; font-size: 0.95rem;">-$${descontado.toLocaleString("es-CO")}</span>
           </div>
         </div>
         <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 0.5; min-width: 100px; padding-left: 10px; border-left: 1px solid rgba(255,255,255,0.08);">
           <span style="font-size: 0.68rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Sueldo Neto</span>
-          <span style="font-family: monospace; font-weight: 900; color: ${colorNeto}; font-size: 1.2rem;">$${Math.round(neto).toLocaleString("es-CO")}</span>
+          <span style="font-family: monospace; font-weight: 900; color: ${colorNeto}; font-size: 1.2rem;">$${neto.toLocaleString("es-CO")}</span>
         </div>
       </div>`;
   });
@@ -1011,15 +1049,15 @@ window.renderizarTotalNomina = function () {
       <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; width: 100%;">
         <div style="flex: 1; min-width: 130px; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
           <span style="font-size: 0.72rem; font-weight: 800; color: #30d158; text-transform: uppercase;">Total Bruto (+)</span>
-          <span style="font-size: 1.3rem; font-weight: 900; color: #30d158; font-family: monospace;">$${Math.round(totalGlobalGanado).toLocaleString("es-CO")}</span>
+          <span style="font-size: 1.3rem; font-weight: 900; color: #30d158; font-family: monospace;">$${totalGlobalGanado.toLocaleString("es-CO")}</span>
         </div>
         <div style="flex: 1; min-width: 130px; background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.2); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
           <span style="font-size: 0.72rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelantos (-)</span>
-          <span style="font-size: 1.3rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${Math.round(totalGlobalDescontado).toLocaleString("es-CO")}</span>
+          <span style="font-size: 1.3rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${totalGlobalDescontado.toLocaleString("es-CO")}</span>
         </div>
         <div style="flex: 1; min-width: 140px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.3); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
           <span style="font-size: 0.72rem; font-weight: 800; color: #ffffff; text-transform: uppercase;">Nómina Total Neta</span>
-          <span style="font-size: 1.4rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${Math.round(totalGlobalNeto).toLocaleString("es-CO")}</span>
+          <span style="font-size: 1.4rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${totalGlobalNeto.toLocaleString("es-CO")}</span>
         </div>
       </div>`;
   }
@@ -1037,21 +1075,9 @@ window.renderizarTotalNomina = function () {
   container.innerHTML = htmlFinal;
 };
 
-// 🚫 ANULAR CUALQUIER SOBREESCRITURA DE OTROS ARCHIVOS (P. EJ. FINANZAS_STAFF.JS)
+// 🚫 ANULAR CUALQUIER SOBREESCRITURA
 window.cargarNominaMySQL = window.renderizarTotalNomina;
 
 window.filtrarHorasInternas = function () {
   window.renderizarHorasEnPantalla();
-};
-window.formatearMontoEnVivoCOP = function (input) {
-  let val = input.value.replace(/\D/g, "");
-  if (val) {
-    input.value = new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      maximumFractionDigits: 0,
-    }).format(val);
-  } else {
-    input.value = "";
-  }
 };
