@@ -74,10 +74,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO DE TURNO (AUTO-GUARDADO Y AUTO-PAUSA)
+// 2. CRONÓMETRO DE TURNO (AUTO-GUARDADO Y AUTO-PAUSA) - BARRA SUPERIOR DERECHA
 // ==========================================
-let secCronometroTotal = 0; // Segundos visualizados en pantalla (totales de la sesión)
-let secParaGuardar = 0; // Segundos pendientes por enviar a MySQL (se vacía cada 5 min)
+let secCronometroTotal = 0; // Segundos visualizados en pantalla
+let secParaGuardar = 0; // Segundos pendientes por enviar a MySQL
 let timerInterval = null;
 let turnoActivo = false;
 
@@ -202,7 +202,7 @@ function enviarTiempoTrackerAMySQL(asistente, tiempoHHMMSS, razon) {
     .then((res) => {
       if (
         res.status === "success" &&
-        typeof window.cargarHorasDesdeMySQL === "function"
+        typeof window.cargarHorasDesdeNuestraBD === "function"
       ) {
         console.log(
           `[Cybernet] Tiempo guardado en BD (${razon}): ${tiempoHHMMSS}`,
@@ -222,12 +222,10 @@ function formatoSegundosTracker(totalSeg) {
 
 // --- Lógica de Inactividad (Pausa y Reanuda) ---
 function resetInactividad() {
-  // Si estaba pausado por inactividad y se mueve el mouse, se auto-reanuda
   if (pausadoPorInactividad && !turnoActivo) {
     iniciarTurnoTracker();
   }
 
-  // Reiniciar el contador de bomba de tiempo (25 min)
   clearTimeout(inactividadTimer);
   if (turnoActivo) {
     inactividadTimer = setTimeout(() => {
@@ -240,7 +238,7 @@ function iniciarDetectorInactividad() {
   window.addEventListener("mousemove", resetInactividad);
   window.addEventListener("keypress", resetInactividad);
   window.addEventListener("touchstart", resetInactividad);
-  resetInactividad(); // Iniciar cuenta regresiva
+  resetInactividad();
 }
 
 function detenerDetectorInactividad() {
@@ -250,7 +248,7 @@ function detenerDetectorInactividad() {
   clearTimeout(inactividadTimer);
 }
 
-// Asegurar guardado cuando se cierra la página
+// Asegurar guardado cuando se cierra la página o sesión
 window.addEventListener("beforeunload", function (e) {
   if (turnoActivo && secParaGuardar > 0) {
     const activeStaff = (
@@ -260,7 +258,6 @@ window.addEventListener("beforeunload", function (e) {
     )
       .toUpperCase()
       .trim();
-    // Guardado forzoso sincrónico para evitar pérdida antes de cerrar
     const fd = new URLSearchParams();
     fd.append("vendedor", activeStaff);
     fd.append("tiempo", formatoSegundosTracker(secParaGuardar));
@@ -329,11 +326,13 @@ window.toggleShiftsPanel = function () {
       if (btnNom) btnNom.style.setProperty("display", "none", "important");
     }
 
-    window.cargarHorasDesdeMySQL();
+    // 🔥 LLAMA A LA NUEVA FUNCIÓN DIRECTA (EVITA CONFLICTOS CON CORE.JS)
+    window.cargarHorasDesdeNuestraBD();
   }
 };
 
-window.cargarHorasDesdeMySQL = function () {
+// 🔥 FUNCIÓN RENOMBRADA PARA EVITAR EL ERROR DE CORE.JS
+window.cargarHorasDesdeNuestraBD = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
 
@@ -644,6 +643,9 @@ window.renderizarHorasEnPantalla = function () {
 // 4. FUNCIONES DE MODIFICAR / AGREGAR / ADELANTO
 // ==========================================
 window.toggleFormularioHoras = function () {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
   const overlay = document.getElementById("addHoursOverlay");
   if (!overlay) return;
 
@@ -667,6 +669,9 @@ window.toggleFormularioHoras = function () {
 };
 
 window.toggleModalAdelanto = function (abrir) {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
   const overlay = document.getElementById("adelantoShiftOverlay");
   if (!overlay) return;
 
@@ -715,15 +720,26 @@ window.ejecutarAdelantoDesdeShift = function (e) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `vendedor=${encodeURIComponent(empleado)}&monto=${encodeURIComponent(monto)}`,
   })
-    .then((res) => res.json())
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error("Error del servidor");
+      }
+    })
     .then((res) => {
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = originalText;
       }
       if (res && res.status === "success") {
+        if (typeof triggerToast === "function")
+          triggerToast(
+            `<div style="color:var(--ios-green);">✅ Adelanto aplicado</div>`,
+          );
         window.toggleModalAdelanto(false);
-        window.cargarHorasDesdeMySQL();
+        window.cargarHorasDesdeNuestraBD();
       } else {
         alert("❌ Error: " + (res ? res.message : "Fallo guardando"));
       }
@@ -766,15 +782,26 @@ window.ejecutarGuardadoHorasManual = function (e) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `vendedor=${encodeURIComponent(vendedor)}&tiempo=${encodeURIComponent(tiempo)}&fecha=${encodeURIComponent(fecha)}`,
   })
-    .then((res) => res.json())
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error("Error del servidor");
+      }
+    })
     .then((res) => {
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = originalText;
       }
       if (res && res.status === "success") {
+        if (typeof triggerToast === "function")
+          triggerToast(
+            `<div style="color:var(--ios-green);">✅ Horas guardadas</div>`,
+          );
         window.toggleFormularioHoras();
-        window.cargarHorasDesdeMySQL();
+        window.cargarHorasDesdeNuestraBD();
       } else {
         alert("❌ Error: " + (res ? res.message : "Fallo"));
       }
@@ -809,11 +836,24 @@ window.modificarTurnoSuperAdmin = function (
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo.trim())}`,
   })
-    .then((res) => res.json())
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error("Error del servidor");
+      }
+    })
     .then((res) => {
-      if (res && res.status === "success") window.cargarHorasDesdeMySQL();
-      else alert("⚠️ Error: " + (res ? res.message : ""));
-    });
+      if (res && res.status === "success") {
+        if (typeof triggerToast === "function")
+          triggerToast(
+            `<div style="color:var(--ios-green);">✅ Turno guardado</div>`,
+          );
+        window.cargarHorasDesdeNuestraBD();
+      } else alert("⚠️ Error: " + (res ? res.message : ""));
+    })
+    .catch((err) => alert("❌ " + err.message));
 };
 
 window.eliminarTurnoSuperAdmin = function (idTurno) {
@@ -829,7 +869,7 @@ window.eliminarTurnoSuperAdmin = function (idTurno) {
   })
     .then((res) => res.json())
     .then((res) => {
-      if (res && res.status === "success") window.cargarHorasDesdeMySQL();
+      if (res && res.status === "success") window.cargarHorasDesdeNuestraBD();
     });
 };
 
@@ -847,7 +887,7 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
       body: `id=${encodeURIComponent(id)}`,
     }).then((res) => res.json()),
   );
-  Promise.all(peticiones).then(() => window.cargarHorasDesdeMySQL());
+  Promise.all(peticiones).then(() => window.cargarHorasDesdeNuestraBD());
 };
 
 // ==========================================
@@ -890,7 +930,7 @@ window.refrescarTotalNominaEnVivo = async function (btn) {
     if (data && data.status === "success")
       window.currentHorasStock = data.data || [];
   } catch (e) {
-    console.error("Error leyendo turnos:", e);
+    console.error("Error leyendo turnos para nómina:", e);
   }
 
   if (btn) {
@@ -937,19 +977,26 @@ window.renderizarTotalNomina = function () {
     if (!esQ1 && dia <= 15) return;
 
     let asist = (item.vendedor || "STAFF").toUpperCase().trim();
-    if (!mapaNomina[asist])
+
+    if (!mapaNomina[asist]) {
       mapaNomina[asist] = { ganado: 0, descontado: 0, neto: 0 };
+    }
 
     let monto = parseFloat(item.total) || 0;
     let esAdelanto =
       monto < 0 || (item.estado || "").toUpperCase().includes("ADELANTO");
 
-    if (esAdelanto) mapaNomina[asist].descontado += Math.abs(monto);
-    else mapaNomina[asist].ganado += monto;
+    if (esAdelanto) {
+      mapaNomina[asist].descontado += Math.abs(monto);
+    } else {
+      mapaNomina[asist].ganado += monto;
+    }
   });
 
   let listaProcesar = obtenerTodosLosAsistentes();
-  if (!esSuperAdmin) listaProcesar = [activeStaff];
+  if (!esSuperAdmin) {
+    listaProcesar = [activeStaff];
+  }
 
   let totalGlobalGanado = 0;
   let totalGlobalDescontado = 0;
@@ -986,6 +1033,7 @@ window.renderizarTotalNomina = function () {
 
     htmlFilas += `
       <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; flex-wrap: wrap; gap: 10px;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+        
         <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 140px;">
           <div style="width: 36px; height: 36px; border-radius: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
             ${asistente.charAt(0)}
@@ -995,6 +1043,7 @@ window.renderizarTotalNomina = function () {
             ${btnCopiarTel}
           </div>
         </div>
+
         <div style="display: flex; flex-direction: row; justify-content: flex-end; align-items: center; gap: 20px; flex: 1; min-width: 160px;">
           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
             <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Turnos (+)</span>
@@ -1005,10 +1054,12 @@ window.renderizarTotalNomina = function () {
             <span style="font-family: monospace; font-weight: 700; color: #ff453a; font-size: 0.95rem;">-$${Math.round(descontado).toLocaleString("es-CO")}</span>
           </div>
         </div>
+
         <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 0.5; min-width: 100px; padding-left: 10px; border-left: 1px solid rgba(255,255,255,0.08);">
           <span style="font-size: 0.68rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Sueldo Neto</span>
           <span style="font-family: monospace; font-weight: 900; color: ${colorNeto}; font-size: 1.2rem;">$${Math.round(neto).toLocaleString("es-CO")}</span>
         </div>
+
       </div>`;
   });
 
@@ -1025,7 +1076,7 @@ window.renderizarTotalNomina = function () {
           <span style="font-size: 1.3rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${Math.round(totalGlobalDescontado).toLocaleString("es-CO")}</span>
         </div>
         <div style="flex: 1; min-width: 140px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.3); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
-          <span style="font-size: 0.72rem; font-weight: 800; color: #ffffff; text-transform: uppercase;">Nómina Total Neta</span>
+          <span style="font-size: 0.72rem; font-weight: 800; color: #ffffff; text-transform: uppercase;">Nómina Neta</span>
           <span style="font-size: 1.4rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${Math.round(totalGlobalNeto).toLocaleString("es-CO")}</span>
         </div>
       </div>`;
