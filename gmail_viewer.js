@@ -32,7 +32,7 @@ window.toggleGmailPanel = function () {
   }
 };
 
-// 🔄 CONSULTA A LA API DE GMAIL CON PARÁMETRO OBLIGATORIO 'CORREO'
+// 🔄 CONSULTA A LA API DE GMAIL CON LECTURA ROBUSTA DE JSON
 window.cargarDatosGmail = function () {
   if (typeof haptic === "function") haptic();
   const contenedor = document.getElementById("contenedorGmailMensajes");
@@ -61,30 +61,39 @@ window.cargarDatosGmail = function () {
   fetch(
     `https://api.cybernetsp.com/obtener_gmail.php?correo=${encodeURIComponent(correoVal)}`,
   )
-    .then((res) => res.json())
+    .then(async (response) => {
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error(
+          "Respuesta del servidor no es un JSON válido: " +
+            text.substring(0, 100),
+        );
+      }
+    })
     .then((res) => {
-      if (
-        res &&
-        (res.status === "success" ||
-          Array.isArray(res.data) ||
-          Array.isArray(res.mensajes) ||
-          Array.isArray(res))
-      ) {
-        let lista = res.data || res.mensajes || (Array.isArray(res) ? res : []);
-        window.memoriaGmailDatos = lista;
-        window.renderizarListaGmail(correoVal);
-      } else {
+      if (res && res.status === "error") {
         contenedor.innerHTML = `
           <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
-            ❌ ${res ? res.message || "No se encontraron mensajes para este correo." : "Respuesta no válida del servidor."}
+            ❌ ${res.message || "No se encontraron datos."}
           </div>`;
+        return;
       }
+
+      let lista =
+        res.data ||
+        res.mensajes ||
+        res.correos ||
+        (Array.isArray(res) ? res : []);
+      window.memoriaGmailDatos = lista;
+      window.renderizarListaGmail(correoVal);
     })
     .catch((err) => {
       console.error("Error al consultar Gmail:", err);
       contenedor.innerHTML = `
         <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
-          ❌ Error de comunicación con el servidor. Verifica tu conexión.
+          ❌ ${err.message}
         </div>`;
     });
 };
@@ -99,14 +108,14 @@ window.renderizarListaGmail = function (correoBuscado = "") {
   if (!datos || datos.length === 0) {
     contenedor.innerHTML = `
       <div style="text-align: center; padding: 40px 20px; color: #a1a1aa; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 18px; border: 1px dashed rgba(255, 255, 255, 0.08);">
-        📭 No hay mensajes o notificaciones recientes para <b>${correoBuscado}</b>.
+        📭 No se encontraron correos recientes o mensajes para <b>${correoBuscado}</b>.
       </div>`;
     return;
   }
 
   let html = "";
   datos.forEach((item) => {
-    let remitente = item.remitente || item.de || item.from || "Google / Apps";
+    let remitente = item.remitente || item.de || item.from || "Notificación";
     let asunto = item.asunto || item.subject || "Sin asunto";
     let fecha = item.fecha || item.date || "Reciente";
     let mensajeTexto =
