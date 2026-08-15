@@ -2,14 +2,15 @@
    🌟 CYBERNET OS - CREACIÓN AUTOMATIZADA DE NETFLIX (SHEETS ➔ MYSQL)
    ========================================================================== */
 
-const SCRIPT_URL_NETFLIX =
-  typeof GOOGLE_SCRIPT_URL !== "undefined"
-    ? GOOGLE_SCRIPT_URL
-    : "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
+// Detectar URL global de Google Script
+const URL_SCRIPT_NETFLIX_GEN = typeof GOOGLE_SCRIPT_URL !== "undefined" 
+  ? GOOGLE_SCRIPT_URL 
+  : "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 
 window.crearCuentaNetflixAliasExterna = function () {
   if (typeof haptic === "function") haptic();
 
+  // Eliminar modal previo si existe
   const existingModal = document.getElementById("modalCrearNetflixOverlay");
   if (existingModal) existingModal.remove();
 
@@ -17,8 +18,10 @@ window.crearCuentaNetflixAliasExterna = function () {
     <div class="overlay-ios open" id="modalCrearNetflixOverlay" style="display: flex !important; z-index: 999999 !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
       <div class="modal-ios" style="max-width: 420px; width: 92%; background: #16161a; border: 1px solid rgba(229, 9, 20, 0.3); border-radius: 26px; padding: 26px 24px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative; overflow: hidden;">
         
+        <!-- Efecto Glow Rojo Superior -->
         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, transparent, #e50914, transparent); box-shadow: 0 0 15px #e50914; opacity: 0.9;"></div>
 
+        <!-- Encabezado -->
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <div style="background: rgba(229, 9, 20, 0.15); color: #e50914; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(229, 9, 20, 0.3);">
@@ -32,15 +35,20 @@ window.crearCuentaNetflixAliasExterna = function () {
           <button type="button" onclick="document.getElementById('modalCrearNetflixOverlay').remove()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: 0.2s;">✕</button>
         </div>
 
+        <!-- Contenido dinámico -->
         <div id="contenedorGeneradorNet" style="display: flex; flex-direction: column; gap: 16px; text-align: center;">
           <p style="color: #a1a1aa; font-size: 0.85rem; margin: 0; line-height: 1.5; text-align: left;">
-            El sistema buscará un correo libre en la pestaña <b>ALIAS</b>, asignará el <b>PIN de Refácil</b>, lo guardará en <b>PINESMES</b> y lo registrará en la base de datos <b>MySQL</b>.
+            El sistema tomará un correo libre de la pestaña <b>ALIAS</b>, asignará un <b>PIN de Refácil</b>, asentará la fila en <b>PINESMES</b> y registrará la cuenta en <b>MySQL</b>.
           </p>
           
           <button type="button" id="btnProcesarCrearNet" onclick="window.ejecutarGeneracionAliasDual(this)" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 16px; border-radius: 14px; font-weight: 900; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4); transition: transform 0.1s;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
             Generar y Guardar Cuenta
           </button>
+
+          <span id="subtextoEsperaNet" style="font-size: 0.75rem; color: #e50914; font-weight: 600; display: none;">
+            ⏳ Procesando en Google Sheets (esto puede tomar entre 5 y 10 segundos)...
+          </span>
         </div>
 
       </div>
@@ -54,15 +62,16 @@ window.ejecutarGeneracionAliasDual = function (btn) {
   if (typeof haptic === "function") haptic();
 
   const originalText = btn.innerHTML;
-  btn.innerHTML = `<svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> 1/2: Tomando Alias y PINESMES...`;
+  btn.innerHTML = `<svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> 1/2: Procesando en PINESMES...`;
   btn.disabled = true;
 
-  const userActivo =
-    sessionStorage.getItem("active_staff") ||
-    localStorage.getItem("cyber_saved_staff") ||
-    "Sistema";
+  const subtexto = document.getElementById("subtextoEsperaNet");
+  if (subtexto) subtexto.style.display = "block";
+
+  const userActivo = sessionStorage.getItem("active_staff") || localStorage.getItem("cyber_saved_staff") || "Sistema";
   const cbName = "cb_alias_cta_" + Date.now();
 
+  // Callback llamado por Google Apps Script cuando termina de asignar alias y PIN
   window[cbName] = function (res) {
     const scriptNode = document.getElementById("node_" + cbName);
     if (scriptNode) scriptNode.remove();
@@ -71,10 +80,11 @@ window.ejecutarGeneracionAliasDual = function (btn) {
     if (res && res.status === "success" && res.data) {
       const correoGenerado = res.data.correo;
       const claveGenerada = res.data.clave;
+      
+      if (subtexto) subtexto.style.display = "none";
+      btn.innerHTML = `<svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> 2/2: Subiendo a MySQL...`;
 
-      btn.innerHTML = `<svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> 2/2: Guardando en MySQL...`;
-
-      // REGISTRAR DIRECTO EN MYSQL
+      // Registrar datos en MySQL
       const formData = new FormData();
       formData.append("accion", "crear_cuenta_netflix_alias");
       formData.append("correo", correoGenerado);
@@ -87,14 +97,12 @@ window.ejecutarGeneracionAliasDual = function (btn) {
         .then((r) => r.json())
         .then((dbRes) => {
           if (dbRes && dbRes.status === "success") {
-            if (typeof triggerToast === "function")
-              triggerToast(`✅ Sincronización Exitosa: ${correoGenerado}`);
+            if (typeof triggerToast === "function") triggerToast(`✅ Sincronización Exitosa: ${correoGenerado}`);
 
-            if (typeof window.cargarDatosMySQL === "function")
-              window.cargarDatosMySQL();
-            if (typeof window.cargarCortesOperativosNetflix === "function")
-              window.cargarCortesOperativosNetflix();
+            if (typeof window.cargarDatosMySQL === "function") window.cargarDatosMySQL();
+            if (typeof window.cargarCortesOperativosNetflix === "function") window.cargarCortesOperativosNetflix();
 
+            // Dibujar resultado en pantalla
             document.getElementById("contenedorGeneradorNet").innerHTML = `
               <div style="background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.3); padding: 20px; border-radius: 18px; display: flex; flex-direction: column; gap: 14px; text-align: left;">
                 
@@ -118,11 +126,9 @@ window.ejecutarGeneracionAliasDual = function (btn) {
                 </button>
               </div>
             `;
+
           } else {
-            alert(
-              "⚠️ Se procesó en PINESMES pero falló en MySQL: " +
-                (dbRes ? dbRes.message : "Error desconocido"),
-            );
+            alert("⚠️ Se procesó en PINESMES pero falló en MySQL: " + (dbRes ? dbRes.message : "Error desconocido"));
             btn.innerHTML = originalText;
             btn.disabled = false;
           }
@@ -133,20 +139,18 @@ window.ejecutarGeneracionAliasDual = function (btn) {
           btn.innerHTML = originalText;
           btn.disabled = false;
         });
+
     } else {
-      alert(
-        "❌ Google Sheets: " +
-          (res
-            ? res.message
-            : "Sin respuesta de Apps Script o sin pines/alias disponibles."),
-      );
+      if (subtexto) subtexto.style.display = "none";
+      alert("❌ Google Sheets: " + (res ? res.message : "Sin respuesta de Apps Script o sin pines/alias disponibles."));
       btn.innerHTML = originalText;
       btn.disabled = false;
     }
   };
 
+  // Creación dinámica del tag script
   const script = document.createElement("script");
   script.id = "node_" + cbName;
-  script.src = `${SCRIPT_URL_NETFLIX}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
+  script.src = `${URL_SCRIPT_NETFLIX_GEN}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
