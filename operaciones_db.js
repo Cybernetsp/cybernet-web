@@ -3,7 +3,7 @@
    ========================================================================== */
 
 /* ==========================================================================
-   🍿 MÓDULO DE NETFLIX: CORTES OPERATIVOS Y CREACIÓN DE ALIAS
+   🍿 MÓDULO DE NETFLIX: CORTES OPERATIVOS
    ========================================================================== */
 
 const oldToggleNetflixManagerPanel = window.toggleNetflixManagerPanel;
@@ -27,16 +27,20 @@ window.toggleNetflixManagerPanel = function () {
   }
 };
 
+// 🔴 RENDERIZADO PREMIUM DE TARJETAS DE CORTE
 window.cargarCortesOperativosNetflix = function () {
   const container = document.getElementById("listaCortesOperativosNetflix");
   if (!container) return;
 
+  // Estado de Carga (Spinning)
   container.innerHTML = `
-    <div style="text-align: center; color: #ff453a; padding: 40px;">
-      <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-      <br><span style="font-weight: 700; font-size: 0.9rem;">Escaneando cuentas para corte...</span>
-    </div>
-  `;
+    <div style="text-align: center; padding: 45px 20px; color: #e50914; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+      <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line>
+        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+      </svg>
+      <span style="font-weight: 800; font-size: 0.95rem;">Escaneando cortes pendientes...</span>
+    </div>`;
 
   const formData = new FormData();
   formData.append("accion", "obtener_cortes_netflix");
@@ -48,78 +52,131 @@ window.cargarCortesOperativosNetflix = function () {
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
-        const cuentas = res.data || [];
-        if (cuentas.length === 0) {
-          container.innerHTML = `
-            <div style="text-align: center; padding: 50px 20px; color: #30d158; font-weight: 800; background: rgba(48, 209, 88, 0.05); border-radius: 18px; border: 1px dashed rgba(48, 209, 88, 0.2);">
-              🎉 ¡Excelente! No hay cortes pendientes en Netflix para hoy.
-            </div>
-          `;
-          return;
-        }
-
-        let html = "";
-        cuentas.forEach((item) => {
-          const correo = item.correo;
-          const claveVieja = item.clave_actual || item.clave || "fuego41@@";
-          const claveNueva =
-            item.clave_nueva || window.generarClaveTVAleatoria();
-          const perfiles = item.perfiles_afectados || "1, 2, 3, 4, 5";
-
-          html += `
-            <div class="card-corte-item" style="background: #16161a; border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 18px; padding: 16px; margin-bottom: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-              
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px;">
-                <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
-                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #ff453a; box-shadow: 0 0 8px #ff453a; flex-shrink: 0;"></span>
-                  <span style="color: #ff453a; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.5px; text-transform: uppercase; flex-shrink: 0;">CORTE REQUERIDO</span>
-                  <span style="color: #ffffff; font-weight: 800; font-family: monospace; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${correo}</span>
-                  <button onclick="window.copiarTextoUnico(this, '${encodeURIComponent(correo)}')" style="background: transparent; border: none; color: #a1a1aa; cursor: pointer; padding: 2px;" title="Copiar Correo">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  </button>
-                </div>
-                <span style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; white-space: nowrap;">
-                  Perfiles: ${perfiles}
-                </span>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(0, 0, 0, 0.4); padding: 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 12px; align-items: center;">
-                <div>
-                  <span style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">CLAVE VENCIDA</span>
-                  <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                    <span style="color: #71717a; font-family: monospace; font-weight: 700; font-size: 0.9rem; text-decoration: line-through;">${claveVieja}</span>
-                  </div>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08);">
-                  <div>
-                    <span style="display: block; font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">NUEVA CLAVE TV</span>
-                    <span style="color: #ffffff; font-family: monospace; font-weight: 800; font-size: 0.95rem;">${claveNueva}</span>
-                  </div>
-                  <button onclick="window.copiarTextoUnico(this, '${encodeURIComponent(claveNueva)}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; cursor: pointer;">
-                    Copiar
-                  </button>
-                </div>
-              </div>
-
-              <button onclick="window.procesarCorteNetflix('${encodeURIComponent(correo)}', '${encodeURIComponent(claveNueva)}', this)" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(229, 9, 20, 0.35); transition: transform 0.2s ease;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Procesar Corte y Subir a Hoy
-              </button>
-
-            </div>
-          `;
-        });
-
-        container.innerHTML = html;
+        window.renderizarTarjetasCortesNetflix(res.data);
       } else {
-        container.innerHTML = `<div style="color: #ff453a; text-align: center; padding: 30px;">Error: ${res ? res.message : "No se pudieron obtener los cortes."}</div>`;
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.08);">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" style="margin-bottom: 12px;">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <div style="color: #ffffff; font-weight: 800; font-size: 1.05rem;">¡Todo al día!</div>
+            <div style="color: #a1a1aa; font-size: 0.85rem; margin-top: 6px;">No hay cortes operativos pendientes en este momento.</div>
+          </div>`;
       }
     })
     .catch((err) => {
       console.error(err);
-      container.innerHTML = `<div style="color: #ff453a; text-align: center; padding: 30px;">❌ Error de conexión al consultar cortes.</div>`;
+      container.innerHTML = `<div style="text-align: center; color: #ff453a; font-weight: 800; padding: 30px;">❌ Error conectando con el servidor.</div>`;
     });
+};
+
+window.renderizarTarjetasCortesNetflix = function (cuentas) {
+  const container = document.getElementById("listaCortesOperativosNetflix");
+  if (!container) return;
+
+  if (!cuentas || cuentas.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.08);">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" style="margin-bottom: 12px;">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <div style="color: #ffffff; font-weight: 800; font-size: 1.05rem;">¡Todo al día!</div>
+        <div style="color: #a1a1aa; font-size: 0.85rem; margin-top: 6px;">No hay cortes operativos pendientes en este momento.</div>
+      </div>`;
+    return;
+  }
+
+  let html = "";
+  cuentas.forEach((cuenta) => {
+    let correo = cuenta.correo || "Sin correo";
+    let claveVieja = cuenta.clave_actual || cuenta.clave || "fuego41@@";
+    let claveNueva = cuenta.clave_nueva || window.generarClaveTVAleatoria();
+    let perfiles = cuenta.perfiles_afectados || "1, 2, 3, 4, 5";
+
+    html += `
+      <div class="card-ios" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(229, 9, 20, 0.18); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 16px; transition: all 0.2s ease; position: relative; overflow: hidden;">
+          
+          <!-- Efecto Glow Superior -->
+          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, transparent, #e50914, transparent); opacity: 0.9;"></div>
+
+          <!-- Fila 1: Header / Correo -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 14px;">
+              <div style="display: flex; align-items: center; gap: 10px; max-width: 75%; overflow: hidden;">
+                  <div style="width: 10px; height: 10px; border-radius: 50%; background: #ff453a; box-shadow: 0 0 12px #ff453a; flex-shrink: 0;"></div>
+                  <span style="font-family: monospace; font-weight: 800; color: #ffffff; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${correo}">${correo}</span>
+              </div>
+              <button onclick="copiarAlPortapapelesLigero('${correo}', this)" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #e4e4e7; border-radius: 12px; padding: 6px 12px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  Copiar
+              </button>
+          </div>
+
+          <!-- Fila 2: Claves -->
+          <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px;">
+              <!-- Clave Vencida -->
+              <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 12px 16px; display: flex; flex-direction: column; justify-content: center; gap: 4px;">
+                  <span style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Clave Vencida</span>
+                  <span style="font-family: monospace; color: #ff453a; font-weight: 700; font-size: 0.95rem; text-decoration: line-through; opacity: 0.8;">${claveVieja}</span>
+              </div>
+
+              <!-- Nueva Clave -->
+              <div style="background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.3); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: inset 0 0 20px rgba(48, 209, 88, 0.05);">
+                  <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden;">
+                      <span style="font-size: 0.68rem; color: #30d158; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Nueva Clave TV</span>
+                      <span style="font-family: monospace; color: #ffffff; font-weight: 900; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${claveNueva}</span>
+                  </div>
+                  <button onclick="copiarAlPortapapelesLigero('${claveNueva}', this)" style="background: #30d158; color: #000000; border: none; border-radius: 12px; padding: 8px 14px; font-size: 0.8rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(48, 209, 88, 0.3); transition: transform 0.1s; flex-shrink: 0;">
+                      Copiar
+                  </button>
+              </div>
+          </div>
+
+          <!-- Fila 3: Perfiles y Botón Acción -->
+          <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 4px;">
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 800; color: #e50914; background: rgba(229, 9, 20, 0.12); padding: 8px 16px; border-radius: 12px; width: fit-content; border: 1px solid rgba(229, 9, 20, 0.25);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  Perfiles a renovar: ${perfiles}
+              </div>
+              
+              <button onclick="window.procesarCorteNetflix('${encodeURIComponent(correo)}', '${encodeURIComponent(claveNueva)}', this)" class="btn-ios" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 16px; font-weight: 900; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 8px 25px rgba(229, 9, 20, 0.4); transition: all 0.2s ease;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  ✓ Procesar Corte y Subir a Hoy
+              </button>
+          </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+};
+
+// Función auxiliar visual de copiado
+window.copiarAlPortapapelesLigero = function (texto, btn) {
+  navigator.clipboard.writeText(texto).then(() => {
+    let oldText = btn.innerHTML;
+    let oldBg = btn.style.background;
+    let oldColor = btn.style.color;
+
+    btn.innerHTML = `✓ Copiado`;
+    btn.style.background = "rgba(48, 209, 88, 0.2)";
+    btn.style.color = "#30d158";
+    btn.style.border = "1px solid rgba(48, 209, 88, 0.4)";
+
+    if (typeof haptic === "function") haptic();
+
+    setTimeout(() => {
+      btn.innerHTML = oldText;
+      btn.style.background = oldBg;
+      btn.style.color = oldColor;
+      btn.style.border = "";
+    }, 1500);
+  });
 };
 
 window.generarClaveTVAleatoria = function () {
@@ -157,9 +214,10 @@ window.procesarCorteNetflix = function (
     return;
   }
 
+  const originalContent = btn.innerHTML;
   if (btn) {
     btn.disabled = true;
-    btn.innerText = "Procesando corte...";
+    btn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Procesando corte...`;
   }
 
   const formData = new FormData();
@@ -182,7 +240,7 @@ window.procesarCorteNetflix = function (
         );
         if (btn) {
           btn.disabled = false;
-          btn.innerText = "Procesar Corte y Subir a Hoy";
+          btn.innerHTML = originalContent;
         }
         return;
       }
@@ -199,7 +257,7 @@ window.procesarCorteNetflix = function (
         );
         if (btn) {
           btn.disabled = false;
-          btn.innerText = "Procesar Corte y Subir a Hoy";
+          btn.innerHTML = originalContent;
         }
       }
     })
@@ -208,7 +266,7 @@ window.procesarCorteNetflix = function (
       alert("❌ Error de conexión al servidor.");
       if (btn) {
         btn.disabled = false;
-        btn.innerText = "Procesar Corte y Subir a Hoy";
+        btn.innerHTML = originalContent;
       }
     });
 };
@@ -374,61 +432,6 @@ window.copiarTodosLosNumerosCorte = function (btn, todosEscapados) {
   });
 };
 
-window.crearCuentaNetflixAlias = function () {
-  if (typeof haptic === "function") haptic();
-
-  const correoBase = prompt(
-    "Ingresa el correo base para crear el Alias:\n(Ej: durmal05y@outlook.com)",
-  );
-  if (!correoBase || !correoBase.trim()) return;
-
-  const aliasNumero = prompt(
-    "Ingresa el identificador/número de alias:\n(Ej: 1, 2, 3 o 'septiembre')",
-    "1",
-  );
-  if (!aliasNumero) return;
-
-  let correoFinal = correoBase.trim();
-  if (correoBase.includes("@")) {
-    const partes = correoBase.trim().split("@");
-    correoFinal = `${partes[0]}+${aliasNumero.trim()}@${partes[1]}`;
-  }
-
-  const clave = prompt(
-    `Ingresa la contraseña para:\n${correoFinal}`,
-    "fuego41@@",
-  );
-  if (!clave) return;
-
-  const formData = new FormData();
-  formData.append("accion", "crear_cuenta_netflix_alias");
-  formData.append("correo", correoFinal);
-  formData.append("clave", clave.trim());
-
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((res) => {
-      if (res && res.status === "success") {
-        alert(
-          `✅ Cuenta creada con éxito:\n\nCorreo: ${correoFinal}\nClave: ${clave}`,
-        );
-        if (typeof cargarDatosMySQL === "function") cargarDatosMySQL();
-        window.cargarCortesOperativosNetflix();
-      } else {
-        alert(
-          "❌ Error: " + (res ? res.message : "No se pudo crear la cuenta."),
-        );
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      alert("❌ Error de comunicación al crear cuenta.");
-    });
-};
-
 window.crearModalNetflixManagerHTML = function () {
   if (document.getElementById("netflixManagerOverlay")) return;
 
@@ -447,11 +450,6 @@ window.crearModalNetflixManagerHTML = function () {
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
-          <button onclick="window.crearCuentaNetflixAlias()" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 13px; border-radius: 14px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            Crear cuenta de Netflix (Usar Alias)
-          </button>
-
           <button onclick="window.cargarCortesOperativosNetflix()" style="width: 100%; background: rgba(255, 255, 255, 0.06); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.12); padding: 12px; border-radius: 14px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
             Refrescar Escaneo de Cortes
@@ -1398,7 +1396,7 @@ window.renderizarTablaNeyop = function () {
   }
 
   html += `</tbody></table>`;
-  contenedor.innerHTML = html;
+  container.innerHTML = html;
 };
 
 window.marcarListoNeyop = function (filaIndex, btnElement) {
@@ -1612,14 +1610,4 @@ window.extraerPinIndividual = function (correo, btnElement) {
   script.id = "node_" + cbName;
   script.src = `${GOOGLE_SCRIPT_URL}?action=procesarPinIndividualSuspendidas&correo=${encodeURIComponent(correo)}&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
-};
-
-window.cambiarCuentaMalaAlias = function () {
-  if (typeof haptic === "function") haptic();
-  if (confirm("¿Deseas descartar esta cuenta y cerrar el modal?")) {
-    localStorage.removeItem("cyber_netflix_pendiente");
-    if (typeof cerrarModalCreacionNetflixTotalmente === "function") {
-      cerrarModalCreacionNetflixTotalmente();
-    }
-  }
 };
