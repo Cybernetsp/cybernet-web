@@ -2,7 +2,7 @@
    🌟 CYBERNET OS - CREACIÓN AUTOMATIZADA DE NETFLIX (SHEETS ➔ MYSQL)
    ========================================================================== */
 
-// URL oficial de tu Apps Script integrada
+// URL oficial de tu Apps Script
 const SCRIPT_URL_NETFLIX =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 
@@ -13,7 +13,7 @@ window.crearCuentaNetflixAliasExterna = function () {
   const existingModal = document.getElementById("modalCrearNetflixOverlay");
   if (existingModal) existingModal.remove();
 
-  // Inyectar HTML del Modal Ultra Premium
+  // Inyectar HTML del Modal
   const modalHtml = `
     <div class="overlay-ios open" id="modalCrearNetflixOverlay" style="display: flex !important; z-index: 999999 !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
       <div class="modal-ios" style="max-width: 420px; width: 92%; background: #16161a; border: 1px solid rgba(229, 9, 20, 0.3); border-radius: 26px; padding: 26px 24px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative; overflow: hidden;">
@@ -69,14 +69,13 @@ window.ejecutarGeneracionAliasDual = function (btn) {
     localStorage.getItem("cyber_saved_staff") ||
     "Sistema";
 
-  // PASO 1: CONECTAR A GOOGLE APPS SCRIPT (generarNuevaCuentaAlias)
   const cbName = "cb_alias_" + Date.now();
 
-  // 🕒 Timeout de seguridad (20 Segundos)
+  // Timeout de seguridad por si Google tarde más de 25 segundos
   const timeoutId = setTimeout(() => {
     if (window[cbName]) {
       alert(
-        "⏱️ Tiempo de espera agotado. Google Sheets está tardando demasiado en responder.",
+        "⚠️ La conexión tardó demasiado. Revisa si creaste la 'Nueva Implementación' en Google Apps Script.",
       );
       btn.innerHTML = originalText;
       btn.disabled = false;
@@ -84,10 +83,10 @@ window.ejecutarGeneracionAliasDual = function (btn) {
       const s = document.getElementById("node_" + cbName);
       if (s) s.remove();
     }
-  }, 20000);
+  }, 25000);
 
   window[cbName] = function (res) {
-    clearTimeout(timeoutId); // Limpiar timeout si respondió
+    clearTimeout(timeoutId);
     const scriptNode = document.getElementById("node_" + cbName);
     if (scriptNode) scriptNode.remove();
     delete window[cbName];
@@ -98,7 +97,7 @@ window.ejecutarGeneracionAliasDual = function (btn) {
 
       btn.innerHTML = `<svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> 2/2: Subiendo a MySQL...`;
 
-      // PASO 2: MANDAR A MYSQL LA CUENTA QUE DEVOLVIÓ SHEETS
+      // SUBIR A MYSQL
       const formData = new FormData();
       formData.append("accion", "crear_cuenta_netflix_alias");
       formData.append("correo", correoGenerado);
@@ -114,13 +113,12 @@ window.ejecutarGeneracionAliasDual = function (btn) {
             if (typeof triggerToast === "function")
               triggerToast(`✅ Sincronización Exitosa: ${correoGenerado}`);
 
-            // Refrescar paneles invisibles
             if (typeof window.cargarDatosMySQL === "function")
               window.cargarDatosMySQL();
             if (typeof window.cargarCortesOperativosNetflix === "function")
               window.cargarCortesOperativosNetflix();
 
-            // PASO 3: DIBUJAR PANTALLA DE ÉXITO EN EL MODAL
+            // PANTALLA DE ÉXITO
             document.getElementById("contenedorGeneradorNet").innerHTML = `
               <div style="background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.3); padding: 20px; border-radius: 18px; display: flex; flex-direction: column; gap: 14px; text-align: left;">
                 
@@ -129,7 +127,7 @@ window.ejecutarGeneracionAliasDual = function (btn) {
                   ¡Sincronización Completada!
                 </div>
                 
-                <div style="background: rgba(0,0,0,0.5); padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); position: relative;">
+                <div style="background: rgba(0,0,0,0.5); padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05);">
                   <span style="font-size: 0.65rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Correo Asignado (Alias)</span>
                   <div style="color: #ffffff; font-family: monospace; font-size: 1.05rem; font-weight: 800; margin-top: 4px; word-break: break-all;">${correoGenerado}</div>
                 </div>
@@ -146,8 +144,7 @@ window.ejecutarGeneracionAliasDual = function (btn) {
             `;
           } else {
             alert(
-              "⚠️ La cuenta se creó en Sheets, pero hubo un error subiéndola a MySQL: " +
-                dbRes.message,
+              "⚠️ Se guardó en Sheets pero falló en MySQL: " + dbRes.message,
             );
             btn.innerHTML = originalText;
             btn.disabled = false;
@@ -155,36 +152,24 @@ window.ejecutarGeneracionAliasDual = function (btn) {
         })
         .catch((err) => {
           console.error(err);
-          alert("❌ Error de comunicación con la base de datos MySQL.");
+          alert("❌ Error conectando con MySQL.");
           btn.innerHTML = originalText;
           btn.disabled = false;
         });
     } else {
       alert(
-        "❌ Error en Google Sheets: " +
-          (res ? res.message : "Fallo de conexión o sin pines disponibles."),
+        "❌ Google Sheets: " +
+          (res ? res.message : "Sin respuesta o sin pines disponibles."),
       );
       btn.innerHTML = originalText;
       btn.disabled = false;
     }
   };
 
-  // 🚀 DISPARAR LA PETICIÓN AL APPS SCRIPT
+  // Inyección de script dinámica JSONP
+  const scriptUrl = `${SCRIPT_URL_NETFLIX}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
   const script = document.createElement("script");
   script.id = "node_" + cbName;
-  script.src = `${SCRIPT_URL_NETFLIX}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
-
-  // Escudo contra bloqueos de AdBlocker o caída de internet
-  script.onerror = function () {
-    clearTimeout(timeoutId);
-    alert(
-      "❌ Error de red: No se pudo conectar con el servidor de Google (Verifica tu internet o adblockers).",
-    );
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-    delete window[cbName];
-    script.remove();
-  };
-
+  script.src = scriptUrl;
   document.body.appendChild(script);
 };
