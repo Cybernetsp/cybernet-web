@@ -790,6 +790,13 @@ window.renderDashboard = function () {
     document.getElementById("tipoDeudaMutua").value =
       window.globalFinanzasData.tipoDeudaActual;
   }
+
+  // 🎯 INYECCIÓN QUE REEMPLAZA EL MENSAJE "Calculando balance desde MySQL..."
+  if (window.globalFinanzasData.listaDetallada) {
+    window.renderizarHistorialMovimientosUI(
+      window.globalFinanzasData.listaDetallada,
+    );
+  }
 };
 
 /* ==========================================================================
@@ -876,9 +883,10 @@ window.confirmarOperacionPrestamoModal = function (e) {
     guardarDeudaEnSheets();
   }
 };
-// Parche de renderizado limpio para Historial de Movimientos
+
 window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
   const contenedor =
+    document.getElementById("listaDesgloseGastos") ||
     document.querySelector("#historialMovimientosContainer") ||
     document.querySelector(".historial-movimientos-list") ||
     document.querySelector("#contenedorMovimientos");
