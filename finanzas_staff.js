@@ -32,7 +32,7 @@ window.iniciarRelojTurno = window.startShiftTimer = function () {
           let segsPrevios = res.segundos_transcurridos || 0;
           sessionStorage.setItem(
             "cyber_shift_start_time",
-            Date.now() - segsPrevios * 1000
+            Date.now() - segsPrevios * 1000,
           );
           sessionStorage.setItem("cyber_last_sync_time", Date.now());
         }
@@ -111,7 +111,7 @@ window.cerrarSesionStaff = function () {
 
   if (
     confirm(
-      "¿Estás seguro de que deseas cerrar tu sesión y finalizar tu turno de hoy?"
+      "¿Estás seguro de que deseas cerrar tu sesión y finalizar tu turno de hoy?",
     )
   ) {
     let timerEl = document.getElementById("shiftTimer");
@@ -140,8 +140,56 @@ window.cerrarSesionStaff = function () {
 };
 
 /* ==========================================================================
-   👥 PUENTES AL MÓDULO DE CALENDARIO Y NÓMINA BENTO (personal_staff.js)
+   👥 CONTROL DE PANELES DE PERSONAL Y CALENDARIO
    ========================================================================== */
+window.toggleShiftsPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("shiftsOverlay");
+  if (!overlay) return;
+
+  const estaAbierto =
+    overlay.classList.contains("open") || overlay.style.display === "flex";
+
+  if (estaAbierto) {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
+  } else {
+    if (typeof cerrarTodasLasVentanas === "function") {
+      cerrarTodasLasVentanas();
+    }
+    overlay.classList.add("open");
+    overlay.style.setProperty("display", "flex", "important");
+    overlay.style.setProperty("align-items", "center", "important");
+    overlay.style.setProperty("justify-content", "center", "important");
+
+    const user = (
+      sessionStorage.getItem("active_staff") ||
+      localStorage.getItem("cyber_saved_staff") ||
+      ""
+    )
+      .toUpperCase()
+      .trim();
+
+    const esSuperAdmin = user === "CAMILO";
+    const btnAde = document.getElementById("btnAdelantoCamilo");
+    const btnNom = document.getElementById("btnNominaCamilo");
+
+    if (esSuperAdmin) {
+      if (btnAde)
+        btnAde.style.setProperty("display", "inline-flex", "important");
+      if (btnNom)
+        btnNom.style.setProperty("display", "inline-flex", "important");
+    } else {
+      if (btnAde) btnAde.style.setProperty("display", "none", "important");
+      if (btnNom) btnNom.style.setProperty("display", "none", "important");
+    }
+
+    if (typeof window.cargarHorasDirectasPHP === "function") {
+      window.cargarHorasDirectasPHP();
+    }
+  }
+};
+
 window.cargarHorasDesdeMySQL = function () {
   if (typeof window.cargarHorasDirectasPHP === "function") {
     window.cargarHorasDirectasPHP();
@@ -186,7 +234,7 @@ window.cargarInventarioStockMySQL = function () {
   if (!contenedor) return;
 
   const usuarioActivoObj = JSON.parse(
-    sessionStorage.getItem("usuario_activo") || "null"
+    sessionStorage.getItem("usuario_activo") || "null",
   );
   const user = usuarioActivoObj ? usuarioActivoObj.nombre.toUpperCase() : null;
   const rol = usuarioActivoObj ? usuarioActivoObj.rol : null;
@@ -234,7 +282,7 @@ window.cargarInventarioStockMySQL = function () {
 
 window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
   const usuarioActivoObj = JSON.parse(
-    sessionStorage.getItem("usuario_activo") || "null"
+    sessionStorage.getItem("usuario_activo") || "null",
   );
   const user = usuarioActivoObj ? usuarioActivoObj.nombre.toUpperCase() : null;
   const rol = usuarioActivoObj ? usuarioActivoObj.rol : null;
@@ -244,7 +292,7 @@ window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
     inputElem.checked = !inputElem.checked;
     if (typeof triggerToast === "function")
       triggerToast(
-        "⛔ Solo el administrador Camilo puede modificar las plataformas."
+        "⛔ Solo el administrador Camilo puede modificar las plataformas.",
       );
     return;
   }
@@ -446,7 +494,7 @@ window.copiarSaldoDistri = function (btn, nombre, saldoFormateado) {
 
     if (typeof triggerToast === "function") {
       triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Reporte de saldo copiado</span></div>`
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Reporte de saldo copiado</span></div>`,
       );
     }
 
@@ -462,7 +510,7 @@ window.filtrarTablaRevendedores = function () {
     .toLowerCase()
     .trim();
   const filas = document.querySelectorAll(
-    "#tablaDistribuidores .distri-row-item"
+    "#tablaDistribuidores .distri-row-item",
   );
   filas.forEach((row) => {
     row.style.display = row.innerText.toLowerCase().includes(query)
@@ -680,7 +728,7 @@ window.cargarRentabilidadPlataformas = function () {
           let color =
             r.gananciaNeta < 0 ? "var(--ios-red)" : colors[idx % colors.length];
           let pctBar = Math.round(
-            (Math.abs(r.gananciaNeta) / maxGanancia) * 100
+            (Math.abs(r.gananciaNeta) / maxGanancia) * 100,
           );
 
           html += `
@@ -764,7 +812,7 @@ window.guardarTransaccion = function (e) {
       } else {
         alert(
           "Error: " +
-            (res ? res.message : "No se pudo guardar la transacción.")
+            (res ? res.message : "No se pudo guardar la transacción."),
         );
       }
     })
@@ -812,13 +860,13 @@ window.guardarDeudaEnSheets = window.guardarDeudaEnMySQL = function () {
       if (res && res.status === "success") {
         if (typeof triggerToast === "function") {
           triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Deuda guardada en MySQL</span></div>`
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Deuda guardada en MySQL</span></div>`,
           );
         }
       } else {
         alert(
           "❌ Error: " +
-            (res ? res.message : "Fallo de conexión al guardar la deuda.")
+            (res ? res.message : "Fallo de conexión al guardar la deuda."),
         );
       }
     })
@@ -850,13 +898,13 @@ window.renderDashboard = function () {
 
   if (document.getElementById("val_ingresos"))
     document.getElementById("val_ingresos").innerText = formatMoneda(
-      d.ingresos
+      d.ingresos,
     );
   if (document.getElementById("val_gastos"))
     document.getElementById("val_gastos").innerText = formatMoneda(d.gastos);
   if (document.getElementById("val_inversiones"))
     document.getElementById("val_inversiones").innerText = formatMoneda(
-      d.inversiones
+      d.inversiones,
     );
   if (document.getElementById("val_nomina"))
     document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
@@ -898,7 +946,7 @@ window.renderDashboard = function () {
     document.getElementById("valDeudaTotal")
   ) {
     document.getElementById("valDeudaTotal").value = parseFloat(
-      window.globalFinanzasData.deudaActual || 0
+      window.globalFinanzasData.deudaActual || 0,
     ).toLocaleString("es-CO");
   }
   if (
