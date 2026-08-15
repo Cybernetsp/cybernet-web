@@ -59,28 +59,14 @@ window.ejecutarGeneracionAliasDual = function (btn) {
     sessionStorage.getItem("active_staff") ||
     localStorage.getItem("cyber_saved_staff") ||
     "Sistema";
-  const cbName = "cb_alias_" + Date.now();
-
-  const timeoutId = setTimeout(() => {
-    if (window[cbName]) {
-      alert(
-        "⚠️ La solicitud en Google Apps Script tardó más de 50 segundos. Verifica si tienes PIN libre en la pestaña REFACIL o correos disponibles en ALIAS.",
-      );
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-      delete window[cbName];
-      const s = document.getElementById("node_" + cbName);
-      if (s) s.remove();
-    }
-  }, 50000);
+  const cbName = "cb_alias_cta_" + Date.now();
 
   window[cbName] = function (res) {
-    clearTimeout(timeoutId);
     const scriptNode = document.getElementById("node_" + cbName);
     if (scriptNode) scriptNode.remove();
     delete window[cbName];
 
-    if (res && res.status === "success") {
+    if (res && res.status === "success" && res.data) {
       const correoGenerado = res.data.correo;
       const claveGenerada = res.data.clave;
 
@@ -131,7 +117,8 @@ window.ejecutarGeneracionAliasDual = function (btn) {
             `;
           } else {
             alert(
-              "⚠️ Se guardó en Sheets pero falló en MySQL: " + dbRes.message,
+              "⚠️ Se guardó en Sheets pero falló en MySQL: " +
+                (dbRes ? dbRes.message : "Error desconocido"),
             );
             btn.innerHTML = originalText;
             btn.disabled = false;
@@ -153,19 +140,8 @@ window.ejecutarGeneracionAliasDual = function (btn) {
     }
   };
 
-  const scriptUrl = `${SCRIPT_URL_NETFLIX}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
   const script = document.createElement("script");
   script.id = "node_" + cbName;
-  script.src = scriptUrl;
-
-  script.onerror = function () {
-    clearTimeout(timeoutId);
-    alert("❌ Error de red: No se pudo conectar con el servidor de Google.");
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-    delete window[cbName];
-    script.remove();
-  };
-
+  script.src = `${SCRIPT_URL_NETFLIX}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
