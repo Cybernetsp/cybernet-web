@@ -5548,7 +5548,7 @@
       </div>
     </div>
 
-    <!-- 👥 MODAL: CONTROL DE PERSONAL Y TURNOS -->
+    <!-- 👥 MODAL: CONTROL DE PERSONAL Y TURNOS (CENTRADURA ABSOLUTA Y MYSQL DIRECTO) -->
     <div
       class="overlay-ios"
       id="shiftsOverlay"
@@ -5565,6 +5565,8 @@
         background: rgba(0, 0, 0, 0.8) !important;
         backdrop-filter: blur(16px) !important;
         -webkit-backdrop-filter: blur(16px) !important;
+        margin: 0 !important;
+        padding: 0 !important;
       "
     >
       <style>
@@ -5579,22 +5581,28 @@
         class="sheet-ios"
         onclick="event.stopPropagation()"
         style="
-          max-width: 880px;
-          width: 92%;
+          max-width: 880px !important;
+          width: 92% !important;
           height: auto !important;
           max-height: 85vh !important;
-          display: flex;
-          flex-direction: column;
-          padding: 0;
-          border-radius: 24px;
-          overflow: hidden;
-          background: #0b0b0d;
-          margin: auto;
+          display: flex !important;
+          flex-direction: column !important;
+          padding: 0 !important;
+          border-radius: 24px !important;
+          overflow: hidden !important;
+          background: #0b0b0d !important;
+          margin: auto !important;
           position: relative !important;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+          top: auto !important;
+          bottom: auto !important;
+          left: auto !important;
+          right: auto !important;
+          transform: none !important;
+          border: 1px solid rgba(255, 255, 255, 0.08) !important;
+          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9) !important;
         "
       >
+        <!-- CABECERA -->
         <div
           class="sheet-header"
           style="
@@ -5653,6 +5661,7 @@
             Turnos de Personal
           </h3>
 
+          <!-- BOTONES CABECERA -->
           <div
             style="
               display: flex;
@@ -5739,7 +5748,7 @@
                 font-weight: 700;
                 cursor: pointer;
               "
-              onclick="cargarHorasDirectasPHP()"
+              onclick="cargarTurnosMySQLDirecto()"
             >
               <svg
                 width="14"
@@ -5773,6 +5782,7 @@
           </button>
         </div>
 
+        <!-- CUERPO DE LA VENTANA -->
         <div
           style="
             overflow-y: auto;
