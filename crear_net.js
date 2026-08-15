@@ -3,7 +3,9 @@
    ========================================================================== */
 
 const SCRIPT_URL_NETFLIX =
-  "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
+  typeof GOOGLE_SCRIPT_URL !== "undefined"
+    ? GOOGLE_SCRIPT_URL
+    : "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 
 window.crearCuentaNetflixAliasExterna = function () {
   if (typeof haptic === "function") haptic();
@@ -32,7 +34,7 @@ window.crearCuentaNetflixAliasExterna = function () {
 
         <div id="contenedorGeneradorNet" style="display: flex; flex-direction: column; gap: 16px; text-align: center;">
           <p style="color: #a1a1aa; font-size: 0.85rem; margin: 0; line-height: 1.5; text-align: left;">
-            El sistema conectará a tu Apps Script para asignar el <b>PIN de Refácil</b>, tomará el siguiente <b>Alias</b>, y la guardará automáticamente en <b>PINESMES</b>.<br><br>Luego se subirá inmediatamente a <b>MySQL</b>.
+            El sistema buscará un correo libre en la pestaña <b>ALIAS</b>, asignará el <b>PIN de Refácil</b>, lo guardará en <b>PINESMES</b> y lo registrará en la base de datos <b>MySQL</b>.
           </p>
           
           <button type="button" id="btnProcesarCrearNet" onclick="window.ejecutarGeneracionAliasDual(this)" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 16px; border-radius: 14px; font-weight: 900; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4); transition: transform 0.1s;">
@@ -52,7 +54,7 @@ window.ejecutarGeneracionAliasDual = function (btn) {
   if (typeof haptic === "function") haptic();
 
   const originalText = btn.innerHTML;
-  btn.innerHTML = `<svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> 1/2: Procesando en PINESMES...`;
+  btn.innerHTML = `<svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> 1/2: Tomando Alias y PINESMES...`;
   btn.disabled = true;
 
   const userActivo =
@@ -70,8 +72,9 @@ window.ejecutarGeneracionAliasDual = function (btn) {
       const correoGenerado = res.data.correo;
       const claveGenerada = res.data.clave;
 
-      btn.innerHTML = `<svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> 2/2: Subiendo a MySQL...`;
+      btn.innerHTML = `<svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> 2/2: Guardando en MySQL...`;
 
+      // REGISTRAR DIRECTO EN MYSQL
       const formData = new FormData();
       formData.append("accion", "crear_cuenta_netflix_alias");
       formData.append("correo", correoGenerado);
@@ -117,7 +120,7 @@ window.ejecutarGeneracionAliasDual = function (btn) {
             `;
           } else {
             alert(
-              "⚠️ Se guardó en Sheets pero falló en MySQL: " +
+              "⚠️ Se procesó en PINESMES pero falló en MySQL: " +
                 (dbRes ? dbRes.message : "Error desconocido"),
             );
             btn.innerHTML = originalText;
@@ -133,7 +136,9 @@ window.ejecutarGeneracionAliasDual = function (btn) {
     } else {
       alert(
         "❌ Google Sheets: " +
-          (res ? res.message : "Sin respuesta o sin pines disponibles."),
+          (res
+            ? res.message
+            : "Sin respuesta de Apps Script o sin pines/alias disponibles."),
       );
       btn.innerHTML = originalText;
       btn.disabled = false;
