@@ -78,7 +78,7 @@ window.sincronizarW1 = function () {
       console.error("Error en W1:", err);
       if (contador) contador.innerText = "Error";
       if (listaContenedor) {
-        listaContenedor.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #ff453a; font-weight: 700;">Error de conexión al servidor.</div>`;
+        listaContenedor.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #ff453a; font-weight: 700;">Error de conexión al servidor MySQL.</div>`;
       }
     });
 };
@@ -123,13 +123,13 @@ window.sincronizarW2 = function () {
       console.error("Error en W2:", err);
       if (contador) contador.innerText = "Error";
       if (listaContenedor) {
-        listaContenedor.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #ff453a; font-weight: 700;">Error de conexión al servidor.</div>`;
+        listaContenedor.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #ff453a; font-weight: 700;">Error de conexión al servidor MySQL.</div>`;
       }
     });
 };
 
 // =========================================================================
-// 🎨 RENDERIZADO TIPO IMG 3 (PÍLDORAS NUMERADAS Y BLOQUES ENUMERADOS DE MÁX 20)
+// 🎨 RENDERIZADO TIPO PÍLDORA NUMERADA Y BLOQUES ENUMERADOS DE MÁX 20
 // =========================================================================
 window.renderizarCanalRecordatorios = function (canal) {
   const esW1 = canal === "W1";
@@ -182,7 +182,7 @@ window.renderizarCanalRecordatorios = function (canal) {
     bloquesContenedor.innerHTML = htmlBloques;
   }
 
-  // 2. RENDERIZAR TARJETAS EN PÍLDORA NUMERADA (ESTILO IMAGEN 3 EXACTO)
+  // 2. RENDERIZAR TARJETAS EN PÍLDORA NUMERADA
   let htmlCards = "";
   listaData.forEach((item, idx) => {
     const msjEscapado = encodeURIComponent(item.mensaje || "");
@@ -199,7 +199,7 @@ window.renderizarCanalRecordatorios = function (canal) {
 
         <!-- Identificador / Teléfono -->
         <div style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-          <span style="font-weight: 800; font-size: 0.88rem; color: #ffffff; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          <span class="txt-identificador" style="font-weight: 800; font-size: 0.88rem; color: #ffffff; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
             ${nombreOIdentificador}
           </span>
           ${item.user && item.user !== "CLIENTE CYBERNET" ? `<span style="font-size: 0.72rem; color: #a1a1aa; font-family: monospace;">${item.tel}</span>` : ""}
@@ -225,7 +225,7 @@ window.renderizarCanalRecordatorios = function (canal) {
 };
 
 // =========================================================================
-// 📋 COPIADO INDIVIDUAL
+// 📋 COPIADO INDIVIDUAL CON TACHADO DE FILA
 // =========================================================================
 window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
   if (typeof haptic === "function") haptic();
@@ -237,6 +237,14 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
 
     btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
     btn.style.setProperty("background", "rgba(48, 209, 88, 0.2)", "important");
+
+    // 🎯 TACHADO Y ATENUADO DE LA FILA COPIADA
+    const pillParent = btn.closest(".pill-recordatorio-item");
+    if (pillParent) {
+      pillParent.style.opacity = "0.45";
+      pillParent.style.textDecoration = "line-through";
+      pillParent.style.filter = "grayscale(0.6)";
+    }
 
     if (typeof triggerToast === "function") {
       triggerToast(
@@ -252,7 +260,7 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
 };
 
 // =========================================================================
-// 📋 COPIAR BLOQUE EXCLUSIVAMENTE CON FORMATO wa.me/57XXXXXXXXXX
+// 📋 COPIAR BLOQUE CON ENUMERACIÓN (1. wa.me/57...) Y TACHADO EN BLOQUE
 // =========================================================================
 window.copiarBloqueRecordatorio = function (
   canal,
@@ -270,14 +278,14 @@ window.copiarBloqueRecordatorio = function (
 
   const subLista = dataList.slice(inicioIdx, finIdx);
 
-  // Formatear numéricamente solo a wa.me/57XXXXXXXXXX sin parámetros ni textos
+  // 🎯 ENUMERACIÓN "1. wa.me/57..."
   const textoEnlaces = subLista
-    .map((item) => {
+    .map((item, idx) => {
       let telRaw = String(item.tel || "").replace(/\D/g, "");
       if (telRaw.length === 10) {
         telRaw = "57" + telRaw;
       }
-      return `wa.me/${telRaw}`;
+      return `${idx + 1}. wa.me/${telRaw}`;
     })
     .join("\n");
 
@@ -303,9 +311,25 @@ window.copiarBloqueRecordatorio = function (
       }, 1500);
     }
 
+    // 🎯 TACHAR TODAS LAS FILAS DE ESTE BLOQUE
+    const esW1 = canal === "W1";
+    const contenedor = document.getElementById(
+      esW1 ? "listaIndividualW1" : "listaIndividualW2",
+    );
+    if (contenedor) {
+      const pills = contenedor.querySelectorAll(".pill-recordatorio-item");
+      for (let i = inicioIdx; i < finIdx && i < pills.length; i++) {
+        if (pills[i]) {
+          pills[i].style.opacity = "0.45";
+          pills[i].style.textDecoration = "line-through";
+          pills[i].style.filter = "grayscale(0.6)";
+        }
+      }
+    }
+
     if (typeof triggerToast === "function") {
       triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Bloque copiado (${subLista.length} enlaces wa.me/57...)</span></div>`,
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Bloque copiado (${subLista.length} enlaces enumerados)</span></div>`,
       );
     }
   });
