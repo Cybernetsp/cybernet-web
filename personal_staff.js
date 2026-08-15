@@ -1,5 +1,5 @@
 /* ==========================================================================
-   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL (REPARADO BOTONES)
+   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL (ICONOS VISIBLES)
    ========================================================================== */
 
 window.URL_OBTENER_HORAS = "https://api.cybernetsp.com/obtener_horas.php";
@@ -14,7 +14,7 @@ window.filtroAnioTurnos = new Date().getFullYear();
 window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
 
-// Función maestra para verificar si el usuario logueado es el jefe (CAMILO)
+// Función maestra para verificar si el usuario logueado es el Superadmin (CAMILO)
 function verificarSiEsSuperAdmin() {
   let user =
     sessionStorage.getItem("active_staff") ||
@@ -98,7 +98,7 @@ window.cargarHorasDesdeMySQL = function () {
     });
 };
 
-// 📅 PARSEADOR DE FECHA COMPATIBLE CON FORMATOS CON HORA
+// 📅 PARSEADOR DE FECHA COMPATIBLE CON FORMATOS CON HORA (Ej: 14/08/2026 12:05 AM)
 function parsearFechaTurno(fechaRaw) {
   if (!fechaRaw) return new Date();
   if (fechaRaw instanceof Date) return fechaRaw;
@@ -149,7 +149,7 @@ window.cambiarAsistenteAdmin = function (vendedor) {
   window.renderizarHorasEnPantalla();
 };
 
-// 🎨 RENDERIZADOR CALENDARIO CON ADELANTOS UNIFICADOS Y BOTONES SVG SUPERADMIN
+// 🎨 RENDERIZADOR CALENDARIO CON BOTONES VISIBLES
 window.renderizarHorasEnPantalla = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -186,7 +186,7 @@ window.renderizarHorasEnPantalla = function () {
   ];
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-  // 1. FILTRADO DE PRIVACIDAD
+  // 1. FILTRADO DE PRIVACIDAD POR USUARIO
   let todosLosRegistros = window.currentHorasStock;
   let asistentesDisponibles = new Set();
 
@@ -352,19 +352,19 @@ window.renderizarHorasEnPantalla = function () {
           Math.round(reg.total),
         ).toLocaleString("es-CO");
 
-        // Botones de Lápiz y Papelera exclusivos
-        let botonceraSuperAdmin = "";
+        // 🔥 BOTONES CON PÍLDORA VISIBLE Y COLORES HEXADECIMALES DIRECTOS (#0a84ff y #ff453a)
+        let btnSuperAdmin = "";
         if (esSuperAdmin) {
-          botonceraSuperAdmin = `
-            <div style="display:flex; justify-content:center; gap:8px; margin-top:8px;">
-              <button onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" title="Modificar Turno" style="background: transparent; border: none; padding: 0; cursor: pointer;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:all 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.2)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+          btnSuperAdmin = `
+            <div style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:6px; width:100%;">
+              <button type="button" onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" title="Modificar Turno" style="background: rgba(10, 132, 255, 0.2); border: 1px solid rgba(10, 132, 255, 0.4); color: #0a84ff; padding: 4px 8px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#0a84ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
               </button>
-              <button onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" title="Eliminar Turno" style="background: transparent; border: none; padding: 0; cursor: pointer;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:all 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.2)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+              <button type="button" onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" title="Eliminar Turno" style="background: rgba(255, 69, 58, 0.2); border: 1px solid rgba(255, 69, 58, 0.4); color: #ff453a; padding: 4px 8px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
@@ -373,10 +373,10 @@ window.renderizarHorasEnPantalla = function () {
         }
 
         htmlRegistros += `
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 6px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 4px;">
             <span style="font-size: 0.75rem; font-weight: 800; color: #0a84ff; font-family: monospace;">${reg.tiempo_trabajado !== "00:00:00" ? reg.tiempo_trabajado : "Turno"}</span>
-            <span style="font-size: 0.85rem; font-weight: 900; color: #30d158; font-family: monospace;">$${valorAbsolutoFormateado}</span>
-            ${botonceraSuperAdmin}
+            <span style="font-size: 0.8rem; font-weight: 900; color: #30d158; font-family: monospace;">$${valorAbsolutoFormateado}</span>
+            ${btnSuperAdmin}
           </div>`;
       });
 
@@ -390,9 +390,9 @@ window.renderizarHorasEnPantalla = function () {
         let botonBorrarAdelantos = "";
         if (esSuperAdmin) {
           botonBorrarAdelantos = `
-            <div style="display:flex; justify-content:center; margin-top:8px;">
-              <button onclick="window.eliminarMultiplesTurnosSuperAdmin('${idUnificadosStr}')" title="Eliminar Adelantos de este día" style="background: transparent; border: none; padding: 0; cursor: pointer;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:all 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.2)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+            <div style="display:flex; justify-content:center; align-items:center; margin-top:4px; width:100%;">
+              <button type="button" onclick="window.eliminarMultiplesTurnosSuperAdmin('${idUnificadosStr}')" title="Eliminar Adelantos de este día" style="background: rgba(255, 69, 58, 0.2); border: 1px solid rgba(255, 69, 58, 0.4); color: #ff453a; padding: 4px 8px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
@@ -401,7 +401,7 @@ window.renderizarHorasEnPantalla = function () {
         }
 
         htmlRegistros += `
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255, 69, 58, 0.3);">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(255, 69, 58, 0.3);">
             <span style="font-size: 0.65rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelanto Total</span>
             <span style="font-size: 0.78rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${valorUnificadoMonto}</span>
             ${botonBorrarAdelantos}
@@ -416,7 +416,7 @@ window.renderizarHorasEnPantalla = function () {
         : "1px solid rgba(255, 255, 255, 0.05)";
 
       celdasCalendario += `
-        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 125px; box-sizing: border-box; overflow: visible;">
+        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 105px; box-sizing: border-box; overflow: visible;">
           <span style="font-size: 0.75rem; font-weight: 800; color: ${tieneTurno ? "#ffffff" : "#71717a"}; align-self: flex-start; margin-bottom: auto;">${dia}</span>
           ${htmlRegistros}
         </div>`;
