@@ -1233,7 +1233,7 @@ window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
 };
 
 // =========================================================================
-// ➕ VENTANA MODAL Y GUARDADO DE REGISTRO ÚNICO DE NETFLIX (1 PERFIL)
+// ➕ VENTANA MODAL Y GUARDADO DE REGISTRO ÚNICO DE NETFLIX (ESTÉTICA FIEL A IMG 2)
 // =========================================================================
 
 window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
@@ -1264,68 +1264,74 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
   const vencDefault = hoy.getDate() + "DE" + mesesMayus[hoy.getMonth()];
 
   const modalHtml = `
-    <div class="overlay-ios open" id="modalAnadirUnPerfilNetOverlay" style="display: flex !important; z-index: 9999999 !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
-      <div class="modal-ios" style="max-width: 520px; width: 92%; background: #141417; border: 1px solid rgba(229, 9, 20, 0.3); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
+    <div class="overlay-ios open" id="modalAnadirUnPerfilNetOverlay" style="display: flex !important; z-index: 9999999 !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); align-items: center; justify-content: center;">
+      <div style="width: 92%; max-width: 500px; background: #0c0d12; border: 1px solid #1a4980; box-shadow: 0 0 25px rgba(10, 132, 255, 0.25); border-radius: 20px; padding: 22px 24px; box-sizing: border-box; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: relative;">
         
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 1.3rem;">✏️</span>
-            <h3 style="margin: 0; color: #0a84ff; font-size: 1.15rem; font-weight: 800;">Añadir Registro Netflix</h3>
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.1rem;">✏️</span>
+            <h3 style="margin: 0; color: #0a84ff; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.3px;">Añadir Registro Netflix</h3>
           </div>
-          <button type="button" onclick="document.getElementById('modalAnadirUnPerfilNetOverlay').remove()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">✕</button>
+          <button type="button" onclick="document.getElementById('modalAnadirUnPerfilNetOverlay').remove()" style="background: rgba(255,255,255,0.08); border: none; color: #8e8e93; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; transition: background 0.2s;">✕</button>
         </div>
 
-        <form onsubmit="window.guardarRegistroUnicoMySQL(event, '${fechaContable}')" style="display: flex; flex-direction: column; gap: 14px; margin: 0;">
+        <!-- Formulario -->
+        <form onsubmit="window.guardarRegistroUnicoMySQL(event, '${fechaContable}')" style="display: flex; flex-direction: column; gap: 12px; margin: 0;">
           
+          <!-- Fila 1: Correo / Contraseña -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CORREO / USUARIO</label>
-              <input type="email" id="addNetCorreoUnico" required style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 700; font-family: monospace; outline: none;">
+            <div>
+              <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">CORREO / USUARIO</label>
+              <input type="email" id="addNetCorreoUnico" required style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
             </div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CONTRASEÑA</label>
-              <input type="text" id="addNetClaveUnico" required style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #30d158; padding: 10px; border-radius: 10px; font-weight: 700; font-family: monospace; outline: none;">
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px;">
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">PERFIL</label>
-              <input type="text" id="addNetPerfilUnico" value="1" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 700; outline: none;">
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">PIN</label>
-              <input type="text" id="addNetPinUnico" value="-" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 700; font-family: monospace; outline: none;">
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">VENCIMIENTO</label>
-              <input type="text" id="addNetVencimientoUnico" value="${vencDefault}" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #ff9f0a; padding: 10px; border-radius: 10px; font-weight: 800; font-family: monospace; outline: none;">
+            <div>
+              <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">CONTRASEÑA</label>
+              <input type="text" id="addNetClaveUnico" required style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
             </div>
           </div>
 
+          <!-- Fila 2: Perfil / Pin / Vencimiento -->
+          <div style="display: grid; grid-template-columns: 0.8fr 1fr 1.4fr; gap: 10px;">
+            <div>
+              <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">PERFIL</label>
+              <input type="text" id="addNetPerfilUnico" value="1" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; outline: none;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">PIN</label>
+              <input type="text" id="addNetPinUnico" value="-" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">VENCIMIENTO</label>
+              <input type="text" id="addNetVencimientoUnico" value="${vencDefault}" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.8rem; font-family: monospace; outline: none;">
+            </div>
+          </div>
+
+          <!-- Fila 3: Cliente / Teléfono -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CLIENTE</label>
-              <input type="text" id="addNetClienteUnico" value="Sin Nombre" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 600; outline: none;">
+            <div>
+              <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">CLIENTE</label>
+              <input type="text" id="addNetClienteUnico" value="Sin Nombre" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; outline: none;">
             </div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">TELÉFONO</label>
-              <input type="text" id="addNetTelefonoUnico" value="-" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 600; font-family: monospace; outline: none;">
+            <div>
+              <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">TELÉFONO</label>
+              <input type="text" id="addNetTelefonoUnico" value="-" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
             </div>
           </div>
 
+          <!-- Fila 4: Fecha Pago / Valor / Método Pago -->
           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">FECHA PAGO</label>
-              <input type="text" id="addNetFechaPagoUnico" value="${fechaContable}" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 600; font-family: monospace; outline: none;">
+            <div>
+              <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">FECHA PAGO</label>
+              <input type="text" id="addNetFechaPagoUnico" value="${fechaContable}" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
             </div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">VALOR</label>
-              <input type="text" id="addNetValorUnico" value="-" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #30d158; padding: 10px; border-radius: 10px; font-weight: 700; font-family: monospace; outline: none;">
+            <div>
+              <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">VALOR</label>
+              <input type="text" id="addNetValorUnico" value="-" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
             </div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">MÉTODO PAGO</label>
-              <select id="addNetMetodoPagoUnico" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 700; outline: none;">
+            <div>
+              <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">MÉTODO PAGO</label>
+              <select id="addNetMetodoPagoUnico" style="width: 100%; height: 38px; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 8px 10px; border-radius: 10px; font-size: 0.85rem; outline: none; cursor: pointer;">
                 <option value="-">-</option>
                 <option value="Nequi">Nequi</option>
                 <option value="Daviplata">Daviplata</option>
@@ -1337,9 +1343,10 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
             </div>
           </div>
 
-          <div style="display: flex; gap: 12px; margin-top: 10px;">
-            <button type="button" onclick="document.getElementById('modalAnadirUnPerfilNetOverlay').remove()" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #ffffff; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer;">Cancelar</button>
-            <button type="submit" id="btnSubmitAnadirUnicoNet" style="flex: 1.2; background: #ffffff; color: #000000; border: none; padding: 12px; border-radius: 12px; font-weight: 900; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.2);">Guardar Cambios</button>
+          <!-- Botones de Acción -->
+          <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; margin-top: 10px;">
+            <button type="button" onclick="document.getElementById('modalAnadirUnPerfilNetOverlay').remove()" style="background: #2b2c30; border: none; color: #ffffff; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: background 0.2s;">Cancelar</button>
+            <button type="submit" id="btnSubmitAnadirUnicoNet" style="background: #ffffff; border: none; color: #000000; padding: 12px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.25); transition: opacity 0.2s;">Guardar Cambios</button>
           </div>
 
         </form>
@@ -1348,6 +1355,9 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
   `;
 
   document.body.insertAdjacentHTML("beforeend", modalHtml);
+  setTimeout(() => {
+    document.getElementById("addNetCorreoUnico").focus();
+  }, 100);
 };
 
 window.guardarRegistroUnicoMySQL = function (e, fechaContable) {
@@ -1389,7 +1399,7 @@ window.guardarRegistroUnicoMySQL = function (e, fechaContable) {
   formData.append("fecha", fechaPago);
   formData.append("valor", valor);
   formData.append("pago", metodoPago);
-  formData.append("cantidad_perfiles", "1");
+  formData.append("cantidad_perfiles", "1"); // Forzar la inyección de 1 solo perfil
 
   fetch("https://api.cybernetsp.com/acciones_mysql.php", {
     method: "POST",
