@@ -1563,3 +1563,12 @@ window.extraerPinIndividual = function (correo, btnElement) {
   script.src = `${GOOGLE_SCRIPT_URL}?action=procesarPinIndividualSuspendidas&correo=${encodeURIComponent(correo)}&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
+window.cambiarCuentaMalaAlias = function () {
+  if (typeof haptic === "function") haptic();
+  if (confirm("¿Deseas descartar esta cuenta y cerrar el modal?")) {
+    localStorage.removeItem("cyber_netflix_pendiente");
+    if (typeof cerrarModalCreacionNetflixTotalmente === "function") {
+      cerrarModalCreacionNetflixTotalmente();
+    }
+  }
+};
