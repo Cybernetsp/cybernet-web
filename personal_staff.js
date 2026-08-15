@@ -6,15 +6,6 @@ window.URL_OBTENER_HORAS = "https://api.cybernetsp.com/obtener_horas.php";
 window.URL_MODIFICAR_TURNO = "https://api.cybernetsp.com/modificar_turno.php";
 window.URL_ELIMINAR_TURNO = "https://api.cybernetsp.com/eliminar_turno.php";
 
-// Lista base de personal registrado en Cybernet
-window.ASISTENTES_BASE = [
-  "ANGELICA",
-  "KATHERINE",
-  "LAURA",
-  "MANUEL",
-  "MANUP",
-  "PABLO",
-];
 window.currentHorasStock = [];
 
 // Filtros globales del calendario
@@ -22,18 +13,6 @@ window.filtroMesTurnos = new Date().getMonth();
 window.filtroAnioTurnos = new Date().getFullYear();
 window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
-
-// 🌐 OBTENER LISTA COMPLETA DE ASISTENTES (BASE + MYSQL)
-function obtenerTodosLosAsistentes() {
-  let setAsistentes = new Set(window.ASISTENTES_BASE);
-  if (Array.isArray(window.currentHorasStock)) {
-    window.currentHorasStock.forEach((item) => {
-      let v = (item.vendedor || "").toUpperCase().trim();
-      if (v && v !== "STAFF") setAsistentes.add(v);
-    });
-  }
-  return Array.from(setAsistentes).sort();
-}
 
 // Función maestra para verificar si el usuario logueado es el Superadmin (CAMILO)
 function verificarSiEsSuperAdmin() {
@@ -92,7 +71,6 @@ window.toggleShiftsPanel = function () {
   }
 };
 
-// 🔄 CARGAR REGISTROS DESDE MYSQL
 window.cargarHorasDesdeMySQL = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -135,7 +113,7 @@ window.cargarHorasDesdeMySQL = function () {
     });
 };
 
-// 📅 PARSEADOR DE FECHAS
+// 📅 PARSEADOR DE FECHA
 function parsearFechaTurno(fechaRaw) {
   if (!fechaRaw) return new Date();
   if (fechaRaw instanceof Date) return fechaRaw;
@@ -161,7 +139,7 @@ function parsearFechaTurno(fechaRaw) {
   return new Date();
 }
 
-// 🗓️ FILTROS DE VISTA
+// 🗓️ ACCIONES DE FILTRO
 window.cambiarMesTurnos = function (mesIndex) {
   try {
     if (typeof haptic === "function") haptic();
@@ -186,7 +164,7 @@ window.cambiarAsistenteAdmin = function (vendedor) {
   window.renderizarHorasEnPantalla();
 };
 
-// 🎨 RENDERIZADOR PRINCIPAL DE CALENDARIO
+// 🎨 RENDERIZADOR CALENDARIO
 window.renderizarHorasEnPantalla = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -223,11 +201,16 @@ window.renderizarHorasEnPantalla = function () {
   ];
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-  // 1. OBTENER LISTA COMPLETA DE ASISTENTES
-  let listaTodosAsistentes = obtenerTodosLosAsistentes();
-
-  // Filtrar registros por fecha
   let todosLosRegistros = window.currentHorasStock;
+  let asistentesDisponibles = new Set();
+
+  todosLosRegistros.forEach((item) => {
+    let v = (item.vendedor || "STAFF").toUpperCase().trim();
+    if (v) asistentesDisponibles.add(v);
+  });
+
+  let listaAsistentes = Array.from(asistentesDisponibles).sort();
+
   let datosFiltrados = todosLosRegistros.filter((item) => {
     let vendedorItem = (item.vendedor || "STAFF").toUpperCase().trim();
     let d = parsearFechaTurno(item.fecha);
@@ -247,7 +230,6 @@ window.renderizarHorasEnPantalla = function () {
     }
   });
 
-  // 2. DESPLEGABLE DE CONTROLES SUPERADMIN
   let opcionesMes = mesesNombres
     .map(
       (m, idx) =>
@@ -258,7 +240,7 @@ window.renderizarHorasEnPantalla = function () {
   let selectorAsistentesAdmin = "";
   if (esSuperAdmin) {
     let optsAsistentes = `<option value="TODOS" ${window.asistenteSeleccionadoAdmin === "TODOS" ? "selected" : ""}>👥 Todos los Asistentes</option>`;
-    listaTodosAsistentes.forEach((asist) => {
+    listaAsistentes.forEach((asist) => {
       optsAsistentes += `<option value="${asist}" ${window.asistenteSeleccionadoAdmin === asist ? "selected" : ""}>👤 ${asist}</option>`;
     });
 
@@ -287,7 +269,6 @@ window.renderizarHorasEnPantalla = function () {
       ${selectorAsistentesAdmin}
     </div>`;
 
-  // 3. AGRUPAR REGISTROS POR ASISTENTE Y DÍA
   let mapaAsistentes = {};
 
   datosFiltrados.forEach((item) => {
@@ -301,24 +282,25 @@ window.renderizarHorasEnPantalla = function () {
     mapaAsistentes[asist][diaNum].push(item);
   });
 
-  // Determinar qué asistentes renderizar
-  let asistentesAMostrar = [];
+  let asistentesAMostrar = Object.keys(mapaAsistentes);
 
-  if (!esSuperAdmin) {
+  if (!esSuperAdmin && !mapaAsistentes[activeStaff]) {
     asistentesAMostrar = [activeStaff];
-  } else {
-    if (window.asistenteSeleccionadoAdmin !== "TODOS") {
-      asistentesAMostrar = [window.asistenteSeleccionadoAdmin];
-    } else {
-      let conRegistros = Object.keys(mapaAsistentes);
-      asistentesAMostrar =
-        conRegistros.length > 0 ? conRegistros : listaTodosAsistentes;
-    }
+    mapaAsistentes[activeStaff] = {};
+  }
+
+  if (asistentesAMostrar.length === 0) {
+    container.innerHTML =
+      htmlControles +
+      `
+      <div style="text-align:center; padding:40px; color:#a1a1aa; font-weight:600; background:rgba(255,255,255,0.02); border-radius:18px; border:1px dashed rgba(255,255,255,0.08);">
+        📌 No hay turnos o registros para este periodo.
+      </div>`;
+    return;
   }
 
   let htmlCuerpo = htmlControles;
 
-  // 4. GENERAR TARJETAS DE CALENDARIO
   asistentesAMostrar.forEach((asistente) => {
     let turnosPorDia = mapaAsistentes[asistente] || {};
     let totalPagoAsistente = 0;
@@ -375,25 +357,24 @@ window.renderizarHorasEnPantalla = function () {
         }
       });
 
-      // RENDERIZAR TURNOS NORMALES
+      // RENDERIZAR TURNOS NORMALES CON BOTONES BLINDADOS
       turnosPuros.forEach((reg) => {
         let valorAbsolutoFormateado = Math.abs(
           Math.round(reg.total),
         ).toLocaleString("es-CO");
 
-        // Botones SVG en contenedor con fondo visible
         let btnSuperAdmin = "";
         if (esSuperAdmin) {
           btnSuperAdmin = `
-            <div style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:6px;">
-              <button type="button" onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" title="Modificar Turno" style="background: rgba(10, 132, 255, 0.2); border: 1px solid rgba(10, 132, 255, 0.4); border-radius: 8px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#0a84ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <div style="display: flex !important; justify-content: center !important; align-items: center !important; gap: 6px !important; margin-top: 6px !important; width: 100% !important; opacity: 1 !important; visibility: visible !important;">
+              <button type="button" onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" title="Modificar Turno" style="background: rgba(10, 132, 255, 0.25) !important; border: 1px solid #0a84ff !important; border-radius: 8px !important; padding: 4px 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; transition: all 0.2s ease !important; opacity: 1 !important; visibility: visible !important;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#0a84ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
               </button>
-              <button type="button" onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" title="Eliminar Turno" style="background: rgba(255, 69, 58, 0.2); border: 1px solid rgba(255, 69, 58, 0.4); border-radius: 8px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <button type="button" onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" title="Eliminar Turno" style="background: rgba(255, 69, 58, 0.25) !important; border: 1px solid #ff453a !important; border-radius: 8px !important; padding: 4px 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; transition: all 0.2s ease !important; opacity: 1 !important; visibility: visible !important;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
@@ -409,7 +390,7 @@ window.renderizarHorasEnPantalla = function () {
           </div>`;
       });
 
-      // RENDERIZAR ADELANTOS UNIFICADOS
+      // RENDERIZAR ADELANTOS UNIFICADOS CON BOTONES BLINDADOS
       if (adelantosPuros.length > 0) {
         let valorUnificadoMonto = Math.abs(
           Math.round(sumaAdelantos),
@@ -419,9 +400,9 @@ window.renderizarHorasEnPantalla = function () {
         let botonBorrarAdelantos = "";
         if (esSuperAdmin) {
           botonBorrarAdelantos = `
-            <div style="display:flex; justify-content:center; align-items:center; margin-top:4px;">
-              <button type="button" onclick="window.eliminarMultiplesTurnosSuperAdmin('${idUnificadosStr}')" title="Eliminar Adelantos" style="background: rgba(255, 69, 58, 0.2); border: 1px solid rgba(255, 69, 58, 0.4); border-radius: 8px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <div style="display: flex !important; justify-content: center !important; align-items: center !important; margin-top: 4px !important; width: 100% !important; opacity: 1 !important; visibility: visible !important;">
+              <button type="button" onclick="window.eliminarMultiplesTurnosSuperAdmin('${idUnificadosStr}')" title="Eliminar Adelantos" style="background: rgba(255, 69, 58, 0.25) !important; border: 1px solid #ff453a !important; border-radius: 8px !important; padding: 4px 8px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; transition: all 0.2s ease !important; opacity: 1 !important; visibility: visible !important;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
@@ -445,8 +426,8 @@ window.renderizarHorasEnPantalla = function () {
         : "1px solid rgba(255, 255, 255, 0.05)";
 
       celdasCalendario += `
-        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 115px; box-sizing: border-box; overflow: visible;">
-          <span style="font-size: 0.75rem; font-weight: 800; color: ${tieneTurno ? "#ffffff" : "#71717a"}; align-self: flex-start; margin-bottom: auto;">${dia}</span>
+        <div style="background: ${bgCelda} !important; border: ${borderCelda} !important; border-radius: 12px !important; padding: 6px !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; min-height: 125px !important; box-sizing: border-box !important; overflow: visible !important; position: relative !important;">
+          <span style="font-size: 0.75rem !important; font-weight: 800 !important; color: ${tieneTurno ? "#ffffff" : "#71717a"} !important; align-self: flex-start !important; margin-bottom: 4px !important;">${dia}</span>
           ${htmlRegistros}
         </div>`;
     }
@@ -493,74 +474,7 @@ window.renderizarHorasEnPantalla = function () {
   container.innerHTML = htmlCuerpo;
 };
 
-// ➕ ABRIR FORMULARIO DE INGRESAR HORAS
-window.toggleFormularioHoras = function () {
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
-
-  const overlay = document.getElementById("addHoursOverlay");
-  if (!overlay) return;
-
-  const estaAbierto =
-    overlay.classList.contains("open") || overlay.style.display === "flex";
-
-  if (estaAbierto) {
-    overlay.classList.remove("open");
-    overlay.style.display = "none";
-  } else {
-    overlay.classList.add("open");
-    overlay.style.setProperty("display", "flex", "important");
-    overlay.style.setProperty("align-items", "center", "important");
-    overlay.style.setProperty("justify-content", "center", "important");
-
-    // Poblar desplegable con TODOS los asistentes
-    const selectVendedor = document.getElementById("inputVendedorShift");
-    if (selectVendedor) {
-      let lista = obtenerTodosLosAsistentes();
-      let opts =
-        '<option value="" disabled selected>Selecciona un asistente...</option>';
-      lista.forEach((asist) => {
-        opts += `<option value="${asist}">${asist}</option>`;
-      });
-      selectVendedor.innerHTML = opts;
-    }
-  }
-};
-
-// 💵 ABRIR FORMULARIO DE ADELANTO
-window.toggleModalAdelanto = function (abrir) {
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
-
-  const overlay = document.getElementById("adelantoShiftOverlay");
-  if (!overlay) return;
-
-  if (abrir) {
-    overlay.classList.add("open");
-    overlay.style.setProperty("display", "flex", "important");
-    overlay.style.setProperty("align-items", "center", "important");
-    overlay.style.setProperty("justify-content", "center", "important");
-
-    // Poblar desplegable con TODOS los asistentes
-    const selectAde = document.getElementById("adeEmpleado");
-    if (selectAde) {
-      let lista = obtenerTodosLosAsistentes();
-      let opts =
-        '<option value="" disabled selected>Selecciona un asistente...</option>';
-      lista.forEach((asist) => {
-        opts += `<option value="${asist}">${asist}</option>`;
-      });
-      selectAde.innerHTML = opts;
-    }
-  } else {
-    overlay.classList.remove("open");
-    overlay.style.display = "none";
-  }
-};
-
-// ✏️ MODIFICAR TURNO (CAMILO)
+// MODIFICAR TURNO
 window.modificarTurnoSuperAdmin = function (
   idTurno,
   vendedor,
@@ -611,7 +525,7 @@ window.modificarTurnoSuperAdmin = function (
     .catch((err) => alert("❌ " + err.message));
 };
 
-// 🗑️ ELIMINAR TURNO (CAMILO)
+// ELIMINAR TURNO
 window.eliminarTurnoSuperAdmin = function (idTurno) {
   if (!verificarSiEsSuperAdmin()) return;
 
@@ -646,7 +560,7 @@ window.eliminarTurnoSuperAdmin = function (idTurno) {
     .catch((err) => console.error("Error al eliminar:", err));
 };
 
-// 🗑️ ELIMINAR MÚLTIPLES ADELANTOS (CAMILO)
+// ELIMINAR MÚLTIPLES ADELANTOS
 window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
   if (!verificarSiEsSuperAdmin()) return;
 
@@ -675,7 +589,7 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
   });
 };
 
-// 🔍 FILTRO DE BÚSQUEDA
+// FILTRO DE BÚSQUEDA
 window.filtrarHorasInternas = function () {
   window.renderizarHorasEnPantalla();
 };
