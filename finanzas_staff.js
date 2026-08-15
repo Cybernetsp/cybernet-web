@@ -182,13 +182,8 @@ window.cargarHorasDesdeMySQL = function (silencioso = false) {
       </div>`;
   }
 
-  const formData = new FormData();
-  formData.append("accion", "obtener_control_horas");
-
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
+  const ts = Date.now();
+  fetch(`https://api.cybernetsp.com/obtener_horas.php?nocache=${ts}`)
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -202,7 +197,7 @@ window.cargarHorasDesdeMySQL = function (silencioso = false) {
           pagoTurno:
             item.total !== undefined ? item.total : item.pago_turno || "0",
           estado: item.estado || "CERRADO",
-          horaInicio: item.hora_inicio || "-",
+          horaInicio: item.hora_salida || "-",
           filaIndex: item.id,
         }));
 
@@ -220,7 +215,7 @@ window.cargarHorasDesdeMySQL = function (silencioso = false) {
     })
     .catch((err) => {
       console.error(err);
-      container.innerHTML = `<div style="text-align:center; padding:40px; color:#ff453a;">❌ Error de conexión con acciones_mysql.php</div>`;
+      container.innerHTML = `<div style="text-align:center; padding:40px; color:#ff453a;">❌ Error de conexión con obtener_horas.php</div>`;
     });
 };
 
