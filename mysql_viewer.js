@@ -2,7 +2,7 @@ window.tablaMySQLActual = "netflix";
 let searchTimeoutMySQL = null;
 
 // =========================================================================
-// 👁️ APERTURA Y CONTROL DEL PANEL MYSQL
+// 👁️ APERTURA Y CONTROL DEL PANEL
 // =========================================================================
 window.toggleMysqlPanel = function () {
   if (typeof haptic === "function") haptic();
@@ -19,27 +19,10 @@ window.toggleMysqlPanel = function () {
     overlay.style.setProperty("align-items", "center", "important");
     overlay.style.setProperty("justify-content", "center", "important");
 
-    const usuarioActivoObj = JSON.parse(
-      sessionStorage.getItem("usuario_activo") || "{}",
-    );
-    const usuarioNombre = (
-      usuarioActivoObj.nombre ||
-      sessionStorage.getItem("active_staff") ||
-      ""
-    ).toUpperCase();
-    const esSuperAdmin =
-      usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
-
-    const btnAdd = document.getElementById("btnAgregarMySQL");
-    if (btnAdd) {
-      btnAdd.style.display = esSuperAdmin ? "inline-flex" : "none";
-    }
-
     cargarDatosMySQL();
   }
 };
 
-// Evaluar sesión y rol del usuario
 const usuarioActivoObj = JSON.parse(
   sessionStorage.getItem("usuario_activo") || "{}",
 );
@@ -52,12 +35,7 @@ const esSuperAdmin =
   usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
 
 document.addEventListener("DOMContentLoaded", () => {
-  if (esSuperAdmin) {
-    const btnAdd = document.getElementById("btnAgregarMySQL");
-    if (btnAdd) {
-      btnAdd.style.display = "inline-flex";
-    }
-  }
+  cargarDatosMySQL();
 });
 
 function cambiarTablaMySQL(nombreTabla, btnElement) {
@@ -91,7 +69,6 @@ function cargarDatosMySQL() {
     tableNode.parentElement.style.overflowX = "auto";
   }
 
-  // 🛡️ INYECCIÓN DE ESTILOS: TABLE-LAYOUT FIXED CON TRUNCADO INTELIGENTE
   if (!document.getElementById("css-sticky-hover-mysql")) {
     const styleSticky = document.createElement("style");
     styleSticky.id = "css-sticky-hover-mysql";
@@ -118,7 +95,6 @@ function cargarDatosMySQL() {
   const thBase =
     "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
 
-  // 1. DIBUJAR ENCABEZADOS CON PROPORCIONES ESTRICTAS
   if (esNetflix) {
     thead.innerHTML = `
       <tr>
@@ -160,7 +136,6 @@ function cargarDatosMySQL() {
       </tr>
     `;
   } else {
-    // DEMÁS PLATAFORMAS
     thead.innerHTML = `
       <tr>
         <th style="${thBase} width: 7%; color: #ff9f0a;">PROV</th>
@@ -188,7 +163,7 @@ function cargarDatosMySQL() {
           <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
           <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
         </svg>
-        Consultando MySQL...
+        Consultando datos...
       </td>
     </tr>
   `;
@@ -224,7 +199,6 @@ function cargarDatosMySQL() {
               ? "rgba(255, 255, 255, 0.015)"
               : "transparent";
 
-            // GRUPO DE FECHA EN LA CABECERA
             if (
               !esVentas &&
               !esGarantias &&
@@ -254,7 +228,6 @@ function cargarDatosMySQL() {
               `;
             }
 
-            // TEXTO COMPLETO PARA FICHA
             let textoCopiarFicha = `📺 ${window.tablaMySQLActual.toUpperCase()}\n📧 Correo: ${correoVal}\n🔑 Clave: ${claveVal}\n👤 Perfil: ${perfilVal}\n📍 PIN: ${pinVal}`;
             if (esNetflix) {
               textoCopiarFicha += `\n📅 Vence: ${vencVal}`;
@@ -265,7 +238,6 @@ function cargarDatosMySQL() {
             let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
             let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
 
-            // CELDAS CON LÍMITE RÍGIDO DE ANCHO Y RECORTE CON '...'
             let celdaCorreo =
               correoVal !== "-"
                 ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: inline-block; vertical-align: middle; cursor: pointer; transition: color 0.15s ease;" title="${correoVal}">${correoVal}</span>`
@@ -291,9 +263,6 @@ function cargarDatosMySQL() {
             const tdBase =
               "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
 
-            // ─────────────────────────────────────────────────────────────
-            // VISTA NETFLIX
-            // ─────────────────────────────────────────────────────────────
             if (esNetflix) {
               let botonesAccionNetflix = `
                 <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
@@ -310,14 +279,12 @@ function cargarDatosMySQL() {
                 `;
               }
 
-              // BOTÓN COPIAR COMPACTO (SVG SOLAMENTE)
               botonesAccionNetflix += `
                 <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
               `;
 
-              // BOTÓN HOY COMPACTO (SVG SOLAMENTE)
               if (esSuperAdmin) {
                 botonesAccionNetflix += `
                   <button onclick="window.pasarRegistroAHoyMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Pasar registro a hoy" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
@@ -346,11 +313,7 @@ function cargarDatosMySQL() {
                   <td style="${tdBase} text-align: center;">${botonesAccionNetflix}</td>
                 </tr>
               `;
-            }
-            // ─────────────────────────────────────────────────────────────
-            // DEMÁS PLATAFORMAS
-            // ─────────────────────────────────────────────────────────────
-            else if (!esVentas && !esGarantias) {
+            } else if (!esVentas && !esGarantias) {
               let botonesAccionDemas = `
                 <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
               `;
@@ -438,126 +401,92 @@ function eliminarFechaMySQL(diaEscapado) {
     .catch((err) => alert("❌ Error al procesar la eliminación por fecha."));
 }
 
-function abrirModalAgregarMySQL() {
-  if (typeof haptic === "function") haptic();
-  document.getElementById("formAgregarMySQL").reset();
-
-  const selectPlat = document.getElementById("addMySQLPlataforma");
-  if (selectPlat) {
-    selectPlat.value = window.tablaMySQLActual;
-  }
-
-  document.getElementById("modalAgregarMySQL").style.display = "flex";
-  document.getElementById("addMySQLBloque").focus();
-}
-
-function cerrarModalAgregarMySQL() {
-  if (typeof haptic === "function") haptic();
-  document.getElementById("modalAgregarMySQL").style.display = "none";
-}
-
-function guardarNuevoRegistroMySQL(e) {
-  e.preventDefault();
-  if (typeof haptic === "function") haptic();
-
-  const btn = document.getElementById("btnGuardarAddMySQL");
-  const plataforma = document.getElementById("addMySQLPlataforma").value;
-  const bloque = document.getElementById("addMySQLBloque").value.trim();
-
-  if (!bloque) {
-    alert("⚠️ Pega primero los datos de Google Sheets en el recuadro.");
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerText = "Subiendo...";
-
-  const formData = new FormData();
-  formData.append("accion", "agregar");
-  formData.append("tabla", plataforma);
-  formData.append("bloque_cuentas", bloque);
-
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      btn.disabled = false;
-      btn.innerText = "Subir a MySQL";
-
-      if (data.status === "success") {
-        cerrarModalAgregarMySQL();
-        if (
-          plataforma.toLowerCase() === window.tablaMySQLActual.toLowerCase()
-        ) {
-          cargarDatosMySQL();
-        } else {
-          window.tablaMySQLActual = plataforma;
-          document
-            .querySelectorAll(".mysql-tab-btn")
-            .forEach((b) => b.classList.remove("active"));
-          cargarDatosMySQL();
-        }
-      } else {
-        alert("❌ " + data.message);
-      }
-    })
-    .catch((err) => {
-      btn.disabled = false;
-      btn.innerText = "Subir a MySQL";
-      alert("❌ Error al conectar con el servidor.");
-    });
-}
-
+// 🌟 CARGA DE DATOS EN EL MODAL DE EDICIÓN 🌟
 function abrirModalEditarMySQL(filaEscapada) {
   if (typeof haptic === "function") haptic();
   const fila = JSON.parse(decodeURIComponent(filaEscapada));
 
-  document.getElementById("editMySQLId").value = fila.id;
-  document.getElementById("editMySQLCorreo").value =
-    fila.correo || fila.usuario || "";
-  document.getElementById("editMySQLClave").value =
-    fila.clave || fila.contrasena || "";
-  document.getElementById("editMySQLPerfil").value = fila.perfil || "";
-  document.getElementById("editMySQLPin").value = fila.pin || "";
-  document.getElementById("editMySQLVencimiento").value =
-    fila.vencimiento || "";
-  document.getElementById("editMySQLNombre").value =
-    fila.nombre || fila.cliente || "";
-  document.getElementById("editMySQLNumero").value =
-    fila.numero || fila.telefono || "";
+  const iId = document.getElementById("editMySQLId");
+  const iCorreo = document.getElementById("editMySQLCorreo");
+  const iClave = document.getElementById("editMySQLClave");
+  const iPerfil = document.getElementById("editMySQLPerfil");
+  const iPin = document.getElementById("editMySQLPin");
+  const iVenc = document.getElementById("editMySQLVencimiento");
+  const iNombre = document.getElementById("editMySQLNombre");
+  const iNumero = document.getElementById("editMySQLNumero");
+  const iFechaPago = document.getElementById("editMySQLFechaPago");
+  const iValor = document.getElementById("editMySQLValor");
+  const iPago = document.getElementById("editMySQLPago");
 
-  document.getElementById("modalEditarMySQL").style.display = "flex";
+  if (iId) iId.value = fila.id || "";
+  if (iCorreo) iCorreo.value = fila.correo || fila.usuario || "";
+  if (iClave) iClave.value = fila.clave || fila.contrasena || "";
+  if (iPerfil) iPerfil.value = fila.perfil || "";
+  if (iPin) iPin.value = fila.pin || "";
+  if (iVenc) iVenc.value = fila.vencimiento || "";
+  if (iNombre) iNombre.value = fila.nombre || fila.cliente || "";
+  if (iNumero) iNumero.value = fila.numero || fila.telefono || "";
+  if (iFechaPago) iFechaPago.value = fila.fecha || "";
+  if (iValor) iValor.value = fila.valor || "";
+  if (iPago) iPago.value = fila.pago || "";
+
+  const modal = document.getElementById("modalEditarMySQL");
+  if (modal) modal.style.display = "flex";
 }
 
 function cerrarModalEditarMySQL() {
   if (typeof haptic === "function") haptic();
-  document.getElementById("modalEditarMySQL").style.display = "none";
+  const modal = document.getElementById("modalEditarMySQL");
+  if (modal) modal.style.display = "none";
 }
 
+// 🌟 ENVÍO DE DATOS EDITADOS (INCLUYENDO FECHA PAGO, VALOR Y MÉTODO) 🌟
 function guardarEdicionMySQL(e) {
   e.preventDefault();
   if (typeof haptic === "function") haptic();
 
   const btn = document.getElementById("btnGuardarEditMySQL");
-  btn.disabled = true;
-  btn.innerText = "Guardando...";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "Guardando...";
+  }
+
+  const iFechaPago = document.getElementById("editMySQLFechaPago");
+  const iValor = document.getElementById("editMySQLValor");
+  const iPago = document.getElementById("editMySQLPago");
 
   const formData = new FormData();
   formData.append("accion", "editar");
   formData.append("tabla", window.tablaMySQLActual);
   formData.append("id", document.getElementById("editMySQLId").value);
-  formData.append("correo", document.getElementById("editMySQLCorreo").value);
-  formData.append("clave", document.getElementById("editMySQLClave").value);
-  formData.append("perfil", document.getElementById("editMySQLPerfil").value);
-  formData.append("pin", document.getElementById("editMySQLPin").value);
+  formData.append(
+    "correo",
+    document.getElementById("editMySQLCorreo").value.trim(),
+  );
+  formData.append(
+    "clave",
+    document.getElementById("editMySQLClave").value.trim(),
+  );
+  formData.append(
+    "perfil",
+    document.getElementById("editMySQLPerfil").value.trim(),
+  );
+  formData.append("pin", document.getElementById("editMySQLPin").value.trim());
   formData.append(
     "vencimiento",
-    document.getElementById("editMySQLVencimiento").value,
+    document.getElementById("editMySQLVencimiento").value.trim(),
   );
-  formData.append("nombre", document.getElementById("editMySQLNombre").value);
-  formData.append("numero", document.getElementById("editMySQLNumero").value);
+  formData.append(
+    "nombre",
+    document.getElementById("editMySQLNombre").value.trim(),
+  );
+  formData.append(
+    "numero",
+    document.getElementById("editMySQLNumero").value.trim(),
+  );
+  formData.append("fecha", iFechaPago ? iFechaPago.value.trim() : "");
+  formData.append("valor", iValor ? iValor.value.trim() : "");
+  formData.append("pago", iPago ? iPago.value.trim() : "");
 
   fetch("https://api.cybernetsp.com/acciones_mysql.php", {
     method: "POST",
@@ -565,19 +494,28 @@ function guardarEdicionMySQL(e) {
   })
     .then((res) => res.json())
     .then((data) => {
-      btn.disabled = false;
-      btn.innerText = "Guardar";
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Guardar";
+      }
 
       if (data.status === "success") {
         cerrarModalEditarMySQL();
         cargarDatosMySQL();
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${data.message}</span></div>`,
+          );
+        }
       } else {
-        alert("❌ " + data.message);
+        alert("❌ Error: " + data.message);
       }
     })
     .catch((err) => {
-      btn.disabled = false;
-      btn.innerText = "Guardar";
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Guardar";
+      }
       alert("❌ Error al actualizar el registro.");
     });
 }
@@ -609,7 +547,6 @@ function eliminarRegistroMySQL(id) {
     .catch((err) => alert("❌ Error al eliminar el registro."));
 }
 
-// COPIADO DIRECTO AL HACER CLIC SOBRE EL TEXTO
 function copiarTextoUnico(element, textoEscapado) {
   if (typeof haptic === "function") haptic();
   const texto = decodeURIComponent(textoEscapado);
@@ -658,7 +595,6 @@ function fallbackCopiar(texto, callback) {
   document.body.removeChild(textarea);
 }
 
-// COPIAR FICHA COMPLETA CON ANIMACIÓN DE CHECK
 function copiarAccesoMySQL(btn, textoEscapado) {
   if (typeof haptic === "function") haptic();
   const texto = decodeURIComponent(textoEscapado);
@@ -667,7 +603,6 @@ function copiarAccesoMySQL(btn, textoEscapado) {
     let oldHtml = btn.innerHTML;
     let oldBg = btn.style.background;
 
-    // Cambia el ícono SVG por un Checkmark verde sutil
     btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
     btn.style.background = "rgba(48, 209, 88, 0.2)";
 
