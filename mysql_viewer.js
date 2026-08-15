@@ -86,6 +86,27 @@ function cargarDatosMySQL() {
   const tbody = document.getElementById("tablaMySQLCuerpo");
   if (!tbody || !thead) return;
 
+  const tableNode = thead.closest("table");
+  if (tableNode && tableNode.parentElement) {
+    tableNode.parentElement.style.overflowX = "auto";
+  }
+
+  // 🛡️ INYECCIÓN DE ESTILOS: TABLE-LAYOUT AUTO PARA QUE LAS COLUMNAS ABRACEN EL TEXTO
+  if (!document.getElementById("css-sticky-hover-mysql")) {
+    const styleSticky = document.createElement("style");
+    styleSticky.id = "css-sticky-hover-mysql";
+    styleSticky.innerHTML = `
+      #tablaMySQLCabecera th { position: sticky !important; top: 0 !important; z-index: 100 !important; background-color: #121317 !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important; white-space: nowrap !important; }
+      .tr-mysql-row { background-color: #111216 !important; transition: background 0.2s ease !important; }
+      .tr-mysql-row:hover { background-color: rgba(255, 255, 255, 0.04) !important; }
+      .tr-mysql-row.tr-caida { background-color: rgba(255, 0, 0, 0.12) !important; }
+      .tr-mysql-row.tr-caida:hover { background-color: rgba(255, 0, 0, 0.22) !important; }
+      table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: auto !important; width: 100% !important; min-width: 1000px !important; background-color: #111216 !important; }
+      th, td { white-space: nowrap !important; }
+    `;
+    document.head.appendChild(styleSticky);
+  }
+
   const tablaLower = window.tablaMySQLActual.toLowerCase();
   const esNetflix = tablaLower === "netflix";
   const esGarantias = tablaLower === "garantias";
@@ -95,62 +116,62 @@ function cargarDatosMySQL() {
   if (esNetflix) totalColumnas = 12;
 
   const thBase =
-    "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;";
+    "padding: 12px 10px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;";
 
-  // 1. DIBUJAR ENCABEZADOS AJUSTADOS SEGÚN LA PLATAFORMA
+  // 1. DIBUJAR ENCABEZADOS AJUSTADOS (ANCHO DENSIDAD AUTO/1%)
   if (esNetflix) {
     thead.innerHTML = `
       <tr>
-        <th style="${thBase} width: 5%;">FECHA</th>
-        <th style="${thBase} width: 16%;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 9%;">CONTRASEÑA</th>
-        <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
-        <th style="${thBase} width: 4%; text-align: center;">PIN</th>
-        <th style="${thBase} width: 10%;">VENCIMIENTO</th>
-        <th style="${thBase} width: 9%;">CLIENTE</th>
-        <th style="${thBase} width: 9%;">TELÉFONO</th>
-        <th style="${thBase} width: 7%;">FECHA PAGO</th>
-        <th style="${thBase} width: 6%;">VALOR</th>
-        <th style="${thBase} width: 7%;">PAGO</th>
-        <th style="${thBase} width: 14%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        <th style="${thBase} width: 1%;">FECHA</th>
+        <th style="${thBase} width: 1%;">CORREO / USUARIO</th>
+        <th style="${thBase} width: 1%;">CONTRASEÑA</th>
+        <th style="${thBase} width: 1%; text-align: center;">PERFIL</th>
+        <th style="${thBase} width: 1%; text-align: center;">PIN</th>
+        <th style="${thBase} width: 1%;">VENCIMIENTO</th>
+        <th style="${thBase} width: 10%;">CLIENTE</th>
+        <th style="${thBase} width: 1%;">TELÉFONO</th>
+        <th style="${thBase} width: 1%;">FECHA PAGO</th>
+        <th style="${thBase} width: 1%;">VALOR</th>
+        <th style="${thBase} width: 1%;">PAGO</th>
+        <th style="${thBase} width: 1%; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   } else if (esVentas) {
     thead.innerHTML = `
       <tr>
-        <th style="${thBase} width: 10%;">FECHA</th>
-        <th style="${thBase} width: 18%;">CLIENTE / TELÉFONO</th>
-        <th style="${thBase} width: 30%;">PLATAFORMAS</th>
-        <th style="${thBase} width: 12%; color: #30d158;">PAGO</th>
-        <th style="${thBase} width: 10%;">MÉTODO</th>
-        <th style="${thBase} width: 10%; text-align: center;">TIPO</th>
-        <th style="${thBase} width: 10%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        <th style="${thBase} width: 1%;">FECHA</th>
+        <th style="${thBase} width: 1%;">CLIENTE / TELÉFONO</th>
+        <th style="${thBase} width: 20%;">PLATAFORMAS</th>
+        <th style="${thBase} width: 1%; color: #30d158;">PAGO</th>
+        <th style="${thBase} width: 1%;">MÉTODO</th>
+        <th style="${thBase} width: 1%; text-align: center;">TIPO</th>
+        <th style="${thBase} width: 1%; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   } else if (esGarantias) {
     thead.innerHTML = `
       <tr>
-        <th style="${thBase} width: 15%; text-align: center;">PLATAFORMA</th>
-        <th style="${thBase} width: 12%; color: #ff9f0a;">PROV</th>
-        <th style="${thBase} width: 8%;">FECHA</th>
-        <th style="${thBase} width: 25%;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 15%;">CONTRASEÑA</th>
-        <th style="${thBase} width: 25%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        <th style="${thBase} width: 1%; text-align: center;">PLATAFORMA</th>
+        <th style="${thBase} width: 1%; color: #ff9f0a;">PROV</th>
+        <th style="${thBase} width: 1%;">FECHA</th>
+        <th style="${thBase} width: 1%;">CORREO / USUARIO</th>
+        <th style="${thBase} width: 1%;">CONTRASEÑA</th>
+        <th style="${thBase} width: 1%; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   } else {
     // DEMÁS PLATAFORMAS
     thead.innerHTML = `
       <tr>
-        <th style="${thBase} width: 7%; color: #ff9f0a;">PROV</th>
-        <th style="${thBase} width: 6%;">FECHA</th>
-        <th style="${thBase} width: 18%;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 11%;">CONTRASEÑA</th>
-        <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
-        <th style="${thBase} width: 4%; text-align: center;">PIN</th>
+        <th style="${thBase} width: 1%; color: #ff9f0a;">PROV</th>
+        <th style="${thBase} width: 1%;">FECHA</th>
+        <th style="${thBase} width: 1%;">CORREO / USUARIO</th>
+        <th style="${thBase} width: 1%;">CONTRASEÑA</th>
+        <th style="${thBase} width: 1%; text-align: center;">PERFIL</th>
+        <th style="${thBase} width: 1%; text-align: center;">PIN</th>
         <th style="${thBase} width: 10%;">CLIENTE</th>
-        <th style="${thBase} width: 9%;">TELÉFONO</th>
-        <th style="${thBase} width: 31%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        <th style="${thBase} width: 1%;">TELÉFONO</th>
+        <th style="${thBase} width: 1%; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   }
@@ -244,38 +265,38 @@ function cargarDatosMySQL() {
             let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
             let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
 
-            // CELDAS CON COPIADO DIRECTO AL DAR CLIC (SIN BOTÓN ADICIONAL)
+            // CELDAS CON COPIADO DIRECTO AL DAR CLIC EN EL TEXTO
             let celdaCorreo =
               correoVal !== "-"
-                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color 0.15s ease;" title="Clic para copiar correo">${correoVal}</span>`
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color 0.15s ease; display: inline-block;" title="Clic para copiar correo">${correoVal}</span>`
                 : '<span style="color: #a1a1aa;">-</span>';
 
             let celdaClave =
               claveVal !== "-"
-                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color 0.15s ease;" title="Clic para copiar contraseña">${claveVal}</span>`
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; white-space: nowrap; cursor: pointer; display: inline-block;" title="Clic para copiar contraseña">${claveVal}</span>`
                 : '<span style="color: #a1a1aa;">-</span>';
 
             let celdaPin =
               pinVal !== "-"
-                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(pinVal)}')" style="color: #ffd60a; font-weight: 700; font-family: monospace; cursor: pointer; transition: color 0.15s ease;" title="Clic para copiar PIN">${pinVal}</span>`
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(pinVal)}')" style="color: #ffd60a; font-weight: 700; font-family: monospace; cursor: pointer; display: inline-block;" title="Clic para copiar PIN">${pinVal}</span>`
                 : '<span style="color: #a1a1aa;">-</span>';
 
             let celdaTelefono =
               numeroVal !== "-" && numeroVal.trim() !== ""
-                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color 0.15s ease;" title="Clic para copiar teléfono">${numeroVal}</span>`
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; white-space: nowrap; cursor: pointer; display: inline-block;" title="Clic para copiar teléfono">${numeroVal}</span>`
                 : esSuperAdmin
                   ? `<button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Agregar Teléfono" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: var(--ios-green); padding: 4px 10px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.8rem; display: inline-flex; align-items: center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>`
                   : '<span style="color: #a1a1aa;">-</span>';
 
             const tdBase =
-              "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03);";
+              "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap;";
 
             // ─────────────────────────────────────────────────────────────
             // VISTA NETFLIX
             // ─────────────────────────────────────────────────────────────
             if (esNetflix) {
               let botonesAccionNetflix = `
-                <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; min-width: 140px; white-space: nowrap;">
+                <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; white-space: nowrap;">
               `;
 
               if (esSuperAdmin) {
