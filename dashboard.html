@@ -1334,7 +1334,7 @@
       </div>
     </div>
 
-    <!-- 🗄️ MODAL: VISOR MAESTRO MULTI-TABLA MYSQL (CENTRADO EN PANTALLA) -->
+    <!-- 🗄️ MODAL: VISOR MAESTRO MULTI-TABLA (BÓVEDA DE CUENTAS) -->
     <div
       class="overlay-ios"
       id="mysqlOverlay"
@@ -1421,27 +1421,8 @@
                 <line x1="9" y1="3" x2="9" y2="21"></line>
               </svg>
             </div>
-            Base de Datos MySQL
+            Bóveda de Cuentas
           </h3>
-
-          <button
-            id="btnAgregarMySQL"
-            class="btn-ios btn-primary"
-            onclick="abrirModalAgregarMySQL()"
-            style="
-              display: none;
-              padding: 8px 16px;
-              font-weight: 800;
-              border-radius: 50px;
-              background: #30d158;
-              color: #000;
-              white-space: nowrap;
-              font-size: 0.82rem;
-              cursor: pointer;
-            "
-          >
-            ➕ Agregar Registro
-          </button>
 
           <div
             class="mysql-search-box"
@@ -1710,7 +1691,7 @@
       </div>
     </div>
 
-    <!-- ➕ SUB-MODAL: AGREGAR REGISTRO A MYSQL -->
+    <!-- ➕ SUB-MODAL: AGREGAR REGISTRO -->
     <div
       class="overlay-ios"
       id="modalAgregarMySQL"
@@ -1751,7 +1732,7 @@
             text-align: center;
           "
         >
-          ➕ Cargar Cuentas en MySQL
+          ➕ Cargar Cuentas
         </h3>
         <form
           id="formAgregarMySQL"
@@ -1851,7 +1832,7 @@
                 font-weight: 800;
               "
             >
-              Subir a MySQL
+              Subir Registros
             </button>
           </div>
         </form>
@@ -1899,7 +1880,7 @@
             text-align: center;
           "
         >
-          ✏️ Editar Registro en MySQL
+          ✏️ Editar Registro
         </h3>
         <form
           id="formEditarMySQL"
@@ -1999,6 +1980,50 @@
               />
             </div>
           </div>
+
+          <!-- CAMPOS DE PAGO AGREGADOS -->
+          <div style="display: flex; gap: 10px">
+            <div style="flex: 1">
+              <label
+                style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
+                >FECHA PAGO</label
+              >
+              <input
+                type="text"
+                id="editMySQLFechaPago"
+                class="input-ios"
+                placeholder="Ej: 14-ago"
+                style="background: rgba(0, 0, 0, 0.4) !important"
+              />
+            </div>
+            <div style="flex: 1">
+              <label
+                style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
+                >VALOR</label
+              >
+              <input
+                type="text"
+                id="editMySQLValor"
+                class="input-ios"
+                placeholder="Ej: $15.000"
+                style="background: rgba(0, 0, 0, 0.4) !important"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
+              >MÉTODO DE PAGO</label
+            >
+            <input
+              type="text"
+              id="editMySQLPago"
+              class="input-ios"
+              placeholder="Ej: Bre-B, Nequi, Daviplata"
+              style="background: rgba(0, 0, 0, 0.4) !important"
+            />
+          </div>
+
           <div style="display: flex; gap: 10px; margin-top: 15px">
             <button
               type="button"
