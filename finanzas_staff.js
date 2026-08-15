@@ -757,8 +757,8 @@ window.renderDashboard = function () {
   if (document.getElementById("val_nomina"))
     document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
 
-  // 3. 🎯 RENDERIZADO DE ANILLOS Y LEYENDAS (VERDE / ROJO)
-  window.renderAnillosBentoWidget(pctIngresos, pctGastos);
+  // 3. 🎯 RENDERIZADO DE ANILLOS Y LEYENDAS EN VIVO (VERDE / ROJO)
+  window.actualizarWidgetAnillosYBanderas(pctIngresos, pctGastos);
 
   // 4. PROYECCIONES Y FONDOS
   const baseVentas = d.ingresos || 0;
@@ -808,61 +808,83 @@ window.renderDashboard = function () {
 };
 
 // 🎯 DIBUJAR ANILLOS DE COLOR Y LEYENDA (INGRESOS VERDE / GASTOS ROJO)
-window.renderAnillosBentoWidget = function (pctIng, pctGas) {
-  let container = document.getElementById("bentoRingsWidgetContainer");
+window.actualizarWidgetAnillosYBanderas = function (pctIng, pctGas) {
+  // 1. Actualizar textos de Porcentaje en vivo
+  const elementos = document.querySelectorAll(
+    "span, div, p, b, strong, td, th",
+  );
 
-  if (!container) {
-    const parent =
-      document.querySelector("#val_neto")?.closest(".card-ios") ||
-      document.querySelector("#val_neto")?.closest("div[class*='card']");
-    if (parent) {
-      container =
-        parent.querySelector("svg")?.parentElement || parent.children[1];
+  elementos.forEach((el) => {
+    if (el.children.length === 0 && el.textContent) {
+      const txt = el.textContent.trim();
+
+      if (txt === "Ingresos Totales") {
+        const contenedorFila = el.closest("div, flex, tr") || el.parentElement;
+        if (contenedorFila) {
+          const elPct = Array.from(
+            contenedorFila.querySelectorAll("span, div, p, b, strong"),
+          ).find((node) => node !== el && node.textContent.includes("%"));
+          if (elPct) elPct.textContent = pctIng + "%";
+        }
+      }
+
+      if (txt === "Gastos Operativos") {
+        const contenedorFila = el.closest("div, flex, tr") || el.parentElement;
+        if (contenedorFila) {
+          const elPct = Array.from(
+            contenedorFila.querySelectorAll("span, div, p, b, strong"),
+          ).find((node) => node !== el && node.textContent.includes("%"));
+          if (elPct) elPct.textContent = pctGas + "%";
+        }
+      }
+    }
+  });
+
+  // 2. Animar los Anillos SVG de Color (Verde #30d158 e Interior Rojo #ff453a)
+  const elementoCajaReal =
+    document.getElementById("val_neto") ||
+    Array.from(document.querySelectorAll("*")).find(
+      (e) => e.textContent && e.textContent.includes("CAJA REAL"),
+    );
+
+  if (elementoCajaReal) {
+    const tarjetaBento = elementoCajaReal.closest(
+      ".card-ios, .bento-card, div",
+    );
+    if (tarjetaBento) {
+      const svg = tarjetaBento.querySelector("svg");
+      if (svg) {
+        const c1 = 138.23; // Circunferencia radio 22
+        const c2 = 87.96; // Circunferencia radio 14
+
+        const offsetIng = c1 - (c1 * Math.min(pctIng, 100)) / 100;
+        const offsetGas = c2 - (c2 * Math.min(pctGas, 100)) / 100;
+
+        const nuevoSvgHTML = `
+          <svg width="68" height="68" viewBox="0 0 60 60" style="transform: rotate(-90deg); flex-shrink: 0; filter: drop-shadow(0 0 6px rgba(0,0,0,0.5));">
+            <!-- Pista Exterior (Ingresos) -->
+            <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(48, 209, 88, 0.15)" stroke-width="5.5" />
+            <!-- Anillo Exterior Verde -->
+            <circle cx="30" cy="30" r="22" fill="none" stroke="#30d158" stroke-width="5.5"
+                    stroke-dasharray="${c1}" stroke-dashoffset="${offsetIng}" stroke-linecap="round"
+                    style="transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);" />
+
+            <!-- Pista Interior (Gastos) -->
+            <circle cx="30" cy="30" r="14" fill="none" stroke="rgba(255, 69, 58, 0.15)" stroke-width="5.5" />
+            <!-- Anillo Interior Rojo -->
+            <circle cx="30" cy="30" r="14" fill="none" stroke="#ff453a" stroke-width="5.5"
+                    stroke-dasharray="${c2}" stroke-dashoffset="${offsetGas}" stroke-linecap="round"
+                    style="transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);" />
+          </svg>
+        `;
+
+        const parentSvg = svg.parentElement;
+        if (parentSvg) {
+          parentSvg.innerHTML = nuevoSvgHTML;
+        }
+      }
     }
   }
-
-  if (!container) return;
-
-  const c1 = 138.23; // Circunferencia exterior (r=22)
-  const c2 = 87.96; // Circunferencia interior (r=14)
-
-  const offsetIng = c1 - (c1 * Math.min(pctIng, 100)) / 100;
-  const offsetGas = c2 - (c2 * Math.min(pctGas, 100)) / 100;
-
-  container.id = "bentoRingsWidgetContainer";
-  container.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 16px; margin-left: auto;">
-      <!-- Anillos SVG Concéntricos -->
-      <svg width="64" height="60" viewBox="0 0 60 60" style="transform: rotate(-90deg); flex-shrink: 0; filter: drop-shadow(0 0 8px rgba(0,0,0,0.5));">
-        <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(48, 209, 88, 0.15)" stroke-width="5" />
-        <circle cx="30" cy="30" r="22" fill="none" stroke="#30d158" stroke-width="5"
-                stroke-dasharray="${c1}" stroke-dashoffset="${offsetIng}" stroke-linecap="round"
-                style="transition: stroke-dashoffset 0.8s ease;" />
-        <circle cx="30" cy="30" r="14" fill="none" stroke="rgba(255, 69, 58, 0.15)" stroke-width="5" />
-        <circle cx="30" cy="30" r="14" fill="none" stroke="#ff453a" stroke-width="5"
-                stroke-dasharray="${c2}" stroke-dashoffset="${offsetGas}" stroke-linecap="round"
-                style="transition: stroke-dashoffset 0.8s ease;" />
-      </svg>
-
-      <!-- Leyendas y Porcentajes -->
-      <div style="display: flex; flex-direction: column; gap: 6px; min-width: 145px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
-          <span style="color: #a1a1aa; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: #30d158; display: inline-block;"></span>
-            Ingresos Totales
-          </span>
-          <span style="color: #ffffff; font-weight: 800; font-family: monospace;">${pctIng}%</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
-          <span style="color: #a1a1aa; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: #ff453a; display: inline-block;"></span>
-            Gastos Operativos
-          </span>
-          <span style="color: #ffffff; font-weight: 800; font-family: monospace;">${pctGas}%</span>
-        </div>
-      </div>
-    </div>
-  `;
 };
 
 /* ==========================================================================
