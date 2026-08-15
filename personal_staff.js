@@ -84,7 +84,7 @@ let turnoActivo = false;
 
 let inactividadTimer = null;
 let pausadoPorInactividad = false;
-const TIEMPO_MAX_INACTIVIDAD = 25 * 60 * 1000; // 25 Minutos en milisegundos
+const TIEMPO_MAX_INACTIVIDAD = 25 * 60 * 1000; // 25 Minutos
 
 window.toggleTrackerShift = function () {
   if (turnoActivo) detenerTurnoTracker(false);
@@ -122,7 +122,6 @@ function iniciarTurnoTracker() {
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // Guardado automático en MySQL cada 5 minutos (300 s)
     if (secParaGuardar >= 300) {
       enviarTiempoTrackerAMySQL(
         activeStaff,
@@ -174,7 +173,7 @@ function detenerTurnoTracker(porInactividad = false) {
     pausadoPorInactividad = true;
     if (typeof triggerToast === "function")
       triggerToast(
-        `<div style="color:var(--ios-orange);">⏸ Turno pausado a los 25m por inactividad.</div>`,
+        `<div style="color:var(--ios-orange);">⏸ Turno auto-pausado por inactividad.</div>`,
       );
   } else {
     pausadoPorInactividad = false;
@@ -195,9 +194,9 @@ function enviarTiempoTrackerAMySQL(asistente, tiempoHHMMSS, razon) {
     .then((res) => {
       if (
         res.status === "success" &&
-        typeof window.cargarHorasDirectasPHP === "function"
+        typeof window.cargarTurnosMySQLDirecto === "function"
       ) {
-        window.cargarHorasDirectasPHP();
+        window.cargarTurnosMySQLDirecto();
       }
     })
     .catch((e) => console.error("Error guardando tiempo:", e));
@@ -211,7 +210,6 @@ function formatoSegundosTracker(totalSeg) {
 }
 
 function resetInactividad() {
-  // Si estaba pausado por inactividad y el usuario vuelve a mover el mouse, reanuda automáticamente
   if (pausadoPorInactividad && !turnoActivo) {
     iniciarTurnoTracker();
   }
@@ -240,7 +238,6 @@ function detenerDetectorInactividad() {
   clearTimeout(inactividadTimer);
 }
 
-// Envío sincrónico al cerrar la ventana o cambiar de página
 window.addEventListener("beforeunload", function () {
   if (turnoActivo && secParaGuardar > 0) {
     const activeStaff = (
@@ -259,7 +256,7 @@ window.addEventListener("beforeunload", function () {
 });
 
 // ==========================================
-// 3. CALENDARIO Y CONSULTA A OBTENER_HORAS.PHP
+// 3. CALENDARIO Y CONSULTA A OBTENER_HORAS.PHP (DIRECTO SIN ERRORES)
 // ==========================================
 function parsearFechaTurno(fechaRaw) {
   if (!fechaRaw) return new Date();
@@ -318,24 +315,24 @@ window.toggleShiftsPanel = function () {
       if (btnNom) btnNom.style.setProperty("display", "none", "important");
     }
 
-    window.cargarHorasDirectasPHP();
+    window.cargarTurnosMySQLDirecto();
   }
 };
 
-// 🔄 SOBRESCRIBE CUALQUIER FUNCIÓN VIEJA DE CORE.JS QUE LLAME A GOOGLE APPS SCRIPT
-window.cargarHorasDirectasPHP = function () {
+// 🚀 FUNCIÓN AISLADA QUE CONSULTA OBTENER_HORAS.PHP
+window.cargarTurnosMySQLDirecto = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
 
   container.innerHTML = `<div style="text-align:center; padding:45px; color:#0a84ff;">Sincronizando con MySQL...</div>`;
 
-  fetch(window.URL_OBTENER_HORAS)
+  fetch("https://api.cybernetsp.com/obtener_horas.php")
     .then(async (res) => {
       const text = await res.text();
       try {
         return JSON.parse(text);
       } catch (e) {
-        throw new Error("Respuesta no válida del servidor");
+        throw new Error("Respuesta no válida del servidor PHP");
       }
     })
     .then((res) => {
@@ -351,9 +348,9 @@ window.cargarHorasDirectasPHP = function () {
     });
 };
 
-// Alias de seguridad para compatibilidad con botones existentes
-window.cargarHorasDesdeMySQL = window.cargarHorasDirectasPHP;
-window.forzarRefrescoDeHoras = window.cargarHorasDirectasPHP;
+// Mapeos para neutralizar llamadas viejas de otros archivos
+window.cargarHorasDesdeMySQL = window.cargarTurnosMySQLDirecto;
+window.forzarRefrescoDeHoras = window.cargarTurnosMySQLDirecto;
 
 window.cambiarMesTurnos = function (mesIndex) {
   window.filtroMesTurnos = parseInt(mesIndex, 10);
@@ -717,7 +714,7 @@ window.ejecutarAdelantoDesdeShift = function (e) {
       }
       if (res && res.status === "success") {
         window.toggleModalAdelanto(false);
-        window.cargarHorasDirectasPHP();
+        window.cargarTurnosMySQLDirecto();
       } else {
         alert("❌ Error: " + (res ? res.message : "Fallo guardando"));
       }
@@ -768,7 +765,7 @@ window.ejecutarGuardadoHorasManual = function (e) {
       }
       if (res && res.status === "success") {
         window.toggleFormularioHoras();
-        window.cargarHorasDirectasPHP();
+        window.cargarTurnosMySQLDirecto();
       } else {
         alert("❌ Error: " + (res ? res.message : "Fallo"));
       }
@@ -805,7 +802,7 @@ window.modificarTurnoSuperAdmin = function (
   })
     .then((res) => res.json())
     .then((res) => {
-      if (res && res.status === "success") window.cargarHorasDirectasPHP();
+      if (res && res.status === "success") window.cargarTurnosMySQLDirecto();
       else alert("⚠️ Error: " + (res ? res.message : ""));
     });
 };
@@ -823,7 +820,7 @@ window.eliminarTurnoSuperAdmin = function (idTurno) {
   })
     .then((res) => res.json())
     .then((res) => {
-      if (res && res.status === "success") window.cargarHorasDirectasPHP();
+      if (res && res.status === "success") window.cargarTurnosMySQLDirecto();
     });
 };
 
@@ -841,7 +838,7 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
       body: `id=${encodeURIComponent(id)}`,
     }).then((res) => res.json()),
   );
-  Promise.all(peticiones).then(() => window.cargarHorasDirectasPHP());
+  Promise.all(peticiones).then(() => window.cargarTurnosMySQLDirecto());
 };
 
 // ==========================================
