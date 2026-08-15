@@ -1,5 +1,5 @@
-/* ==========================================================================
-   📧 CYBERNET OS - MÓDULO GMAIL / CONSULTA DE MENSAJES (gmail_viewer.js)
+}/* ==========================================================================
+   📧 CYBERNET OS - MÓDULO GMAIL / CONSULTA EN TIEMPO REAL (gmail_viewer.js)
    ========================================================================== */
 
 window.memoriaGmailDatos = [];
@@ -10,10 +10,7 @@ window.APPS_SCRIPT_DIRECT_URL =
 window.toggleGmailPanel = function () {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("gmailOverlay");
-  if (!overlay) {
-    alert("⚠️ Error: No se encontró el modal #gmailOverlay en el HTML.");
-    return;
-  }
+  if (!overlay) return;
 
   if (overlay.classList.contains("open") || overlay.style.display === "flex") {
     overlay.classList.remove("open");
@@ -34,7 +31,7 @@ window.toggleGmailPanel = function () {
   }
 };
 
-// 🔄 CONSULTA DUAL CON FALLBACK AUTOMÁTICO A GOOGLE APPS SCRIPT
+// 🔄 CONSULTA DIRECTA CON TIMEOUT DE SEGURIDAD (MÁXIMO 10 SEGUNDOS)
 window.cargarDatosGmail = function () {
   if (typeof haptic === "function") haptic();
   const contenedor = document.getElementById("contenedorGmailMensajes");
@@ -46,12 +43,13 @@ window.cargarDatosGmail = function () {
   if (!correoVal) {
     contenedor.innerHTML = `
       <div style="text-align: center; padding: 40px 20px; color: #ff9f0a; font-weight: 600; background: rgba(255, 159, 10, 0.05); border-radius: 18px; border: 1px dashed rgba(255, 159, 10, 0.25);">
-        ⚠️ Por favor ingresa un correo electrónico en la casilla de búsqueda arriba.
+        ⚠️ Ingresa un correo electrónico arriba para consultar la bandeja.
       </div>`;
     if (inputSearch) inputSearch.focus();
     return;
   }
 
+  // Estado de carga visual
   contenedor.innerHTML = `
     <div style="text-align: center; padding: 45px; color: #ea4335;">
       <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
@@ -60,75 +58,53 @@ window.cargarDatosGmail = function () {
       </div>
     </div>`;
 
-  const phpUrl = `https://api.cybernetsp.com/obtener_gmail.php?correo=${encodeURIComponent(correoVal)}`;
+  const cbName = "cb_gmail_" + Date.now();
+  let yaRespondio = false;
 
-  // Intento 1: Servidor PHP
-  fetch(phpUrl)
-    .then(async (response) => {
-      const text = await response.text();
-      try {
-        return JSON.parse(text);
-      } catch (err) {
-        throw new Error("Formato inválido del PHP");
-      }
-    })
-    .then((res) => {
-      if (res && res.status === "error") {
-        contenedor.innerHTML = `
-          <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
-            ❌ ${res.message || "No se encontraron mensajes para este correo."}
-          </div>`;
-        return;
-      }
+  // Temporizador de corte (10 segundos máximo)
+  const timerTimeout = setTimeout(() => {
+    if (!yaRespondio) {
+      yaRespondio = true;
+      delete window[cbName];
+      const scriptTag = document.getElementById("script_" + cbName);
+      if (scriptTag) scriptTag.remove();
 
-      let lista =
-        res.data ||
-        res.mensajes ||
-        res.correos ||
-        (Array.isArray(res) ? res : []);
-      window.memoriaGmailDatos = lista;
-      window.renderizarListaGmail(correoVal);
-    })
-    .catch((err) => {
-      console.warn(
-        "PHP falló o bloqueó CORS, activando conexión directa con Google Apps Script por JSONP...",
-        err,
-      );
-      // Intento 2: Fallback directo a Google Apps Script por JSONP
-      window.consultarGmailDirectoJSONP(correoVal);
-    });
-};
+      contenedor.innerHTML = `
+        <div style="text-align: center; padding: 35px 20px; color: #a1a1aa; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 18px; border: 1px dashed rgba(255, 255, 255, 0.08);">
+          📭 No se encontraron correos recientes o notificaciones para <b>${correoVal}</b> en la última hora.
+        </div>`;
+    }
+  }, 10000);
 
-// ⚡ FALLBACK DIRECTO VIA JSONP A APPS SCRIPT (GARANTÍA DE CERO ERRORES DE RED)
-window.consultarGmailDirectoJSONP = function (correoVal) {
-  const contenedor = document.getElementById("contenedorGmailMensajes");
-  const cbName = "cb_gmail_direct_" + Date.now();
-
+  // Callback dinámico
   window[cbName] = function (res) {
-    const oldScript = document.getElementById("node_" + cbName);
-    if (oldScript) oldScript.remove();
+    if (yaRespondio) return;
+    yaRespondio = true;
+    clearTimeout(timerTimeout);
+
+    const scriptTag = document.getElementById("script_" + cbName);
+    if (scriptTag) scriptTag.remove();
     delete window[cbName];
 
     if (res && res.status === "success") {
       window.memoriaGmailDatos = res.data || [];
       window.renderizarListaGmail(correoVal);
     } else {
-      if (contenedor) {
-        contenedor.innerHTML = `
-          <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
-            ❌ ${res ? res.message || "No se encontraron correos recientes." : "Error de consulta en Google Apps Script."}
-          </div>`;
-      }
+      contenedor.innerHTML = `
+        <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
+          ❌ ${res ? res.message || "No se encontraron mensajes para este correo." : "Error de respuesta del servidor."}
+        </div>`;
     }
   };
 
+  // Inyección de script JSONP directo a Google
   const script = document.createElement("script");
-  script.id = "node_" + cbName;
+  script.id = "script_" + cbName;
   script.src = `${window.APPS_SCRIPT_DIRECT_URL}?action=obtenerCorreosRecientesGlobal&correo=${encodeURIComponent(correoVal)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
 
-// 🎨 RENDERIZADO DE LA LISTA DE MENSAJES Y EXTRACCIÓN INTELIGENTE DE CÓDIGOS
+// 🎨 RENDERIZADO DE MENSAJES Y EXTRACCIÓN DE CÓDIGOS DE ACCESO
 window.renderizarListaGmail = function (correoBuscado = "") {
   const contenedor = document.getElementById("contenedorGmailMensajes");
   if (!contenedor) return;
@@ -138,48 +114,46 @@ window.renderizarListaGmail = function (correoBuscado = "") {
   if (!datos || datos.length === 0) {
     contenedor.innerHTML = `
       <div style="text-align: center; padding: 40px 20px; color: #a1a1aa; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 18px; border: 1px dashed rgba(255, 255, 255, 0.08);">
-        📭 No hay mensajes o notificaciones recientes para <b>${correoBuscado}</b>.
+        📭 No hay correos o códigos de verificación recientes (última hora) para <b>${correoBuscado}</b>.
       </div>`;
     return;
   }
 
   let html = "";
   datos.forEach((item) => {
-    let remitente = item.remitente || item.de || item.from || "Google / Apps";
+    let remitente = item.remitente || item.de || item.from || "Notificación";
     let asunto = item.asunto || item.subject || "Sin asunto";
     let fecha = item.fecha || item.date || "Reciente";
     let fragmento = item.fragmento || item.cuerpo || item.snippet || "";
     let cuerpoHtml = item.cuerpoHtml || item.html || "";
 
-    // 🔍 Extracción automática de Código o Enlace
     let codigoExtraido = "";
     let enlaceExtraido = "";
-
     let textoBuscar = fragmento + " " + cuerpoHtml;
 
-    // Buscar código numérico de 4 a 8 dígitos
+    // Extracción automática de código numérico
     let matchCod =
       textoBuscar.match(/(?:c[oó]digo|code|verification)[:\s]*([0-9]{4,8})/i) ||
       textoBuscar.match(/\b([0-9]{4,8})\b/);
     if (matchCod) {
-      let codCandidate = matchCod[1] || matchCod[0];
-      if (["2024", "2025", "2026", "2027"].indexOf(codCandidate) === -1) {
-        codigoExtraido = codCandidate;
+      let cand = matchCod[1] || matchCod[0];
+      if (["2024", "2025", "2026", "2027"].indexOf(cand) === -1) {
+        codigoExtraido = cand;
       }
     }
 
-    // Buscar enlaces de verificación
+    // Extracción de enlace de verificación
     let matchLink =
       cuerpoHtml.match(/href="(https:\/\/[^"]+)"/i) ||
       textoBuscar.match(/(https:\/\/[^\s"<]+)/i);
     if (matchLink) {
-      let linkCandidate = matchLink[1] || matchLink[0];
+      let candLink = matchLink[1] || matchLink[0];
       if (
-        linkCandidate.indexOf("netflix.com") !== -1 ||
-        linkCandidate.indexOf("disney") !== -1 ||
-        linkCandidate.indexOf("verify") !== -1
+        candLink.indexOf("netflix.com") !== -1 ||
+        candLink.indexOf("disney") !== -1 ||
+        candLink.indexOf("verify") !== -1
       ) {
-        enlaceExtraido = linkCandidate.replace(/&amp;/g, "&");
+        enlaceExtraido = candLink.replace(/&amp;/g, "&");
       }
     }
 
@@ -189,7 +163,6 @@ window.renderizarListaGmail = function (correoBuscado = "") {
     html += `
       <div class="gmail-card-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(234, 67, 53, 0.35)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
         
-        <!-- Encabezado -->
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
             <span style="background: rgba(234, 67, 53, 0.15); border: 1px solid rgba(234, 67, 53, 0.3); color: #ea4335; font-weight: 800; font-size: 0.72rem; padding: 3px 10px; border-radius: 8px; text-transform: uppercase;">
@@ -204,12 +177,10 @@ window.renderizarListaGmail = function (correoBuscado = "") {
           </span>
         </div>
 
-        <!-- Fragmento del mensaje -->
         <div style="background: rgba(0, 0, 0, 0.35); padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.82rem; color: #e4e4e7; line-height: 1.4; word-break: break-word;">
           ${fragmento || asunto}
         </div>
 
-        <!-- Botones de Acción -->
         <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 8px;">
             ${
