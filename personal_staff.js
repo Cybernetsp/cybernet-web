@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO DE BARRA SUPERIOR (AUTO-GUARDADO Y AUTO-PAUSA POR INACTIVIDAD)
+// 2. CRONÓMETRO DE BARRA SUPERIOR (AUTO-GUARDADO Y PAUSA POR INACTIVIDAD)
 // ==========================================
 let secCronometroTotal = 0;
 let secParaGuardar = 0;
@@ -122,7 +122,7 @@ function iniciarTurnoTracker() {
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // Cada 5 minutos (300 s) envía copia de respaldo a MySQL
+    // Respaldo automático en MySQL cada 5 minutos
     if (secParaGuardar >= 300) {
       enviarTiempoTrackerAMySQL(
         activeStaff,
@@ -136,7 +136,7 @@ function iniciarTurnoTracker() {
   iniciarDetectorInactividad();
   if (typeof triggerToast === "function")
     triggerToast(
-      `<div style="color:var(--ios-green);">▶ Turno iniciado. Guardado automático cada 5m.</div>`,
+      `<div style="color:var(--ios-green);">▶ Turno iniciado. Guardado automático activo.</div>`,
     );
 }
 
@@ -174,7 +174,7 @@ function detenerTurnoTracker(porInactividad = false) {
     pausadoPorInactividad = true;
     if (typeof triggerToast === "function")
       triggerToast(
-        `<div style="color:var(--ios-orange);">⏸ Turno pausado tras 25m de inactividad.</div>`,
+        `<div style="color:var(--ios-orange);">⏸ Turno pausado por 25m de inactividad.</div>`,
       );
   } else {
     pausadoPorInactividad = false;
@@ -210,7 +210,7 @@ function formatoSegundosTracker(totalSeg) {
 
 function resetInactividad() {
   if (pausadoPorInactividad && !turnoActivo) {
-    iniciarTurnoTracker(); // Reanuda automáticamente al detectar actividad
+    iniciarTurnoTracker(); // Reanuda al mover el mouse o tocar pantalla
   }
 
   clearTimeout(inactividadTimer);
@@ -237,7 +237,6 @@ function detenerDetectorInactividad() {
   clearTimeout(inactividadTimer);
 }
 
-// Respaldo sincrónico al cerrar navegador o pestaña
 window.addEventListener("beforeunload", function () {
   if (turnoActivo && secParaGuardar > 0) {
     const activeStaff = (
@@ -328,9 +327,7 @@ window.cargarHorasDirectasPHP = function () {
   const ts = new Date().getTime();
   fetch(`https://api.cybernetsp.com/obtener_horas.php?nocache=${ts}`, {
     method: "GET",
-    headers: {
-      Accept: "application/json",
-    },
+    headers: { Accept: "application/json" },
   })
     .then(async (res) => {
       const text = await res.text();
@@ -353,7 +350,6 @@ window.cargarHorasDirectasPHP = function () {
     });
 };
 
-// Sobrescribir nombres legados para anular fallbacks viejos
 window.cargarHorasDesdeMySQL = window.cargarHorasDirectasPHP;
 window.cargarTurnosMySQLDirecto = window.cargarHorasDirectasPHP;
 window.forzarRefrescoDeHoras = window.cargarHorasDirectasPHP;
@@ -848,7 +844,7 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
 };
 
 // ==========================================
-// 5. MÓDULO NÓMINA BENTO (FLEXBOX REAL)
+// 5. MÓDULO NÓMINA BENTO (DISEÑO HORIZONTAL FLEXBOX REAL)
 // ==========================================
 window.abrirTotalNomina = function () {
   const overlay = document.getElementById("nominaOverlay");
@@ -1040,6 +1036,9 @@ window.renderizarTotalNomina = function () {
 
   container.innerHTML = htmlFinal;
 };
+
+// 🚫 ANULAR CUALQUIER SOBREESCRITURA DE OTROS ARCHIVOS (P. EJ. FINANZAS_STAFF.JS)
+window.cargarNominaMySQL = window.renderizarTotalNomina;
 
 window.filtrarHorasInternas = function () {
   window.renderizarHorasEnPantalla();
