@@ -2205,44 +2205,46 @@
     </div>
 
     <!-- TODOS LOS MODALES RESTANTES DE TU SISTEMA (Ventas, Finanzas, Cargar, etc.) -->
-    <!-- 📦 MODAL OPTIMIZADO CON SCROLL: ENTREGAR SERVICIO / VENDER -->
+    <!-- 📦 MODAL OPTIMIZADO: ENTREGAR SERVICIO / VENDER -->
     <div
       class="overlay-ios"
       id="ventasOverlay"
       style="
         display: none;
         z-index: 15000;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.82);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        align-items: center;
-        justify-content: center;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0, 0, 0, 0.82) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        align-items: center !important;
+        justify-content: center !important;
       "
     >
       <div
         class="modal-ios"
         style="
-          max-width: 480px;
-          width: 92%;
-          max-height: 90vh;
-          background: rgba(22, 22, 26, 0.95);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 28px;
-          padding: 20px 24px;
-          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.85);
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-          box-sizing: border-box;
-          overflow: hidden;
+          max-width: 490px !important;
+          width: 92% !important;
+          max-height: 88vh !important;
+          background: #141418 !important;
+          border: 1px solid rgba(10, 132, 255, 0.3) !important;
+          border-radius: 26px !important;
+          padding: 22px 24px !important;
+          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9) !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 14px !important;
+          box-sizing: border-box !important;
+          overflow: hidden !important;
+          margin: auto !important;
         "
+        onclick="event.stopPropagation()"
       >
-        <!-- Encabezado Modal (Fijo en la parte superior) -->
+        <!-- Encabezado Fijo -->
         <div
           style="
             display: flex;
@@ -2289,14 +2291,14 @@
                   margin: 0;
                   color: #ffffff;
                   font-weight: 800;
-                  font-size: 1.2rem;
+                  font-size: 1.15rem;
                   letter-spacing: -0.3px;
                 "
               >
                 Entregar servicio
               </h3>
-              <span style="font-size: 0.7rem; color: #a1a1aa; font-weight: 600"
-                >Asignación inmediata desde MySQL</span
+              <span style="font-size: 0.72rem; color: #a1a1aa; font-weight: 600"
+                >Asignación inmediata desde la Bóveda</span
               >
             </div>
           </div>
@@ -2307,14 +2309,14 @@
               background: rgba(255, 255, 255, 0.08);
               border: 1px solid rgba(255, 255, 255, 0.1);
               color: #a1a1aa;
-              width: 32px;
-              height: 32px;
+              width: 30px;
+              height: 30px;
               border-radius: 50%;
               cursor: pointer;
               display: flex;
               align-items: center;
               justify-content: center;
-              font-size: 0.9rem;
+              font-size: 0.85rem;
               transition: all 0.2s ease;
             "
           >
@@ -2322,18 +2324,18 @@
           </button>
         </div>
 
-        <!-- Formulario con Desplazamiento (Scrollable) -->
+        <!-- Formulario con Desplazamiento Interno -->
         <form
           id="formRegistrarVentaModal"
           onsubmit="ejecutarVentaFinal(event)"
           style="
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
             margin: 0;
             flex: 1;
             overflow-y: auto;
-            padding-right: 4px;
+            padding-right: 2px;
             box-sizing: border-box;
           "
         >
@@ -2342,8 +2344,8 @@
             style="
               background: rgba(255, 255, 255, 0.025);
               border: 1px solid rgba(255, 255, 255, 0.07);
-              padding: 14px;
-              border-radius: 18px;
+              padding: 12px 14px;
+              border-radius: 16px;
               display: flex;
               flex-direction: column;
               gap: 8px;
@@ -2361,32 +2363,6 @@
             >
 
             <div style="display: flex; gap: 8px; align-items: center">
-              <div
-                style="
-                  width: 38px;
-                  height: 38px;
-                  border-radius: 10px;
-                  background: rgba(255, 255, 255, 0.05);
-                  border: 1px solid rgba(255, 255, 255, 0.1);
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  color: #0a84ff;
-                  flex-shrink: 0;
-                "
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                >
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              </div>
               <input
                 type="text"
                 id="vendedorClienteNombre"
@@ -2394,13 +2370,15 @@
                 class="input-ios"
                 style="
                   flex: 1;
-                  background: rgba(0, 0, 0, 0.35) !important;
-                  padding: 10px 12px;
-                  border-radius: 10px;
-                  font-size: 0.82rem;
-                  color: #ffffff;
-                  border: 1px solid rgba(255, 255, 255, 0.08);
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 9px 12px !important;
+                  border-radius: 10px !important;
+                  font-size: 0.82rem !important;
+                  color: #ffffff !important;
+                  border: 1px solid rgba(255, 255, 255, 0.08) !important;
                   outline: none;
+                  height: 36px !important;
+                  margin: 0 !important;
                 "
               />
               <input
@@ -2411,60 +2389,54 @@
                 class="input-ios"
                 style="
                   flex: 1;
-                  background: rgba(0, 0, 0, 0.35) !important;
-                  padding: 10px 12px;
-                  border-radius: 10px;
-                  font-size: 0.82rem;
-                  color: #ffffff;
-                  border: 1px solid rgba(255, 255, 255, 0.08);
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 9px 12px !important;
+                  border-radius: 10px !important;
+                  font-size: 0.82rem !important;
+                  color: #ffffff !important;
+                  border: 1px solid rgba(255, 255, 255, 0.08) !important;
                   outline: none;
+                  height: 36px !important;
+                  margin: 0 !important;
                 "
                 oninput="verificarNumeroStaffEnVivo(this.value)"
               />
             </div>
           </div>
 
-          <!-- 2. SERVICIOS A ENTREGAR (Con Scroll Propio) -->
+          <!-- 2. SERVICIOS A ENTREGAR -->
           <div
             style="
               background: rgba(255, 255, 255, 0.025);
               border: 1px solid rgba(255, 255, 255, 0.07);
-              padding: 14px;
-              border-radius: 18px;
+              padding: 12px 14px;
+              border-radius: 16px;
               display: flex;
               flex-direction: column;
-              gap: 10px;
+              gap: 8px;
             "
           >
-            <div
+            <span
               style="
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
+                font-size: 0.68rem;
+                font-weight: 800;
+                color: #a1a1aa;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
               "
+              >📺 SERVICIOS A ENTREGAR</span
             >
-              <span
-                style="
-                  font-size: 0.68rem;
-                  font-weight: 800;
-                  color: #a1a1aa;
-                  text-transform: uppercase;
-                  letter-spacing: 0.8px;
-                "
-                >📺 SERVICIOS A ENTREGAR</span
-              >
-            </div>
 
-            <!-- Lista de servicios con desplazamiento interno si supera los 220px -->
+            <!-- Lista dinámica con scroll si excede la altura -->
             <div
               id="contenedorFilasServicios"
               style="
                 display: flex;
                 flex-direction: column;
                 gap: 8px;
-                max-height: 220px;
+                max-height: 200px;
                 overflow-y: auto;
-                padding-right: 4px;
+                padding-right: 2px;
               "
             ></div>
 
@@ -2476,8 +2448,8 @@
                 background: rgba(10, 132, 255, 0.08);
                 border: 1px dashed rgba(10, 132, 255, 0.3);
                 color: #0a84ff;
-                padding: 10px;
-                border-radius: 12px;
+                padding: 9px;
+                border-radius: 10px;
                 font-weight: 800;
                 font-size: 0.82rem;
                 cursor: pointer;
@@ -2486,9 +2458,10 @@
                 align-items: center;
                 justify-content: center;
                 gap: 6px;
+                margin-top: 2px;
               "
             >
-              <span style="font-size: 1rem; font-weight: 900">+</span> Otro
+              <span style="font-size: 0.95rem; font-weight: 900">+</span> Otro
               servicio (combo)
             </button>
           </div>
@@ -2498,8 +2471,8 @@
             style="
               background: rgba(255, 255, 255, 0.025);
               border: 1px solid rgba(255, 255, 255, 0.07);
-              padding: 14px;
-              border-radius: 18px;
+              padding: 12px 14px;
+              border-radius: 16px;
               display: flex;
               flex-direction: column;
               gap: 8px;
@@ -2518,10 +2491,10 @@
 
             <div style="display: flex; gap: 8px">
               <div
-                style="flex: 1; display: flex; flex-direction: column; gap: 4px"
+                style="flex: 1; display: flex; flex-direction: column; gap: 3px"
               >
                 <label
-                  style="font-size: 0.68rem; color: #a1a1aa; font-weight: 700"
+                  style="font-size: 0.65rem; color: #a1a1aa; font-weight: 700"
                   >Monto cobrado *</label
                 >
                 <input
@@ -2531,23 +2504,25 @@
                   required
                   class="input-ios"
                   style="
-                    background: rgba(0, 0, 0, 0.35) !important;
-                    padding: 10px 12px;
-                    border-radius: 10px;
-                    font-size: 0.9rem;
-                    font-weight: 800;
-                    color: #30d158;
-                    border: 1px solid rgba(48, 209, 88, 0.25);
+                    background: rgba(0, 0, 0, 0.4) !important;
+                    padding: 8px 12px !important;
+                    border-radius: 10px !important;
+                    font-size: 0.92rem !important;
+                    font-weight: 800 !important;
+                    color: #30d158 !important;
+                    border: 1px solid rgba(48, 209, 88, 0.3) !important;
                     outline: none;
+                    height: 36px !important;
+                    margin: 0 !important;
                   "
                   oninput="formatearMontoEnVivoCOP(this)"
                 />
               </div>
               <div
-                style="flex: 1; display: flex; flex-direction: column; gap: 4px"
+                style="flex: 1; display: flex; flex-direction: column; gap: 3px"
               >
                 <label
-                  style="font-size: 0.68rem; color: #a1a1aa; font-weight: 700"
+                  style="font-size: 0.65rem; color: #a1a1aa; font-weight: 700"
                   >Medio de pago *</label
                 >
                 <select
@@ -2555,13 +2530,15 @@
                   required
                   class="input-ios"
                   style="
-                    background: rgba(0, 0, 0, 0.35) !important;
-                    padding: 10px 12px;
-                    border-radius: 10px;
-                    font-size: 0.82rem;
-                    color: #ffffff;
-                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    background: rgba(0, 0, 0, 0.4) !important;
+                    padding: 8px 10px !important;
+                    border-radius: 10px !important;
+                    font-size: 0.82rem !important;
+                    color: #ffffff !important;
+                    border: 1px solid rgba(255, 255, 255, 0.1) !important;
                     outline: none;
+                    height: 36px !important;
+                    margin: 0 !important;
                   "
                 >
                   <option value="" disabled selected>
@@ -2578,7 +2555,7 @@
           </div>
         </form>
 
-        <!-- Botones de Acción (Fijos en la parte inferior) -->
+        <!-- Botones de Acción (Fijos al pie) -->
         <div
           style="
             display: flex;
@@ -2594,10 +2571,11 @@
             style="
               flex: 1;
               background: rgba(255, 255, 255, 0.08);
-              padding: 12px;
-              border-radius: 14px;
+              padding: 11px;
+              border-radius: 12px;
               color: #a1a1aa;
               font-weight: 700;
+              font-size: 0.88rem;
               border: 1px solid rgba(255, 255, 255, 0.1);
               cursor: pointer;
               transition: all 0.2s ease;
@@ -2612,16 +2590,16 @@
             id="btnEjecutarVenta"
             class="btn-ios"
             style="
-              flex: 1.5;
+              flex: 1.4;
               background: #30d158;
               color: #000000;
-              padding: 12px;
-              border-radius: 14px;
+              padding: 11px;
+              border-radius: 12px;
               font-weight: 900;
-              font-size: 0.9rem;
+              font-size: 0.88rem;
               border: none;
               cursor: pointer;
-              box-shadow: 0 4px 20px rgba(48, 209, 88, 0.35);
+              box-shadow: 0 4px 18px rgba(48, 209, 88, 0.35);
               transition: transform 0.2s ease;
             "
           >
