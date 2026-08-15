@@ -297,6 +297,16 @@ function cargarDatosMySQL() {
             ) {
               fechaGrupoActual = diaVal;
 
+              // Botón de + disponible para todos los usuarios solo en la sección de Netflix
+              let btnAnadirNet = "";
+              if (esNetflix) {
+                btnAnadirNet = `
+                  <button onclick="window.abrirModalAnadirUnPerfilNet('${encodeURIComponent(diaVal)}')" title="Añadir Registro" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 4px 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; margin-right: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  </button>
+                `;
+              }
+
               let btnBorrarFecha = "";
               if (esSuperAdmin) {
                 btnBorrarFecha = `
@@ -311,7 +321,10 @@ function cargarDatosMySQL() {
                   <td colspan="${totalColumnas}" style="padding: 8px 16px; border-top: 1px solid rgba(10, 132, 255, 0.2); border-bottom: 1px solid rgba(10, 132, 255, 0.2); color: #0a84ff; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                       <span>📅 CUENTAS DEL: ${diaVal.toUpperCase()}</span>
-                      ${btnBorrarFecha}
+                      <div style="display: flex; align-items: center;">
+                        ${btnAnadirNet}
+                        ${btnBorrarFecha}
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -1216,5 +1229,194 @@ window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
     .catch((err) => {
       console.error(err);
       alert("❌ Error de comunicación al mover la fecha.");
+    });
+};
+
+// =========================================================================
+// ➕ VENTANA MODAL Y GUARDADO DE REGISTRO ÚNICO DE NETFLIX (1 PERFIL)
+// =========================================================================
+
+window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
+  if (typeof haptic === "function") haptic();
+  const fechaContable = decodeURIComponent(fechaEscapada);
+
+  const existingModal = document.getElementById(
+    "modalAnadirUnPerfilNetOverlay",
+  );
+  if (existingModal) existingModal.remove();
+
+  const hoy = new Date();
+  hoy.setDate(hoy.getDate() + 30);
+  const mesesMayus = [
+    "ENERO",
+    "FEBRERO",
+    "MARZO",
+    "ABRIL",
+    "MAYO",
+    "JUNIO",
+    "JULIO",
+    "AGOSTO",
+    "SEPTIEMBRE",
+    "OCTUBRE",
+    "NOVIEMBRE",
+    "DICIEMBRE",
+  ];
+  const vencDefault = hoy.getDate() + "DE" + mesesMayus[hoy.getMonth()];
+
+  const modalHtml = `
+    <div class="overlay-ios open" id="modalAnadirUnPerfilNetOverlay" style="display: flex !important; z-index: 9999999 !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
+      <div class="modal-ios" style="max-width: 520px; width: 92%; background: #141417; border: 1px solid rgba(229, 9, 20, 0.3); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.3rem;">✏️</span>
+            <h3 style="margin: 0; color: #0a84ff; font-size: 1.15rem; font-weight: 800;">Añadir Registro Netflix</h3>
+          </div>
+          <button type="button" onclick="document.getElementById('modalAnadirUnPerfilNetOverlay').remove()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">✕</button>
+        </div>
+
+        <form onsubmit="window.guardarRegistroUnicoMySQL(event, '${fechaContable}')" style="display: flex; flex-direction: column; gap: 14px; margin: 0;">
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CORREO / USUARIO</label>
+              <input type="email" id="addNetCorreoUnico" required style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 700; font-family: monospace; outline: none;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CONTRASEÑA</label>
+              <input type="text" id="addNetClaveUnico" required style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #30d158; padding: 10px; border-radius: 10px; font-weight: 700; font-family: monospace; outline: none;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">PERFIL</label>
+              <input type="text" id="addNetPerfilUnico" value="1" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 700; outline: none;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">PIN</label>
+              <input type="text" id="addNetPinUnico" value="-" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 700; font-family: monospace; outline: none;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">VENCIMIENTO</label>
+              <input type="text" id="addNetVencimientoUnico" value="${vencDefault}" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #ff9f0a; padding: 10px; border-radius: 10px; font-weight: 800; font-family: monospace; outline: none;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CLIENTE</label>
+              <input type="text" id="addNetClienteUnico" value="Sin Nombre" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 600; outline: none;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">TELÉFONO</label>
+              <input type="text" id="addNetTelefonoUnico" value="-" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 600; font-family: monospace; outline: none;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">FECHA PAGO</label>
+              <input type="text" id="addNetFechaPagoUnico" value="${fechaContable}" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 600; font-family: monospace; outline: none;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">VALOR</label>
+              <input type="text" id="addNetValorUnico" value="-" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #30d158; padding: 10px; border-radius: 10px; font-weight: 700; font-family: monospace; outline: none;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">MÉTODO PAGO</label>
+              <select id="addNetMetodoPagoUnico" style="background: #000; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 10px; font-weight: 700; outline: none;">
+                <option value="-">-</option>
+                <option value="Nequi">Nequi</option>
+                <option value="Daviplata">Daviplata</option>
+                <option value="Bancolombia">Bancolombia</option>
+                <option value="Bre-B">Bre-B</option>
+                <option value="Dale">Dale</option>
+                <option value="Efectivo">Efectivo</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 10px;">
+            <button type="button" onclick="document.getElementById('modalAnadirUnPerfilNetOverlay').remove()" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #ffffff; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer;">Cancelar</button>
+            <button type="submit" id="btnSubmitAnadirUnicoNet" style="flex: 1.2; background: #ffffff; color: #000000; border: none; padding: 12px; border-radius: 12px; font-weight: 900; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.2);">Guardar Cambios</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+};
+
+window.guardarRegistroUnicoMySQL = function (e, fechaContable) {
+  e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const btn = document.getElementById("btnSubmitAnadirUnicoNet");
+  const correo = document.getElementById("addNetCorreoUnico").value.trim();
+  const clave = document.getElementById("addNetClaveUnico").value.trim();
+  const perfil = document.getElementById("addNetPerfilUnico").value.trim();
+  const pin = document.getElementById("addNetPinUnico").value.trim();
+  const vencimiento = document
+    .getElementById("addNetVencimientoUnico")
+    .value.trim();
+  const cliente = document.getElementById("addNetClienteUnico").value.trim();
+  const telefono = document.getElementById("addNetTelefonoUnico").value.trim();
+  const fechaPago = document
+    .getElementById("addNetFechaPagoUnico")
+    .value.trim();
+  const valor = document.getElementById("addNetValorUnico").value.trim();
+  const metodoPago = document
+    .getElementById("addNetMetodoPagoUnico")
+    .value.trim();
+
+  if (!correo || !clave) return;
+
+  btn.disabled = true;
+  btn.innerText = "Guardando...";
+
+  const formData = new FormData();
+  formData.append("accion", "confirmar_guardado_netflix");
+  formData.append("correo", correo);
+  formData.append("clave", clave);
+  formData.append("perfil", perfil);
+  formData.append("pin", pin);
+  formData.append("vencimiento", vencimiento);
+  formData.append("nombre", cliente);
+  formData.append("numero", telefono);
+  formData.append("fecha", fechaPago);
+  formData.append("valor", valor);
+  formData.append("pago", metodoPago);
+  formData.append("cantidad_perfiles", "1");
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      btn.disabled = false;
+      btn.innerText = "Guardar Cambios";
+
+      if (data.status === "success") {
+        const modal = document.getElementById("modalAnadirUnPerfilNetOverlay");
+        if (modal) modal.remove();
+
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><span>✅ Perfil añadido correctamente</span></div>`,
+          );
+        }
+        cargarDatosMySQL();
+      } else {
+        alert("❌ Error: " + data.message);
+      }
+    })
+    .catch((err) => {
+      btn.disabled = false;
+      btn.innerText = "Guardar Cambios";
+      alert("❌ Error de red al registrar en MySQL.");
     });
 };
