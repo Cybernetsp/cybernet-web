@@ -1043,3 +1043,15 @@ window.cargarNominaMySQL = window.renderizarTotalNomina;
 window.filtrarHorasInternas = function () {
   window.renderizarHorasEnPantalla();
 };
+window.formatearMontoEnVivoCOP = function (input) {
+  let val = input.value.replace(/\D/g, "");
+  if (val) {
+    input.value = new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      maximumFractionDigits: 0,
+    }).format(val);
+  } else {
+    input.value = "";
+  }
+};
