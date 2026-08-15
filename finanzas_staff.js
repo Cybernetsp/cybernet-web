@@ -663,7 +663,7 @@ window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
 };
 
 /* ==========================================================================
-   💳 SALDO DE DISTRIBUIDORES (MEJORADO Y OPTIMIZADO)
+   💳 SALDO DE DISTRIBUIDORES (AJUSTADO CON ÍCONO SVG Y SALDO GENERAL)
    ========================================================================== */
 const oldToggleDistrisPanel = window.toggleDistrisPanel;
 window.toggleDistrisPanel = function () {
@@ -712,7 +712,11 @@ window.cargarDistribuidores = function () {
         let html = "";
         data.forEach((distri, idx) => {
           let saldoRaw =
-            distri.saldo !== undefined ? distri.saldo : distri.balance || 0;
+            distri.saldo !== undefined
+              ? distri.saldo
+              : distri.balance !== undefined
+                ? distri.balance
+                : distri.monto || distri.total || 0;
           let saldoClean = 0;
 
           if (typeof saldoRaw === "number") {
@@ -747,18 +751,25 @@ window.cargarDistribuidores = function () {
 
           html += `
             <tr class="distri-row-item" style="background: ${bgRow}; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s ease;">
-              <td style="padding: 14px 18px; color: #ffffff;">
+              <td style="padding: 14px 18px; color: #ffffff; vertical-align: middle;">
                 <div style="font-weight: 800; font-size: 0.92rem; color: #ffffff;">${nombreLimpio}</div>
                 <div style="font-size: 0.78rem; color: #a1a1aa; font-family: monospace; margin-top: 3px; display: flex; align-items: center; gap: 4px;">
                   <span>📱 ${telefonoReal}</span>
                 </div>
               </td>
-              <td style="padding: 14px 18px; text-align: right;">
-                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
+              <td style="padding: 14px 18px; text-align: right; vertical-align: middle;">
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
                   <span style="font-size: 1.15rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.5px;">${saldoFormateado}</span>
-                  <button type="button" onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 7px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(10, 132, 255, 0.25)'" onmouseout="this.style.background='rgba(10, 132, 255, 0.15)'">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    <span>Copiar</span>
+                  <button type="button" 
+                          onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')" 
+                          title="Copiar reporte de saldo"
+                          style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 7px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
+                          onmouseover="this.style.background='rgba(10, 132, 255, 0.25)'" 
+                          onmouseout="this.style.background='rgba(10, 132, 255, 0.15)'">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
                   </button>
                 </div>
               </td>
@@ -785,10 +796,11 @@ window.copiarSaldoDistri = function (btn, nombre, saldoFormateado) {
   const textoWhatsApp = `🔔 *NOTIFICACIÓN DE SALDO CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${nombreDisplay}\n💰 *Saldo Disponible:* ${saldoFormateado}\n────────────────────\n✨ _¡Gracias por tu confianza y preferencia!_`;
 
   navigator.clipboard.writeText(textoWhatsApp).then(() => {
-    let originalHTML = btn.innerHTML;
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Copiado</span>`;
-    btn.style.setProperty("background", "#30d158", "important");
-    btn.style.setProperty("color", "#000000", "important");
+    let oldHtml = btn.innerHTML;
+    let oldBg = btn.style.background;
+
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    btn.style.background = "rgba(48, 209, 88, 0.2)";
 
     if (typeof triggerToast === "function") {
       triggerToast(
@@ -797,13 +809,8 @@ window.copiarSaldoDistri = function (btn, nombre, saldoFormateado) {
     }
 
     setTimeout(() => {
-      btn.innerHTML = originalHTML;
-      btn.style.setProperty(
-        "background",
-        "rgba(10, 132, 255, 0.15)",
-        "important",
-      );
-      btn.style.setProperty("color", "#0a84ff", "important");
+      btn.innerHTML = oldHtml;
+      btn.style.background = oldBg;
     }, 1500);
   });
 };
