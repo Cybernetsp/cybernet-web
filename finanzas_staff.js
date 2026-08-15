@@ -724,6 +724,7 @@ window.renderDashboard = function () {
 
   if (!d) return;
 
+  // 1. Renderizado de Montos Principales
   const netEl = document.getElementById("val_neto");
   if (netEl) {
     netEl.innerText = formatMoneda(d.neto);
@@ -743,6 +744,67 @@ window.renderDashboard = function () {
   if (document.getElementById("val_nomina"))
     document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
 
+  // 2. CÁLCULO Y ANIMACIÓN DINÁMICA DE PORCENTAJES Y ANILLOS BENTO
+  const ingNum = Number(d.ingresos) || 0;
+  const gasNum = Number(d.gastos) || 0;
+  const totalFlujo = ingNum + gasNum;
+
+  const pctIngresos =
+    totalFlujo > 0 ? Math.round((ingNum / totalFlujo) * 100) : 0;
+  const pctGastos =
+    totalFlujo > 0 ? Math.round((gasNum / totalFlujo) * 100) : 0;
+
+  // Actualización de textos de porcentaje por ID o búsqueda estructural
+  const elPctIng =
+    document.getElementById("pct_ingresos") ||
+    document.getElementById("pctIngresosVal");
+  const elPctGas =
+    document.getElementById("pct_gastos") ||
+    document.getElementById("pctGastosVal");
+
+  if (elPctIng) elPctIng.innerText = pctIngresos + "%";
+  if (elPctGas) elPctGas.innerText = pctGastos + "%";
+
+  // Búsqueda inteligente por etiqueta en el DOM
+  document.querySelectorAll("span, div, p").forEach((el) => {
+    if (el.children.length === 0 && el.innerText) {
+      if (el.innerText.trim() === "Ingresos Totales") {
+        const spanVal = el.parentElement
+          ? el.parentElement.querySelector("span:last-child, div:last-child")
+          : null;
+        if (spanVal && spanVal !== el) spanVal.innerText = pctIngresos + "%";
+      }
+      if (el.innerText.trim() === "Gastos Operativos") {
+        const spanVal = el.parentElement
+          ? el.parentElement.querySelector("span:last-child, div:last-child")
+          : null;
+        if (spanVal && spanVal !== el) spanVal.innerText = pctGastos + "%";
+      }
+    }
+  });
+
+  // Animación del Anillo SVG / Anillos concéntricos
+  const ringIng = document.querySelector(
+    ".ring-ingresos, #ringIngresos, svg circle:nth-child(1)",
+  );
+  const ringGas = document.querySelector(
+    ".ring-gastos, #ringGastos, svg circle:nth-child(2)",
+  );
+
+  if (ringIng) {
+    const strokeDash = 2 * Math.PI * 18; // Radio aproximado 18
+    ringIng.style.strokeDasharray = strokeDash;
+    ringIng.style.strokeDashoffset =
+      strokeDash - (strokeDash * pctIngresos) / 100;
+  }
+  if (ringGas) {
+    const strokeDash = 2 * Math.PI * 12; // Radio aproximado 12
+    ringGas.style.strokeDasharray = strokeDash;
+    ringGas.style.strokeDashoffset =
+      strokeDash - (strokeDash * pctGastos) / 100;
+  }
+
+  // 3. Proyecciones y Fondos
   const baseVentas = d.ingresos || 0;
   const montoFondoNegocio = Math.round(baseVentas * 0.55);
   const montoReservaNomina = Math.round(baseVentas * 0.17);
@@ -775,6 +837,7 @@ window.renderDashboard = function () {
     document.getElementById("valProyMioMasJeisson").innerText =
       formatMoneda(miGananciaNeta);
 
+  // 4. Deudas
   if (
     window.globalFinanzasData.deudaActual !== undefined &&
     document.getElementById("valDeudaTotal")
@@ -791,7 +854,7 @@ window.renderDashboard = function () {
       window.globalFinanzasData.tipoDeudaActual;
   }
 
-  // 🎯 INYECCIÓN QUE REEMPLAZA EL MENSAJE "Calculando balance desde MySQL..."
+  // 5. Historial de Movimientos
   if (window.globalFinanzasData.listaDetallada) {
     window.renderizarHistorialMovimientosUI(
       window.globalFinanzasData.listaDetallada,
