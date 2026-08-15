@@ -1,5 +1,5 @@
 /* ==========================================================================
-   👥 CYBERNET OS - MÓDULO DE PERSONAL, NÓMINA Y CALENDARIO MYSQL
+   👥 CYBERNET OS - MÓDULO DE PERSONAL, NÓMINA, CALENDARIO Y CRONÓMETRO MYSQL
    ========================================================================== */
 
 window.URL_OBTENER_HORAS = "https://api.cybernetsp.com/obtener_horas.php";
@@ -26,7 +26,9 @@ window.filtroAnioTurnos = new Date().getFullYear();
 window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
 
-// OBTENER LISTA COMPLETA
+// ==========================================
+// 1. UTILIDADES BÁSICAS Y LISTAS
+// ==========================================
 function obtenerTodosLosAsistentes() {
   let setAsistentes = new Set(window.ASISTENTES_BASE);
   if (Array.isArray(window.usuariosCache)) {
@@ -44,7 +46,6 @@ function obtenerTodosLosAsistentes() {
   return Array.from(setAsistentes).sort();
 }
 
-// VERIFICAR SUPERADMIN
 function verificarSiEsSuperAdmin() {
   let user =
     sessionStorage.getItem("active_staff") ||
@@ -53,7 +54,6 @@ function verificarSiEsSuperAdmin() {
   return user.toUpperCase().trim() === "CAMILO";
 }
 
-// 🔄 CARGAR USUARIOS DESDE MYSQL (NEQUI/TELÉFONOS)
 window.cargarUsuariosBaseMySQL = async function () {
   try {
     let res = await fetch(window.URL_OBTENER_USUARIOS);
@@ -69,7 +69,231 @@ window.cargarUsuariosBaseMySQL = async function () {
   }
 };
 
-// 👁️ ABRIR / CERRAR PANEL DE TURNOS
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(window.cargarUsuariosBaseMySQL, 1500);
+});
+
+// ==========================================
+// 2. CRONÓMETRO DE TURNO (AUTO-GUARDADO Y AUTO-PAUSA)
+// ==========================================
+let secCronometroTotal = 0; // Segundos visualizados en pantalla (totales de la sesión)
+let secParaGuardar = 0; // Segundos pendientes por enviar a MySQL (se vacía cada 5 min)
+let timerInterval = null;
+let turnoActivo = false;
+
+// Variables para Inactividad
+let inactividadTimer = null;
+let pausadoPorInactividad = false;
+const TIEMPO_MAX_INACTIVIDAD = 25 * 60 * 1000; // 25 Minutos en milisegundos
+
+// Inicialización de botones del cronómetro en la barra
+window.toggleTrackerShift = function () {
+  if (turnoActivo) detenerTurnoTracker(false);
+  else iniciarTurnoTracker();
+};
+
+function iniciarTurnoTracker() {
+  const activeStaff = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    ""
+  )
+    .toUpperCase()
+    .trim();
+  if (!activeStaff || activeStaff === "STAFF" || activeStaff === "CAMILO") {
+    alert(
+      "⚠️ Inicia sesión con el nombre de un Asistente para rastrear tu propio tiempo.",
+    );
+    return;
+  }
+
+  turnoActivo = true;
+  pausadoPorInactividad = false;
+
+  // UI Verde (Activo)
+  const dot = document.getElementById("ledConexion");
+  if (dot) {
+    dot.style.background = "#30d158";
+    dot.style.boxShadow = "0 0 8px #30d158";
+  }
+
+  // Bucle principal (Cada segundo)
+  timerInterval = setInterval(() => {
+    secCronometroTotal++;
+    secParaGuardar++;
+
+    // Actualizar texto UI
+    const lbl = document.getElementById("shiftTimer");
+    if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
+
+    // Guardado en BD cada 5 minutos (300 segundos)
+    if (secParaGuardar >= 300) {
+      enviarTiempoTrackerAMySQL(
+        activeStaff,
+        formatoSegundosTracker(secParaGuardar),
+        "Automático 5m",
+      );
+      secParaGuardar = 0; // Reiniciar cuenta para guardar
+    }
+  }, 1000);
+
+  iniciarDetectorInactividad();
+  if (typeof triggerToast === "function")
+    triggerToast(
+      `<div style="color:var(--ios-green);">▶ Turno iniciado. Autoguardado activado.</div>`,
+    );
+}
+
+function detenerTurnoTracker(porInactividad = false) {
+  if (!turnoActivo) return;
+  turnoActivo = false;
+  clearInterval(timerInterval);
+  detenerDetectorInactividad();
+
+  // UI Rojo/Naranja (Pausado)
+  const dot = document.getElementById("ledConexion");
+  if (dot) {
+    dot.style.background = porInactividad ? "#ff9f0a" : "#ff453a";
+    dot.style.boxShadow = porInactividad
+      ? "0 0 8px #ff9f0a"
+      : "0 0 8px #ff453a";
+  }
+
+  // Guardar segundos sobrantes en BD
+  if (secParaGuardar > 0) {
+    const activeStaff = (
+      sessionStorage.getItem("active_staff") ||
+      localStorage.getItem("cyber_saved_staff") ||
+      ""
+    )
+      .toUpperCase()
+      .trim();
+    enviarTiempoTrackerAMySQL(
+      activeStaff,
+      formatoSegundosTracker(secParaGuardar),
+      "Cierre / Pausa",
+    );
+    secParaGuardar = 0;
+  }
+
+  if (porInactividad) {
+    pausadoPorInactividad = true;
+    if (typeof triggerToast === "function")
+      triggerToast(
+        `<div style="color:var(--ios-orange);">⏸ Turno auto-pausado por inactividad.</div>`,
+      );
+  } else {
+    pausadoPorInactividad = false;
+    if (typeof triggerToast === "function")
+      triggerToast(
+        `<div style="color:var(--ios-red);">⏹ Turno pausado manualmente.</div>`,
+      );
+  }
+}
+
+// Envía el tiempo exacto a PHP para sumarlo al día
+function enviarTiempoTrackerAMySQL(asistente, tiempoHHMMSS, razon) {
+  fetch(window.URL_GUARDAR_HORAS_MANUAL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `vendedor=${encodeURIComponent(asistente)}&tiempo=${encodeURIComponent(tiempoHHMMSS)}&fecha=hoy`,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (
+        res.status === "success" &&
+        typeof window.cargarHorasDesdeMySQL === "function"
+      ) {
+        console.log(
+          `[Cybernet] Tiempo guardado en BD (${razon}): ${tiempoHHMMSS}`,
+        );
+      }
+    })
+    .catch((e) => console.error("Error guardando tiempo:", e));
+}
+
+// Convertidor de Segundos a HH:MM:SS
+function formatoSegundosTracker(totalSeg) {
+  let h = Math.floor(totalSeg / 3600);
+  let m = Math.floor((totalSeg % 3600) / 60);
+  let s = totalSeg % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+// --- Lógica de Inactividad (Pausa y Reanuda) ---
+function resetInactividad() {
+  // Si estaba pausado por inactividad y se mueve el mouse, se auto-reanuda
+  if (pausadoPorInactividad && !turnoActivo) {
+    iniciarTurnoTracker();
+  }
+
+  // Reiniciar el contador de bomba de tiempo (25 min)
+  clearTimeout(inactividadTimer);
+  if (turnoActivo) {
+    inactividadTimer = setTimeout(() => {
+      detenerTurnoTracker(true); // Se auto-pausa
+    }, TIEMPO_MAX_INACTIVIDAD);
+  }
+}
+
+function iniciarDetectorInactividad() {
+  window.addEventListener("mousemove", resetInactividad);
+  window.addEventListener("keypress", resetInactividad);
+  window.addEventListener("touchstart", resetInactividad);
+  resetInactividad(); // Iniciar cuenta regresiva
+}
+
+function detenerDetectorInactividad() {
+  window.removeEventListener("mousemove", resetInactividad);
+  window.removeEventListener("keypress", resetInactividad);
+  window.removeEventListener("touchstart", resetInactividad);
+  clearTimeout(inactividadTimer);
+}
+
+// Asegurar guardado cuando se cierra la página
+window.addEventListener("beforeunload", function (e) {
+  if (turnoActivo && secParaGuardar > 0) {
+    const activeStaff = (
+      sessionStorage.getItem("active_staff") ||
+      localStorage.getItem("cyber_saved_staff") ||
+      ""
+    )
+      .toUpperCase()
+      .trim();
+    // Guardado forzoso sincrónico para evitar pérdida antes de cerrar
+    const fd = new URLSearchParams();
+    fd.append("vendedor", activeStaff);
+    fd.append("tiempo", formatoSegundosTracker(secParaGuardar));
+    fd.append("fecha", "hoy");
+    navigator.sendBeacon(window.URL_GUARDAR_HORAS_MANUAL, fd);
+  }
+});
+
+// ==========================================
+// 3. CALENDARIO DE TURNOS (VISOR E INTERFAZ)
+// ==========================================
+function parsearFechaTurno(fechaRaw) {
+  if (!fechaRaw) return new Date();
+  if (fechaRaw instanceof Date) return fechaRaw;
+  let str = String(fechaRaw).trim().split(" ")[0];
+  let parts = str.includes("/") ? str.split("/") : str.split("-");
+  if (parts.length === 3) {
+    if (parts[0].length === 4)
+      return new Date(
+        parseInt(parts[0], 10),
+        parseInt(parts[1], 10) - 1,
+        parseInt(parts[2], 10),
+      );
+    else
+      return new Date(
+        parseInt(parts[2], 10),
+        parseInt(parts[1], 10) - 1,
+        parseInt(parts[0], 10),
+      );
+  }
+  return new Date();
+}
+
 window.toggleShiftsPanel = function () {
   try {
     if (typeof haptic === "function") haptic();
@@ -113,13 +337,7 @@ window.cargarHorasDesdeMySQL = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
 
-  container.innerHTML = `
-    <div style="text-align:center; padding:45px; color:#0a84ff;">
-      <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
-        <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg>
-        <span style="font-weight:700; font-size:0.9rem;">Sincronizando con MySQL...</span>
-      </div>
-    </div>`;
+  container.innerHTML = `<div style="text-align:center; padding:45px; color:#0a84ff;">Sincronizando con MySQL...</div>`;
 
   fetch(window.URL_OBTENER_HORAS)
     .then(async (res) => {
@@ -135,61 +353,29 @@ window.cargarHorasDesdeMySQL = function () {
         window.currentHorasStock = res.data || [];
         window.renderizarHorasEnPantalla();
       } else {
-        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Fallo de BD"}</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a;">❌ Fallo de BD</div>`;
       }
     })
     .catch((err) => {
-      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error de Red</div>`;
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a;">❌ Error de Red</div>`;
     });
 };
 
-function parsearFechaTurno(fechaRaw) {
-  if (!fechaRaw) return new Date();
-  if (fechaRaw instanceof Date) return fechaRaw;
-  let str = String(fechaRaw).trim().split(" ")[0];
-  let parts = str.includes("/") ? str.split("/") : str.split("-");
-  if (parts.length === 3) {
-    if (parts[0].length === 4)
-      return new Date(
-        parseInt(parts[0], 10),
-        parseInt(parts[1], 10) - 1,
-        parseInt(parts[2], 10),
-      );
-    else
-      return new Date(
-        parseInt(parts[2], 10),
-        parseInt(parts[1], 10) - 1,
-        parseInt(parts[0], 10),
-      );
-  }
-  return new Date();
-}
-
 window.cambiarMesTurnos = function (mesIndex) {
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
   window.filtroMesTurnos = parseInt(mesIndex, 10);
   window.renderizarHorasEnPantalla();
 };
 
 window.cambiarQuincenaTurnos = function (quincena) {
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
   window.filtroQuincenaTurnos = quincena;
   window.renderizarHorasEnPantalla();
 };
 
 window.cambiarAsistenteAdmin = function (vendedor) {
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
   window.asistenteSeleccionadoAdmin = vendedor;
   window.renderizarHorasEnPantalla();
 };
 
-// 🎨 RENDERIZADOR CALENDARIO
 window.renderizarHorasEnPantalla = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -226,9 +412,8 @@ window.renderizarHorasEnPantalla = function () {
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
   let listaTodosAsistentes = obtenerTodosLosAsistentes();
-  let todosLosRegistros = window.currentHorasStock;
 
-  let datosFiltrados = todosLosRegistros.filter((item) => {
+  let datosFiltrados = window.currentHorasStock.filter((item) => {
     let vendedorItem = (item.vendedor || "STAFF").toUpperCase().trim();
     let d = parsearFechaTurno(item.fecha);
 
@@ -455,11 +640,10 @@ window.renderizarHorasEnPantalla = function () {
   container.innerHTML = htmlCuerpo;
 };
 
-// ➕ FORMULARIOS DE MODIFICAR / AGREGAR / ADELANTO
+// ==========================================
+// 4. FUNCIONES DE MODIFICAR / AGREGAR / ADELANTO
+// ==========================================
 window.toggleFormularioHoras = function () {
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
   const overlay = document.getElementById("addHoursOverlay");
   if (!overlay) return;
 
@@ -469,8 +653,6 @@ window.toggleFormularioHoras = function () {
   } else {
     overlay.classList.add("open");
     overlay.style.setProperty("display", "flex", "important");
-    overlay.style.setProperty("align-items", "center", "important");
-    overlay.style.setProperty("justify-content", "center", "important");
 
     const selectVendedor = document.getElementById("inputVendedorShift");
     if (selectVendedor) {
@@ -485,18 +667,12 @@ window.toggleFormularioHoras = function () {
 };
 
 window.toggleModalAdelanto = function (abrir) {
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
   const overlay = document.getElementById("adelantoShiftOverlay");
   if (!overlay) return;
 
   if (abrir) {
     overlay.classList.add("open");
     overlay.style.setProperty("display", "flex", "important");
-    overlay.style.setProperty("align-items", "center", "important");
-    overlay.style.setProperty("justify-content", "center", "important");
-
     const selectAde = document.getElementById("adeEmpleado");
     if (selectAde) {
       let opts =
@@ -539,24 +715,13 @@ window.ejecutarAdelantoDesdeShift = function (e) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `vendedor=${encodeURIComponent(empleado)}&monto=${encodeURIComponent(monto)}`,
   })
-    .then(async (res) => {
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch (err) {
-        throw new Error("Error del servidor");
-      }
-    })
+    .then((res) => res.json())
     .then((res) => {
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = originalText;
       }
       if (res && res.status === "success") {
-        if (typeof triggerToast === "function")
-          triggerToast(
-            `<div style="color:var(--ios-green);">✅ Adelanto aplicado</div>`,
-          );
         window.toggleModalAdelanto(false);
         window.cargarHorasDesdeMySQL();
       } else {
@@ -601,24 +766,13 @@ window.ejecutarGuardadoHorasManual = function (e) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `vendedor=${encodeURIComponent(vendedor)}&tiempo=${encodeURIComponent(tiempo)}&fecha=${encodeURIComponent(fecha)}`,
   })
-    .then(async (res) => {
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch (err) {
-        throw new Error("Error del servidor");
-      }
-    })
+    .then((res) => res.json())
     .then((res) => {
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = originalText;
       }
       if (res && res.status === "success") {
-        if (typeof triggerToast === "function")
-          triggerToast(
-            `<div style="color:var(--ios-green);">✅ Horas guardadas</div>`,
-          );
         window.toggleFormularioHoras();
         window.cargarHorasDesdeMySQL();
       } else {
@@ -655,24 +809,11 @@ window.modificarTurnoSuperAdmin = function (
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo.trim())}`,
   })
-    .then(async (res) => {
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch (e) {
-        throw new Error("Error del servidor");
-      }
-    })
+    .then((res) => res.json())
     .then((res) => {
-      if (res && res.status === "success") {
-        if (typeof triggerToast === "function")
-          triggerToast(
-            `<div style="color:var(--ios-green);">✅ Turno guardado</div>`,
-          );
-        window.cargarHorasDesdeMySQL();
-      } else alert("⚠️ Error: " + (res ? res.message : ""));
-    })
-    .catch((err) => alert("❌ " + err.message));
+      if (res && res.status === "success") window.cargarHorasDesdeMySQL();
+      else alert("⚠️ Error: " + (res ? res.message : ""));
+    });
 };
 
 window.eliminarTurnoSuperAdmin = function (idTurno) {
@@ -710,7 +851,7 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
 };
 
 // ==========================================
-// 📊 MÓDULO NÓMINA BENTO (FLEXBOX)
+// 5. MÓDULO NÓMINA BENTO (FLEXBOX)
 // ==========================================
 window.abrirTotalNomina = function () {
   const overlay = document.getElementById("nominaOverlay");
@@ -741,18 +882,15 @@ window.refrescarTotalNominaEnVivo = async function (btn) {
     container.innerHTML = `<div style="text-align:center; padding:45px; color:#30d158;">Calculando Nómina...</div>`;
   }
 
-  if (window.usuariosCache.length === 0) {
-    await window.cargarUsuariosBaseMySQL();
-  }
+  if (window.usuariosCache.length === 0) await window.cargarUsuariosBaseMySQL();
 
   try {
     let res = await fetch(window.URL_OBTENER_HORAS);
     let data = await res.json();
-    if (data && data.status === "success") {
+    if (data && data.status === "success")
       window.currentHorasStock = data.data || [];
-    }
   } catch (e) {
-    console.error("Error leyendo turnos para nómina:", e);
+    console.error("Error leyendo turnos:", e);
   }
 
   if (btn) {
@@ -799,26 +937,19 @@ window.renderizarTotalNomina = function () {
     if (!esQ1 && dia <= 15) return;
 
     let asist = (item.vendedor || "STAFF").toUpperCase().trim();
-
-    if (!mapaNomina[asist]) {
+    if (!mapaNomina[asist])
       mapaNomina[asist] = { ganado: 0, descontado: 0, neto: 0 };
-    }
 
     let monto = parseFloat(item.total) || 0;
     let esAdelanto =
       monto < 0 || (item.estado || "").toUpperCase().includes("ADELANTO");
 
-    if (esAdelanto) {
-      mapaNomina[asist].descontado += Math.abs(monto);
-    } else {
-      mapaNomina[asist].ganado += monto;
-    }
+    if (esAdelanto) mapaNomina[asist].descontado += Math.abs(monto);
+    else mapaNomina[asist].ganado += monto;
   });
 
   let listaProcesar = obtenerTodosLosAsistentes();
-  if (!esSuperAdmin) {
-    listaProcesar = [activeStaff];
-  }
+  if (!esSuperAdmin) listaProcesar = [activeStaff];
 
   let totalGlobalGanado = 0;
   let totalGlobalDescontado = 0;
@@ -855,7 +986,6 @@ window.renderizarTotalNomina = function () {
 
     htmlFilas += `
       <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; flex-wrap: wrap; gap: 10px;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-        
         <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 140px;">
           <div style="width: 36px; height: 36px; border-radius: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
             ${asistente.charAt(0)}
@@ -865,7 +995,6 @@ window.renderizarTotalNomina = function () {
             ${btnCopiarTel}
           </div>
         </div>
-
         <div style="display: flex; flex-direction: row; justify-content: flex-end; align-items: center; gap: 20px; flex: 1; min-width: 160px;">
           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
             <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Turnos (+)</span>
@@ -876,7 +1005,6 @@ window.renderizarTotalNomina = function () {
             <span style="font-family: monospace; font-weight: 700; color: #ff453a; font-size: 0.95rem;">-$${Math.round(descontado).toLocaleString("es-CO")}</span>
           </div>
         </div>
-
         <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 0.5; min-width: 100px; padding-left: 10px; border-left: 1px solid rgba(255,255,255,0.08);">
           <span style="font-size: 0.68rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Sueldo Neto</span>
           <span style="font-family: monospace; font-weight: 900; color: ${colorNeto}; font-size: 1.2rem;">$${Math.round(neto).toLocaleString("es-CO")}</span>
@@ -897,7 +1025,7 @@ window.renderizarTotalNomina = function () {
           <span style="font-size: 1.3rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${Math.round(totalGlobalDescontado).toLocaleString("es-CO")}</span>
         </div>
         <div style="flex: 1; min-width: 140px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.3); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
-          <span style="font-size: 0.72rem; font-weight: 800; color: #0a84ff; text-transform: uppercase;">Nómina Neta</span>
+          <span style="font-size: 0.72rem; font-weight: 800; color: #ffffff; text-transform: uppercase;">Nómina Total Neta</span>
           <span style="font-size: 1.4rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${Math.round(totalGlobalNeto).toLocaleString("es-CO")}</span>
         </div>
       </div>`;
@@ -919,7 +1047,3 @@ window.renderizarTotalNomina = function () {
 window.filtrarHorasInternas = function () {
   window.renderizarHorasEnPantalla();
 };
-
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(window.cargarUsuariosBaseMySQL, 1500);
-});
