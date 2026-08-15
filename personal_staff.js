@@ -768,6 +768,7 @@ window.refrescarTotalNominaEnVivo = async function (btn) {
   window.renderizarTotalNomina();
 };
 
+// 🎨 RENDERIZADOR BENTO DE NÓMINA OPTIMIZADO (GRID FLEXBOX)
 window.renderizarTotalNomina = function () {
   const container = document.getElementById("nominaContentArea");
   if (!container) return;
@@ -785,7 +786,7 @@ window.renderizarTotalNomina = function () {
   const dAnio = window.filtroAnioTurnos;
   const esQ1 = window.filtroQuincenaTurnos === 1;
 
-  // Cruzar la lista de teléfonos/Nequi de MySQL
+  // Cruzar la lista de teléfonos/Nequi/Bre-B de MySQL
   let mapaTelefonos = {};
   window.usuariosCache.forEach((u) => {
     let nom = (u.nombre || "").toUpperCase().trim();
@@ -840,7 +841,7 @@ window.renderizarTotalNomina = function () {
     };
     let ganado = datosUser.ganado;
     let descontado = datosUser.descontado;
-    let neto = ganado - descontado;
+    let neto = ganado - descontado; // 🔥 CÁLCULO DEL TOTAL EXACTO A PAGAR
 
     totalGlobalGanado += ganado;
     totalGlobalDescontado += descontado;
@@ -849,81 +850,81 @@ window.renderizarTotalNomina = function () {
     let telefonoNum = mapaTelefonos[asistente] || "Sin Nequi";
     let colorNeto = neto < 0 ? "#ff453a" : "#30d158";
 
+    // Botón de copiado
     let btnCopiarTel = "";
     if (telefonoNum !== "Sin Nequi") {
       btnCopiarTel = `
-        <button onclick="navigator.clipboard.writeText('${telefonoNum}'); this.style.color='#30d158'; setTimeout(()=>this.style.color='#0a84ff', 1000);" title="Copiar Nequi" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 3px 7px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; font-family: monospace; transition: 0.2s;">
+        <button onclick="navigator.clipboard.writeText('${telefonoNum}'); this.style.color='#30d158'; setTimeout(()=>this.style.color='#0a84ff', 1000);" title="Copiar Nequi/Bre-B" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 4px 8px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 800; font-family: monospace; transition: 0.2s;">
           <span>${telefonoNum}</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
         </button>`;
     } else {
-      btnCopiarTel = `<span style="font-size:0.75rem; color:#71717a;">Sin Nequi</span>`;
+      btnCopiarTel = `<span style="font-size:0.75rem; color:#71717a; padding-left:2px;">Sin Nequi</span>`;
     }
 
-    // TABLA FIX: Anchos definidos para que no se esconda ninguna columna
+    // 🏆 DISEÑO FLEXBOX FLUIDO PARA CADA FILA (No es Tabla)
     htmlFilas += `
-      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-        <td style="padding: 14px 10px; width: 35%;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              ${asistente.charAt(0)}
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 2px;">
-              <span style="font-weight: 800; color: #ffffff; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">${asistente}</span>
-              ${btnCopiarTel}
-            </div>
+      <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; flex-wrap: wrap; gap: 10px;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+        
+        <!-- Bloque Izquierdo: Avatar, Nombre y Nequi -->
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 140px;">
+          <div style="width: 36px; height: 36px; border-radius: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            ${asistente.charAt(0)}
           </div>
-        </td>
-        <td style="padding: 14px 10px; font-family: monospace; font-weight: 700; color: #30d158; font-size: 0.9rem; width: 22%;">
-          +$${Math.round(ganado).toLocaleString("es-CO")}
-        </td>
-        <td style="padding: 14px 10px; font-family: monospace; font-weight: 700; color: #ff453a; font-size: 0.9rem; width: 22%;">
-          -$${Math.round(descontado).toLocaleString("es-CO")}
-        </td>
-        <td style="padding: 14px 10px; font-family: monospace; font-weight: 900; color: ${colorNeto}; font-size: 1rem; text-align: right; width: 21%;">
-          $${Math.round(neto).toLocaleString("es-CO")}
-        </td>
-      </tr>`;
+          <div style="display: flex; flex-direction: column; gap: 3px; justify-content: center;">
+            <span style="font-weight: 800; color: #ffffff; font-size: 0.95rem; line-height: 1;">${asistente}</span>
+            ${btnCopiarTel}
+          </div>
+        </div>
+
+        <!-- Bloque Central: Ganado y Adelanto -->
+        <div style="display: flex; flex-direction: row; justify-content: flex-end; align-items: center; gap: 20px; flex: 1; min-width: 160px;">
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+            <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Turnos (+)</span>
+            <span style="font-family: monospace; font-weight: 700; color: #30d158; font-size: 0.95rem;">+$${Math.round(ganado).toLocaleString("es-CO")}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+            <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Adelantos (-)</span>
+            <span style="font-family: monospace; font-weight: 700; color: #ff453a; font-size: 0.95rem;">-$${Math.round(descontado).toLocaleString("es-CO")}</span>
+          </div>
+        </div>
+
+        <!-- Bloque Derecho: Sueldo Neto Exacto -->
+        <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 0.5; min-width: 100px; padding-left: 10px; border-left: 1px solid rgba(255,255,255,0.08);">
+          <span style="font-size: 0.68rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Total a Pagar</span>
+          <span style="font-family: monospace; font-weight: 900; color: ${colorNeto}; font-size: 1.2rem;">$${Math.round(neto).toLocaleString("es-CO")}</span>
+        </div>
+
+      </div>`;
   });
 
+  // Tarjetas Resumen Globales
   let htmlResumenGlobal = "";
   if (esSuperAdmin) {
     htmlResumenGlobal = `
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
-        <div style="background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px;">
-          <span style="font-size: 0.65rem; font-weight: 800; color: #30d158; text-transform: uppercase;">Total Bruto (+)</span>
-          <span style="font-size: 1.1rem; font-weight: 900; color: #30d158; font-family: monospace;">$${Math.round(totalGlobalGanado).toLocaleString("es-CO")}</span>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; width: 100%;">
+        <div style="flex: 1; min-width: 130px; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 0.72rem; font-weight: 800; color: #30d158; text-transform: uppercase;">Total Bruto (+)</span>
+          <span style="font-size: 1.3rem; font-weight: 900; color: #30d158; font-family: monospace;">$${Math.round(totalGlobalGanado).toLocaleString("es-CO")}</span>
         </div>
-        <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.2); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px;">
-          <span style="font-size: 0.65rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelantos (-)</span>
-          <span style="font-size: 1.1rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${Math.round(totalGlobalDescontado).toLocaleString("es-CO")}</span>
+        <div style="flex: 1; min-width: 130px; background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.2); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 0.72rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelantos (-)</span>
+          <span style="font-size: 1.3rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${Math.round(totalGlobalDescontado).toLocaleString("es-CO")}</span>
         </div>
-        <div style="background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.3); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px;">
-          <span style="font-size: 0.65rem; font-weight: 800; color: #0a84ff; text-transform: uppercase;">Neto A Pagar</span>
-          <span style="font-size: 1.2rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${Math.round(totalGlobalNeto).toLocaleString("es-CO")}</span>
+        <div style="flex: 1; min-width: 140px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.3); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 0.72rem; font-weight: 800; color: #0a84ff; text-transform: uppercase;">Nómina Total Neta</span>
+          <span style="font-size: 1.4rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${Math.round(totalGlobalNeto).toLocaleString("es-CO")}</span>
         </div>
       </div>`;
   }
 
-  // FIX TABLA: Se obliga a usar el ancho de la pantalla correctamente `table-layout: fixed;`
+  // 📦 INYECCIÓN FINAL
   let htmlFinal = `
     <div style="display: flex; flex-direction: column; width: 100%;">
       ${htmlResumenGlobal}
-      <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; overflow: hidden; width: 100%;">
-        <div style="width: 100%; overflow-x: hidden;">
-          <table style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 0.85rem; color: #ffffff; text-align: left;">
-            <thead>
-              <tr style="background: #16161b; color: #a1a1aa; border-bottom: 1px solid rgba(255,255,255,0.08);">
-                <th style="padding: 10px 8px; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; width: 35%;">ASISTENTE</th>
-                <th style="padding: 10px 8px; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; width: 22%;">GANADO</th>
-                <th style="padding: 10px 8px; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; width: 22%;">ADELANTO</th>
-                <th style="padding: 10px 8px; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; text-align: right; width: 21%;">NETO</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${htmlFilas}
-            </tbody>
-          </table>
+      <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; overflow: hidden; width: 100%;">
+        <div style="display: flex; flex-direction: column; width: 100%;">
+          ${htmlFilas}
         </div>
       </div>
     </div>`;
