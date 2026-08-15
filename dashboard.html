@@ -7261,7 +7261,7 @@
       </div>
     </div>
 
-    <!-- 📧 MODAL OPTIMIZADO: BANDEJA GMAIL -->
+    <!-- 📧 MODAL: BANDEJA GMAIL -->
     <div
       class="overlay-ios"
       id="gmailOverlay"
@@ -7285,13 +7285,14 @@
         class="sheet-ios"
         onclick="event.stopPropagation()"
         style="
-          max-width: 900px !important;
+          max-width: 950px !important;
           width: 94%;
-          max-height: 88vh !important;
+          height: 88vh !important;
+          max-height: 900px !important;
           display: flex;
           flex-direction: column;
           padding: 0;
-          border-radius: 26px;
+          border-radius: 28px;
           overflow: hidden;
           background: #121215;
           border: 1px solid rgba(234, 67, 53, 0.35);
@@ -7300,16 +7301,16 @@
           box-sizing: border-box;
         "
       >
-        <!-- ENCABEZADO FIJO -->
+        <!-- CABECERA PRINCIPAL -->
         <div
           class="sheet-header"
           style="
-            padding: 18px 24px;
+            padding: 16px 24px;
             background: #16161b;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             margin: 0 !important;
             z-index: 10;
             flex-shrink: 0;
@@ -7318,15 +7319,14 @@
           <div style="display: flex; align-items: center; gap: 12px">
             <div
               style="
-                width: 42px;
-                height: 42px;
-                border-radius: 14px;
                 background: rgba(234, 67, 53, 0.15);
-                border: 1px solid rgba(234, 67, 53, 0.3);
+                color: #ea4335;
+                padding: 9px;
+                border-radius: 14px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #ea4335;
+                border: 1px solid rgba(234, 67, 53, 0.3);
                 box-shadow: 0 0 15px rgba(234, 67, 53, 0.2);
                 flex-shrink: 0;
               "
@@ -7337,7 +7337,7 @@
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2.2"
+                stroke-width="2.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
@@ -7347,12 +7347,12 @@
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </div>
-            <div style="display: flex; flex-direction: column">
+            <div>
               <h3
                 style="
-                  margin: 0;
                   color: #ffffff;
-                  font-size: 1.18rem;
+                  margin: 0;
+                  font-size: 1.15rem;
                   font-weight: 800;
                   letter-spacing: -0.3px;
                 "
@@ -7364,6 +7364,7 @@
               >
             </div>
           </div>
+
           <button
             class="btn-close-circle"
             style="
@@ -7377,8 +7378,8 @@
               display: flex;
               align-items: center;
               justify-content: center;
-              font-size: 0.85rem;
               margin: 0;
+              font-size: 0.85rem;
               transition: all 0.2s ease;
             "
             onclick="toggleGmailPanel()"
@@ -7387,7 +7388,7 @@
           </button>
         </div>
 
-        <!-- CONTENEDOR INTERNO -->
+        <!-- CUERPO Y BUSCADOR -->
         <div
           class="cyber-custom-scroll"
           style="
@@ -7397,13 +7398,11 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            background: transparent;
+            background: #121215;
             box-sizing: border-box;
           "
         >
-          <!-- FORMULARIO DE BÚSQUEDA POR CORREO -->
           <form
-            id="formSearchGmail"
             onsubmit="
               event.preventDefault();
               cargarDatosGmail();
@@ -7435,9 +7434,9 @@
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
               <input
-                type="email"
+                type="text"
                 id="inputSearchGmail"
-                placeholder="Ingresa el correo a consultar (ej: usuario@outlook.com)..."
+                placeholder="Ingresa el correo a consultar (ej: stormalpha7312@outlook.com)..."
                 style="
                   width: 100%;
                   background: transparent !important;
@@ -7467,7 +7466,6 @@
                 gap: 8px;
                 white-space: nowrap;
                 transition: all 0.2s ease;
-                box-shadow: 0 4px 15px rgba(234, 67, 53, 0.2);
               "
             >
               <svg
@@ -7487,7 +7485,7 @@
             </button>
           </form>
 
-          <!-- MESA / LISTA DE MENSAJES -->
+          <!-- TABLA DE RESULTADOS DE CORREO -->
           <div
             id="contenedorGmailMensajes"
             style="
@@ -7495,6 +7493,7 @@
               flex-direction: column;
               gap: 12px;
               width: 100%;
+              min-height: 200px;
             "
           >
             <div
@@ -7508,26 +7507,68 @@
                 border: 1px dashed rgba(255, 255, 255, 0.08);
               "
             >
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#ea4335"
-                stroke-width="2"
-                style="margin-bottom: 10px; opacity: 0.8"
-              >
-                <path
-                  d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-                ></path>
-                <polyline points="22,6 12,13 2,6"></polyline>
-              </svg>
-              <br />
               Escribe el correo electrónico arriba y presiona <b>Buscar</b> para
-              escanear la bandeja.
+              consultar los mensajes.
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- 📩 SUB-MODAL FLOTANTE: LECTOR DE CUERPO DE CORREO HTML -->
+    <div
+      id="modalLectorCorreoGlobal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(12px);
+        z-index: 20000;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: #ffffff;
+          color: #000000;
+          width: 90%;
+          max-width: 700px;
+          max-height: 80vh;
+          border-radius: 20px;
+          padding: 24px;
+          overflow-y: auto;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+          position: relative;
+        "
+      >
+        <button
+          onclick="cerrarLectorCorreoGlobal()"
+          style="
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            color: #000;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+          "
+        >
+          ✕
+        </button>
+        <div
+          id="cuerpoLectorCorreoGlobal"
+          style="margin-top: 10px; font-size: 0.9rem"
+        ></div>
       </div>
     </div>
 
