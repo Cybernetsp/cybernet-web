@@ -70,12 +70,16 @@ window.cargarUsuariosBaseMySQL = async function () {
   }
 };
 
+// ⚡ INICIO AUTOMÁTICO AL CARGAR LA PÁGINA
 document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(window.cargarUsuariosBaseMySQL, 1200);
+  setTimeout(() => {
+    window.cargarUsuariosBaseMySQL();
+    window.verificarEIniciarTurnoAuto(); // 🔥 Inicia el cronómetro automáticamente si hay un asistente logueado
+  }, 800);
 });
 
 // ==========================================
-// 2. CRONÓMETRO Y CONTROL DE SESIÓN STAFF
+// 2. CRONÓMETRO DE BARRA SUPERIOR (INICIO AUTOMÁTICO, AUTO-GUARDADO Y INACTIVIDAD)
 // ==========================================
 let secCronometroTotal = 0;
 let secParaGuardar = 0;
@@ -84,55 +88,10 @@ let turnoActivo = false;
 
 let inactividadTimer = null;
 let pausadoPorInactividad = false;
-const TIEMPO_MAX_INACTIVIDAD = 25 * 60 * 1000; // 25 Minutos
+const TIEMPO_MAX_INACTIVIDAD = 25 * 60 * 1000; // 25 Minutos en ms
 
-// 🚪 CERRAR SESIÓN STAFF CON GUARDADO AUTOMÁTICO EN BD
-window.cerrarSesionStaff = function () {
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
-
-  let usuarioActivo = (
-    sessionStorage.getItem("active_staff") ||
-    localStorage.getItem("cyber_saved_staff") ||
-    "STAFF"
-  )
-    .toUpperCase()
-    .trim();
-
-  // Si es Camilo (Admin), cierra directo
-  if (usuarioActivo === "CAMILO") {
-    if (turnoActivo) detenerTurnoTracker(false);
-    sessionStorage.clear();
-    localStorage.removeItem("cyber_saved_staff");
-    location.reload();
-    return;
-  }
-
-  // Confirmación para Asistentes
-  if (
-    confirm(
-      "⚠️ ¿Estás seguro de que deseas cerrar sesión y finalizar tu turno?",
-    )
-  ) {
-    if (turnoActivo) {
-      detenerTurnoTracker(false); // Guarda segundos pendientes en MySQL
-    }
-
-    setTimeout(() => {
-      sessionStorage.clear();
-      localStorage.removeItem("cyber_saved_staff");
-      location.reload();
-    }, 350);
-  }
-};
-
-window.toggleTrackerShift = function () {
-  if (turnoActivo) detenerTurnoTracker(false);
-  else iniciarTurnoTracker();
-};
-
-function iniciarTurnoTracker() {
+// 🔥 FUNCIÓN DE DETECCIÓN E INICIO AUTOMÁTICO
+window.verificarEIniciarTurnoAuto = function () {
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
     localStorage.getItem("cyber_saved_staff") ||
@@ -140,12 +99,41 @@ function iniciarTurnoTracker() {
   )
     .toUpperCase()
     .trim();
+
+  if (
+    activeStaff &&
+    activeStaff !== "STAFF" &&
+    activeStaff !== "CAMILO" &&
+    !turnoActivo
+  ) {
+    iniciarTurnoTracker(true); // Se inicia silenciosamente de una vez
+  }
+};
+
+window.toggleTrackerShift = function () {
+  if (turnoActivo) detenerTurnoTracker(false);
+  else iniciarTurnoTracker(false);
+};
+
+function iniciarTurnoTracker(esAuto = false) {
+  const activeStaff = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    ""
+  )
+    .toUpperCase()
+    .trim();
+
   if (!activeStaff || activeStaff === "STAFF" || activeStaff === "CAMILO") {
-    alert(
-      "⚠️ Inicia sesión con el nombre de un Asistente para rastrear tu tiempo de trabajo.",
-    );
+    if (!esAuto) {
+      alert(
+        "⚠️ Inicia sesión con el nombre de un Asistente para rastrear tu tiempo de trabajo.",
+      );
+    }
     return;
   }
+
+  if (turnoActivo) return; // Si ya está corriendo, no duplicar el timer
 
   turnoActivo = true;
   pausadoPorInactividad = false;
@@ -163,6 +151,7 @@ function iniciarTurnoTracker() {
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
+    // Respaldo automático en MySQL cada 5 minutos
     if (secParaGuardar >= 300) {
       enviarTiempoTrackerAMySQL(
         activeStaff,
@@ -174,10 +163,12 @@ function iniciarTurnoTracker() {
   }, 1000);
 
   iniciarDetectorInactividad();
-  if (typeof triggerToast === "function")
+
+  if (typeof triggerToast === "function") {
     triggerToast(
-      `<div style="color:var(--ios-green);">▶ Turno iniciado. Guardado automático activo.</div>`,
+      `<div style="color:var(--ios-green);">▶ Turno iniciado automáticamente para ${activeStaff}.</div>`,
     );
+  }
 }
 
 function detenerTurnoTracker(porInactividad = false) {
@@ -250,7 +241,7 @@ function formatoSegundosTracker(totalSeg) {
 
 function resetInactividad() {
   if (pausadoPorInactividad && !turnoActivo) {
-    iniciarTurnoTracker();
+    iniciarTurnoTracker(true); // Reanuda automáticamente al detectar movimiento
   }
 
   clearTimeout(inactividadTimer);
@@ -276,6 +267,45 @@ function detenerDetectorInactividad() {
   window.removeEventListener("scroll", resetInactividad);
   clearTimeout(inactividadTimer);
 }
+
+// 🚪 CERRAR SESIÓN STAFF CON GUARDADO AUTOMÁTICO
+window.cerrarSesionStaff = function () {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  let usuarioActivo = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "STAFF"
+  )
+    .toUpperCase()
+    .trim();
+
+  if (usuarioActivo === "CAMILO") {
+    if (turnoActivo) detenerTurnoTracker(false);
+    sessionStorage.clear();
+    localStorage.removeItem("cyber_saved_staff");
+    location.reload();
+    return;
+  }
+
+  if (
+    confirm(
+      "⚠️ ¿Estás seguro de que deseas cerrar sesión y finalizar tu turno?",
+    )
+  ) {
+    if (turnoActivo) {
+      detenerTurnoTracker(false); // Guarda el acumulado en MySQL
+    }
+
+    setTimeout(() => {
+      sessionStorage.clear();
+      localStorage.removeItem("cyber_saved_staff");
+      location.reload();
+    }, 350);
+  }
+};
 
 window.addEventListener("beforeunload", function () {
   if (turnoActivo && secParaGuardar > 0) {
