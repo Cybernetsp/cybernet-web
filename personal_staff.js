@@ -1,5 +1,5 @@
 /* ==========================================================================
-   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL (CÓDIGO COMPLETO)
+   👥 CYBERNET OS - MÓDULO DE PERSONAL, NÓMINA Y CALENDARIO MYSQL
    ========================================================================== */
 
 window.URL_OBTENER_HORAS = "https://api.cybernetsp.com/obtener_horas.php";
@@ -8,6 +8,7 @@ window.URL_ELIMINAR_TURNO = "https://api.cybernetsp.com/eliminar_turno.php";
 window.URL_GUARDAR_ADELANTO = "https://api.cybernetsp.com/guardar_adelanto.php";
 window.URL_GUARDAR_HORAS_MANUAL =
   "https://api.cybernetsp.com/guardar_horas_manual.php";
+window.URL_OBTENER_USUARIOS = "obtener_usuarios.php";
 
 // Lista base de personal registrado en Cybernet
 window.ASISTENTES_BASE = [
@@ -18,7 +19,9 @@ window.ASISTENTES_BASE = [
   "MANUP",
   "PABLO",
 ];
+
 window.currentHorasStock = [];
+window.usuariosCache = [];
 
 // Filtros globales del calendario
 window.filtroMesTurnos = new Date().getMonth();
@@ -26,9 +29,15 @@ window.filtroAnioTurnos = new Date().getFullYear();
 window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
 
-// OBTENER LISTA COMPLETA DE ASISTENTES (BASE + MYSQL)
+// 🌐 OBTENER LISTA COMPLETA DE ASISTENTES (BASE + MYSQL)
 function obtenerTodosLosAsistentes() {
   let setAsistentes = new Set(window.ASISTENTES_BASE);
+  if (Array.isArray(window.usuariosCache)) {
+    window.usuariosCache.forEach((u) => {
+      let nom = (u.nombre || "").toUpperCase().trim();
+      if (nom && nom !== "STAFF") setAsistentes.add(nom);
+    });
+  }
   if (Array.isArray(window.currentHorasStock)) {
     window.currentHorasStock.forEach((item) => {
       let v = (item.vendedor || "").toUpperCase().trim();
@@ -46,6 +55,22 @@ function verificarSiEsSuperAdmin() {
     "STAFF";
   return user.toUpperCase().trim() === "CAMILO";
 }
+
+// 🔄 CARGAR USUARIOS DESDE MYSQL
+window.cargarUsuariosBaseMySQL = async function () {
+  try {
+    let res = await fetch(window.URL_OBTENER_USUARIOS);
+    let data = await res.json();
+    if (data && data.status === "success") {
+      window.usuariosCache = data.data_completa || [];
+      if (Array.isArray(data.data) && data.data.length > 0) {
+        window.ASISTENTES_BASE = data.data;
+      }
+    }
+  } catch (e) {
+    console.error("Error cargando usuarios desde MySQL:", e);
+  }
+};
 
 // 👁️ ABRIR / CERRAR PANEL DE TURNOS
 window.toggleShiftsPanel = function () {
@@ -289,7 +314,7 @@ window.renderizarHorasEnPantalla = function () {
       ${selectorAsistentesAdmin}
     </div>`;
 
-  // 3. AGRUPAR REGISTROS POR ASISTENTE Y DÍA
+  // 3. AGRUPAR REGISTROS
   let mapaAsistentes = {};
 
   datosFiltrados.forEach((item) => {
@@ -815,7 +840,285 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
   });
 };
 
+// 📊 MÓDULO NÓMINA EMPRESARIAL MYSQL
+window.URL_OBTENER_USUARIOS = "obtener_usuarios.php";
+window.usuariosCache = [];
+
+window.cargarUsuariosBaseMySQL = async function () {
+  try {
+    let res = await fetch(window.URL_OBTENER_USUARIOS);
+    let data = await res.json();
+    if (data && data.status === "success") {
+      window.usuariosCache = data.data_completa || [];
+      if (Array.isArray(data.data) && data.data.length > 0) {
+        window.ASISTENTES_BASE = data.data;
+      }
+    }
+  } catch (e) {
+    console.error("Error cargando usuarios desde MySQL:", e);
+  }
+};
+
+window.abrirTotalNomina = function () {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  const overlay = document.getElementById("nominaOverlay");
+  if (!overlay) return;
+
+  overlay.classList.add("open");
+  overlay.style.setProperty("display", "flex", "important");
+  overlay.style.setProperty("align-items", "center", "important");
+  overlay.style.setProperty("justify-content", "center", "important");
+  overlay.style.setProperty("background", "rgba(0, 0, 0, 0.8)", "important");
+  overlay.style.setProperty("backdrop-filter", "blur(16px)", "important");
+  overlay.style.setProperty(
+    "-webkit-backdrop-filter",
+    "blur(16px)",
+    "important",
+  );
+
+  window.refrescarTotalNominaEnVivo();
+};
+
+window.cerrarTotalNomina = function () {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+  const overlay = document.getElementById("nominaOverlay");
+  if (overlay) {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
+  }
+};
+
+window.refrescarTotalNominaEnVivo = async function (btn) {
+  if (btn) {
+    try {
+      if (typeof haptic === "function") haptic();
+    } catch (e) {}
+    btn.disabled = true;
+    btn.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Calculando...`;
+  }
+
+  const container = document.getElementById("nominaContentArea");
+  if (container) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:45px; color:#30d158;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+          <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+          <span style="font-weight:700; font-size:0.9rem;">Sincronizando nómina con MySQL...</span>
+        </div>
+      </div>`;
+  }
+
+  if (window.usuariosCache.length === 0) {
+    await window.cargarUsuariosBaseMySQL();
+  }
+
+  if (!window.currentHorasStock || window.currentHorasStock.length === 0) {
+    try {
+      let res = await fetch(window.URL_OBTENER_HORAS);
+      let data = await res.json();
+      if (data && data.status === "success") {
+        window.currentHorasStock = data.data || [];
+      }
+    } catch (e) {
+      console.error("Error leyendo turnos para nómina:", e);
+    }
+  }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = "Refrescar";
+  }
+
+  window.renderizarTotalNomina();
+};
+
+window.renderizarTotalNomina = function () {
+  const container = document.getElementById("nominaContentArea");
+  if (!container) return;
+
+  const activeStaff = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "STAFF"
+  )
+    .toUpperCase()
+    .trim();
+  const esSuperAdmin = verificarSiEsSuperAdmin();
+
+  const dMes = window.filtroMesTurnos;
+  const dAnio = window.filtroAnioTurnos;
+  const esQ1 = window.filtroQuincenaTurnos === 1;
+
+  const mesesNombres = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+
+  let mapaTelefonos = {};
+  window.usuariosCache.forEach((u) => {
+    let nom = (u.nombre || "").toUpperCase().trim();
+    let num = (u.numero || u.telefono || "").trim();
+    if (nom) mapaTelefonos[nom] = num;
+  });
+
+  let todosLosRegistros = window.currentHorasStock || [];
+  let mapaNomina = {};
+
+  todosLosRegistros.forEach((item) => {
+    let d = parsearFechaTurno(item.fecha);
+    if (d.getMonth() !== dMes || d.getFullYear() !== dAnio) return;
+
+    let dia = d.getDate();
+    if (esQ1 && dia > 15) return;
+    if (!esQ1 && dia <= 15) return;
+
+    let asist = (item.vendedor || "STAFF").toUpperCase().trim();
+
+    if (!mapaNomina[asist]) {
+      mapaNomina[asist] = { ganado: 0, descontado: 0, neto: 0 };
+    }
+
+    let monto = parseFloat(item.total) || 0;
+    let esAdelanto =
+      monto < 0 || (item.estado || "").toUpperCase().includes("ADELANTO");
+
+    if (esAdelanto) {
+      mapaNomina[asist].descontado += Math.abs(monto);
+    } else {
+      mapaNomina[asist].ganado += monto;
+    }
+  });
+
+  let listaProcesar = obtenerTodosLosAsistentes();
+  if (!esSuperAdmin) {
+    listaProcesar = [activeStaff];
+  }
+
+  let totalGlobalGanado = 0;
+  let totalGlobalDescontado = 0;
+  let totalGlobalNeto = 0;
+
+  let htmlFilas = "";
+
+  listaProcesar.forEach((asistente) => {
+    let datosUser = mapaNomina[asistente] || {
+      ganado: 0,
+      descontado: 0,
+      neto: 0,
+    };
+    let ganado = datosUser.ganado;
+    let descontado = datosUser.descontado;
+    let neto = ganado - descontado;
+
+    totalGlobalGanado += ganado;
+    totalGlobalDescontado += descontado;
+    totalGlobalNeto += neto;
+
+    let telefonoNum = mapaTelefonos[asistente] || "Sin registrar";
+    let colorNeto = neto < 0 ? "#ff453a" : "#30d158";
+
+    let btnCopiarTel = "";
+    if (telefonoNum !== "Sin registrar") {
+      btnCopiarTel = `
+        <button onclick="copiarDatoAisladoLupa(this, '${telefonoNum}')" title="Copiar Nequi / Teléfono" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 3px 7px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; font-family: monospace;">
+          <span>${telefonoNum}</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </button>`;
+    } else {
+      btnCopiarTel = `<span style="font-size:0.75rem; color:#71717a;">Sin Nequi</span>`;
+    }
+
+    htmlFilas += `
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+        <td style="padding: 14px 16px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 0.95rem; display: flex; align-items: center; justify-content: center;">
+              ${asistente.charAt(0)}
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-weight: 800; color: #ffffff; font-size: 0.95rem;">${asistente}</span>
+              ${btnCopiarTel}
+            </div>
+          </div>
+        </td>
+        <td style="padding: 14px 16px; font-family: monospace; font-weight: 700; color: #30d158; font-size: 0.95rem;">
+          +$${Math.round(ganado).toLocaleString("es-CO")}
+        </td>
+        <td style="padding: 14px 16px; font-family: monospace; font-weight: 700; color: #ff453a; font-size: 0.95rem;">
+          -$${Math.round(descontado).toLocaleString("es-CO")}
+        </td>
+        <td style="padding: 14px 16px; font-family: monospace; font-weight: 900; color: ${colorNeto}; font-size: 1.1rem; text-align: right;">
+          $${Math.round(neto).toLocaleString("es-CO")}
+        </td>
+      </tr>`;
+  });
+
+  let htmlResumenGlobal = "";
+  if (esSuperAdmin) {
+    htmlResumenGlobal = `
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+        <div style="background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 0.68rem; font-weight: 800; color: #30d158; text-transform: uppercase;">Total Bruto (+)</span>
+          <span style="font-size: 1.15rem; font-weight: 900; color: #30d158; font-family: monospace;">$${Math.round(totalGlobalGanado).toLocaleString("es-CO")}</span>
+        </div>
+        <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.2); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 0.68rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelantos (-)</span>
+          <span style="font-size: 1.15rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${Math.round(totalGlobalDescontado).toLocaleString("es-CO")}</span>
+        </div>
+        <div style="background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.3); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 0.68rem; font-weight: 800; color: #0a84ff; text-transform: uppercase;">Neto A Pagar</span>
+          <span style="font-size: 1.25rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${Math.round(totalGlobalNeto).toLocaleString("es-CO")}</span>
+        </div>
+      </div>`;
+  }
+
+  let htmlFinal = `
+    <div style="display: flex; flex-direction: column; width: 100%;">
+      ${htmlResumenGlobal}
+
+      <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; overflow: hidden; width: 100%;">
+        <div style="width: 100%; overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; color: #ffffff; text-align: left; white-space: nowrap;">
+            <thead>
+              <tr style="background: #16161b; color: #a1a1aa; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <th style="padding: 12px 16px; font-weight: 800; font-size: 0.75rem; text-transform: uppercase;">ASISTENTE / NEQUI</th>
+                <th style="padding: 12px 16px; font-weight: 800; font-size: 0.75rem; text-transform: uppercase;">GANADO (+)</th>
+                <th style="padding: 12px 16px; font-weight: 800; font-size: 0.75rem; text-transform: uppercase;">ADELANTOS (-)</th>
+                <th style="padding: 12px 16px; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; text-align: right;">SUELDO NETO</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${htmlFilas}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+
+  container.innerHTML = htmlFinal;
+};
+
 // 🔍 FILTRO DE BÚSQUEDA
 window.filtrarHorasInternas = function () {
   window.renderizarHorasEnPantalla();
 };
+
+// Cargar usuarios de MySQL al cargar el documento
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(window.cargarUsuariosBaseMySQL, 1500);
+});
