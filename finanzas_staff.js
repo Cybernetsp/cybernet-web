@@ -724,7 +724,17 @@ window.renderDashboard = function () {
 
   if (!d) return;
 
-  // 1. Renderizado de Montos Principales
+  // 1. CÁLCULO DE VALORES Y PORCENTAJES
+  const ingNum = Number(d.ingresos) || 0;
+  const gasNum = Number(d.gastos) || 0;
+  const totalFlujo = ingNum + gasNum;
+
+  const pctIngresos =
+    totalFlujo > 0 ? Math.round((ingNum / totalFlujo) * 100) : 0;
+  const pctGastos =
+    totalFlujo > 0 ? Math.round((gasNum / totalFlujo) * 100) : 0;
+
+  // 2. RENDERIZADO DE TEXTOS Y MONTO NETO
   const netEl = document.getElementById("val_neto");
   if (netEl) {
     netEl.innerText = formatMoneda(d.neto);
@@ -744,28 +754,16 @@ window.renderDashboard = function () {
   if (document.getElementById("val_nomina"))
     document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
 
-  // 2. CÁLCULO Y ANIMACIÓN DINÁMICA DE PORCENTAJES Y ANILLOS BENTO
-  const ingNum = Number(d.ingresos) || 0;
-  const gasNum = Number(d.gastos) || 0;
-  const totalFlujo = ingNum + gasNum;
-
-  const pctIngresos =
-    totalFlujo > 0 ? Math.round((ingNum / totalFlujo) * 100) : 0;
-  const pctGastos =
-    totalFlujo > 0 ? Math.round((gasNum / totalFlujo) * 100) : 0;
-
-  // Actualización de textos de porcentaje por ID o búsqueda estructural
+  // Actualizar porcentajes
   const elPctIng =
     document.getElementById("pct_ingresos") ||
     document.getElementById("pctIngresosVal");
   const elPctGas =
     document.getElementById("pct_gastos") ||
     document.getElementById("pctGastosVal");
-
   if (elPctIng) elPctIng.innerText = pctIngresos + "%";
   if (elPctGas) elPctGas.innerText = pctGastos + "%";
 
-  // Búsqueda inteligente por etiqueta en el DOM
   document.querySelectorAll("span, div, p").forEach((el) => {
     if (el.children.length === 0 && el.innerText) {
       if (el.innerText.trim() === "Ingresos Totales") {
@@ -783,28 +781,10 @@ window.renderDashboard = function () {
     }
   });
 
-  // Animación del Anillo SVG / Anillos concéntricos
-  const ringIng = document.querySelector(
-    ".ring-ingresos, #ringIngresos, svg circle:nth-child(1)",
-  );
-  const ringGas = document.querySelector(
-    ".ring-gastos, #ringGastos, svg circle:nth-child(2)",
-  );
+  // 3. 🍎 MOTOR DE ANIMACIÓN DE ANILLOS APPLE ACTIVITY (VERDE Y ROJO EN VIVO)
+  window.animarAnillosActividadApple(pctIngresos, pctGastos);
 
-  if (ringIng) {
-    const strokeDash = 2 * Math.PI * 18; // Radio aproximado 18
-    ringIng.style.strokeDasharray = strokeDash;
-    ringIng.style.strokeDashoffset =
-      strokeDash - (strokeDash * pctIngresos) / 100;
-  }
-  if (ringGas) {
-    const strokeDash = 2 * Math.PI * 12; // Radio aproximado 12
-    ringGas.style.strokeDasharray = strokeDash;
-    ringGas.style.strokeDashoffset =
-      strokeDash - (strokeDash * pctGastos) / 100;
-  }
-
-  // 3. Proyecciones y Fondos
+  // 4. PROYECCIONES Y FONDOS
   const baseVentas = d.ingresos || 0;
   const montoFondoNegocio = Math.round(baseVentas * 0.55);
   const montoReservaNomina = Math.round(baseVentas * 0.17);
@@ -837,7 +817,7 @@ window.renderDashboard = function () {
     document.getElementById("valProyMioMasJeisson").innerText =
       formatMoneda(miGananciaNeta);
 
-  // 4. Deudas
+  // 5. DEUDAS E HISTORIAL
   if (
     window.globalFinanzasData.deudaActual !== undefined &&
     document.getElementById("valDeudaTotal")
@@ -846,20 +826,71 @@ window.renderDashboard = function () {
       window.globalFinanzasData.deudaActual || 0,
     ).toLocaleString("es-CO");
   }
-  if (
-    window.globalFinanzasData.tipoDeudaActual &&
-    document.getElementById("tipoDeudaMutua")
-  ) {
-    document.getElementById("tipoDeudaMutua").value =
-      window.globalFinanzasData.tipoDeudaActual;
-  }
 
-  // 5. Historial de Movimientos
   if (window.globalFinanzasData.listaDetallada) {
     window.renderizarHistorialMovimientosUI(
       window.globalFinanzasData.listaDetallada,
     );
   }
+};
+
+// 🎯 GENERADOR DE ANILLOS SVG CON ANIMACIÓN FLUIDA
+window.animarAnillosActividadApple = function (pctIng, pctGas) {
+  // Búsqueda del contenedor del círculo
+  let target =
+    document.querySelector(".apple-rings-container") ||
+    document.querySelector(".rings-wrapper");
+
+  if (!target) {
+    document.querySelectorAll("svg").forEach((svg) => {
+      const parent = svg.parentElement;
+      if (
+        parent &&
+        parent.innerText &&
+        parent.innerText.includes("Ingresos Totales")
+      ) {
+        target = svg.parentElement;
+      }
+    });
+  }
+
+  if (!target) {
+    const ingLabel = Array.from(document.querySelectorAll("span, div")).find(
+      (e) => e.innerText && e.innerText.trim() === "Ingresos Totales",
+    );
+    if (ingLabel) {
+      const parentCard =
+        ingLabel.closest(".bento-card") ||
+        ingLabel.closest("div[class*='card']");
+      if (parentCard) target = parentCard.querySelector("svg")?.parentElement;
+    }
+  }
+
+  if (!target) return;
+
+  const c1 = 2 * Math.PI * 22; // Circunferencia exterior (138.23)
+  const c2 = 2 * Math.PI * 15; // Circunferencia interior (94.25)
+
+  const offsetIng = c1 - (c1 * Math.min(pctIng, 100)) / 100;
+  const offsetGas = c2 - (c2 * Math.min(pctGas, 100)) / 100;
+
+  target.innerHTML = `
+    <svg width="68" height="68" viewBox="0 0 60 60" style="transform: rotate(-90deg); filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));">
+      <!-- Pista Exterior (Ingresos - Fondo) -->
+      <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(48, 209, 88, 0.15)" stroke-width="5.5" />
+      <!-- Anillo Exterior (Ingresos - Verde) -->
+      <circle cx="30" cy="30" r="22" fill="none" stroke="#30d158" stroke-width="5.5"
+              stroke-dasharray="${c1}" stroke-dashoffset="${offsetIng}" stroke-linecap="round"
+              style="transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1);" />
+
+      <!-- Pista Interior (Gastos - Fondo) -->
+      <circle cx="30" cy="30" r="15" fill="none" stroke="rgba(255, 69, 58, 0.15)" stroke-width="5.5" />
+      <!-- Anillo Interior (Gastos - Rojo) -->
+      <circle cx="30" cy="30" r="15" fill="none" stroke="#ff453a" stroke-width="5.5"
+              stroke-dasharray="${c2}" stroke-dashoffset="${offsetGas}" stroke-linecap="round"
+              style="transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1);" />
+    </svg>
+  `;
 };
 
 /* ==========================================================================
