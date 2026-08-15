@@ -407,7 +407,6 @@ window.verificarNumeroStaffEnVivo = function (numeroIngresado) {
   const selectBanco = document.getElementById("vendedorMedioPago");
   let optNomina = document.getElementById("optDescontarNomina");
 
-  // Reemplazar window.staffTelefonosList por los reales de tu negocio si los necesitas
   if (
     numLimpio.length >= 7 &&
     (window.staffTelefonosList || []).includes(numLimpio)
