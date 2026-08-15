@@ -1235,3 +1235,87 @@ window.renderDashboard = function () {
       window.globalFinanzasData.tipoDeudaActual;
   }
 };
+/* ==========================================================================
+   💳 CONTROL DE DEUDA MUTUA (MODAL Y RETIROS)
+   ========================================================================== */
+window.modoOperacionModalActual = "prestamo";
+
+window.agregarNuevoPrestamo = function () {
+  if (typeof haptic === "function") haptic();
+  window.modoOperacionModalActual = "prestamo";
+
+  const titleEl = document.getElementById("titlePrestamoModal");
+  const descEl = document.getElementById("descPrestamoModal");
+  const inputEl = document.getElementById("inputMontoPrestamoModal");
+
+  if (titleEl) titleEl.innerText = "➕ Nuevo Préstamo / Registro";
+  if (descEl) descEl.innerText = "Ingresa el monto del nuevo préstamo:";
+  if (inputEl) inputEl.value = "";
+
+  const modal = document.getElementById("prestamoModalOverlay");
+  if (modal) modal.style.display = "flex";
+  setTimeout(() => {
+    if (inputEl) inputEl.focus();
+  }, 100);
+};
+
+window.aplicarRetiroDeudaHoy = function () {
+  if (typeof haptic === "function") haptic();
+  window.modoOperacionModalActual = "retiro";
+
+  let sugeridoText = document.getElementById("valDescuentoHoy")
+    ? document.getElementById("valDescuentoHoy").innerText.replace(/\D/g, "")
+    : "0";
+  let sugerido = parseFloat(sugeridoText) || 0;
+
+  const titleEl = document.getElementById("titlePrestamoModal");
+  const descEl = document.getElementById("descPrestamoModal");
+  const inputEl = document.getElementById("inputMontoPrestamoModal");
+
+  if (titleEl) titleEl.innerText = "🟢 Retirar / Abonar Dinero de Hoy";
+  if (descEl)
+    descEl.innerText = "Confirma o modifica la cantidad abonada/retirada hoy:";
+  if (inputEl)
+    inputEl.value = sugerido > 0 ? sugerido.toLocaleString("es-CO") : "";
+
+  const modal = document.getElementById("prestamoModalOverlay");
+  if (modal) modal.style.display = "flex";
+  setTimeout(() => {
+    if (inputEl) inputEl.focus();
+  }, 100);
+};
+
+window.cerrarPrestamoModal = function () {
+  if (typeof haptic === "function") haptic();
+  const modal = document.getElementById("prestamoModalOverlay");
+  if (modal) modal.style.display = "none";
+};
+
+window.confirmarOperacionPrestamoModal = function (e) {
+  if (e) e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const inputEl = document.getElementById("inputMontoPrestamoModal");
+  let montoRaw = inputEl ? inputEl.value.replace(/\D/g, "") : "0";
+  let montoIngresado = parseFloat(montoRaw) || 0;
+
+  if (montoIngresado <= 0) return;
+
+  let valDeudaEl = document.getElementById("valDeudaTotal");
+  let deudaActual = parseFloat(valDeudaEl.value.replace(/\D/g, "")) || 0;
+
+  if (window.modoOperacionModalActual === "prestamo") {
+    let nuevaDeuda = deudaActual + montoIngresado;
+    valDeudaEl.value = nuevaDeuda.toLocaleString("es-CO");
+  } else {
+    let nuevaDeuda = Math.max(0, deudaActual - montoIngresado);
+    valDeudaEl.value = nuevaDeuda.toLocaleString("es-CO");
+  }
+
+  if (typeof calcularDescuentoDeuda === "function") calcularDescuentoDeuda();
+  window.cerrarPrestamoModal();
+
+  if (typeof guardarDeudaEnSheets === "function") {
+    guardarDeudaEnSheets();
+  }
+};
