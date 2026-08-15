@@ -251,20 +251,252 @@ window.crearModalNetflixManagerHTML = function () {
   document.body.insertAdjacentHTML("beforeend", modalHtml);
 };
 
-// Funciones delegadas que deberás definir en tu archivo "crear_net.js"
-window.ejecutarProcesoCorteExterno = function (id, correo, nuevaClave, btn) {
-  if (typeof procesarCorteOperativoEnBD === "function") {
-    procesarCorteOperativoEnBD(id, correo, nuevaClave, btn);
-  } else {
-    alert("La función de corte externo no está vinculada.");
+/* ==========================================================================
+   🔄 LÓGICA DE PROCESAMIENTO Y VENTANA FINAL DE CORTE NETFLIX
+   ========================================================================== */
+
+window.ejecutarProcesoCorteExterno = function (
+  idCuenta,
+  correo,
+  claveNueva,
+  btn,
+) {
+  if (typeof haptic === "function") haptic();
+
+  if (
+    !confirm(
+      `¿Confirmas procesar el corte para la cuenta:\n${correo}?\n\nSe actualizará la contraseña a: ${claveNueva} y la fecha al día de HOY.`,
+    )
+  ) {
+    return;
   }
+
+  const originalContent = btn.innerHTML;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `⏳ Procesando corte...`;
+  }
+
+  const formData = new FormData();
+  formData.append("accion", "procesar_corte_netflix");
+  formData.append("correo", correo);
+  formData.append("clave_nueva", claveNueva);
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.text())
+    .then((text) => {
+      let res;
+      try {
+        res = JSON.parse(text);
+      } catch (e) {
+        alert(
+          "❌ Error PHP:\n\n" + (text.trim() || "El servidor respondió vacío."),
+        );
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalContent;
+        }
+        return;
+      }
+
+      if (res && res.status === "success") {
+        if (typeof triggerToast === "function")
+          triggerToast(`✅ Corte procesado con éxito.`);
+        window.cargarCortesOperativosNetflix(); // Refresca la lista de cortes
+        if (typeof window.cargarDatosMySQL === "function")
+          window.cargarDatosMySQL(); // Refresca inventario maestro
+        window.mostrarModalResumenCorteNetflix(res); // Muestra la ventana de WhatsApp
+      } else {
+        alert(
+          "❌ Error: " + (res ? res.message : "No se pudo procesar el corte."),
+        );
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalContent;
+        }
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("❌ Error de conexión al servidor.");
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+      }
+    });
+};
+
+window.mostrarModalResumenCorteNetflix = function (data) {
+  const oldModal = document.getElementById("modalResumenCorteNetflix");
+  if (oldModal) oldModal.remove();
+
+  const correo = data.correo || "";
+  const claveNueva = data.clave_nueva || "";
+  const perfiles = data.perfiles || [];
+
+  const enlacesWaMeArr = [];
+  let itemsHtml = "";
+
+  perfiles.forEach((p) => {
+    const numRaw = (p.numero || "").trim();
+    let numSoloDigitos = numRaw.replace(/\D/g, "");
+
+    if (numSoloDigitos.length === 10) numSoloDigitos = "57" + numSoloDigitos;
+    const tieneNumeroValido = numSoloDigitos.length >= 10;
+
+    if (!tieneNumeroValido) return;
+
+    const waLink = `https://wa.me/${numSoloDigitos}`;
+    enlacesWaMeArr.push(`wa.me/${numSoloDigitos}`);
+
+    const tieneNombreReal =
+      p.cliente &&
+      p.cliente.trim() !== "" &&
+      p.cliente.trim().toLowerCase() !== "sin nombre";
+    const clienteDisplay = tieneNombreReal ? p.cliente.trim() : "";
+    const saludoNombre = clienteDisplay
+      ? ` *¡Hola ${clienteDisplay}!*`
+      : " *¡Hola!*";
+
+    const mensajeWA = `🌟${saludoNombre}\n\nTu cuenta de *NETFLIX PREMIUM* ha sido actualizada por cambio de clave / mantenimiento ✅\n\n⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n🎬 *NUEVOS DATOS DE ACCESO* 🔐\n────────────────────\n📧 *Correo:* ${correo}\n🔑 *Contraseña:* ${claveNueva}\n👤 *Perfil:* ${p.perfil}\n📍 *PIN:* ${p.pin || "-"}\n📅 *Vence:* ${p.vencimiento || "-"}\n\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n\n✨ *¡Gracias por tu confianza!* ✨`;
+    const msjEscapado = encodeURIComponent(mensajeWA);
+    const numeroTextoMostrar =
+      numRaw && numRaw !== "-" ? numRaw : numSoloDigitos;
+
+    itemsHtml += `
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="background: rgba(229, 9, 20, 0.2); color: #e50914; border: 1px solid rgba(229, 9, 20, 0.4); border-radius: 8px; padding: 2px 10px; font-weight: 800; font-size: 0.78rem;">PERFIL ${p.perfil}</span>
+            ${clienteDisplay ? `<span style="color: #ffffff; font-weight: 700; font-size: 0.88rem;">${clienteDisplay}</span>` : ""}
+          </div>
+          <span style="color: #a1a1aa; font-size: 0.75rem; font-family: monospace;">PIN: ${p.pin || "-"}</span>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.3); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05);">
+          <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
+            <span style="font-size: 0.8rem; color: #30d158;">📱</span>
+            <a href="${waLink}" target="_blank" style="color: #30d158; font-family: monospace; font-weight: 800; font-size: 0.85rem; text-decoration: none;" title="Abrir chat en WhatsApp">${numeroTextoMostrar}</a>
+          </div>
+
+          <button onclick="window.copiarMensajeCorteWhatsApp(this, '${msjEscapado}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Copiar mensaje de WhatsApp para este cliente">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar Mensaje
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  const textoTodosNumeros = enlacesWaMeArr
+    .map((link, idx) => `${idx + 1}. ${link}`)
+    .join("\n");
+  const todosNumEscapados = encodeURIComponent(textoTodosNumeros);
+
+  if (enlacesWaMeArr.length === 0) {
+    itemsHtml = `<div style="text-align: center; padding: 30px 15px; color: #a1a1aa; font-weight: 600; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.08);">📭 No hay perfiles con número telefónico registrado en esta cuenta.</div>`;
+  }
+
+  const modalHtml = `
+    <div class="overlay-ios open" id="modalResumenCorteNetflix" style="display: flex !important; z-index: 999999 !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
+      <div class="modal-ios" style="max-width: 500px; width: 92%; max-height: 90vh; background: #141417; border: 1px solid rgba(48, 209, 88, 0.3); border-radius: 26px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); overflow: hidden;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-shrink: 0;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div>
+              <h3 style="margin: 0; color: #ffffff; font-size: 1.1rem; font-weight: 800;">Corte Procesado</h3>
+              <span style="color: #a1a1aa; font-size: 0.72rem; font-family: monospace;">${correo}</span>
+            </div>
+          </div>
+          <button type="button" onclick="document.getElementById('modalResumenCorteNetflix').remove()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">✕</button>
+        </div>
+
+        <button onclick="window.copiarTodosLosNumerosCorte(this, '${todosNumEscapados}')" style="width: 100%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copiar todos los números (${enlacesWaMeArr.length})
+        </button>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex-grow: 1;">
+          ${itemsHtml}
+        </div>
+
+        <button onclick="document.getElementById('modalResumenCorteNetflix').remove()" style="width: 100%; background: #30d158; color: #000000; border: none; padding: 12px; border-radius: 14px; font-weight: 900; font-size: 0.88rem; cursor: pointer; flex-shrink: 0;">
+          Entendido / Cerrar Ventana
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+};
+
+window.copiarMensajeCorteWhatsApp = function (btn, msjEscapado) {
+  if (typeof haptic === "function") haptic();
+  const texto = decodeURIComponent(msjEscapado);
+
+  navigator.clipboard.writeText(texto).then(() => {
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Copiado!`;
+    btn.style.setProperty("background", "#30d158", "important");
+    btn.style.setProperty("color", "#000000", "important");
+
+    if (typeof triggerToast === "function")
+      triggerToast(`📋 Mensaje copiado al portapapeles.`);
+
+    setTimeout(() => {
+      btn.innerHTML = oldHtml;
+      btn.style.setProperty(
+        "background",
+        "rgba(48, 209, 88, 0.15)",
+        "important",
+      );
+      btn.style.setProperty("color", "#30d158", "important");
+    }, 1500);
+  });
+};
+
+window.copiarTodosLosNumerosCorte = function (btn, todosEscapados) {
+  if (typeof haptic === "function") haptic();
+  const texto = decodeURIComponent(todosEscapados);
+
+  if (!texto || texto.trim() === "") {
+    alert("⚠️ No hay números registrados en esta cuenta.");
+    return;
+  }
+
+  navigator.clipboard.writeText(texto).then(() => {
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Números Copiados!`;
+    btn.style.setProperty("background", "#30d158", "important");
+    btn.style.setProperty("color", "#000000", "important");
+
+    if (typeof triggerToast === "function")
+      triggerToast(`📋 Lista de números copiada.`);
+
+    setTimeout(() => {
+      btn.innerHTML = oldHtml;
+      btn.style.setProperty(
+        "background",
+        "rgba(255, 255, 255, 0.08)",
+        "important",
+      );
+      btn.style.setProperty("color", "#ffffff", "important");
+    }, 1500);
+  });
 };
 
 window.crearCuentaNetflixAliasExterna = function () {
-  if (typeof iniciarCreacionAliasNetflix === "function") {
-    iniciarCreacionAliasNetflix();
+  if (typeof window.crearCuentaNetflixAlias === "function") {
+    window.crearCuentaNetflixAlias();
   } else {
-    alert("La función de crear alias externo no está vinculada.");
+    alert(
+      "La función de crear alias externo no está vinculada. Asegúrate de tener crear_net.js",
+    );
   }
 };
 
