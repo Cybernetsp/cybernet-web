@@ -23,6 +23,7 @@ window.toggleMysqlPanel = function () {
   }
 };
 
+// Evaluar sesión y rol del usuario
 const usuarioActivoObj = JSON.parse(
   sessionStorage.getItem("usuario_activo") || "{}",
 );
@@ -59,6 +60,59 @@ function filtrarMySQL() {
   }, 300);
 }
 
+// 🗓️ FORMATEADOR DE FECHA CORTA (Ej: 14/08/2026 08:12:00 -> 14-ago)
+function formatearFechaCorta(fStr) {
+  if (!fStr || fStr === "-") return "-";
+  let str = String(fStr).trim();
+  if (/^\d{1,2}-[a-z]{3}$/i.test(str)) return str;
+
+  let fechaPart = str.split(" ")[0];
+  let partes = fechaPart.includes("/")
+    ? fechaPart.split("/")
+    : fechaPart.split("-");
+
+  let dia, mesNum;
+  if (partes.length === 3) {
+    if (partes[0].length === 4) {
+      // YYYY-MM-DD
+      dia = parseInt(partes[2], 10);
+      mesNum = parseInt(partes[1], 10) - 1;
+    } else {
+      // DD/MM/YYYY
+      dia = parseInt(partes[0], 10);
+      mesNum = parseInt(partes[1], 10) - 1;
+    }
+    const mesesAbrev = [
+      "ene",
+      "feb",
+      "mar",
+      "abr",
+      "may",
+      "jun",
+      "jul",
+      "ago",
+      "sep",
+      "oct",
+      "nov",
+      "dic",
+    ];
+    if (!isNaN(dia) && !isNaN(mesNum) && mesesAbrev[mesNum]) {
+      return `${dia}-${mesesAbrev[mesNum]}`;
+    }
+  }
+  return fechaPart;
+}
+
+// 💵 FORMATEADOR DE MONEDA AUTOMÁTICO (Ej: 15000 -> $15.000)
+function formatearMontoMoneda(vStr) {
+  if (!vStr || vStr === "-") return "-";
+  let str = String(vStr).trim();
+  if (str.startsWith("$")) return str;
+  let num = parseFloat(str.replace(/\D/g, ""));
+  if (isNaN(num) || num === 0) return str;
+  return "$" + num.toLocaleString("es-CO");
+}
+
 function cargarDatosMySQL() {
   const thead = document.getElementById("tablaMySQLCabecera");
   const tbody = document.getElementById("tablaMySQLCuerpo");
@@ -69,7 +123,6 @@ function cargarDatosMySQL() {
     tableNode.parentElement.style.overflowX = "auto";
   }
 
-  // 🛡️ ESTILOS PARA FIJAR EL ENCABEZADO ARRIBA (STICKY HEADER)
   if (!document.getElementById("css-sticky-hover-mysql")) {
     const styleSticky = document.createElement("style");
     styleSticky.id = "css-sticky-hover-mysql";
@@ -206,8 +259,27 @@ function cargarDatosMySQL() {
             let clienteVal = fila.nombre || fila.cliente || "-";
             let numeroVal = fila.numero || fila.telefono || "-";
             let fechaPagoVal = fila.fecha || "-";
-            let valorVal = fila.valor || fila.monto || "-";
-            let pagoVal = fila.pago || fila.metodo || fila.medio_pago || "-";
+
+            // 💰 CAPTURA MULTI-CAMPO DE PAGO/VALOR
+            let valorValRaw =
+              fila.valor ||
+              fila.monto_cobrado ||
+              fila.monto ||
+              fila.valor_cobrado ||
+              fila.precio ||
+              fila.total ||
+              fila.monto_total ||
+              "-";
+            let valorVal = formatearMontoMoneda(valorValRaw);
+
+            // 🏦 CAPTURA MULTI-CAMPO DE MÉTODO DE PAGO
+            let pagoVal =
+              fila.pago ||
+              fila.metodo ||
+              fila.medio_pago ||
+              fila.metodo_pago ||
+              fila.banco ||
+              "-";
 
             let isCaida = fila.estado === "caida" || fila.es_caida == 1;
 
@@ -360,7 +432,7 @@ function cargarDatosMySQL() {
 
               html += `
                 <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
-                  <td style="${tdBase} color: #a1a1aa;">${diaVal}</td>
+                  <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
                   <td style="${tdBase}">${celdaCorreo}</td>
                   <td style="${tdBase}">${celdaClave}</td>
                   <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
@@ -368,7 +440,7 @@ function cargarDatosMySQL() {
                   <td style="${tdBase} font-weight: 800; color: #ff9f0a;">${vencVal}</td>
                   <td style="${tdBase} color: #e4e4e7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${clienteVal}">${clienteVal}</td>
                   <td style="${tdBase}">${celdaTelefono}</td>
-                  <td style="${tdBase} color: #a1a1aa;">${fechaPagoVal}</td>
+                  <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(fechaPagoVal)}</td>
                   <td style="${tdBase} color: #30d158; font-weight: bold;">${valorVal}</td>
                   <td style="${tdBase} max-width: 100px; overflow: hidden;">
                     <span style="background: rgba(255,255,255,0.08); padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 90px; vertical-align: middle; color: #bf5af2; font-weight: 700;" title="${pagoVal}">${pagoVal}</span>
@@ -378,7 +450,7 @@ function cargarDatosMySQL() {
               `;
             }
             // ─────────────────────────────────────────────────────────────
-            // 2. VISTA REGISTRO VENTAS
+            // 2. VISTA REGISTRO VENTAS (CORREGIDO FECHA Y MONTO)
             // ─────────────────────────────────────────────────────────────
             else if (esVentas) {
               let platVta =
@@ -407,7 +479,7 @@ function cargarDatosMySQL() {
 
               html += `
                 <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
-                  <td style="${tdBase} color: #a1a1aa;">${diaVal}</td>
+                  <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
                   <td style="${tdBase}">${celdaClienteTel}</td>
                   <td style="${tdBase} color: #ffffff; font-weight: 600;" title="${platVta}">${platVta}</td>
                   <td style="${tdBase} color: #30d158; font-weight: bold;">${valorVal}</td>
@@ -422,7 +494,9 @@ function cargarDatosMySQL() {
             // ─────────────────────────────────────────────────────────────
             else if (esGarantias) {
               let platGar = (fila.plataforma || "-").toUpperCase();
-              let fechaGar = fila.fecha_compra || fila.fecha || fila.dia || "-";
+              let fechaGar = formatearFechaCorta(
+                fila.fecha_compra || fila.fecha || fila.dia || "-",
+              );
 
               let celdaCorreoGar =
                 correoVal !== "-"
@@ -501,9 +575,9 @@ function cargarDatosMySQL() {
               botonesAccionDemas += `</div>`;
 
               html += `
-                <tr class="tr-mysql-row ${isCaida ? "tr-caida" : ""}" style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
                   <td style="${tdBase} color: #ff9f0a; font-weight: 800; text-transform: uppercase;">${provVal}</td>
-                  <td style="${tdBase} color: #a1a1aa;">${diaVal}</td>
+                  <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
                   <td style="${tdBase}">${celdaCorreo}</td>
                   <td style="${tdBase}">${celdaClave}</td>
                   <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
@@ -657,8 +731,9 @@ function abrirModalEditarMySQL(filaEscapada) {
   if (iNombre) iNombre.value = fila.nombre || fila.cliente || "";
   if (iNumero) iNumero.value = fila.numero || fila.telefono || "";
   if (iFechaPago) iFechaPago.value = fila.fecha || "";
-  if (iValor) iValor.value = fila.valor || "";
-  if (iPago) iPago.value = fila.pago || "";
+  if (iValor)
+    iValor.value = fila.valor || fila.monto_cobrado || fila.monto || "";
+  if (iPago) iPago.value = fila.pago || fila.metodo || fila.medio_pago || "";
 
   const modal = document.getElementById("modalEditarMySQL");
   if (modal) modal.style.display = "flex";
@@ -913,7 +988,6 @@ window.generarTemp = function (btn, id) {
     });
 };
 
-// 🌟 REPORTE AUTOMÁTICO CON COPIADO DE FICHA EXACTA
 window.marcarComoGarantia = function (
   id,
   correoEscapado,
@@ -935,7 +1009,6 @@ window.marcarComoGarantia = function (
   const dia = diaEscapado ? decodeURIComponent(diaEscapado) : "";
   let platNorm = window.tablaMySQLActual.toUpperCase().replace(/_/g, "-");
 
-  // 📋 FICHA DE REPORTE EXACTA
   let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platNorm}\n📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n👤 *Proveedor:* ${prov}\n📅 *Fecha Compra:* ${dia}`;
 
   navigator.clipboard
@@ -985,7 +1058,6 @@ window.marcarComoGarantia = function (
     });
 };
 
-// 🌟 APERTURA DEL SUB-MODAL "RESOLVER GARANTÍA"
 window.abrirModalResolverGarantia = function (
   id,
   correoViejoEscapado,
