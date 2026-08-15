@@ -86,42 +86,71 @@ function cargarDatosMySQL() {
   const tbody = document.getElementById("tablaMySQLCuerpo");
   if (!tbody || !thead) return;
 
-  const esNetflix = window.tablaMySQLActual.toLowerCase() === "netflix";
-  const totalColumnas = esNetflix ? 12 : 10;
+  const tablaLower = window.tablaMySQLActual.toLowerCase();
+  const esNetflix = tablaLower === "netflix";
+  const esGarantias = tablaLower === "garantias";
+  const esVentas = tablaLower === "registro_ventas";
+
+  let totalColumnas = 10;
+  if (esNetflix) totalColumnas = 12;
 
   const thBase =
-    "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;";
+    "padding: 12px 10px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;";
 
+  // 1. DIBUJAR ENCABEZADOS SEGÚN LA PLATAFORMA
   if (esNetflix) {
     thead.innerHTML = `
       <tr>
-        <th style="${thBase} width: 7%;">FECHA / DÍA</th>
-        <th style="${thBase} width: 15%;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 10%;">CONTRASEÑA</th>
-        <th style="${thBase} width: 5%; text-align: center;">PERFIL</th>
-        <th style="${thBase} width: 5%; text-align: center;">PIN</th>
-        <th style="${thBase} width: 9%;">VENCIMIENTO</th>
-        <th style="${thBase} width: 9%;">CLIENTE</th>
-        <th style="${thBase} width: 9%;">TELÉFONO</th>
-        <th style="${thBase} width: 7%;">FECHA PAGO</th>
-        <th style="${thBase} width: 7%;">VALOR</th>
-        <th style="${thBase} width: 10%;">PAGO</th>
-        <th style="${thBase} width: 12%; text-align: center;">ACCIÓN</th>
+        <th style="${thBase} width: 6%;">FECHA</th>
+        <th style="${thBase} width: 17%;">CORREO / USUARIO</th>
+        <th style="${thBase} width: 11%;">CONTRASEÑA</th>
+        <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
+        <th style="${thBase} width: 4%; text-align: center;">PIN</th>
+        <th style="${thBase} width: 10%;">VENCIMIENTO</th>
+        <th style="${thBase} width: 8%;">CLIENTE</th>
+        <th style="${thBase} width: 8%;">TELÉFONO</th>
+        <th style="${thBase} width: 6%;">FECHA PAGO</th>
+        <th style="${thBase} width: 6%;">VALOR</th>
+        <th style="${thBase} width: 7%;">PAGO</th>
+        <th style="${thBase} width: 13%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+      </tr>
+    `;
+  } else if (esVentas) {
+    thead.innerHTML = `
+      <tr>
+        <th style="${thBase} width: 10%;">FECHA</th>
+        <th style="${thBase} width: 18%;">CLIENTE / TELÉFONO</th>
+        <th style="${thBase} width: 30%;">PLATAFORMAS</th>
+        <th style="${thBase} width: 12%; color: #30d158;">PAGO</th>
+        <th style="${thBase} width: 10%;">MÉTODO</th>
+        <th style="${thBase} width: 10%; text-align: center;">TIPO</th>
+        <th style="${thBase} width: 10%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+      </tr>
+    `;
+  } else if (esGarantias) {
+    thead.innerHTML = `
+      <tr>
+        <th style="${thBase} width: 15%; text-align: center;">PLATAFORMA</th>
+        <th style="${thBase} width: 12%; color: #ff9f0a;">PROV</th>
+        <th style="${thBase} width: 8%;">FECHA</th>
+        <th style="${thBase} width: 25%;">CORREO / USUARIO</th>
+        <th style="${thBase} width: 15%;">CONTRASEÑA</th>
+        <th style="${thBase} width: 25%; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   } else {
+    // DEMÁS PLATAFORMAS (IMAGEN 3)
     thead.innerHTML = `
       <tr>
-        <th style="${thBase} width: 8%;">FECHA / DÍA</th>
-        <th style="${thBase} width: 8%;">PROVEEDOR</th>
-        <th style="${thBase} width: 16%;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 10%;">CONTRASEÑA</th>
-        <th style="${thBase} width: 5%; text-align: center;">PERFIL</th>
-        <th style="${thBase} width: 5%; text-align: center;">PIN</th>
-        <th style="${thBase} width: 10%;">VENCIMIENTO</th>
-        <th style="${thBase} width: 11%;">CLIENTE</th>
-        <th style="${thBase} width: 11%;">TELÉFONO</th>
-        <th style="${thBase} width: 16%; text-align: center;">ACCIÓN</th>
+        <th style="${thBase} width: 7%; color: #ff9f0a;">PROV</th>
+        <th style="${thBase} width: 6%;">FECHA</th>
+        <th style="${thBase} width: 18%;">CORREO / USUARIO</th>
+        <th style="${thBase} width: 11%;">CONTRASEÑA</th>
+        <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
+        <th style="${thBase} width: 4%; text-align: center;">PIN</th>
+        <th style="${thBase} width: 10%;">CLIENTE</th>
+        <th style="${thBase} width: 9%;">TELÉFONO</th>
+        <th style="${thBase} width: 31%; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   }
@@ -182,14 +211,20 @@ function cargarDatosMySQL() {
               ? "rgba(255, 255, 255, 0.015)"
               : "transparent";
 
-            if (diaVal !== fechaGrupoActual && diaVal !== "-") {
+            // GRUPO DE FECHA EN LA CABECERA (IGUAL A IMAGEN 2 Y 3)
+            if (
+              !esVentas &&
+              !esGarantias &&
+              diaVal !== fechaGrupoActual &&
+              diaVal !== "-"
+            ) {
               fechaGrupoActual = diaVal;
 
               let btnBorrarFecha = "";
               if (esSuperAdmin) {
                 btnBorrarFecha = `
-                  <button onclick="eliminarFechaMySQL('${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 4px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">
-                    🗑️ Borrar Fecha
+                  <button onclick="eliminarFechaMySQL('${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 4px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Borrar Fecha
                   </button>
                 `;
               }
@@ -206,6 +241,7 @@ function cargarDatosMySQL() {
               `;
             }
 
+            // TEXTO COMPLETO PARA COPIAR FICHA
             let textoCopiarFicha = `📺 ${window.tablaMySQLActual.toUpperCase()}\n📧 Correo: ${correoVal}\n🔑 Clave: ${claveVal}\n👤 Perfil: ${perfilVal}\n📍 PIN: ${pinVal}`;
             if (esNetflix) {
               textoCopiarFicha += `\n📅 Vence: ${vencVal}`;
@@ -232,62 +268,103 @@ function cargarDatosMySQL() {
                  </div>`
                 : '<span style="color: #a1a1aa;">-</span>';
 
-            let botonesAccion = `<button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">📋 Copiar</button>`;
+            const tdBase =
+              "padding: 10px 10px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03);";
 
-            if (esSuperAdmin) {
-              botonesAccion = `
-                <div style="display: flex; gap: 6px; align-items: center; justify-content: center; min-width: 130px; white-space: nowrap;">
-                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #0a84ff; transition: all 0.2s ease;">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                      </svg>
-                  </button>
-                  <button onclick="eliminarRegistroMySQL(${fila.id})" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #ff453a; transition: all 0.2s ease;">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                          <polyline points="3 6 5 6 21 6"></polyline>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                      </svg>
-                  </button>
-                  <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
-                      📋 Copiar
-                  </button>
-                </div>
-              `;
-            }
-
+            // ─────────────────────────────────────────────────────────────
+            // CASO A: VISTA NETFLIX (IMAGEN 2 + FECHA PAGO, VALOR, PAGO)
+            // ─────────────────────────────────────────────────────────────
             if (esNetflix) {
+              let botonesAccionNetflix = `
+                <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; min-width: 140px; white-space: nowrap;">
+              `;
+
+              if (esSuperAdmin) {
+                botonesAccionNetflix += `
+                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  </button>
+                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                `;
+              }
+
+              botonesAccionNetflix += `
+                <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
+                  📋 Copiar
+                </button>
+              `;
+
+              if (esSuperAdmin) {
+                botonesAccionNetflix += `
+                  <button onclick="window.pasarRegistroAHoyMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Pasar a hoy" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">📅 Hoy</button>
+                `;
+              }
+
+              botonesAccionNetflix += `</div>`;
+
               html += `
-                <tr style="background: ${colorFondoFila}; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.3s ease;">
-                  <td style="padding: 10px 8px; color: #a1a1aa;">${diaVal}</td>
-                  <td style="padding: 10px 8px;">${celdaCorreo}</td>
-                  <td style="padding: 10px 8px;">${celdaClave}</td>
-                  <td style="padding: 10px 8px; color: #e4e4e7; font-weight: 600; text-align: center;">${perfilVal}</td>
-                  <td style="padding: 10px 8px; color: #ffd60a; font-weight: 700; font-family: monospace; text-align: center;">${pinVal}</td>
-                  <td style="padding: 10px 8px; font-weight: 800; color: #ff9f0a;">${vencVal}</td>
-                  <td style="padding: 10px 8px; color: #e4e4e7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${clienteVal}">${clienteVal}</td>
-                  <td style="padding: 10px 8px; color: #a1a1aa; font-family: monospace;">${numeroVal}</td>
-                  <td style="padding: 10px 8px; color: #a1a1aa;">${fechaPagoVal}</td>
-                  <td style="padding: 10px 8px; color: #30d158; font-weight: bold;">${valorVal}</td>
-                  <td style="padding: 10px 8px; max-width: 120px; overflow: hidden;">
-                    <span style="background: rgba(255,255,255,0.08); padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 110px; vertical-align: middle;" title="${pagoVal}">${pagoVal}</span>
+                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                  <td style="${tdBase} color: #a1a1aa;">${diaVal}</td>
+                  <td style="${tdBase}">${celdaCorreo}</td>
+                  <td style="${tdBase}">${celdaClave}</td>
+                  <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
+                  <td style="${tdBase} text-align: center; color: #ffd60a; font-weight: 700; font-family: monospace;">${pinVal}</td>
+                  <td style="${tdBase} font-weight: 800; color: #ff9f0a;">${vencVal}</td>
+                  <td style="${tdBase} color: #e4e4e7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${clienteVal}">${clienteVal}</td>
+                  <td style="${tdBase} color: #a1a1aa; font-family: monospace;">${numeroVal}</td>
+                  <td style="${tdBase} color: #a1a1aa;">${fechaPagoVal}</td>
+                  <td style="${tdBase} color: #30d158; font-weight: bold;">${valorVal}</td>
+                  <td style="${tdBase} max-width: 110px; overflow: hidden;">
+                    <span style="background: rgba(255,255,255,0.08); padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 100px; vertical-align: middle; color: #bf5af2; font-weight: 700;" title="${pagoVal}">${pagoVal}</span>
                   </td>
-                  <td style="padding: 10px 8px; text-align: center;">${botonesAccion}</td>
+                  <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionNetflix}</td>
                 </tr>
               `;
-            } else {
+            }
+            // ─────────────────────────────────────────────────────────────
+            // CASO B: DEMÁS PLATAFORMAS (EXACTAMENTE COMO IMAGEN 3)
+            // ─────────────────────────────────────────────────────────────
+            else if (!esVentas && !esGarantias) {
+              let botonesAccionDemas = `
+                <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; white-space: nowrap;">
+              `;
+
+              if (esSuperAdmin) {
+                botonesAccionDemas += `
+                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  </button>
+                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                `;
+              }
+
+              botonesAccionDemas += `
+                <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                  📋 Copiar
+                </button>
+                <button onclick="window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                  ⏳ Temp
+                </button>
+                <button onclick="window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                  🚨 Reportar
+                </button>
+              </div>`;
+
               html += `
-                <tr style="background: ${colorFondoFila}; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.3s ease;">
-                  <td style="padding: 10px 8px; color: #a1a1aa;">${diaVal}</td>
-                  <td style="padding: 10px 8px; color: #ff9f0a; font-weight: 700;">${provVal}</td>
-                  <td style="padding: 10px 8px;">${celdaCorreo}</td>
-                  <td style="padding: 10px 8px;">${celdaClave}</td>
-                  <td style="padding: 10px 8px; color: #e4e4e7; font-weight: 600; text-align: center;">${perfilVal}</td>
-                  <td style="padding: 10px 8px; color: #ffd60a; font-weight: 700; font-family: monospace; text-align: center;">${pinVal}</td>
-                  <td style="padding: 10px 8px; font-weight: 800; color: #ff9f0a;">${vencVal}</td>
-                  <td style="padding: 10px 8px; color: #e4e4e7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${clienteVal}">${clienteVal}</td>
-                  <td style="padding: 10px 8px; color: #a1a1aa; font-family: monospace;">${numeroVal}</td>
-                  <td style="padding: 10px 8px; text-align: center;">${botonesAccion}</td>
+                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                  <td style="${tdBase} color: #ff9f0a; font-weight: 800; text-transform: uppercase;">${provVal}</td>
+                  <td style="${tdBase} color: #a1a1aa;">${diaVal}</td>
+                  <td style="${tdBase}">${celdaCorreo}</td>
+                  <td style="${tdBase}">${celdaClave}</td>
+                  <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
+                  <td style="${tdBase} text-align: center; color: #ffd60a; font-weight: 700; font-family: monospace;">${pinVal}</td>
+                  <td style="${tdBase} color: #e4e4e7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${clienteVal}">${clienteVal}</td>
+                  <td style="${tdBase} color: #a1a1aa; font-family: monospace;">${numeroVal}</td>
+                  <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionDemas}</td>
                 </tr>
               `;
             }
@@ -541,3 +618,157 @@ function copiarAccesoMySQL(btn, textoEscapado) {
     }, 1500);
   });
 }
+
+window.generarTemp = function (btn, id) {
+  if (typeof haptic === "function") haptic();
+
+  const urlPHP = `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}`;
+  fetch(urlPHP)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "success" && data.data) {
+        let filaEncontrada = data.data.find(
+          (f) => parseInt(f.id) === parseInt(id),
+        );
+
+        if (filaEncontrada) {
+          let cuenta = filaEncontrada;
+          let perfilTxt =
+            cuenta.perfil && cuenta.perfil !== "N/A" && cuenta.perfil !== ""
+              ? `\n👤 *Perfil:* ${cuenta.perfil}`
+              : "";
+          let pinTxt =
+            cuenta.pin &&
+            cuenta.pin !== "N/A" &&
+            cuenta.pin !== "-" &&
+            cuenta.pin !== ""
+              ? `\n📍 *PIN:* ${cuenta.pin}`
+              : "";
+          let platNorm = window.tablaMySQLActual
+            .toUpperCase()
+            .replace(/_/g, " ");
+
+          let mensajeTemporal = `🌟 *¡Hola! Lamentamos los inconvenientes con tu servicio.*\n\nMientras nuestro equipo técnico repara tu cuenta principal, te hemos habilitado un *acceso temporal* para que no pares de disfrutar tu programación favorita 🍿🎬:\n\n📺 *${platNorm} (TEMPORAL)*\n────────────────────\n📧 *Correo:* ${cuenta.correo || cuenta.usuario}\n🔐 *Clave:* ${cuenta.clave || cuenta.contrasena}${perfilTxt}${pinTxt}\n────────────────────\n_Te avisaremos por este medio apenas tu cuenta original esté solucionada. ¡Gracias por tu paciencia!_ ✨`;
+
+          navigator.clipboard.writeText(mensajeTemporal).then(() => {
+            if (btn) {
+              let oldText = btn.innerHTML;
+              btn.innerHTML = `✅ Copiado`;
+              btn.style.setProperty("background", "#30d158", "important");
+              btn.style.setProperty("color", "#000000", "important");
+              btn.style.setProperty("border-color", "transparent", "important");
+
+              setTimeout(() => {
+                btn.innerHTML = oldText;
+                btn.style.setProperty(
+                  "background",
+                  "rgba(255, 159, 10, 0.15)",
+                  "important",
+                );
+                btn.style.setProperty("color", "#ff9f0a", "important");
+                btn.style.setProperty(
+                  "border-color",
+                  "rgba(255, 159, 10, 0.3)",
+                  "important",
+                );
+              }, 1500);
+            }
+
+            if (typeof triggerToast === "function")
+              triggerToast(
+                `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Cuenta temporal copiada al portapapeles</span></div>`,
+              );
+          });
+        }
+      }
+    });
+};
+
+window.marcarComoGarantia = function (
+  id,
+  correoEscapado,
+  claveEscapada,
+  provEscapado,
+  diaEscapado = "",
+) {
+  if (
+    !confirm(
+      "⚠️ ¿Estás seguro de enviar esta cuenta a Garantías? Toda la cuenta se marcará como caída (rojo).",
+    )
+  )
+    return;
+  if (typeof haptic === "function") haptic();
+
+  const correo = decodeURIComponent(correoEscapado);
+  const clave = decodeURIComponent(claveEscapada);
+  const prov = decodeURIComponent(provEscapado);
+  const dia = diaEscapado ? decodeURIComponent(diaEscapado) : "";
+
+  const formData = new FormData();
+  formData.append("accion", "reportar_garantia");
+  formData.append("tabla", window.tablaMySQLActual);
+  formData.append("id", id);
+  formData.append("correo", correo);
+  formData.append("clave", clave);
+  formData.append("proveedor", prov);
+  formData.append("fecha_compra", dia);
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (errParse) {
+        throw new Error("Respuesta inválida del servidor PHP: " + text);
+      }
+    })
+    .then((data) => {
+      if (data.status === "success") {
+        window.cargarDatosMySQL();
+        if (typeof triggerToast === "function")
+          triggerToast("🚨 " + data.message);
+      } else {
+        alert("❌ Error: " + data.message);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("❌ Error de comunicación: \n" + err.message);
+    });
+};
+
+window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
+  if (typeof haptic === "function") haptic();
+  const correo = correoEscapado ? decodeURIComponent(correoEscapado) : "";
+
+  const formData = new FormData();
+  formData.append("accion", "pasar_a_hoy");
+  formData.append("tabla", window.tablaMySQLActual);
+  formData.append("id", id);
+  formData.append("correo", correo);
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "success") {
+        window.cargarDatosMySQL();
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${data.message}</span></div>`,
+          );
+        }
+      } else {
+        alert("❌ Error: " + data.message);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("❌ Error de comunicación al mover la fecha.");
+    });
+};
