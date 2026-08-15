@@ -1691,155 +1691,7 @@
       </div>
     </div>
 
-    <!-- ➕ SUB-MODAL: AGREGAR REGISTRO -->
-    <div
-      class="overlay-ios"
-      id="modalAgregarMySQL"
-      style="
-        display: none;
-        z-index: 16000;
-        align-items: center;
-        justify-content: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.7);
-        backdrop-filter: blur(8px);
-      "
-    >
-      <div
-        class="modal-ios"
-        style="
-          max-width: 520px;
-          width: 92%;
-          padding: 24px;
-          border-radius: 24px;
-          text-align: left;
-          background: #111115;
-          border: 1px solid rgba(48, 209, 88, 0.3);
-          margin: auto;
-        "
-        onclick="event.stopPropagation()"
-      >
-        <h3
-          style="
-            margin-top: 0;
-            color: #30d158;
-            font-weight: 800;
-            font-size: 1.2rem;
-            text-align: center;
-          "
-        >
-          ➕ Cargar Cuentas
-        </h3>
-        <form
-          id="formAgregarMySQL"
-          onsubmit="guardarNuevoRegistroMySQL(event)"
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            margin-top: 15px;
-          "
-        >
-          <div>
-            <label
-              style="
-                font-size: 0.75rem;
-                color: #a1a1aa;
-                font-weight: 700;
-                text-transform: uppercase;
-              "
-              >Plataforma Destino *</label
-            >
-            <select
-              id="addMySQLPlataforma"
-              class="input-ios"
-              required
-              style="margin-top: 4px; background: rgba(0, 0, 0, 0.4) !important"
-            >
-              <option value="netflix">🔴 NETFLIX</option>
-              <option value="garantias">🚨 GARANTÍAS</option>
-              <option value="registro_ventas">💰 REGISTRO VENTAS</option>
-              <option value="amazon_prime_video">📦 AMAZON-PRIME-VIDEO</option>
-              <option value="disney_estandar">🔵 DISNEY-ESTANDAR</option>
-              <option value="disney_premium">🔵 DISNEY-PREMIUM</option>
-              <option value="hbo_max">🟣 HBO-MAX</option>
-              <option value="crunchyroll">📺 CRUNCHYROLL</option>
-              <option value="metegol">📺 METEGOL</option>
-              <option value="universal">📺 UNIVERSAL</option>
-              <option value="deezer">🎵 DEEZER</option>
-              <option value="spotify">🎵 SPOTIFY</option>
-              <option value="canva">💻 CANVA</option>
-              <option value="capcut">💻 CAPCUT</option>
-              <option value="vix">📺 VIX</option>
-              <option value="plex">📺 PLEX</option>
-              <option value="apple">📺 APPLE</option>
-              <option value="paramount">📺 PARAMOUNT</option>
-              <option value="mubi">📺 MUBI</option>
-              <option value="youtube">📺 YOUTUBE</option>
-              <option value="iptv">📺 IPTV</option>
-              <option value="flujo">📺 FLUJO</option>
-              <option value="directv_go">📺 DIRECTV-GO</option>
-              <option value="emby">📺 EMBY</option>
-            </select>
-          </div>
-          <div>
-            <label
-              style="
-                font-size: 0.75rem;
-                color: #a1a1aa;
-                font-weight: 700;
-                text-transform: uppercase;
-              "
-              >Pega aquí las celdas copiadas de Google Sheets *</label
-            >
-            <textarea
-              id="addMySQLBloque"
-              class="input-ios"
-              style="
-                min-height: 160px;
-                font-family: monospace;
-                font-size: 0.85rem;
-                margin-top: 4px;
-                resize: vertical;
-                background: rgba(0, 0, 0, 0.4) !important;
-              "
-              placeholder="Copia las filas en tu Google Sheets (Ctrl + C) y pégalas directamente en este cuadro..."
-              required
-            ></textarea>
-          </div>
-          <div style="display: flex; gap: 10px; margin-top: 10px">
-            <button
-              type="button"
-              class="btn-ios btn-secondary"
-              style="flex: 1; border-radius: 50px"
-              onclick="cerrarModalAgregarMySQL()"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              id="btnGuardarAddMySQL"
-              class="btn-ios btn-primary"
-              style="
-                flex: 1;
-                border-radius: 50px;
-                background: #30d158;
-                color: #000;
-                font-weight: 800;
-              "
-            >
-              Subir Registros
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ✏️ SUB-MODAL: EDITAR REGISTRO -->
+    <!-- ✏️ SUB-MODAL: EDITAR REGISTRO COMPACTO -->
     <div
       class="overlay-ios"
       id="modalEditarMySQL"
@@ -1853,182 +1705,384 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(0, 0, 0, 0.7);
-        backdrop-filter: blur(8px);
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
       "
     >
       <div
         class="modal-ios"
         style="
-          max-width: 450px;
-          width: 90%;
-          padding: 24px;
-          border-radius: 24px;
+          max-width: 540px !important;
+          width: 92% !important;
+          padding: 18px 22px !important;
+          border-radius: 20px !important;
           text-align: left;
-          background: #111115;
-          border: 1px solid rgba(10, 132, 255, 0.3);
+          background: #111115 !important;
+          border: 1px solid rgba(10, 132, 255, 0.3) !important;
           margin: auto;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8) !important;
         "
         onclick="event.stopPropagation()"
       >
-        <h3
+        <div
           style="
-            margin-top: 0;
-            color: #0a84ff;
-            font-weight: 800;
-            font-size: 1.2rem;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 8px;
           "
         >
-          ✏️ Editar Registro
-        </h3>
+          <h3
+            style="
+              margin: 0;
+              color: #0a84ff;
+              font-weight: 800;
+              font-size: 1.05rem;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+            "
+          >
+            ✏️ Editar Registro
+          </h3>
+          <button
+            type="button"
+            onclick="cerrarModalEditarMySQL()"
+            style="
+              background: rgba(255, 255, 255, 0.08);
+              border: none;
+              color: #a1a1aa;
+              width: 26px;
+              height: 26px;
+              border-radius: 50%;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 0.8rem;
+            "
+          >
+            ✕
+          </button>
+        </div>
+
         <form
           id="formEditarMySQL"
           onsubmit="guardarEdicionMySQL(event)"
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-          "
+          style="display: flex; flex-direction: column; gap: 10px"
         >
           <input type="hidden" id="editMySQLId" />
-          <div>
-            <label style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
-              >CORREO / USUARIO</label
-            >
-            <input
-              type="text"
-              id="editMySQLCorreo"
-              class="input-ios"
-              required
-              style="background: rgba(0, 0, 0, 0.4) !important"
-            />
-          </div>
-          <div>
-            <label style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
-              >CONTRASEÑA</label
-            >
-            <input
-              type="text"
-              id="editMySQLClave"
-              class="input-ios"
-              required
-              style="background: rgba(0, 0, 0, 0.4) !important"
-            />
-          </div>
-          <div style="display: flex; gap: 10px">
-            <div style="flex: 1">
+
+          <!-- Fila 1: Correo y Clave -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+            <div>
               <label
-                style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
+                style="
+                  font-size: 0.68rem;
+                  color: #a1a1aa;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
+                >CORREO / USUARIO</label
+              >
+              <input
+                type="text"
+                id="editMySQLCorreo"
+                class="input-ios"
+                required
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                "
+              />
+            </div>
+            <div>
+              <label
+                style="
+                  font-size: 0.68rem;
+                  color: #a1a1aa;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
+                >CONTRASEÑA</label
+              >
+              <input
+                type="text"
+                id="editMySQLClave"
+                class="input-ios"
+                required
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                "
+              />
+            </div>
+          </div>
+
+          <!-- Fila 2: Perfil, PIN, Vencimiento -->
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr 1.2fr;
+              gap: 10px;
+            "
+          >
+            <div>
+              <label
+                style="
+                  font-size: 0.68rem;
+                  color: #a1a1aa;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
                 >PERFIL</label
               >
               <input
                 type="text"
                 id="editMySQLPerfil"
                 class="input-ios"
-                style="background: rgba(0, 0, 0, 0.4) !important"
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                "
               />
             </div>
-            <div style="flex: 1">
+            <div>
               <label
-                style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
+                style="
+                  font-size: 0.68rem;
+                  color: #a1a1aa;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
                 >PIN</label
               >
               <input
                 type="text"
                 id="editMySQLPin"
                 class="input-ios"
-                style="background: rgba(0, 0, 0, 0.4) !important"
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                "
+              />
+            </div>
+            <div>
+              <label
+                style="
+                  font-size: 0.68rem;
+                  color: #a1a1aa;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
+                >VENCIMIENTO</label
+              >
+              <input
+                type="text"
+                id="editMySQLVencimiento"
+                class="input-ios"
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                "
               />
             </div>
           </div>
-          <div>
-            <label style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
-              >VENCIMIENTO</label
-            >
-            <input
-              type="text"
-              id="editMySQLVencimiento"
-              class="input-ios"
-              style="background: rgba(0, 0, 0, 0.4) !important"
-            />
-          </div>
-          <div style="display: flex; gap: 10px">
-            <div style="flex: 1.2">
+
+          <!-- Fila 3: Cliente y Teléfono -->
+          <div
+            style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px"
+          >
+            <div>
               <label
-                style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
+                style="
+                  font-size: 0.68rem;
+                  color: #a1a1aa;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
                 >CLIENTE</label
               >
               <input
                 type="text"
                 id="editMySQLNombre"
                 class="input-ios"
-                style="background: rgba(0, 0, 0, 0.4) !important"
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                "
               />
             </div>
-            <div style="flex: 1">
+            <div>
               <label
-                style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
+                style="
+                  font-size: 0.68rem;
+                  color: #a1a1aa;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
                 >TELÉFONO</label
               >
               <input
                 type="text"
                 id="editMySQLNumero"
                 class="input-ios"
-                style="background: rgba(0, 0, 0, 0.4) !important"
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                "
               />
             </div>
           </div>
 
-          <!-- CAMPOS DE PAGO AGREGADOS -->
-          <div style="display: flex; gap: 10px">
-            <div style="flex: 1">
+          <!-- Fila 4: Fecha Pago, Valor, Método -->
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr 1.2fr;
+              gap: 10px;
+            "
+          >
+            <div>
               <label
-                style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
+                style="
+                  font-size: 0.68rem;
+                  color: #a1a1aa;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
                 >FECHA PAGO</label
               >
               <input
                 type="text"
                 id="editMySQLFechaPago"
                 class="input-ios"
-                placeholder="Ej: 14-ago"
-                style="background: rgba(0, 0, 0, 0.4) !important"
+                placeholder="14-ago"
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                "
               />
             </div>
-            <div style="flex: 1">
+            <div>
               <label
-                style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
+                style="
+                  font-size: 0.68rem;
+                  color: #a1a1aa;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
                 >VALOR</label
               >
               <input
                 type="text"
                 id="editMySQLValor"
                 class="input-ios"
-                placeholder="Ej: $15.000"
-                style="background: rgba(0, 0, 0, 0.4) !important"
+                placeholder="$15.000"
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                "
+              />
+            </div>
+            <div>
+              <label
+                style="
+                  font-size: 0.68rem;
+                  color: #a1a1aa;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
+                >MÉTODO PAGO</label
+              >
+              <input
+                type="text"
+                id="editMySQLPago"
+                class="input-ios"
+                placeholder="Bre-B"
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                "
               />
             </div>
           </div>
 
-          <div>
-            <label style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700"
-              >MÉTODO DE PAGO</label
-            >
-            <input
-              type="text"
-              id="editMySQLPago"
-              class="input-ios"
-              placeholder="Ej: Bre-B, Nequi, Daviplata"
-              style="background: rgba(0, 0, 0, 0.4) !important"
-            />
-          </div>
-
-          <div style="display: flex; gap: 10px; margin-top: 15px">
+          <!-- Botones Acción -->
+          <div style="display: flex; gap: 10px; margin-top: 8px">
             <button
               type="button"
               class="btn-ios btn-secondary"
-              style="flex: 1; border-radius: 50px"
+              style="
+                flex: 1;
+                border-radius: 12px;
+                padding: 9px;
+                font-size: 0.85rem;
+                font-weight: 700;
+              "
               onclick="cerrarModalEditarMySQL()"
             >
               Cancelar
@@ -2037,9 +2091,16 @@
               type="submit"
               id="btnGuardarEditMySQL"
               class="btn-ios btn-primary"
-              style="flex: 1; border-radius: 50px"
+              style="
+                flex: 1;
+                border-radius: 12px;
+                padding: 9px;
+                font-size: 0.85rem;
+                font-weight: 800;
+                background: #0a84ff;
+              "
             >
-              Guardar
+              Guardar Cambios
             </button>
           </div>
         </form>
