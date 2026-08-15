@@ -1,5 +1,5 @@
 /* ==========================================================================
-   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL (SIN APPSCRIPT)
+   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL
    ========================================================================== */
 
 window.URL_OBTENER_HORAS = "obtener_horas.php";
@@ -46,7 +46,7 @@ window.toggleShiftsPanel = function () {
   }
 };
 
-// 🔄 CARGAR DATOS DESDE PHP MYSQL
+// 🔄 CARGAR DATOS DESDE PHP MYSQL CON MANEJO DE ERRORES MEJORADO
 window.cargarHorasDesdeMySQL = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -55,7 +55,7 @@ window.cargarHorasDesdeMySQL = function () {
     <div style="text-align:center; padding:45px; color:#0a84ff;">
       <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
         <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-        <span style="font-weight:700; font-size:0.9rem;">Cargando calendario desde MySQL...</span>
+        <span style="font-weight:700; font-size:0.9rem;">Sincronizando calendario con MySQL...</span>
       </div>
     </div>`;
 
@@ -65,7 +65,10 @@ window.cargarHorasDesdeMySQL = function () {
       try {
         return JSON.parse(text);
       } catch (e) {
-        throw new Error("Respuesta inválida del servidor PHP.");
+        console.error("Respuesta cruda de PHP:", text);
+        throw new Error(
+          "El PHP devolvió un formato no válido. Revisa los logs.",
+        );
       }
     })
     .then((res) => {
@@ -82,11 +85,12 @@ window.cargarHorasDesdeMySQL = function () {
     });
 };
 
-// 📅 PARSEADOR DE FECHA ROBUSTO
+// 📅 PARSEADOR DE FECHA COMPATIBLE CON FORMATOS CON HORA (Ej: 14/08/2026 12:05 AM)
 function parsearFechaTurno(fechaRaw) {
   if (!fechaRaw) return new Date();
   if (fechaRaw instanceof Date) return fechaRaw;
 
+  // Extrae únicamente el bloque de fecha ignorando la hora
   let str = String(fechaRaw).trim().split(" ")[0];
   let parts = str.includes("/") ? str.split("/") : str.split("-");
 
@@ -108,7 +112,7 @@ function parsearFechaTurno(fechaRaw) {
   return new Date();
 }
 
-// 🗓️ ACCIONES DE FILTRO DEL CALENDARIO
+// 🗓️ ACCIONES DE FILTRO
 window.cambiarMesTurnos = function (mesIndex) {
   try {
     if (typeof haptic === "function") haptic();
@@ -133,7 +137,7 @@ window.cambiarAsistenteAdmin = function (vendedor) {
   window.renderizarHorasEnPantalla();
 };
 
-// 🎨 RENDERIZADOR CALENDARIO CON PRIVACIDAD Y MODIFICACIÓN
+// 🎨 RENDERIZADOR CALENDARIO
 window.renderizarHorasEnPantalla = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -170,7 +174,7 @@ window.renderizarHorasEnPantalla = function () {
   ];
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-  // 1. FILTRADO DE PRIVACIDAD POR USUARIO
+  // 1. FILTRADO DE PRIVACIDAD
   let todosLosRegistros = window.currentHorasStock;
   let asistentesDisponibles = new Set();
 
@@ -191,10 +195,8 @@ window.renderizarHorasEnPantalla = function () {
     if (!esQ1 && dia <= 15) return false;
 
     if (!esSuperAdmin) {
-      // Asistente normal: SOLO VE SUS PROPIOS REGISTROS
-      return vendedorItem === activeStaff;
+      return vendedorItem === activeStaff; // Asistente normal solo ve sus propios datos
     } else {
-      // Superadmin CAMILO: Puede ver todos o filtrar
       if (window.asistenteSeleccionadoAdmin !== "TODOS") {
         return vendedorItem === window.asistenteSeleccionadoAdmin;
       }
@@ -242,7 +244,7 @@ window.renderizarHorasEnPantalla = function () {
       ${selectorAsistentesAdmin}
     </div>`;
 
-  // 3. AGRUPAR REGISTROS POR ASISTENTE Y DÍA
+  // 3. AGRUPAR REGISTROS
   let mapaAsistentes = {};
 
   datosFiltrados.forEach((item) => {
@@ -275,7 +277,7 @@ window.renderizarHorasEnPantalla = function () {
 
   let htmlCuerpo = htmlControles;
 
-  // 4. CONSTRUCCIÓN DEL CALENDARIO POR ASISTENTE
+  // 4. CONSTRUIR CALENDARIO
   asistentesAMostrar.forEach((asistente) => {
     let turnosPorDia = mapaAsistentes[asistente] || {};
     let totalPagoAsistente = 0;
@@ -321,11 +323,11 @@ window.renderizarHorasEnPantalla = function () {
           Math.round(totalMonto),
         ).toLocaleString("es-CO");
 
-        // BOTÓN MODIFICAR EXCLUSIVO PARA SUPERADMIN (CAMILO)
+        // BOTÓN EDITAR EXCLUSIVO PARA SUPERADMIN (CAMILO)
         let btnEditarSuperAdmin = "";
         if (esSuperAdmin) {
           btnEditarSuperAdmin = `
-            <button type="button" onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}', '${reg.total}')" title="Modificar Turno" style="background: rgba(10, 132, 255, 0.2); border: 1px solid rgba(10, 132, 255, 0.4); color: #0a84ff; padding: 3px 8px; border-radius: 6px; font-size: 0.68rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; margin-top: 4px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(10, 132, 255, 0.4)'" onmouseout="this.style.background='rgba(10, 132, 255, 0.2)'">
+            <button type="button" onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}', '${reg.total}')" title="Modificar Turno" style="background: rgba(10, 132, 255, 0.2); border: 1px solid rgba(10, 132, 255, 0.4); color: #0a84ff; padding: 3px 8px; border-radius: 6px; font-size: 0.68rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; margin-top: 4px; transition: all 0.2s ease;">
               ✏️ Modificar
             </button>`;
         }
@@ -393,7 +395,7 @@ window.renderizarHorasEnPantalla = function () {
   container.innerHTML = htmlCuerpo;
 };
 
-// ✏️ MODIFICACIÓN VÍA PHP/MYSQL (SOLO SUPERADMIN CAMILO)
+// ✏️ EDICIÓN EXCLUSIVA SUPERADMIN (CAMILO)
 window.modificarTurnoSuperAdmin = function (
   idTurno,
   vendedor,
@@ -433,7 +435,7 @@ window.modificarTurnoSuperAdmin = function (
 
   nuevoTotal = parseFloat(nuevoTotal) || 0;
 
-  // Modificación local en memoria
+  // Actualización local en memoria
   let registroLocal = window.currentHorasStock.find(
     (r) => String(r.id) === String(idTurno),
   );
@@ -443,7 +445,7 @@ window.modificarTurnoSuperAdmin = function (
     window.renderizarHorasEnPantalla();
   }
 
-  // Envío POST a modificar_turno.php
+  // Envío POST
   fetch(window.URL_MODIFICAR_TURNO, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -459,7 +461,7 @@ window.modificarTurnoSuperAdmin = function (
         }
         window.cargarHorasDesdeMySQL();
       } else {
-        alert("⚠️ Atencion: No se pudo guardar la modificación en MySQL.");
+        alert("⚠️ Atención: No se pudo guardar la modificación en MySQL.");
       }
     })
     .catch((err) => {
