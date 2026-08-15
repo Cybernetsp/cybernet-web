@@ -1,3 +1,40 @@
+// 🛠️ REPARACIÓN DE SCROLL AUTOMÁTICO Y ALTURA MÁXIMA
+(function repararScrollVisorMySQL() {
+  if (document.getElementById("css-fix-scroll-mysql")) return;
+  const style = document.createElement("style");
+  style.id = "css-fix-scroll-mysql";
+  style.innerHTML = `
+    /* Contenedor principal de la tabla */
+    #contenedorTablaMySQL, 
+    .tabla-container, 
+    .visor-mysql-body {
+      max-height: calc(100vh - 180px) !important;
+      overflow-y: auto !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      border-radius: 12px !important;
+    }
+
+    /* Personalización de la barra de desplazamiento macOS / iOS */
+    #contenedorTablaMySQL::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    #contenedorTablaMySQL::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+    #contenedorTablaMySQL::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+    }
+    #contenedorTablaMySQL::-webkit-scrollbar-thumb:hover {
+      background: rgba(10, 132, 255, 0.5);
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
 window.tablaMySQLActual = "netflix";
 let searchTimeoutMySQL = null;
 
