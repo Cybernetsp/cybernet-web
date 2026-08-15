@@ -2,6 +2,10 @@
    🌟 CYBERNET OS - CREACIÓN AUTOMATIZADA DE NETFLIX (SHEETS ➔ MYSQL)
    ========================================================================== */
 
+// URL oficial de tu Apps Script integrada
+const SCRIPT_URL_NETFLIX =
+  "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
+
 window.crearCuentaNetflixAliasExterna = function () {
   if (typeof haptic === "function") haptic();
 
@@ -68,7 +72,22 @@ window.ejecutarGeneracionAliasDual = function (btn) {
   // PASO 1: CONECTAR A GOOGLE APPS SCRIPT (generarNuevaCuentaAlias)
   const cbName = "cb_alias_" + Date.now();
 
+  // 🕒 Timeout de seguridad (20 Segundos)
+  const timeoutId = setTimeout(() => {
+    if (window[cbName]) {
+      alert(
+        "⏱️ Tiempo de espera agotado. Google Sheets está tardando demasiado en responder.",
+      );
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      delete window[cbName];
+      const s = document.getElementById("node_" + cbName);
+      if (s) s.remove();
+    }
+  }, 20000);
+
   window[cbName] = function (res) {
+    clearTimeout(timeoutId); // Limpiar timeout si respondió
     const scriptNode = document.getElementById("node_" + cbName);
     if (scriptNode) scriptNode.remove();
     delete window[cbName];
@@ -153,7 +172,19 @@ window.ejecutarGeneracionAliasDual = function (btn) {
   // 🚀 DISPARAR LA PETICIÓN AL APPS SCRIPT
   const script = document.createElement("script");
   script.id = "node_" + cbName;
-  // Utiliza la URL de tu backend en Sheets
-  script.src = `${GOOGLE_SCRIPT_URL}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
+  script.src = `${SCRIPT_URL_NETFLIX}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
+
+  // Escudo contra bloqueos de AdBlocker o caída de internet
+  script.onerror = function () {
+    clearTimeout(timeoutId);
+    alert(
+      "❌ Error de red: No se pudo conectar con el servidor de Google (Verifica tu internet o adblockers).",
+    );
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    delete window[cbName];
+    script.remove();
+  };
+
   document.body.appendChild(script);
 };
