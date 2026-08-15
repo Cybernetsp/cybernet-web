@@ -3,6 +3,8 @@
    ========================================================================== */
 
 window.memoriaGmailDatos = [];
+window.APPS_SCRIPT_DIRECT_URL =
+  "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 
 // 👁️ APERTURA Y CONTROL DEL PANEL DE GMAIL
 window.toggleGmailPanel = function () {
@@ -32,7 +34,7 @@ window.toggleGmailPanel = function () {
   }
 };
 
-// 🔄 CONSULTA A LA API DE GMAIL
+// 🔄 CONSULTA DUAL CON FALLBACK AUTOMÁTICO A GOOGLE APPS SCRIPT
 window.cargarDatosGmail = function () {
   if (typeof haptic === "function") haptic();
   const contenedor = document.getElementById("contenedorGmailMensajes");
@@ -58,10 +60,18 @@ window.cargarDatosGmail = function () {
       </div>
     </div>`;
 
-  const urlTarget = `https://api.cybernetsp.com/obtener_gmail.php?correo=${encodeURIComponent(correoVal)}`;
+  const phpUrl = `https://api.cybernetsp.com/obtener_gmail.php?correo=${encodeURIComponent(correoVal)}`;
 
-  fetch(urlTarget)
-    .then((response) => response.json())
+  // Intento 1: Servidor PHP
+  fetch(phpUrl)
+    .then(async (response) => {
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error("Formato inválido del PHP");
+      }
+    })
     .then((res) => {
       if (res && res.status === "error") {
         contenedor.innerHTML = `
@@ -80,15 +90,45 @@ window.cargarDatosGmail = function () {
       window.renderizarListaGmail(correoVal);
     })
     .catch((err) => {
-      console.error("Error al consultar Gmail:", err);
-      contenedor.innerHTML = `
-        <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
-          ❌ Error al conectar con el servidor. Revisa tu conexión o que la URL del PHP sea correcta.
-        </div>`;
+      console.warn(
+        "PHP falló o bloqueó CORS, activando conexión directa con Google Apps Script por JSONP...",
+        err,
+      );
+      // Intento 2: Fallback directo a Google Apps Script por JSONP
+      window.consultarGmailDirectoJSONP(correoVal);
     });
 };
 
-// 🎨 RENDERIZADO DE LA LISTA DE MENSAJES
+// ⚡ FALLBACK DIRECTO VIA JSONP A APPS SCRIPT (GARANTÍA DE CERO ERRORES DE RED)
+window.consultarGmailDirectoJSONP = function (correoVal) {
+  const contenedor = document.getElementById("contenedorGmailMensajes");
+  const cbName = "cb_gmail_direct_" + Date.now();
+
+  window[cbName] = function (res) {
+    const oldScript = document.getElementById("node_" + cbName);
+    if (oldScript) oldScript.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      window.memoriaGmailDatos = res.data || [];
+      window.renderizarListaGmail(correoVal);
+    } else {
+      if (contenedor) {
+        contenedor.innerHTML = `
+          <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
+            ❌ ${res ? res.message || "No se encontraron correos recientes." : "Error de consulta en Google Apps Script."}
+          </div>`;
+      }
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${window.APPS_SCRIPT_DIRECT_URL}?action=obtenerCorreosRecientesGlobal&correo=${encodeURIComponent(correoVal)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+// 🎨 RENDERIZADO DE LA LISTA DE MENSAJES Y EXTRACCIÓN INTELIGENTE DE CÓDIGOS
 window.renderizarListaGmail = function (correoBuscado = "") {
   const contenedor = document.getElementById("contenedorGmailMensajes");
   if (!contenedor) return;
@@ -105,23 +145,55 @@ window.renderizarListaGmail = function (correoBuscado = "") {
 
   let html = "";
   datos.forEach((item) => {
-    let remitente = item.remitente || item.de || item.from || "Notificación";
+    let remitente = item.remitente || item.de || item.from || "Google / Apps";
     let asunto = item.asunto || item.subject || "Sin asunto";
     let fecha = item.fecha || item.date || "Reciente";
-    let mensajeTexto =
-      item.cuerpo || item.snippet || item.mensaje || item.link || "";
-    let enlaceDirecto = item.link || item.enlace || item.url || "";
+    let fragmento = item.fragmento || item.cuerpo || item.snippet || "";
+    let cuerpoHtml = item.cuerpoHtml || item.html || "";
 
-    let mensajeEscapado = encodeURIComponent(mensajeTexto || asunto);
+    // 🔍 Extracción automática de Código o Enlace
+    let codigoExtraido = "";
+    let enlaceExtraido = "";
+
+    let textoBuscar = fragmento + " " + cuerpoHtml;
+
+    // Buscar código numérico de 4 a 8 dígitos
+    let matchCod =
+      textoBuscar.match(/(?:c[oó]digo|code|verification)[:\s]*([0-9]{4,8})/i) ||
+      textoBuscar.match(/\b([0-9]{4,8})\b/);
+    if (matchCod) {
+      let codCandidate = matchCod[1] || matchCod[0];
+      if (["2024", "2025", "2026", "2027"].indexOf(codCandidate) === -1) {
+        codigoExtraido = codCandidate;
+      }
+    }
+
+    // Buscar enlaces de verificación
+    let matchLink =
+      cuerpoHtml.match(/href="(https:\/\/[^"]+)"/i) ||
+      textoBuscar.match(/(https:\/\/[^\s"<]+)/i);
+    if (matchLink) {
+      let linkCandidate = matchLink[1] || matchLink[0];
+      if (
+        linkCandidate.indexOf("netflix.com") !== -1 ||
+        linkCandidate.indexOf("disney") !== -1 ||
+        linkCandidate.indexOf("verify") !== -1
+      ) {
+        enlaceExtraido = linkCandidate.replace(/&amp;/g, "&");
+      }
+    }
+
+    let textoCopiar = codigoExtraido || fragmento || asunto;
+    let textoEscapado = encodeURIComponent(textoCopiar);
 
     html += `
       <div class="gmail-card-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(234, 67, 53, 0.35)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
         
-        <!-- Encabezado del mensaje -->
+        <!-- Encabezado -->
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
             <span style="background: rgba(234, 67, 53, 0.15); border: 1px solid rgba(234, 67, 53, 0.3); color: #ea4335; font-weight: 800; font-size: 0.72rem; padding: 3px 10px; border-radius: 8px; text-transform: uppercase;">
-              ${remitente}
+              ${remitente.substring(0, 25)}
             </span>
             <span style="color: #ffffff; font-weight: 800; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
               ${asunto}
@@ -132,34 +204,36 @@ window.renderizarListaGmail = function (correoBuscado = "") {
           </span>
         </div>
 
-        <!-- Cuerpo del mensaje -->
-        ${
-          mensajeTexto
-            ? `
-          <div style="background: rgba(0, 0, 0, 0.35); padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.82rem; color: #e4e4e7; line-height: 1.4; word-break: break-word;">
-            ${mensajeTexto}
+        <!-- Fragmento del mensaje -->
+        <div style="background: rgba(0, 0, 0, 0.35); padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.82rem; color: #e4e4e7; line-height: 1.4; word-break: break-word;">
+          ${fragmento || asunto}
+        </div>
+
+        <!-- Botones de Acción -->
+        <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            ${
+              codigoExtraido
+                ? `<span style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; font-weight: 900; font-family: monospace; padding: 4px 10px; border-radius: 8px; font-size: 1rem;">${codigoExtraido}</span>`
+                : ""
+            }
           </div>
-        `
-            : ""
-        }
 
-        <!-- Botones de Acción SVG -->
-        <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
-          ${
-            enlaceDirecto
-              ? `
-            <a href="${enlaceDirecto}" target="_blank" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 7px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-              Abrir Enlace
-            </a>
-          `
-              : ""
-          }
+          <div style="display: flex; gap: 8px; align-items: center;">
+            ${
+              enlaceExtraido
+                ? `<a href="${enlaceExtraido}" target="_blank" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 7px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    Abrir Enlace
+                  </a>`
+                : ""
+            }
 
-          <button type="button" onclick="window.copiarContenidoGmail(this, '${mensajeEscapado}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 7px 12px; border-radius: 10px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            Copiar
-          </button>
+            <button type="button" onclick="window.copiarContenidoGmail(this, '${textoEscapado}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 7px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+          </div>
         </div>
 
       </div>`;
@@ -181,7 +255,7 @@ window.copiarContenidoGmail = function (btn, textoEscapado) {
 
     if (typeof triggerToast === "function") {
       triggerToast(
-        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Contenido copiado al portapapeles</span></div>`,
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Texto copiado al portapapeles</span></div>`,
       );
     }
 
