@@ -2,7 +2,7 @@ window.tablaMySQLActual = "netflix";
 let searchTimeoutMySQL = null;
 
 // =========================================================================
-// 👁️ APERTURA Y CONTROL DEL PANEL
+// 👁️ APERTURA Y CONTROL DEL PANEL MYSQL
 // =========================================================================
 window.toggleMysqlPanel = function () {
   if (typeof haptic === "function") haptic();
@@ -69,11 +69,24 @@ function cargarDatosMySQL() {
     tableNode.parentElement.style.overflowX = "auto";
   }
 
+  // 🛡️ ESTILOS PARA FIJAR EL ENCABEZADO ARRIBA (STICKY HEADER)
   if (!document.getElementById("css-sticky-hover-mysql")) {
     const styleSticky = document.createElement("style");
     styleSticky.id = "css-sticky-hover-mysql";
     styleSticky.innerHTML = `
-      #tablaMySQLCabecera th { position: sticky !important; top: 0 !important; z-index: 100 !important; background-color: #121317 !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important; white-space: nowrap !important; }
+      .mysql-table-wrapper {
+        max-height: calc(90vh - 120px) !important;
+        overflow-y: auto !important;
+        overflow-x: auto !important;
+      }
+      #tablaMySQLCabecera th { 
+        position: sticky !important; 
+        top: 0 !important; 
+        z-index: 100 !important; 
+        background-color: #111216 !important; 
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important; 
+        white-space: nowrap !important; 
+      }
       .tr-mysql-row { background-color: #111216 !important; transition: background 0.2s ease !important; }
       .tr-mysql-row:hover { background-color: rgba(255, 255, 255, 0.04) !important; }
       .tr-mysql-row.tr-caida { background-color: rgba(255, 0, 0, 0.12) !important; }
@@ -401,7 +414,79 @@ function eliminarFechaMySQL(diaEscapado) {
     .catch((err) => alert("❌ Error al procesar la eliminación por fecha."));
 }
 
-// 🌟 CARGA DE DATOS EN EL MODAL DE EDICIÓN 🌟
+function abrirModalAgregarMySQL() {
+  if (typeof haptic === "function") haptic();
+  document.getElementById("formAgregarMySQL").reset();
+
+  const selectPlat = document.getElementById("addMySQLPlataforma");
+  if (selectPlat) {
+    selectPlat.value = window.tablaMySQLActual;
+  }
+
+  document.getElementById("modalAgregarMySQL").style.display = "flex";
+  document.getElementById("addMySQLBloque").focus();
+}
+
+function cerrarModalAgregarMySQL() {
+  if (typeof haptic === "function") haptic();
+  document.getElementById("modalAgregarMySQL").style.display = "none";
+}
+
+function guardarNuevoRegistroMySQL(e) {
+  e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const btn = document.getElementById("btnGuardarAddMySQL");
+  const plataforma = document.getElementById("addMySQLPlataforma").value;
+  const bloque = document.getElementById("addMySQLBloque").value.trim();
+
+  if (!bloque) {
+    alert("⚠️ Pega primero los datos de Google Sheets en el recuadro.");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = "Subiendo...";
+
+  const formData = new FormData();
+  formData.append("accion", "agregar");
+  formData.append("tabla", plataforma);
+  formData.append("bloque_cuentas", bloque);
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      btn.disabled = false;
+      btn.innerText = "Subir a MySQL";
+
+      if (data.status === "success") {
+        cerrarModalAgregarMySQL();
+        if (
+          plataforma.toLowerCase() === window.tablaMySQLActual.toLowerCase()
+        ) {
+          cargarDatosMySQL();
+        } else {
+          window.tablaMySQLActual = plataforma;
+          document
+            .querySelectorAll(".mysql-tab-btn")
+            .forEach((b) => b.classList.remove("active"));
+          cargarDatosMySQL();
+        }
+      } else {
+        alert("❌ " + data.message);
+      }
+    })
+    .catch((err) => {
+      btn.disabled = false;
+      btn.innerText = "Subir a MySQL";
+      alert("❌ Error al conectar con el servidor.");
+    });
+}
+
+// 🌟 CARGA DE DATOS EN EL MODAL COMPACTO DE EDICIÓN
 function abrirModalEditarMySQL(filaEscapada) {
   if (typeof haptic === "function") haptic();
   const fila = JSON.parse(decodeURIComponent(filaEscapada));
@@ -440,7 +525,7 @@ function cerrarModalEditarMySQL() {
   if (modal) modal.style.display = "none";
 }
 
-// 🌟 ENVÍO DE DATOS EDITADOS (INCLUYENDO FECHA PAGO, VALOR Y MÉTODO) 🌟
+// 🌟 ENVÍO DE DATOS DESDE EL EDITOR COMPACTO
 function guardarEdicionMySQL(e) {
   e.preventDefault();
   if (typeof haptic === "function") haptic();
@@ -496,7 +581,7 @@ function guardarEdicionMySQL(e) {
     .then((data) => {
       if (btn) {
         btn.disabled = false;
-        btn.innerText = "Guardar";
+        btn.innerText = "Guardar Cambios";
       }
 
       if (data.status === "success") {
@@ -514,7 +599,7 @@ function guardarEdicionMySQL(e) {
     .catch((err) => {
       if (btn) {
         btn.disabled = false;
-        btn.innerText = "Guardar";
+        btn.innerText = "Guardar Cambios";
       }
       alert("❌ Error al actualizar el registro.");
     });
