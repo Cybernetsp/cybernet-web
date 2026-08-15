@@ -1,7 +1,8 @@
 /* ==========================================================================
-   👥 MÓDULO CONTROL DE PERSONAL / HORAS (CONEXIÓN DIRECTA A MYSQL)
+   👥 MÓDULO CONTROL DE PERSONAL / HORAS (CONEXIÓN API MYSQL)
    ========================================================================== */
 
+window.URL_API_HORAS = "https://api.cybernetsp.com/obtener_horas.php";
 window.currentHorasStock = [];
 
 // 👁️ APERTURA Y CONTROL DEL PANEL DE PERSONAL
@@ -37,7 +38,7 @@ window.toggleShiftsPanel = function () {
   }
 };
 
-// 🔄 OBTENER REGISTROS DESDE obtener_horas.php
+// 🔄 OBTENER REGISTROS DESDE API MYSQL CON LECTURA PROTEGIDA
 window.cargarHorasDesdeMySQL = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -50,20 +51,28 @@ window.cargarHorasDesdeMySQL = function () {
       </div>
     </div>`;
 
-  // APUNTA DIRECTAMENTE A obtener_horas.php
-  fetch("obtener_horas.php")
-    .then((res) => res.json())
+  fetch(window.URL_API_HORAS)
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error(
+          "Respuesta no válida del servidor: " + text.substring(0, 100),
+        );
+      }
+    })
     .then((res) => {
       if (res && res.status === "success") {
         window.currentHorasStock = res.data || [];
         window.renderizarHorasEnPantalla();
       } else {
-        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error: ${res ? res.message : "Fallo al consultar la base de datos."}</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Fallo al consultar la base de datos."}</div>`;
       }
     })
     .catch((err) => {
       console.error("Error al cargar horas:", err);
-      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error de conexión al consultar obtener_horas.php</div>`;
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${err.message}</div>`;
     });
 };
 
