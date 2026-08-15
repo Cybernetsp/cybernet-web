@@ -319,7 +319,6 @@ window.toggleShiftsPanel = function () {
   }
 };
 
-// 🚀 CONSULTA DIRECTA Y SIN CACHÉ A OBTENER_HORAS.PHP
 window.cargarHorasDirectasPHP = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -327,7 +326,12 @@ window.cargarHorasDirectasPHP = function () {
   container.innerHTML = `<div style="text-align:center; padding:45px; color:#0a84ff;">Sincronizando con MySQL...</div>`;
 
   const ts = new Date().getTime();
-  fetch(`https://api.cybernetsp.com/obtener_horas.php?nocache=${ts}`)
+  fetch(`https://api.cybernetsp.com/obtener_horas.php?nocache=${ts}`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+    },
+  })
     .then(async (res) => {
       const text = await res.text();
       try {
