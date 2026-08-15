@@ -241,12 +241,54 @@ function cargarDatosMySQL() {
               `;
             }
 
-            let textoCopiarFicha = `📺 ${window.tablaMySQLActual.toUpperCase()}\n📧 Correo: ${correoVal}\n🔑 Clave: ${claveVal}\n👤 Perfil: ${perfilVal}\n📍 PIN: ${pinVal}`;
-            if (esNetflix) {
-              textoCopiarFicha += `\n📅 Vence: ${vencVal}`;
-            } else if (provVal !== "-") {
-              textoCopiarFicha = `📺 ${window.tablaMySQLActual.toUpperCase()}\n👤 Proveedor: ${provVal}\n📧 Correo: ${correoVal}\n🔑 Clave: ${claveVal}\n👤 Perfil: ${perfilVal}\n📍 PIN: ${pinVal}\n📅 Vence: ${vencVal}`;
+            // 🌟 CONSTRUCCIÓN DINÁMICA DE LA FICHA COMERCIAL COMPLETA
+            let platNorm = window.tablaMySQLActual
+              .toUpperCase()
+              .replace(/_/g, " ")
+              .replace(/-/g, " ");
+            let esNet = window.tablaMySQLActual.toLowerCase() === "netflix";
+            let nombreClienteFicha =
+              clienteVal &&
+              clienteVal !== "-" &&
+              clienteVal.trim().toLowerCase() !== "sin nombre"
+                ? " " + clienteVal.trim()
+                : "";
+
+            let textoCopiarFicha = `🌟 *¡Hola${nombreClienteFicha}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n🎬 *DETALLES DE ${platNorm}* ✅\n────────────────────\n`;
+
+            if (esNet) {
+              textoCopiarFicha += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
             }
+
+            let etiquetaUser =
+              platNorm === "IPTV" || platNorm === "EMBY" ? "Usuario" : "Correo";
+            let etiquetaPerfil =
+              platNorm === "IPTV"
+                ? "URL"
+                : platNorm === "EMBY"
+                  ? "Servidor"
+                  : "Perfil";
+
+            textoCopiarFicha += `👤 *${etiquetaUser}:* ${correoVal}\n🔐 *Contraseña:* ${claveVal}\n`;
+
+            if (perfilVal && perfilVal !== "-" && perfilVal !== "") {
+              textoCopiarFicha += `🌐 *${etiquetaPerfil}:* ${perfilVal}\n`;
+            }
+            if (platNorm === "EMBY") {
+              textoCopiarFicha += `🔌 *Puerto:* Dejar vacío\n`;
+            }
+            if (pinVal && pinVal !== "-" && pinVal !== "") {
+              textoCopiarFicha += `📍 *PIN:* ${pinVal}\n`;
+            }
+            if (vencVal && vencVal !== "-" && vencVal !== "") {
+              textoCopiarFicha += `📅 *Vence:* ${vencVal}\n`;
+            }
+
+            if (esNet) {
+              textoCopiarFicha += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n`;
+            }
+
+            textoCopiarFicha += `\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
             let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
             let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
@@ -276,6 +318,9 @@ function cargarDatosMySQL() {
             const tdBase =
               "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
 
+            // ─────────────────────────────────────────────────────────────
+            // VISTA NETFLIX
+            // ─────────────────────────────────────────────────────────────
             if (esNetflix) {
               let botonesAccionNetflix = `
                 <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
@@ -326,7 +371,11 @@ function cargarDatosMySQL() {
                   <td style="${tdBase} text-align: center;">${botonesAccionNetflix}</td>
                 </tr>
               `;
-            } else if (!esVentas && !esGarantias) {
+            }
+            // ─────────────────────────────────────────────────────────────
+            // DEMÁS PLATAFORMAS
+            // ─────────────────────────────────────────────────────────────
+            else if (!esVentas && !esGarantias) {
               let botonesAccionDemas = `
                 <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
               `;
@@ -632,6 +681,7 @@ function eliminarRegistroMySQL(id) {
     .catch((err) => alert("❌ Error al eliminar el registro."));
 }
 
+// COPIADO DIRECTO AL HACER CLIC SOBRE EL TEXTO
 function copiarTextoUnico(element, textoEscapado) {
   if (typeof haptic === "function") haptic();
   const texto = decodeURIComponent(textoEscapado);
@@ -680,6 +730,7 @@ function fallbackCopiar(texto, callback) {
   document.body.removeChild(textarea);
 }
 
+// COPIAR FICHA COMPLETA CON ANIMACIÓN DE CHECK
 function copiarAccesoMySQL(btn, textoEscapado) {
   if (typeof haptic === "function") haptic();
   const texto = decodeURIComponent(textoEscapado);
@@ -827,7 +878,7 @@ window.marcarComoGarantia = function (
 
 window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
   if (typeof haptic === "function") haptic();
-  const correo = correoEscapado ? decodeURIComponent(correoEscapado) : "";
+  const correo = decodeURIComponent(correoEscapado);
 
   const formData = new FormData();
   formData.append("accion", "pasar_a_hoy");
