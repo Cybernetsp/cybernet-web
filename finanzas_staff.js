@@ -780,6 +780,10 @@ window.renderDashboard = function () {
   const ahorroCalculado = Math.round(miGananciaNeta * 0.5);
   const otrosCalculado = miGananciaNeta - ahorroCalculado;
 
+  // 🎯 SUMA DE ABONOS DE JEISSON A LA GANANCIA TOTAL
+  const montoJeisson = Number(d.jeisson) || 0;
+  const gananciaTotalJeisson = miGananciaNeta + montoJeisson;
+
   if (document.getElementById("valProyMio"))
     document.getElementById("valProyMio").innerText =
       formatMoneda(miGananciaNeta);
@@ -789,6 +793,10 @@ window.renderDashboard = function () {
   if (document.getElementById("valGananciaOtros"))
     document.getElementById("valGananciaOtros").innerText =
       formatMoneda(otrosCalculado);
+
+  if (document.getElementById("valProyMioMasJeisson"))
+    document.getElementById("valProyMioMasJeisson").innerText =
+      formatMoneda(gananciaTotalJeisson);
 
   // 5. DEUDAS E HISTORIAL
   if (
