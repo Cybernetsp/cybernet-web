@@ -140,7 +140,7 @@ window.cambiarAsistenteAdmin = function (vendedor) {
   window.renderizarHorasEnPantalla();
 };
 
-// 🎨 RENDERIZADOR CALENDARIO
+// 🎨 RENDERIZADOR CALENDARIO CON ADELANTOS UNIFICADOS Y BOTONES SVG SUPERADMIN
 window.renderizarHorasEnPantalla = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -177,7 +177,7 @@ window.renderizarHorasEnPantalla = function () {
   ];
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-  // 1. FILTRADO DE PRIVACIDAD
+  // 1. FILTRADO DE PRIVACIDAD POR USUARIO
   let todosLosRegistros = window.currentHorasStock;
   let asistentesDisponibles = new Set();
 
@@ -198,7 +198,7 @@ window.renderizarHorasEnPantalla = function () {
     if (!esQ1 && dia <= 15) return false;
 
     if (!esSuperAdmin) {
-      return vendedorItem === activeStaff; // Asistente normal solo ve sus propios datos
+      return vendedorItem === activeStaff;
     } else {
       if (window.asistenteSeleccionadoAdmin !== "TODOS") {
         return vendedorItem === window.asistenteSeleccionadoAdmin;
@@ -271,7 +271,8 @@ window.renderizarHorasEnPantalla = function () {
   if (asistentesAMostrar.length === 0) {
     container.innerHTML =
       htmlControles +
-      `<div style="text-align:center; padding:40px; color:#a1a1aa; font-weight:600; background:rgba(255,255,255,0.02); border-radius:18px; border:1px dashed rgba(255,255,255,0.08);">
+      `
+      <div style="text-align:center; padding:40px; color:#a1a1aa; font-weight:600; background:rgba(255,255,255,0.02); border-radius:18px; border:1px dashed rgba(255,255,255,0.08);">
         📌 No hay turnos o registros para este periodo.
       </div>`;
     return;
@@ -304,7 +305,6 @@ window.renderizarHorasEnPantalla = function () {
       let tieneTurno = registrosDia.length > 0;
       let htmlRegistros = "";
 
-      // Variables para unificar adelantos
       let sumaAdelantos = 0;
       let idsAdelantosArray = [];
 
@@ -343,26 +343,29 @@ window.renderizarHorasEnPantalla = function () {
           Math.round(reg.total),
         ).toLocaleString("es-CO");
 
-        // Botones SVG Limpios para CAMILO
         let btnSuperAdmin = "";
         if (esSuperAdmin) {
           btnSuperAdmin = `
             <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
-              <svg onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-              <svg onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
+              <button onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" title="Modificar Turno" style="background:transparent; border:none; padding:0; cursor:pointer;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" title="Eliminar Turno" style="background:transparent; border:none; padding:0; cursor:pointer;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
             </div>`;
         }
 
         htmlRegistros += `
           <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 4px;">
-            <span style="font-size: 0.75rem; font-weight: 800; color: #0a84ff; font-family: monospace;">${reg.tiempo_trabajado !== "00:00:00" ? reg.tiempo_trabajado : "Turno"}</span>
-            <span style="font-size: 0.8rem; font-weight: 900; color: #30d158; font-family: monospace;">$${valorAbsolutoFormateado}</span>
+            <span style="font-size: 0.72rem; font-weight: 800; color: #0a84ff; font-family: monospace;">${reg.tiempo_trabajado !== "00:00:00" ? reg.tiempo_trabajado : "Turno"}</span>
+            <span style="font-size: 0.78rem; font-weight: 900; color: #30d158; font-family: monospace;">$${valorAbsolutoFormateado}</span>
             ${btnSuperAdmin}
           </div>`;
       });
@@ -378,10 +381,12 @@ window.renderizarHorasEnPantalla = function () {
         if (esSuperAdmin) {
           botonBorrarAdelantos = `
             <div style="display:flex; justify-content:center; margin-top:4px;">
-              <svg onclick="window.eliminarMultiplesTurnosSuperAdmin('${idUnificadosStr}')" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
+              <button onclick="window.eliminarMultiplesTurnosSuperAdmin('${idUnificadosStr}')" title="Eliminar Adelantos de este día" style="background:transparent; border:none; padding:0; cursor:pointer;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
             </div>`;
         }
 
@@ -400,9 +405,10 @@ window.renderizarHorasEnPantalla = function () {
         ? "1px solid rgba(10, 132, 255, 0.3)"
         : "1px solid rgba(255, 255, 255, 0.05)";
 
+      // 🔥 FIX DE ESPACIO: min-height incrementado a 110px para que los botones y textos no se escondan
       celdasCalendario += `
-        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 80px; box-sizing: border-box;">
-          <span style="font-size: 0.75rem; font-weight: 800; color: ${tieneTurno ? "#ffffff" : "#71717a"}; align-self: flex-start;">${dia}</span>
+        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 110px; box-sizing: border-box; overflow: visible;">
+          <span style="font-size: 0.75rem; font-weight: 800; color: ${tieneTurno ? "#ffffff" : "#71717a"}; align-self: flex-start; margin-bottom: auto;">${dia}</span>
           ${htmlRegistros}
         </div>`;
     }
@@ -438,7 +444,7 @@ window.renderizarHorasEnPantalla = function () {
           </div>
         </div>
 
-        <div style="width: 100%; overflow-x: auto;">
+        <div style="width: 100%; overflow-x: auto; padding-bottom: 10px;">
           <div style="min-width: 440px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
             ${celdasCalendario}
           </div>
