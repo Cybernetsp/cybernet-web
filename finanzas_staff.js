@@ -663,7 +663,7 @@ window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
 };
 
 /* ==========================================================================
-   💳 SALDO DE DISTRIBUIDORES (AJUSTADO CON ÍCONO SVG Y SALDO GENERAL)
+   💳 SALDO DE DISTRIBUIDORES (RENDERIZADO FLEXBOX CON SVG DERECHO)
    ========================================================================== */
 const oldToggleDistrisPanel = window.toggleDistrisPanel;
 window.toggleDistrisPanel = function () {
@@ -686,18 +686,16 @@ window.toggleDistrisPanel = function () {
 
 window.cargarDistribuidores = function () {
   if (typeof haptic === "function") haptic();
-  const tbody = document.getElementById("tablaDistribuidores");
-  if (!tbody) return;
+  const container = document.getElementById("tablaDistribuidores");
+  if (!container) return;
 
-  tbody.innerHTML = `
-    <tr>
-      <td colspan="2" style="text-align: center; padding: 40px; color: #0a84ff;">
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
-          <svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-          <span style="font-weight: 700; font-size: 0.88rem;">Sincronizando distribuidores...</span>
-        </div>
-      </td>
-    </tr>`;
+  container.innerHTML = `
+    <div style="text-align: center; padding: 40px; color: #0a84ff;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+        <svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+        <span style="font-weight: 700; font-size: 0.88rem;">Sincronizando distribuidores...</span>
+      </div>
+    </div>`;
 
   fetch("https://api.cybernetsp.com/obtener_distribuidores.php")
     .then((res) => res.json())
@@ -705,12 +703,12 @@ window.cargarDistribuidores = function () {
       if (res.status === "success") {
         let data = res.data || [];
         if (data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; padding: 30px; color: #a1a1aa;">No hay distribuidores registrados.</td></tr>`;
+          container.innerHTML = `<div style="text-align: center; padding: 30px; color: #a1a1aa;">No hay distribuidores registrados.</div>`;
           return;
         }
 
         let html = "";
-        data.forEach((distri, idx) => {
+        data.forEach((distri) => {
           let saldoRaw =
             distri.saldo !== undefined
               ? distri.saldo
@@ -732,8 +730,6 @@ window.cargarDistribuidores = function () {
           let saldoFormateado =
             "$" + Math.round(saldoClean).toLocaleString("es-CO");
           let colorSaldo = saldoClean > 0 ? "#30d158" : "#ff453a";
-          const bgRow =
-            idx % 2 === 0 ? "rgba(255, 255, 255, 0.015)" : "transparent";
 
           let nombreReal =
             distri.nombre &&
@@ -750,39 +746,40 @@ window.cargarDistribuidores = function () {
           let nombreLimpio = nombreReal !== "" ? nombreReal : telefonoReal;
 
           html += `
-            <tr class="distri-row-item" style="background: ${bgRow}; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s ease;">
-              <td style="padding: 14px 18px; color: #ffffff; vertical-align: middle;">
-                <div style="font-weight: 800; font-size: 0.92rem; color: #ffffff;">${nombreLimpio}</div>
-                <div style="font-size: 0.78rem; color: #a1a1aa; font-family: monospace; margin-top: 3px; display: flex; align-items: center; gap: 4px;">
+            <div class="distri-row-item" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.2s ease;">
+              <!-- LADO IZQUIERDO: NOMBRE Y TELÉFONO -->
+              <div style="display: flex; flex-direction: column; gap: 3px; overflow: hidden; flex: 1;">
+                <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreLimpio}</div>
+                <div style="font-size: 0.78rem; color: #a1a1aa; font-family: monospace; display: flex; align-items: center; gap: 4px;">
                   <span>📱 ${telefonoReal}</span>
                 </div>
-              </td>
-              <td style="padding: 14px 18px; text-align: right; vertical-align: middle;">
-                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
-                  <span style="font-size: 1.15rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.5px;">${saldoFormateado}</span>
-                  <button type="button" 
-                          onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')" 
-                          title="Copiar reporte de saldo"
-                          style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 7px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
-                          onmouseover="this.style.background='rgba(10, 132, 255, 0.25)'" 
-                          onmouseout="this.style.background='rgba(10, 132, 255, 0.15)'">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                  </button>
-                </div>
-              </td>
-            </tr>`;
+              </div>
+
+              <!-- LADO DERECHO: SALDO Y BOTÓN SVG DE COPIAR -->
+              <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                <span style="font-size: 1.15rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.5px;">${saldoFormateado}</span>
+                <button type="button" 
+                        onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')" 
+                        title="Copiar reporte de saldo"
+                        style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 8px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
+                        onmouseover="this.style.background='rgba(10, 132, 255, 0.25)'" 
+                        onmouseout="this.style.background='rgba(10, 132, 255, 0.15)'">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>`;
         });
-        tbody.innerHTML = html;
+        container.innerHTML = html;
       } else {
-        tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; padding: 25px; color: #ff453a; font-weight: 700;">Error: ${res.message}</td></tr>`;
+        container.innerHTML = `<div style="text-align: center; padding: 25px; color: #ff453a; font-weight: 700;">Error: ${res.message}</div>`;
       }
     })
     .catch((err) => {
       console.error(err);
-      tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; padding: 25px; color: #ff453a; font-weight: 700;">❌ Error de conexión con el servidor.</td></tr>`;
+      container.innerHTML = `<div style="text-align: center; padding: 25px; color: #ff453a; font-weight: 700;">❌ Error de conexión con el servidor.</div>`;
     });
 };
 
@@ -796,11 +793,11 @@ window.copiarSaldoDistri = function (btn, nombre, saldoFormateado) {
   const textoWhatsApp = `🔔 *NOTIFICACIÓN DE SALDO CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${nombreDisplay}\n💰 *Saldo Disponible:* ${saldoFormateado}\n────────────────────\n✨ _¡Gracias por tu confianza y preferencia!_`;
 
   navigator.clipboard.writeText(textoWhatsApp).then(() => {
-    let oldHtml = btn.innerHTML;
-    let oldBg = btn.style.background;
+    let originalHTML = btn.innerHTML;
+    let originalBg = btn.style.background;
 
-    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-    btn.style.background = "rgba(48, 209, 88, 0.2)";
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    btn.style.setProperty("background", "rgba(48, 209, 88, 0.2)", "important");
 
     if (typeof triggerToast === "function") {
       triggerToast(
@@ -809,8 +806,8 @@ window.copiarSaldoDistri = function (btn, nombre, saldoFormateado) {
     }
 
     setTimeout(() => {
-      btn.innerHTML = oldHtml;
-      btn.style.background = oldBg;
+      btn.innerHTML = originalHTML;
+      btn.style.background = originalBg;
     }, 1500);
   });
 };
@@ -824,7 +821,7 @@ window.filtrarTablaRevendedores = function () {
   );
   filas.forEach((row) => {
     row.style.display = row.innerText.toLowerCase().includes(query)
-      ? "table-row"
+      ? "flex"
       : "none";
   });
 };
