@@ -401,69 +401,48 @@ window.renderizarHorasEnPantalla = function () {
   container.innerHTML = htmlCuerpo;
 };
 
-window.modificarTurnoSuperAdmin = function (
-  idTurno,
-  vendedor,
-  fecha,
-  tiempoActual,
-) {
-  const activeStaff = (
-    sessionStorage.getItem("active_staff") ||
-    localStorage.getItem("cyber_saved_staff") ||
-    ""
-  )
-    .toUpperCase()
-    .trim();
+window.modificarTurnoSuperAdmin = function (idTurno, vendedor, fecha, tiempoActual) {
+  const activeStaff = (sessionStorage.getItem("active_staff") || localStorage.getItem("cyber_saved_staff") || "").toUpperCase().trim();
   if (activeStaff !== "CAMILO") {
-    alert(
-      "⛔ Acceso Denegado: Solo el Superadmin (CAMILO) tiene permisos para modificar turnos.",
-    );
+    alert("⛔ Acceso Denegado: Solo el Superadmin (CAMILO) tiene permisos para modificar turnos.");
     return;
   }
 
-  try {
-    if (typeof haptic === "function") haptic();
-  } catch (e) {}
+  try { if (typeof haptic === "function") haptic(); } catch (e) {}
 
-  let nuevoTiempo = prompt(
-    `[SUPERADMIN] Modificar tiempo para ${vendedor} (${fecha}):\nPuedes ingresar horas simples (ej: 3) o formato completo (ej: 03:00:00)`,
-    tiempoActual,
-  );
+  let nuevoTiempo = prompt(`[SUPERADMIN] Modificar tiempo para ${vendedor} (${fecha}):\nPuedes ingresar horas simples (ej: 3) o formato completo (ej: 03:00:00)`, tiempoActual);
   if (nuevoTiempo === null || nuevoTiempo.trim() === "") return;
 
-  // Petición de actualización directa a MySQL
-  fetch(window.URL_MODIFICAR_TURNO, {
+  // Ruta explícita
+  const urlModificar = "https://api.cybernetsp.com/modificar_turno.php";
+
+  fetch(urlModificar, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo.trim())}`,
+    body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo.trim())}`
   })
     .then(async (res) => {
       const text = await res.text();
       try {
         return JSON.parse(text);
       } catch (e) {
-        throw new Error(
-          "Respuesta de servidor no válida: " + text.substring(0, 100),
-        );
+        console.error("Respuesta fallida cruda:", text);
+        alert(`❌ Error crítico en PHP:\nEl servidor no devolvió JSON válido. Revisa la consola (F12).`);
+        throw new Error("Formato inválido.");
       }
     })
     .then((res) => {
       if (res && res.status === "success") {
         if (typeof triggerToast === "function") {
-          triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Turno guardado y recalculado en MySQL ($${Math.round(res.total_calculado).toLocaleString("es-CO")})</span></div>`,
-          );
+          triggerToast(`<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Cálculo aplicado: $${Math.round(res.total_calculado).toLocaleString("es-CO")}</span></div>`);
         }
-        window.cargarHorasDesdeMySQL(); // Recarga la información directa de la BD
+        window.cargarHorasDesdeMySQL(); // Recarga la cuadrícula automáticamente
       } else {
-        alert(
-          "⚠️ Error en MySQL: " + (res ? res.message : "Fallo al guardar."),
-        );
+        alert("⚠️ Error en MySQL: " + (res ? res.message : "Desconocido."));
       }
     })
     .catch((err) => {
       console.error("Error al actualizar turno:", err);
-      alert("❌ " + err.message);
     });
 };
 
