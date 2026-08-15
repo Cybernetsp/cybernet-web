@@ -70,16 +70,16 @@ window.cargarUsuariosBaseMySQL = async function () {
   }
 };
 
-// ⚡ INICIO AUTOMÁTICO AL CARGAR LA PÁGINA
+// ⚡ INICIO Y RESTAURACIÓN AUTOMÁTICA AL CARGAR/RECARGAR PÁGINA
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     window.cargarUsuariosBaseMySQL();
-    window.verificarEIniciarTurnoAuto(); // 🔥 Inicia el cronómetro automáticamente si hay un asistente logueado
+    window.verificarEIniciarTurnoAuto();
   }, 800);
 });
 
 // ==========================================
-// 2. CRONÓMETRO DE BARRA SUPERIOR (INICIO AUTOMÁTICO, AUTO-GUARDADO Y INACTIVIDAD)
+// 2. CRONÓMETRO DE BARRA SUPERIOR CON PERSISTENCIA
 // ==========================================
 let secCronometroTotal = 0;
 let secParaGuardar = 0;
@@ -90,7 +90,15 @@ let inactividadTimer = null;
 let pausadoPorInactividad = false;
 const TIEMPO_MAX_INACTIVIDAD = 25 * 60 * 1000; // 25 Minutos en ms
 
-// 🔥 FUNCIÓN DE DETECCIÓN E INICIO AUTOMÁTICO
+function limpiarCacheShift() {
+  localStorage.removeItem("cyber_shift_vendedor");
+  localStorage.removeItem("cyber_shift_active");
+  localStorage.removeItem("cyber_shift_start_ts");
+  localStorage.removeItem("cyber_shift_accumulated");
+  localStorage.removeItem("cyber_shift_unsaved_sec");
+}
+
+// 🔥 RESTAURACIÓN DE TIEMPO TRAS RECARGA DE PÁGINA
 window.verificarEIniciarTurnoAuto = function () {
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
@@ -100,13 +108,44 @@ window.verificarEIniciarTurnoAuto = function () {
     .toUpperCase()
     .trim();
 
-  if (
-    activeStaff &&
-    activeStaff !== "STAFF" &&
-    activeStaff !== "CAMILO" &&
-    !turnoActivo
-  ) {
-    iniciarTurnoTracker(true); // Se inicia silenciosamente de una vez
+  if (!activeStaff || activeStaff === "STAFF" || activeStaff === "CAMILO")
+    return;
+
+  let savedVendedor = localStorage.getItem("cyber_shift_vendedor");
+
+  if (savedVendedor && savedVendedor === activeStaff) {
+    let activeState = localStorage.getItem("cyber_shift_active");
+    let accum = parseInt(
+      localStorage.getItem("cyber_shift_accumulated") || "0",
+      10,
+    );
+    let unsaved = parseInt(
+      localStorage.getItem("cyber_shift_unsaved_sec") || "0",
+      10,
+    );
+    let startTs = parseInt(
+      localStorage.getItem("cyber_shift_start_ts") || Date.now(),
+      10,
+    );
+
+    if (activeState === "true") {
+      let diffSec = Math.floor((Date.now() - startTs) / 1000);
+      secCronometroTotal = accum + diffSec;
+      secParaGuardar = unsaved + diffSec;
+    } else {
+      secCronometroTotal = accum;
+      secParaGuardar = unsaved;
+    }
+
+    const lbl = document.getElementById("shiftTimer");
+    if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
+
+    if (activeState === "true") {
+      iniciarTurnoTracker(true);
+    }
+  } else {
+    // Si cambió de usuario o es primera vez
+    iniciarTurnoTracker(true);
   }
 };
 
@@ -133,10 +172,23 @@ function iniciarTurnoTracker(esAuto = false) {
     return;
   }
 
-  if (turnoActivo) return; // Si ya está corriendo, no duplicar el timer
+  if (turnoActivo) return;
+
+  let savedVendedor = localStorage.getItem("cyber_shift_vendedor");
+  if (savedVendedor !== activeStaff) {
+    secCronometroTotal = 0;
+    secParaGuardar = 0;
+    localStorage.setItem("cyber_shift_vendedor", activeStaff);
+    localStorage.setItem("cyber_shift_accumulated", "0");
+    localStorage.setItem("cyber_shift_unsaved_sec", "0");
+  }
 
   turnoActivo = true;
   pausadoPorInactividad = false;
+
+  localStorage.setItem("cyber_shift_active", "true");
+  localStorage.setItem("cyber_shift_start_ts", Date.now());
+  localStorage.setItem("cyber_shift_accumulated", secCronometroTotal);
 
   const dot = document.getElementById("ledConexion");
   if (dot) {
@@ -144,14 +196,20 @@ function iniciarTurnoTracker(esAuto = false) {
     dot.style.boxShadow = "0 0 8px #30d158";
   }
 
+  if (timerInterval) clearInterval(timerInterval);
+
   timerInterval = setInterval(() => {
     secCronometroTotal++;
     secParaGuardar++;
 
+    // Guardar estado en memoria local para sobrevivir a reloads
+    localStorage.setItem("cyber_shift_accumulated", secCronometroTotal);
+    localStorage.setItem("cyber_shift_unsaved_sec", secParaGuardar);
+
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // Respaldo automático en MySQL cada 5 minutos
+    // Guardado en MySQL cada 5 minutos (300 s)
     if (secParaGuardar >= 300) {
       enviarTiempoTrackerAMySQL(
         activeStaff,
@@ -159,14 +217,15 @@ function iniciarTurnoTracker(esAuto = false) {
         "Autoguardado 5m",
       );
       secParaGuardar = 0;
+      localStorage.setItem("cyber_shift_unsaved_sec", "0");
     }
   }, 1000);
 
   iniciarDetectorInactividad();
 
-  if (typeof triggerToast === "function") {
+  if (typeof triggerToast === "function" && !esAuto) {
     triggerToast(
-      `<div style="color:var(--ios-green);">▶ Turno iniciado automáticamente para ${activeStaff}.</div>`,
+      `<div style="color:var(--ios-green);">▶ Turno activo para ${activeStaff}. Autoguardado cada 5m.</div>`,
     );
   }
 }
@@ -176,6 +235,9 @@ function detenerTurnoTracker(porInactividad = false) {
   turnoActivo = false;
   clearInterval(timerInterval);
   detenerDetectorInactividad();
+
+  localStorage.setItem("cyber_shift_active", "false");
+  localStorage.setItem("cyber_shift_accumulated", secCronometroTotal);
 
   const dot = document.getElementById("ledConexion");
   if (dot) {
@@ -199,6 +261,7 @@ function detenerTurnoTracker(porInactividad = false) {
       porInactividad ? "Inactividad 25m" : "Pausa/Cierre",
     );
     secParaGuardar = 0;
+    localStorage.setItem("cyber_shift_unsaved_sec", "0");
   }
 
   if (porInactividad) {
@@ -241,7 +304,7 @@ function formatoSegundosTracker(totalSeg) {
 
 function resetInactividad() {
   if (pausadoPorInactividad && !turnoActivo) {
-    iniciarTurnoTracker(true); // Reanuda automáticamente al detectar movimiento
+    iniciarTurnoTracker(true);
   }
 
   clearTimeout(inactividadTimer);
@@ -268,7 +331,7 @@ function detenerDetectorInactividad() {
   clearTimeout(inactividadTimer);
 }
 
-// 🚪 CERRAR SESIÓN STAFF CON GUARDADO AUTOMÁTICO
+// 🚪 CERRAR SESIÓN STAFF CON GUARDADO FINAL Y LIMPIEZA
 window.cerrarSesionStaff = function () {
   try {
     if (typeof haptic === "function") haptic();
@@ -284,6 +347,7 @@ window.cerrarSesionStaff = function () {
 
   if (usuarioActivo === "CAMILO") {
     if (turnoActivo) detenerTurnoTracker(false);
+    limpiarCacheShift();
     sessionStorage.clear();
     localStorage.removeItem("cyber_saved_staff");
     location.reload();
@@ -296,8 +360,9 @@ window.cerrarSesionStaff = function () {
     )
   ) {
     if (turnoActivo) {
-      detenerTurnoTracker(false); // Guarda el acumulado en MySQL
+      detenerTurnoTracker(false);
     }
+    limpiarCacheShift();
 
     setTimeout(() => {
       sessionStorage.clear();
@@ -704,6 +769,19 @@ window.renderizarHorasEnPantalla = function () {
 // ==========================================
 // 4. MODALES DE FORMULARIOS (INGRESOS / ADELANTOS)
 // ==========================================
+window.formatearMontoEnVivoCOP = function (input) {
+  let val = input.value.replace(/\D/g, "");
+  if (val) {
+    input.value = new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      maximumFractionDigits: 0,
+    }).format(val);
+  } else {
+    input.value = "";
+  }
+};
+
 window.toggleFormularioHoras = function () {
   const overlay = document.getElementById("addHoursOverlay");
   if (!overlay) return;
