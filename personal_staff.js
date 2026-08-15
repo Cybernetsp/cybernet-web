@@ -1,5 +1,5 @@
 /* ==========================================================================
-   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL (FINAL Y CORREGIDO)
+   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL (REPARADO BOTONES)
    ========================================================================== */
 
 window.URL_OBTENER_HORAS = "https://api.cybernetsp.com/obtener_horas.php";
@@ -13,6 +13,15 @@ window.filtroMesTurnos = new Date().getMonth();
 window.filtroAnioTurnos = new Date().getFullYear();
 window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
+
+// Función maestra para verificar si el usuario logueado es el jefe (CAMILO)
+function verificarSiEsSuperAdmin() {
+  let user =
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "STAFF";
+  return user.toUpperCase().trim() === "CAMILO";
+}
 
 // 👁️ ABRIR / CERRAR PANEL
 window.toggleShiftsPanel = function () {
@@ -89,7 +98,7 @@ window.cargarHorasDesdeMySQL = function () {
     });
 };
 
-// 📅 PARSEADOR DE FECHA COMPATIBLE CON FORMATOS CON HORA (Ej: 14/08/2026 12:05 AM)
+// 📅 PARSEADOR DE FECHA COMPATIBLE CON FORMATOS CON HORA
 function parsearFechaTurno(fechaRaw) {
   if (!fechaRaw) return new Date();
   if (fechaRaw instanceof Date) return fechaRaw;
@@ -152,7 +161,7 @@ window.renderizarHorasEnPantalla = function () {
   )
     .toUpperCase()
     .trim();
-  const esSuperAdmin = activeStaff === "CAMILO";
+  const esSuperAdmin = verificarSiEsSuperAdmin();
 
   const dMes = window.filtroMesTurnos;
   const dAnio = window.filtroAnioTurnos;
@@ -177,7 +186,7 @@ window.renderizarHorasEnPantalla = function () {
   ];
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-  // 1. FILTRADO DE PRIVACIDAD POR USUARIO
+  // 1. FILTRADO DE PRIVACIDAD
   let todosLosRegistros = window.currentHorasStock;
   let asistentesDisponibles = new Set();
 
@@ -343,18 +352,19 @@ window.renderizarHorasEnPantalla = function () {
           Math.round(reg.total),
         ).toLocaleString("es-CO");
 
-        let btnSuperAdmin = "";
+        // Botones de Lápiz y Papelera exclusivos
+        let botonceraSuperAdmin = "";
         if (esSuperAdmin) {
-          btnSuperAdmin = `
-            <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
-              <button onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" title="Modificar Turno" style="background:transparent; border:none; padding:0; cursor:pointer;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+          botonceraSuperAdmin = `
+            <div style="display:flex; justify-content:center; gap:8px; margin-top:8px;">
+              <button onclick="window.modificarTurnoSuperAdmin('${reg.id}', '${asistente}', '${reg.fecha}', '${reg.tiempo_trabajado}')" title="Modificar Turno" style="background: transparent; border: none; padding: 0; cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:all 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.2)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
               </button>
-              <button onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" title="Eliminar Turno" style="background:transparent; border:none; padding:0; cursor:pointer;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+              <button onclick="window.eliminarTurnoSuperAdmin('${reg.id}')" title="Eliminar Turno" style="background: transparent; border: none; padding: 0; cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:all 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.2)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
@@ -363,10 +373,10 @@ window.renderizarHorasEnPantalla = function () {
         }
 
         htmlRegistros += `
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 4px;">
-            <span style="font-size: 0.72rem; font-weight: 800; color: #0a84ff; font-family: monospace;">${reg.tiempo_trabajado !== "00:00:00" ? reg.tiempo_trabajado : "Turno"}</span>
-            <span style="font-size: 0.78rem; font-weight: 900; color: #30d158; font-family: monospace;">$${valorAbsolutoFormateado}</span>
-            ${btnSuperAdmin}
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 6px;">
+            <span style="font-size: 0.75rem; font-weight: 800; color: #0a84ff; font-family: monospace;">${reg.tiempo_trabajado !== "00:00:00" ? reg.tiempo_trabajado : "Turno"}</span>
+            <span style="font-size: 0.85rem; font-weight: 900; color: #30d158; font-family: monospace;">$${valorAbsolutoFormateado}</span>
+            ${botonceraSuperAdmin}
           </div>`;
       });
 
@@ -380,9 +390,9 @@ window.renderizarHorasEnPantalla = function () {
         let botonBorrarAdelantos = "";
         if (esSuperAdmin) {
           botonBorrarAdelantos = `
-            <div style="display:flex; justify-content:center; margin-top:4px;">
-              <button onclick="window.eliminarMultiplesTurnosSuperAdmin('${idUnificadosStr}')" title="Eliminar Adelantos de este día" style="background:transparent; border:none; padding:0; cursor:pointer;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
+            <div style="display:flex; justify-content:center; margin-top:8px;">
+              <button onclick="window.eliminarMultiplesTurnosSuperAdmin('${idUnificadosStr}')" title="Eliminar Adelantos de este día" style="background: transparent; border: none; padding: 0; cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ios-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; transition:all 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.2)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
@@ -405,9 +415,8 @@ window.renderizarHorasEnPantalla = function () {
         ? "1px solid rgba(10, 132, 255, 0.3)"
         : "1px solid rgba(255, 255, 255, 0.05)";
 
-      // 🔥 FIX DE ESPACIO: min-height incrementado a 110px para que los botones y textos no se escondan
       celdasCalendario += `
-        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 110px; box-sizing: border-box; overflow: visible;">
+        <div style="background: ${bgCelda}; border: ${borderCelda}; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 125px; box-sizing: border-box; overflow: visible;">
           <span style="font-size: 0.75rem; font-weight: 800; color: ${tieneTurno ? "#ffffff" : "#71717a"}; align-self: flex-start; margin-bottom: auto;">${dia}</span>
           ${htmlRegistros}
         </div>`;
@@ -462,16 +471,9 @@ window.modificarTurnoSuperAdmin = function (
   fecha,
   tiempoActual,
 ) {
-  const activeStaff = (
-    sessionStorage.getItem("active_staff") ||
-    localStorage.getItem("cyber_saved_staff") ||
-    ""
-  )
-    .toUpperCase()
-    .trim();
-  if (activeStaff !== "CAMILO") {
+  if (!verificarSiEsSuperAdmin()) {
     alert(
-      "⛔ Acceso Denegado: Solo el Superadmin (CAMILO) tiene permisos para modificar turnos.",
+      "⛔ Acceso Denegado: Solo el Superadmin tiene permisos para modificar turnos.",
     );
     return;
   }
@@ -486,7 +488,6 @@ window.modificarTurnoSuperAdmin = function (
   );
   if (nuevoTiempo === null || nuevoTiempo.trim() === "") return;
 
-  // Llama a PHP (que ya está programado para calcular el dinero en el servidor si envias tiempo)
   fetch(window.URL_MODIFICAR_TURNO, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -516,12 +517,15 @@ window.modificarTurnoSuperAdmin = function (
 
 // 🗑️ ELIMINACIÓN DE TURNO (SUPERADMIN CAMILO)
 window.eliminarTurnoSuperAdmin = function (idTurno) {
+  if (!verificarSiEsSuperAdmin()) return;
+
   if (
     !confirm(
       "⚠️ ¿Estás seguro de eliminar este turno? Esta acción es irreversible.",
     )
   )
     return;
+
   try {
     if (typeof haptic === "function") haptic();
   } catch (e) {}
@@ -548,8 +552,11 @@ window.eliminarTurnoSuperAdmin = function (idTurno) {
 
 // 🗑️ ELIMINAR TODOS LOS ADELANTOS UNIFICADOS DE UN DÍA (SUPERADMIN CAMILO)
 window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
+  if (!verificarSiEsSuperAdmin()) return;
+
   if (!confirm("⚠️ ¿Estás seguro de eliminar TODOS los adelantos de este día?"))
     return;
+
   try {
     if (typeof haptic === "function") haptic();
   } catch (e) {}
