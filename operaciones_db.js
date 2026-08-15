@@ -30,7 +30,10 @@ window.toggleNetflixManagerPanel = function () {
 // 🔴 RENDERIZADO PREMIUM DE TARJETAS DE CORTE
 window.cargarCortesOperativosNetflix = function () {
   const container = document.getElementById("listaCortesOperativosNetflix");
+  const btnCrearAlias = document.getElementById("btnCrearAliasHeader");
   if (!container) return;
+
+  if (btnCrearAlias) btnCrearAlias.style.display = "none";
 
   // Estado de Carga (Spinning)
   container.innerHTML = `
@@ -54,15 +57,7 @@ window.cargarCortesOperativosNetflix = function () {
       if (res && res.status === "success") {
         window.renderizarTarjetasCortesNetflix(res.data);
       } else {
-        container.innerHTML = `
-          <div style="text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.08);">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" style="margin-bottom: 12px;">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <div style="color: #ffffff; font-weight: 800; font-size: 1.05rem;">¡Todo al día!</div>
-            <div style="color: #a1a1aa; font-size: 0.85rem; margin-top: 6px;">No hay cortes operativos pendientes en este momento.</div>
-          </div>`;
+        window.mostrarEstadoSinCortes();
       }
     })
     .catch((err) => {
@@ -71,22 +66,34 @@ window.cargarCortesOperativosNetflix = function () {
     });
 };
 
+window.mostrarEstadoSinCortes = function () {
+  const container = document.getElementById("listaCortesOperativosNetflix");
+  const btnCrearAlias = document.getElementById("btnCrearAliasHeader");
+
+  if (btnCrearAlias) btnCrearAlias.style.display = "flex";
+
+  container.innerHTML = `
+    <div style="text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.08);">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" style="margin-bottom: 12px;">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <div style="color: #ffffff; font-weight: 800; font-size: 1.05rem;">¡Todo al día!</div>
+      <div style="color: #a1a1aa; font-size: 0.85rem; margin-top: 6px;">No hay cuentas pendientes por corte.</div>
+    </div>`;
+};
+
 window.renderizarTarjetasCortesNetflix = function (cuentas) {
   const container = document.getElementById("listaCortesOperativosNetflix");
+  const btnCrearAlias = document.getElementById("btnCrearAliasHeader");
   if (!container) return;
 
   if (!cuentas || cuentas.length === 0) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.08);">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" style="margin-bottom: 12px;">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
-        <div style="color: #ffffff; font-weight: 800; font-size: 1.05rem;">¡Todo al día!</div>
-        <div style="color: #a1a1aa; font-size: 0.85rem; margin-top: 6px;">No hay cortes operativos pendientes en este momento.</div>
-      </div>`;
+    window.mostrarEstadoSinCortes();
     return;
   }
+
+  if (btnCrearAlias) btnCrearAlias.style.display = "none";
 
   let html = "";
   cuentas.forEach((cuenta) => {
@@ -94,60 +101,65 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     let claveVieja = cuenta.clave_actual || cuenta.clave || "fuego41@@";
     let claveNueva = cuenta.clave_nueva || window.generarClaveTVAleatoria();
     let perfiles = cuenta.perfiles_afectados || "1, 2, 3, 4, 5";
+    let idCuenta = cuenta.id || "";
 
     html += `
-      <div class="card-ios" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(229, 9, 20, 0.18); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 16px; transition: all 0.2s ease; position: relative; overflow: hidden;">
+      <div class="card-ios" style="background: #18181b; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden; margin-bottom: 16px;">
           
-          <!-- Efecto Glow Superior -->
-          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, transparent, #e50914, transparent); opacity: 0.9;"></div>
+          <!-- Efecto Glow Rojo Superior -->
+          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #e50914, transparent); box-shadow: 0 0 15px #e50914; opacity: 0.8;"></div>
 
-          <!-- Fila 1: Header / Correo -->
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 14px;">
-              <div style="display: flex; align-items: center; gap: 10px; max-width: 75%; overflow: hidden;">
-                  <div style="width: 10px; height: 10px; border-radius: 50%; background: #ff453a; box-shadow: 0 0 12px #ff453a; flex-shrink: 0;"></div>
-                  <span style="font-family: monospace; font-weight: 800; color: #ffffff; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${correo}">${correo}</span>
-              </div>
-              <button onclick="copiarAlPortapapelesLigero('${correo}', this)" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #e4e4e7; border-radius: 12px; padding: 6px 12px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  Copiar
-              </button>
+          <!-- Correo (Clickeable) -->
+          <div 
+            onclick="copiarTextoLigero('${correo}', this, 'correo')"
+            title="Clic para copiar"
+            style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; padding-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);"
+          >
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #e50914; box-shadow: 0 0 8px #e50914;"></div>
+              <span style="font-family: monospace; font-weight: 800; color: #ffffff; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${correo}</span>
           </div>
 
-          <!-- Fila 2: Claves -->
-          <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px;">
-              <!-- Clave Vencida -->
-              <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 12px 16px; display: flex; flex-direction: column; justify-content: center; gap: 4px;">
-                  <span style="font-size: 0.68rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Clave Vencida</span>
-                  <span style="font-family: monospace; color: #ff453a; font-weight: 700; font-size: 0.95rem; text-decoration: line-through; opacity: 0.8;">${claveVieja}</span>
+          <!-- Bloque de Claves -->
+          <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; align-items: stretch;">
+              
+              <!-- Clave Vencida (Clickeable) -->
+              <div 
+                onclick="copiarTextoLigero('${claveVieja}', this, 'clave')"
+                title="Clic para copiar"
+                style="flex: 1; background: #111115; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; border: 1px solid transparent; transition: background 0.2s;"
+                onmouseover="this.style.background='rgba(255,255,255,0.03)'" 
+                onmouseout="this.style.background='#111115'"
+              >
+                  <span style="font-size: 0.65rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CLAVE VENCIDA</span>
+                  <span style="font-family: monospace; color: #e50914; font-weight: 700; font-size: 0.95rem; text-decoration: line-through;">${claveVieja}</span>
               </div>
 
-              <!-- Nueva Clave -->
-              <div style="background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.3); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: inset 0 0 20px rgba(48, 209, 88, 0.05);">
-                  <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden;">
-                      <span style="font-size: 0.68rem; color: #30d158; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Nueva Clave TV</span>
-                      <span style="font-family: monospace; color: #ffffff; font-weight: 900; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${claveNueva}</span>
-                  </div>
-                  <button onclick="copiarAlPortapapelesLigero('${claveNueva}', this)" style="background: #30d158; color: #000000; border: none; border-radius: 12px; padding: 8px 14px; font-size: 0.8rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(48, 209, 88, 0.3); transition: transform 0.1s; flex-shrink: 0;">
-                      Copiar
-                  </button>
+              <!-- Nueva Clave (Clickeable) -->
+              <div 
+                onclick="copiarTextoLigero('${claveNueva}', this, 'clave')"
+                title="Clic para copiar"
+                style="flex: 1.2; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.3); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: background 0.2s;"
+                onmouseover="this.style.background='rgba(48, 209, 88, 0.15)'" 
+                onmouseout="this.style.background='rgba(48, 209, 88, 0.08)'"
+              >
+                  <span style="font-size: 0.65rem; color: #30d158; font-weight: 800; text-transform: uppercase;">NUEVA CLAVE TV</span>
+                  <span style="font-family: monospace; color: #ffffff; font-weight: 900; font-size: 1.1rem;">${claveNueva}</span>
               </div>
           </div>
 
-          <!-- Fila 3: Perfiles y Botón Acción -->
-          <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 4px;">
+          <!-- Perfiles y Botón Acción -->
+          <div style="display: flex; flex-direction: column; gap: 14px;">
               <div style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 800; color: #e50914; background: rgba(229, 9, 20, 0.12); padding: 8px 16px; border-radius: 12px; width: fit-content; border: 1px solid rgba(229, 9, 20, 0.25);">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                       <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                   </svg>
-                  Perfiles a renovar: ${perfiles}
+                  Perfiles a cortar: ${perfiles}
               </div>
               
-              <button onclick="window.procesarCorteNetflix('${encodeURIComponent(correo)}', '${encodeURIComponent(claveNueva)}', this)" class="btn-ios" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 16px; font-weight: 900; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 8px 25px rgba(229, 9, 20, 0.4); transition: all 0.2s ease;">
+              <button onclick="window.ejecutarProcesoCorteExterno('${idCuenta}', '${correo}', '${claveNueva}', this)" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3); transition: transform 0.1s;">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  ✓ Procesar Corte y Subir a Hoy
+                  Procesar Corte y Subir a Hoy
               </button>
           </div>
       </div>`;
@@ -156,26 +168,33 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
   container.innerHTML = html;
 };
 
-// Función auxiliar visual de copiado
-window.copiarAlPortapapelesLigero = function (texto, btn) {
+// Función para copiar con efecto visual en el mismo texto
+window.copiarTextoLigero = function (texto, elemento, tipo) {
+  if (typeof haptic === "function") haptic();
+
   navigator.clipboard.writeText(texto).then(() => {
-    let oldText = btn.innerHTML;
-    let oldBg = btn.style.background;
-    let oldColor = btn.style.color;
+    const spanValor =
+      tipo === "correo"
+        ? elemento.querySelector("span")
+        : elemento.querySelectorAll("span")[1];
 
-    btn.innerHTML = `✓ Copiado`;
-    btn.style.background = "rgba(48, 209, 88, 0.2)";
-    btn.style.color = "#30d158";
-    btn.style.border = "1px solid rgba(48, 209, 88, 0.4)";
+    const originalText = spanValor.innerText;
+    const originalColor = spanValor.style.color;
 
-    if (typeof haptic === "function") haptic();
+    spanValor.innerText = "✓ Copiado";
+    spanValor.style.color = "#30d158";
+
+    // Pequeño resplandor al contenedor
+    const oldBg = elemento.style.background;
+    elemento.style.background = "rgba(48, 209, 88, 0.1)";
+    elemento.style.borderColor = "rgba(48, 209, 88, 0.4)";
 
     setTimeout(() => {
-      btn.innerHTML = oldText;
-      btn.style.background = oldBg;
-      btn.style.color = oldColor;
-      btn.style.border = "";
-    }, 1500);
+      spanValor.innerText = originalText;
+      spanValor.style.color = originalColor;
+      elemento.style.background = oldBg;
+      elemento.style.borderColor = "";
+    }, 1200);
   });
 };
 
@@ -197,266 +216,33 @@ window.generarClaveTVAleatoria = function () {
   return `${palabra}${num}@@`;
 };
 
-window.procesarCorteNetflix = function (
-  correoEscapado,
-  claveNuevaEscapada,
-  btn,
-) {
-  if (typeof haptic === "function") haptic();
-  const correo = decodeURIComponent(correoEscapado);
-  const claveNueva = decodeURIComponent(claveNuevaEscapada);
-
-  if (
-    !confirm(
-      `¿Confirmas procesar el corte para la cuenta:\n${correo}?\n\nSe actualizará la contraseña a: ${claveNueva} y la fecha al día de HOY.`,
-    )
-  ) {
-    return;
-  }
-
-  const originalContent = btn.innerHTML;
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Procesando corte...`;
-  }
-
-  const formData = new FormData();
-  formData.append("accion", "procesar_corte_netflix");
-  formData.append("correo", correo);
-  formData.append("clave_nueva", claveNueva);
-
-  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.text())
-    .then((text) => {
-      let res;
-      try {
-        res = JSON.parse(text);
-      } catch (e) {
-        alert(
-          "❌ Error PHP:\n\n" + (text.trim() || "El servidor respondió vacío."),
-        );
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = originalContent;
-        }
-        return;
-      }
-
-      if (res && res.status === "success") {
-        if (typeof triggerToast === "function")
-          triggerToast(`✅ Corte procesado con éxito.`);
-        window.cargarCortesOperativosNetflix();
-        if (typeof cargarDatosMySQL === "function") cargarDatosMySQL();
-        window.mostrarModalResumenCorteNetflix(res);
-      } else {
-        alert(
-          "❌ Error: " + (res ? res.message : "No se pudo procesar el corte."),
-        );
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = originalContent;
-        }
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      alert("❌ Error de conexión al servidor.");
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = originalContent;
-      }
-    });
-};
-
-window.mostrarModalResumenCorteNetflix = function (data) {
-  const oldModal = document.getElementById("modalResumenCorteNetflix");
-  if (oldModal) oldModal.remove();
-
-  const correo = data.correo || "";
-  const claveNueva = data.clave_nueva || "";
-  const perfiles = data.perfiles || [];
-
-  const enlacesWaMeArr = [];
-  let itemsHtml = "";
-
-  perfiles.forEach((p) => {
-    const numRaw = (p.numero || "").trim();
-    let numSoloDigitos = numRaw.replace(/\D/g, "");
-
-    if (numSoloDigitos.length === 10) numSoloDigitos = "57" + numSoloDigitos;
-    const tieneNumeroValido = numSoloDigitos.length >= 10;
-
-    if (!tieneNumeroValido) return;
-
-    const waLink = `https://wa.me/${numSoloDigitos}`;
-    enlacesWaMeArr.push(`wa.me/${numSoloDigitos}`);
-
-    const tieneNombreReal =
-      p.cliente &&
-      p.cliente.trim() !== "" &&
-      p.cliente.trim().toLowerCase() !== "sin nombre";
-    const clienteDisplay = tieneNombreReal ? p.cliente.trim() : "";
-    const saludoNombre = clienteDisplay
-      ? ` *¡Hola ${clienteDisplay}!*`
-      : " *¡Hola!*";
-
-    const mensajeWA = `🌟${saludoNombre}\n\nTu cuenta de *NETFLIX PREMIUM* ha sido actualizada por cambio de clave / mantenimiento ✅\n\n⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n🎬 *NUEVOS DATOS DE ACCESO* 🔐\n────────────────────\n📧 *Correo:* ${correo}\n🔑 *Contraseña:* ${claveNueva}\n👤 *Perfil:* ${p.perfil}\n📍 *PIN:* ${p.pin || "-"}\n📅 *Vence:* ${p.vencimiento || "-"}\n\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n\n✨ *¡Gracias por tu confianza!* ✨`;
-    const msjEscapado = encodeURIComponent(mensajeWA);
-    const numeroTextoMostrar =
-      numRaw && numRaw !== "-" ? numRaw : numSoloDigitos;
-
-    itemsHtml += `
-      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="background: rgba(229, 9, 20, 0.2); color: #e50914; border: 1px solid rgba(229, 9, 20, 0.4); border-radius: 8px; padding: 2px 10px; font-weight: 800; font-size: 0.78rem;">PERFIL ${p.perfil}</span>
-            ${clienteDisplay ? `<span style="color: #ffffff; font-weight: 700; font-size: 0.88rem;">${clienteDisplay}</span>` : ""}
-          </div>
-          <span style="color: #a1a1aa; font-size: 0.75rem; font-family: monospace;">PIN: ${p.pin || "-"}</span>
-        </div>
-
-        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.3); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05);">
-          <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
-            <span style="font-size: 0.8rem; color: #30d158;">📱</span>
-            <a href="${waLink}" target="_blank" style="color: #30d158; font-family: monospace; font-weight: 800; font-size: 0.85rem; text-decoration: none;" title="Abrir chat en WhatsApp">${numeroTextoMostrar}</a>
-          </div>
-
-          <button onclick="window.copiarMensajeCorteWhatsApp(this, '${msjEscapado}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Copiar mensaje de WhatsApp para este cliente">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar Mensaje
-          </button>
-        </div>
-      </div>
-    `;
-  });
-
-  const textoTodosNumeros = enlacesWaMeArr
-    .map((link, idx) => `${idx + 1}. ${link}`)
-    .join("\n");
-  const todosNumEscapados = encodeURIComponent(textoTodosNumeros);
-
-  if (enlacesWaMeArr.length === 0) {
-    itemsHtml = `<div style="text-align: center; padding: 30px 15px; color: #a1a1aa; font-weight: 600; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.08);">📭 No hay perfiles con número telefónico registrado en esta cuenta.</div>`;
-  }
-
-  const modalHtml = `
-    <div class="overlay-ios open" id="modalResumenCorteNetflix" style="display: flex !important; z-index: 999999 !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
-      <div class="modal-ios" style="max-width: 500px; width: 92%; max-height: 90vh; background: #141417; border: 1px solid rgba(48, 209, 88, 0.3); border-radius: 26px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); overflow: hidden;">
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-shrink: 0;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-            <div>
-              <h3 style="margin: 0; color: #ffffff; font-size: 1.1rem; font-weight: 800;">Corte Procesado</h3>
-              <span style="color: #a1a1aa; font-size: 0.72rem; font-family: monospace;">${correo}</span>
-            </div>
-          </div>
-          <button type="button" onclick="document.getElementById('modalResumenCorteNetflix').remove()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">✕</button>
-        </div>
-
-        <button onclick="window.copiarTodosLosNumerosCorte(this, '${todosNumEscapados}')" style="width: 100%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          Copiar todos los números (${enlacesWaMeArr.length})
-        </button>
-
-        <div style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex-grow: 1;">
-          ${itemsHtml}
-        </div>
-
-        <button onclick="document.getElementById('modalResumenCorteNetflix').remove()" style="width: 100%; background: #30d158; color: #000000; border: none; padding: 12px; border-radius: 14px; font-weight: 900; font-size: 0.88rem; cursor: pointer; flex-shrink: 0;">
-          Entendido / Cerrar Ventana
-        </button>
-      </div>
-    </div>
-  `;
-
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
-};
-
-window.copiarMensajeCorteWhatsApp = function (btn, msjEscapado) {
-  if (typeof haptic === "function") haptic();
-  const texto = decodeURIComponent(msjEscapado);
-
-  navigator.clipboard.writeText(texto).then(() => {
-    const oldHtml = btn.innerHTML;
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Copiado!`;
-    btn.style.setProperty("background", "#30d158", "important");
-    btn.style.setProperty("color", "#000000", "important");
-
-    if (typeof triggerToast === "function")
-      triggerToast(`📋 Mensaje copiado al portapapeles.`);
-
-    setTimeout(() => {
-      btn.innerHTML = oldHtml;
-      btn.style.setProperty(
-        "background",
-        "rgba(48, 209, 88, 0.15)",
-        "important",
-      );
-      btn.style.setProperty("color", "#30d158", "important");
-    }, 1500);
-  });
-};
-
-window.copiarTodosLosNumerosCorte = function (btn, todosEscapados) {
-  if (typeof haptic === "function") haptic();
-  const texto = decodeURIComponent(todosEscapados);
-
-  if (!texto || texto.trim() === "") {
-    alert("⚠️ No hay números registrados en esta cuenta.");
-    return;
-  }
-
-  navigator.clipboard.writeText(texto).then(() => {
-    const oldHtml = btn.innerHTML;
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Números Copiados!`;
-    btn.style.setProperty("background", "#30d158", "important");
-    btn.style.setProperty("color", "#000000", "important");
-
-    if (typeof triggerToast === "function")
-      triggerToast(`📋 Lista de números copiada.`);
-
-    setTimeout(() => {
-      btn.innerHTML = oldHtml;
-      btn.style.setProperty(
-        "background",
-        "rgba(255, 255, 255, 0.08)",
-        "important",
-      );
-      btn.style.setProperty("color", "#ffffff", "important");
-    }, 1500);
-  });
-};
-
+// Generación de Modal HTML
 window.crearModalNetflixManagerHTML = function () {
   if (document.getElementById("netflixManagerOverlay")) return;
 
   const modalHtml = `
-    <div class="overlay-ios" id="netflixManagerOverlay" style="display: none; z-index: 16000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.82); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
-      <div class="sheet-ios" onclick="event.stopPropagation()" style="max-width: 520px; width: 92%; max-height: 88vh; background: #111115; border: 1px solid rgba(229, 9, 20, 0.3); border-radius: 28px; padding: 22px; box-shadow: 0 30px 70px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 16px; overflow: hidden; margin: auto;">
+    <div class="overlay-ios" id="netflixManagerOverlay" style="display: none; z-index: 16000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
+      <div class="sheet-ios" onclick="event.stopPropagation()" style="max-width: 480px; width: 92%; max-height: 88vh; background: #111115; border: 1px solid rgba(255,255,255,0.08); border-radius: 26px; padding: 22px; box-shadow: 0 30px 70px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 16px; overflow: hidden; margin: auto;">
         
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; flex-shrink: 0;">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="background: rgba(229, 9, 20, 0.15); border: 1px solid rgba(229, 9, 20, 0.3); color: #e50914; padding: 8px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+            <div style="color: #e50914; display: flex; align-items: center; justify-content: center;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
             </div>
-            <h3 style="margin: 0; color: #e50914; font-size: 1.25rem; font-weight: 800;">Cortes Operativos</h3>
+            <h3 style="margin: 0; color: #e50914; font-size: 1.15rem; font-weight: 800;">Cortes Operativos</h3>
           </div>
-          <button type="button" onclick="window.toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">✕</button>
+          <button type="button" onclick="window.toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">✕</button>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
-          <button onclick="window.cargarCortesOperativosNetflix()" style="width: 100%; background: rgba(255, 255, 255, 0.06); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.12); padding: 12px; border-radius: 14px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-            Refrescar Escaneo de Cortes
+        <div style="display: flex; flex-direction: column; flex-shrink: 0;">
+          <!-- Botón de crear alias (Oculto por defecto, se muestra si no hay cortes) -->
+          <button id="btnCrearAliasHeader" onclick="window.crearCuentaNetflixAliasExterna()" style="display: none; width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Crear cuenta de Netflix (Usar Alias)
           </button>
         </div>
 
-        <div id="listaCortesOperativosNetflix" style="flex: 1; overflow-y: auto; padding-right: 2px;">
+        <div id="listaCortesOperativosNetflix" class="cyber-custom-scroll" style="flex: 1; overflow-y: auto; padding-right: 4px;">
           <div style="text-align: center; color: #a1a1aa; padding: 30px;">Cargando cortes...</div>
         </div>
 
@@ -465,6 +251,23 @@ window.crearModalNetflixManagerHTML = function () {
   `;
 
   document.body.insertAdjacentHTML("beforeend", modalHtml);
+};
+
+// Funciones delegadas que deberás definir en tu archivo "crear_net.js"
+window.ejecutarProcesoCorteExterno = function (id, correo, nuevaClave, btn) {
+  if (typeof procesarCorteOperativoEnBD === "function") {
+    procesarCorteOperativoEnBD(id, correo, nuevaClave, btn);
+  } else {
+    alert("La función de corte externo no está vinculada.");
+  }
+};
+
+window.crearCuentaNetflixAliasExterna = function () {
+  if (typeof iniciarCreacionAliasNetflix === "function") {
+    iniciarCreacionAliasNetflix();
+  } else {
+    alert("La función de crear alias externo no está vinculada.");
+  }
 };
 
 /* ==========================================================================
