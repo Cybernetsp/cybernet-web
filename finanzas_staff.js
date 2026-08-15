@@ -418,19 +418,23 @@ window.actualizarFiltrosUI = function () {
 
   window.activePeriod = dia === "TODOS" || dia === "" ? "mes" : "dia";
 
-  const txtPeriodo = document.getElementById("txtPeriodoLabel");
-  if (txtPeriodo)
+  const txtPeriodo =
+    document.getElementById("txtPeriodoLabel") ||
+    document.querySelector(".caja-real-title");
+  if (txtPeriodo) {
     txtPeriodo.innerText =
       window.activePeriod === "mes"
-        ? "CAJA REAL MENSUAL"
+        ? `CAJA REAL ${mes}`
         : `CAJA REAL DÍA ${dia}`;
+  }
 
   const txtLibro = document.getElementById("txtLibroHeader");
-  if (txtLibro)
+  if (txtLibro) {
     txtLibro.innerText =
       dia === "TODOS" || dia === ""
         ? `LIBRO DE ${mes}`
         : `LIBRO DEL DÍA ${dia} DE ${mes}`;
+  }
 
   window.cargarDashboardFinanzas();
 };
@@ -510,14 +514,13 @@ window.filtrarAyer = function () {
 
 window.filtrarMes = function () {
   if (typeof haptic === "function") haptic();
-  const hoy = new Date();
   const mSelect = document.getElementById("appleMonthSelect");
   const dSelect = document.getElementById("appleDaySelect");
-  if (mSelect && dSelect) {
-    mSelect.value = mesesArray[hoy.getMonth()];
-    dSelect.value = "TODOS";
-    window.actualizarFiltrosUI();
-  }
+
+  if (dSelect) dSelect.value = "TODOS";
+
+  window.activePeriod = "mes";
+  window.actualizarFiltrosUI();
 };
 
 window.cargarRentabilidadPlataformas = function () {
@@ -716,7 +719,7 @@ window.guardarDeudaEnSheets = window.guardarDeudaEnMySQL = function () {
 window.renderDashboard = function () {
   if (!window.globalFinanzasData) return;
 
-  const activeKey = window.activePeriod || "dia";
+  const activeKey = window.activePeriod || "mes";
   const d =
     window.globalFinanzasData[activeKey] ||
     window.globalFinanzasData["mes"] ||
@@ -734,7 +737,7 @@ window.renderDashboard = function () {
   const pctGastos =
     totalFlujo > 0 ? Math.round((gasNum / totalFlujo) * 100) : 0;
 
-  // 2. RENDERIZADO DE TEXTOS Y MONTO NETO
+  // 2. RENDERIZADO DE MONTO NETO Y VALORES
   const netEl = document.getElementById("val_neto");
   if (netEl) {
     netEl.innerText = formatMoneda(d.neto);
@@ -754,35 +757,8 @@ window.renderDashboard = function () {
   if (document.getElementById("val_nomina"))
     document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
 
-  // Actualizar porcentajes
-  const elPctIng =
-    document.getElementById("pct_ingresos") ||
-    document.getElementById("pctIngresosVal");
-  const elPctGas =
-    document.getElementById("pct_gastos") ||
-    document.getElementById("pctGastosVal");
-  if (elPctIng) elPctIng.innerText = pctIngresos + "%";
-  if (elPctGas) elPctGas.innerText = pctGastos + "%";
-
-  document.querySelectorAll("span, div, p").forEach((el) => {
-    if (el.children.length === 0 && el.innerText) {
-      if (el.innerText.trim() === "Ingresos Totales") {
-        const spanVal = el.parentElement
-          ? el.parentElement.querySelector("span:last-child, div:last-child")
-          : null;
-        if (spanVal && spanVal !== el) spanVal.innerText = pctIngresos + "%";
-      }
-      if (el.innerText.trim() === "Gastos Operativos") {
-        const spanVal = el.parentElement
-          ? el.parentElement.querySelector("span:last-child, div:last-child")
-          : null;
-        if (spanVal && spanVal !== el) spanVal.innerText = pctGastos + "%";
-      }
-    }
-  });
-
-  // 3. 🍎 MOTOR DE ANIMACIÓN DE ANILLOS APPLE ACTIVITY (VERDE Y ROJO EN VIVO)
-  window.animarAnillosActividadApple(pctIngresos, pctGastos);
+  // 3. 🎯 RENDERIZADO DE ANILLOS Y LEYENDAS (VERDE / ROJO)
+  window.renderAnillosBentoWidget(pctIngresos, pctGastos);
 
   // 4. PROYECCIONES Y FONDOS
   const baseVentas = d.ingresos || 0;
@@ -813,9 +789,6 @@ window.renderDashboard = function () {
   if (document.getElementById("valGananciaOtros"))
     document.getElementById("valGananciaOtros").innerText =
       formatMoneda(otrosCalculado);
-  if (document.getElementById("valProyMioMasJeisson"))
-    document.getElementById("valProyMioMasJeisson").innerText =
-      formatMoneda(miGananciaNeta);
 
   // 5. DEUDAS E HISTORIAL
   if (
@@ -834,62 +807,61 @@ window.renderDashboard = function () {
   }
 };
 
-// 🎯 GENERADOR DE ANILLOS SVG CON ANIMACIÓN FLUIDA
-window.animarAnillosActividadApple = function (pctIng, pctGas) {
-  // Búsqueda del contenedor del círculo
-  let target =
-    document.querySelector(".apple-rings-container") ||
-    document.querySelector(".rings-wrapper");
+// 🎯 DIBUJAR ANILLOS DE COLOR Y LEYENDA (INGRESOS VERDE / GASTOS ROJO)
+window.renderAnillosBentoWidget = function (pctIng, pctGas) {
+  let container = document.getElementById("bentoRingsWidgetContainer");
 
-  if (!target) {
-    document.querySelectorAll("svg").forEach((svg) => {
-      const parent = svg.parentElement;
-      if (
-        parent &&
-        parent.innerText &&
-        parent.innerText.includes("Ingresos Totales")
-      ) {
-        target = svg.parentElement;
-      }
-    });
-  }
-
-  if (!target) {
-    const ingLabel = Array.from(document.querySelectorAll("span, div")).find(
-      (e) => e.innerText && e.innerText.trim() === "Ingresos Totales",
-    );
-    if (ingLabel) {
-      const parentCard =
-        ingLabel.closest(".bento-card") ||
-        ingLabel.closest("div[class*='card']");
-      if (parentCard) target = parentCard.querySelector("svg")?.parentElement;
+  if (!container) {
+    const parent =
+      document.querySelector("#val_neto")?.closest(".card-ios") ||
+      document.querySelector("#val_neto")?.closest("div[class*='card']");
+    if (parent) {
+      container =
+        parent.querySelector("svg")?.parentElement || parent.children[1];
     }
   }
 
-  if (!target) return;
+  if (!container) return;
 
-  const c1 = 2 * Math.PI * 22; // Circunferencia exterior (138.23)
-  const c2 = 2 * Math.PI * 15; // Circunferencia interior (94.25)
+  const c1 = 138.23; // Circunferencia exterior (r=22)
+  const c2 = 87.96; // Circunferencia interior (r=14)
 
   const offsetIng = c1 - (c1 * Math.min(pctIng, 100)) / 100;
   const offsetGas = c2 - (c2 * Math.min(pctGas, 100)) / 100;
 
-  target.innerHTML = `
-    <svg width="68" height="68" viewBox="0 0 60 60" style="transform: rotate(-90deg); filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));">
-      <!-- Pista Exterior (Ingresos - Fondo) -->
-      <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(48, 209, 88, 0.15)" stroke-width="5.5" />
-      <!-- Anillo Exterior (Ingresos - Verde) -->
-      <circle cx="30" cy="30" r="22" fill="none" stroke="#30d158" stroke-width="5.5"
-              stroke-dasharray="${c1}" stroke-dashoffset="${offsetIng}" stroke-linecap="round"
-              style="transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1);" />
+  container.id = "bentoRingsWidgetContainer";
+  container.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 16px; margin-left: auto;">
+      <!-- Anillos SVG Concéntricos -->
+      <svg width="64" height="60" viewBox="0 0 60 60" style="transform: rotate(-90deg); flex-shrink: 0; filter: drop-shadow(0 0 8px rgba(0,0,0,0.5));">
+        <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(48, 209, 88, 0.15)" stroke-width="5" />
+        <circle cx="30" cy="30" r="22" fill="none" stroke="#30d158" stroke-width="5"
+                stroke-dasharray="${c1}" stroke-dashoffset="${offsetIng}" stroke-linecap="round"
+                style="transition: stroke-dashoffset 0.8s ease;" />
+        <circle cx="30" cy="30" r="14" fill="none" stroke="rgba(255, 69, 58, 0.15)" stroke-width="5" />
+        <circle cx="30" cy="30" r="14" fill="none" stroke="#ff453a" stroke-width="5"
+                stroke-dasharray="${c2}" stroke-dashoffset="${offsetGas}" stroke-linecap="round"
+                style="transition: stroke-dashoffset 0.8s ease;" />
+      </svg>
 
-      <!-- Pista Interior (Gastos - Fondo) -->
-      <circle cx="30" cy="30" r="15" fill="none" stroke="rgba(255, 69, 58, 0.15)" stroke-width="5.5" />
-      <!-- Anillo Interior (Gastos - Rojo) -->
-      <circle cx="30" cy="30" r="15" fill="none" stroke="#ff453a" stroke-width="5.5"
-              stroke-dasharray="${c2}" stroke-dashoffset="${offsetGas}" stroke-linecap="round"
-              style="transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1);" />
-    </svg>
+      <!-- Leyendas y Porcentajes -->
+      <div style="display: flex; flex-direction: column; gap: 6px; min-width: 145px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+          <span style="color: #a1a1aa; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #30d158; display: inline-block;"></span>
+            Ingresos Totales
+          </span>
+          <span style="color: #ffffff; font-weight: 800; font-family: monospace;">${pctIng}%</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+          <span style="color: #a1a1aa; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #ff453a; display: inline-block;"></span>
+            Gastos Operativos
+          </span>
+          <span style="color: #ffffff; font-weight: 800; font-family: monospace;">${pctGas}%</span>
+        </div>
+      </div>
+    </div>
   `;
 };
 
@@ -1018,3 +990,18 @@ window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
   html += `</div>`;
   contenedor.innerHTML = html;
 };
+
+// 📌 ESCUCHADOR DE BOTONES "MES / HOY / AYER"
+document.addEventListener("click", function (e) {
+  const btn = e.target.closest("button, .btn-filtro, .pill-filtro");
+  if (!btn) return;
+
+  const txt = btn.innerText.trim().toLowerCase();
+  if (txt === "mes" || txt.includes("mes")) {
+    window.filtrarMes();
+  } else if (txt === "hoy") {
+    window.filtrarHoy();
+  } else if (txt === "ayer") {
+    window.filtrarAyer();
+  }
+});
