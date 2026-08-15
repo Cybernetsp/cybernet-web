@@ -101,7 +101,7 @@ function cargarDatosMySQL() {
       .tr-mysql-row:hover { background-color: rgba(255, 255, 255, 0.04) !important; }
       .tr-mysql-row.tr-caida { background-color: rgba(255, 0, 0, 0.12) !important; }
       .tr-mysql-row.tr-caida:hover { background-color: rgba(255, 0, 0, 0.22) !important; }
-      table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: fixed !important; width: 100% !important; min-width: 1200px !important; background-color: #111216 !important; }
+      table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: fixed !important; width: 100% !important; min-width: 1100px !important; background-color: #111216 !important; }
       th, td { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
     `;
     document.head.appendChild(styleSticky);
@@ -128,12 +128,12 @@ function cargarDatosMySQL() {
         <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
         <th style="${thBase} width: 4%; text-align: center;">PIN</th>
         <th style="${thBase} width: 10%;">VENCIMIENTO</th>
-        <th style="${thBase} width: 9%;">CLIENTE</th>
-        <th style="${thBase} width: 9%;">TELÉFONO</th>
+        <th style="${thBase} width: 10%;">CLIENTE</th>
+        <th style="${thBase} width: 10%;">TELÉFONO</th>
         <th style="${thBase} width: 7%;">FECHA PAGO</th>
         <th style="${thBase} width: 6%;">VALOR</th>
-        <th style="${thBase} width: 6%;">PAGO</th>
-        <th style="${thBase} width: 11%; text-align: center;">ACCIÓN</th>
+        <th style="${thBase} width: 7%;">PAGO</th>
+        <th style="${thBase} width: 8%; text-align: center;">ACCIÓN</th>
       </tr>
     `;
   } else if (esVentas) {
@@ -296,29 +296,33 @@ function cargarDatosMySQL() {
             // ─────────────────────────────────────────────────────────────
             if (esNetflix) {
               let botonesAccionNetflix = `
-                <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; white-space: nowrap;">
+                <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
               `;
 
               if (esSuperAdmin) {
                 botonesAccionNetflix += `
-                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center;">
+                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                   </button>
-                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center;">
+                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   </button>
                 `;
               }
 
+              // BOTÓN COPIAR COMPACTO (SVG SOLAMENTE)
               botonesAccionNetflix += `
-                <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
-                  📋 Copiar
+                <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
               `;
 
+              // BOTÓN HOY COMPACTO (SVG SOLAMENTE)
               if (esSuperAdmin) {
                 botonesAccionNetflix += `
-                  <button onclick="window.pasarRegistroAHoyMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Pasar a hoy" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">📅 Hoy</button>
+                  <button onclick="window.pasarRegistroAHoyMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Pasar registro a hoy" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  </button>
                 `;
               }
 
@@ -339,7 +343,7 @@ function cargarDatosMySQL() {
                   <td style="${tdBase} max-width: 100px; overflow: hidden;">
                     <span style="background: rgba(255,255,255,0.08); padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 90px; vertical-align: middle; color: #bf5af2; font-weight: 700;" title="${pagoVal}">${pagoVal}</span>
                   </td>
-                  <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionNetflix}</td>
+                  <td style="${tdBase} text-align: center;">${botonesAccionNetflix}</td>
                 </tr>
               `;
             }
@@ -348,7 +352,7 @@ function cargarDatosMySQL() {
             // ─────────────────────────────────────────────────────────────
             else if (!esVentas && !esGarantias) {
               let botonesAccionDemas = `
-                <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; white-space: nowrap;">
+                <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
               `;
 
               if (esSuperAdmin) {
@@ -363,8 +367,8 @@ function cargarDatosMySQL() {
               }
 
               botonesAccionDemas += `
-                <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                  📋 Copiar
+                <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
                 <button onclick="window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
                   ⏳ Temp
@@ -654,22 +658,28 @@ function fallbackCopiar(texto, callback) {
   document.body.removeChild(textarea);
 }
 
+// COPIAR FICHA COMPLETA CON ANIMACIÓN DE CHECK
 function copiarAccesoMySQL(btn, textoEscapado) {
   if (typeof haptic === "function") haptic();
   const texto = decodeURIComponent(textoEscapado);
 
   navigator.clipboard.writeText(texto).then(() => {
-    let oldText = btn.innerHTML;
-    btn.innerHTML = "✅ Copiado";
-    btn.style.background = "#30d158";
-    btn.style.color = "#000";
-    btn.style.borderColor = "transparent";
+    let oldHtml = btn.innerHTML;
+    let oldBg = btn.style.background;
+
+    // Cambia el ícono SVG por un Checkmark verde sutil
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    btn.style.background = "rgba(48, 209, 88, 0.2)";
+
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Ficha copiada al portapapeles</span></div>`,
+      );
+    }
 
     setTimeout(() => {
-      btn.innerHTML = oldText;
-      btn.style.background = "rgba(255, 255, 255, 0.08)";
-      btn.style.color = "#ffffff";
-      btn.style.borderColor = "rgba(255, 255, 255, 0.15)";
+      btn.innerHTML = oldHtml;
+      btn.style.background = oldBg;
     }, 1500);
   });
 }
