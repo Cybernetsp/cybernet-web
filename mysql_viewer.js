@@ -69,7 +69,7 @@ function cargarDatosMySQL() {
     tableNode.parentElement.style.overflowX = "auto";
   }
 
-  // 🛡️ ESTILOS PARA FIJAR EL ENCABEZADO ARRIBA (STICKY HEADER)
+  // 🛡️ ESTILOS CSS INYECTADOS
   if (!document.getElementById("css-sticky-hover-mysql")) {
     const styleSticky = document.createElement("style");
     styleSticky.id = "css-sticky-hover-mysql";
@@ -89,8 +89,8 @@ function cargarDatosMySQL() {
       }
       .tr-mysql-row { background-color: #111216 !important; transition: background 0.2s ease !important; }
       .tr-mysql-row:hover { background-color: rgba(255, 255, 255, 0.04) !important; }
-      .tr-mysql-row.tr-caida { background-color: rgba(255, 0, 0, 0.12) !important; }
-      .tr-mysql-row.tr-caida:hover { background-color: rgba(255, 0, 0, 0.22) !important; }
+      .tr-mysql-row.tr-caida { background-color: rgba(255, 69, 58, 0.18) !important; }
+      .tr-mysql-row.tr-caida:hover { background-color: rgba(255, 69, 58, 0.28) !important; }
       table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: fixed !important; width: 100% !important; min-width: 1100px !important; background-color: #111216 !important; }
       th, td { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
     `;
@@ -207,10 +207,14 @@ function cargarDatosMySQL() {
             let valorVal = fila.valor || "-";
             let pagoVal = fila.pago || "-";
 
+            let isCaida = fila.estado === "caida" || fila.es_caida == 1;
+
             const esFilaPar = idx % 2 === 0;
-            const colorFondoFila = esFilaPar
-              ? "rgba(255, 255, 255, 0.015)"
-              : "transparent";
+            const colorFondoFila = isCaida
+              ? "rgba(255, 69, 58, 0.15)"
+              : esFilaPar
+                ? "rgba(255, 255, 255, 0.015)"
+                : "transparent";
 
             if (
               !esVentas &&
@@ -241,11 +245,10 @@ function cargarDatosMySQL() {
               `;
             }
 
-            // 🌟 CONSTRUCCIÓN DINÁMICA DE LA FICHA COMERCIAL COMPLETA
+            // TEXTO PARA FICHA
             let platNorm = window.tablaMySQLActual
               .toUpperCase()
-              .replace(/_/g, " ")
-              .replace(/-/g, " ");
+              .replace(/_/g, "-");
             let esNet = window.tablaMySQLActual.toLowerCase() === "netflix";
             let nombreClienteFicha =
               clienteVal &&
@@ -354,7 +357,7 @@ function cargarDatosMySQL() {
               botonesAccionNetflix += `</div>`;
 
               html += `
-                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                <tr class="tr-mysql-row ${isCaida ? "tr-caida" : ""}" style="background: ${colorFondoFila}; transition: background 0.2s ease;">
                   <td style="${tdBase} color: #a1a1aa;">${diaVal}</td>
                   <td style="${tdBase}">${celdaCorreo}</td>
                   <td style="${tdBase}">${celdaClave}</td>
@@ -373,7 +376,7 @@ function cargarDatosMySQL() {
               `;
             }
             // ─────────────────────────────────────────────────────────────
-            // DEMÁS PLATAFORMAS
+            // DEMÁS PLATAFORMAS (LÓGICA GARANTÍA / RESOLVER DINÁMICA)
             // ─────────────────────────────────────────────────────────────
             else if (!esVentas && !esGarantias) {
               let botonesAccionDemas = `
@@ -391,20 +394,32 @@ function cargarDatosMySQL() {
                 `;
               }
 
-              botonesAccionDemas += `
-                <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </button>
-                <button onclick="window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                  ⏳ Temp
-                </button>
-                <button onclick="window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                  🚨 Reportar
-                </button>
-              </div>`;
+              // SI ESTÁ CAÍDA: SE OCULTAN COPIAR Y TEMP, Y SE MUESTRA UNICAMENTE RESOLVER
+              if (isCaida) {
+                botonesAccionDemas += `
+                  <button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${window.tablaMySQLActual}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                    ✔️ Resolver
+                  </button>
+                `;
+              } else {
+                // SI NO ESTÁ CAÍDA: SE MUESTRAN COPIAR, TEMP Y REPORTAR
+                botonesAccionDemas += `
+                  <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  </button>
+                  <button onclick="window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                    ⏳ Temp
+                  </button>
+                  <button onclick="window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                    🚨 Reportar
+                  </button>
+                `;
+              }
+
+              botonesAccionDemas += `</div>`;
 
               html += `
-                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                <tr class="tr-mysql-row ${isCaida ? "tr-caida" : ""}" style="background: ${colorFondoFila}; transition: background 0.2s ease;">
                   <td style="${tdBase} color: #ff9f0a; font-weight: 800; text-transform: uppercase;">${provVal}</td>
                   <td style="${tdBase} color: #a1a1aa;">${diaVal}</td>
                   <td style="${tdBase}">${celdaCorreo}</td>
@@ -535,7 +550,6 @@ function guardarNuevoRegistroMySQL(e) {
     });
 }
 
-// 🌟 CARGA DE DATOS EN EL MODAL COMPACTO DE EDICIÓN
 function abrirModalEditarMySQL(filaEscapada) {
   if (typeof haptic === "function") haptic();
   const fila = JSON.parse(decodeURIComponent(filaEscapada));
@@ -574,7 +588,6 @@ function cerrarModalEditarMySQL() {
   if (modal) modal.style.display = "none";
 }
 
-// 🌟 ENVÍO DE DATOS DESDE EL EDITOR COMPACTO
 function guardarEdicionMySQL(e) {
   e.preventDefault();
   if (typeof haptic === "function") haptic();
@@ -681,7 +694,6 @@ function eliminarRegistroMySQL(id) {
     .catch((err) => alert("❌ Error al eliminar el registro."));
 }
 
-// COPIADO DIRECTO AL HACER CLIC SOBRE EL TEXTO
 function copiarTextoUnico(element, textoEscapado) {
   if (typeof haptic === "function") haptic();
   const texto = decodeURIComponent(textoEscapado);
@@ -730,7 +742,6 @@ function fallbackCopiar(texto, callback) {
   document.body.removeChild(textarea);
 }
 
-// COPIAR FICHA COMPLETA CON ANIMACIÓN DE CHECK
 function copiarAccesoMySQL(btn, textoEscapado) {
   if (typeof haptic === "function") haptic();
   const texto = decodeURIComponent(textoEscapado);
@@ -820,6 +831,7 @@ window.generarTemp = function (btn, id) {
     });
 };
 
+// 🌟 REPORTE AUTOMÁTICO CON COPIADO DE FICHA EXACTA
 window.marcarComoGarantia = function (
   id,
   correoEscapado,
@@ -839,6 +851,23 @@ window.marcarComoGarantia = function (
   const clave = decodeURIComponent(claveEscapada);
   const prov = decodeURIComponent(provEscapado);
   const dia = diaEscapado ? decodeURIComponent(diaEscapado) : "";
+  let platNorm = window.tablaMySQLActual.toUpperCase().replace(/_/g, "-");
+
+  // 📋 FICHA DE REPORTE EXACTA
+  let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platNorm}\n📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n👤 *Proveedor:* ${prov}\n📅 *Fecha Compra:* ${dia}`;
+
+  navigator.clipboard
+    .writeText(textoReporte)
+    .then(() => {
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Reporte copiado al portapapeles!</span></div>`,
+        );
+      }
+    })
+    .catch(() => {
+      fallbackCopiar(textoReporte, () => {});
+    });
 
   const formData = new FormData();
   formData.append("accion", "reportar_garantia");
@@ -864,8 +893,6 @@ window.marcarComoGarantia = function (
     .then((data) => {
       if (data.status === "success") {
         window.cargarDatosMySQL();
-        if (typeof triggerToast === "function")
-          triggerToast("🚨 " + data.message);
       } else {
         alert("❌ Error: " + data.message);
       }
@@ -876,9 +903,109 @@ window.marcarComoGarantia = function (
     });
 };
 
+// 🌟 APERTURA DEL SUB-MODAL "RESOLVER GARANTÍA"
+window.abrirModalResolverGarantia = function (
+  id,
+  correoViejoEscapado,
+  plataforma,
+) {
+  if (typeof haptic === "function") haptic();
+  const correoViejo = decodeURIComponent(correoViejoEscapado);
+
+  const iId = document.getElementById("resolverMySQLId");
+  const iPlat = document.getElementById("resolverMySQLPlataforma");
+  const iCorreoViejo = document.getElementById("resolverMySQLCorreoViejo");
+  const iCorreoNuevo = document.getElementById("resolverMySQLCorreoNuevo");
+  const iClaveNueva = document.getElementById("resolverMySQLClaveNueva");
+
+  if (iId) iId.value = id;
+  if (iPlat) iPlat.value = plataforma;
+  if (iCorreoViejo) iCorreoViejo.value = correoViejo;
+  if (iCorreoNuevo) iCorreoNuevo.value = correoViejo;
+  if (iClaveNueva) iClaveNueva.value = "";
+
+  const modal = document.getElementById("modalResolverMySQL");
+  if (modal) modal.style.display = "flex";
+};
+
+window.cerrarModalResolverMySQL = function () {
+  if (typeof haptic === "function") haptic();
+  const modal = document.getElementById("modalResolverMySQL");
+  if (modal) modal.style.display = "none";
+};
+
+window.guardarResolucionMySQL = function (e) {
+  e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const btn = document.getElementById("btnGuardarResolverMySQL");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "Guardando...";
+  }
+
+  const idFila = document.getElementById("resolverMySQLId").value;
+  const platOriginal = document.getElementById("resolverMySQLPlataforma").value;
+  const correoViejo = document.getElementById("resolverMySQLCorreoViejo").value;
+  const correoNuevo = document
+    .getElementById("resolverMySQLCorreoNuevo")
+    .value.trim();
+  const claveNueva = document
+    .getElementById("resolverMySQLClaveNueva")
+    .value.trim();
+
+  const formData = new FormData();
+  formData.append("accion", "resolver_garantia");
+  formData.append("id", idFila);
+  formData.append("tabla", platOriginal);
+  formData.append("correo_viejo", correoViejo);
+  formData.append("correo_nuevo", correoNuevo);
+  formData.append("clave_nueva", claveNueva);
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (errParse) {
+        throw new Error("Respuesta inválida del servidor PHP: \n\n" + text);
+      }
+    })
+    .then((data) => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Guardar y Resolver";
+      }
+
+      if (data.status === "success") {
+        window.cerrarModalResolverMySQL();
+        window.cargarDatosMySQL();
+
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${data.message}</span></div>`,
+          );
+        }
+      } else {
+        alert("❌ Error: " + data.message);
+      }
+    })
+    .catch((err) => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Guardar y Resolver";
+      }
+      console.error(err);
+      alert("❌ " + err.message);
+    });
+};
+
 window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
   if (typeof haptic === "function") haptic();
-  const correo = decodeURIComponent(correoEscapado);
+  const correo = correoEscapado ? decodeURIComponent(correoEscapado) : "";
 
   const formData = new FormData();
   formData.append("accion", "pasar_a_hoy");
