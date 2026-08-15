@@ -6477,7 +6477,7 @@
       </div>
     </div>
 
-    <!-- 🔔 MODAL: RECORDATORIOS DE PAGO MULTI-WHATSAPP -->
+    <!-- 🔔 MODAL: RECORDATORIOS DE PAGO MULTI-WHATSAPP (DISEÑO PÍLDORAS TIPO IMG 3) -->
     <div
       class="overlay-ios"
       id="recordatoriosOverlay"
@@ -6606,7 +6606,7 @@
             flex-grow: 1;
             padding: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
             gap: 20px;
             background: #121215;
             box-sizing: border-box;
@@ -6685,17 +6685,19 @@
                 >
               </div>
 
+              <!-- SELECTOR DE PERÍODO (ACTUALIZACIÓN AUTOMÁTICA AL CAMBIAR) -->
               <div style="display: flex; gap: 10px; width: 100%">
                 <select
                   id="periodoW1"
+                  onchange="sincronizarW1()"
                   style="
-                    flex: 1;
+                    width: 100%;
                     background: rgba(0, 0, 0, 0.45);
                     border: 1px solid rgba(255, 255, 255, 0.1);
                     color: #ffffff;
-                    padding: 10px 14px;
+                    padding: 11px 14px;
                     border-radius: 12px;
-                    font-size: 0.85rem;
+                    font-size: 0.88rem;
                     font-weight: 700;
                     outline: none;
                     cursor: pointer;
@@ -6706,37 +6708,14 @@
                   <option value="antes_ayer">Vencieron: Antes de Ayer</option>
                   <option value="tres_dias">Por Vencer: En 3 Días</option>
                 </select>
-
-                <button
-                  class="btn-ios"
-                  type="button"
-                  style="
-                    background: rgba(191, 90, 242, 0.15);
-                    color: #bf5af2;
-                    border: 1px solid rgba(191, 90, 242, 0.3);
-                    padding: 10px 18px;
-                    border-radius: 12px;
-                    font-weight: 800;
-                    font-size: 0.85rem;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    white-space: nowrap;
-                    transition: all 0.2s ease;
-                  "
-                  onclick="sincronizarW1()"
-                >
-                  🔄 Sincronizar
-                </button>
               </div>
 
-              <!-- BLOQUES DE ENVÍO MASIVO W1 -->
+              <!-- BLOQUES DE ENVÍO MASIVO W1 (MAX 20 POR BOTÓN) -->
               <div
                 id="bloquesW1"
                 style="
                   display: grid;
-                  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
                   gap: 10px;
                   width: 100%;
                 "
@@ -6771,7 +6750,7 @@
                   height="18"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#a1a1aa"
+                  stroke="#bf5af2"
                   stroke-width="2.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -6799,7 +6778,7 @@
                 id="listaIndividualW1"
                 style="
                   display: grid;
-                  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
                   gap: 10px;
                   width: 100%;
                 "
@@ -6880,17 +6859,19 @@
                 >
               </div>
 
+              <!-- SELECTOR DE PERÍODO (ACTUALIZACIÓN AUTOMÁTICA AL CAMBIAR) -->
               <div style="display: flex; gap: 10px; width: 100%">
                 <select
                   id="periodoW2"
+                  onchange="sincronizarW2()"
                   style="
-                    flex: 1;
+                    width: 100%;
                     background: rgba(0, 0, 0, 0.45);
                     border: 1px solid rgba(255, 255, 255, 0.1);
                     color: #ffffff;
-                    padding: 10px 14px;
+                    padding: 11px 14px;
                     border-radius: 12px;
-                    font-size: 0.85rem;
+                    font-size: 0.88rem;
                     font-weight: 700;
                     outline: none;
                     cursor: pointer;
@@ -6903,37 +6884,14 @@
                   <option value="ayer">Vencieron: Ayer</option>
                   <option value="antes_ayer">Vencieron: Antes de Ayer</option>
                 </select>
-
-                <button
-                  class="btn-ios"
-                  type="button"
-                  style="
-                    background: rgba(48, 209, 88, 0.15);
-                    color: #30d158;
-                    border: 1px solid rgba(48, 209, 88, 0.3);
-                    padding: 10px 18px;
-                    border-radius: 12px;
-                    font-weight: 800;
-                    font-size: 0.85rem;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    white-space: nowrap;
-                    transition: all 0.2s ease;
-                  "
-                  onclick="sincronizarW2()"
-                >
-                  🔄 Sincronizar
-                </button>
               </div>
 
-              <!-- BLOQUES DE ENVÍO MASIVO W2 -->
+              <!-- BLOQUES DE ENVÍO MASIVO W2 (MAX 20 POR BOTÓN) -->
               <div
                 id="bloquesW2"
                 style="
                   display: grid;
-                  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
                   gap: 10px;
                   width: 100%;
                 "
@@ -6968,7 +6926,7 @@
                   height="18"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#a1a1aa"
+                  stroke="#30d158"
                   stroke-width="2.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -6996,7 +6954,7 @@
                 id="listaIndividualW2"
                 style="
                   display: grid;
-                  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
                   gap: 10px;
                   width: 100%;
                 "
