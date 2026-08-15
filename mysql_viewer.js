@@ -69,7 +69,7 @@ function cargarDatosMySQL() {
     tableNode.parentElement.style.overflowX = "auto";
   }
 
-  // 🛡️ ESTILOS CSS INYECTADOS
+  // 🛡️ ESTILOS PARA FIJAR EL ENCABEZADO ARRIBA (STICKY HEADER)
   if (!document.getElementById("css-sticky-hover-mysql")) {
     const styleSticky = document.createElement("style");
     styleSticky.id = "css-sticky-hover-mysql";
@@ -104,6 +104,8 @@ function cargarDatosMySQL() {
 
   let totalColumnas = 10;
   if (esNetflix) totalColumnas = 12;
+  if (esVentas) totalColumnas = 7;
+  if (esGarantias) totalColumnas = 6;
 
   const thBase =
     "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
@@ -204,8 +206,8 @@ function cargarDatosMySQL() {
             let clienteVal = fila.nombre || fila.cliente || "-";
             let numeroVal = fila.numero || fila.telefono || "-";
             let fechaPagoVal = fila.fecha || "-";
-            let valorVal = fila.valor || "-";
-            let pagoVal = fila.pago || "-";
+            let valorVal = fila.valor || fila.monto || "-";
+            let pagoVal = fila.pago || fila.metodo || fila.medio_pago || "-";
 
             let isCaida = fila.estado === "caida" || fila.es_caida == 1;
 
@@ -313,7 +315,7 @@ function cargarDatosMySQL() {
 
             let celdaTelefono =
               numeroVal !== "-" && numeroVal.trim() !== ""
-                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; display: inline-block; vertical-align: middle; cursor: pointer; transition: color 0.15s ease;" title="${numeroVal}">${numeroVal}</span>`
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; white-space: nowrap; cursor: pointer; display: inline-block;" title="${numeroVal}">${numeroVal}</span>`
                 : esSuperAdmin
                   ? `<button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Agregar Teléfono" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: var(--ios-green); padding: 4px 10px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.8rem; display: inline-flex; align-items: center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>`
                   : '<span style="color: #a1a1aa;">-</span>';
@@ -322,7 +324,7 @@ function cargarDatosMySQL() {
               "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
 
             // ─────────────────────────────────────────────────────────────
-            // VISTA NETFLIX
+            // 1. VISTA NETFLIX
             // ─────────────────────────────────────────────────────────────
             if (esNetflix) {
               let botonesAccionNetflix = `
@@ -357,7 +359,7 @@ function cargarDatosMySQL() {
               botonesAccionNetflix += `</div>`;
 
               html += `
-                <tr class="tr-mysql-row ${isCaida ? "tr-caida" : ""}" style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
                   <td style="${tdBase} color: #a1a1aa;">${diaVal}</td>
                   <td style="${tdBase}">${celdaCorreo}</td>
                   <td style="${tdBase}">${celdaClave}</td>
@@ -376,9 +378,91 @@ function cargarDatosMySQL() {
               `;
             }
             // ─────────────────────────────────────────────────────────────
-            // DEMÁS PLATAFORMAS (LÓGICA GARANTÍA / RESOLVER DINÁMICA)
+            // 2. VISTA REGISTRO VENTAS
             // ─────────────────────────────────────────────────────────────
-            else if (!esVentas && !esGarantias) {
+            else if (esVentas) {
+              let platVta =
+                fila.plataformas || fila.descripcion || fila.servicios || "-";
+              let tipoVta = fila.tipo || "Venta";
+
+              let celdaClienteTel = `
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                  <span style="color:#fff; font-weight:700;">${clienteVal}</span>
+                  <span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="color:#a1a1aa; font-family:monospace; font-size:0.75rem; cursor:pointer;" title="Clic para copiar teléfono">${numeroVal}</span>
+                </div>
+              `;
+
+              let botonesAccionVentas = `<div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">`;
+              if (esSuperAdmin) {
+                botonesAccionVentas += `
+                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  </button>
+                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                `;
+              }
+              botonesAccionVentas += `</div>`;
+
+              html += `
+                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                  <td style="${tdBase} color: #a1a1aa;">${diaVal}</td>
+                  <td style="${tdBase}">${celdaClienteTel}</td>
+                  <td style="${tdBase} color: #ffffff; font-weight: 600;" title="${platVta}">${platVta}</td>
+                  <td style="${tdBase} color: #30d158; font-weight: bold;">${valorVal}</td>
+                  <td style="${tdBase} color: #bf5af2; font-weight: 700;">${pagoVal}</td>
+                  <td style="${tdBase} text-align: center; color: #a1a1aa;">${tipoVta}</td>
+                  <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionVentas}</td>
+                </tr>
+              `;
+            }
+            // ─────────────────────────────────────────────────────────────
+            // 3. VISTA GARANTÍAS
+            // ─────────────────────────────────────────────────────────────
+            else if (esGarantias) {
+              let platGar = (fila.plataforma || "-").toUpperCase();
+              let fechaGar = fila.fecha_compra || fila.fecha || fila.dia || "-";
+
+              let celdaCorreoGar =
+                correoVal !== "-"
+                  ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; cursor: pointer;" title="${correoVal}">${correoVal}</span>`
+                  : "-";
+
+              let celdaClaveGar =
+                claveVal !== "-"
+                  ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; cursor: pointer;" title="${claveVal}">${claveVal}</span>`
+                  : "-";
+
+              let botonesAccionGarantias = `
+                <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; white-space: nowrap;">
+                  <button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${platGar.toLowerCase()}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                    ✔️ Resolver
+                  </button>
+              `;
+
+              if (esSuperAdmin) {
+                botonesAccionGarantias += `
+                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                `;
+              }
+              botonesAccionGarantias += `</div>`;
+
+              html += `
+                <tr style="background: rgba(255, 69, 58, 0.12); border-bottom: 1px solid rgba(255, 69, 58, 0.25);">
+                  <td style="${tdBase} text-align: center; color: #ff453a; font-weight: 800;">${platGar}</td>
+                  <td style="${tdBase} color: #ff9f0a; font-weight: 800;">${provVal}</td>
+                  <td style="${tdBase} color: #a1a1aa;">${fechaGar}</td>
+                  <td style="${tdBase}">${celdaCorreoGar}</td>
+                  <td style="${tdBase}">${celdaClaveGar}</td>
+                  <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionGarantias}</td>
+                </tr>
+              `;
+            }
+            // ─────────────────────────────────────────────────────────────
+            // 4. DEMÁS PLATAFORMAS (DISNEY, HBO, AMAZON, ETC.)
+            // ─────────────────────────────────────────────────────────────
+            else {
               let botonesAccionDemas = `
                 <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
               `;
@@ -394,7 +478,6 @@ function cargarDatosMySQL() {
                 `;
               }
 
-              // SI ESTÁ CAÍDA: SE OCULTAN COPIAR Y TEMP, Y SE MUESTRA UNICAMENTE RESOLVER
               if (isCaida) {
                 botonesAccionDemas += `
                   <button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${window.tablaMySQLActual}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
@@ -402,7 +485,6 @@ function cargarDatosMySQL() {
                   </button>
                 `;
               } else {
-                // SI NO ESTÁ CAÍDA: SE MUESTRAN COPIAR, TEMP Y REPORTAR
                 botonesAccionDemas += `
                   <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -1005,7 +1087,7 @@ window.guardarResolucionMySQL = function (e) {
 
 window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
   if (typeof haptic === "function") haptic();
-  const correo = correoEscapado ? decodeURIComponent(correoEscapado) : "";
+  const correo = decodeURIComponent(correoEscapado);
 
   const formData = new FormData();
   formData.append("accion", "pasar_a_hoy");
