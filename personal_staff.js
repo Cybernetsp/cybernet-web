@@ -1,11 +1,23 @@
 /* ==========================================================================
-   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL
+   👥 CYBERNET OS - MÓDULO DE PERSONAL / CALENDARIO MYSQL (CÓDIGO COMPLETO)
    ========================================================================== */
 
 window.URL_OBTENER_HORAS = "https://api.cybernetsp.com/obtener_horas.php";
 window.URL_MODIFICAR_TURNO = "https://api.cybernetsp.com/modificar_turno.php";
 window.URL_ELIMINAR_TURNO = "https://api.cybernetsp.com/eliminar_turno.php";
+window.URL_GUARDAR_ADELANTO = "https://api.cybernetsp.com/guardar_adelanto.php";
+window.URL_GUARDAR_HORAS_MANUAL =
+  "https://api.cybernetsp.com/guardar_horas_manual.php";
 
+// Lista base de personal registrado en Cybernet
+window.ASISTENTES_BASE = [
+  "ANGELICA",
+  "KATHERINE",
+  "LAURA",
+  "MANUEL",
+  "MANUP",
+  "PABLO",
+];
 window.currentHorasStock = [];
 
 // Filtros globales del calendario
@@ -14,7 +26,19 @@ window.filtroAnioTurnos = new Date().getFullYear();
 window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
 
-// Función maestra para verificar si el usuario logueado es el Superadmin (CAMILO)
+// OBTENER LISTA COMPLETA DE ASISTENTES (BASE + MYSQL)
+function obtenerTodosLosAsistentes() {
+  let setAsistentes = new Set(window.ASISTENTES_BASE);
+  if (Array.isArray(window.currentHorasStock)) {
+    window.currentHorasStock.forEach((item) => {
+      let v = (item.vendedor || "").toUpperCase().trim();
+      if (v && v !== "STAFF") setAsistentes.add(v);
+    });
+  }
+  return Array.from(setAsistentes).sort();
+}
+
+// VERIFICAR SUPERADMIN (CAMILO)
 function verificarSiEsSuperAdmin() {
   let user =
     sessionStorage.getItem("active_staff") ||
@@ -113,7 +137,7 @@ window.cargarHorasDesdeMySQL = function () {
     });
 };
 
-// 📅 PARSEADOR DE FECHA
+// 📅 PARSEADOR DE FECHAS
 function parsearFechaTurno(fechaRaw) {
   if (!fechaRaw) return new Date();
   if (fechaRaw instanceof Date) return fechaRaw;
@@ -139,7 +163,7 @@ function parsearFechaTurno(fechaRaw) {
   return new Date();
 }
 
-// 🗓️ ACCIONES DE FILTRO
+// 🗓️ FILTROS DE VISTA
 window.cambiarMesTurnos = function (mesIndex) {
   try {
     if (typeof haptic === "function") haptic();
@@ -164,7 +188,7 @@ window.cambiarAsistenteAdmin = function (vendedor) {
   window.renderizarHorasEnPantalla();
 };
 
-// 🎨 RENDERIZADOR CALENDARIO
+// 🎨 RENDERIZADOR PRINCIPAL DE CALENDARIO
 window.renderizarHorasEnPantalla = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -201,16 +225,11 @@ window.renderizarHorasEnPantalla = function () {
   ];
   const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
+  // 1. OBTENER LISTA COMPLETA DE ASISTENTES
+  let listaTodosAsistentes = obtenerTodosLosAsistentes();
+
+  // Filtrar registros por fecha
   let todosLosRegistros = window.currentHorasStock;
-  let asistentesDisponibles = new Set();
-
-  todosLosRegistros.forEach((item) => {
-    let v = (item.vendedor || "STAFF").toUpperCase().trim();
-    if (v) asistentesDisponibles.add(v);
-  });
-
-  let listaAsistentes = Array.from(asistentesDisponibles).sort();
-
   let datosFiltrados = todosLosRegistros.filter((item) => {
     let vendedorItem = (item.vendedor || "STAFF").toUpperCase().trim();
     let d = parsearFechaTurno(item.fecha);
@@ -230,6 +249,7 @@ window.renderizarHorasEnPantalla = function () {
     }
   });
 
+  // 2. DESPLEGABLE DE CONTROLES SUPERADMIN
   let opcionesMes = mesesNombres
     .map(
       (m, idx) =>
@@ -240,7 +260,7 @@ window.renderizarHorasEnPantalla = function () {
   let selectorAsistentesAdmin = "";
   if (esSuperAdmin) {
     let optsAsistentes = `<option value="TODOS" ${window.asistenteSeleccionadoAdmin === "TODOS" ? "selected" : ""}>👥 Todos los Asistentes</option>`;
-    listaAsistentes.forEach((asist) => {
+    listaTodosAsistentes.forEach((asist) => {
       optsAsistentes += `<option value="${asist}" ${window.asistenteSeleccionadoAdmin === asist ? "selected" : ""}>👤 ${asist}</option>`;
     });
 
@@ -269,6 +289,7 @@ window.renderizarHorasEnPantalla = function () {
       ${selectorAsistentesAdmin}
     </div>`;
 
+  // 3. AGRUPAR REGISTROS POR ASISTENTE Y DÍA
   let mapaAsistentes = {};
 
   datosFiltrados.forEach((item) => {
@@ -282,25 +303,23 @@ window.renderizarHorasEnPantalla = function () {
     mapaAsistentes[asist][diaNum].push(item);
   });
 
-  let asistentesAMostrar = Object.keys(mapaAsistentes);
+  let asistentesAMostrar = [];
 
-  if (!esSuperAdmin && !mapaAsistentes[activeStaff]) {
+  if (!esSuperAdmin) {
     asistentesAMostrar = [activeStaff];
-    mapaAsistentes[activeStaff] = {};
-  }
-
-  if (asistentesAMostrar.length === 0) {
-    container.innerHTML =
-      htmlControles +
-      `
-      <div style="text-align:center; padding:40px; color:#a1a1aa; font-weight:600; background:rgba(255,255,255,0.02); border-radius:18px; border:1px dashed rgba(255,255,255,0.08);">
-        📌 No hay turnos o registros para este periodo.
-      </div>`;
-    return;
+  } else {
+    if (window.asistenteSeleccionadoAdmin !== "TODOS") {
+      asistentesAMostrar = [window.asistenteSeleccionadoAdmin];
+    } else {
+      let conRegistros = Object.keys(mapaAsistentes);
+      asistentesAMostrar =
+        conRegistros.length > 0 ? conRegistros : listaTodosAsistentes;
+    }
   }
 
   let htmlCuerpo = htmlControles;
 
+  // 4. GENERAR TARJETAS DE CALENDARIO
   asistentesAMostrar.forEach((asistente) => {
     let turnosPorDia = mapaAsistentes[asistente] || {};
     let totalPagoAsistente = 0;
@@ -426,7 +445,7 @@ window.renderizarHorasEnPantalla = function () {
         : "1px solid rgba(255, 255, 255, 0.05)";
 
       celdasCalendario += `
-        <div style="background: ${bgCelda} !important; border: ${borderCelda} !important; border-radius: 12px !important; padding: 6px !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; min-height: 125px !important; box-sizing: border-box !important; overflow: visible !important; position: relative !important;">
+        <div style="background: ${bgCelda} !important; border: ${borderCelda} !important; border-radius: 12px !important; padding: 6px !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; min-height: 115px !important; box-sizing: border-box !important; overflow: visible !important; position: relative !important;">
           <span style="font-size: 0.75rem !important; font-weight: 800 !important; color: ${tieneTurno ? "#ffffff" : "#71717a"} !important; align-self: flex-start !important; margin-bottom: 4px !important;">${dia}</span>
           ${htmlRegistros}
         </div>`;
@@ -474,7 +493,214 @@ window.renderizarHorasEnPantalla = function () {
   container.innerHTML = htmlCuerpo;
 };
 
-// MODIFICAR TURNO
+// ➕ ABRIR FORMULARIO DE INGRESAR HORAS
+window.toggleFormularioHoras = function () {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  const overlay = document.getElementById("addHoursOverlay");
+  if (!overlay) return;
+
+  const estaAbierto =
+    overlay.classList.contains("open") || overlay.style.display === "flex";
+
+  if (estaAbierto) {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
+  } else {
+    overlay.classList.add("open");
+    overlay.style.setProperty("display", "flex", "important");
+    overlay.style.setProperty("align-items", "center", "important");
+    overlay.style.setProperty("justify-content", "center", "important");
+
+    const selectVendedor = document.getElementById("inputVendedorShift");
+    if (selectVendedor) {
+      let lista = obtenerTodosLosAsistentes();
+      let opts =
+        '<option value="" disabled selected>Selecciona un asistente...</option>';
+      lista.forEach((asist) => {
+        opts += `<option value="${asist}">${asist}</option>`;
+      });
+      selectVendedor.innerHTML = opts;
+    }
+  }
+};
+
+// 💵 ABRIR FORMULARIO DE ADELANTO
+window.toggleModalAdelanto = function (abrir) {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  const overlay = document.getElementById("adelantoShiftOverlay");
+  if (!overlay) return;
+
+  if (abrir) {
+    overlay.classList.add("open");
+    overlay.style.setProperty("display", "flex", "important");
+    overlay.style.setProperty("align-items", "center", "important");
+    overlay.style.setProperty("justify-content", "center", "important");
+
+    const selectAde = document.getElementById("adeEmpleado");
+    if (selectAde) {
+      let lista = obtenerTodosLosAsistentes();
+      let opts =
+        '<option value="" disabled selected>Selecciona un asistente...</option>';
+      lista.forEach((asist) => {
+        opts += `<option value="${asist}">${asist}</option>`;
+      });
+      selectAde.innerHTML = opts;
+    }
+  } else {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
+  }
+};
+
+// 💸 EJECUTAR REGISTRO DE ADELANTO EN MYSQL
+window.ejecutarAdelantoDesdeShift = function (e) {
+  if (e) e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const empleado = document.getElementById("adeEmpleado")
+    ? document.getElementById("adeEmpleado").value
+    : "";
+  const montoInput = document.getElementById("adeMonto")
+    ? document.getElementById("adeMonto").value
+    : "";
+  const monto = parseFloat(String(montoInput).replace(/\D/g, "")) || 0;
+
+  if (!empleado || monto <= 0) {
+    alert("⚠️ Selecciona un trabajador e ingresa un monto válido.");
+    return;
+  }
+
+  const btn = document.getElementById("btnSubmitAdeShift");
+  const originalText = btn ? btn.innerHTML : "Aplicar y Descontar";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "Procesando...";
+  }
+
+  fetch(window.URL_GUARDAR_ADELANTO, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `vendedor=${encodeURIComponent(empleado)}&monto=${encodeURIComponent(monto)}`,
+  })
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error(
+          "Respuesta inválida del servidor PHP: " + text.substring(0, 100),
+        );
+      }
+    })
+    .then((res) => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+
+      if (res && res.status === "success") {
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Adelanto aplicado a ${empleado}</span></div>`,
+          );
+        }
+        window.toggleModalAdelanto(false);
+        window.cargarHorasDesdeMySQL();
+      } else {
+        alert(
+          "❌ Error: " +
+            (res ? res.message : "No se pudo guardar el adelanto."),
+        );
+      }
+    })
+    .catch((err) => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+      alert("❌ Error al procesar el adelanto: " + err.message);
+    });
+};
+
+// ➕ EJECUTAR REGISTRO DE HORAS MANUAL EN MYSQL
+window.ejecutarGuardadoHorasManual = function (e) {
+  if (e) e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const vendedor = document.getElementById("inputVendedorShift")
+    ? document.getElementById("inputVendedorShift").value
+    : "";
+  const tiempo = document.getElementById("inputHorasShift")
+    ? document.getElementById("inputHorasShift").value.trim()
+    : "";
+  const fecha = document.getElementById("inputFechaShift")
+    ? document.getElementById("inputFechaShift").value
+    : "";
+
+  if (!vendedor || !tiempo || !fecha) {
+    alert("⚠️ Completa todos los campos obligatorios.");
+    return;
+  }
+
+  const btn = document.getElementById("btnGuardarShiftManual");
+  const originalText = btn ? btn.innerHTML : "Guardar Horas";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "Guardando...";
+  }
+
+  fetch(window.URL_GUARDAR_HORAS_MANUAL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `vendedor=${encodeURIComponent(vendedor)}&tiempo=${encodeURIComponent(tiempo)}&fecha=${encodeURIComponent(fecha)}`,
+  })
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error(
+          "Respuesta inválida del servidor PHP: " + text.substring(0, 100),
+        );
+      }
+    })
+    .then((res) => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+
+      if (res && res.status === "success") {
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Horas guardadas correctamente</span></div>`,
+          );
+        }
+        window.toggleFormularioHoras();
+        window.cargarHorasDesdeMySQL();
+      } else {
+        alert(
+          "❌ Error: " +
+            (res ? res.message : "No se pudieron guardar las horas."),
+        );
+      }
+    })
+    .catch((err) => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+      alert("❌ Error de red al guardar horas: " + err.message);
+    });
+};
+
+// ✏️ MODIFICAR TURNO (CAMILO)
 window.modificarTurnoSuperAdmin = function (
   idTurno,
   vendedor,
@@ -525,7 +751,7 @@ window.modificarTurnoSuperAdmin = function (
     .catch((err) => alert("❌ " + err.message));
 };
 
-// ELIMINAR TURNO
+// 🗑️ ELIMINAR TURNO (CAMILO)
 window.eliminarTurnoSuperAdmin = function (idTurno) {
   if (!verificarSiEsSuperAdmin()) return;
 
@@ -560,7 +786,7 @@ window.eliminarTurnoSuperAdmin = function (idTurno) {
     .catch((err) => console.error("Error al eliminar:", err));
 };
 
-// ELIMINAR MÚLTIPLES ADELANTOS
+// 🗑️ ELIMINAR MÚLTIPLES ADELANTOS (CAMILO)
 window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
   if (!verificarSiEsSuperAdmin()) return;
 
@@ -589,7 +815,7 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
   });
 };
 
-// FILTRO DE BÚSQUEDA
+// 🔍 FILTRO DE BÚSQUEDA
 window.filtrarHorasInternas = function () {
   window.renderizarHorasEnPantalla();
 };
