@@ -23,17 +23,14 @@ function verificarSiEsSuperAdmin() {
   return user.toUpperCase().trim() === "CAMILO";
 }
 
-// 👁️ ABRIR / CERRAR PANEL
+// 👁️ APERTURA Y CONTROL DEL PANEL DE TURNOS (REVELA BOTONES DE CAMILO)
 window.toggleShiftsPanel = function () {
   try {
     if (typeof haptic === "function") haptic();
   } catch (e) {}
 
   const overlay = document.getElementById("shiftsOverlay");
-  if (!overlay) {
-    alert("⚠️ Error: No se encontró el modal #shiftsOverlay en la página.");
-    return;
-  }
+  if (!overlay) return;
 
   const estaAbierto =
     overlay.classList.contains("open") || overlay.style.display === "flex";
@@ -47,13 +44,168 @@ window.toggleShiftsPanel = function () {
         cerrarTodasLasVentanas();
       } catch (e) {}
     }
+
     overlay.classList.add("open");
     overlay.style.setProperty("display", "flex", "important");
     overlay.style.setProperty("align-items", "center", "important");
     overlay.style.setProperty("justify-content", "center", "important");
 
+    // 🔒 MOSTRAR BOTONES ADELANTO Y NÓMINA SOLO SI ES CAMILO
+    const esSuperAdmin = verificarSiEsSuperAdmin();
+    const btnAde = document.getElementById("btnAdelantoCamilo");
+    const btnNom = document.getElementById("btnNominaCamilo");
+
+    if (esSuperAdmin) {
+      if (btnAde)
+        btnAde.style.setProperty("display", "inline-flex", "important");
+      if (btnNom)
+        btnNom.style.setProperty("display", "inline-flex", "important");
+    } else {
+      if (btnAde) btnAde.style.setProperty("display", "none", "important");
+      if (btnNom) btnNom.style.setProperty("display", "none", "important");
+    }
+
     window.cargarHorasDesdeMySQL();
   }
+};
+
+// ➕ BOTÓN + AGREGAR (MODAL DE HORAS MANUALE)
+window.toggleFormularioHoras = function () {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  const overlay = document.getElementById("addHoursOverlay");
+  if (!overlay) return;
+
+  const estaAbierto =
+    overlay.classList.contains("open") || overlay.style.display === "flex";
+
+  if (estaAbierto) {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
+  } else {
+    overlay.classList.add("open");
+    overlay.style.setProperty("display", "flex", "important");
+    overlay.style.setProperty("align-items", "center", "important");
+    overlay.style.setProperty("justify-content", "center", "important");
+    overlay.style.setProperty("background", "rgba(0, 0, 0, 0.8)", "important");
+    overlay.style.setProperty("backdrop-filter", "blur(16px)", "important");
+    overlay.style.setProperty(
+      "-webkit-backdrop-filter",
+      "blur(16px)",
+      "important",
+    );
+
+    // Poblar select de asistentes
+    const selectVendedor = document.getElementById("inputVendedorShift");
+    if (selectVendedor && window.currentHorasStock) {
+      let asistentesSet = new Set();
+      window.currentHorasStock.forEach((item) => {
+        if (item.vendedor)
+          asistentesSet.add(item.vendedor.toUpperCase().trim());
+      });
+      let opts =
+        '<option value="" disabled selected>Selecciona un asistente...</option>';
+      Array.from(asistentesSet)
+        .sort()
+        .forEach((asist) => {
+          opts += `<option value="${asist}">${asist}</option>`;
+        });
+      selectVendedor.innerHTML = opts;
+    }
+  }
+};
+
+// 💵 BOTÓN ADELANTO
+window.toggleModalAdelanto = function (abrir) {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  const overlay = document.getElementById("adelantoShiftOverlay");
+  if (!overlay) return;
+
+  if (abrir) {
+    overlay.classList.add("open");
+    overlay.style.setProperty("display", "flex", "important");
+    overlay.style.setProperty("align-items", "center", "important");
+    overlay.style.setProperty("justify-content", "center", "important");
+    overlay.style.setProperty("background", "rgba(0, 0, 0, 0.8)", "important");
+    overlay.style.setProperty("backdrop-filter", "blur(16px)", "important");
+    overlay.style.setProperty(
+      "-webkit-backdrop-filter",
+      "blur(16px)",
+      "important",
+    );
+
+    // Poblar select de asistentes en adelanto
+    const selectAde = document.getElementById("adeEmpleado");
+    if (selectAde && window.currentHorasStock) {
+      let asistentesSet = new Set();
+      window.currentHorasStock.forEach((item) => {
+        if (item.vendedor)
+          asistentesSet.add(item.vendedor.toUpperCase().trim());
+      });
+      let opts =
+        '<option value="" disabled selected>Selecciona un asistente...</option>';
+      Array.from(asistentesSet)
+        .sort()
+        .forEach((asist) => {
+          opts += `<option value="${asist}">${asist}</option>`;
+        });
+      selectAde.innerHTML = opts;
+    }
+  } else {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
+  }
+};
+
+// 📊 BOTÓN NÓMINA
+window.abrirTotalNomina = function () {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  const overlay = document.getElementById("nominaOverlay");
+  if (!overlay) return;
+
+  overlay.classList.add("open");
+  overlay.style.setProperty("display", "flex", "important");
+  overlay.style.setProperty("align-items", "center", "important");
+  overlay.style.setProperty("justify-content", "center", "important");
+  overlay.style.setProperty("background", "rgba(0, 0, 0, 0.8)", "important");
+  overlay.style.setProperty("backdrop-filter", "blur(16px)", "important");
+  overlay.style.setProperty(
+    "-webkit-backdrop-filter",
+    "blur(16px)",
+    "important",
+  );
+
+  if (typeof window.refrescarTotalNominaEnVivo === "function") {
+    window.refrescarTotalNominaEnVivo();
+  }
+};
+
+window.cerrarTotalNomina = function () {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+
+  const overlay = document.getElementById("nominaOverlay");
+  if (overlay) {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
+  }
+};
+
+// 🔄 BOTÓN REFRESCAR
+window.forzarRefrescoDeHoras = function () {
+  try {
+    if (typeof haptic === "function") haptic();
+  } catch (e) {}
+  window.cargarHorasDesdeMySQL();
 };
 
 window.cargarHorasDesdeMySQL = function () {
