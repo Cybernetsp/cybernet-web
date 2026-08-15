@@ -32,7 +32,7 @@ window.toggleGmailPanel = function () {
   }
 };
 
-// 🔄 CONSULTA A LA API DE GMAIL CON LECTURA ROBUSTA DE CÓDIGOS DE ESTADO Y ERRORES DE RED
+// 🔄 CONSULTA A LA API DE GMAIL
 window.cargarDatosGmail = function () {
   if (typeof haptic === "function") haptic();
   const contenedor = document.getElementById("contenedorGmailMensajes");
@@ -44,7 +44,7 @@ window.cargarDatosGmail = function () {
   if (!correoVal) {
     contenedor.innerHTML = `
       <div style="text-align: center; padding: 40px 20px; color: #ff9f0a; font-weight: 600; background: rgba(255, 159, 10, 0.05); border-radius: 18px; border: 1px dashed rgba(255, 159, 10, 0.25);">
-        ⚠️ Por favor ingresa un correo electrónico en la casilla de búsqueda de arriba.
+        ⚠️ Por favor ingresa un correo electrónico en la casilla de búsqueda arriba.
       </div>`;
     if (inputSearch) inputSearch.focus();
     return;
@@ -58,32 +58,15 @@ window.cargarDatosGmail = function () {
       </div>
     </div>`;
 
-  const targetUrl = `https://api.cybernetsp.com/obtener_gmail.php?correo=${encodeURIComponent(correoVal)}`;
+  const urlTarget = `https://api.cybernetsp.com/obtener_gmail.php?correo=${encodeURIComponent(correoVal)}`;
 
-  fetch(targetUrl, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-    },
-  })
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(`Error de servidor HTTP ${response.status}`);
-      }
-      const text = await response.text();
-      try {
-        return JSON.parse(text);
-      } catch (err) {
-        throw new Error(
-          "Respuesta no válida del servidor: " + text.substring(0, 80),
-        );
-      }
-    })
+  fetch(urlTarget)
+    .then((response) => response.json())
     .then((res) => {
       if (res && res.status === "error") {
         contenedor.innerHTML = `
           <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
-            ❌ ${res.message || "No se encontraron datos para este correo."}
+            ❌ ${res.message || "No se encontraron mensajes para este correo."}
           </div>`;
         return;
       }
@@ -100,7 +83,7 @@ window.cargarDatosGmail = function () {
       console.error("Error al consultar Gmail:", err);
       contenedor.innerHTML = `
         <div style="text-align: center; padding: 35px 20px; color: #ff453a; font-weight: 700; background: rgba(255, 69, 58, 0.05); border-radius: 18px; border: 1px solid rgba(255, 69, 58, 0.2);">
-          ❌ Error de red o CORS: ${err.message}. Asegúrate de haber guardado el archivo PHP con las cabeceras de CORS.
+          ❌ Error al conectar con el servidor. Revisa tu conexión o que la URL del PHP sea correcta.
         </div>`;
     });
 };
@@ -115,7 +98,7 @@ window.renderizarListaGmail = function (correoBuscado = "") {
   if (!datos || datos.length === 0) {
     contenedor.innerHTML = `
       <div style="text-align: center; padding: 40px 20px; color: #a1a1aa; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 18px; border: 1px dashed rgba(255, 255, 255, 0.08);">
-        📭 No se encontraron correos recientes para <b>${correoBuscado}</b>.
+        📭 No hay mensajes o notificaciones recientes para <b>${correoBuscado}</b>.
       </div>`;
     return;
   }
@@ -134,6 +117,7 @@ window.renderizarListaGmail = function (correoBuscado = "") {
     html += `
       <div class="gmail-card-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(234, 67, 53, 0.35)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
         
+        <!-- Encabezado del mensaje -->
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
             <span style="background: rgba(234, 67, 53, 0.15); border: 1px solid rgba(234, 67, 53, 0.3); color: #ea4335; font-weight: 800; font-size: 0.72rem; padding: 3px 10px; border-radius: 8px; text-transform: uppercase;">
@@ -148,6 +132,7 @@ window.renderizarListaGmail = function (correoBuscado = "") {
           </span>
         </div>
 
+        <!-- Cuerpo del mensaje -->
         ${
           mensajeTexto
             ? `
@@ -158,6 +143,7 @@ window.renderizarListaGmail = function (correoBuscado = "") {
             : ""
         }
 
+        <!-- Botones de Acción SVG -->
         <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
           ${
             enlaceDirecto
