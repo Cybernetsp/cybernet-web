@@ -401,13 +401,12 @@ window.renderizarHorasEnPantalla = function () {
   container.innerHTML = htmlCuerpo;
 };
 
-// ✏️ EDICIÓN EXCLUSIVA SUPERADMIN (CAMILO)
+// ✏️ MODIFICACIÓN VÍA PHP/MYSQL (SOLO SUPERADMIN CAMILO)
 window.modificarTurnoSuperAdmin = function (
   idTurno,
   vendedor,
   fecha,
   tiempoActual,
-  totalActual,
 ) {
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
@@ -431,43 +430,38 @@ window.modificarTurnoSuperAdmin = function (
     `[SUPERADMIN] Modificar tiempo para ${vendedor} (${fecha}):\nFormato: HH:MM:SS`,
     tiempoActual,
   );
-  if (nuevoTiempo === null) return;
+  if (nuevoTiempo === null || nuevoTiempo.trim() === "") return;
 
-  let nuevoTotal = prompt(
-    `[SUPERADMIN] Modificar total a pagar ($) para ${vendedor} (${fecha}):`,
-    totalActual,
-  );
-  if (nuevoTotal === null) return;
-
-  nuevoTotal = parseFloat(nuevoTotal) || 0;
-
-  // Actualización local en memoria
+  // Actualización local temporal (mientras el server procesa)
   let registroLocal = window.currentHorasStock.find(
     (r) => String(r.id) === String(idTurno),
   );
   if (registroLocal) {
     registroLocal.tiempo_trabajado = nuevoTiempo;
-    registroLocal.total = nuevoTotal;
+    registroLocal.total = 0; // Se repintará el valor real al recargar desde la BD
     window.renderizarHorasEnPantalla();
   }
 
-  // Envío POST
+  // Envío POST: Al mandar total=0, el PHP detecta y recalcula el monto correcto.
   fetch(window.URL_MODIFICAR_TURNO, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo)}&total=${encodeURIComponent(nuevoTotal)}`,
+    body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo)}&total=0`,
   })
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
         if (typeof triggerToast === "function") {
           triggerToast(
-            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Turno actualizado en MySQL</span></div>`,
+            `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg><span>Turno actualizado y recalculado</span></div>`,
           );
         }
-        window.cargarHorasDesdeMySQL();
+        window.cargarHorasDesdeMySQL(); // 🔥 Recarga para obtener el monto recién calculado
       } else {
-        alert("⚠️ Atención: No se pudo guardar la modificación en MySQL.");
+        alert(
+          "⚠️ Atención: No se pudo guardar la modificación en MySQL.\n" +
+            (res ? res.message : ""),
+        );
       }
     })
     .catch((err) => {
