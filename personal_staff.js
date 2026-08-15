@@ -37,7 +37,7 @@ window.toggleShiftsPanel = function () {
   }
 };
 
-// 🔄 OBTENER REGISTROS DE HORAS DESDE MYSQL
+// 🔄 OBTENER REGISTROS DESDE obtener_horas.php
 window.cargarHorasDesdeMySQL = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -50,7 +50,8 @@ window.cargarHorasDesdeMySQL = function () {
       </div>
     </div>`;
 
-  fetch("obtener_control_horas.php")
+  // APUNTA DIRECTAMENTE A obtener_horas.php
+  fetch("obtener_horas.php")
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -62,7 +63,7 @@ window.cargarHorasDesdeMySQL = function () {
     })
     .catch((err) => {
       console.error("Error al cargar horas:", err);
-      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error de conexión con el archivo obtener_control_horas.php</div>`;
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error de conexión al consultar obtener_horas.php</div>`;
     });
 };
 
