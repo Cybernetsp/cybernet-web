@@ -95,24 +95,24 @@ function cargarDatosMySQL() {
   if (esNetflix) totalColumnas = 12;
 
   const thBase =
-    "padding: 12px 10px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;";
+    "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;";
 
-  // 1. DIBUJAR ENCABEZADOS SEGÚN LA PLATAFORMA
+  // 1. DIBUJAR ENCABEZADOS AJUSTADOS SEGÚN LA PLATAFORMA
   if (esNetflix) {
     thead.innerHTML = `
       <tr>
-        <th style="${thBase} width: 6%;">FECHA</th>
-        <th style="${thBase} width: 17%;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 11%;">CONTRASEÑA</th>
+        <th style="${thBase} width: 5%;">FECHA</th>
+        <th style="${thBase} width: 16%;">CORREO / USUARIO</th>
+        <th style="${thBase} width: 9%;">CONTRASEÑA</th>
         <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
         <th style="${thBase} width: 4%; text-align: center;">PIN</th>
         <th style="${thBase} width: 10%;">VENCIMIENTO</th>
-        <th style="${thBase} width: 8%;">CLIENTE</th>
-        <th style="${thBase} width: 8%;">TELÉFONO</th>
-        <th style="${thBase} width: 6%;">FECHA PAGO</th>
+        <th style="${thBase} width: 9%;">CLIENTE</th>
+        <th style="${thBase} width: 9%;">TELÉFONO</th>
+        <th style="${thBase} width: 7%;">FECHA PAGO</th>
         <th style="${thBase} width: 6%;">VALOR</th>
         <th style="${thBase} width: 7%;">PAGO</th>
-        <th style="${thBase} width: 13%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        <th style="${thBase} width: 14%; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   } else if (esVentas) {
@@ -139,7 +139,7 @@ function cargarDatosMySQL() {
       </tr>
     `;
   } else {
-    // DEMÁS PLATAFORMAS (IMAGEN 3)
+    // DEMÁS PLATAFORMAS
     thead.innerHTML = `
       <tr>
         <th style="${thBase} width: 7%; color: #ff9f0a;">PROV</th>
@@ -184,14 +184,6 @@ function cargarDatosMySQL() {
         } else {
           let fechaGrupoActual = null;
 
-          const svgCopyIcon = (datoEscapado, titulo) => {
-            return `
-              <button onclick="copiarTextoUnico(this, '${datoEscapado}')" title="${titulo}" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.2s ease;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              </button>
-            `;
-          };
-
           data.data.forEach((fila, idx) => {
             let diaVal = fila.dia || fila.fecha || "-";
             let provVal = fila.proveedor || "-";
@@ -211,7 +203,7 @@ function cargarDatosMySQL() {
               ? "rgba(255, 255, 255, 0.015)"
               : "transparent";
 
-            // GRUPO DE FECHA EN LA CABECERA (IGUAL A IMAGEN 2 Y 3)
+            // GRUPO DE FECHA EN LA CABECERA
             if (
               !esVentas &&
               !esGarantias &&
@@ -241,7 +233,7 @@ function cargarDatosMySQL() {
               `;
             }
 
-            // TEXTO COMPLETO PARA COPIAR FICHA
+            // TEXTO COMPLETO PARA FICHA
             let textoCopiarFicha = `📺 ${window.tablaMySQLActual.toUpperCase()}\n📧 Correo: ${correoVal}\n🔑 Clave: ${claveVal}\n👤 Perfil: ${perfilVal}\n📍 PIN: ${pinVal}`;
             if (esNetflix) {
               textoCopiarFicha += `\n📅 Vence: ${vencVal}`;
@@ -252,27 +244,34 @@ function cargarDatosMySQL() {
             let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
             let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
 
+            // CELDAS CON COPIADO DIRECTO AL DAR CLIC (SIN BOTÓN ADICIONAL)
             let celdaCorreo =
               correoVal !== "-"
-                ? `<div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; overflow: hidden;">
-                   <span style="color: #0a84ff; font-family: monospace; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${correoVal}">${correoVal}</span>
-                   ${svgCopyIcon(encodeURIComponent(correoVal), "Copiar correo")}
-                 </div>`
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color 0.15s ease;" title="Clic para copiar correo">${correoVal}</span>`
                 : '<span style="color: #a1a1aa;">-</span>';
 
             let celdaClave =
               claveVal !== "-"
-                ? `<div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; overflow: hidden;">
-                   <span style="color: #30d158; font-family: monospace; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${claveVal}">${claveVal}</span>
-                   ${svgCopyIcon(encodeURIComponent(claveVal), "Copiar contraseña")}
-                 </div>`
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color 0.15s ease;" title="Clic para copiar contraseña">${claveVal}</span>`
                 : '<span style="color: #a1a1aa;">-</span>';
 
+            let celdaPin =
+              pinVal !== "-"
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(pinVal)}')" style="color: #ffd60a; font-weight: 700; font-family: monospace; cursor: pointer; transition: color 0.15s ease;" title="Clic para copiar PIN">${pinVal}</span>`
+                : '<span style="color: #a1a1aa;">-</span>';
+
+            let celdaTelefono =
+              numeroVal !== "-" && numeroVal.trim() !== ""
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color 0.15s ease;" title="Clic para copiar teléfono">${numeroVal}</span>`
+                : esSuperAdmin
+                  ? `<button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Agregar Teléfono" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: var(--ios-green); padding: 4px 10px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.8rem; display: inline-flex; align-items: center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>`
+                  : '<span style="color: #a1a1aa;">-</span>';
+
             const tdBase =
-              "padding: 10px 10px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03);";
+              "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03);";
 
             // ─────────────────────────────────────────────────────────────
-            // CASO A: VISTA NETFLIX (IMAGEN 2 + FECHA PAGO, VALOR, PAGO)
+            // VISTA NETFLIX
             // ─────────────────────────────────────────────────────────────
             if (esNetflix) {
               let botonesAccionNetflix = `
@@ -310,10 +309,10 @@ function cargarDatosMySQL() {
                   <td style="${tdBase}">${celdaCorreo}</td>
                   <td style="${tdBase}">${celdaClave}</td>
                   <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
-                  <td style="${tdBase} text-align: center; color: #ffd60a; font-weight: 700; font-family: monospace;">${pinVal}</td>
+                  <td style="${tdBase} text-align: center;">${celdaPin}</td>
                   <td style="${tdBase} font-weight: 800; color: #ff9f0a;">${vencVal}</td>
                   <td style="${tdBase} color: #e4e4e7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${clienteVal}">${clienteVal}</td>
-                  <td style="${tdBase} color: #a1a1aa; font-family: monospace;">${numeroVal}</td>
+                  <td style="${tdBase}">${celdaTelefono}</td>
                   <td style="${tdBase} color: #a1a1aa;">${fechaPagoVal}</td>
                   <td style="${tdBase} color: #30d158; font-weight: bold;">${valorVal}</td>
                   <td style="${tdBase} max-width: 110px; overflow: hidden;">
@@ -324,7 +323,7 @@ function cargarDatosMySQL() {
               `;
             }
             // ─────────────────────────────────────────────────────────────
-            // CASO B: DEMÁS PLATAFORMAS (EXACTAMENTE COMO IMAGEN 3)
+            // DEMÁS PLATAFORMAS
             // ─────────────────────────────────────────────────────────────
             else if (!esVentas && !esGarantias) {
               let botonesAccionDemas = `
@@ -361,9 +360,9 @@ function cargarDatosMySQL() {
                   <td style="${tdBase}">${celdaCorreo}</td>
                   <td style="${tdBase}">${celdaClave}</td>
                   <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
-                  <td style="${tdBase} text-align: center; color: #ffd60a; font-weight: 700; font-family: monospace;">${pinVal}</td>
+                  <td style="${tdBase} text-align: center;">${celdaPin}</td>
                   <td style="${tdBase} color: #e4e4e7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${clienteVal}">${clienteVal}</td>
-                  <td style="${tdBase} color: #a1a1aa; font-family: monospace;">${numeroVal}</td>
+                  <td style="${tdBase}">${celdaTelefono}</td>
                   <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionDemas}</td>
                 </tr>
               `;
@@ -585,18 +584,53 @@ function eliminarRegistroMySQL(id) {
     .catch((err) => alert("❌ Error al eliminar el registro."));
 }
 
-function copiarTextoUnico(btn, textoEscapado) {
+// COPIADO DIRECTO AL HACER CLIC SOBRE EL TEXTO (DESTELLO VERDE Y TOAST)
+function copiarTextoUnico(element, textoEscapado) {
   if (typeof haptic === "function") haptic();
   const texto = decodeURIComponent(textoEscapado);
 
-  navigator.clipboard.writeText(texto).then(() => {
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+  const copiarAccion = () => {
+    const colorOriginal = element.style.color;
+    element.style.color = "#30d158";
+
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Copiado al portapapeles!</span></div>`,
+      );
+    }
 
     setTimeout(() => {
-      btn.innerHTML = originalHTML;
-    }, 1500);
-  });
+      element.style.color = colorOriginal;
+    }, 1000);
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard
+      .writeText(texto)
+      .then(copiarAccion)
+      .catch(() => {
+        fallbackCopiar(texto, copiarAccion);
+      });
+  } else {
+    fallbackCopiar(texto, copiarAccion);
+  }
+}
+
+function fallbackCopiar(texto, callback) {
+  const textarea = document.createElement("textarea");
+  textarea.value = texto;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  try {
+    document.execCommand("copy");
+    callback();
+  } catch (err) {
+    alert("Tu navegador no permitió copiar el texto automáticamente.");
+  }
+  document.body.removeChild(textarea);
 }
 
 function copiarAccesoMySQL(btn, textoEscapado) {
