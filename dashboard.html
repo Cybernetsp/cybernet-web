@@ -5982,6 +5982,595 @@
       </div>
     </div>
 
+    <!-- ==========================================
+     ➕ MODAL 1: INGRESAR TIEMPO EXTRA (+ AGREGAR)
+     ========================================== -->
+    <div
+      class="overlay-ios"
+      id="addHoursOverlay"
+      role="dialog"
+      aria-modal="true"
+      style="
+        z-index: 16000;
+        display: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+      "
+    >
+      <div
+        class="modal-ios"
+        onclick="event.stopPropagation()"
+        style="
+          max-width: 420px;
+          width: 90%;
+          padding: 32px 24px;
+          border-radius: 32px;
+          margin: auto;
+          background: #121215;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
+        "
+      >
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+          "
+        >
+          <div
+            style="
+              background: rgba(48, 209, 88, 0.15);
+              color: #30d158;
+              padding: 12px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 16px;
+              border: 1px solid rgba(48, 209, 88, 0.2);
+            "
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+          </div>
+          <h3
+            style="
+              color: #ffffff;
+              font-size: 1.25rem;
+              font-weight: 800;
+              margin: 0 0 6px 0;
+            "
+          >
+            Ingresar Tiempo Extra
+          </h3>
+          <p
+            style="
+              font-size: 0.85rem;
+              text-align: center;
+              margin: 0;
+              color: #a1a1aa;
+              line-height: 1.4;
+            "
+          >
+            Registra el tiempo trabajado de forma manual en MySQL.
+          </p>
+        </div>
+
+        <form
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            text-align: left;
+          "
+          onsubmit="ejecutarGuardadoHorasManual(event)"
+        >
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label
+              for="inputVendedorShift"
+              style="
+                font-size: 0.72rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                color: #a1a1aa;
+                padding-left: 4px;
+              "
+            >
+              Trabajador Seleccionado
+            </label>
+            <select
+              id="inputVendedorShift"
+              class="input-ios"
+              required
+              style="
+                background: rgba(0, 0, 0, 0.4) !important;
+                padding: 12px 16px;
+                border-radius: 12px;
+                color: #ffffff;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                margin: 0;
+              "
+            >
+              <option value="" disabled selected>
+                Cargando lista de asistentes...
+              </option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label
+              for="inputHorasShift"
+              style="
+                font-size: 0.72rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                color: #a1a1aa;
+                padding-left: 4px;
+              "
+            >
+              Tiempo Trabajado (HH:MM:SS)
+            </label>
+            <input
+              type="text"
+              id="inputHorasShift"
+              class="input-ios"
+              placeholder="Ej: 03:00:00"
+              style="
+                background: rgba(0, 0, 0, 0.4) !important;
+                padding: 12px 16px;
+                border-radius: 12px;
+                font-weight: 800;
+                color: #30d158;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                margin: 0;
+                font-family: monospace;
+              "
+              required
+            />
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label
+              for="inputFechaShift"
+              style="
+                font-size: 0.72rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                color: #a1a1aa;
+                padding-left: 4px;
+              "
+            >
+              Fecha Correspondiente
+            </label>
+            <input
+              type="date"
+              id="inputFechaShift"
+              class="input-ios"
+              style="
+                background: rgba(0, 0, 0, 0.4) !important;
+                padding: 11px 16px;
+                border-radius: 12px;
+                color: #ffffff;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                margin: 0;
+              "
+              required
+            />
+          </div>
+
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              margin-top: 10px;
+            "
+          >
+            <button
+              type="submit"
+              id="btnGuardarShiftManual"
+              class="btn-ios btn-success"
+              style="
+                padding: 14px;
+                font-size: 0.95rem;
+                border-radius: 50px;
+                font-weight: 800;
+                cursor: pointer;
+              "
+            >
+              Guardar Horas
+            </button>
+            <button
+              type="button"
+              class="btn-ios btn-secondary"
+              style="
+                padding: 12px;
+                font-size: 0.9rem;
+                border-radius: 50px;
+                color: #ff453a;
+                background: rgba(255, 69, 58, 0.1);
+                border: 1px solid rgba(255, 69, 58, 0.2);
+                cursor: pointer;
+              "
+              onclick="toggleFormularioHoras()"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==========================================
+     💵 MODAL 2: REGISTRAR ADELANTO
+     ========================================== -->
+    <div
+      class="overlay-ios"
+      id="adelantoShiftOverlay"
+      role="dialog"
+      aria-modal="true"
+      style="
+        z-index: 17000;
+        display: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+      "
+    >
+      <div
+        class="modal-ios"
+        onclick="event.stopPropagation()"
+        style="
+          max-width: 380px;
+          width: 90%;
+          padding: 28px 22px;
+          border-radius: 28px;
+          margin: auto;
+          background: #121215;
+          border: 1px solid rgba(255, 159, 10, 0.3);
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
+        "
+      >
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+          "
+        >
+          <div
+            style="
+              background: rgba(255, 159, 10, 0.15);
+              color: #ff9f0a;
+              padding: 12px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 12px;
+              border: 1px solid rgba(255, 159, 10, 0.2);
+            "
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H6"></path>
+            </svg>
+          </div>
+          <h3
+            style="
+              color: #ffffff;
+              font-size: 1.2rem;
+              font-weight: 800;
+              margin: 0 0 4px 0;
+            "
+          >
+            Registrar Adelanto
+          </h3>
+          <p
+            style="
+              font-size: 0.82rem;
+              margin: 0;
+              color: #a1a1aa;
+              line-height: 1.4;
+              text-align: center;
+            "
+          >
+            El monto se restará del total a pagar en la quincena.
+          </p>
+        </div>
+
+        <form
+          id="formAdelantoShift"
+          style="display: flex; flex-direction: column; gap: 14px"
+          onsubmit="ejecutarAdelantoDesdeShift(event)"
+        >
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label
+              for="adeEmpleado"
+              style="
+                font-size: 0.72rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                color: #a1a1aa;
+                padding-left: 4px;
+              "
+            >
+              Trabajador
+            </label>
+            <select
+              id="adeEmpleado"
+              class="input-ios"
+              required
+              style="
+                background: rgba(0, 0, 0, 0.4) !important;
+                padding: 12px 16px;
+                border-radius: 12px;
+                color: #ffffff;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                margin: 0;
+              "
+            >
+              <option value="" disabled selected>
+                Selecciona un asistente...
+              </option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label
+              for="adeMonto"
+              style="
+                font-size: 0.72rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                color: #a1a1aa;
+                padding-left: 4px;
+              "
+            >
+              Monto Adelantado ($)
+            </label>
+            <input
+              type="number"
+              id="adeMonto"
+              class="input-ios"
+              placeholder="Monto (ej: 10000)"
+              required
+              style="
+                font-weight: 800;
+                color: #ff453a;
+                text-align: center;
+                background: rgba(0, 0, 0, 0.4) !important;
+                padding: 12px 16px;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                margin: 0;
+                font-family: monospace;
+              "
+            />
+          </div>
+
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              margin-top: 6px;
+            "
+          >
+            <button
+              type="submit"
+              id="btnSubmitAdeShift"
+              class="btn-ios"
+              style="
+                padding: 12px;
+                font-weight: 800;
+                background: #ff453a;
+                color: white;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+              "
+            >
+              Aplicar y Descontar
+            </button>
+            <button
+              type="button"
+              class="btn-ios btn-secondary"
+              style="
+                padding: 12px;
+                color: #a1a1aa;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 50px;
+                cursor: pointer;
+              "
+              onclick="toggleModalAdelanto(false)"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==========================================
+     📊 MODAL 3: TOTAL NÓMINA
+     ========================================== -->
+    <div
+      class="overlay-ios"
+      id="nominaOverlay"
+      role="dialog"
+      aria-modal="true"
+      style="
+        z-index: 17000;
+        display: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+      "
+    >
+      <div
+        class="sheet-ios"
+        onclick="event.stopPropagation()"
+        style="
+          max-width: 650px;
+          width: 90%;
+          height: 85vh;
+          max-height: 800px;
+          display: flex;
+          flex-direction: column;
+          padding: 24px;
+          border-radius: 28px;
+          margin: auto;
+          background: #0b0b0d;
+          border: 1px solid rgba(48, 209, 88, 0.25);
+          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.95);
+        "
+      >
+        <div
+          class="sheet-header"
+          style="
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <h3
+            style="
+              color: #30d158;
+              font-size: 1.15rem;
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              margin: 0;
+            "
+          >
+            <div
+              style="
+                background: rgba(48, 209, 88, 0.15);
+                color: #30d158;
+                padding: 8px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(48, 209, 88, 0.2);
+              "
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <rect x="2" y="4" width="20" height="16" rx="3"></rect>
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+              </svg>
+            </div>
+            Resumen de Nómina
+          </h3>
+          <div style="gap: 12px; display: flex; align-items: center">
+            <button
+              type="button"
+              class="btn-ios btn-secondary"
+              style="
+                padding: 8px 16px;
+                font-size: 0.85rem;
+                border-radius: 50px;
+                cursor: pointer;
+              "
+              onclick="abrirTotalNomina()"
+            >
+              Refrescar
+            </button>
+            <button
+              type="button"
+              class="btn-close-circle"
+              style="margin: 0; cursor: pointer"
+              onclick="cerrarTotalNomina()"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div
+          style="
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-bottom: 20px;
+          "
+        >
+          <div id="nominaContentArea">
+            <div
+              style="
+                background: rgba(255, 255, 255, 0.02);
+                border-radius: 20px;
+                padding: 40px;
+                text-align: center;
+                color: #a1a1aa;
+                font-weight: 600;
+              "
+            >
+              Cargando métricas de nómina...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 🔔 MODAL ULTRAPULIDO: RECORDATORIOS DE PAGO MULTI-WHATSAPP -->
     <div
       class="overlay-ios"
