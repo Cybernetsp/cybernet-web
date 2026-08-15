@@ -494,33 +494,75 @@ window.toggleCargarPanel = function () {
   }
 };
 
+window.plataformasCargaMap = [
+  { id: "netflix", nombre: "🔴 NETFLIX", keys: ["NETFLIX", "netflix"] },
+  {
+    id: "amazon_prime_video",
+    nombre: "📦 AMAZON PRIME VIDEO",
+    keys: [
+      "AMAZON PRIME VIDEO",
+      "AMAZON-PRIME-VIDEO",
+      "amazon_prime_video",
+      "AMAZON",
+    ],
+  },
+  {
+    id: "disney_premium",
+    nombre: "🔵 DISNEY PREMIUM",
+    keys: ["DISNEY PREMIUM", "DISNEY-PREMIUM", "disney_premium"],
+  },
+  {
+    id: "disney_estandar",
+    nombre: "🔵 DISNEY ESTANDAR",
+    keys: ["DISNEY ESTANDAR", "DISNEY-ESTANDAR", "disney_estandar"],
+  },
+  {
+    id: "hbo_max",
+    nombre: "🟣 HBO MAX (MAX)",
+    keys: ["HBO MAX", "HBO-MAX", "hbo_max", "MAX"],
+  },
+  {
+    id: "crunchyroll",
+    nombre: "📺 CRUNCHYROLL",
+    keys: ["CRUNCHYROLL", "crunchyroll"],
+  },
+  { id: "metegol", nombre: "📺 METEGOL", keys: ["METEGOL", "metegol"] },
+  {
+    id: "universal",
+    nombre: "📺 UNIVERSAL+",
+    keys: ["UNIVERSAL", "universal"],
+  },
+  { id: "deezer", nombre: "🎵 DEEZER", keys: ["DEEZER", "deezer"] },
+  { id: "spotify", nombre: "🎵 SPOTIFY", keys: ["SPOTIFY", "spotify"] },
+  { id: "canva", nombre: "💻 CANVA PRO", keys: ["CANVA", "canva"] },
+  { id: "capcut", nombre: "💻 CAPCUT", keys: ["CAPCUT", "capcut"] },
+  { id: "vix", nombre: "📺 VIX", keys: ["VIX", "vix"] },
+  { id: "plex", nombre: "📺 PLEX", keys: ["PLEX", "plex"] },
+  {
+    id: "apple",
+    nombre: "📺 APPLE TV+",
+    keys: ["APPLE TV+", "APPLE-TV", "apple", "APPLE"],
+  },
+  {
+    id: "paramount",
+    nombre: "📺 PARAMOUNT+",
+    keys: ["PARAMOUNT+", "PARAMOUNT", "paramount"],
+  },
+  { id: "mubi", nombre: "📺 MUBI", keys: ["MUBI", "mubi"] },
+  { id: "youtube", nombre: "📺 YOUTUBE PREMIUM", keys: ["YOUTUBE", "youtube"] },
+  { id: "iptv", nombre: "📺 IPTV SMARTERS", keys: ["IPTV", "iptv"] },
+  { id: "flujo", nombre: "📺 FLUJO TV", keys: ["FLUJO TV", "FLUJO", "flujo"] },
+  {
+    id: "directv_go",
+    nombre: "📺 DIRECTV GO (DGO)",
+    keys: ["DIRECTV GO (DGO)", "DIRECTV GO", "DIRECTV-GO", "directv_go"],
+  },
+  { id: "emby", nombre: "📺 EMBY", keys: ["EMBY", "emby"] },
+];
+
 window.cargarStockSelectCargas = function () {
   const selectPlat = document.getElementById("loadPlataforma");
   if (!selectPlat) return;
-
-  const plataformasMap = [
-    { id: "AMAZON-PRIME-VIDEO", nombre: "AMAZON PRIME VIDEO" },
-    { id: "APPLE-TV", nombre: "APPLE TV+" },
-    { id: "DISNEY-PREMIUM", nombre: "DISNEY PREMIUM" },
-    { id: "HBO-MAX", nombre: "HBO MAX" },
-    { id: "DISNEY-ESTANDAR", nombre: "DISNEY ESTANDAR" },
-    { id: "PLEX", nombre: "PLEX" },
-    { id: "CRUNCHYROLL", nombre: "CRUNCHYROLL" },
-    { id: "VIX", nombre: "VIX" },
-    { id: "UNIVERSAL", nombre: "UNIVERSAL" },
-    { id: "PARAMOUNT", nombre: "PARAMOUNT" },
-    { id: "DIRECTV-GO", nombre: "DIRECTV GO (DGO)" },
-    { id: "CANVA", nombre: "CANVA" },
-    { id: "CAPCUT", nombre: "CAPCUT" },
-    { id: "SPOTIFY", nombre: "SPOTIFY" },
-    { id: "YOUTUBE", nombre: "YOUTUBE" },
-    { id: "METEGOL", nombre: "METEGOL" },
-    { id: "DEEZER", nombre: "DEEZER" },
-    { id: "MUBI", nombre: "MUBI" },
-    { id: "IPTV", nombre: "IPTV" },
-    { id: "FLUJO", nombre: "FLUJO TV" },
-    { id: "EMBY", nombre: "EMBY" },
-  ];
 
   const formData = new FormData();
   formData.append("accion", "obtener_stock_plataformas");
@@ -534,16 +576,24 @@ window.cargarStockSelectCargas = function () {
       let stock = res && res.status === "success" ? res.stock || {} : {};
       let html =
         '<option value="" disabled selected>Selecciona Plataforma...</option>';
-      plataformasMap.forEach((p) => {
-        let cant = stock[p.nombre] !== undefined ? stock[p.nombre] : 0;
+
+      window.plataformasCargaMap.forEach((p) => {
+        let cant = 0;
+        for (let k of p.keys) {
+          if (stock[k] !== undefined) {
+            cant = stock[k];
+            break;
+          }
+        }
         html += `<option value="${p.id}">${p.nombre} (${cant} libres)</option>`;
       });
+
       selectPlat.innerHTML = html;
     })
     .catch(() => {
       let html =
         '<option value="" disabled selected>Selecciona Plataforma...</option>';
-      plataformasMap.forEach((p) => {
+      window.plataformasCargaMap.forEach((p) => {
         html += `<option value="${p.id}">${p.nombre}</option>`;
       });
       selectPlat.innerHTML = html;
@@ -591,7 +641,7 @@ window.ejecutarCargaLote = function (e) {
   }
 
   btnSubmit.disabled = true;
-  btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Cargando en MySQL...`;
+  btnSubmit.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px; vertical-align:middle;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Cargando en MySQL...`;
 
   const formData = new FormData();
   formData.append("accion", "agregar");
@@ -628,8 +678,8 @@ window.ejecutarCargaLote = function (e) {
 
         document.getElementById("loadCuentasBloque").value = "";
         document.getElementById("formCargarCuentas").reset();
-        document.getElementById("wrapperProveedorManual").style.display =
-          "none";
+        const wrapperManual = document.getElementById("wrapperProveedorManual");
+        if (wrapperManual) wrapperManual.style.display = "none";
 
         window.renderizarCargadasEsteTurno();
         window.cargarStockSelectCargas();
@@ -668,21 +718,21 @@ window.renderizarCargadasEsteTurno = function () {
 
   let html = "";
   window.cuentasCargadasEsteTurno.forEach((c) => {
-    const correoEsc = encodeURIComponent(c.correo);
-    const claveEsc = encodeURIComponent(c.clave);
+    const correoEsc = encodeURIComponent(c.correo || "");
+    const claveEsc = encodeURIComponent(c.clave || "");
 
     html += `
       <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
         <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden; flex-grow: 1;">
-          <span style="color: #0a84ff; font-weight: 800; font-family: monospace; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.correo}</span>
-          <span style="color: #30d158; font-weight: 700; font-family: monospace; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.clave}</span>
+          <span style="color: #0a84ff; font-weight: 800; font-family: monospace; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.correo || "-"}</span>
+          <span style="color: #30d158; font-weight: 700; font-family: monospace; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.clave || "-"}</span>
         </div>
 
         <div style="display: flex; gap: 6px; flex-shrink: 0;">
-          <button onclick="window.copiarDatoCargaIndividual(this, '${correoEsc}')" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">
+          <button onclick="window.copiarTextoUnico(this, '${correoEsc}')" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">
             Correo
           </button>
-          <button onclick="window.copiarDatoCargaIndividual(this, '${claveEsc}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">
+          <button onclick="window.copiarTextoUnico(this, '${claveEsc}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">
             Clave
           </button>
         </div>
@@ -1096,7 +1146,7 @@ window.renderizarTablaSuspendidas = function () {
         if (!dato || dato === "-") return "";
         const datoLimpio = String(dato).replace(/'/g, "\\'");
         return `
-          <button onclick="window.copiarDatoCargaIndividual(this, '${datoLimpio}')" title="${titulo}" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'">
+          <button onclick="window.copiarTextoUnico(this, '${datoLimpio}')" title="${titulo}" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           </button>
         `;
@@ -1348,7 +1398,7 @@ window.renderizarTablaNeyop = function () {
   }
 
   html += `</tbody></table>`;
-  container.innerHTML = html;
+  contenedor.innerHTML = html;
 };
 
 window.marcarListoNeyop = function (filaIndex, btnElement) {
@@ -1563,6 +1613,7 @@ window.extraerPinIndividual = function (correo, btnElement) {
   script.src = `${GOOGLE_SCRIPT_URL}?action=procesarPinIndividualSuspendidas&correo=${encodeURIComponent(correo)}&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
+
 window.cambiarCuentaMalaAlias = function () {
   if (typeof haptic === "function") haptic();
   if (confirm("¿Deseas descartar esta cuenta y cerrar el modal?")) {
