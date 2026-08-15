@@ -940,3 +940,126 @@ window.filtrarHorasInternas = function () {
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(window.cargarUsuariosBaseMySQL, 1500);
 });
+/* ==========================================================================
+   ⏱️ WIDGET FLOTANTE: RASTREADOR DE TURNO (CADA 5 MINUTOS)
+   ========================================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+  const widgetHTML = `
+    <div id="cyberTracker" style="position: fixed; bottom: 25px; right: 25px; z-index: 20000; background: rgba(15,15,18,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); transition: 0.3s;">
+      <div id="trackerDot" style="width: 10px; height: 10px; border-radius: 50%; background: #ff453a; box-shadow: 0 0 8px #ff453a; transition: 0.3s;"></div>
+      <span id="trackerTime" style="color: #fff; font-family: monospace; font-size: 1.15rem; font-weight: 800; letter-spacing: 1px; min-width: 75px; text-align: center;">00:00:00</span>
+      <button id="btnTrackerPlay" onclick="toggleTrackerShift()" style="background: #30d158; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;">
+        <svg id="iconPlay" viewBox="0 0 24 24" width="16" height="16" fill="white" style="margin-left: 2px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        <svg id="iconPause" viewBox="0 0 24 24" width="14" height="14" fill="white" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+      </button>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", widgetHTML);
+});
+
+let secCronometro = 0;
+let uiInterval = null;
+let syncInterval = null;
+let turnoActivo = false;
+
+window.toggleTrackerShift = function () {
+  if (turnoActivo) detenerTurno();
+  else iniciarTurno();
+};
+
+function iniciarTurno() {
+  const activeStaff = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    ""
+  )
+    .toUpperCase()
+    .trim();
+  if (!activeStaff || activeStaff === "STAFF" || activeStaff === "CAMILO") {
+    alert(
+      "⚠️ Inicia sesión con el nombre de un Asistente para rastrear tu propio tiempo.",
+    );
+    return;
+  }
+
+  turnoActivo = true;
+  document.getElementById("trackerDot").style.background = "#30d158";
+  document.getElementById("trackerDot").style.boxShadow = "0 0 12px #30d158";
+  document.getElementById("btnTrackerPlay").style.background = "#ff453a";
+  document.getElementById("iconPlay").style.display = "none";
+  document.getElementById("iconPause").style.display = "block";
+
+  // 1. Cronómetro visual (Suma 1 segundo cada 1000ms)
+  uiInterval = setInterval(() => {
+    secCronometro++;
+    document.getElementById("trackerTime").innerText =
+      formatoSegundos(secCronometro);
+  }, 1000);
+
+  // 2. BACKUP MYSQL: Enviar 5 minutos de tiempo cada 300,000ms (5 min exactos)
+  syncInterval = setInterval(() => {
+    enviarTiempoTrackerAMySQL(activeStaff, "00:05:00");
+  }, 300000);
+
+  if (typeof triggerToast === "function")
+    triggerToast(
+      `<div style="color:var(--ios-green);">▶ Turno iniciado. Se hará copia a la BD cada 5 min.</div>`,
+    );
+}
+
+function detenerTurno() {
+  turnoActivo = false;
+  clearInterval(uiInterval);
+  clearInterval(syncInterval);
+
+  document.getElementById("trackerDot").style.background = "#ff453a";
+  document.getElementById("trackerDot").style.boxShadow = "0 0 8px #ff453a";
+  document.getElementById("btnTrackerPlay").style.background = "#30d158";
+  document.getElementById("iconPlay").style.display = "block";
+  document.getElementById("iconPause").style.display = "none";
+
+  // Calcular segundos que quedaron sobrando que aún no se habían guardado en el ciclo de 5min
+  let segundosSobrantes = secCronometro % 300;
+  if (segundosSobrantes > 0) {
+    const activeStaff = (
+      sessionStorage.getItem("active_staff") ||
+      localStorage.getItem("cyber_saved_staff") ||
+      ""
+    )
+      .toUpperCase()
+      .trim();
+    enviarTiempoTrackerAMySQL(activeStaff, formatoSegundos(segundosSobrantes));
+  }
+
+  if (typeof triggerToast === "function")
+    triggerToast(
+      `<div style="color:var(--ios-orange);">⏸ Turno finalizado y tiempo guardado en BD.</div>`,
+    );
+}
+
+function enviarTiempoTrackerAMySQL(asistente, tiempoStr) {
+  fetch(window.URL_GUARDAR_HORAS_MANUAL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `vendedor=${encodeURIComponent(asistente)}&tiempo=${encodeURIComponent(tiempoStr)}&fecha=hoy`,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      // Si la BD se actualiza bien, forzamos un refresco visual si el modal está abierto
+      if (
+        res.status === "success" &&
+        typeof window.cargarHorasDesdeMySQL === "function"
+      ) {
+        window.cargarHorasDesdeMySQL();
+      }
+    })
+    .catch((e) => console.error("Error guardando ciclo de tiempo:", e));
+}
+
+function formatoSegundos(totalSeg) {
+  let h = Math.floor(totalSeg / 3600);
+  let m = Math.floor((totalSeg % 3600) / 60);
+  let s = totalSeg % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
