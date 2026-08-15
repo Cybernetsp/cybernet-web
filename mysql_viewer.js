@@ -260,7 +260,6 @@ function cargarDatosMySQL() {
             let numeroVal = fila.numero || fila.telefono || "-";
             let fechaPagoVal = fila.fecha || "-";
 
-            // 💰 CAPTURA DE PAGO DE REGISTRO VENTAS INCLUYENDO 'pago_total'
             let valorValRaw =
               fila.pago_total ||
               fila.valor ||
@@ -273,11 +272,10 @@ function cargarDatosMySQL() {
               "-";
             let valorVal = formatearMontoMoneda(valorValRaw);
 
-            // 🏦 CAPTURA DE MÉTODO/BANCO DE VENTAS
             let pagoVal =
+              fila.pago ||
               fila.metodo ||
               fila.banco ||
-              fila.pago ||
               fila.medio_pago ||
               fila.metodo_pago ||
               "-";
@@ -389,9 +387,7 @@ function cargarDatosMySQL() {
             let celdaTelefono =
               numeroVal !== "-" && numeroVal.trim() !== ""
                 ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; white-space: nowrap; cursor: pointer; display: inline-block;" title="${numeroVal}">${numeroVal}</span>`
-                : esSuperAdmin
-                  ? `<button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Agregar Teléfono" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: var(--ios-green); padding: 4px 10px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.8rem; display: inline-flex; align-items: center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>`
-                  : '<span style="color: #a1a1aa;">-</span>';
+                : `<button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Agregar Teléfono" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: var(--ios-green); padding: 4px 10px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.8rem; display: inline-flex; align-items: center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>`;
 
             const tdBase =
               "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
@@ -402,13 +398,13 @@ function cargarDatosMySQL() {
             if (esNetflix) {
               let botonesAccionNetflix = `
                 <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
+                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  </button>
               `;
 
               if (esSuperAdmin) {
                 botonesAccionNetflix += `
-                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  </button>
                   <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   </button>
@@ -451,7 +447,7 @@ function cargarDatosMySQL() {
               `;
             }
             // ─────────────────────────────────────────────────────────────
-            // 2. VISTA REGISTRO VENTAS (PAGO_TOTAL + METODO OBLIGATORIOS)
+            // 2. VISTA REGISTRO VENTAS
             // ─────────────────────────────────────────────────────────────
             else if (esVentas) {
               let platVta =
@@ -465,12 +461,15 @@ function cargarDatosMySQL() {
                 </div>
               `;
 
-              let botonesAccionVentas = `<div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">`;
-              if (esSuperAdmin) {
-                botonesAccionVentas += `
+              let botonesAccionVentas = `
+                <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
                   <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                   </button>
+              `;
+
+              if (esSuperAdmin) {
+                botonesAccionVentas += `
                   <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   </button>
@@ -491,7 +490,7 @@ function cargarDatosMySQL() {
               `;
             }
             // ─────────────────────────────────────────────────────────────
-            // 3. VISTA GARANTÍAS
+            // 3. VISTA GARANTÍAS (HABILITADO BOTÓN COPIAR REPORTE)
             // ─────────────────────────────────────────────────────────────
             else if (esGarantias) {
               let platGar = (fila.plataforma || "-").toUpperCase();
@@ -509,8 +508,14 @@ function cargarDatosMySQL() {
                   ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; cursor: pointer;" title="${claveVal}">${claveVal}</span>`
                   : "-";
 
+              let textoReporteGar = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platGar}\n📧 *Correo:* ${correoVal}\n🔑 *Clave:* ${claveVal}\n👤 *Proveedor:* ${provVal}\n📅 *Fecha Compra:* ${fechaGar}`;
+              let textoEscapadoReporteGar = encodeURIComponent(textoReporteGar);
+
               let botonesAccionGarantias = `
                 <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; white-space: nowrap;">
+                  <button onclick="copiarAccesoMySQL(this, '${textoEscapadoReporteGar}')" title="Copiar Reporte de Garantía" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                    📋 Reporte
+                  </button>
                   <button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${platGar.toLowerCase()}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                     ✔️ Resolver
                   </button>
@@ -535,18 +540,18 @@ function cargarDatosMySQL() {
               `;
             }
             // ─────────────────────────────────────────────────────────────
-            // 4. DEMÁS PLATAFORMAS (DISNEY, HBO, AMAZON, ETC.)
+            // 4. DEMÁS PLATAFORMAS
             // ─────────────────────────────────────────────────────────────
             else {
               let botonesAccionDemas = `
                 <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
+                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  </button>
               `;
 
               if (esSuperAdmin) {
                 botonesAccionDemas += `
-                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  </button>
                   <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   </button>
@@ -707,9 +712,21 @@ function guardarNuevoRegistroMySQL(e) {
     });
 }
 
+// 🌟 CARGA DE DATOS EN EL MODAL COMPACTO DE EDICIÓN (BLOQUEO DE CORREO SI NO ES SUPERADMIN)
 function abrirModalEditarMySQL(filaEscapada) {
   if (typeof haptic === "function") haptic();
   const fila = JSON.parse(decodeURIComponent(filaEscapada));
+
+  const usuarioActivoObj = JSON.parse(
+    sessionStorage.getItem("usuario_activo") || "{}",
+  );
+  const usuarioNombre = (
+    usuarioActivoObj.nombre ||
+    sessionStorage.getItem("active_staff") ||
+    ""
+  ).toUpperCase();
+  const esSuperAdminLocal =
+    usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
 
   const iId = document.getElementById("editMySQLId");
   const iCorreo = document.getElementById("editMySQLCorreo");
@@ -724,7 +741,15 @@ function abrirModalEditarMySQL(filaEscapada) {
   const iPago = document.getElementById("editMySQLPago");
 
   if (iId) iId.value = fila.id || "";
-  if (iCorreo) iCorreo.value = fila.correo || fila.usuario || "";
+  if (iCorreo) {
+    iCorreo.value = fila.correo || fila.usuario || "";
+    iCorreo.readOnly = !esSuperAdminLocal;
+    iCorreo.style.opacity = esSuperAdminLocal ? "1" : "0.6";
+    iCorreo.style.cursor = esSuperAdminLocal ? "text" : "not-allowed";
+    iCorreo.title = esSuperAdminLocal
+      ? ""
+      : "Solo administradores pueden cambiar el correo";
+  }
   if (iClave) iClave.value = fila.clave || fila.contrasena || "";
   if (iPerfil) iPerfil.value = fila.perfil || "";
   if (iPin) iPin.value = fila.pin || "";
