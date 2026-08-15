@@ -46,7 +46,8 @@ window.toggleShiftsPanel = function () {
   }
 };
 
-// 🔄 CARGAR DATOS DESDE PHP MYSQL CON MANEJO DE ERRORES MEJORADO
+window.URL_API_HORAS = "https://api.cybernetsp.com/obtener_horas.php"; // 👈 Asegúrate que esta URL sea correcta
+
 window.cargarHorasDesdeMySQL = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -59,29 +60,34 @@ window.cargarHorasDesdeMySQL = function () {
       </div>
     </div>`;
 
-  fetch(window.URL_OBTENER_HORAS)
+  fetch(window.URL_API_HORAS)
     .then(async (res) => {
-      const text = await res.text();
+      const text = await res.text(); // Leemos el texto crudo primero
       try {
-        return JSON.parse(text);
+        return JSON.parse(text); // Intentamos convertirlo
       } catch (e) {
-        console.error("Respuesta cruda de PHP:", text);
-        throw new Error(
-          "El PHP devolvió un formato no válido. Revisa los logs.",
-        );
+        // 🔥 SI FALLA, RETORNA EL TEXTO BASURA PARA VER QUÉ IMPRIMIÓ PHP
+        console.error("Respuesta basura de PHP:", text);
+        return {
+          status: "error",
+          message:
+            "Formato inválido de PHP: <br><span style='color:white; font-family:monospace; background:rgba(0,0,0,0.5); padding:4px; display:block; margin-top:8px;'>" +
+            text.substring(0, 150) +
+            "...</span>",
+        };
       }
     })
     .then((res) => {
       if (res && res.status === "success") {
         window.currentHorasStock = res.data || [];
-        window.renderizarHorasEnPantalla();
+        window.renderizarHorasEnPantalla(); // Llama a la función del calendario iPadOS que te pasé antes
       } else {
-        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Error consultando MySQL."}</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Fallo al consultar la base de datos."}</div>`;
       }
     })
     .catch((err) => {
-      console.error("Error cargando turnos:", err);
-      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${err.message}</div>`;
+      console.error("Error al cargar horas:", err);
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error de Red: ${err.message}</div>`;
     });
 };
 
