@@ -3,37 +3,44 @@
    ========================================================================== */
 
 /* ==========================================================================
-   📡 WIDGET PAGOS BRE-B EN VIVO (CONECTADO A PHP)
+   📡 WIDGET FLOTANTE IZQUIERDO: PAGOS BRE-B EN VIVO (CONEXIÓN PHP / MYSQL)
    ========================================================================== */
 let autoHideTimer = null;
 let cantidadPagosAnterior = 0;
 
-window.filtrarPagosEnVivo = function () {
-  const texto = document.getElementById("breb-buscador").value.toLowerCase();
-  const tarjetas = document.querySelectorAll("#breb-lista .breb-card");
-
-  tarjetas.forEach((tarjeta) => {
-    const contenido = tarjeta.innerText.toLowerCase();
-    tarjeta.style.display = contenido.includes(texto) ? "flex" : "none";
-  });
-  window.iniciarAutoOcultado();
-};
-
+// 🚪 MOSTRAR / EXPANDIR WIDGET DE PAGOS BRE-B
 window.mostrarWidgetBreB = function () {
-  document.getElementById("btn-expand-breb").style.display = "none";
-  document.getElementById("breb-widget").style.transform = "translateX(0)";
-  document.getElementById("breb-widget").style.display = "flex";
+  if (typeof haptic === "function") haptic();
+
+  const btnExpand = document.getElementById("btn-expand-breb");
+  const widget = document.getElementById("breb-widget");
+
+  if (btnExpand) btnExpand.style.display = "none";
+  if (widget) {
+    widget.style.display = "flex";
+    // Forzar reflow para animación fluida CSS
+    void widget.offsetWidth;
+    widget.style.transform = "translateX(0)";
+  }
 
   window.establecerFechaHoy();
   window.cargarPagosBreB();
   window.iniciarAutoOcultado();
 };
 
+// 🚪 OCULTAR / COLAPSAR WIDGET DE PAGOS BRE-B
 window.ocultarWidgetBreB = function () {
-  document.getElementById("breb-widget").style.transform = "translateX(-350px)";
+  if (typeof haptic === "function") haptic();
+
+  const widget = document.getElementById("breb-widget");
+  const btnExpand = document.getElementById("btn-expand-breb");
+
+  if (widget) widget.style.transform = "translateX(-360px)";
+
   setTimeout(() => {
-    document.getElementById("btn-expand-breb").style.display = "flex";
-  }, 300);
+    if (widget) widget.style.display = "none";
+    if (btnExpand) btnExpand.style.display = "flex";
+  }, 320);
 
   if (autoHideTimer) {
     clearTimeout(autoHideTimer);
@@ -41,6 +48,7 @@ window.ocultarWidgetBreB = function () {
   }
 };
 
+// ⏱️ TEMPORIZADOR DE AUTO-OCULTADO (60 SEGUNDOS)
 window.iniciarAutoOcultado = function () {
   if (autoHideTimer) clearTimeout(autoHideTimer);
   autoHideTimer = setTimeout(() => {
@@ -48,18 +56,37 @@ window.iniciarAutoOcultado = function () {
   }, 60000);
 };
 
+// 🔄 REFRESCAR MANUALMENTE Y REINICIAR TEMPORIZADOR
 window.forzarActualizacionBreB = function () {
+  if (typeof haptic === "function") haptic();
   const icono = document.getElementById("icon-refresh-breb");
   if (icono) icono.classList.add("spin-breb-anim");
+
   window.cargarPagosBreB();
   window.iniciarAutoOcultado();
 };
 
+// 🔍 FILTRADO EN TIEMPO REAL DESDE EL BUSCADOR INTERNO
+window.filtrarPagosEnVivo = function () {
+  const buscador = document.getElementById("breb-buscador");
+  const texto = buscador ? buscador.value.toLowerCase().trim() : "";
+  const tarjetas = document.querySelectorAll("#breb-lista .breb-card");
+
+  tarjetas.forEach((tarjeta) => {
+    const contenido = tarjeta.innerText.toLowerCase();
+    tarjeta.style.display = contenido.includes(texto) ? "flex" : "none";
+  });
+
+  window.iniciarAutoOcultado();
+};
+
+// 📅 CAMBIO DE FECHA
 window.alCambiarFechaBreB = function () {
   window.cargarPagosBreB();
   window.iniciarAutoOcultado();
 };
 
+// 📅 AUTOFILLED DE FECHA HOY
 window.establecerFechaHoy = function () {
   const inputFecha = document.getElementById("breb-fecha");
   if (inputFecha && !inputFecha.value) {
@@ -71,22 +98,37 @@ window.establecerFechaHoy = function () {
   }
 };
 
+// 📥 CONSULTA DE PAGOS DESDE PHP / MYSQL
 window.cargarPagosBreB = function () {
   const contenedor = document.getElementById("breb-lista");
   if (!contenedor) return;
 
-  contenedor.innerHTML = `<div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; padding: 40px 0;">Buscando pagos en Base de Datos...</div>`;
+  contenedor.innerHTML = `
+    <div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; font-weight: 700; padding: 40px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+      <svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+      <span>Buscando pagos en Base de Datos...</span>
+    </div>`;
+
   const buscador = document.getElementById("breb-buscador");
   if (buscador) buscador.value = "";
 
-  fetch("https://api.cybernetsp.com/obtener_pagos_breb.php")
+  const inputFecha = document.getElementById("breb-fecha");
+  const fechaVal = inputFecha ? inputFecha.value : "";
+
+  let url = "https://api.cybernetsp.com/obtener_pagos_breb.php";
+  if (fechaVal) {
+    url += `?fecha=${encodeURIComponent(fechaVal)}`;
+  }
+
+  fetch(url)
     .then((res) => res.json())
     .then((data) => {
       const icono = document.getElementById("icon-refresh-breb");
       if (icono) icono.classList.remove("spin-breb-anim");
       contenedor.innerHTML = "";
 
-      if (data.status === "success" && data.data.length > 0) {
+      if (data.status === "success" && data.data && data.data.length > 0) {
+        // Sonido de notificación si hay nuevos pagos detectados
         if (
           cantidadPagosAnterior > 0 &&
           data.data.length > cantidadPagosAnterior
@@ -95,35 +137,45 @@ window.cargarPagosBreB = function () {
         }
         cantidadPagosAnterior = data.data.length;
 
+        let htmlCards = "";
         data.data.forEach((pago) => {
           const nombreMayusculas = pago.nombre
             ? pago.nombre.toUpperCase()
-            : "CLIENTE DESCONOCIDO";
-          contenedor.innerHTML += `
-            <div class="breb-card">
+            : (pago.remitente ? pago.remitente.toUpperCase() : "CLIENTE DESCONOCIDO");
+
+          const valorFormateado = pago.valor || pago.monto || "0";
+          const horaFmt = pago.hora || "";
+          const fechaFmt = pago.fecha || "";
+
+          htmlCards += `
+            <div class="breb-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s ease;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #30d158; font-weight: 800; font-size: 17px;">+$${pago.valor || "0"}</span>
-                <span style="color: rgba(255,255,255,0.7); font-size: 10px; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 6px;">${pago.hora || ""}</span>
+                <span style="color: #30d158; font-weight: 900; font-size: 1rem; font-family: monospace;">+$${valorFormateado}</span>
+                <span style="color: rgba(255,255,255,0.6); font-size: 0.7rem; font-family: monospace; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 6px;">${horaFmt}</span>
               </div>
-              <div style="color: #ffffff; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; text-transform: uppercase !important;">
+              <div style="color: #ffffff; font-size: 0.82rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">
                 👤 ${nombreMayusculas}
               </div>
-              <div style="color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 2px;">
-                📅 ${pago.fecha || ""}
+              <div style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">
+                📅 ${fechaFmt}
               </div>
             </div>
           `;
         });
+
+        contenedor.innerHTML = htmlCards;
       } else {
-        contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 12px; padding: 30px 0;">No se detectaron pagos hoy.</div>`;
+        contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 0.8rem; font-weight: 600; padding: 30px 0;">📭 No se detectaron pagos para esta fecha.</div>`;
       }
     })
     .catch((err) => {
       const icono = document.getElementById("icon-refresh-breb");
       if (icono) icono.classList.remove("spin-breb-anim");
-      contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 12px; padding: 20px 0;">❌ Error conectando a MySQL.</div>`;
+      contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 0.8rem; font-weight: 700; padding: 20px 0;">❌ Error de conexión con el servidor.</div>`;
+      console.error("Error BRE-B:", err);
     });
 };
+
 
 /* ==========================================================================
    📋 PLANTILLAS DESDE MYSQL Y MOTORES DE COPIADO
@@ -414,10 +466,10 @@ function lanzarErrorCopia(imgElement) {
   );
 }
 
+
 /* ==========================================================================
    📩 BANDEJA DE CÓDIGOS DE ACCESO (MYSQL / GMAIL)
    ========================================================================== */
-// Override para ejecutar la carga automáticamente al abrir
 const oldToggleCodesPanel = window.toggleCodesPanel;
 window.toggleCodesPanel = function () {
   if (oldToggleCodesPanel) oldToggleCodesPanel();
@@ -500,6 +552,7 @@ window.filtrarCodigosInternos = function () {
       : "none";
   }
 };
+
 
 /* ==========================================================================
    👁️ BÓVEDAS (ANA Y CHAYO) E IFRAMES
@@ -608,6 +661,7 @@ window.copiarCredencialChayo = function (texto, btn, tipo) {
   });
 };
 
+
 /* ==========================================================================
    🟡 YOPMAIL
    ========================================================================== */
@@ -628,6 +682,7 @@ window.buscarYopmailDirecto = function (correoPrefix) {
   let correo = correoPrefix.replace("@yopmail.com", "");
   window.open(`https://yopmail.com/es/?login=${correo}`, "_blank");
 };
+
 
 /* ==========================================================================
    🔴 GMAIL GLOBAL
@@ -759,6 +814,7 @@ window.cerrarLectorCorreoGlobal = function () {
   if (visorModal) visorModal.style.display = "none";
   if (visorContent) visorContent.innerHTML = "";
 };
+
 
 /* ==========================================================================
    🔔 RECORDATORIOS DE WHATSAPP (BLOQUES W1 Y W2)
