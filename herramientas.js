@@ -3,74 +3,71 @@
    ========================================================================== */
 
 /* ==========================================================================
-   📡 WIDGET FLOTANTE IZQUIERDO: PAGOS BRE-B (AUTO-INYECCIÓN & CONEXIÓN PHP)
+   📡 WIDGET FLOTANTE IZQUIERDO: PAGOS BRE-B EN VIVO (ESTÁTICO / AUTO-INYECCIÓN)
    ========================================================================== */
-let autoHideTimer = null;
 let cantidadPagosAnterior = 0;
 
 // 1. AUTO-INYECTOR DE ESTRUCTURA Y ESTILOS PARA PAGOS BRE-B EN EL DOM
 function inyectarEstructuraBreB() {
   if (document.getElementById("breb-widget")) return;
 
-  // Inyectar Estilos CSS
+  // Inyectar Estilos CSS con máxima prioridad (!important)
   const style = document.createElement("style");
   style.id = "breb-dynamic-css";
   style.innerHTML = `
     #btn-expand-breb {
-      position: fixed;
-      top: 180px;
-      left: 0;
-      z-index: 99998;
-      background: rgba(20, 20, 25, 0.92);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(48, 209, 88, 0.4);
-      border-left: none;
-      border-radius: 0 14px 14px 0;
-      padding: 12px 8px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 6px 8px 24px rgba(0, 0, 0, 0.5);
-      transition: all 0.3s ease;
+      position: fixed !important;
+      top: 180px !important;
+      left: 0 !important;
+      z-index: 99998 !important;
+      background: rgba(20, 20, 25, 0.92) !important;
+      backdrop-filter: blur(16px) !important;
+      border: 1px solid rgba(48, 209, 88, 0.4) !important;
+      border-left: none !important;
+      border-radius: 0 14px 14px 0 !important;
+      padding: 12px 8px !important;
+      cursor: pointer !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 8px !important;
+      box-shadow: 6px 8px 24px rgba(0, 0, 0, 0.5) !important;
+      transition: all 0.3s ease !important;
     }
     #btn-expand-breb:hover {
-      background: rgba(30, 30, 38, 0.98);
-      border-color: #30d158;
-      box-shadow: 8px 10px 28px rgba(48, 209, 88, 0.3);
+      background: rgba(30, 30, 38, 0.98) !important;
+      border-color: #30d158 !important;
+      box-shadow: 8px 10px 28px rgba(48, 209, 88, 0.3) !important;
     }
     .breb-vertical-txt {
-      writing-mode: vertical-rl;
-      text-transform: uppercase;
-      font-size: 0.7rem;
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      writing-mode: vertical-rl !important;
+      text-transform: uppercase !important;
+      font-size: 0.72rem !important;
+      font-weight: 900 !important;
+      letter-spacing: 1.5px !important;
+      color: #ffffff !important;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
     #breb-widget {
-      position: fixed;
-      top: 100px;
-      left: 0;
-      z-index: 99999;
-      width: 340px;
-      height: 520px;
-      background: rgba(18, 18, 22, 0.95);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-left: none;
-      border-radius: 0 20px 20px 0;
-      box-shadow: 12px 12px 35px rgba(0, 0, 0, 0.6);
-      display: none;
-      flex-direction: column;
-      transform: translateX(-360px);
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      position: fixed !important;
+      top: 100px !important;
+      left: 15px !important;
+      z-index: 99998 !important;
+      width: 330px !important;
+      height: 520px !important;
+      background: rgba(18, 18, 22, 0.95) !important;
+      backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(48, 209, 88, 0.3) !important;
+      border-radius: 18px !important;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      transition: opacity 0.25s ease, transform 0.25s ease !important;
     }
     .spin-breb-anim {
-      animation: spinBreB 0.8s linear infinite;
+      animation: spinBreB 0.8s linear infinite !important;
     }
     @keyframes spinBreB {
       from { transform: rotate(0deg); }
@@ -79,11 +76,12 @@ function inyectarEstructuraBreB() {
   `;
   document.head.appendChild(style);
 
-  // Inyectar Botón Flotante Izquierdo
+  // Inyectar Botón Flotante Pestaña Izquierda
   const btn = document.createElement("div");
   btn.id = "btn-expand-breb";
   btn.title = "Abrir Pagos BRE-B";
   btn.onclick = window.mostrarWidgetBreB;
+  btn.style.display = "none"; // Inicia oculto si la ventana abre estática
   btn.innerHTML = `
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="9 18 15 12 9 6"></polyline>
@@ -92,7 +90,7 @@ function inyectarEstructuraBreB() {
   `;
   document.body.appendChild(btn);
 
-  // Inyectar Ventana Flotante Deslizante
+  // Inyectar Ventana Flotante Estática
   const widget = document.createElement("div");
   widget.id = "breb-widget";
   widget.innerHTML = `
@@ -109,15 +107,19 @@ function inyectarEstructuraBreB() {
       </div>
     </div>
     <div style="padding: 10px 14px; display: flex; gap: 8px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-      <input type="date" id="breb-fecha" onchange="window.alCambiarFechaBreB()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 8px; font-size: 0.75rem; width: 125px; outline: none;">
+      <input type="date" id="breb-fecha" onchange="window.alCambiarFechaBreB()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 8px; font-size: 0.75rem; width: 120px; outline: none;">
       <input type="text" id="breb-buscador" placeholder="Buscar cliente..." onkeyup="window.filtrarPagosEnVivo()" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; outline: none;">
     </div>
     <div id="breb-lista" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
   `;
   document.body.appendChild(widget);
+
+  // Inicializar datos
+  window.establecerFechaHoy();
+  window.cargarPagosBreB();
 }
 
-// 🚪 MOSTRAR / EXPANDIR WIDGET DE PAGOS BRE-B
+// 🚪 MOSTRAR WIDGET ESTÁTICO DE PAGOS BRE-B
 window.mostrarWidgetBreB = function () {
   if (typeof haptic === "function") haptic();
 
@@ -127,51 +129,39 @@ window.mostrarWidgetBreB = function () {
   if (btnExpand) btnExpand.style.display = "none";
   if (widget) {
     widget.style.display = "flex";
-    void widget.offsetWidth;
+    widget.style.opacity = "1";
     widget.style.transform = "translateX(0)";
   }
 
   window.establecerFechaHoy();
   window.cargarPagosBreB();
-  window.iniciarAutoOcultado();
 };
 
-// 🚪 OCULTAR / COLAPSAR WIDGET DE PAGOS BRE-B
+// 🚪 OCULTAR WIDGET DE PAGOS BRE-B (CEDE ESPACIO AL BOTÓN FLOTANTE)
 window.ocultarWidgetBreB = function () {
   if (typeof haptic === "function") haptic();
 
   const widget = document.getElementById("breb-widget");
   const btnExpand = document.getElementById("btn-expand-breb");
 
-  if (widget) widget.style.transform = "translateX(-360px)";
+  if (widget) {
+    widget.style.opacity = "0";
+    widget.style.transform = "translateX(-360px)";
+  }
 
   setTimeout(() => {
     if (widget) widget.style.display = "none";
     if (btnExpand) btnExpand.style.display = "flex";
-  }, 320);
-
-  if (autoHideTimer) {
-    clearTimeout(autoHideTimer);
-    autoHideTimer = null;
-  }
+  }, 250);
 };
 
-// ⏱️ TEMPORIZADOR DE AUTO-OCULTADO (60 SEGUNDOS)
-window.iniciarAutoOcultado = function () {
-  if (autoHideTimer) clearTimeout(autoHideTimer);
-  autoHideTimer = setTimeout(() => {
-    window.ocultarWidgetBreB();
-  }, 60000);
-};
-
-// 🔄 REFRESCAR MANUALMENTE Y REINICIAR TEMPORIZADOR
+// 🔄 REFRESCAR MANUALMENTE
 window.forzarActualizacionBreB = function () {
   if (typeof haptic === "function") haptic();
   const icono = document.getElementById("icon-refresh-breb");
   if (icono) icono.classList.add("spin-breb-anim");
 
   window.cargarPagosBreB();
-  window.iniciarAutoOcultado();
 };
 
 // 🔍 FILTRADO EN TIEMPO REAL DESDE EL BUSCADOR INTERNO
@@ -184,14 +174,11 @@ window.filtrarPagosEnVivo = function () {
     const contenido = tarjeta.innerText.toLowerCase();
     tarjeta.style.display = contenido.includes(texto) ? "flex" : "none";
   });
-
-  window.iniciarAutoOcultado();
 };
 
 // 📅 CAMBIO DE FECHA
 window.alCambiarFechaBreB = function () {
   window.cargarPagosBreB();
-  window.iniciarAutoOcultado();
 };
 
 // 📅 AUTOFILLED DE FECHA HOY
@@ -285,7 +272,7 @@ window.cargarPagosBreB = function () {
     });
 };
 
-// Inicialización automática de la estructura BRE-B al cargar el JS
+// Inicialización automática de la estructura BRE-B al cargar
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", inyectarEstructuraBreB);
 } else {
