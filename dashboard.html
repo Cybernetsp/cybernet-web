@@ -9542,7 +9542,7 @@
     </div>
 
     <!-- ==========================================================================
-   💳 MODAL DE PAGOS BRE-B (GMAIL) - REDISEÑO GLASS CYBERNET
+   💳 MODAL DE PAGOS BRE-B (GMAIL) - DISEÑO LINEAL & TOTAL SUPERADMIN
    ========================================================================== -->
     <div
       id="brebOverlay"
@@ -9565,14 +9565,12 @@
       <div
         style="
           width: 92%;
-          max-width: 460px;
+          max-width: 480px;
           height: 580px;
           background: rgba(18, 18, 24, 0.96);
           border: 1px solid rgba(48, 209, 88, 0.35);
           border-radius: 24px;
-          box-shadow:
-            0 25px 50px -12px rgba(0, 0, 0, 0.85),
-            0 0 30px rgba(48, 209, 88, 0.12);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
           display: flex;
           flex-direction: column;
           overflow: hidden;
@@ -9584,7 +9582,7 @@
         <!-- Encabezado de la Ventana -->
         <div
           style="
-            padding: 18px 22px;
+            padding: 16px 20px;
             background: rgba(255, 255, 255, 0.02);
             border-bottom: 1px solid rgba(255, 255, 255, 0.07);
             display: flex;
@@ -9592,7 +9590,7 @@
             align-items: center;
           "
         >
-          <div style="display: flex; align-items: center; gap: 12px">
+          <div style="display: flex; align-items: center; gap: 10px">
             <div
               style="
                 width: 32px;
@@ -9624,7 +9622,7 @@
               <div
                 style="
                   font-weight: 800;
-                  font-size: 0.95rem;
+                  font-size: 0.92rem;
                   color: #ffffff;
                   letter-spacing: 0.5px;
                 "
@@ -9642,6 +9640,43 @@
               </div>
             </div>
           </div>
+
+          <!-- BADGE TOTAL ACUMULADO (SÓLO PARA SUPERADMIN) -->
+          <div
+            id="breb-total-badge"
+            style="
+              display: none;
+              background: rgba(48, 209, 88, 0.12);
+              border: 1px solid rgba(48, 209, 88, 0.3);
+              border-radius: 10px;
+              padding: 4px 10px;
+              text-align: right;
+            "
+          >
+            <div
+              style="
+                font-size: 0.6rem;
+                color: rgba(255, 255, 255, 0.5);
+                font-weight: 800;
+                text-transform: uppercase;
+              "
+            >
+              Total Día
+            </div>
+            <div
+              id="breb-monto-total"
+              style="
+                font-size: 0.9rem;
+                font-weight: 900;
+                color: #30d158;
+                font-family: monospace;
+              "
+            >
+              $0
+            </div>
+          </div>
+
+          <!-- Botón Cerrar -->
           <button
             onclick="toggleBreBPanel()"
             style="
@@ -9666,26 +9701,14 @@
               this.style.color = 'rgba(255,255,255,0.7)';
             "
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+            ✕
           </button>
         </div>
 
-        <!-- Barra de Herramientas (Fecha, Buscador, Refrescar) -->
+        <!-- Barra de Herramientas -->
         <div
           style="
-            padding: 12px 16px;
+            padding: 10px 14px;
             background: rgba(0, 0, 0, 0.25);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
@@ -9702,55 +9725,30 @@
               border: 1px solid rgba(255, 255, 255, 0.1);
               color: #ffffff;
               border-radius: 10px;
-              padding: 8px 10px;
+              padding: 7px 9px;
               font-size: 0.75rem;
               outline: none;
               font-weight: 600;
               font-family: inherit;
             "
           />
-
-          <div
+          <input
+            type="text"
+            id="breb-buscar-modal"
+            placeholder="Buscar cliente..."
+            onkeyup="filtrarBreBModal()"
             style="
-              position: relative;
               flex: 1;
-              display: flex;
-              align-items: center;
+              background: rgba(255, 255, 255, 0.05);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              color: #ffffff;
+              border-radius: 10px;
+              padding: 7px 10px;
+              font-size: 0.78rem;
+              outline: none;
+              font-family: inherit;
             "
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgba(255,255,255,0.4)"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              style="position: absolute; left: 10px; pointer-events: none"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input
-              type="text"
-              id="breb-buscar-modal"
-              placeholder="Buscar cliente..."
-              onkeyup="filtrarBreBModal()"
-              style="
-                width: 100%;
-                background: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                color: #ffffff;
-                border-radius: 10px;
-                padding: 8px 10px 8px 30px;
-                font-size: 0.78rem;
-                outline: none;
-                font-family: inherit;
-              "
-            />
-          </div>
-
+          />
           <button
             onclick="forzarActualizacionBreBModal()"
             style="
@@ -9758,21 +9756,20 @@
               border: 1px solid rgba(10, 132, 255, 0.3);
               color: #0a84ff;
               border-radius: 10px;
-              width: 34px;
-              height: 34px;
+              width: 32px;
+              height: 32px;
               cursor: pointer;
               display: flex;
               align-items: center;
               justify-content: center;
               flex-shrink: 0;
-              transition: all 0.2s ease;
             "
             title="Refrescar"
           >
             <svg
               id="icon-refresh-breb-modal"
-              width="15"
-              height="15"
+              width="14"
+              height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -9786,16 +9783,16 @@
           </button>
         </div>
 
-        <!-- Lista de Pagos -->
+        <!-- Lista de Pagos Lineales -->
         <div
           id="breb-lista-modal"
           style="
             flex: 1;
-            padding: 14px;
+            padding: 12px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
           "
         ></div>
       </div>
