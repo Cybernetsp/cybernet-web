@@ -55,8 +55,7 @@ window.establecerFechaHoyBreBModal = function () {
 // 📥 CONSULTA EN TIEMPO REAL A GMAIL (APPS SCRIPT)
 window.cargarPagosBreBModal = function () {
   const contenedor = document.getElementById("breb-lista-modal");
-  const totalBadge = document.getElementById("breb-total-badge");
-  const totalMontoElem = document.getElementById("breb-monto-total");
+  const totalInlineElem = document.getElementById("breb-monto-total-inline");
 
   if (!contenedor) return;
 
@@ -98,9 +97,14 @@ window.cargarPagosBreBModal = function () {
           : "CLIENTE DESCONOCIDO";
         const montoStr = pago.monto || "0";
 
-        // Suma limpia del monto
+        // 🛠️ LIMPIEZA MATEMÁTICA: Elimina puntos de miles para no corromper la suma en JS
         const numMonto =
-          parseFloat(String(montoStr).replace(/[^0-9.]/g, "")) || 0;
+          parseFloat(
+            String(montoStr)
+              .replace(/\./g, "")
+              .replace(/,/g, ".")
+              .replace(/[^0-9.]/g, ""),
+          ) || 0;
         sumaTotal += numMonto;
 
         const hora = pago.hora || "";
@@ -121,11 +125,14 @@ window.cargarPagosBreBModal = function () {
       // 🛡️ VERIFICACIÓN DE ROL/USUARIO EXCLUSIVO PARA SUPERADMIN
       const usuarioActivo = (
         localStorage.getItem("usuario") ||
+        localStorage.getItem("user") ||
         sessionStorage.getItem("usuario") ||
+        window.usuarioActivo ||
         ""
       )
         .toUpperCase()
         .trim();
+
       const rolActivo = (
         localStorage.getItem("rol") ||
         sessionStorage.getItem("rol") ||
@@ -139,15 +146,15 @@ window.cargarPagosBreBModal = function () {
         rolActivo === "superadmin" ||
         usuarioActivo === "ADMIN";
 
-      if (esSuperAdmin && totalBadge && totalMontoElem) {
-        totalMontoElem.innerText = "$" + sumaTotal.toLocaleString("es-CO");
-        totalBadge.style.display = "block";
-      } else if (totalBadge) {
-        totalBadge.style.display = "none";
+      if (esSuperAdmin && totalInlineElem) {
+        totalInlineElem.innerText = "$" + sumaTotal.toLocaleString("es-CO");
+        totalInlineElem.style.display = "inline-block";
+      } else if (totalInlineElem) {
+        totalInlineElem.style.display = "none";
       }
     } else {
       contenedor.innerHTML = `<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 50px 20px; font-size: 0.85rem; font-weight: 600;">📭 No se detectaron pagos en esta fecha</div>`;
-      if (totalBadge) totalBadge.style.display = "none";
+      if (totalInlineElem) totalInlineElem.style.display = "none";
     }
   };
 
@@ -158,7 +165,7 @@ window.cargarPagosBreBModal = function () {
     delete window[callbackName];
     if (iconoRefresh) iconoRefresh.classList.remove("spin-anim");
     contenedor.innerHTML = `<div style="text-align: center; color: #ff453a; padding: 40px 20px; font-size: 0.85rem; font-weight: 700;">❌ Error al conectar con Google Script</div>`;
-    if (totalBadge) totalBadge.style.display = "none";
+    if (totalInlineElem) totalInlineElem.style.display = "none";
   };
 
   document.body.appendChild(script);
