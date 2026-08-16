@@ -25,7 +25,7 @@
       );
   };
 
-  // 2. RENDERIZADO EN PANTALLA (TOP-RIGHT)
+  // 2. RENDERIZADO EN PANTALLA (POSICIÓN Y ESTILOS)
   function renderizarWidgetsTopRight(alertasStock, garantias) {
     let container = document.getElementById("widgetsTopRightFloatingContainer");
 
@@ -34,13 +34,13 @@
       container.id = "widgetsTopRightFloatingContainer";
       container.style.cssText = `
         position: fixed;
-        top: 18px;
+        top: 65px; /* 📍 BAJADO PARA LIBERAR LA BARRA DE USUARIO (CAMILO) */
         right: 20px;
         z-index: 99999;
         display: flex;
         flex-direction: column;
         gap: 10px;
-        max-width: 300px;
+        max-width: 290px;
         width: 100%;
         pointer-events: none;
       `;
@@ -53,7 +53,7 @@
     // 🟠 WIDGET 1: STOCK CRÍTICO
     if (alertasStock && alertasStock.length > 0) {
       html += `
-        <div style="background: rgba(20, 20, 25, 0.88); backdrop-filter: blur(16px); border: 1px solid rgba(255, 159, 10, 0.35); border-radius: 14px; padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+        <div style="background: rgba(20, 20, 25, 0.92); backdrop-filter: blur(16px); border: 1px solid rgba(255, 159, 10, 0.35); border-radius: 14px; padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:6px;">
             <span style="font-size:0.75rem; font-weight:800; color:#ff9f0a; display:flex; align-items:center; gap:6px; letter-spacing:0.5px;">
               <span style="width:7px; height:7px; border-radius:50%; background:#ff9f0a; display:inline-block; box-shadow:0 0 8px #ff9f0a;"></span>
@@ -79,7 +79,7 @@
     // 🔴 WIDGET 2: GARANTÍAS ACTIVAS
     if (garantias && garantias.length > 0) {
       html += `
-        <div style="background: rgba(20, 20, 25, 0.88); backdrop-filter: blur(16px); border: 1px solid rgba(255, 69, 58, 0.35); border-radius: 14px; padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+        <div style="background: rgba(20, 20, 25, 0.92); backdrop-filter: blur(16px); border: 1px solid rgba(255, 69, 58, 0.35); border-radius: 14px; padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:6px;">
             <span style="font-size:0.75rem; font-weight:800; color:#ff453a; display:flex; align-items:center; gap:6px; letter-spacing:0.5px;">
               <span style="width:7px; height:7px; border-radius:50%; background:#ff453a; display:inline-block; box-shadow:0 0 8px #ff453a;"></span>
@@ -105,10 +105,10 @@
     container.innerHTML = html;
   }
 
-  // 3. INICIALIZACIÓN Y AUTO-ACTUALIZACIÓN CADA 30 SEGUNDOS
+  // 3. INICIALIZACIÓN Y AUTO-REFRESCO CADA 10 SEGUNDOS
   function init() {
     window.cargarWidgetsAlertasTopRight();
-    setInterval(window.cargarWidgetsAlertasTopRight, 30000);
+    setInterval(window.cargarWidgetsAlertasTopRight, 10000); // ⚡ Refresco cada 10s
   }
 
   if (document.readyState === "loading") {
