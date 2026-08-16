@@ -182,10 +182,14 @@ window.renderizarCanalRecordatorios = function (canal) {
     bloquesContenedor.innerHTML = htmlBloques;
   }
 
-  // 2. RENDERIZAR TARJETAS EN PÍLDORA NUMERADA
+  // 2. RENDERIZAR TARJETAS EN PÍLDORA NUMERADA (CON ESCAPADO BLINDADO DE COMILLAS)
   let htmlCards = "";
   listaData.forEach((item, idx) => {
-    const msjEscapado = encodeURIComponent(item.mensaje || "");
+    // 🛡️ REPARACIÓN 1: Escape estricto de comillas simples y caracteres especiales para evitar roturas en onclick
+    const msjEscapado = encodeURIComponent(item.mensaje || "").replace(
+      /'/g,
+      "%27",
+    );
     const nombreOIdentificador =
       item.user && item.user !== "CLIENTE CYBERNET" ? item.user : item.tel;
 
@@ -205,7 +209,7 @@ window.renderizarCanalRecordatorios = function (canal) {
           ${item.user && item.user !== "CLIENTE CYBERNET" ? `<span style="font-size: 0.72rem; color: #a1a1aa; font-family: monospace;">${item.tel}</span>` : ""}
         </div>
 
-        <!-- Botón SVG de Copiado Directo (Único que tacha esta fila) -->
+        <!-- Botón SVG de Copiado Directo -->
         <button type="button" 
                 onclick="window.copiarMensajeRecordatorio(this, '${msjEscapado}')" 
                 title="Copiar mensaje de recordatorio"
@@ -225,13 +229,19 @@ window.renderizarCanalRecordatorios = function (canal) {
 };
 
 // =========================================================================
-// 📋 COPIADO INDIVIDUAL CON TACHADO EXCLUSIVO DE ESA FILA
+// 📋 COPIADO INDIVIDUAL CON TRIPLE RESPALDO Y TACHADO DE FILA
 // =========================================================================
 window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
   if (typeof haptic === "function") haptic();
-  const mensaje = decodeURIComponent(msjEscapado);
 
-  navigator.clipboard.writeText(mensaje).then(() => {
+  let mensaje = "";
+  try {
+    mensaje = decodeURIComponent(msjEscapado);
+  } catch (errDec) {
+    mensaje = msjEscapado;
+  }
+
+  const animarExito = () => {
     let oldHtml = btn.innerHTML;
     let oldBg = btn.style.background;
 
@@ -256,8 +266,36 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
       btn.innerHTML = oldHtml;
       btn.style.background = oldBg;
     }, 1500);
-  });
+  };
+
+  // 🛡️ REPARACIÓN 2: Intenta API moderna y si falla usa método de respaldo (textarea)
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard
+      .writeText(mensaje)
+      .then(animarExito)
+      .catch(() => usarFallbackCopiadoRecordatorio(mensaje, animarExito));
+  } else {
+    usarFallbackCopiadoRecordatorio(mensaje, animarExito);
+  }
 };
+
+// 🛠️ FUNCIÓN DE RESPALDO UNIVERSAL PARA NAVEGADORES QUE BLOQUEAN EL PORTAPAPELES
+function usarFallbackCopiadoRecordatorio(texto, callbackExito) {
+  const textarea = document.createElement("textarea");
+  textarea.value = texto;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  try {
+    document.execCommand("copy");
+    if (callbackExito) callbackExito();
+  } catch (err) {
+    alert("Tu navegador bloqueó la copia automática.");
+  }
+  document.body.removeChild(textarea);
+}
 
 // =========================================================================
 // 📋 COPIAR BLOQUE CON ENUMERACIÓN "1. wa.me/57..." SIN TACHAR FILAS
@@ -289,7 +327,7 @@ window.copiarBloqueRecordatorio = function (
     })
     .join("\n");
 
-  navigator.clipboard.writeText(textoEnlaces).then(() => {
+  const animarExitoBloque = () => {
     if (btnElement) {
       let oldHtml = btnElement.innerHTML;
       btnElement.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Copiados!`;
@@ -316,5 +354,16 @@ window.copiarBloqueRecordatorio = function (
         `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Bloque copiado (${subLista.length} enlaces enumerados)</span></div>`,
       );
     }
-  });
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard
+      .writeText(textoEnlaces)
+      .then(animarExitoBloque)
+      .catch(() =>
+        usarFallbackCopiadoRecordatorio(textoEnlaces, animarExitoBloque),
+      );
+  } else {
+    usarFallbackCopiadoRecordatorio(textoEnlaces, animarExitoBloque);
+  }
 };
