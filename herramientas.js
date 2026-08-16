@@ -3,10 +3,119 @@
    ========================================================================== */
 
 /* ==========================================================================
-   📡 WIDGET FLOTANTE IZQUIERDO: PAGOS BRE-B EN VIVO (CONEXIÓN PHP / MYSQL)
+   📡 WIDGET FLOTANTE IZQUIERDO: PAGOS BRE-B (AUTO-INYECCIÓN & CONEXIÓN PHP)
    ========================================================================== */
 let autoHideTimer = null;
 let cantidadPagosAnterior = 0;
+
+// 1. AUTO-INYECTOR DE ESTRUCTURA Y ESTILOS PARA PAGOS BRE-B EN EL DOM
+function inyectarEstructuraBreB() {
+  if (document.getElementById("breb-widget")) return;
+
+  // Inyectar Estilos CSS
+  const style = document.createElement("style");
+  style.id = "breb-dynamic-css";
+  style.innerHTML = `
+    #btn-expand-breb {
+      position: fixed;
+      top: 180px;
+      left: 0;
+      z-index: 99998;
+      background: rgba(20, 20, 25, 0.92);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(48, 209, 88, 0.4);
+      border-left: none;
+      border-radius: 0 14px 14px 0;
+      padding: 12px 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 6px 8px 24px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+    #btn-expand-breb:hover {
+      background: rgba(30, 30, 38, 0.98);
+      border-color: #30d158;
+      box-shadow: 8px 10px 28px rgba(48, 209, 88, 0.3);
+    }
+    .breb-vertical-txt {
+      writing-mode: vertical-rl;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    #breb-widget {
+      position: fixed;
+      top: 100px;
+      left: 0;
+      z-index: 99999;
+      width: 340px;
+      height: 520px;
+      background: rgba(18, 18, 22, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: none;
+      border-radius: 0 20px 20px 0;
+      box-shadow: 12px 12px 35px rgba(0, 0, 0, 0.6);
+      display: none;
+      flex-direction: column;
+      transform: translateX(-360px);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .spin-breb-anim {
+      animation: spinBreB 0.8s linear infinite;
+    }
+    @keyframes spinBreB {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Inyectar Botón Flotante Izquierdo
+  const btn = document.createElement("div");
+  btn.id = "btn-expand-breb";
+  btn.title = "Abrir Pagos BRE-B";
+  btn.onclick = window.mostrarWidgetBreB;
+  btn.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+    <span class="breb-vertical-txt">PAGOS BRE-B</span>
+  `;
+  document.body.appendChild(btn);
+
+  // Inyectar Ventana Flotante Deslizante
+  const widget = document.createElement("div");
+  widget.id = "breb-widget";
+  widget.innerHTML = `
+    <div style="padding: 14px 16px; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.88rem; color: #ffffff;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #30d158; box-shadow: 0 0 8px #30d158;"></span>
+        PAGOS BRE-B
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button onclick="window.forzarActualizacionBreB()" style="background: none; border: none; color: #0a84ff; cursor: pointer; padding: 4px; display:flex; align-items:center;" title="Refrescar">
+          <svg id="icon-refresh-breb" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+        </button>
+        <button onclick="window.ocultarWidgetBreB()" style="background: none; border: none; color: #a1a1aa; cursor: pointer; font-size: 1.1rem; font-weight: bold; line-height: 1;" title="Ocultar">✕</button>
+      </div>
+    </div>
+    <div style="padding: 10px 14px; display: flex; gap: 8px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+      <input type="date" id="breb-fecha" onchange="window.alCambiarFechaBreB()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 8px; font-size: 0.75rem; width: 125px; outline: none;">
+      <input type="text" id="breb-buscador" placeholder="Buscar cliente..." onkeyup="window.filtrarPagosEnVivo()" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; outline: none;">
+    </div>
+    <div id="breb-lista" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+  `;
+  document.body.appendChild(widget);
+}
 
 // 🚪 MOSTRAR / EXPANDIR WIDGET DE PAGOS BRE-B
 window.mostrarWidgetBreB = function () {
@@ -18,7 +127,6 @@ window.mostrarWidgetBreB = function () {
   if (btnExpand) btnExpand.style.display = "none";
   if (widget) {
     widget.style.display = "flex";
-    // Forzar reflow para animación fluida CSS
     void widget.offsetWidth;
     widget.style.transform = "translateX(0)";
   }
@@ -128,7 +236,6 @@ window.cargarPagosBreB = function () {
       contenedor.innerHTML = "";
 
       if (data.status === "success" && data.data && data.data.length > 0) {
-        // Sonido de notificación si hay nuevos pagos detectados
         if (
           cantidadPagosAnterior > 0 &&
           data.data.length > cantidadPagosAnterior
@@ -141,7 +248,9 @@ window.cargarPagosBreB = function () {
         data.data.forEach((pago) => {
           const nombreMayusculas = pago.nombre
             ? pago.nombre.toUpperCase()
-            : (pago.remitente ? pago.remitente.toUpperCase() : "CLIENTE DESCONOCIDO");
+            : pago.remitente
+              ? pago.remitente.toUpperCase()
+              : "CLIENTE DESCONOCIDO";
 
           const valorFormateado = pago.valor || pago.monto || "0";
           const horaFmt = pago.hora || "";
@@ -176,6 +285,12 @@ window.cargarPagosBreB = function () {
     });
 };
 
+// Inicialización automática de la estructura BRE-B al cargar el JS
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", inyectarEstructuraBreB);
+} else {
+  inyectarEstructuraBreB();
+}
 
 /* ==========================================================================
    📋 PLANTILLAS DESDE MYSQL Y MOTORES DE COPIADO
@@ -466,7 +581,6 @@ function lanzarErrorCopia(imgElement) {
   );
 }
 
-
 /* ==========================================================================
    📩 BANDEJA DE CÓDIGOS DE ACCESO (MYSQL / GMAIL)
    ========================================================================== */
@@ -552,7 +666,6 @@ window.filtrarCodigosInternos = function () {
       : "none";
   }
 };
-
 
 /* ==========================================================================
    👁️ BÓVEDAS (ANA Y CHAYO) E IFRAMES
@@ -661,7 +774,6 @@ window.copiarCredencialChayo = function (texto, btn, tipo) {
   });
 };
 
-
 /* ==========================================================================
    🟡 YOPMAIL
    ========================================================================== */
@@ -682,7 +794,6 @@ window.buscarYopmailDirecto = function (correoPrefix) {
   let correo = correoPrefix.replace("@yopmail.com", "");
   window.open(`https://yopmail.com/es/?login=${correo}`, "_blank");
 };
-
 
 /* ==========================================================================
    🔴 GMAIL GLOBAL
@@ -814,7 +925,6 @@ window.cerrarLectorCorreoGlobal = function () {
   if (visorModal) visorModal.style.display = "none";
   if (visorContent) visorContent.innerHTML = "";
 };
-
 
 /* ==========================================================================
    🔔 RECORDATORIOS DE WHATSAPP (BLOQUES W1 Y W2)
