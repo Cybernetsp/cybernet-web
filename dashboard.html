@@ -9542,7 +9542,7 @@
     </div>
 
     <!-- ==========================================================================
-   💳 MODAL DE PAGOS BRE-B (GMAIL) - DISEÑO LINEAL & TOTAL SUPERADMIN
+   💳 MODAL DE PAGOS BRE-B (GMAIL) - ENCABEZADO CON TOTAL ADYACENTE
    ========================================================================== -->
     <div
       id="brebOverlay"
@@ -9618,7 +9618,9 @@
                 ></path>
               </svg>
             </div>
-            <div>
+
+            <!-- Título y Total al lado -->
+            <div style="display: flex; align-items: center; gap: 10px">
               <div
                 style="
                   font-weight: 800;
@@ -9629,50 +9631,24 @@
               >
                 PAGOS BRE-B
               </div>
-              <div
+
+              <!-- INSIGNIA TOTAL (SÓLO VISIBLE PARA SUPERADMIN) -->
+              <span
+                id="breb-monto-total-inline"
                 style="
-                  font-size: 0.68rem;
-                  color: rgba(255, 255, 255, 0.45);
-                  font-weight: 600;
+                  display: none;
+                  background: rgba(48, 209, 88, 0.15);
+                  border: 1px solid rgba(48, 209, 88, 0.35);
+                  color: #30d158;
+                  font-family: monospace;
+                  font-size: 0.85rem;
+                  font-weight: 900;
+                  padding: 2px 8px;
+                  border-radius: 8px;
                 "
               >
-                Lectura en Vivo de Gmail
-              </div>
-            </div>
-          </div>
-
-          <!-- BADGE TOTAL ACUMULADO (SÓLO PARA SUPERADMIN) -->
-          <div
-            id="breb-total-badge"
-            style="
-              display: none;
-              background: rgba(48, 209, 88, 0.12);
-              border: 1px solid rgba(48, 209, 88, 0.3);
-              border-radius: 10px;
-              padding: 4px 10px;
-              text-align: right;
-            "
-          >
-            <div
-              style="
-                font-size: 0.6rem;
-                color: rgba(255, 255, 255, 0.5);
-                font-weight: 800;
-                text-transform: uppercase;
-              "
-            >
-              Total Día
-            </div>
-            <div
-              id="breb-monto-total"
-              style="
-                font-size: 0.9rem;
-                font-weight: 900;
-                color: #30d158;
-                font-family: monospace;
-              "
-            >
-              $0
+                $0
+              </span>
             </div>
           </div>
 
