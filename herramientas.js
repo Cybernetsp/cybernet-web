@@ -3,52 +3,35 @@
    ========================================================================== */
 
 /* ==========================================================================
-   📡 WIDGET FLOTANTE IZQUIERDO: PAGOS BRE-B GMAIL (10S AUTO-HIDE & ANTI-OBSTRUCCIÓN)
+   📡 WIDGET IZQUIERDO: PAGOS BRE-B (BOTÓN FLOTANTE + AUTO-HIDE 10S)
    ========================================================================== */
-let autoHideTimer = null;
+let autoHideTimerBreB = null;
 let cantidadPagosAnterior = 0;
 const URL_APPS_SCRIPT_BREB =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 
-// 🔍 DETECTOR DE VENTANAS Y OVERLAYS ABIERTOS EN PANTALLA
+// 🔍 DETECTOR ESTRICTO DE MODALES / OVERLAYS REALMENTE ABIERTOS
 function hayModalAbierto() {
-  const modales = document.querySelectorAll(
-    '[id*="Overlay"], [class*="overlay"], [id*="modal"], [id*="Modal"], .card-ios-modal, .boveda-modal',
+  const modalesAbiertos = document.querySelectorAll(
+    ".overlay.open, .modal.open, .open[id*='Overlay'], .open[id*='modal'], [id*='Overlay'][style*='display: flex'], [id*='Overlay'][style*='display: block']",
   );
 
-  for (let el of modales) {
+  for (let el of modalesAbiertos) {
     if (el.id === "breb-widget" || el.id === "btn-expand-breb") continue;
-
-    const style = window.getComputedStyle(el);
-    const esVisible =
-      style.display !== "none" &&
-      style.visibility !== "hidden" &&
-      style.opacity !== "0" &&
-      el.offsetWidth > 0 &&
-      el.offsetHeight > 0;
-
-    const tieneClaseOpen =
-      el.classList.contains("open") ||
-      el.classList.contains("active") ||
-      el.classList.contains("show");
-
-    if (esVisible || tieneClaseOpen) {
-      return true;
-    }
+    return true;
   }
   return false;
 }
 
-// 1. AUTO-INYECCIÓN DE PESTAÑA CON FLECHA Y PANEL IZQUIERDO
+// 1. INYECCIÓN DEL BOTÓN Y PANEL FLOTANTE EN EL BORDE IZQUIERDO
 function inyectarEstructuraBreB() {
+  if (document.getElementById("btn-expand-breb")) return;
   if (!document.body) {
     setTimeout(inyectarEstructuraBreB, 50);
     return;
   }
 
-  if (document.getElementById("breb-widget")) return;
-
-  // Inyectar Estilos CSS con máxima prioridad
+  // Estilos CSS con prioridad absoluta
   const style = document.createElement("style");
   style.id = "breb-dynamic-css";
   style.innerHTML = `
@@ -56,31 +39,29 @@ function inyectarEstructuraBreB() {
       position: fixed !important;
       top: 180px !important;
       left: 0 !important;
-      z-index: 99998 !important;
-      background: rgba(20, 20, 25, 0.94) !important;
+      z-index: 999999 !important;
+      background: rgba(18, 18, 22, 0.96) !important;
       backdrop-filter: blur(16px) !important;
-      border: 1px solid rgba(48, 209, 88, 0.4) !important;
+      border: 1px solid #30d158 !important;
       border-left: none !important;
       border-radius: 0 14px 14px 0 !important;
       padding: 12px 10px !important;
       cursor: pointer !important;
       display: flex !important;
       align-items: center !important;
-      gap: 10px !important;
+      gap: 8px !important;
       box-shadow: 6px 8px 24px rgba(0, 0, 0, 0.6) !important;
-      transition: all 0.3s ease !important;
+      transition: all 0.25s ease !important;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }
     #btn-expand-breb:hover {
-      background: rgba(30, 30, 38, 0.98) !important;
-      border-color: #30d158 !important;
-      box-shadow: 8px 10px 28px rgba(48, 209, 88, 0.35) !important;
+      background: rgba(30, 30, 38, 1) !important;
+      box-shadow: 8px 10px 28px rgba(48, 209, 88, 0.4) !important;
     }
     .breb-icon-arrow {
-      width: 16px;
-      height: 16px;
-      stroke: #30d158;
-      transition: transform 0.3s ease;
+      width: 14px !important;
+      height: 14px !important;
+      stroke: #30d158 !important;
     }
     .breb-badge-txt {
       font-size: 0.75rem !important;
@@ -91,12 +72,12 @@ function inyectarEstructuraBreB() {
     }
     #breb-widget {
       position: fixed !important;
-      top: 100px !important;
+      top: 110px !important;
       left: 0 !important;
-      z-index: 99999 !important;
+      z-index: 999999 !important;
       width: 340px !important;
       height: 520px !important;
-      background: rgba(18, 18, 22, 0.95) !important;
+      background: rgba(18, 18, 22, 0.96) !important;
       backdrop-filter: blur(20px) !important;
       border: 1px solid rgba(48, 209, 88, 0.35) !important;
       border-left: none !important;
@@ -119,7 +100,7 @@ function inyectarEstructuraBreB() {
   `;
   document.head.appendChild(style);
 
-  // Inyectar Botón Pestaña Izquierda (Con Flecha + Anuncio BRE-B)
+  // Crear Botón Flotante (Siempre visible en el borde izquierdo)
   const btn = document.createElement("div");
   btn.id = "btn-expand-breb";
   btn.title = "Clic para abrir Pagos BRE-B";
@@ -132,7 +113,7 @@ function inyectarEstructuraBreB() {
   `;
   document.body.appendChild(btn);
 
-  // Inyectar Panel Flotante
+  // Crear Panel Deslizante
   const widget = document.createElement("div");
   widget.id = "breb-widget";
   widget.innerHTML = `
@@ -156,15 +137,12 @@ function inyectarEstructuraBreB() {
   `;
   document.body.appendChild(widget);
 
-  // Iniciar Observador de Modales para ocultar automáticamente al abrir otras ventanas
   iniciarObservadorModales();
 }
 
-// 🚪 MOSTRAR / DESLIZAR WIDGET Y PROGRAMAR OCULTADO DE 10S
+// 🚪 MOSTRAR Y DESLIZAR PANEL BRE-B
 window.mostrarWidgetBreB = function () {
   if (typeof haptic === "function") haptic();
-
-  if (hayModalAbierto()) return; // Si hay modal abierto, no interrumpe
 
   const btnExpand = document.getElementById("btn-expand-breb");
   const widget = document.getElementById("breb-widget");
@@ -178,10 +156,10 @@ window.mostrarWidgetBreB = function () {
 
   window.establecerFechaHoy();
   window.cargarPagosBreB();
-  window.iniciarAutoOcultado(); // ⏱️ Inicia temporizador de 10 segundos
+  window.iniciarAutoOcultado();
 };
 
-// 🚪 OCULTAR Y COLAPSAR WIDGET DE PAGOS BRE-B
+// 🚪 OCULTAR Y COLAPSAR PANEL BRE-B
 window.ocultarWidgetBreB = function () {
   const widget = document.getElementById("breb-widget");
   const btnExpand = document.getElementById("btn-expand-breb");
@@ -193,21 +171,21 @@ window.ocultarWidgetBreB = function () {
     if (btnExpand && !hayModalAbierto()) btnExpand.style.display = "flex";
   }, 320);
 
-  if (autoHideTimer) {
-    clearTimeout(autoHideTimer);
-    autoHideTimer = null;
+  if (autoHideTimerBreB) {
+    clearTimeout(autoHideTimerBreB);
+    autoHideTimerBreB = null;
   }
 };
 
-// ⏱️ TEMPORIZADOR DE AUTO-OCULTADO EXACTO DE 10 SEGUNDOS
+// ⏱️ AUTO-OCULTADO A LOS 10 SEGUNDOS
 window.iniciarAutoOcultado = function () {
-  if (autoHideTimer) clearTimeout(autoHideTimer);
-  autoHideTimer = setTimeout(() => {
+  if (autoHideTimerBreB) clearTimeout(autoHideTimerBreB);
+  autoHideTimerBreB = setTimeout(() => {
     window.ocultarWidgetBreB();
-  }, 10000); // 10 Segundos
+  }, 10000);
 };
 
-// 🔄 REFRESCAR Y REINICIAR TEMPORIZADOR
+// 🔄 REFRESCAR MANUALMENTE
 window.forzarActualizacionBreB = function () {
   if (typeof haptic === "function") haptic();
   const icono = document.getElementById("icon-refresh-breb");
@@ -228,7 +206,7 @@ window.filtrarPagosEnVivo = function () {
     tarjeta.style.display = contenido.includes(texto) ? "flex" : "none";
   });
 
-  window.iniciarAutoOcultado(); // Reinicia los 10 segundos al interactuar
+  window.iniciarAutoOcultado();
 };
 
 // 📅 CAMBIO DE FECHA
@@ -237,7 +215,7 @@ window.alCambiarFechaBreB = function () {
   window.iniciarAutoOcultado();
 };
 
-// 📅 AUTOFILLED FECHA HOY
+// 📅 AUTOFILLED DE FECHA HOY
 window.establecerFechaHoy = function () {
   const inputFecha = document.getElementById("breb-fecha");
   if (inputFecha && !inputFecha.value) {
@@ -249,7 +227,7 @@ window.establecerFechaHoy = function () {
   }
 };
 
-// 📥 CONSULTA EN TIEMPO REAL A GOOGLE APPS SCRIPT (GMAIL BRE-B)
+// 📥 CONSULTA EN TIEMPO REAL A GMAIL (APPS SCRIPT)
 window.cargarPagosBreB = function () {
   const contenedor = document.getElementById("breb-lista");
   if (!contenedor) return;
@@ -325,17 +303,15 @@ window.cargarPagosBreB = function () {
   document.body.appendChild(script);
 };
 
-// 🛡️ OBSERVADOR PARA OCULTAR EL WIDGET O PESTAÑA CUANDO SE ABRE OTRA VENTANA
+// 🛡️ OBSERVADOR PARA OCULTAR SI SE ABRE OTRA VENTANA EN EL SISTEMA
 function iniciarObservadorModales() {
   const observer = new MutationObserver(() => {
     const btnExpand = document.getElementById("btn-expand-breb");
 
     if (hayModalAbierto()) {
-      // Ocultar de inmediato el panel y el botón para no obstruir la ventana abierta
       window.ocultarWidgetBreB();
       if (btnExpand) btnExpand.style.display = "none";
     } else {
-      // Si se cerró la ventana, restaurar el botón flotante en la izquierda
       const widget = document.getElementById("breb-widget");
       const estaWidgetAbierto = widget && widget.style.display === "flex";
       if (btnExpand && !estaWidgetAbierto) {
@@ -352,7 +328,7 @@ function iniciarObservadorModales() {
   });
 }
 
-// Inicializador DOM
+// Inicializador
 if (
   document.readyState === "complete" ||
   document.readyState === "interactive"
@@ -361,6 +337,7 @@ if (
 } else {
   document.addEventListener("DOMContentLoaded", inyectarEstructuraBreB);
 }
+setTimeout(inyectarEstructuraBreB, 200);
 
 /* ==========================================================================
    📋 PLANTILLAS DESDE MYSQL Y MOTORES DE COPIADO
