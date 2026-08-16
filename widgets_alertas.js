@@ -5,7 +5,36 @@
 (function () {
   "use strict";
 
-  // 1. CONSULTA DE ALERTAS DESDE MYSQL
+  // 1. DETECTOR EN TIEMPO REAL DE VENTANAS Y OVERLAYS ABIERTOS
+  function hayModalAbierto() {
+    const posiblesModales = document.querySelectorAll(
+      '[id*="Overlay"], [class*="overlay"], [id*="modal"], [id*="Modal"], .card-ios-modal, .boveda-modal',
+    );
+
+    for (let el of posiblesModales) {
+      if (el.id === "widgetsTopRightFloatingContainer") continue;
+
+      const style = window.getComputedStyle(el);
+      const isVisible =
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        style.opacity !== "0" &&
+        el.offsetWidth > 0 &&
+        el.offsetHeight > 0;
+
+      const tieneClaseOpen =
+        el.classList.contains("open") ||
+        el.classList.contains("active") ||
+        el.classList.contains("show");
+
+      if (isVisible || tieneClaseOpen) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // 2. CONSULTA DE ALERTAS DESDE MYSQL
   window.cargarWidgetsAlertasTopRight = function () {
     const formData = new FormData();
     formData.append("accion", "obtener_widgets_alertas");
@@ -25,7 +54,7 @@
       );
   };
 
-  // 2. RENDERIZADO EN PANTALLA (POSICIÓN Y ESTILOS)
+  // 3. RENDERIZADO Y CONTROL DE VISIBILIDAD
   function renderizarWidgetsTopRight(alertasStock, garantias) {
     let container = document.getElementById("widgetsTopRightFloatingContainer");
 
@@ -34,7 +63,7 @@
       container.id = "widgetsTopRightFloatingContainer";
       container.style.cssText = `
         position: fixed;
-        top: 65px; /* 📍 BAJADO PARA LIBERAR LA BARRA DE USUARIO (CAMILO) */
+        top: 65px;
         right: 20px;
         z-index: 99999;
         display: flex;
@@ -43,11 +72,28 @@
         max-width: 290px;
         width: 100%;
         pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
       `;
       document.body.appendChild(container);
     }
 
+    // 🎯 OCULTAR AUTOMÁTICAMENTE SI HAY VENTANAS ABIERTAS
+    if (hayModalAbierto()) {
+      container.style.opacity = "0";
+      container.style.pointerEvents = "none";
+      container.style.transform = "translateY(-10px)";
+      setTimeout(() => {
+        if (hayModalAbierto()) container.style.display = "none";
+      }, 250);
+      return;
+    }
+
+    // MOSTRAR SI NO HAY MODALES
+    container.style.display = "flex";
     container.style.pointerEvents = "auto";
+    container.style.opacity = "1";
+    container.style.transform = "translateY(0)";
+
     let html = "";
 
     // 🟠 WIDGET 1: STOCK CRÍTICO
@@ -105,10 +151,46 @@
     container.innerHTML = html;
   }
 
-  // 3. INICIALIZACIÓN Y AUTO-REFRESCO CADA 10 SEGUNDOS
+  // 4. OBSERVADOR DE CAMBIOS EN EL DOM (OCULTADO INSTANTÁNEO AL ABRIR VENTANAS)
+  function iniciarObservadorVentanas() {
+    const observer = new MutationObserver(() => {
+      const container = document.getElementById(
+        "widgetsTopRightFloatingContainer",
+      );
+      if (!container) return;
+
+      if (hayModalAbierto()) {
+        container.style.opacity = "0";
+        container.style.pointerEvents = "none";
+        container.style.transform = "translateY(-10px)";
+        setTimeout(() => {
+          if (hayModalAbierto()) container.style.display = "none";
+        }, 200);
+      } else {
+        container.style.display = "flex";
+        setTimeout(() => {
+          if (!hayModalAbierto()) {
+            container.style.opacity = "1";
+            container.style.pointerEvents = "auto";
+            container.style.transform = "translateY(0)";
+          }
+        }, 50);
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style"],
+    });
+  }
+
+  // 5. INICIALIZACIÓN
   function init() {
     window.cargarWidgetsAlertasTopRight();
-    setInterval(window.cargarWidgetsAlertasTopRight, 10000); // ⚡ Refresco cada 10s
+    setInterval(window.cargarWidgetsAlertasTopRight, 10000);
+    iniciarObservadorVentanas();
   }
 
   if (document.readyState === "loading") {
