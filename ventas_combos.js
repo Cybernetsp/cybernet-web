@@ -116,6 +116,7 @@ window.agregarFilaServicioCombo = function () {
         <option value="PARAMOUNT">${getTxt("PARAMOUNT")}</option>
         <option value="APPLE TV">${getTxt("APPLE TV")}</option>
         <option value="YOUTUBE">${getTxt("YOUTUBE")}</option>
+        <option value="SPOTIFY">${getTxt("SPOTIFY")}</option>
       </select>
 
       <select class="input-ios sel-pantallas" style="display: none; flex: 1; min-width: 0; background: rgba(0, 0, 0, 0.4) !important; padding: 10px 6px; border-radius: 10px; font-size: 0.8rem; color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); outline: none;">
