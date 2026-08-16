@@ -70,19 +70,24 @@ window.cargarPagosBreBModal = function () {
   if (!contenedor) return;
 
   contenedor.innerHTML = `
-    <div style="color: #0a84ff; text-align: center; padding: 40px; font-weight: 700; font-size: 0.88rem; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-      <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-      <span>Buscando pagos Bre-B en Gmail...</span>
+    <div style="color: #0a84ff; text-align: center; padding: 50px 20px; font-weight: 700; font-size: 0.88rem; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+      <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+      <span>Sincronizando pagos de Gmail...</span>
     </div>`;
 
   const inputFecha = document.getElementById("breb-fecha-modal");
   const fechaVal = inputFecha ? inputFecha.value : "";
   const callbackName = "cb_breb_modal_" + Date.now();
 
+  const iconoRefresh = document.getElementById("icon-refresh-breb-modal");
+  if (iconoRefresh) iconoRefresh.classList.add("spin-anim");
+
   window[callbackName] = function (res) {
     delete window[callbackName];
     const scriptElem = document.getElementById(callbackName);
     if (scriptElem) scriptElem.remove();
+
+    if (iconoRefresh) iconoRefresh.classList.remove("spin-anim");
 
     if (res && res.status === "success" && res.data && res.data.length > 0) {
       if (
@@ -103,24 +108,43 @@ window.cargarPagosBreBModal = function () {
         const fecha = pago.fecha || "";
 
         html += `
-          <div class="breb-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; transition: all 0.2s ease;">
-            <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex: 1;">
-              <span style="color: #ffffff; font-weight: 800; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">
-                👤 ${cliente}
-              </span>
-              <span style="color: rgba(255, 255, 255, 0.45); font-size: 0.72rem;">
-                📅 ${fecha}
-              </span>
+          <div class="breb-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(48, 209, 88, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.07)';">
+            <!-- Icono Cliente e Info -->
+            <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1;">
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px; overflow: hidden;">
+                <span style="color: #ffffff; font-weight: 800; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; letter-spacing: 0.3px;">
+                  ${cliente}
+                </span>
+                <div style="display: flex; align-items: center; gap: 4px; color: rgba(255, 255, 255, 0.4); font-size: 0.7rem;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  <span>${fecha}</span>
+                </div>
+              </div>
             </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
-              <span style="color: #30d158; font-weight: 900; font-size: 1.05rem; font-family: monospace;">+$${monto}</span>
-              <span style="color: rgba(255, 255, 255, 0.7); font-size: 0.7rem; font-family: monospace; background: rgba(0, 0, 0, 0.4); padding: 2px 7px; border-radius: 6px;">${hora}</span>
+
+            <!-- Monto y Hora -->
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0;">
+              <span style="color: #30d158; font-weight: 900; font-size: 1.05rem; font-family: monospace; letter-spacing: -0.5px;">+$${monto}</span>
+              <div style="display: flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); padding: 2px 7px; border-radius: 6px; color: rgba(255, 255, 255, 0.7); font-size: 0.68rem; font-family: monospace;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span>${hora}</span>
+              </div>
             </div>
           </div>`;
       });
       contenedor.innerHTML = html;
     } else {
-      contenedor.innerHTML = `<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 40px; font-size: 0.85rem; font-weight: 600;">📭 No hay pagos de Bre-B registrados en Gmail para esta fecha.</div>`;
+      contenedor.innerHTML = `
+        <div style="text-align: center; color: rgba(255,255,255,0.4); padding: 50px 20px; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.4;"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+          <span style="font-weight: 600;">No se detectaron pagos en esta fecha</span>
+        </div>`;
     }
   };
 
@@ -129,7 +153,12 @@ window.cargarPagosBreBModal = function () {
   script.src = `${URL_APPS_SCRIPT_BREB}?action=obtenerPagosBreB&fechaBusqueda=${encodeURIComponent(fechaVal)}&callback=${callbackName}`;
   script.onerror = function () {
     delete window[callbackName];
-    contenedor.innerHTML = `<div style="text-align: center; color: #ff453a; padding: 30px; font-size: 0.85rem; font-weight: 700;">❌ Error al conectar con Google Script.</div>`;
+    if (iconoRefresh) iconoRefresh.classList.remove("spin-anim");
+    contenedor.innerHTML = `
+      <div style="text-align: center; color: #ff453a; padding: 40px 20px; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span style="font-weight: 700;">Error al conectar con Google Script</span>
+      </div>`;
   };
 
   document.body.appendChild(script);
@@ -137,7 +166,7 @@ window.cargarPagosBreBModal = function () {
 
 // 🔍 FILTRAR CLIENTES EN VIVO
 window.filtrarBreBModal = function () {
-  window.reiniciarTimerBreB(); // Extender tiempo si el usuario está buscando
+  window.reiniciarTimerBreB();
   const buscador = document.getElementById("breb-buscar-modal");
   const texto = buscador ? buscador.value.toLowerCase().trim() : "";
   const tarjetas = document.querySelectorAll("#breb-lista-modal .breb-card");
