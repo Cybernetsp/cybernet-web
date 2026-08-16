@@ -79,16 +79,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO DE BARRA SUPERIOR (CON GUARDADO EN X)
+// 2. CRONÓMETRO DE BARRA SUPERIOR (GUARDADO CONTINUO 1MIN / SIN INACTIVIDAD)
 // ==========================================
 let secCronometroTotal = 0;
 let secParaGuardar = 0;
 let timerInterval = null;
 let turnoActivo = false;
-
-let inactividadTimer = null;
-let pausadoPorInactividad = false;
-const TIEMPO_MAX_INACTIVIDAD = 25 * 60 * 1000; // 25 Minutos en ms
 
 function limpiarCacheShift() {
   localStorage.removeItem("cyber_shift_vendedor");
@@ -127,14 +123,17 @@ window.verificarEIniciarTurnoAuto = function () {
     let diffSec =
       lastCloseTs > 0 ? Math.floor((Date.now() - lastCloseTs) / 1000) : 0;
 
-    // Si fue un refresco rápido (F5 / menos de 15 segundos)
-    if (activeState === "true" && lastCloseTs > 0 && diffSec < 15) {
+    // Si fue un refresco rápido (F5 / menos de 15 segundos) O un cierre agresivo,
+    // el sistema suma las horas offline acumuladas en la PC y las restaura.
+    if (activeState === "true" && lastCloseTs > 0) {
       secCronometroTotal = accum + diffSec;
     } else {
-      // Si la ventana estuvo cerrada por la X, el tiempo previo ya se envió a MySQL mediante SendBeacon
       secCronometroTotal = accum;
     }
-    secParaGuardar = 0;
+    secParaGuardar = parseInt(
+      localStorage.getItem("cyber_shift_unsaved_sec") || "0",
+      10,
+    );
   } else {
     secCronometroTotal = 0;
     secParaGuardar = 0;
@@ -144,7 +143,7 @@ window.verificarEIniciarTurnoAuto = function () {
 };
 
 window.toggleTrackerShift = function () {
-  if (turnoActivo) detenerTurnoTracker(false);
+  if (turnoActivo) detenerTurnoTracker();
   else iniciarTurnoTracker(false);
 };
 
@@ -178,7 +177,6 @@ function iniciarTurnoTracker(esAuto = false) {
   }
 
   turnoActivo = true;
-  pausadoPorInactividad = false;
 
   localStorage.setItem("cyber_shift_active", "true");
   localStorage.setItem("cyber_shift_vendedor", activeStaff);
@@ -201,42 +199,37 @@ function iniciarTurnoTracker(esAuto = false) {
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // Respaldo periódico en MySQL cada 5 minutos (300 s)
-    if (secParaGuardar >= 300) {
+    // 🔥 RESPALDO CADA 1 MINUTO (60 SEGUNDOS EXACTOS) A LA NUBE
+    if (secParaGuardar >= 60) {
       enviarTiempoTrackerAMySQL(
         activeStaff,
         formatoSegundosTracker(secParaGuardar),
-        "Autoguardado 5m",
+        "Autoguardado 1m",
       );
       secParaGuardar = 0;
       localStorage.setItem("cyber_shift_unsaved_sec", "0");
     }
   }, 1000);
 
-  iniciarDetectorInactividad();
-
   if (typeof triggerToast === "function" && !esAuto) {
     triggerToast(
-      `<div style="color:var(--ios-green);">▶ Turno activo para ${activeStaff}. Autoguardado cada 5m.</div>`,
+      `<div style="color:var(--ios-green);">▶ Turno activo para ${activeStaff}. Autoguardado silencioso activado.</div>`,
     );
   }
 }
 
-function detenerTurnoTracker(porInactividad = false) {
+function detenerTurnoTracker() {
   if (!turnoActivo) return;
   turnoActivo = false;
   clearInterval(timerInterval);
-  detenerDetectorInactividad();
 
   localStorage.setItem("cyber_shift_active", "false");
   localStorage.setItem("cyber_shift_accumulated", secCronometroTotal);
 
   const dot = document.getElementById("ledConexion");
   if (dot) {
-    dot.style.background = porInactividad ? "#ff9f0a" : "#ff453a";
-    dot.style.boxShadow = porInactividad
-      ? "0 0 8px #ff9f0a"
-      : "0 0 8px #ff453a";
+    dot.style.background = "#ff453a";
+    dot.style.boxShadow = "0 0 8px #ff453a";
   }
 
   if (secParaGuardar > 0) {
@@ -250,22 +243,16 @@ function detenerTurnoTracker(porInactividad = false) {
     enviarTiempoTrackerAMySQL(
       activeStaff,
       formatoSegundosTracker(secParaGuardar),
-      porInactividad ? "Inactividad 25m" : "Pausa/Cierre",
+      "Pausa/Cierre",
     );
     secParaGuardar = 0;
     localStorage.setItem("cyber_shift_unsaved_sec", "0");
   }
 
-  if (porInactividad) {
-    pausadoPorInactividad = true;
-    if (typeof triggerToast === "function")
-      triggerToast(
-        `<div style="color:var(--ios-orange);">⏸ Turno pausado tras 25m de inactividad.</div>`,
-      );
-  } else {
-    pausadoPorInactividad = false;
-    if (typeof triggerToast === "function")
-      triggerToast(`<div style="color:var(--ios-red);">⏹ Turno pausado.</div>`);
+  if (typeof triggerToast === "function") {
+    triggerToast(
+      `<div style="color:var(--ios-red);">⏹ Turno pausado y tiempo registrado.</div>`,
+    );
   }
 }
 
@@ -294,36 +281,7 @@ function formatoSegundosTracker(totalSeg) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function resetInactividad() {
-  if (pausadoPorInactividad && !turnoActivo) {
-    iniciarTurnoTracker(true);
-  }
-
-  clearTimeout(inactividadTimer);
-  if (turnoActivo) {
-    inactividadTimer = setTimeout(() => {
-      detenerTurnoTracker(true);
-    }, TIEMPO_MAX_INACTIVIDAD);
-  }
-}
-
-function iniciarDetectorInactividad() {
-  window.addEventListener("mousemove", resetInactividad);
-  window.addEventListener("keypress", resetInactividad);
-  window.addEventListener("touchstart", resetInactividad);
-  window.addEventListener("scroll", resetInactividad);
-  resetInactividad();
-}
-
-function detenerDetectorInactividad() {
-  window.removeEventListener("mousemove", resetInactividad);
-  window.removeEventListener("keypress", resetInactividad);
-  window.removeEventListener("touchstart", resetInactividad);
-  window.removeEventListener("scroll", resetInactividad);
-  clearTimeout(inactividadTimer);
-}
-
-// 🚪 CERRAR SESIÓN STAFF FORMAL
+// 🚪 CERRAR SESIÓN STAFF FORMAL (Botón Apagado Círculo)
 window.cerrarSesionStaff = function () {
   try {
     if (typeof haptic === "function") haptic();
@@ -338,7 +296,7 @@ window.cerrarSesionStaff = function () {
     .trim();
 
   if (usuarioActivo === "CAMILO") {
-    if (turnoActivo) detenerTurnoTracker(false);
+    if (turnoActivo) detenerTurnoTracker();
     limpiarCacheShift();
     sessionStorage.clear();
     localStorage.removeItem("cyber_saved_staff");
@@ -348,11 +306,11 @@ window.cerrarSesionStaff = function () {
 
   if (
     confirm(
-      "⚠️ ¿Estás seguro de que deseas cerrar sesión y finalizar tu turno?",
+      "⚠️ ¿Estás seguro de que deseas cerrar sesión y finalizar tu turno de forma permanente?",
     )
   ) {
     if (turnoActivo) {
-      detenerTurnoTracker(false);
+      detenerTurnoTracker();
     }
     limpiarCacheShift();
 
@@ -364,7 +322,7 @@ window.cerrarSesionStaff = function () {
   }
 };
 
-// 🚨 RESPALDO INSTANTÁNEO EN MYSQL SI SE PRESIONA LA 'X' O SE CIERRA LA PESTAÑA
+// 🚨 CERRAR VENTANA: RESPALDO INSTANTÁNEO EN MYSQL SI SE PRESIONA LA 'X'
 function guardarEmergenciaAlCerrarVentana() {
   if (turnoActivo && secParaGuardar > 0) {
     const activeStaff = (
@@ -374,13 +332,14 @@ function guardarEmergenciaAlCerrarVentana() {
     )
       .toUpperCase()
       .trim();
+
     if (activeStaff && activeStaff !== "STAFF" && activeStaff !== "CAMILO") {
-      const fd = new URLSearchParams();
+      const fd = new FormData();
       fd.append("vendedor", activeStaff);
       fd.append("tiempo", formatoSegundosTracker(secParaGuardar));
       fd.append("fecha", "hoy");
 
-      // Transmisión inmediata garantizada al destruir el proceso del navegador
+      // Transmisión inmediata y garantizada al destruir el navegador (Incluso sin Javascript asíncrono)
       navigator.sendBeacon(window.URL_GUARDAR_HORAS_MANUAL, fd);
 
       // Guardar timestamps de referencia para cuando reabra
@@ -392,6 +351,7 @@ function guardarEmergenciaAlCerrarVentana() {
   }
 }
 
+// Detectar cierres del navegador de todas las maneras posibles
 window.addEventListener("pagehide", guardarEmergenciaAlCerrarVentana);
 window.addEventListener("beforeunload", guardarEmergenciaAlCerrarVentana);
 document.addEventListener("visibilitychange", function () {
