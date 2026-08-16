@@ -3,74 +3,87 @@
    ========================================================================== */
 
 /* ==========================================================================
-   📡 WIDGET FLOTANTE IZQUIERDO: PAGOS BRE-B (ESTÁTICO / AUTO-INYECCIÓN)
+   📡 WIDGET ESTÁTICO IZQUIERDO: PAGOS BRE-B (AUTO-INYECCIÓN GARANTIZADA)
    ========================================================================== */
-let cantidadPagosAnterior = 0;
+(function () {
+  "use strict";
 
-// 1. INYECTOR SEGURO EN EL DOM (IZQUIERDA ESTÁTICA)
-function inyectarEstructuraBreB() {
-  if (!document.body) {
-    setTimeout(inyectarEstructuraBreB, 50);
-    return;
+  function crearWidgetBreB() {
+    if (document.getElementById("breb-widget-static")) return;
+    if (!document.body) {
+      setTimeout(crearWidgetBreB, 50);
+      return;
+    }
+
+    // 1. Inyección de Estilos CSS con prioridad máxima (!important)
+    const style = document.createElement("style");
+    style.id = "breb-static-css";
+    style.innerHTML = `
+      #breb-widget-static {
+        position: fixed !important;
+        top: 110px !important;
+        left: 25px !important;
+        z-index: 9999 !important;
+        width: 310px !important;
+        height: 500px !important;
+        background: rgba(18, 18, 22, 0.94) !important;
+        backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(48, 209, 88, 0.35) !important;
+        border-radius: 18px !important;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        transition: opacity 0.25s ease, transform 0.25s ease !important;
+      }
+      .spin-breb-anim {
+        animation: spinBreB 0.8s linear infinite !important;
+      }
+      @keyframes spinBreB {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // 2. Inyección de la Tarjeta Estática en la Izquierda
+    const widget = document.createElement("div");
+    widget.id = "breb-widget-static";
+    widget.innerHTML = `
+      <div style="padding: 14px 16px; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.88rem; color: #ffffff;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: #30d158; box-shadow: 0 0 8px #30d158;"></span>
+          PAGOS BRE-B
+        </div>
+        <button onclick="window.forzarActualizacionBreB()" style="background: none; border: none; color: #0a84ff; cursor: pointer; padding: 4px; display:flex; align-items:center;" title="Refrescar">
+          <svg id="icon-refresh-breb" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+        </button>
+      </div>
+      <div style="padding: 10px 14px; display: flex; gap: 8px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+        <input type="date" id="breb-fecha" onchange="window.alCambiarFechaBreB()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 8px; font-size: 0.75rem; width: 115px; outline: none;">
+        <input type="text" id="breb-buscador" placeholder="Buscar cliente..." onkeyup="window.filtrarPagosEnVivo()" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; outline: none;">
+      </div>
+      <div id="breb-lista" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+    `;
+    document.body.appendChild(widget);
+
+    window.establecerFechaHoy();
+    window.cargarPagosBreB();
   }
 
-  if (document.getElementById("breb-widget")) return;
+  if (
+    document.readyState === "complete" ||
+    document.readyState === "interactive"
+  ) {
+    crearWidgetBreB();
+  } else {
+    document.addEventListener("DOMContentLoaded", crearWidgetBreB);
+  }
+  setTimeout(crearWidgetBreB, 300);
+})();
 
-  // Inyectar Estilos CSS con máxima prioridad (!important)
-  const style = document.createElement("style");
-  style.id = "breb-dynamic-css";
-  style.innerHTML = `
-    #breb-widget {
-      position: fixed !important;
-      top: 120px !important;
-      left: 20px !important;
-      z-index: 99990 !important;
-      width: 310px !important;
-      height: 500px !important;
-      background: rgba(18, 18, 22, 0.94) !important;
-      backdrop-filter: blur(20px) !important;
-      border: 1px solid rgba(48, 209, 88, 0.35) !important;
-      border-radius: 18px !important;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7) !important;
-      display: flex !important;
-      flex-direction: column !important;
-      overflow: hidden !important;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    }
-    .spin-breb-anim {
-      animation: spinBreB 0.8s linear infinite !important;
-    }
-    @keyframes spinBreB {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-  `;
-  document.head.appendChild(style);
-
-  // Inyectar Ventana Flotante Estática en la Izquierda
-  const widget = document.createElement("div");
-  widget.id = "breb-widget";
-  widget.innerHTML = `
-    <div style="padding: 14px 16px; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center;">
-      <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.88rem; color: #ffffff;">
-        <span style="width: 8px; height: 8px; border-radius: 50%; background: #30d158; box-shadow: 0 0 8px #30d158;"></span>
-        PAGOS BRE-B
-      </div>
-      <button onclick="window.forzarActualizacionBreB()" style="background: none; border: none; color: #0a84ff; cursor: pointer; padding: 4px; display:flex; align-items:center;" title="Refrescar">
-        <svg id="icon-refresh-breb" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-      </button>
-    </div>
-    <div style="padding: 10px 14px; display: flex; gap: 8px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-      <input type="date" id="breb-fecha" onchange="window.alCambiarFechaBreB()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 8px; font-size: 0.75rem; width: 115px; outline: none;">
-      <input type="text" id="breb-buscador" placeholder="Buscar cliente..." onkeyup="window.filtrarPagosEnVivo()" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; outline: none;">
-    </div>
-    <div id="breb-lista" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
-  `;
-  document.body.appendChild(widget);
-
-  window.establecerFechaHoy();
-  window.cargarPagosBreB();
-}
+let cantidadPagosAnterior = 0;
 
 // 🔄 REFRESCAR MANUALMENTE
 window.forzarActualizacionBreB = function () {
@@ -188,13 +201,6 @@ window.cargarPagosBreB = function () {
       console.error("Error BRE-B:", err);
     });
 };
-
-// Inicialización
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", inyectarEstructuraBreB);
-} else {
-  inyectarEstructuraBreB();
-}
 
 /* ==========================================================================
    📋 PLANTILLAS DESDE MYSQL Y MOTORES DE COPIADO
