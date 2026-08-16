@@ -3,221 +3,58 @@
    ========================================================================== */
 
 /* ==========================================================================
-   📡 WIDGET IZQUIERDO: PAGOS BRE-B (BOTÓN FLOTANTE + AUTO-HIDE 10S)
+   💳 CYBERNET OS - MÓDULO MODAL PAGOS BRE-B (GMAIL)
    ========================================================================== */
-let autoHideTimerBreB = null;
-let cantidadPagosAnterior = 0;
 const URL_APPS_SCRIPT_BREB =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
+let timerOcultadoBreB = null;
+let cantidadPagosAnterior = 0;
 
-// 🔍 DETECTOR ESTRICTO DE MODALES / OVERLAYS REALMENTE ABIERTOS
-function hayModalAbierto() {
-  const modalesAbiertos = document.querySelectorAll(
-    ".overlay.open, .modal.open, .open[id*='Overlay'], .open[id*='modal'], [id*='Overlay'][style*='display: flex'], [id*='Overlay'][style*='display: block']",
-  );
-
-  for (let el of modalesAbiertos) {
-    if (el.id === "breb-widget" || el.id === "btn-expand-breb") continue;
-    return true;
-  }
-  return false;
-}
-
-// 1. INYECCIÓN DEL BOTÓN Y PANEL FLOTANTE EN EL BORDE IZQUIERDO
-function inyectarEstructuraBreB() {
-  if (document.getElementById("btn-expand-breb")) return;
-  if (!document.body) {
-    setTimeout(inyectarEstructuraBreB, 50);
-    return;
-  }
-
-  // Estilos CSS con prioridad absoluta
-  const style = document.createElement("style");
-  style.id = "breb-dynamic-css";
-  style.innerHTML = `
-    #btn-expand-breb {
-      position: fixed !important;
-      top: 180px !important;
-      left: 0 !important;
-      z-index: 999999 !important;
-      background: rgba(18, 18, 22, 0.96) !important;
-      backdrop-filter: blur(16px) !important;
-      border: 1px solid #30d158 !important;
-      border-left: none !important;
-      border-radius: 0 14px 14px 0 !important;
-      padding: 12px 10px !important;
-      cursor: pointer !important;
-      display: flex !important;
-      align-items: center !important;
-      gap: 8px !important;
-      box-shadow: 6px 8px 24px rgba(0, 0, 0, 0.6) !important;
-      transition: all 0.25s ease !important;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    }
-    #btn-expand-breb:hover {
-      background: rgba(30, 30, 38, 1) !important;
-      box-shadow: 8px 10px 28px rgba(48, 209, 88, 0.4) !important;
-    }
-    .breb-icon-arrow {
-      width: 14px !important;
-      height: 14px !important;
-      stroke: #30d158 !important;
-    }
-    .breb-badge-txt {
-      font-size: 0.75rem !important;
-      font-weight: 900 !important;
-      letter-spacing: 1.2px !important;
-      color: #ffffff !important;
-      text-transform: uppercase !important;
-    }
-    #breb-widget {
-      position: fixed !important;
-      top: 110px !important;
-      left: 0 !important;
-      z-index: 999999 !important;
-      width: 340px !important;
-      height: 520px !important;
-      background: rgba(18, 18, 22, 0.96) !important;
-      backdrop-filter: blur(20px) !important;
-      border: 1px solid rgba(48, 209, 88, 0.35) !important;
-      border-left: none !important;
-      border-radius: 0 20px 20px 0 !important;
-      box-shadow: 12px 12px 35px rgba(0, 0, 0, 0.7) !important;
-      display: none;
-      flex-direction: column !important;
-      transform: translateX(-360px);
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease !important;
-      overflow: hidden !important;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    }
-    .spin-breb-anim {
-      animation: spinBreB 0.8s linear infinite !important;
-    }
-    @keyframes spinBreB {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-  `;
-  document.head.appendChild(style);
-
-  // Crear Botón Flotante (Siempre visible en el borde izquierdo)
-  const btn = document.createElement("div");
-  btn.id = "btn-expand-breb";
-  btn.title = "Clic para abrir Pagos BRE-B";
-  btn.onclick = window.mostrarWidgetBreB;
-  btn.innerHTML = `
-    <svg class="breb-icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="9 18 15 12 9 6"></polyline>
-    </svg>
-    <span class="breb-badge-txt">PAGOS BRE-B</span>
-  `;
-  document.body.appendChild(btn);
-
-  // Crear Panel Deslizante
-  const widget = document.createElement("div");
-  widget.id = "breb-widget";
-  widget.innerHTML = `
-    <div style="padding: 14px 16px; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center;">
-      <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.88rem; color: #ffffff;">
-        <span style="width: 8px; height: 8px; border-radius: 50%; background: #30d158; box-shadow: 0 0 8px #30d158;"></span>
-        PAGOS BRE-B
-      </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <button onclick="window.forzarActualizacionBreB()" style="background: none; border: none; color: #0a84ff; cursor: pointer; padding: 4px; display:flex; align-items:center;" title="Refrescar">
-          <svg id="icon-refresh-breb" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-        </button>
-        <button onclick="window.ocultarWidgetBreB()" style="background: none; border: none; color: #a1a1aa; cursor: pointer; font-size: 1.1rem; font-weight: bold; line-height: 1;" title="Ocultar">✕</button>
-      </div>
-    </div>
-    <div style="padding: 10px 14px; display: flex; gap: 8px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-      <input type="date" id="breb-fecha" onchange="window.alCambiarFechaBreB()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 8px; font-size: 0.75rem; width: 120px; outline: none;">
-      <input type="text" id="breb-buscador" placeholder="Buscar cliente..." onkeyup="window.filtrarPagosEnVivo()" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; outline: none;">
-    </div>
-    <div id="breb-lista" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
-  `;
-  document.body.appendChild(widget);
-
-  iniciarObservadorModales();
-}
-
-// 🚪 MOSTRAR Y DESLIZAR PANEL BRE-B
-window.mostrarWidgetBreB = function () {
+// 👁️ ABRIR / CERRAR VENTANA MODAL DE BRE-B CON 10S AUTO-HIDE
+window.toggleBreBPanel = function () {
   if (typeof haptic === "function") haptic();
 
-  const btnExpand = document.getElementById("btn-expand-breb");
-  const widget = document.getElementById("breb-widget");
+  const overlay = document.getElementById("brebOverlay");
+  if (!overlay) return;
 
-  if (btnExpand) btnExpand.style.display = "none";
-  if (widget) {
-    widget.style.display = "flex";
-    void widget.offsetWidth;
-    widget.style.transform = "translateX(0)";
-  }
+  const isVisible =
+    overlay.classList.contains("open") || overlay.style.display === "flex";
 
-  window.establecerFechaHoy();
-  window.cargarPagosBreB();
-  window.iniciarAutoOcultado();
-};
+  if (isVisible) {
+    window.cerrarBreBPanel();
+  } else {
+    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
 
-// 🚪 OCULTAR Y COLAPSAR PANEL BRE-B
-window.ocultarWidgetBreB = function () {
-  const widget = document.getElementById("breb-widget");
-  const btnExpand = document.getElementById("btn-expand-breb");
+    overlay.classList.add("open");
+    overlay.style.setProperty("display", "flex", "important");
 
-  if (widget) widget.style.transform = "translateX(-360px)";
+    window.establecerFechaHoyBreBModal();
+    window.cargarPagosBreBModal();
 
-  setTimeout(() => {
-    if (widget) widget.style.display = "none";
-    if (btnExpand && !hayModalAbierto()) btnExpand.style.display = "flex";
-  }, 320);
-
-  if (autoHideTimerBreB) {
-    clearTimeout(autoHideTimerBreB);
-    autoHideTimerBreB = null;
+    // ⏱️ Auto ocultar a los 10 segundos
+    window.reiniciarTimerBreB();
   }
 };
 
-// ⏱️ AUTO-OCULTADO A LOS 10 SEGUNDOS
-window.iniciarAutoOcultado = function () {
-  if (autoHideTimerBreB) clearTimeout(autoHideTimerBreB);
-  autoHideTimerBreB = setTimeout(() => {
-    window.ocultarWidgetBreB();
+window.cerrarBreBPanel = function () {
+  const overlay = document.getElementById("brebOverlay");
+  if (overlay) {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
+  }
+  if (timerOcultadoBreB) clearTimeout(timerOcultadoBreB);
+};
+
+window.reiniciarTimerBreB = function () {
+  if (timerOcultadoBreB) clearTimeout(timerOcultadoBreB);
+  timerOcultadoBreB = setTimeout(() => {
+    window.cerrarBreBPanel();
   }, 10000);
 };
 
-// 🔄 REFRESCAR MANUALMENTE
-window.forzarActualizacionBreB = function () {
-  if (typeof haptic === "function") haptic();
-  const icono = document.getElementById("icon-refresh-breb");
-  if (icono) icono.classList.add("spin-breb-anim");
-
-  window.cargarPagosBreB();
-  window.iniciarAutoOcultado();
-};
-
-// 🔍 FILTRADO EN TIEMPO REAL
-window.filtrarPagosEnVivo = function () {
-  const buscador = document.getElementById("breb-buscador");
-  const texto = buscador ? buscador.value.toLowerCase().trim() : "";
-  const tarjetas = document.querySelectorAll("#breb-lista .breb-card");
-
-  tarjetas.forEach((tarjeta) => {
-    const contenido = tarjeta.innerText.toLowerCase();
-    tarjeta.style.display = contenido.includes(texto) ? "flex" : "none";
-  });
-
-  window.iniciarAutoOcultado();
-};
-
-// 📅 CAMBIO DE FECHA
-window.alCambiarFechaBreB = function () {
-  window.cargarPagosBreB();
-  window.iniciarAutoOcultado();
-};
-
-// 📅 AUTOFILLED DE FECHA HOY
-window.establecerFechaHoy = function () {
-  const inputFecha = document.getElementById("breb-fecha");
+// 📅 AUTOFILLED FECHA HOY
+window.establecerFechaHoyBreBModal = function () {
+  const inputFecha = document.getElementById("breb-fecha-modal");
   if (inputFecha && !inputFecha.value) {
     const hoy = new Date();
     const yyyy = hoy.getFullYear();
@@ -228,27 +65,24 @@ window.establecerFechaHoy = function () {
 };
 
 // 📥 CONSULTA EN TIEMPO REAL A GMAIL (APPS SCRIPT)
-window.cargarPagosBreB = function () {
-  const contenedor = document.getElementById("breb-lista");
+window.cargarPagosBreBModal = function () {
+  const contenedor = document.getElementById("breb-lista-modal");
   if (!contenedor) return;
 
   contenedor.innerHTML = `
-    <div style="color: #0a84ff; width: 100%; text-align: center; font-size: 13px; font-weight: 700; padding: 40px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-      <svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-      <span>Buscando en Gmail Bre-B...</span>
+    <div style="color: #0a84ff; text-align: center; padding: 40px; font-weight: 700; font-size: 0.88rem; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+      <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+      <span>Buscando pagos Bre-B en Gmail...</span>
     </div>`;
 
-  const inputFecha = document.getElementById("breb-fecha");
+  const inputFecha = document.getElementById("breb-fecha-modal");
   const fechaVal = inputFecha ? inputFecha.value : "";
-  const callbackName = "cb_breb_" + Date.now();
+  const callbackName = "cb_breb_modal_" + Date.now();
 
   window[callbackName] = function (res) {
     delete window[callbackName];
     const scriptElem = document.getElementById(callbackName);
     if (scriptElem) scriptElem.remove();
-
-    const icono = document.getElementById("icon-refresh-breb");
-    if (icono) icono.classList.remove("spin-breb-anim");
 
     if (res && res.status === "success" && res.data && res.data.length > 0) {
       if (
@@ -259,34 +93,34 @@ window.cargarPagosBreB = function () {
       }
       cantidadPagosAnterior = res.data.length;
 
-      let htmlCards = "";
+      let html = "";
       res.data.forEach((pago) => {
-        const nombreCliente = pago.remitente
+        const cliente = pago.remitente
           ? pago.remitente.toUpperCase()
           : "CLIENTE DESCONOCIDO";
-        const valorMonto = pago.monto || "0";
-        const horaEnvio = pago.hora || "";
-        const fechaEnvio = pago.fecha || "";
+        const monto = pago.monto || "0";
+        const hora = pago.hora || "";
+        const fecha = pago.fecha || "";
 
-        htmlCards += `
-          <div class="breb-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s ease;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #30d158; font-weight: 900; font-size: 1.05rem; font-family: monospace;">+$${valorMonto}</span>
-              <span style="color: rgba(255,255,255,0.7); font-size: 0.72rem; font-family: monospace; background: rgba(0,0,0,0.35); padding: 2px 7px; border-radius: 6px;">${horaEnvio}</span>
+        html += `
+          <div class="breb-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; transition: all 0.2s ease;">
+            <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex: 1;">
+              <span style="color: #ffffff; font-weight: 800; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">
+                👤 ${cliente}
+              </span>
+              <span style="color: rgba(255, 255, 255, 0.45); font-size: 0.72rem;">
+                📅 ${fecha}
+              </span>
             </div>
-            <div style="color: #ffffff; font-size: 0.83rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">
-              👤 ${nombreCliente}
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+              <span style="color: #30d158; font-weight: 900; font-size: 1.05rem; font-family: monospace;">+$${monto}</span>
+              <span style="color: rgba(255, 255, 255, 0.7); font-size: 0.7rem; font-family: monospace; background: rgba(0, 0, 0, 0.4); padding: 2px 7px; border-radius: 6px;">${hora}</span>
             </div>
-            <div style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">
-              📅 ${fechaEnvio}
-            </div>
-          </div>
-        `;
+          </div>`;
       });
-
-      contenedor.innerHTML = htmlCards;
+      contenedor.innerHTML = html;
     } else {
-      contenedor.innerHTML = `<div style="color: rgba(255,255,255,0.5); width: 100%; text-align: center; font-size: 0.8rem; font-weight: 600; padding: 35px 0;">📭 No hay pagos de Bre-B en Gmail hoy.</div>`;
+      contenedor.innerHTML = `<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 40px; font-size: 0.85rem; font-weight: 600;">📭 No hay pagos de Bre-B registrados en Gmail para esta fecha.</div>`;
     }
   };
 
@@ -295,49 +129,36 @@ window.cargarPagosBreB = function () {
   script.src = `${URL_APPS_SCRIPT_BREB}?action=obtenerPagosBreB&fechaBusqueda=${encodeURIComponent(fechaVal)}&callback=${callbackName}`;
   script.onerror = function () {
     delete window[callbackName];
-    const icono = document.getElementById("icon-refresh-breb");
-    if (icono) icono.classList.remove("spin-breb-anim");
-    contenedor.innerHTML = `<div style="color: #ff453a; width: 100%; text-align: center; font-size: 0.8rem; font-weight: 700; padding: 20px 0;">❌ Error al conectar con Google Script.</div>`;
+    contenedor.innerHTML = `<div style="text-align: center; color: #ff453a; padding: 30px; font-size: 0.85rem; font-weight: 700;">❌ Error al conectar con Google Script.</div>`;
   };
 
   document.body.appendChild(script);
 };
 
-// 🛡️ OBSERVADOR PARA OCULTAR SI SE ABRE OTRA VENTANA EN EL SISTEMA
-function iniciarObservadorModales() {
-  const observer = new MutationObserver(() => {
-    const btnExpand = document.getElementById("btn-expand-breb");
+// 🔍 FILTRAR CLIENTES EN VIVO
+window.filtrarBreBModal = function () {
+  window.reiniciarTimerBreB(); // Extender tiempo si el usuario está buscando
+  const buscador = document.getElementById("breb-buscar-modal");
+  const texto = buscador ? buscador.value.toLowerCase().trim() : "";
+  const tarjetas = document.querySelectorAll("#breb-lista-modal .breb-card");
 
-    if (hayModalAbierto()) {
-      window.ocultarWidgetBreB();
-      if (btnExpand) btnExpand.style.display = "none";
-    } else {
-      const widget = document.getElementById("breb-widget");
-      const estaWidgetAbierto = widget && widget.style.display === "flex";
-      if (btnExpand && !estaWidgetAbierto) {
-        btnExpand.style.display = "flex";
-      }
-    }
+  tarjetas.forEach((tarjeta) => {
+    const contenido = tarjeta.innerText.toLowerCase();
+    tarjeta.style.display = contenido.includes(texto) ? "flex" : "none";
   });
+};
 
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ["class", "style"],
-  });
-}
+// 📅 CAMBIO DE FECHA
+window.alCambiarFechaBreBModal = function () {
+  window.reiniciarTimerBreB();
+  window.cargarPagosBreBModal();
+};
 
-// Inicializador
-if (
-  document.readyState === "complete" ||
-  document.readyState === "interactive"
-) {
-  inyectarEstructuraBreB();
-} else {
-  document.addEventListener("DOMContentLoaded", inyectarEstructuraBreB);
-}
-setTimeout(inyectarEstructuraBreB, 200);
+// 🔄 REFRESCAR MANUALMENTE
+window.forzarActualizacionBreBModal = function () {
+  window.reiniciarTimerBreB();
+  window.cargarPagosBreBModal();
+};
 
 /* ==========================================================================
    📋 PLANTILLAS DESDE MYSQL Y MOTORES DE COPIADO
@@ -390,7 +211,7 @@ window.cargarPlantillasDesdeSheets = function () {
 
           headerContainer.innerHTML = `
             <div class="card-ios w-100" style="max-width: 440px; align-items: center; gap: 12px; padding: 20px;">
-              <img src="${plantillaPagos.imagenUrl}" alt="QR" onclick="window.copiarImagenQRPagos(this, '${plantillaPagos.imagenUrl}')" style="max-width:210px; width:100%; border-radius:16px; border: 2px solid transparent; box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Haz clic para copiar la imagen del QR">
+              <img src="${plantillaPagos.imagenUrl}" alt="QR" onclick="window.copiarImagenQRPagos(this, '${plantillaPagos.imagenUrl}')" style="max-width:210px; width:100%; border-radius:16px; border: 2px solid transparent; box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Haz clic para copiar la imagen del QR">
               <span class="text-secondary text-center" style="font-size:0.75rem; font-weight:500; margin-top: -4px;">(Haz clic sobre el QR para copiar la imagen)</span>
               <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 4px;">
                 <button class="btn-ios w-100" style="padding: 14px !important; font-size: 0.85rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer;" onclick="window.copiarPlantillaGlobal(this, '${textoPagosSeguro}')">
