@@ -3,68 +3,39 @@
    ========================================================================== */
 
 /* ==========================================================================
-   📡 WIDGET FLOTANTE IZQUIERDO: PAGOS BRE-B EN VIVO (ESTÁTICO / AUTO-INYECCIÓN)
+   📡 WIDGET FLOTANTE IZQUIERDO: PAGOS BRE-B (ESTÁTICO / AUTO-INYECCIÓN)
    ========================================================================== */
 let cantidadPagosAnterior = 0;
 
-// 1. AUTO-INYECTOR DE ESTRUCTURA Y ESTILOS PARA PAGOS BRE-B EN EL DOM
+// 1. INYECTOR SEGURO EN EL DOM (IZQUIERDA ESTÁTICA)
 function inyectarEstructuraBreB() {
+  if (!document.body) {
+    setTimeout(inyectarEstructuraBreB, 50);
+    return;
+  }
+
   if (document.getElementById("breb-widget")) return;
 
   // Inyectar Estilos CSS con máxima prioridad (!important)
   const style = document.createElement("style");
   style.id = "breb-dynamic-css";
   style.innerHTML = `
-    #btn-expand-breb {
-      position: fixed !important;
-      top: 180px !important;
-      left: 0 !important;
-      z-index: 99998 !important;
-      background: rgba(20, 20, 25, 0.92) !important;
-      backdrop-filter: blur(16px) !important;
-      border: 1px solid rgba(48, 209, 88, 0.4) !important;
-      border-left: none !important;
-      border-radius: 0 14px 14px 0 !important;
-      padding: 12px 8px !important;
-      cursor: pointer !important;
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      gap: 8px !important;
-      box-shadow: 6px 8px 24px rgba(0, 0, 0, 0.5) !important;
-      transition: all 0.3s ease !important;
-    }
-    #btn-expand-breb:hover {
-      background: rgba(30, 30, 38, 0.98) !important;
-      border-color: #30d158 !important;
-      box-shadow: 8px 10px 28px rgba(48, 209, 88, 0.3) !important;
-    }
-    .breb-vertical-txt {
-      writing-mode: vertical-rl !important;
-      text-transform: uppercase !important;
-      font-size: 0.72rem !important;
-      font-weight: 900 !important;
-      letter-spacing: 1.5px !important;
-      color: #ffffff !important;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
-    }
     #breb-widget {
       position: fixed !important;
-      top: 100px !important;
-      left: 15px !important;
-      z-index: 99998 !important;
-      width: 330px !important;
-      height: 520px !important;
-      background: rgba(18, 18, 22, 0.95) !important;
+      top: 120px !important;
+      left: 20px !important;
+      z-index: 99990 !important;
+      width: 310px !important;
+      height: 500px !important;
+      background: rgba(18, 18, 22, 0.94) !important;
       backdrop-filter: blur(20px) !important;
-      border: 1px solid rgba(48, 209, 88, 0.3) !important;
+      border: 1px solid rgba(48, 209, 88, 0.35) !important;
       border-radius: 18px !important;
       box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7) !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-      transition: opacity 0.25s ease, transform 0.25s ease !important;
     }
     .spin-breb-anim {
       animation: spinBreB 0.8s linear infinite !important;
@@ -76,21 +47,7 @@ function inyectarEstructuraBreB() {
   `;
   document.head.appendChild(style);
 
-  // Inyectar Botón Flotante Pestaña Izquierda
-  const btn = document.createElement("div");
-  btn.id = "btn-expand-breb";
-  btn.title = "Abrir Pagos BRE-B";
-  btn.onclick = window.mostrarWidgetBreB;
-  btn.style.display = "none"; // Inicia oculto si la ventana abre estática
-  btn.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="9 18 15 12 9 6"></polyline>
-    </svg>
-    <span class="breb-vertical-txt">PAGOS BRE-B</span>
-  `;
-  document.body.appendChild(btn);
-
-  // Inyectar Ventana Flotante Estática
+  // Inyectar Ventana Flotante Estática en la Izquierda
   const widget = document.createElement("div");
   widget.id = "breb-widget";
   widget.innerHTML = `
@@ -99,61 +56,21 @@ function inyectarEstructuraBreB() {
         <span style="width: 8px; height: 8px; border-radius: 50%; background: #30d158; box-shadow: 0 0 8px #30d158;"></span>
         PAGOS BRE-B
       </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <button onclick="window.forzarActualizacionBreB()" style="background: none; border: none; color: #0a84ff; cursor: pointer; padding: 4px; display:flex; align-items:center;" title="Refrescar">
-          <svg id="icon-refresh-breb" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-        </button>
-        <button onclick="window.ocultarWidgetBreB()" style="background: none; border: none; color: #a1a1aa; cursor: pointer; font-size: 1.1rem; font-weight: bold; line-height: 1;" title="Ocultar">✕</button>
-      </div>
+      <button onclick="window.forzarActualizacionBreB()" style="background: none; border: none; color: #0a84ff; cursor: pointer; padding: 4px; display:flex; align-items:center;" title="Refrescar">
+        <svg id="icon-refresh-breb" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+      </button>
     </div>
     <div style="padding: 10px 14px; display: flex; gap: 8px; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-      <input type="date" id="breb-fecha" onchange="window.alCambiarFechaBreB()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 8px; font-size: 0.75rem; width: 120px; outline: none;">
+      <input type="date" id="breb-fecha" onchange="window.alCambiarFechaBreB()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 8px; font-size: 0.75rem; width: 115px; outline: none;">
       <input type="text" id="breb-buscador" placeholder="Buscar cliente..." onkeyup="window.filtrarPagosEnVivo()" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; outline: none;">
     </div>
     <div id="breb-lista" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
   `;
   document.body.appendChild(widget);
 
-  // Inicializar datos
   window.establecerFechaHoy();
   window.cargarPagosBreB();
 }
-
-// 🚪 MOSTRAR WIDGET ESTÁTICO DE PAGOS BRE-B
-window.mostrarWidgetBreB = function () {
-  if (typeof haptic === "function") haptic();
-
-  const btnExpand = document.getElementById("btn-expand-breb");
-  const widget = document.getElementById("breb-widget");
-
-  if (btnExpand) btnExpand.style.display = "none";
-  if (widget) {
-    widget.style.display = "flex";
-    widget.style.opacity = "1";
-    widget.style.transform = "translateX(0)";
-  }
-
-  window.establecerFechaHoy();
-  window.cargarPagosBreB();
-};
-
-// 🚪 OCULTAR WIDGET DE PAGOS BRE-B (CEDE ESPACIO AL BOTÓN FLOTANTE)
-window.ocultarWidgetBreB = function () {
-  if (typeof haptic === "function") haptic();
-
-  const widget = document.getElementById("breb-widget");
-  const btnExpand = document.getElementById("btn-expand-breb");
-
-  if (widget) {
-    widget.style.opacity = "0";
-    widget.style.transform = "translateX(-360px)";
-  }
-
-  setTimeout(() => {
-    if (widget) widget.style.display = "none";
-    if (btnExpand) btnExpand.style.display = "flex";
-  }, 250);
-};
 
 // 🔄 REFRESCAR MANUALMENTE
 window.forzarActualizacionBreB = function () {
@@ -272,7 +189,7 @@ window.cargarPagosBreB = function () {
     });
 };
 
-// Inicialización automática de la estructura BRE-B al cargar
+// Inicialización
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", inyectarEstructuraBreB);
 } else {
