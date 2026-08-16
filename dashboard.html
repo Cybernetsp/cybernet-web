@@ -347,6 +347,7 @@
           onclick="toggleDistrisPanel()"
           >Distris</span
         >
+        <span onclick="toggleBreBPanel()" style="cursor: pointer">Bre-B</span>
       </div>
     </header>
 
@@ -9532,6 +9533,162 @@
             </button>
           </div>
         </div>
+      </div>
+    </div>
+    <!-- ==========================================================================
+   💳 MODAL DE PAGOS BRE-B (GMAIL)
+   ========================================================================== -->
+    <div
+      id="brebOverlay"
+      class="overlay"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(12px);
+        z-index: 999999;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          width: 100%;
+          max-width: 440px;
+          height: 560px;
+          background: rgba(20, 20, 25, 0.95);
+          border: 1px solid rgba(48, 209, 88, 0.35);
+          border-radius: 20px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        "
+      >
+        <!-- Encabezado -->
+        <div
+          style="
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              font-weight: 800;
+              font-size: 0.95rem;
+              color: #ffffff;
+            "
+          >
+            <span
+              style="
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+                background: #30d158;
+                box-shadow: 0 0 10px #30d158;
+              "
+            ></span>
+            PAGOS BRE-B (GMAIL)
+          </div>
+          <button
+            onclick="toggleBreBPanel()"
+            style="
+              background: none;
+              border: none;
+              color: #a1a1aa;
+              cursor: pointer;
+              font-size: 1.2rem;
+              font-weight: bold;
+            "
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Herramientas (Fecha, Buscador, Refrescar) -->
+        <div
+          style="
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: center;
+          "
+        >
+          <input
+            type="date"
+            id="breb-fecha-modal"
+            onchange="alCambiarFechaBreBModal()"
+            style="
+              background: rgba(255, 255, 255, 0.06);
+              border: 1px solid rgba(255, 255, 255, 0.12);
+              color: #fff;
+              border-radius: 10px;
+              padding: 7px 10px;
+              font-size: 0.78rem;
+              outline: none;
+            "
+          />
+          <input
+            type="text"
+            id="breb-buscar-modal"
+            placeholder="Buscar cliente..."
+            onkeyup="filtrarBreBModal()"
+            style="
+              flex: 1;
+              background: rgba(255, 255, 255, 0.06);
+              border: 1px solid rgba(255, 255, 255, 0.12);
+              color: #fff;
+              border-radius: 10px;
+              padding: 7px 12px;
+              font-size: 0.78rem;
+              outline: none;
+            "
+          />
+          <button
+            onclick="forzarActualizacionBreBModal()"
+            style="
+              background: rgba(255, 255, 255, 0.08);
+              border: 1px solid rgba(255, 255, 255, 0.15);
+              color: #0a84ff;
+              border-radius: 10px;
+              padding: 7px 10px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+            title="Refrescar"
+          >
+            🔄
+          </button>
+        </div>
+
+        <!-- Lista de Pagos -->
+        <div
+          id="breb-lista-modal"
+          style="
+            flex: 1;
+            padding: 14px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          "
+        ></div>
       </div>
     </div>
     <!-- Script Lógico Principal (Nuevo Motor) -->
