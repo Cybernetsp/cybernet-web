@@ -9,7 +9,7 @@ const URL_APPS_SCRIPT_BREB =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 let cantidadPagosAnterior = 0;
 
-// 👁️ ABRIR / CERRAR VENTANA MODAL DE BRE-B (SOLO SE CIERRA DE MANERA MANUAL)
+// 👁️ ABRIR / CERRAR VENTANA MODAL DE BRE-B
 window.toggleBreBPanel = function () {
   if (typeof haptic === "function") haptic();
 
@@ -55,6 +55,9 @@ window.establecerFechaHoyBreBModal = function () {
 // 📥 CONSULTA EN TIEMPO REAL A GMAIL (APPS SCRIPT)
 window.cargarPagosBreBModal = function () {
   const contenedor = document.getElementById("breb-lista-modal");
+  const totalBadge = document.getElementById("breb-total-badge");
+  const totalMontoElem = document.getElementById("breb-monto-total");
+
   if (!contenedor) return;
 
   contenedor.innerHTML = `
@@ -86,55 +89,65 @@ window.cargarPagosBreBModal = function () {
       }
       cantidadPagosAnterior = res.data.length;
 
+      let sumaTotal = 0;
       let html = "";
+
       res.data.forEach((pago) => {
         const cliente = pago.remitente
-          ? pago.remitente.toUpperCase()
+          ? pago.remitente.toUpperCase().trim()
           : "CLIENTE DESCONOCIDO";
-        const monto = pago.monto || "0";
+        const montoStr = pago.monto || "0";
+
+        // Suma limpia del monto
+        const numMonto =
+          parseFloat(String(montoStr).replace(/[^0-9.]/g, "")) || 0;
+        sumaTotal += numMonto;
+
         const hora = pago.hora || "";
         const fecha = pago.fecha || "";
 
+        // 🟢 FORMATO LINEAL CONTINUO EN UNA SOLA LÍNEA
         html += `
-          <div class="breb-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(48, 209, 88, 0.35)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.07)';">
-            
-            <!-- Izquierda: Avatar e Información del Cliente -->
-            <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
-              <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(48, 209, 88, 0.12); border: 1px solid rgba(48, 209, 88, 0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              </div>
-              <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1;">
-                <span style="color: #ffffff; font-weight: 800; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.3px;">
-                  ${cliente}
-                </span>
-                <div style="display: flex; align-items: center; gap: 5px; color: rgba(255, 255, 255, 0.45); font-size: 0.72rem;">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                  <span>${fecha}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Derecha: Monto y Hora -->
-            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
-              <span style="color: #30d158; font-weight: 900; font-size: 1.1rem; font-family: -apple-system, BlinkMacSystemFont, sans-serif; letter-spacing: -0.3px;">+$${monto}</span>
-              <div style="display: flex; align-items: center; gap: 4px; color: rgba(255, 255, 255, 0.6); font-size: 0.7rem; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 6px; font-family: monospace;">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span>${hora}</span>
-              </div>
-            </div>
-
+          <div class="breb-card" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px; padding: 10px 14px; font-size: 0.81rem; line-height: 1.4; color: rgba(255, 255, 255, 0.7); transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.borderColor='rgba(48, 209, 88, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.06)';">
+            <strong style="color: #ffffff; font-weight: 800; letter-spacing: 0.2px;">${cliente}</strong>
+            <span style="color: rgba(255, 255, 255, 0.55);"> envió </span>
+            <span style="color: #30d158; font-weight: 900; font-family: monospace; font-size: 0.88rem;">+$${montoStr}</span>
+            <span style="color: rgba(255, 255, 255, 0.45); font-size: 0.73rem;"> el ${fecha} a las ${hora}</span>
           </div>`;
       });
+
       contenedor.innerHTML = html;
+
+      // 🛡️ VERIFICACIÓN DE ROL/USUARIO EXCLUSIVO PARA SUPERADMIN
+      const usuarioActivo = (
+        localStorage.getItem("usuario") ||
+        sessionStorage.getItem("usuario") ||
+        ""
+      )
+        .toUpperCase()
+        .trim();
+      const rolActivo = (
+        localStorage.getItem("rol") ||
+        sessionStorage.getItem("rol") ||
+        ""
+      )
+        .toLowerCase()
+        .trim();
+
+      const esSuperAdmin =
+        usuarioActivo === "CAMILO" ||
+        rolActivo === "superadmin" ||
+        usuarioActivo === "ADMIN";
+
+      if (esSuperAdmin && totalBadge && totalMontoElem) {
+        totalMontoElem.innerText = "$" + sumaTotal.toLocaleString("es-CO");
+        totalBadge.style.display = "block";
+      } else if (totalBadge) {
+        totalBadge.style.display = "none";
+      }
     } else {
-      contenedor.innerHTML = `
-        <div style="text-align: center; color: rgba(255,255,255,0.4); padding: 50px 20px; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.4;"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
-          <span style="font-weight: 600;">No se detectaron pagos en esta fecha</span>
-        </div>`;
+      contenedor.innerHTML = `<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 50px 20px; font-size: 0.85rem; font-weight: 600;">📭 No se detectaron pagos en esta fecha</div>`;
+      if (totalBadge) totalBadge.style.display = "none";
     }
   };
 
@@ -144,11 +157,8 @@ window.cargarPagosBreBModal = function () {
   script.onerror = function () {
     delete window[callbackName];
     if (iconoRefresh) iconoRefresh.classList.remove("spin-anim");
-    contenedor.innerHTML = `
-      <div style="text-align: center; color: #ff453a; padding: 40px 20px; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        <span style="font-weight: 700;">Error al conectar con Google Script</span>
-      </div>`;
+    contenedor.innerHTML = `<div style="text-align: center; color: #ff453a; padding: 40px 20px; font-size: 0.85rem; font-weight: 700;">❌ Error al conectar con Google Script</div>`;
+    if (totalBadge) totalBadge.style.display = "none";
   };
 
   document.body.appendChild(script);
@@ -162,7 +172,7 @@ window.filtrarBreBModal = function () {
 
   tarjetas.forEach((tarjeta) => {
     const contenido = tarjeta.innerText.toLowerCase();
-    tarjeta.style.display = contenido.includes(texto) ? "flex" : "none";
+    tarjeta.style.display = contenido.includes(texto) ? "block" : "none";
   });
 };
 
