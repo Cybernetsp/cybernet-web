@@ -7,10 +7,9 @@
    ========================================================================== */
 const URL_APPS_SCRIPT_BREB =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
-let timerOcultadoBreB = null;
 let cantidadPagosAnterior = 0;
 
-// 👁️ ABRIR / CERRAR VENTANA MODAL DE BRE-B CON 10S AUTO-HIDE
+// 👁️ ABRIR / CERRAR VENTANA MODAL DE BRE-B (SOLO SE CIERRA DE MANERA MANUAL)
 window.toggleBreBPanel = function () {
   if (typeof haptic === "function") haptic();
 
@@ -30,9 +29,6 @@ window.toggleBreBPanel = function () {
 
     window.establecerFechaHoyBreBModal();
     window.cargarPagosBreBModal();
-
-    // ⏱️ Auto ocultar a los 10 segundos
-    window.reiniciarTimerBreB();
   }
 };
 
@@ -42,14 +38,6 @@ window.cerrarBreBPanel = function () {
     overlay.classList.remove("open");
     overlay.style.display = "none";
   }
-  if (timerOcultadoBreB) clearTimeout(timerOcultadoBreB);
-};
-
-window.reiniciarTimerBreB = function () {
-  if (timerOcultadoBreB) clearTimeout(timerOcultadoBreB);
-  timerOcultadoBreB = setTimeout(() => {
-    window.cerrarBreBPanel();
-  }, 10000);
 };
 
 // 📅 AUTOFILLED FECHA HOY
@@ -108,34 +96,36 @@ window.cargarPagosBreBModal = function () {
         const fecha = pago.fecha || "";
 
         html += `
-          <div class="breb-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(48, 209, 88, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.07)';">
-            <!-- Icono Cliente e Info -->
-            <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1;">
-              <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="breb-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(48, 209, 88, 0.35)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.07)';">
+            
+            <!-- Izquierda: Avatar e Información del Cliente -->
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
+              <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(48, 209, 88, 0.12); border: 1px solid rgba(48, 209, 88, 0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
               </div>
-              <div style="display: flex; flex-direction: column; gap: 3px; overflow: hidden;">
-                <span style="color: #ffffff; font-weight: 800; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; letter-spacing: 0.3px;">
+              <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1;">
+                <span style="color: #ffffff; font-weight: 800; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.3px;">
                   ${cliente}
                 </span>
-                <div style="display: flex; align-items: center; gap: 4px; color: rgba(255, 255, 255, 0.4); font-size: 0.7rem;">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <div style="display: flex; align-items: center; gap: 5px; color: rgba(255, 255, 255, 0.45); font-size: 0.72rem;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                   <span>${fecha}</span>
                 </div>
               </div>
             </div>
 
-            <!-- Monto y Hora -->
-            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0;">
-              <span style="color: #30d158; font-weight: 900; font-size: 1.05rem; font-family: monospace; letter-spacing: -0.5px;">+$${monto}</span>
-              <div style="display: flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); padding: 2px 7px; border-radius: 6px; color: rgba(255, 255, 255, 0.7); font-size: 0.68rem; font-family: monospace;">
+            <!-- Derecha: Monto y Hora -->
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+              <span style="color: #30d158; font-weight: 900; font-size: 1.1rem; font-family: -apple-system, BlinkMacSystemFont, sans-serif; letter-spacing: -0.3px;">+$${monto}</span>
+              <div style="display: flex; align-items: center; gap: 4px; color: rgba(255, 255, 255, 0.6); font-size: 0.7rem; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 6px; font-family: monospace;">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 <span>${hora}</span>
               </div>
             </div>
+
           </div>`;
       });
       contenedor.innerHTML = html;
@@ -166,7 +156,6 @@ window.cargarPagosBreBModal = function () {
 
 // 🔍 FILTRAR CLIENTES EN VIVO
 window.filtrarBreBModal = function () {
-  window.reiniciarTimerBreB();
   const buscador = document.getElementById("breb-buscar-modal");
   const texto = buscador ? buscador.value.toLowerCase().trim() : "";
   const tarjetas = document.querySelectorAll("#breb-lista-modal .breb-card");
@@ -179,13 +168,11 @@ window.filtrarBreBModal = function () {
 
 // 📅 CAMBIO DE FECHA
 window.alCambiarFechaBreBModal = function () {
-  window.reiniciarTimerBreB();
   window.cargarPagosBreBModal();
 };
 
 // 🔄 REFRESCAR MANUALMENTE
 window.forzarActualizacionBreBModal = function () {
-  window.reiniciarTimerBreB();
   window.cargarPagosBreBModal();
 };
 
