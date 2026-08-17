@@ -459,7 +459,7 @@ window.filtrarModalRenovacionNet = function () {
 // =========================================================================
 // 🚀 PROCESADOR DE VENTAS HACIA MYSQL
 // =========================================================================
-window.ejecutarVentaFinal = function (e) {
+window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
   if (e) e.preventDefault();
   try {
     if (typeof haptic === "function") haptic();
@@ -541,13 +541,15 @@ window.ejecutarVentaFinal = function (e) {
       return;
     }
 
-    let clienteDisplay =
-      clienteNombre && clienteNombre !== "Sin Nombre"
-        ? clienteNombre
-        : clienteCelular;
-    let mensajeConfirmacion = `❓ ¿CONFIRMAR REGISTRO DE VENTA? 🍿\n────────────────────────────\n👤 Cliente / Distribuidor: ${clienteDisplay}\n📞 Celular: ${clienteCelular}\n🏦 Recibe: ${medioPago}\n💰 Valor Cobrado: ${montoCobrado || "$0"}\n\n📺 Cuentas a entregar:\n${resumenConfirmarArray.join("\n")}\n────────────────────────────\n¿Estás seguro de que los datos ingresados son correctos?`;
+    if (!permitirSeparados) {
+      let clienteDisplay =
+        clienteNombre && clienteNombre !== "Sin Nombre"
+          ? clienteNombre
+          : clienteCelular;
+      let mensajeConfirmacion = `❓ ¿CONFIRMAR REGISTRO DE VENTA? 🍿\n────────────────────────────\n👤 Cliente / Distribuidor: ${clienteDisplay}\n📞 Celular: ${clienteCelular}\n🏦 Recibe: ${medioPago}\n💰 Valor Cobrado: ${montoCobrado || "$0"}\n\n📺 Cuentas a entregar:\n${resumenConfirmarArray.join("\n")}\n────────────────────────────\n¿Estás seguro de que los datos ingresados son correctos?`;
 
-    if (!confirm(mensajeConfirmacion)) return;
+      if (!confirm(mensajeConfirmacion)) return;
+    }
 
     const btnSubmit = document.getElementById("btnEjecutarVenta");
     if (btnSubmit) {
@@ -562,6 +564,9 @@ window.ejecutarVentaFinal = function (e) {
     formData.append("monto_cobrado", montoCobrado || "$0");
     formData.append("medio_pago", medioPago);
     formData.append("servicios_json", JSON.stringify(servicios));
+    if (permitirSeparados) {
+      formData.append("permitir_separados", "true");
+    }
 
     fetch("https://api.cybernetsp.com/acciones_mysql.php", {
       method: "POST",
@@ -572,6 +577,13 @@ window.ejecutarVentaFinal = function (e) {
         if (btnSubmit) {
           btnSubmit.disabled = false;
           btnSubmit.innerHTML = "Realizar Venta";
+        }
+
+        if (data.status === "confirmar_separados") {
+          if (confirm("⚠️ " + data.message)) {
+            window.ejecutarVentaFinal(null, true);
+          }
+          return;
         }
 
         if (data.status === "sin_stock") {
