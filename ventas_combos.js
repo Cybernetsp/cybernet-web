@@ -236,12 +236,68 @@ window.buscarHistorialNetflixEnVenta = function (telefono) {
   }, 400);
 };
 
+// =========================================================================
+// 💼 VERIFICACIÓN EN VIVO DE CELULAR TRABAJADOR / STAFF
+// =========================================================================
+window.verificarCelularTrabajadorVenta = function (inputCelular) {
+  const num = String(inputCelular.value || "")
+    .replace(/\D/g, "")
+    .trim();
+  const selectMedioPago = document.getElementById("vendedorMedioPago");
+  if (!selectMedioPago) return;
+
+  let optNomina = document.getElementById("optDescontarNomina");
+
+  if (num.length < 7) {
+    if (optNomina) {
+      if (selectMedioPago.value === "Descontar de Nómina")
+        selectMedioPago.value = "";
+      optNomina.remove();
+    }
+    return;
+  }
+
+  clearTimeout(window.timeoutCheckTrabajador);
+  window.timeoutCheckTrabajador = setTimeout(() => {
+    fetch(
+      `https://api.cybernetsp.com/acciones_mysql.php?accion=verificar_trabajador&celular=${encodeURIComponent(num)}`,
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.status === "success" && data.esTrabajador) {
+          if (!optNomina) {
+            optNomina = document.createElement("option");
+            optNomina.id = "optDescontarNomina";
+            optNomina.value = "Descontar de Nómina";
+            optNomina.innerText = `💼 Descontar de Nómina (${data.nombre})`;
+            selectMedioPago.appendChild(optNomina);
+          } else {
+            optNomina.innerText = `💼 Descontar de Nómina (${data.nombre})`;
+          }
+          if (typeof triggerToast === "function") {
+            triggerToast(`💼 Trabajador detectado: <b>${data.nombre}</b>`);
+          }
+        } else {
+          if (optNomina) {
+            if (selectMedioPago.value === "Descontar de Nómina")
+              selectMedioPago.value = "";
+            optNomina.remove();
+          }
+        }
+      })
+      .catch((err) =>
+        console.error("Error al verificar celular de trabajador:", err),
+      );
+  }, 350);
+};
+
 // Listener para el celular en el modal de venta
 document.addEventListener("DOMContentLoaded", () => {
   const inputCelular = document.getElementById("vendedorClienteCelular");
   if (inputCelular) {
     inputCelular.addEventListener("input", function () {
       window.buscarHistorialNetflixEnVenta(this.value);
+      window.verificarCelularTrabajadorVenta(this);
     });
   }
 });
@@ -403,34 +459,6 @@ window.filtrarModalRenovacionNet = function () {
 // =========================================================================
 // 🚀 PROCESADOR DE VENTAS HACIA MYSQL
 // =========================================================================
-window.verificarNumeroStaffEnVivo = function (numeroIngresado) {
-  const numLimpio = String(numeroIngresado).trim();
-  const selectBanco = document.getElementById("vendedorMedioPago");
-  let optNomina = document.getElementById("optDescontarNomina");
-
-  if (
-    numLimpio.length >= 7 &&
-    (window.staffTelefonosList || []).includes(numLimpio)
-  ) {
-    if (!optNomina) {
-      optNomina = document.createElement("option");
-      optNomina.id = "optDescontarNomina";
-      optNomina.value = "Descontar de Nómina";
-      optNomina.innerText = "Descontar de Nómina";
-      selectBanco.appendChild(optNomina);
-      if (typeof triggerToast === "function")
-        triggerToast(
-          "✨ Teléfono de Staff detectado. Opción Nómina habilitada.",
-        );
-    }
-  } else {
-    if (optNomina) {
-      if (selectBanco.value === "Descontar de Nómina") selectBanco.value = "";
-      optNomina.remove();
-    }
-  }
-};
-
 window.ejecutarVentaFinal = function (e) {
   if (e) e.preventDefault();
   try {
@@ -494,7 +522,7 @@ window.ejecutarVentaFinal = function (e) {
 
         if (platVal === "RECARGA") {
           resumenConfirmarArray.push(
-            `   • Recarga de Saldo (${bonoServicio}% Bono)`,
+            `    • Recarga de Saldo (${bonoServicio}% Bono)`,
           );
         } else {
           let txtTipo =
@@ -502,7 +530,7 @@ window.ejecutarVentaFinal = function (e) {
               ? `Reno: ${correoReno}`
               : tipoServicio;
           resumenConfirmarArray.push(
-            `   • ${numPantallas}x ${platVal} ➔ [${numMeses} Mes(es) / ${txtTipo}]`,
+            `    • ${numPantallas}x ${platVal} ➔ [${numMeses} Mes(es) / ${txtTipo}]`,
           );
         }
       }
@@ -1038,7 +1066,7 @@ window.copiarCotizacionCombo = function (btn) {
             : ` (${pantallas} Pantallas)`;
       }
       plataformasSeleccionadas.push(
-        `   • 📺 *${cb.value.toUpperCase()}*${textoPantallas}`,
+        `    • 📺 *${cb.value.toUpperCase()}*${textoPantallas}`,
       );
     }
   });
