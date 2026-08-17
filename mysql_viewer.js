@@ -1,4 +1,6 @@
-// 🛠️ REPARACIÓN DE SCROLL AUTOMÁTICO Y ALTURA MÁXIMA
+/* ==========================================================================
+   🛠️ REPARACIÓN DE SCROLL AUTOMÁTICO Y ALTURA MÁXIMA EN VISOR MYSQL
+   ========================================================================== */
 (function repararScrollVisorMySQL() {
   if (document.getElementById("css-fix-scroll-mysql")) return;
   const style = document.createElement("style");
@@ -762,6 +764,7 @@ function guardarNuevoRegistroMySQL(e) {
     });
 }
 
+// 🎯 MODAL EDITAR: SOLO CAMILO PUEDE MODIFICAR EL CAMPO 'DIA'
 function abrirModalEditarMySQL(filaEscapada) {
   if (typeof haptic === "function") haptic();
   const fila = JSON.parse(decodeURIComponent(filaEscapada));
@@ -774,10 +777,12 @@ function abrirModalEditarMySQL(filaEscapada) {
     sessionStorage.getItem("active_staff") ||
     ""
   ).toUpperCase();
-  const esSuperAdminLocal =
-    usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
+
+  const esCamilo = usuarioNombre === "CAMILO";
+  const esSuperAdminLocal = usuarioActivoObj.rol === "superadmin" || esCamilo;
 
   const iId = document.getElementById("editMySQLId");
+  const iDia = document.getElementById("editMySQLDia");
   const iCorreo = document.getElementById("editMySQLCorreo");
   const iClave = document.getElementById("editMySQLClave");
   const iPerfil = document.getElementById("editMySQLPerfil");
@@ -790,6 +795,15 @@ function abrirModalEditarMySQL(filaEscapada) {
   const iPago = document.getElementById("editMySQLPago");
 
   if (iId) iId.value = fila.id || "";
+
+  // 🔒 BLOQUEO EXCLUSIVO: Solo Camilo puede modificar la fecha madre 'dia'
+  if (iDia) {
+    iDia.value = fila.dia || "";
+    iDia.readOnly = !esCamilo;
+    iDia.style.opacity = esCamilo ? "1" : "0.6";
+    iDia.style.cursor = esCamilo ? "text" : "not-allowed";
+  }
+
   if (iCorreo) {
     const correoActual = fila.correo || fila.usuario || "";
     iCorreo.value = correoActual;
@@ -804,7 +818,7 @@ function abrirModalEditarMySQL(filaEscapada) {
   if (iVenc) iVenc.value = fila.vencimiento || "";
   if (iNombre) iNombre.value = fila.nombre || fila.cliente || "";
   if (iNumero) iNumero.value = fila.numero || fila.telefono || "";
-  if (iFechaPago) iFechaPago.value = fila.fecha || ""; // Lee únicamente la fecha de pago
+  if (iFechaPago) iFechaPago.value = fila.fecha || "";
   if (iValor)
     iValor.value =
       fila.pago_total || fila.valor || fila.monto_cobrado || fila.monto || "";
@@ -826,6 +840,7 @@ function guardarEdicionMySQL(e) {
     btn.innerText = "Guardando...";
   }
 
+  const iDia = document.getElementById("editMySQLDia");
   const iCorreo = document.getElementById("editMySQLCorreo");
   const iFechaPago = document.getElementById("editMySQLFechaPago");
   const iValor = document.getElementById("editMySQLValor");
@@ -835,6 +850,7 @@ function guardarEdicionMySQL(e) {
   formData.append("accion", "editar");
   formData.append("tabla", window.tablaMySQLActual);
   formData.append("id", document.getElementById("editMySQLId").value);
+  formData.append("dia", iDia ? iDia.value.trim() : "");
   formData.append(
     "correo_anterior",
     iCorreo ? iCorreo.dataset.correoAnterior || "" : "",
