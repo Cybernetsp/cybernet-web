@@ -79,22 +79,22 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO DE BARRA SUPERIOR (GUARDADO CONTINUO 1MIN / SIN INACTIVIDAD)
+// 2. CRONÓMETRO EXACTO BASADO EN RELOJ REAL (RESISTENTE A SEGUNDO PLANO Y F5)
 // ==========================================
 let secCronometroTotal = 0;
-let secParaGuardar = 0;
 let timerInterval = null;
 let turnoActivo = false;
 
 function limpiarCacheShift() {
   localStorage.removeItem("cyber_shift_vendedor");
   localStorage.removeItem("cyber_shift_active");
-  localStorage.removeItem("cyber_shift_last_close_ts");
+  localStorage.removeItem("cyber_shift_start_ts");
+  localStorage.removeItem("cyber_shift_last_saved_ts");
   localStorage.removeItem("cyber_shift_accumulated");
   localStorage.removeItem("cyber_shift_unsaved_sec");
 }
 
-// 🔥 DETECCIÓN E INICIO / RESTAURACIÓN TRAS RECARGA O CIERRE EN X
+// 🔥 RESTAURACIÓN EXACTA DE TIEMPO REAL
 window.verificarEIniciarTurnoAuto = function () {
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
@@ -108,38 +108,15 @@ window.verificarEIniciarTurnoAuto = function () {
     return;
 
   let savedVendedor = localStorage.getItem("cyber_shift_vendedor");
+  let activeState = localStorage.getItem("cyber_shift_active");
 
-  if (savedVendedor && savedVendedor === activeStaff) {
-    let activeState = localStorage.getItem("cyber_shift_active");
-    let accum = parseInt(
-      localStorage.getItem("cyber_shift_accumulated") || "0",
-      10,
-    );
-    let lastCloseTs = parseInt(
-      localStorage.getItem("cyber_shift_last_close_ts") || "0",
-      10,
-    );
-
-    let diffSec =
-      lastCloseTs > 0 ? Math.floor((Date.now() - lastCloseTs) / 1000) : 0;
-
-    // Si fue un refresco rápido (F5 / menos de 15 segundos) O un cierre agresivo,
-    // el sistema suma las horas offline acumuladas en la PC y las restaura.
-    if (activeState === "true" && lastCloseTs > 0) {
-      secCronometroTotal = accum + diffSec;
-    } else {
-      secCronometroTotal = accum;
-    }
-    secParaGuardar = parseInt(
-      localStorage.getItem("cyber_shift_unsaved_sec") || "0",
-      10,
-    );
-  } else {
-    secCronometroTotal = 0;
-    secParaGuardar = 0;
+  if (
+    savedVendedor &&
+    savedVendedor === activeStaff &&
+    activeState === "true"
+  ) {
+    iniciarTurnoTracker(true);
   }
-
-  iniciarTurnoTracker(true);
 };
 
 window.toggleTrackerShift = function () {
@@ -167,19 +144,33 @@ function iniciarTurnoTracker(esAuto = false) {
 
   if (turnoActivo) return;
 
+  let now = Date.now();
   let savedVendedor = localStorage.getItem("cyber_shift_vendedor");
-  if (savedVendedor !== activeStaff) {
-    secCronometroTotal = 0;
-    secParaGuardar = 0;
+  let startTs = parseInt(
+    localStorage.getItem("cyber_shift_start_ts") || "0",
+    10,
+  );
+  let lastSavedTs = parseInt(
+    localStorage.getItem("cyber_shift_last_saved_ts") || "0",
+    10,
+  );
+
+  // Si cambia de trabajador o no existe timestamp de inicio, se fija el inicio real
+  if (savedVendedor !== activeStaff || !startTs) {
+    startTs = now;
+    lastSavedTs = now;
     localStorage.setItem("cyber_shift_vendedor", activeStaff);
-    localStorage.setItem("cyber_shift_accumulated", "0");
-    localStorage.setItem("cyber_shift_unsaved_sec", "0");
+    localStorage.setItem("cyber_shift_start_ts", startTs);
+    localStorage.setItem("cyber_shift_last_saved_ts", lastSavedTs);
+  }
+
+  if (!lastSavedTs) {
+    lastSavedTs = now;
+    localStorage.setItem("cyber_shift_last_saved_ts", lastSavedTs);
   }
 
   turnoActivo = true;
-
   localStorage.setItem("cyber_shift_active", "true");
-  localStorage.setItem("cyber_shift_vendedor", activeStaff);
 
   const dot = document.getElementById("ledConexion");
   if (dot) {
@@ -187,33 +178,34 @@ function iniciarTurnoTracker(esAuto = false) {
     dot.style.boxShadow = "0 0 8px #30d158";
   }
 
-  if (timerInterval) clearInterval(timerInterval);
-
-  timerInterval = setInterval(() => {
-    secCronometroTotal++;
-    secParaGuardar++;
-
-    localStorage.setItem("cyber_shift_accumulated", secCronometroTotal);
-    localStorage.setItem("cyber_shift_unsaved_sec", secParaGuardar);
+  const actualizarRelojReal = () => {
+    let actualNow = Date.now();
+    secCronometroTotal = Math.max(0, Math.floor((actualNow - startTs) / 1000));
 
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // 🔥 RESPALDO CADA 1 MINUTO (60 SEGUNDOS EXACTOS) A LA NUBE
-    if (secParaGuardar >= 60) {
+    // 🎯 SINCRO CADA 60 SEGUNDOS REALES A MYSQL
+    let unsavedSec = Math.floor((actualNow - lastSavedTs) / 1000);
+    if (unsavedSec >= 60) {
       enviarTiempoTrackerAMySQL(
         activeStaff,
-        formatoSegundosTracker(secParaGuardar),
+        formatoSegundosTracker(unsavedSec),
         "Autoguardado 1m",
       );
-      secParaGuardar = 0;
-      localStorage.setItem("cyber_shift_unsaved_sec", "0");
+      lastSavedTs = actualNow;
+      localStorage.setItem("cyber_shift_last_saved_ts", lastSavedTs);
     }
-  }, 1000);
+  };
+
+  actualizarRelojReal();
+
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(actualizarRelojReal, 1000);
 
   if (typeof triggerToast === "function" && !esAuto) {
     triggerToast(
-      `<div style="color:var(--ios-green);">▶ Turno activo para ${activeStaff}. Autoguardado silencioso activado.</div>`,
+      `<div style="color:var(--ios-green);">▶ Turno activo para ${activeStaff}. Tiempo real sincronizado.</div>`,
     );
   }
 }
@@ -223,8 +215,15 @@ function detenerTurnoTracker() {
   turnoActivo = false;
   clearInterval(timerInterval);
 
+  const activeStaff = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    ""
+  )
+    .toUpperCase()
+    .trim();
+
   localStorage.setItem("cyber_shift_active", "false");
-  localStorage.setItem("cyber_shift_accumulated", secCronometroTotal);
 
   const dot = document.getElementById("ledConexion");
   if (dot) {
@@ -232,21 +231,25 @@ function detenerTurnoTracker() {
     dot.style.boxShadow = "0 0 8px #ff453a";
   }
 
-  if (secParaGuardar > 0) {
-    const activeStaff = (
-      sessionStorage.getItem("active_staff") ||
-      localStorage.getItem("cyber_saved_staff") ||
-      ""
-    )
-      .toUpperCase()
-      .trim();
+  let now = Date.now();
+  let lastSavedTs = parseInt(
+    localStorage.getItem("cyber_shift_last_saved_ts") || "0",
+    10,
+  );
+  let unsavedSec = lastSavedTs > 0 ? Math.floor((now - lastSavedTs) / 1000) : 0;
+
+  if (
+    unsavedSec > 0 &&
+    activeStaff &&
+    activeStaff !== "STAFF" &&
+    activeStaff !== "CAMILO"
+  ) {
     enviarTiempoTrackerAMySQL(
       activeStaff,
-      formatoSegundosTracker(secParaGuardar),
+      formatoSegundosTracker(unsavedSec),
       "Pausa/Cierre",
     );
-    secParaGuardar = 0;
-    localStorage.setItem("cyber_shift_unsaved_sec", "0");
+    localStorage.setItem("cyber_shift_last_saved_ts", now);
   }
 
   if (typeof triggerToast === "function") {
@@ -281,7 +284,7 @@ function formatoSegundosTracker(totalSeg) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-// 🚪 CERRAR SESIÓN STAFF FORMAL (Botón Apagado Círculo)
+// 🚪 CERRAR SESIÓN STAFF
 window.cerrarSesionStaff = function () {
   try {
     if (typeof haptic === "function") haptic();
@@ -322,9 +325,9 @@ window.cerrarSesionStaff = function () {
   }
 };
 
-// 🚨 CERRAR VENTANA: RESPALDO INSTANTÁNEO EN MYSQL SI SE PRESIONA LA 'X'
+// 🚨 RESPALDO INSTANTÁNEO EN CIERRE DE PÁGINA O TAB
 function guardarEmergenciaAlCerrarVentana() {
-  if (turnoActivo && secParaGuardar > 0) {
+  if (turnoActivo) {
     const activeStaff = (
       sessionStorage.getItem("active_staff") ||
       localStorage.getItem("cyber_saved_staff") ||
@@ -334,24 +337,27 @@ function guardarEmergenciaAlCerrarVentana() {
       .trim();
 
     if (activeStaff && activeStaff !== "STAFF" && activeStaff !== "CAMILO") {
-      const fd = new FormData();
-      fd.append("vendedor", activeStaff);
-      fd.append("tiempo", formatoSegundosTracker(secParaGuardar));
-      fd.append("fecha", "hoy");
+      let now = Date.now();
+      let lastSavedTs = parseInt(
+        localStorage.getItem("cyber_shift_last_saved_ts") || "0",
+        10,
+      );
+      let unsavedSec =
+        lastSavedTs > 0 ? Math.floor((now - lastSavedTs) / 1000) : 0;
 
-      // Transmisión inmediata y garantizada al destruir el navegador (Incluso sin Javascript asíncrono)
-      navigator.sendBeacon(window.URL_GUARDAR_HORAS_MANUAL, fd);
+      if (unsavedSec > 0) {
+        const fd = new FormData();
+        fd.append("vendedor", activeStaff);
+        fd.append("tiempo", formatoSegundosTracker(unsavedSec));
+        fd.append("fecha", "hoy");
 
-      // Guardar timestamps de referencia para cuando reabra
-      localStorage.setItem("cyber_shift_accumulated", secCronometroTotal);
-      localStorage.setItem("cyber_shift_unsaved_sec", "0");
-      localStorage.setItem("cyber_shift_last_close_ts", Date.now());
-      secParaGuardar = 0;
+        navigator.sendBeacon(window.URL_GUARDAR_HORAS_MANUAL, fd);
+        localStorage.setItem("cyber_shift_last_saved_ts", now);
+      }
     }
   }
 }
 
-// Detectar cierres del navegador de todas las maneras posibles
 window.addEventListener("pagehide", guardarEmergenciaAlCerrarVentana);
 window.addEventListener("beforeunload", guardarEmergenciaAlCerrarVentana);
 document.addEventListener("visibilitychange", function () {
