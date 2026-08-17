@@ -914,7 +914,7 @@ window.renderizarCargadasEsteTurno = function () {
   container.innerHTML = html;
 };
 
-// 🚨 ACCIÓN DIRECTA DE REPORTAR DESDE LA VISTA DE CUENTAS CARGADAS EN LOTE
+// 🚨 ACCIÓN DIRECTA DE REPORTAR DESDE LA VISTA DE CUENTAS CARGADAS EN LOTE (CON FECHA CORTA)
 window.reportarCuentaCargadaDirecto = function (
   id,
   tablaEsc,
@@ -935,8 +935,26 @@ window.reportarCuentaCargadaDirecto = function (
   const clave = decodeURIComponent(claveEsc);
   const prov = decodeURIComponent(provEsc);
 
+  // 🗓️ Generación de Fecha Corta Real (ejemplo: '17-ago')
+  const hoyObj = new Date();
+  const mesesAbrev = [
+    "ene",
+    "feb",
+    "mar",
+    "abr",
+    "may",
+    "jun",
+    "jul",
+    "ago",
+    "sep",
+    "oct",
+    "nov",
+    "dic",
+  ];
+  const fechaHoyCortaReal = `${hoyObj.getDate()}-${mesesAbrev[hoyObj.getMonth()]}`;
+
   let platNorm = tabla.toUpperCase().replace(/_/g, "-");
-  let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platNorm}\n📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n👤 *Proveedor:* ${prov}\n📅 *Fecha Compra:* HOY`;
+  let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platNorm}\n📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n👤 *Proveedor:* ${prov}\n📅 *Fecha Compra:* ${fechaHoyCortaReal}`;
 
   navigator.clipboard.writeText(textoReporte).then(() => {
     if (typeof triggerToast === "function") {
@@ -953,7 +971,7 @@ window.reportarCuentaCargadaDirecto = function (
   formData.append("correo", correo);
   formData.append("clave", clave);
   formData.append("proveedor", prov);
-  formData.append("fecha_compra", "hoy");
+  formData.append("fecha_compra", fechaHoyCortaReal);
 
   fetch("https://api.cybernetsp.com/acciones_mysql.php", {
     method: "POST",
