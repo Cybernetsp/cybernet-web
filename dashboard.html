@@ -3013,7 +3013,7 @@
 
     <!-- Otros Modales menores... -->
     <!-- Te mantendré la estructura exacta y resumiré los IDs ya configurados para evitar texto excedido -->
-    <!-- 🟢 MODAL: MÓDULO FINANCIERO COMPLETO (MYSQL CON SCROLL Y GRID REPARADO) -->
+    <!-- 🟢 MODAL: MÓDULO FINANCIERO COMPLETO -->
     <div
       class="overlay-ios"
       id="finanzasOverlay"
@@ -4200,7 +4200,7 @@
             </div>
           </section>
 
-          <!-- 6. MOVIMIENTO CONTABLE MANUAL E HISTORIAL (6 COLS) -->
+          <!-- 6. MOVIMIENTO CONTABLE MANUAL E HISTORIAL (6 COLS - ALTURA DINÁMICA Y LLENA) -->
           <section
             style="
               grid-column: span 6 !important;
@@ -4209,6 +4209,10 @@
               border-top: 3px solid #0a84ff;
               border-radius: 20px;
               padding: 18px 20px;
+              display: flex;
+              flex-direction: column;
+              box-sizing: border-box;
+              height: 100%;
             "
           >
             <h3
@@ -4221,6 +4225,7 @@
                 display: flex;
                 align-items: center;
                 gap: 6px;
+                flex-shrink: 0;
               "
             >
               <svg
@@ -4247,6 +4252,7 @@
                 flex-direction: column;
                 gap: 10px;
                 width: 100%;
+                flex-shrink: 0;
               "
             >
               <div style="display: flex; gap: 10px">
@@ -4347,6 +4353,7 @@
                 border-top: 1px solid rgba(255, 255, 255, 0.08);
                 width: 100%;
                 margin: 14px 0 10px 0;
+                flex-shrink: 0;
               "
             ></div>
 
@@ -4356,6 +4363,7 @@
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 8px;
+                flex-shrink: 0;
               "
             >
               <span style="color: #ffffff; font-size: 0.85rem; font-weight: 800"
@@ -4373,15 +4381,19 @@
               >
             </div>
 
+            <!-- HISTORIAL ADAPTABLE AL TAMAÑO TOTAL DE LA CAJA -->
             <div
               id="listaDesgloseGastos"
+              class="cyber-custom-scroll"
               style="
                 display: flex;
                 flex-direction: column;
                 gap: 10px;
-                max-height: 220px;
+                flex: 1;
+                min-height: 240px;
                 overflow-y: auto;
                 padding-right: 4px;
+                box-sizing: border-box;
               "
             >
               <div class="empty-log-msg">
@@ -4401,6 +4413,8 @@
               padding: 18px 20px;
               display: flex;
               flex-direction: column;
+              box-sizing: border-box;
+              height: 100%;
             "
           >
             <span
@@ -4414,6 +4428,7 @@
                 align-items: center;
                 gap: 6px;
                 margin-bottom: 10px;
+                flex-shrink: 0;
               "
             >
               <svg
@@ -4433,13 +4448,16 @@
 
             <div
               id="rankingPlataformasVentas"
+              class="cyber-custom-scroll"
               style="
                 display: flex;
                 flex-direction: column;
                 gap: 12px;
-                max-height: 480px;
+                flex: 1;
+                min-height: 240px;
                 overflow-y: auto;
                 padding-right: 8px;
+                box-sizing: border-box;
               "
             >
               <div class="empty-log-msg">
