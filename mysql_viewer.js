@@ -446,9 +446,18 @@ function cargarDatosMySQL() {
     const queryLower = busqueda.toLowerCase().trim();
     const queryDigits = busqueda.replace(/\D/g, "");
 
+    // 🎯 LIMPIEZA INTELIGENTE DE TÉRMINO PARA LA CONSULTA MYSQL EN LA API
+    let busquedaAPI = busqueda;
+    if (queryDigits.length >= 3 && /^[\d\s\+\-\(\)]+$/.test(busqueda)) {
+      busquedaAPI =
+        queryDigits.length === 12 && queryDigits.startsWith("57")
+          ? queryDigits.substring(2)
+          : queryDigits;
+    }
+
     const promesas = LISTA_TABLAS_GLOBALES.map((tb) =>
       fetch(
-        `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${tb}&busqueda=${encodeURIComponent(busqueda)}`,
+        `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${tb}&busqueda=${encodeURIComponent(busquedaAPI)}`,
       )
         .then((res) => res.json())
         .then((data) => {
@@ -463,12 +472,22 @@ function cargarDatosMySQL() {
     Promise.all(promesas).then((resultadosArrays) => {
       let todosResultados = [].concat(...resultadosArrays);
 
+      // 🧠 FILTRO SMART MULTI-CAMPO (IGNORA ESPACIOS Y FORMATOS DE TELÉFONO)
       let filtradosFinales = todosResultados.filter((fila) => {
         let numValRaw = String(fila.numero || fila.telefono || "").trim();
         let numValDigits = numValRaw.replace(/\D/g, "");
 
-        if (queryDigits.length >= 3 && numValDigits.includes(queryDigits)) {
-          return true;
+        if (queryDigits.length >= 3) {
+          let searchDigits = queryDigits;
+          if (searchDigits.length === 12 && searchDigits.startsWith("57")) {
+            searchDigits = searchDigits.substring(2);
+          }
+          if (
+            numValDigits.includes(searchDigits) ||
+            searchDigits.includes(numValDigits)
+          ) {
+            return true;
+          }
         }
 
         let correoVal = String(fila.correo || fila.usuario || "").toLowerCase();
