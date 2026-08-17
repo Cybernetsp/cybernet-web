@@ -102,6 +102,8 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     let claveNueva = cuenta.clave_nueva || window.generarClaveTVAleatoria();
     let perfiles = cuenta.perfiles_afectados || "1, 2, 3, 4, 5";
     let idCuenta = cuenta.id || "";
+    let proveedor = cuenta.proveedor || cuenta.prov || "-";
+    let fechaCompra = cuenta.fecha || cuenta.dia || "";
 
     html += `
       <div style="background: #2a2a2e; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; position: relative; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
@@ -147,7 +149,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
               </div>
           </div>
 
-          <!-- Perfiles y Botón Acción -->
+          <!-- Perfiles y Botones de Acción -->
           <div style="display: flex; flex-direction: column; gap: 14px;">
               <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; color: #ff3b30; background: rgba(255, 59, 48, 0.1); padding: 8px 16px; border-radius: 8px; width: fit-content; border: 1px solid rgba(255, 59, 48, 0.2);">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -157,14 +159,84 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
                   Perfiles a cortar: ${perfiles}
               </div>
               
-              <button onclick="window.ejecutarProcesoCorteExterno('${idCuenta}', '${correo}', '${claveNueva}', this)" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s;">
-                  ✓ Procesar Corte y Subir a Hoy
-              </button>
+              <div style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                <button onclick="window.ejecutarProcesoCorteExterno('${idCuenta}', '${correo}', '${claveNueva}', this)" style="flex: 1; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s;">
+                    ✓ Procesar Corte y Subir a Hoy
+                </button>
+                <button onclick="window.reportarCorteNetGarantia('${idCuenta}', '${encodeURIComponent(correo)}', '${encodeURIComponent(claveVieja)}', '${encodeURIComponent(proveedor)}', '${encodeURIComponent(fechaCompra)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 14px 16px; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;">
+                    🚨 Reportar
+                </button>
+              </div>
           </div>
       </div>`;
   });
 
   container.innerHTML = html;
+};
+
+// 🚨 FUNCIÓN PARA REPORTAR A GARANTÍAS DESDE CORTES OPERATIVOS
+window.reportarCorteNetGarantia = function (
+  id,
+  correoEsc,
+  claveEsc,
+  provEsc,
+  diaEsc,
+) {
+  if (typeof window.marcarComoGarantia === "function") {
+    const prevTabla = window.tablaMySQLActual;
+    window.tablaMySQLActual = "netflix";
+    window.marcarComoGarantia(id, correoEsc, claveEsc, provEsc, diaEsc);
+    window.tablaMySQLActual = prevTabla || "netflix";
+  } else {
+    if (
+      !confirm(
+        "⚠️ ¿Estás seguro de enviar esta cuenta a Garantías? Toda la cuenta se marcará como caída (rojo).",
+      )
+    )
+      return;
+    if (typeof haptic === "function") haptic();
+
+    const correo = decodeURIComponent(correoEsc);
+    const clave = decodeURIComponent(claveEsc);
+    const prov = decodeURIComponent(provEsc);
+    const dia = diaEsc ? decodeURIComponent(diaEsc) : "";
+
+    let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* NETFLIX\n📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n👤 *Proveedor:* ${prov}\n📅 *Fecha Compra:* ${dia}`;
+
+    navigator.clipboard.writeText(textoReporte).then(() => {
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Reporte copiado al portapapeles!</span></div>`,
+        );
+      }
+    });
+
+    const formData = new FormData();
+    formData.append("accion", "reportar_garantia");
+    formData.append("tabla", "netflix");
+    formData.append("id", id);
+    formData.append("correo", correo);
+    formData.append("clave", clave);
+    formData.append("proveedor", prov);
+    formData.append("fecha_compra", dia);
+
+    fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "success") {
+          if (typeof window.cargarCortesOperativosNetflix === "function")
+            window.cargarCortesOperativosNetflix();
+          if (typeof window.cargarDatosMySQL === "function")
+            window.cargarDatosMySQL();
+        } else {
+          alert("❌ Error: " + data.message);
+        }
+      })
+      .catch((err) => console.error("Error al reportar garantía:", err));
+  }
 };
 
 // Función auxiliar visual de copiado
@@ -183,7 +255,6 @@ window.copiarTextoLigero = function (texto, elemento, tipo) {
     spanValor.innerText = "✓ Copiado";
     spanValor.style.color = "#30d158";
 
-    // Pequeño resplandor al contenedor
     const oldBg = elemento.style.background;
     elemento.style.background = "rgba(48, 209, 88, 0.1)";
     elemento.style.borderColor = "rgba(48, 209, 88, 0.4)";
@@ -653,7 +724,17 @@ window.ejecutarCargaLote = function (e) {
   if (typeof haptic === "function") haptic();
 
   const btnSubmit = document.getElementById("btnSubmitCarga");
-  const plataforma = document.getElementById("loadPlataforma").value;
+  const selectPlat = document.getElementById("loadPlataforma");
+  const plataforma = selectPlat.value;
+
+  const optionPlat = selectPlat.options[selectPlat.selectedIndex];
+  const nombrePlataformaLegible = optionPlat
+    ? optionPlat.text
+        .split("(")[0]
+        .replace(/🔴|📦|🔵|🟣|📺|🎵|💻/g, "")
+        .trim()
+    : plataforma.toUpperCase();
+
   const selectProv = document.getElementById("loadProveedor").value;
   const proveedorManual = document
     .getElementById("loadProveedorManual")
@@ -700,6 +781,8 @@ window.ejecutarCargaLote = function (e) {
 
         if (res.cargadas && res.cargadas.length > 0) {
           res.cargadas.forEach((c) => {
+            c.plataforma = c.plataforma || nombrePlataformaLegible;
+            c.proveedor = c.proveedor || proveedorFinal;
             window.cuentasCargadasEsteTurno.unshift(c);
           });
         }
@@ -752,15 +835,33 @@ window.renderizarCargadasEsteTurno = function () {
   window.cuentasCargadasEsteTurno.forEach((c) => {
     const correoEsc = encodeURIComponent(c.correo || "");
     const claveEsc = encodeURIComponent(c.clave || "");
+    const platNombre = (c.plataforma || "PLATAFORMA")
+      .toUpperCase()
+      .replace(/_/g, " ");
+    const provNombre = (c.proveedor || "PROVEEDOR").toUpperCase();
 
     html += `
-      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-        <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden; flex-grow: 1;">
-          <span style="color: #0a84ff; font-weight: 800; font-family: monospace; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.correo || "-"}</span>
-          <span style="color: #30d158; font-weight: 700; font-family: monospace; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.clave || "-"}</span>
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex-grow: 1;">
+          
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 2px 7px; border-radius: 6px; font-weight: 800; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.3px;">
+              ${platNombre}
+            </span>
+            <span style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 2px 7px; border-radius: 6px; font-weight: 800; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.3px;">
+              PROV: ${provNombre}
+            </span>
+          </div>
+
+          <span style="color: #ffffff; font-weight: 800; font-family: monospace; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+            ${c.correo || "-"}
+          </span>
+          <span style="color: #30d158; font-weight: 700; font-family: monospace; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${c.clave || "-"}
+          </span>
         </div>
 
-        <div style="display: flex; gap: 6px; flex-shrink: 0;">
+        <div style="display: flex; gap: 6px; flex-shrink: 0; align-items: center;">
           <button onclick="window.copiarTextoUnico(this, '${correoEsc}')" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">
             Correo
           </button>
@@ -1430,7 +1531,7 @@ window.renderizarTablaNeyop = function () {
   }
 
   html += `</tbody></table>`;
-  container.innerHTML = html;
+  contenedor.innerHTML = htmlTabla;
 };
 
 window.marcarListoNeyop = function (filaIndex, btnElement) {
