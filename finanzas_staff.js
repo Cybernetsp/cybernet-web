@@ -1035,3 +1035,158 @@ document.addEventListener("click", function (e) {
     window.filtrarAyer();
   }
 });
+
+// ==========================================
+// 🚀 NÓMINA BENTO: RENDERIZADO EXCLUSIVO (Camilo Superadmin)
+// ==========================================
+window.renderizarTotalNomina = function () {
+  const container = document.getElementById("nominaContentArea");
+  if (!container) return;
+
+  const activeStaff = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "STAFF"
+  )
+    .toUpperCase()
+    .trim();
+  const esSuperAdmin = verificarSiEsSuperAdmin();
+
+  const dMes = window.filtroMesTurnos;
+  const dAnio = window.filtroAnioTurnos;
+  const esQ1 = window.filtroQuincenaTurnos === 1;
+
+  let mapaTelefonos = {};
+  window.usuariosCache.forEach((u) => {
+    let nom = (u.nombre || "").toUpperCase().trim();
+    let num = (u.numero || u.telefono || "").trim();
+    if (nom) mapaTelefonos[nom] = num;
+  });
+
+  let todosLosRegistros = window.currentHorasStock || [];
+  let mapaNomina = {};
+
+  todosLosRegistros.forEach((item) => {
+    let d = parsearFechaTurno(item.fecha);
+    if (d.getMonth() !== dMes || d.getFullYear() !== dAnio) return;
+
+    let dia = d.getDate();
+    if (esQ1 && dia > 15) return;
+    if (!esQ1 && dia <= 15) return;
+
+    let asist = (item.vendedor || "STAFF").toUpperCase().trim();
+    if (!mapaNomina[asist])
+      mapaNomina[asist] = { ganado: 0, descontado: 0, neto: 0 };
+
+    let monto = parseFloat(item.total) || 0;
+    let esAdelanto =
+      monto < 0 || (item.estado || "").toUpperCase().includes("ADELANTO");
+
+    if (esAdelanto) mapaNomina[asist].descontado += Math.abs(monto);
+    else mapaNomina[asist].ganado += monto;
+  });
+
+  let listaProcesar = obtenerTodosLosAsistentes();
+  if (!esSuperAdmin) listaProcesar = [activeStaff];
+
+  let totalGlobalGanado = 0;
+  let totalGlobalDescontado = 0;
+  let totalGlobalNeto = 0;
+  let htmlFilas = "";
+
+  listaProcesar.forEach((asistente) => {
+    let datosUser = mapaNomina[asistente] || {
+      ganado: 0,
+      descontado: 0,
+      neto: 0,
+    };
+    let ganado = Math.round(datosUser.ganado);
+    let descontado = Math.round(datosUser.descontado);
+    let neto = ganado - descontado;
+
+    // 🔥 LA MAGIA ESTÁ AQUÍ: Si el asistente NO es "JEISSON", se suma a los totales de arriba.
+    if (asistente.toUpperCase() !== "JEISSON") {
+      totalGlobalGanado += ganado;
+      totalGlobalDescontado += descontado;
+      totalGlobalNeto += neto;
+    }
+
+    let telefonoNum = mapaTelefonos[asistente] || "Sin Nequi";
+    let colorNeto = neto < 0 ? "#ff453a" : "#30d158";
+
+    let btnCopiarTel = "";
+    if (telefonoNum !== "Sin Nequi") {
+      btnCopiarTel = `
+        <button onclick="navigator.clipboard.writeText('${telefonoNum}'); this.style.color='#30d158'; setTimeout(()=>this.style.color='#0a84ff', 1000);" title="Copiar Nequi/Bre-B" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 4px 8px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 800; font-family: monospace; transition: 0.2s;">
+          <span>${telefonoNum}</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </button>`;
+    } else {
+      btnCopiarTel = `<span style="font-size:0.75rem; color:#71717a; padding-left:2px;">Sin Nequi</span>`;
+    }
+
+    htmlFilas += `
+      <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; flex-wrap: wrap; gap: 10px;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 140px;">
+          <div style="width: 36px; height: 36px; border-radius: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            ${asistente.charAt(0)}
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px; justify-content: center;">
+            <span style="font-weight: 800; color: #ffffff; font-size: 0.95rem; line-height: 1;">${asistente}</span>
+            ${btnCopiarTel}
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: row; justify-content: flex-end; align-items: center; gap: 20px; flex: 1; min-width: 160px;">
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+            <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Turnos (+)</span>
+            <span style="font-family: monospace; font-weight: 700; color: #30d158; font-size: 0.95rem;">+$${ganado.toLocaleString("es-CO")}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+            <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Adelantos (-)</span>
+            <span style="font-family: monospace; font-weight: 700; color: #ff453a; font-size: 0.95rem;">-$${descontado.toLocaleString("es-CO")}</span>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 0.5; min-width: 100px; padding-left: 10px; border-left: 1px solid rgba(255,255,255,0.08);">
+          <span style="font-size: 0.68rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Sueldo Neto</span>
+          <span style="font-family: monospace; font-weight: 900; color: ${colorNeto}; font-size: 1.2rem;">$${neto.toLocaleString("es-CO")}</span>
+        </div>
+      </div>`;
+  });
+
+  let htmlResumenGlobal = "";
+  if (esSuperAdmin) {
+    htmlResumenGlobal = `
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; width: 100%;">
+        <div style="flex: 1; min-width: 130px; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 0.72rem; font-weight: 800; color: #30d158; text-transform: uppercase;">Total Bruto (+)</span>
+          <span style="font-size: 1.3rem; font-weight: 900; color: #30d158; font-family: monospace;">$${totalGlobalGanado.toLocaleString("es-CO")}</span>
+        </div>
+        <div style="flex: 1; min-width: 130px; background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.2); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 0.72rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">Adelantos (-)</span>
+          <span style="font-size: 1.3rem; font-weight: 900; color: #ff453a; font-family: monospace;">-$${totalGlobalDescontado.toLocaleString("es-CO")}</span>
+        </div>
+        <div style="flex: 1; min-width: 140px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.3); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 0.72rem; font-weight: 800; color: #ffffff; text-transform: uppercase;">Nómina Total Neta</span>
+          <span style="font-size: 1.4rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${totalGlobalNeto.toLocaleString("es-CO")}</span>
+        </div>
+      </div>`;
+  }
+
+  let htmlFinal = `
+    <div style="display: flex; flex-direction: column; width: 100%;">
+      ${htmlResumenGlobal}
+      <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; overflow: hidden; width: 100%;">
+        <div style="display: flex; flex-direction: column; width: 100%;">
+          ${htmlFilas}
+        </div>
+      </div>
+    </div>`;
+
+  container.innerHTML = htmlFinal;
+};
+
+window.cargarNominaMySQL = window.renderizarTotalNomina;
+
+window.filtrarHorasInternas = function () {
+  window.renderizarHorasEnPantalla();
+};
