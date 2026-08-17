@@ -8,6 +8,47 @@ window.URL_API_RECORDATORIOS =
 window.memoriaRecordatoriosW1 = [];
 window.memoriaRecordatoriosW2 = [];
 
+window.periodoPrevioW1 = null;
+window.periodoPrevioW2 = null;
+
+// =========================================================================
+// 🔑 GESTIÓN DE PERSISTENCIA Y TACHADOS POR USUARIO Y PERIODO
+// =========================================================================
+window.obtenerClaveUsuarioRecordatorios = function () {
+  const userObj = JSON.parse(sessionStorage.getItem("usuario_activo") || "{}");
+  return (
+    userObj.nombre ||
+    sessionStorage.getItem("active_staff") ||
+    "ANONIMO"
+  ).toUpperCase();
+};
+
+window.obtenerCopiadosSet = function () {
+  const u = window.obtenerClaveUsuarioRecordatorios();
+  try {
+    return JSON.parse(sessionStorage.getItem(`rec_copiados_${u}`) || "[]");
+  } catch (e) {
+    return [];
+  }
+};
+
+window.guardarItemCopiado = function (claveItem) {
+  const u = window.obtenerClaveUsuarioRecordatorios();
+  let list = window.obtenerCopiadosSet();
+  if (!list.includes(claveItem)) {
+    list.push(claveItem);
+    sessionStorage.setItem(`rec_copiados_${u}`, JSON.stringify(list));
+  }
+};
+
+window.limpiarCopiadosPorCanalYPeriodo = function (canal, periodo) {
+  const u = window.obtenerClaveUsuarioRecordatorios();
+  let list = window.obtenerCopiadosSet();
+  const prefix = `${canal}_${periodo}_`;
+  list = list.filter((k) => !k.startsWith(prefix));
+  sessionStorage.setItem(`rec_copiados_${u}`, JSON.stringify(list));
+};
+
 // =========================================================================
 // 👁️ APERTURA Y CONTROL DEL PANEL
 // =========================================================================
@@ -47,6 +88,13 @@ window.sincronizarW1 = function () {
   const contador = document.getElementById("contadorW1");
   const listaContenedor = document.getElementById("listaIndividualW1");
   const bloquesContenedor = document.getElementById("bloquesW1");
+
+  // Destachar si se seleccionó otra fecha/periodo
+  if (window.periodoPrevioW1 && window.periodoPrevioW1 !== periodoVal) {
+    window.limpiarCopiadosPorCanalYPeriodo("W1", window.periodoPrevioW1);
+    window.limpiarCopiadosPorCanalYPeriodo("W1", periodoVal);
+  }
+  window.periodoPrevioW1 = periodoVal;
 
   if (contador) contador.innerText = "Consultando...";
   if (listaContenedor) {
@@ -92,6 +140,13 @@ window.sincronizarW2 = function () {
   const contador = document.getElementById("contadorW2");
   const listaContenedor = document.getElementById("listaIndividualW2");
   const bloquesContenedor = document.getElementById("bloquesW2");
+
+  // Destachar si se seleccionó otra fecha/periodo
+  if (window.periodoPrevioW2 && window.periodoPrevioW2 !== periodoVal) {
+    window.limpiarCopiadosPorCanalYPeriodo("W2", window.periodoPrevioW2);
+    window.limpiarCopiadosPorCanalYPeriodo("W2", periodoVal);
+  }
+  window.periodoPrevioW2 = periodoVal;
 
   if (contador) contador.innerText = "Consultando...";
   if (listaContenedor) {
@@ -142,6 +197,10 @@ window.renderizarCanalRecordatorios = function (canal) {
   const bloquesContenedor = document.getElementById(
     esW1 ? "bloquesW1" : "bloquesW2",
   );
+  const selectPeriodo = document.getElementById(
+    esW1 ? "periodoW1" : "periodoW2",
+  );
+  const periodoVal = selectPeriodo ? selectPeriodo.value : "";
 
   if (!listaContenedor) return;
 
@@ -182,10 +241,11 @@ window.renderizarCanalRecordatorios = function (canal) {
     bloquesContenedor.innerHTML = htmlBloques;
   }
 
-  // 2. RENDERIZAR TARJETAS EN PÍLDORA NUMERADA (CON ESCAPADO BLINDADO DE COMILLAS)
+  // 2. RENDERIZAR TARJETAS CON MEMORIA DE TACHADO PERSISTENTE
+  const copiadosSet = window.obtenerCopiadosSet();
   let htmlCards = "";
+
   listaData.forEach((item, idx) => {
-    // 🛡️ REPARACIÓN 1: Escape estricto de comillas simples y caracteres especiales para evitar roturas en onclick
     const msjEscapado = encodeURIComponent(item.mensaje || "").replace(
       /'/g,
       "%27",
@@ -193,8 +253,15 @@ window.renderizarCanalRecordatorios = function (canal) {
     const nombreOIdentificador =
       item.user && item.user !== "CLIENTE CYBERNET" ? item.user : item.tel;
 
+    const itemKey = `${canal}_${periodoVal}_${item.tel}_${item.user || ""}_${idx}`;
+    const estaCopiado = copiadosSet.includes(itemKey);
+
+    const styleTachado = estaCopiado
+      ? "opacity: 0.45; text-decoration: line-through; filter: grayscale(0.6);"
+      : "";
+
     htmlCards += `
-      <div class="pill-recordatorio-item" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.055)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)';">
+      <div class="pill-recordatorio-item" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s ease; ${styleTachado}" onmouseover="this.style.background='rgba(255, 255, 255, 0.055)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)';">
         
         <!-- Índice Numerado -->
         <div style="width: 28px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: #a1a1aa; font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -211,7 +278,7 @@ window.renderizarCanalRecordatorios = function (canal) {
 
         <!-- Botón SVG de Copiado Directo -->
         <button type="button" 
-                onclick="window.copiarMensajeRecordatorio(this, '${msjEscapado}')" 
+                onclick="window.copiarMensajeRecordatorio(this, '${msjEscapado}', '${itemKey}')" 
                 title="Copiar mensaje de recordatorio"
                 style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s ease;"
                 onmouseover="this.style.background='rgba(10, 132, 255, 0.25)'; this.style.borderColor='rgba(10, 132, 255, 0.4)';"
@@ -229,9 +296,9 @@ window.renderizarCanalRecordatorios = function (canal) {
 };
 
 // =========================================================================
-// 📋 COPIADO INDIVIDUAL CON TRIPLE RESPALDO Y TACHADO DE FILA
+// 📋 COPIADO INDIVIDUAL CON PERSISTENCIA Y TACHADO DE FILA
 // =========================================================================
-window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
+window.copiarMensajeRecordatorio = function (btn, msjEscapado, itemKey) {
   if (typeof haptic === "function") haptic();
 
   let mensaje = "";
@@ -248,12 +315,16 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
     btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
     btn.style.setProperty("background", "rgba(48, 209, 88, 0.2)", "important");
 
-    // 🎯 TACHADO Y ATENUADO SOLAMENTE DE LA FILA DONDE SE HIZO CLIC
+    // 🎯 TACHADO Y PERSISTENCIA
     const pillParent = btn.closest(".pill-recordatorio-item");
     if (pillParent) {
       pillParent.style.opacity = "0.45";
       pillParent.style.textDecoration = "line-through";
       pillParent.style.filter = "grayscale(0.6)";
+    }
+
+    if (itemKey) {
+      window.guardarItemCopiado(itemKey);
     }
 
     if (typeof triggerToast === "function") {
@@ -268,7 +339,6 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado) {
     }, 1500);
   };
 
-  // 🛡️ REPARACIÓN 2: Intenta API moderna y si falla usa método de respaldo (textarea)
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard
       .writeText(mensaje)
@@ -298,7 +368,7 @@ function usarFallbackCopiadoRecordatorio(texto, callbackExito) {
 }
 
 // =========================================================================
-// 📋 COPIAR BLOQUE CON ENUMERACIÓN "1. wa.me/57..." SIN TACHAR FILAS
+// 📋 COPIAR BLOQUE CON ENUMERACIÓN DE RANGO (EJ. 21 TO 40)
 // =========================================================================
 window.copiarBloqueRecordatorio = function (
   canal,
@@ -316,14 +386,15 @@ window.copiarBloqueRecordatorio = function (
 
   const subLista = dataList.slice(inicioIdx, finIdx);
 
-  // 🎯 FORMATO ENUMERADO: 1. wa.me/57XXXXXXXXXX
+  // 🎯 FORMATO ENUMERADO SEGÚN EL RANGO DEL BLOQUE: 21. wa.me/57XXXXXXXXXX
   const textoEnlaces = subLista
     .map((item, idx) => {
       let telRaw = String(item.tel || "").replace(/\D/g, "");
       if (telRaw.length === 10) {
         telRaw = "57" + telRaw;
       }
-      return `${idx + 1}. wa.me/${telRaw}`;
+      const numeroGlobal = inicioIdx + idx + 1;
+      return `${numeroGlobal}. wa.me/${telRaw}`;
     })
     .join("\n");
 
