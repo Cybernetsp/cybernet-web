@@ -596,9 +596,12 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
         if (data.status === "success" || data.status === "parcial") {
           if (typeof toggleVentasPanel === "function") toggleVentasPanel();
 
+          // 🎯 SALUDO INTELIGENTE: Si no hay nombre real, dice únicamente "🌟 *¡Hola!*"
           let nombreSaludo =
-            clienteNombre && clienteNombre !== "Sin Nombre"
-              ? " " + clienteNombre
+            clienteNombre &&
+            clienteNombre !== "Sin Nombre" &&
+            clienteNombre.trim() !== ""
+              ? " " + clienteNombre.trim()
               : "";
 
           // 🎯 DETECCIÓN DE SI ES UNA RENOVACIÓN EXCLUSIVA DE NETFLIX
@@ -626,25 +629,65 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
               if (item.esRecarga) {
                 fichaTexto += `\n💼 *RECARGA DE SALDO* ✅\n────────────────────\n💰 *Monto Inyectado:* ${item.monto}\n🎁 *Bono Aplicado:* ${item.bono}%\n`;
               } else {
-                let platFormat = item.plataforma.replace(/_/g, " ");
+                let platFormat = (item.plataforma || "")
+                  .toUpperCase()
+                  .replace(/_/g, "-");
+                if (platFormat === "AMAZON") platFormat = "AMAZON-PRIME-VIDEO";
+                if (platFormat === "HBO") platFormat = "HBO-MAX";
+                if (platFormat === "DISNEY") platFormat = "DISNEY-ESTANDAR";
+
                 let textoMeses =
                   parseInt(item.meses) > 1 ? ` (${item.meses} Meses)` : "";
                 let esRenoItem = (item.tipo || "")
                   .toLowerCase()
                   .includes("reno");
 
+                // 🗓️ CÁLCULO DE VENCIMIENTO REFORZADO SI EL SERVIDOR REGRESA NULL
+                let vencVal = item.vencimiento;
+                if (
+                  !vencVal ||
+                  vencVal === "null" ||
+                  vencVal === "undefined" ||
+                  vencVal === "-" ||
+                  vencVal === ""
+                ) {
+                  let dV = new Date();
+                  dV.setDate(dV.getDate() + parseInt(item.meses || 1) * 30);
+                  const mesesMayus = [
+                    "ENERO",
+                    "FEBRERO",
+                    "MARZO",
+                    "ABRIL",
+                    "MAYO",
+                    "JUNIO",
+                    "JULIO",
+                    "AGOSTO",
+                    "SEPTIEMBRE",
+                    "OCTUBRE",
+                    "NOVIEMBRE",
+                    "DICIEMBRE",
+                  ];
+                  vencVal = dV.getDate() + "DE" + mesesMayus[dV.getMonth()];
+                }
+
                 // 🎯 FORMATO ELEGANTE ESPECIAL PARA RENOVACIÓN DE NETFLIX
                 if (item.plataforma === "NETFLIX" && esRenoItem) {
                   fichaTexto += `\n🔄 *RENOVACIÓN DE NETFLIX PREMIUM*${textoMeses} ✅\n────────────────────\n`;
-                  fichaTexto += `👤 *Correo:* ${item.correo}\n🔐 *Contraseña:* ${item.clave}\n🌐 *Perfil:* ${item.perfil}\n`;
-                  if (item.pin && item.pin !== "" && item.pin !== "-") {
+                  fichaTexto += `👤 *Correo:* ${item.correo || "-"}\n🔐 *Contraseña:* ${item.clave || "-"}\n🌐 *Perfil:* ${item.perfil || "1"}\n`;
+                  if (
+                    item.pin &&
+                    item.pin !== "" &&
+                    item.pin !== "-" &&
+                    item.pin !== "null"
+                  ) {
                     fichaTexto += `📍 *PIN:* ${item.pin}\n`;
                   }
-                  fichaTexto += `📅 *Nueva Fecha de Vencimiento:* ${item.vencimiento}\n`;
+                  fichaTexto += `📅 *Nueva Fecha de Vencimiento:* ${vencVal}\n`;
                 } else {
                   fichaTexto += `\n🎬 *DETALLES DE ${platFormat}*${textoMeses} ✅\n────────────────────\n`;
-                  if (item.plataforma === "NETFLIX")
+                  if (platFormat.includes("NETFLIX")) {
                     fichaTexto += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+                  }
 
                   let etiquetaUser =
                     platFormat === "IPTV" || platFormat === "EMBY"
@@ -657,12 +700,24 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                         ? "Servidor"
                         : "Perfil";
 
-                  fichaTexto += `👤 *${etiquetaUser}:* ${item.correo}\n🔐 *Contraseña:* ${item.clave}\n`;
-                  if (item.perfil && item.perfil !== "")
+                  fichaTexto += `👤 *${etiquetaUser}:* ${item.correo || "-"}\n🔐 *Contraseña:* ${item.clave || "-"}\n`;
+                  if (
+                    item.perfil &&
+                    item.perfil !== "" &&
+                    item.perfil !== "-" &&
+                    item.perfil !== "null"
+                  ) {
                     fichaTexto += `🌐 *${etiquetaPerfil}:* ${item.perfil}\n`;
-                  if (item.pin && item.pin !== "")
+                  }
+                  if (
+                    item.pin &&
+                    item.pin !== "" &&
+                    item.pin !== "-" &&
+                    item.pin !== "null"
+                  ) {
                     fichaTexto += `📍 *PIN:* ${item.pin}\n`;
-                  fichaTexto += `📅 *Vence:* ${item.vencimiento}\n`;
+                  }
+                  fichaTexto += `📅 *Vence:* ${vencVal}\n`;
                 }
               }
             });
