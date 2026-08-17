@@ -124,7 +124,7 @@ function cambiarTablaMySQL(nombreTabla, btnElement) {
   cargarDatosMySQL();
 }
 
-// 🔍 BOTÓN DE BORRAR PEGAR AL TEXTO ESCRITO
+// 🔍 BOTÓN DE BORRAR PEGADO AL TEXTO ESCRITO
 function actualizarBotonBorrarBusquedaMySQL() {
   const input = document.getElementById("inputSearchMySQL");
   if (!input) return;
@@ -208,7 +208,6 @@ window.borrarBusquedaMySQL = function () {
 
   actualizarBotonBorrarBusquedaMySQL();
 
-  // Restaurar la pestaña previa
   window.tablaMySQLActual = window.lastSelectedTab || "netflix";
   document.querySelectorAll(".mysql-tab-btn").forEach((b) => {
     const onclickAttr = b.getAttribute("onclick") || "";
@@ -250,7 +249,7 @@ function filtrarMySQL() {
   }, 300);
 }
 
-// 🗓️ FORMATEADOR DE FECHA CORTA
+// 🗓️ FORMATEADOR DE FECHA CORTA (Ejemplo: '17-ago')
 function formatearFechaCorta(fStr) {
   if (!fStr || fStr === "-") return "-";
 
@@ -302,7 +301,6 @@ function formatearFechaCorta(fStr) {
   return fechaPart;
 }
 
-// 💵 FORMATEADOR DE MONEDA AUTOMÁTICO
 function formatearMontoMoneda(vStr) {
   if (!vStr || vStr === "-") return "-";
   let str = String(vStr).trim();
@@ -793,13 +791,18 @@ function cargarDatosMySQL() {
                 </tr>
               `;
             } else {
+              // 🎯 EN OTRAS PLATAFORMAS: SI YA ESTÁ CAÍDA (ROJA) MUESTRA BORTÓN RESOLVER Y COPIAR REPORTE
+              let btnReporteOResolver = isCaida
+                ? `<button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${window.tablaMySQLActual}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">✔️ Resolver</button>`
+                : `<button onclick="window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}', ${isCaida})" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>`;
+
               let botonesAccionDemas = `
                 <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end;">
                   <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
                   ${esSuperAdmin ? `<button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : ""}
                   <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
                   <button onclick="window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">⏳ Temp</button>
-                  <button onclick="window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}', ${isCaida})" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>
+                  ${btnReporteOResolver}
                 </div>
               `;
 
@@ -1250,7 +1253,7 @@ window.generarTemp = function (btn, id) {
     });
 };
 
-// 🚨 REPORTAR GARANTÍA (CON PROTECCIÓN CONTRA DUPLICADOS Y COPIADO AUTOMÁTICO)
+// 🚨 REPORTAR GARANTÍA (CON COPIADO AUTOMÁTICO Y PROTECCIÓN CONTRA DUPLICADOS)
 window.marcarComoGarantia = function (
   id,
   correoEscapado,
@@ -1264,7 +1267,6 @@ window.marcarComoGarantia = function (
   const prov = decodeURIComponent(provEscapado);
   let dia = diaEscapado ? decodeURIComponent(diaEscapado) : "";
 
-  // Formatear la fecha de compra automáticamente a '17-ago' si no viene definida
   if (!dia || dia.toLowerCase() === "hoy" || dia === "-") {
     dia = formatearFechaCorta(new Date());
   } else {
@@ -1274,7 +1276,7 @@ window.marcarComoGarantia = function (
   let platNorm = window.tablaMySQLActual.toUpperCase().replace(/_/g, "-");
   let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platNorm}\n📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n👤 *Proveedor:* ${prov}\n📅 *Fecha Compra:* ${dia}`;
 
-  // Copiar siempre el texto del reporte al portapapeles
+  // Copiar siempre la ficha del reporte
   navigator.clipboard
     .writeText(textoReporte)
     .then(() => {
@@ -1288,7 +1290,7 @@ window.marcarComoGarantia = function (
       fallbackCopiar(textoReporte, () => {});
     });
 
-  // 🛡️ SI YA ESTÁ CAÍDA / REPORTADA EN GARANTÍAS: NO DUPLICAR
+  // 🛡️ Si la cuenta ya está marcada como caída, se detiene para no duplicar en MySQL
   if (esCaida) {
     alert("⚠️ Esta cuenta ya fue reportada anteriormente en Garantías.");
     return;
