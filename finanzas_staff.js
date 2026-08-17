@@ -737,7 +737,6 @@ window.renderDashboard = function () {
   let montoJeissonExtraido = 0;
   if (window.globalFinanzasData.listaDetallada) {
     window.globalFinanzasData.listaDetallada.forEach((mov) => {
-      // Si el movimiento es un ingreso y dice "JEISSON" en su categoría o detalle
       if (
         mov.tipo === "INGRESO" &&
         (mov.categoria.toUpperCase().includes("JEISSON") ||
@@ -748,10 +747,8 @@ window.renderDashboard = function () {
     });
   }
 
-  // Restamos a Jeisson de los ingresos brutos para que no infle la caja de ventas
   ingNum = ingNum - montoJeissonExtraido;
 
-  // Recalculamos el neto operativo SIN Jeisson
   const netoOperativo = ingNum - (gasNum + invNum + nomNum);
 
   // 2. PORCENTAJES DE ANILLOS
@@ -779,7 +776,7 @@ window.renderDashboard = function () {
 
   window.actualizarWidgetAnillosYBanderas(pctIngresos, pctGastos);
 
-  // 4. PROYECCIONES Y FONDOS EMPRESARIALES (Calculados SIN el dinero de Jeisson)
+  // 4. PROYECCIONES Y FONDOS EMPRESARIALES
   const montoFondoNegocio = Math.round(ingNum * 0.55);
   const montoReservaNomina = Math.round(ingNum * 0.17);
   const totalFondosEmpresa = montoFondoNegocio + montoReservaNomina;
@@ -799,7 +796,6 @@ window.renderDashboard = function () {
   const ahorroCalculado = Math.round(miGananciaNeta * 0.5);
   const otrosCalculado = miGananciaNeta - ahorroCalculado;
 
-  // 🎯 AQUÍ SE SUMA A JEISSON: Tu ganancia personal sí recibe el dinero directo de él
   const gananciaTotalMasJeisson = miGananciaNeta + montoJeissonExtraido;
 
   if (document.getElementById("valProyMio"))
@@ -834,9 +830,8 @@ window.renderDashboard = function () {
   }
 };
 
-// 🎯 DIBUJAR ANILLOS DE COLOR Y LEYENDA (INGRESOS VERDE / GASTOS ROJO)
+// 🎯 DIBUJAR ANILLOS DE COLOR Y LEYENDA
 window.actualizarWidgetAnillosYBanderas = function (pctIng, pctGas) {
-  // 1. Actualizar textos de Porcentaje en vivo
   const elementos = document.querySelectorAll(
     "span, div, p, b, strong, td, th",
   );
@@ -867,7 +862,6 @@ window.actualizarWidgetAnillosYBanderas = function (pctIng, pctGas) {
     }
   });
 
-  // 2. Animar los Anillos SVG de Color (Verde #30d158 e Interior Rojo #ff453a)
   const elementoCajaReal =
     document.getElementById("val_neto") ||
     Array.from(document.querySelectorAll("*")).find(
@@ -881,24 +875,19 @@ window.actualizarWidgetAnillosYBanderas = function (pctIng, pctGas) {
     if (tarjetaBento) {
       const svg = tarjetaBento.querySelector("svg");
       if (svg) {
-        const c1 = 138.23; // Circunferencia radio 22
-        const c2 = 87.96; // Circunferencia radio 14
+        const c1 = 138.23;
+        const c2 = 87.96;
 
         const offsetIng = c1 - (c1 * Math.min(pctIng, 100)) / 100;
         const offsetGas = c2 - (c2 * Math.min(pctGas, 100)) / 100;
 
         const nuevoSvgHTML = `
           <svg width="68" height="68" viewBox="0 0 60 60" style="transform: rotate(-90deg); flex-shrink: 0; filter: drop-shadow(0 0 6px rgba(0,0,0,0.5));">
-            <!-- Pista Exterior (Ingresos) -->
             <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(48, 209, 88, 0.15)" stroke-width="5.5" />
-            <!-- Anillo Exterior Verde -->
             <circle cx="30" cy="30" r="22" fill="none" stroke="#30d158" stroke-width="5.5"
                     stroke-dasharray="${c1}" stroke-dashoffset="${offsetIng}" stroke-linecap="round"
                     style="transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);" />
-
-            <!-- Pista Interior (Gastos) -->
             <circle cx="30" cy="30" r="14" fill="none" stroke="rgba(255, 69, 58, 0.15)" stroke-width="5.5" />
-            <!-- Anillo Interior Rojo -->
             <circle cx="30" cy="30" r="14" fill="none" stroke="#ff453a" stroke-width="5.5"
                     stroke-dasharray="${c2}" stroke-dashoffset="${offsetGas}" stroke-linecap="round"
                     style="transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);" />
@@ -999,6 +988,7 @@ window.confirmarOperacionPrestamoModal = function (e) {
   }
 };
 
+// 🎯 HISTORIAL DE MOVIMIENTOS OPTIMIZADO PARA OCUPAR Y SCROLLEAR PERFECTO EL CONTENEDOR
 window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
   const contenedor =
     document.getElementById("listaDesgloseGastos") ||
@@ -1008,15 +998,19 @@ window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
 
   if (!contenedor) return;
 
+  // Ajustes de maquetación en vivo para que el contenedor use el 100% de la altura de la caja
+  contenedor.style.width = "100%";
+  contenedor.style.boxSizing = "border-box";
+
   if (!listaMovimientos || listaMovimientos.length === 0) {
     contenedor.innerHTML = `
-      <div style="text-align: center; color: #8e8e93; padding: 25px 10px; font-size: 0.9rem; font-weight: 600;">
+      <div style="text-align: center; color: #8e8e93; padding: 35px 10px; font-size: 0.9rem; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 14px; border: 1px dashed rgba(255, 255, 255, 0.08);">
         📭 Sin movimientos registrados en esta fecha.
       </div>`;
     return;
   }
 
-  let html = `<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">`;
+  let html = `<div class="cyber-custom-scroll" style="display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; padding-right: 4px; width: 100%; box-sizing: border-box;">`;
 
   listaMovimientos.forEach((mov) => {
     const esIngreso = mov.tipo === "INGRESO";
@@ -1025,12 +1019,14 @@ window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
     const montoFmt = "$" + Number(mov.monto).toLocaleString("es-CO");
 
     html += `
-      <div style="background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.06);">
-        <div>
-          <div style="font-weight: 700; color: #ffffff; font-size: 0.88rem;">${mov.categoria}</div>
-          <div style="font-size: 0.78rem; color: #a1a1aa;">${mov.detalle || "Sin descripción"} • <span style="color: #71717a;">${mov.fecha}</span></div>
+      <div style="background: rgba(255, 255, 255, 0.035); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(255,255,255,0.15)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.035)'; this.style.borderColor='rgba(255,255,255,0.08)';">
+        <div style="display: flex; flex-direction: column; gap: 3px; overflow: hidden; padding-right: 10px;">
+          <div style="font-weight: 800; color: #ffffff; font-size: 0.9rem; letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${mov.categoria}</div>
+          <div style="font-size: 0.78rem; color: #a1a1aa; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${mov.detalle || "Sin descripción"} • <span style="color: #71717a; font-family: monospace;">${mov.fecha}</span>
+          </div>
         </div>
-        <div style="font-weight: 800; font-size: 0.95rem; color: ${colorMonto};">
+        <div style="font-weight: 900; font-size: 1.05rem; color: ${colorMonto}; font-family: monospace; letter-spacing: 0.3px; flex-shrink: 0; text-align: right;">
           ${signo}${montoFmt}
         </div>
       </div>`;
@@ -1123,7 +1119,6 @@ window.renderizarTotalNomina = function () {
     let descontado = Math.round(datosUser.descontado);
     let neto = ganado - descontado;
 
-    // 🔥 LA MAGIA ESTÁ AQUÍ: Si el asistente NO es "JEISSON", se suma a los totales de arriba.
     if (asistente.toUpperCase() !== "JEISSON") {
       totalGlobalGanado += ganado;
       totalGlobalDescontado += descontado;
