@@ -66,6 +66,62 @@ const LISTA_TABLAS_GLOBALES = [
   "mubi",
 ];
 
+// 🎨 CONSTRUCTOR OFICIAL DE FICHAS Y MENSAJES DE ACCESO
+function construirMensajeFicha(
+  platNombre,
+  correo,
+  clave,
+  perfil,
+  pin,
+  vencimiento,
+  cliente,
+) {
+  let platNorm = (platNombre || "").toUpperCase().replace(/_/g, "-");
+  let esNet = platNorm === "NETFLIX";
+
+  let tieneNombreReal =
+    cliente &&
+    cliente !== "-" &&
+    cliente.trim() !== "" &&
+    cliente.trim().toLowerCase() !== "sin nombre";
+
+  let saludoNombre = tieneNombreReal ? " " + cliente.trim() : "";
+
+  let msg = `🌟 *¡Hola${saludoNombre}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n🎬 *DETALLES DE ${platNorm}* ✅\n────────────────────\n`;
+
+  if (esNet) {
+    msg += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+  }
+
+  let etiquetaUser =
+    platNorm === "IPTV" || platNorm === "EMBY" ? "Usuario" : "Correo";
+  let etiquetaPerfil =
+    platNorm === "IPTV" ? "URL" : platNorm === "EMBY" ? "Servidor" : "Perfil";
+
+  msg += `👤 *${etiquetaUser}:* ${correo || "-"}\n🔐 *Contraseña:* ${clave || "-"}\n`;
+
+  if (perfil && perfil !== "-" && perfil !== "") {
+    msg += `🌐 *${etiquetaPerfil}:* ${perfil}\n`;
+  }
+  if (platNorm === "EMBY") {
+    msg += `🔌 *Puerto:* Dejar vacío\n`;
+  }
+  if (pin && pin !== "-" && pin !== "" && pin !== "N/A") {
+    msg += `📍 *PIN:* ${pin}\n`;
+  }
+  if (vencimiento && vencimiento !== "-" && vencimiento !== "") {
+    msg += `📅 *Vence:* ${vencimiento}\n`;
+  }
+
+  if (esNet) {
+    msg += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n`;
+  }
+
+  msg += `\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
+
+  return msg;
+}
+
 // =========================================================================
 // 👁️ APERTURA Y CONTROL DEL PANEL MYSQL
 // =========================================================================
@@ -109,7 +165,6 @@ function cambiarTablaMySQL(nombreTabla, btnElement) {
   window.tablaMySQLActual = nombreTabla;
   window.lastSelectedTab = nombreTabla;
 
-  // Limpiar campo de búsqueda al cambiar manualmente de pestaña
   const busquedaInput = document.getElementById("inputSearchMySQL");
   if (busquedaInput) busquedaInput.value = "";
   actualizarBotonBorrarBusquedaMySQL();
@@ -124,7 +179,6 @@ function cambiarTablaMySQL(nombreTabla, btnElement) {
   cargarDatosMySQL();
 }
 
-// 🔍 BOTÓN DE BORRAR PEGADO AL TEXTO ESCRITO
 function actualizarBotonBorrarBusquedaMySQL() {
   const input = document.getElementById("inputSearchMySQL");
   if (!input) return;
@@ -249,7 +303,7 @@ function filtrarMySQL() {
   }, 300);
 }
 
-// 🗓️ FORMATEADOR DE FECHA CORTA (Ejemplo: '17-ago')
+// 🗓️ FORMATEADOR DE FECHA CORTA
 function formatearFechaCorta(fStr) {
   if (!fStr || fStr === "-") return "-";
 
@@ -561,7 +615,15 @@ function cargarDatosMySQL() {
             ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; cursor: pointer;">${numeroVal}</span>`
             : "-";
 
-        let textoCopiarFicha = `🌟 *¡Hola ${clienteVal !== "-" ? clienteVal : ""}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n🎬 *DETALLES DE ${platNombreUI}* ✅\n────────────────────\n👤 *Correo:* ${correoVal}\n🔐 *Contraseña:* ${claveVal}\n🌐 *Perfil:* ${perfilVal}\n📍 *PIN:* ${pinVal}\n📅 *Vence:* ${vencVal}\n\n📢 *Garantía activa:* Tu servicio cuenta con respaldo total.`;
+        let textoCopiarFicha = construirMensajeFicha(
+          tablaOrigen,
+          correoVal,
+          claveVal,
+          perfilVal,
+          pinVal,
+          vencVal,
+          clienteVal,
+        );
         let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
         let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
 
@@ -671,10 +733,15 @@ function cargarDatosMySQL() {
               `;
             }
 
-            let platNorm = window.tablaMySQLActual
-              .toUpperCase()
-              .replace(/_/g, "-");
-            let textoCopiarFicha = `🌟 *¡Hola${clienteVal !== "-" ? " " + clienteVal : ""}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n🎬 *DETALLES DE ${platNorm}* ✅\n────────────────────\n👤 *Correo:* ${correoVal}\n🔐 *Contraseña:* ${claveVal}\n🌐 *Perfil:* ${perfilVal}\n📍 *PIN:* ${pinVal}\n📅 *Vence:* ${vencVal}\n\n📢 *Garantía activa:* Tu servicio cuenta con respaldo total.`;
+            let textoCopiarFicha = construirMensajeFicha(
+              window.tablaMySQLActual,
+              correoVal,
+              claveVal,
+              perfilVal,
+              pinVal,
+              vencVal,
+              clienteVal,
+            );
             let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
             let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
 
@@ -791,7 +858,6 @@ function cargarDatosMySQL() {
                 </tr>
               `;
             } else {
-              // 🎯 EN OTRAS PLATAFORMAS: SI YA ESTÁ CAÍDA (ROJA) MUESTRA BORTÓN RESOLVER Y COPIAR REPORTE
               let btnReporteOResolver = isCaida
                 ? `<button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${window.tablaMySQLActual}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">✔️ Resolver</button>`
                 : `<button onclick="window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}', ${isCaida})" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>`;
@@ -1253,7 +1319,6 @@ window.generarTemp = function (btn, id) {
     });
 };
 
-// 🚨 REPORTAR GARANTÍA (CON COPIADO AUTOMÁTICO Y PROTECCIÓN CONTRA DUPLICADOS)
 window.marcarComoGarantia = function (
   id,
   correoEscapado,
@@ -1276,7 +1341,6 @@ window.marcarComoGarantia = function (
   let platNorm = window.tablaMySQLActual.toUpperCase().replace(/_/g, "-");
   let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platNorm}\n📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n👤 *Proveedor:* ${prov}\n📅 *Fecha Compra:* ${dia}`;
 
-  // Copiar siempre la ficha del reporte
   navigator.clipboard
     .writeText(textoReporte)
     .then(() => {
@@ -1290,7 +1354,6 @@ window.marcarComoGarantia = function (
       fallbackCopiar(textoReporte, () => {});
     });
 
-  // 🛡️ Si la cuenta ya está marcada como caída, se detiene para no duplicar en MySQL
   if (esCaida) {
     alert("⚠️ Esta cuenta ya fue reportada anteriormente en Garantías.");
     return;
@@ -1484,7 +1547,7 @@ window.formatearMontoCOP = function (input) {
 };
 
 // =========================================================================
-// ➕ VENTANA MODAL DE REGISTRO ÚNICO (SIN GUIONES Y CON FORMATO COP)
+// ➕ VENTANA MODAL DE REGISTRO ÚNICO
 // =========================================================================
 window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
   if (typeof haptic === "function") haptic();
