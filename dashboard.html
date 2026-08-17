@@ -4200,7 +4200,7 @@
             </div>
           </section>
 
-          <!-- 6. MOVIMIENTO CONTABLE MANUAL E HISTORIAL (6 COLS - ALTURA DINÁMICA Y LLENA) -->
+          <!-- 6. MOVIMIENTO CONTABLE MANUAL E HISTORIAL (6 COLS - ALTURA Y MARGENES REPARADOS) -->
           <section
             style="
               grid-column: span 6 !important;
@@ -4213,6 +4213,7 @@
               flex-direction: column;
               box-sizing: border-box;
               height: 100%;
+              min-height: 0;
             "
           >
             <h3
@@ -4381,7 +4382,7 @@
               >
             </div>
 
-            <!-- HISTORIAL ADAPTABLE AL TAMAÑO TOTAL DE LA CAJA -->
+            <!-- CONTENEDOR CON PADDING SUPERIOR QUE EVITA RECORTE Y LLEGA AL FINAL -->
             <div
               id="listaDesgloseGastos"
               class="cyber-custom-scroll"
@@ -4390,9 +4391,9 @@
                 flex-direction: column;
                 gap: 10px;
                 flex: 1;
-                min-height: 240px;
+                min-height: 0;
                 overflow-y: auto;
-                padding-right: 4px;
+                padding: 6px 4px 6px 2px;
                 box-sizing: border-box;
               "
             >
