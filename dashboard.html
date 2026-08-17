@@ -1822,7 +1822,7 @@
       <div
         class="modal-ios"
         style="
-          max-width: 540px !important;
+          max-width: 580px !important;
           width: 92% !important;
           padding: 18px 22px !important;
           border-radius: 20px !important;
@@ -1885,8 +1885,43 @@
         >
           <input type="hidden" id="editMySQLId" />
 
-          <!-- Fila 1: Correo y Clave -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+          <!-- Fila 1: Fecha Madre (Día), Correo y Clave -->
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 0.8fr 1.2fr 1fr;
+              gap: 10px;
+            "
+          >
+            <div>
+              <label
+                style="
+                  font-size: 0.68rem;
+                  color: #ff9f0a;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  display: block;
+                  margin-bottom: 3px;
+                "
+                >FECHA CUENTA (DÍA)</label
+              >
+              <input
+                type="text"
+                id="editMySQLDia"
+                class="input-ios"
+                placeholder="16-ago"
+                style="
+                  background: rgba(0, 0, 0, 0.4) !important;
+                  padding: 7px 10px !important;
+                  font-size: 0.82rem !important;
+                  border-radius: 10px !important;
+                  margin: 0 !important;
+                  height: 34px !important;
+                  font-weight: 700 !important;
+                  color: #ff9f0a !important;
+                "
+              />
+            </div>
             <div>
               <label
                 style="
