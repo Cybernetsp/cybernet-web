@@ -988,7 +988,7 @@ window.confirmarOperacionPrestamoModal = function (e) {
   }
 };
 
-// 🎯 HISTORIAL DE MOVIMIENTOS OPTIMIZADO PARA OCUPAR Y SCROLLEAR PERFECTO EL CONTENEDOR
+// 🎯 HISTORIAL DE MOVIMIENTOS OPTIMIZADO (SIN CORTE SUPERIOR Y LLENADO COMPLETO)
 window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
   const contenedor =
     document.getElementById("listaDesgloseGastos") ||
@@ -998,10 +998,6 @@ window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
 
   if (!contenedor) return;
 
-  // Ajustes de maquetación en vivo para que el contenedor use el 100% de la altura de la caja
-  contenedor.style.width = "100%";
-  contenedor.style.boxSizing = "border-box";
-
   if (!listaMovimientos || listaMovimientos.length === 0) {
     contenedor.innerHTML = `
       <div style="text-align: center; color: #8e8e93; padding: 35px 10px; font-size: 0.9rem; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 14px; border: 1px dashed rgba(255, 255, 255, 0.08);">
@@ -1010,8 +1006,7 @@ window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
     return;
   }
 
-  let html = `<div class="cyber-custom-scroll" style="display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; padding-right: 4px; width: 100%; box-sizing: border-box;">`;
-
+  let html = "";
   listaMovimientos.forEach((mov) => {
     const esIngreso = mov.tipo === "INGRESO";
     const colorMonto = esIngreso ? "#30d158" : "#ff453a";
@@ -1019,7 +1014,7 @@ window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
     const montoFmt = "$" + Number(mov.monto).toLocaleString("es-CO");
 
     html += `
-      <div style="background: rgba(255, 255, 255, 0.035); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(255,255,255,0.15)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.035)'; this.style.borderColor='rgba(255,255,255,0.08)';">
+      <div style="background: rgba(255, 255, 255, 0.035); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s ease; box-sizing: border-box; width: 100%; flex-shrink: 0;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(255,255,255,0.15)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.035)'; this.style.borderColor='rgba(255,255,255,0.08)';">
         <div style="display: flex; flex-direction: column; gap: 3px; overflow: hidden; padding-right: 10px;">
           <div style="font-weight: 800; color: #ffffff; font-size: 0.9rem; letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${mov.categoria}</div>
           <div style="font-size: 0.78rem; color: #a1a1aa; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -1032,7 +1027,6 @@ window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
       </div>`;
   });
 
-  html += `</div>`;
   contenedor.innerHTML = html;
 };
 
