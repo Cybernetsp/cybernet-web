@@ -727,43 +727,61 @@ window.renderDashboard = function () {
 
   if (!d) return;
 
-  // 1. CÁLCULO DE VALORES Y PORCENTAJES
-  const ingNum = Number(d.ingresos) || 0;
+  // 1. CÁLCULO DE VALORES BASE
+  let ingNum = Number(d.ingresos) || 0;
   const gasNum = Number(d.gastos) || 0;
-  const totalFlujo = ingNum + gasNum;
+  const invNum = Number(d.inversiones) || 0;
+  const nomNum = Number(d.nomina) || 0;
 
+  // 🔴 FILTRO ESPECIAL PARA EXCLUIR A JEISSON DE LOS INGRESOS BRUTOS
+  let montoJeissonExtraido = 0;
+  if (window.globalFinanzasData.listaDetallada) {
+    window.globalFinanzasData.listaDetallada.forEach((mov) => {
+      // Si el movimiento es un ingreso y dice "JEISSON" en su categoría o detalle
+      if (
+        mov.tipo === "INGRESO" &&
+        (mov.categoria.toUpperCase().includes("JEISSON") ||
+          (mov.detalle || "").toUpperCase().includes("JEISSON"))
+      ) {
+        montoJeissonExtraido += Number(mov.monto) || 0;
+      }
+    });
+  }
+
+  // Restamos a Jeisson de los ingresos brutos para que no infle la caja de ventas
+  ingNum = ingNum - montoJeissonExtraido;
+
+  // Recalculamos el neto operativo SIN Jeisson
+  const netoOperativo = ingNum - (gasNum + invNum + nomNum);
+
+  // 2. PORCENTAJES DE ANILLOS
+  const totalFlujo = ingNum + gasNum;
   const pctIngresos =
     totalFlujo > 0 ? Math.round((ingNum / totalFlujo) * 100) : 0;
   const pctGastos =
     totalFlujo > 0 ? Math.round((gasNum / totalFlujo) * 100) : 0;
 
-  // 2. RENDERIZADO DE MONTO NETO Y VALORES
+  // 3. RENDERIZADO DE CAJA REAL Y TARJETAS PRINCIPALES
   const netEl = document.getElementById("val_neto");
   if (netEl) {
-    netEl.innerText = formatMoneda(d.neto);
-    netEl.style.color = d.neto >= 0 ? "#30d158" : "#ff453a";
+    netEl.innerText = formatMoneda(netoOperativo);
+    netEl.style.color = netoOperativo >= 0 ? "#30d158" : "#ff453a";
   }
 
   if (document.getElementById("val_ingresos"))
-    document.getElementById("val_ingresos").innerText = formatMoneda(
-      d.ingresos,
-    );
+    document.getElementById("val_ingresos").innerText = formatMoneda(ingNum);
   if (document.getElementById("val_gastos"))
-    document.getElementById("val_gastos").innerText = formatMoneda(d.gastos);
+    document.getElementById("val_gastos").innerText = formatMoneda(gasNum);
   if (document.getElementById("val_inversiones"))
-    document.getElementById("val_inversiones").innerText = formatMoneda(
-      d.inversiones,
-    );
+    document.getElementById("val_inversiones").innerText = formatMoneda(invNum);
   if (document.getElementById("val_nomina"))
-    document.getElementById("val_nomina").innerText = formatMoneda(d.nomina);
+    document.getElementById("val_nomina").innerText = formatMoneda(nomNum);
 
-  // 3. 🎯 RENDERIZADO DE ANILLOS Y LEYENDAS EN VIVO (VERDE / ROJO)
   window.actualizarWidgetAnillosYBanderas(pctIngresos, pctGastos);
 
-  // 4. PROYECCIONES Y FONDOS
-  const baseVentas = d.ingresos || 0;
-  const montoFondoNegocio = Math.round(baseVentas * 0.55);
-  const montoReservaNomina = Math.round(baseVentas * 0.17);
+  // 4. PROYECCIONES Y FONDOS EMPRESARIALES (Calculados SIN el dinero de Jeisson)
+  const montoFondoNegocio = Math.round(ingNum * 0.55);
+  const montoReservaNomina = Math.round(ingNum * 0.17);
   const totalFondosEmpresa = montoFondoNegocio + montoReservaNomina;
 
   if (document.getElementById("valProyNegocio"))
@@ -776,13 +794,13 @@ window.renderDashboard = function () {
     document.getElementById("valTotalFondosNegocio").innerText =
       formatMoneda(totalFondosEmpresa);
 
-  const miGananciaNeta = Math.round(baseVentas * 0.28);
+  // 5. CÁLCULO DE TU GANANCIA
+  const miGananciaNeta = Math.round(ingNum * 0.28);
   const ahorroCalculado = Math.round(miGananciaNeta * 0.5);
   const otrosCalculado = miGananciaNeta - ahorroCalculado;
 
-  // 🎯 SUMA DE ABONOS DE JEISSON A LA GANANCIA TOTAL
-  const montoJeisson = Number(d.jeisson) || 0;
-  const gananciaTotalJeisson = miGananciaNeta + montoJeisson;
+  // 🎯 AQUÍ SE SUMA A JEISSON: Tu ganancia personal sí recibe el dinero directo de él
+  const gananciaTotalMasJeisson = miGananciaNeta + montoJeissonExtraido;
 
   if (document.getElementById("valProyMio"))
     document.getElementById("valProyMio").innerText =
@@ -795,10 +813,11 @@ window.renderDashboard = function () {
       formatMoneda(otrosCalculado);
 
   if (document.getElementById("valProyMioMasJeisson"))
-    document.getElementById("valProyMioMasJeisson").innerText =
-      formatMoneda(gananciaTotalJeisson);
+    document.getElementById("valProyMioMasJeisson").innerText = formatMoneda(
+      gananciaTotalMasJeisson,
+    );
 
-  // 5. DEUDAS E HISTORIAL
+  // 6. DEUDAS E HISTORIAL
   if (
     window.globalFinanzasData.deudaActual !== undefined &&
     document.getElementById("valDeudaTotal")
