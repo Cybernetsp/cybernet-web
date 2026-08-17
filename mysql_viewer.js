@@ -38,7 +38,33 @@
 })();
 
 window.tablaMySQLActual = "netflix";
+window.lastSelectedTab = "netflix";
 let searchTimeoutMySQL = null;
+
+// Lista de todas las tablas de MySQL para la búsqueda global inteligente
+const LISTA_TABLAS_GLOBALES = [
+  "netflix",
+  "amazon_prime_video",
+  "disney_premium",
+  "disney_estandar",
+  "hbo_max",
+  "crunchyroll",
+  "vix",
+  "plex",
+  "paramount",
+  "apple_tv",
+  "youtube",
+  "spotify",
+  "directv_go",
+  "iptv",
+  "flujo_tv",
+  "emby",
+  "metegol",
+  "canva",
+  "capcut",
+  "deezer",
+  "mubi",
+];
 
 // =========================================================================
 // 👁️ APERTURA Y CONTROL DEL PANEL MYSQL
@@ -81,6 +107,11 @@ document.addEventListener("DOMContentLoaded", () => {
 function cambiarTablaMySQL(nombreTabla, btnElement) {
   if (typeof haptic === "function") haptic();
   window.tablaMySQLActual = nombreTabla;
+  window.lastSelectedTab = nombreTabla;
+
+  // Limpiar campo de búsqueda al cambiar manualmente de pestaña
+  const busquedaInput = document.getElementById("inputSearchMySQL");
+  if (busquedaInput) busquedaInput.value = "";
 
   document
     .querySelectorAll(".mysql-tab-btn")
@@ -95,11 +126,33 @@ function cambiarTablaMySQL(nombreTabla, btnElement) {
 function filtrarMySQL() {
   clearTimeout(searchTimeoutMySQL);
   searchTimeoutMySQL = setTimeout(() => {
+    const busquedaInput = document.getElementById("inputSearchMySQL");
+    const busqueda = busquedaInput ? busquedaInput.value.trim() : "";
+
+    if (busqueda !== "") {
+      // 🔍 SI HAY BÚSQUEDA: Desmarcar todos los botones superiores
+      document
+        .querySelectorAll(".mysql-tab-btn")
+        .forEach((b) => b.classList.remove("active"));
+      window.tablaMySQLActual = "todas";
+    } else {
+      // 🔄 SI SE BORRA LA BÚSQUEDA: Restaurar la pestaña anteriormente seleccionada
+      window.tablaMySQLActual = window.lastSelectedTab || "netflix";
+      document.querySelectorAll(".mysql-tab-btn").forEach((b) => {
+        const onclickAttr = b.getAttribute("onclick") || "";
+        if (onclickAttr.includes(`'${window.tablaMySQLActual}'`)) {
+          b.classList.add("active");
+        } else {
+          b.classList.remove("active");
+        }
+      });
+    }
+
     cargarDatosMySQL();
   }, 300);
 }
 
-// 🗓️ FORMATEADOR DE FECHA CORTA (Ej: 14/08/2026 08:12:00 -> 14-ago)
+// 🗓️ FORMATEADOR DE FECHA CORTA
 function formatearFechaCorta(fStr) {
   if (!fStr || fStr === "-") return "-";
   let str = String(fStr).trim();
@@ -113,11 +166,9 @@ function formatearFechaCorta(fStr) {
   let dia, mesNum;
   if (partes.length === 3) {
     if (partes[0].length === 4) {
-      // YYYY-MM-DD
       dia = parseInt(partes[2], 10);
       mesNum = parseInt(partes[1], 10) - 1;
     } else {
-      // DD/MM/YYYY
       dia = parseInt(partes[0], 10);
       mesNum = parseInt(partes[1], 10) - 1;
     }
@@ -189,77 +240,94 @@ function cargarDatosMySQL() {
     document.head.appendChild(styleSticky);
   }
 
-  const tablaLower = window.tablaMySQLActual.toLowerCase();
-  const esNetflix = tablaLower === "netflix";
-  const esGarantias = tablaLower === "garantias";
-  const esVentas = tablaLower === "registro_ventas";
-
-  let totalColumnas = 10;
-  if (esNetflix) totalColumnas = 12;
-  if (esVentas) totalColumnas = 7;
-  if (esGarantias) totalColumnas = 6;
+  const busquedaInput = document.getElementById("inputSearchMySQL");
+  const busqueda = busquedaInput ? busquedaInput.value.trim() : "";
+  const esBusquedaGlobal =
+    window.tablaMySQLActual === "todas" || busqueda !== "";
 
   const thBase =
     "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
 
-  if (esNetflix) {
+  // 1. CONFIGURAR CABECERA SEGÚN MODO DE VISTA (GLOBAL / INDIVIDUAL)
+  if (esBusquedaGlobal) {
     thead.innerHTML = `
       <tr>
+        <th style="${thBase} width: 10%; color: #0a84ff;">PLATAFORMA</th>
         <th style="${thBase} width: 6%;">FECHA</th>
         <th style="${thBase} width: 18%;">CORREO / USUARIO</th>
         <th style="${thBase} width: 10%;">CONTRASEÑA</th>
         <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
         <th style="${thBase} width: 4%; text-align: center;">PIN</th>
         <th style="${thBase} width: 10%;">VENCIMIENTO</th>
-        <th style="${thBase} width: 10%;">CLIENTE</th>
+        <th style="${thBase} width: 11%;">CLIENTE</th>
         <th style="${thBase} width: 10%;">TELÉFONO</th>
-        <th style="${thBase} width: 7%;">FECHA PAGO</th>
-        <th style="${thBase} width: 6%;">VALOR</th>
-        <th style="${thBase} width: 7%;">PAGO</th>
-        <th style="${thBase} width: 8%; text-align: center;">ACCIÓN</th>
-      </tr>
-    `;
-  } else if (esVentas) {
-    thead.innerHTML = `
-      <tr>
-        <th style="${thBase} width: 8%;">FECHA</th>
-        <th style="${thBase} width: 18%;">CLIENTE / TELÉFONO</th>
-        <th style="${thBase} width: 28%;">PLATAFORMAS</th>
-        <th style="${thBase} width: 10%; color: #30d158;">PAGO</th>
-        <th style="${thBase} width: 10%;">MÉTODO</th>
-        <th style="${thBase} width: 10%; text-align: center;">TIPO</th>
-        <th style="${thBase} width: 16%; text-align: right; padding-right: 15px;">ACCIÓN</th>
-      </tr>
-    `;
-  } else if (esGarantias) {
-    thead.innerHTML = `
-      <tr>
-        <th style="${thBase} width: 15%; text-align: center;">PLATAFORMA</th>
-        <th style="${thBase} width: 10%; color: #ff9f0a;">PROV</th>
-        <th style="${thBase} width: 8%;">FECHA</th>
-        <th style="${thBase} width: 22%;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 15%;">CONTRASEÑA</th>
-        <th style="${thBase} width: 30%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        <th style="${thBase} width: 17%; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   } else {
-    thead.innerHTML = `
-      <tr>
-        <th style="${thBase} width: 7%; color: #ff9f0a;">PROV</th>
-        <th style="${thBase} width: 6%;">FECHA</th>
-        <th style="${thBase} width: 18%;">CORREO / USUARIO</th>
-        <th style="${thBase} width: 10%;">CONTRASEÑA</th>
-        <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
-        <th style="${thBase} width: 4%; text-align: center;">PIN</th>
-        <th style="${thBase} width: 10%;">CLIENTE</th>
-        <th style="${thBase} width: 9%;">TELÉFONO</th>
-        <th style="${thBase} width: 32%; text-align: right; padding-right: 15px;">ACCIÓN</th>
-      </tr>
-    `;
+    const tablaLower = window.tablaMySQLActual.toLowerCase();
+    const esNetflix = tablaLower === "netflix";
+    const esGarantias = tablaLower === "garantias";
+    const esVentas = tablaLower === "registro_ventas";
+
+    if (esNetflix) {
+      thead.innerHTML = `
+        <tr>
+          <th style="${thBase} width: 6%;">FECHA</th>
+          <th style="${thBase} width: 18%;">CORREO / USUARIO</th>
+          <th style="${thBase} width: 10%;">CONTRASEÑA</th>
+          <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
+          <th style="${thBase} width: 4%; text-align: center;">PIN</th>
+          <th style="${thBase} width: 10%;">VENCIMIENTO</th>
+          <th style="${thBase} width: 10%;">CLIENTE</th>
+          <th style="${thBase} width: 10%;">TELÉFONO</th>
+          <th style="${thBase} width: 7%;">FECHA PAGO</th>
+          <th style="${thBase} width: 6%;">VALOR</th>
+          <th style="${thBase} width: 7%;">PAGO</th>
+          <th style="${thBase} width: 8%; text-align: center;">ACCIÓN</th>
+        </tr>
+      `;
+    } else if (esVentas) {
+      thead.innerHTML = `
+        <tr>
+          <th style="${thBase} width: 8%;">FECHA</th>
+          <th style="${thBase} width: 18%;">CLIENTE / TELÉFONO</th>
+          <th style="${thBase} width: 28%;">PLATAFORMAS</th>
+          <th style="${thBase} width: 10%; color: #30d158;">PAGO</th>
+          <th style="${thBase} width: 10%;">MÉTODO</th>
+          <th style="${thBase} width: 10%; text-align: center;">TIPO</th>
+          <th style="${thBase} width: 16%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        </tr>
+      `;
+    } else if (esGarantias) {
+      thead.innerHTML = `
+        <tr>
+          <th style="${thBase} width: 15%; text-align: center;">PLATAFORMA</th>
+          <th style="${thBase} width: 10%; color: #ff9f0a;">PROV</th>
+          <th style="${thBase} width: 8%;">FECHA</th>
+          <th style="${thBase} width: 22%;">CORREO / USUARIO</th>
+          <th style="${thBase} width: 15%;">CONTRASEÑA</th>
+          <th style="${thBase} width: 30%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        </tr>
+      `;
+    } else {
+      thead.innerHTML = `
+        <tr>
+          <th style="${thBase} width: 7%; color: #ff9f0a;">PROV</th>
+          <th style="${thBase} width: 6%;">FECHA</th>
+          <th style="${thBase} width: 18%;">CORREO / USUARIO</th>
+          <th style="${thBase} width: 10%;">CONTRASEÑA</th>
+          <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
+          <th style="${thBase} width: 4%; text-align: center;">PIN</th>
+          <th style="${thBase} width: 10%;">CLIENTE</th>
+          <th style="${thBase} width: 9%;">TELÉFONO</th>
+          <th style="${thBase} width: 32%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        </tr>
+      `;
+    }
   }
 
-  const busquedaInput = document.getElementById("inputSearchMySQL");
-  const busqueda = busquedaInput ? busquedaInput.value.trim() : "";
+  const totalColumnas = thead.querySelectorAll("th").length;
 
   tbody.innerHTML = `
     <tr>
@@ -270,11 +338,148 @@ function cargarDatosMySQL() {
           <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
           <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
         </svg>
-        Consultando datos...
+        ${esBusquedaGlobal ? "🔍 Buscando en todas las plataformas..." : "Consultando datos..."}
       </td>
     </tr>
   `;
 
+  // 2. MODO 1: BÚSQUEDA GLOBAL MULTI-TABLA SMART
+  if (esBusquedaGlobal) {
+    const queryLower = busqueda.toLowerCase().trim();
+    const queryDigits = busqueda.replace(/\D/g, "");
+
+    const promesas = LISTA_TABLAS_GLOBALES.map((tb) =>
+      fetch(
+        `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${tb}&busqueda=${encodeURIComponent(busqueda)}`,
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.status === "success" && data.data) {
+            return data.data.map((row) => ({ ...row, _tablaOrigen: tb }));
+          }
+          return [];
+        })
+        .catch(() => []),
+    );
+
+    Promise.all(promesas).then((resultadosArrays) => {
+      let todosResultados = [].concat(...resultadosArrays);
+
+      // 🧠 FILTRO SMART: Compara coincidencia de texto y coincidencia limpia de dígitos telefónicos
+      let filtradosFinales = todosResultados.filter((fila) => {
+        let numValRaw = String(fila.numero || fila.telefono || "").trim();
+        let numValDigits = numValRaw.replace(/\D/g, "");
+
+        // Si la búsqueda incluye números, comparar ignorando espacios/guiones
+        if (queryDigits.length >= 3 && numValDigits.includes(queryDigits)) {
+          return true;
+        }
+
+        let correoVal = String(fila.correo || fila.usuario || "").toLowerCase();
+        let clienteVal = String(
+          fila.nombre || fila.cliente || "",
+        ).toLowerCase();
+        let claveVal = String(
+          fila.clave || fila.contrasena || "",
+        ).toLowerCase();
+        let perfilVal = String(fila.perfil || "").toLowerCase();
+        let pinVal = String(fila.pin || "").toLowerCase();
+
+        return (
+          correoVal.includes(queryLower) ||
+          clienteVal.includes(queryLower) ||
+          claveVal.includes(queryLower) ||
+          perfilVal.includes(queryLower) ||
+          pinVal.includes(queryLower) ||
+          numValRaw.toLowerCase().includes(queryLower)
+        );
+      });
+
+      if (filtradosFinales.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--ios-red); font-weight: 600;">No se encontraron cuentas asociadas a "${busqueda}" en ninguna plataforma.</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      filtradosFinales.forEach((fila, idx) => {
+        let tablaOrigen = fila._tablaOrigen || "netflix";
+        let platNombreUI = tablaOrigen.toUpperCase().replace(/_/g, " ");
+
+        let diaVal = fila.dia || fila.fecha || "-";
+        let provVal = fila.proveedor || "-";
+        let correoVal = fila.correo || fila.usuario || "-";
+        let claveVal = fila.clave || fila.contrasena || "-";
+        let perfilVal = fila.perfil || "-";
+        let pinVal = fila.pin || "-";
+        let vencVal = fila.vencimiento || "-";
+        let clienteVal = fila.nombre || fila.cliente || "-";
+        let numeroVal = fila.numero || fila.telefono || "-";
+
+        let isCaida = fila.estado === "caida" || fila.es_caida == 1;
+        const colorFondoFila = isCaida
+          ? "rgba(255, 69, 58, 0.15)"
+          : idx % 2 === 0
+            ? "rgba(255, 255, 255, 0.015)"
+            : "transparent";
+
+        let celdaCorreo =
+          correoVal !== "-"
+            ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; cursor: pointer;" title="${correoVal}">${correoVal}</span>`
+            : "-";
+        let celdaClave =
+          claveVal !== "-"
+            ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; cursor: pointer;" title="${claveVal}">${claveVal}</span>`
+            : "-";
+        let celdaPin =
+          pinVal !== "-"
+            ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(pinVal)}')" style="color: #ffd60a; font-weight: 700; font-family: monospace; cursor: pointer;">${pinVal}</span>`
+            : "-";
+        let celdaTel =
+          numeroVal !== "-" && numeroVal.trim() !== ""
+            ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; cursor: pointer;">${numeroVal}</span>`
+            : "-";
+
+        let textoCopiarFicha = `🌟 *¡Hola ${clienteVal !== "-" ? clienteVal : ""}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n🎬 *DETALLES DE ${platNombreUI}* ✅\n────────────────────\n👤 *Correo:* ${correoVal}\n🔐 *Contraseña:* ${claveVal}\n🌐 *Perfil:* ${perfilVal}\n📍 *PIN:* ${pinVal}\n📅 *Vence:* ${vencVal}\n\n📢 *Garantía activa:* Tu servicio cuenta con respaldo total.`;
+        let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
+        let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
+
+        let botonesAccion = `
+          <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
+            <button onclick="window.tablaMySQLActual='${tablaOrigen}'; abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+            <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+            <button onclick="window.tablaMySQLActual='${tablaOrigen}'; window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">⏳ Temp</button>
+            <button onclick="window.tablaMySQLActual='${tablaOrigen}'; window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>
+          </div>
+        `;
+
+        const tdBase =
+          "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
+
+        html += `
+          <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+            <td style="${tdBase}">
+              <span style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.68rem; text-transform: uppercase;">${platNombreUI}</span>
+            </td>
+            <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
+            <td style="${tdBase}">${celdaCorreo}</td>
+            <td style="${tdBase}">${celdaClave}</td>
+            <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
+            <td style="${tdBase} text-align: center;">${celdaPin}</td>
+            <td style="${tdBase} font-weight: 800; color: #ff9f0a;">${vencVal}</td>
+            <td style="${tdBase} color: #e4e4e7;" title="${clienteVal}">${clienteVal}</td>
+            <td style="${tdBase}">${celdaTel}</td>
+            <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccion}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    });
+
+    return;
+  }
+
+  // 3. MODO 2: BÚSQUEDA INDIVIDUAL POR PESTAÑA SELECCIONADA
   fetch(
     `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
   )
@@ -286,6 +491,10 @@ function cargarDatosMySQL() {
           html = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--ios-red); font-weight: 600;">No se encontraron registros en esta tabla.</td></tr>`;
         } else {
           let fechaGrupoActual = null;
+          const tablaLower = window.tablaMySQLActual.toLowerCase();
+          const esNetflix = tablaLower === "netflix";
+          const esGarantias = tablaLower === "garantias";
+          const esVentas = tablaLower === "registro_ventas";
 
           data.data.forEach((fila, idx) => {
             let diaVal = fila.dia || fila.fecha || "-";
@@ -304,27 +513,14 @@ function cargarDatosMySQL() {
               fila.valor ||
               fila.monto_cobrado ||
               fila.monto ||
-              fila.valor_cobrado ||
-              fila.precio ||
-              fila.total ||
-              fila.monto_total ||
               "-";
             let valorVal = formatearMontoMoneda(valorValRaw);
-
-            let pagoVal =
-              fila.pago ||
-              fila.metodo ||
-              fila.banco ||
-              fila.medio_pago ||
-              fila.metodo_pago ||
-              "-";
+            let pagoVal = fila.pago || fila.metodo || fila.banco || "-";
 
             let isCaida = fila.estado === "caida" || fila.es_caida == 1;
-
-            const esFilaPar = idx % 2 === 0;
             const colorFondoFila = isCaida
               ? "rgba(255, 69, 58, 0.15)"
-              : esFilaPar
+              : idx % 2 === 0
                 ? "rgba(255, 255, 255, 0.015)"
                 : "transparent";
 
@@ -335,312 +531,133 @@ function cargarDatosMySQL() {
               diaVal !== "-"
             ) {
               fechaGrupoActual = diaVal;
-
-              // Botón de + disponible para todos los usuarios solo en la sección de Netflix
-              let btnAnadirNet = "";
-              if (esNetflix) {
-                btnAnadirNet = `
-                  <button onclick="window.abrirModalAnadirUnPerfilNet('${encodeURIComponent(diaVal)}')" title="Añadir Registro" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 4px 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; margin-right: 6px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  </button>
-                `;
-              }
-
-              let btnBorrarFecha = "";
-              if (esSuperAdmin) {
-                btnBorrarFecha = `
-                  <button onclick="eliminarFechaMySQL('${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 4px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Borrar Fecha
-                  </button>
-                `;
-              }
+              let btnAnadirNet = esNetflix
+                ? `<button onclick="window.abrirModalAnadirUnPerfilNet('${encodeURIComponent(diaVal)}')" title="Añadir Registro" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 4px 8px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; margin-right: 6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>`
+                : "";
+              let btnBorrarFecha = esSuperAdmin
+                ? `<button onclick="eliminarFechaMySQL('${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 4px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Borrar Fecha</button>`
+                : "";
 
               html += `
                 <tr style="background: rgba(10, 132, 255, 0.05);">
-                  <td colspan="${totalColumnas}" style="padding: 8px 16px; border-top: 1px solid rgba(10, 132, 255, 0.2); border-bottom: 1px solid rgba(10, 132, 255, 0.2); color: #0a84ff; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
+                  <td colspan="${totalColumnas}" style="padding: 8px 16px; border-top: 1px solid rgba(10, 132, 255, 0.2); border-bottom: 1px solid rgba(10, 132, 255, 0.2); color: #0a84ff; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                       <span>📅 CUENTAS DEL: ${diaVal.toUpperCase()}</span>
-                      <div style="display: flex; align-items: center;">
-                        ${btnAnadirNet}
-                        ${btnBorrarFecha}
-                      </div>
+                      <div style="display: flex; align-items: center;">${btnAnadirNet}${btnBorrarFecha}</div>
                     </div>
                   </td>
                 </tr>
               `;
             }
 
-            // TEXTO PARA FICHA
             let platNorm = window.tablaMySQLActual
               .toUpperCase()
               .replace(/_/g, "-");
-            let esNet = window.tablaMySQLActual.toLowerCase() === "netflix";
-            let nombreClienteFicha =
-              clienteVal &&
-              clienteVal !== "-" &&
-              clienteVal.trim().toLowerCase() !== "sin nombre"
-                ? " " + clienteVal.trim()
-                : "";
-
-            let textoCopiarFicha = `🌟 *¡Hola${nombreClienteFicha}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n🎬 *DETALLES DE ${platNorm}* ✅\n────────────────────\n`;
-
-            if (esNet) {
-              textoCopiarFicha += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
-            }
-
-            let etiquetaUser =
-              platNorm === "IPTV" || platNorm === "EMBY" ? "Usuario" : "Correo";
-            let etiquetaPerfil =
-              platNorm === "IPTV"
-                ? "URL"
-                : platNorm === "EMBY"
-                  ? "Servidor"
-                  : "Perfil";
-
-            textoCopiarFicha += `👤 *${etiquetaUser}:* ${correoVal}\n🔐 *Contraseña:* ${claveVal}\n`;
-
-            if (perfilVal && perfilVal !== "-" && perfilVal !== "") {
-              textoCopiarFicha += `🌐 *${etiquetaPerfil}:* ${perfilVal}\n`;
-            }
-            if (platNorm === "EMBY") {
-              textoCopiarFicha += `🔌 *Puerto:* Dejar vacío\n`;
-            }
-            if (pinVal && pinVal !== "-" && pinVal !== "") {
-              textoCopiarFicha += `📍 *PIN:* ${pinVal}\n`;
-            }
-            if (vencVal && vencVal !== "-" && vencVal !== "") {
-              textoCopiarFicha += `📅 *Vence:* ${vencVal}\n`;
-            }
-
-            if (esNet) {
-              textoCopiarFicha += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n`;
-            }
-
-            textoCopiarFicha += `\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
-
+            let textoCopiarFicha = `🌟 *¡Hola${clienteVal !== "-" ? " " + clienteVal : ""}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n🎬 *DETALLES DE ${platNorm}* ✅\n────────────────────\n👤 *Correo:* ${correoVal}\n🔐 *Contraseña:* ${claveVal}\n🌐 *Perfil:* ${perfilVal}\n📍 *PIN:* ${pinVal}\n📅 *Vence:* ${vencVal}\n\n📢 *Garantía activa:* Tu servicio cuenta con respaldo total.`;
             let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
             let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
 
             let celdaCorreo =
               correoVal !== "-"
-                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: inline-block; vertical-align: middle; cursor: pointer; transition: color 0.15s ease;" title="${correoVal}">${correoVal}</span>`
-                : '<span style="color: #a1a1aa;">-</span>';
-
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; cursor: pointer;" title="${correoVal}">${correoVal}</span>`
+                : "-";
             let celdaClave =
               claveVal !== "-"
-                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; display: inline-block; vertical-align: middle; cursor: pointer; transition: color 0.15s ease;" title="${claveVal}">${claveVal}</span>`
-                : '<span style="color: #a1a1aa;">-</span>';
-
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; cursor: pointer;" title="${claveVal}">${claveVal}</span>`
+                : "-";
             let celdaPin =
               pinVal !== "-"
-                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(pinVal)}')" style="color: #ffd60a; font-weight: 700; font-family: monospace; cursor: pointer; display: inline-block;" title="Clic para copiar PIN">${pinVal}</span>`
-                : '<span style="color: #a1a1aa;">-</span>';
-
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(pinVal)}')" style="color: #ffd60a; font-weight: 700; font-family: monospace; cursor: pointer;">${pinVal}</span>`
+                : "-";
             let celdaTelefono =
               numeroVal !== "-" && numeroVal.trim() !== ""
-                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; white-space: nowrap; cursor: pointer; display: inline-block;" title="${numeroVal}">${numeroVal}</span>`
-                : `<button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Agregar Teléfono" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: var(--ios-green); padding: 4px 10px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.8rem; display: inline-flex; align-items: center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>`;
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; cursor: pointer;">${numeroVal}</span>`
+                : `<button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Agregar Teléfono" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: var(--ios-green); padding: 4px 10px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.8rem;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>`;
 
             const tdBase =
               "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
 
-            // ─────────────────────────────────────────────────────────────
-            // 1. VISTA NETFLIX
-            // ─────────────────────────────────────────────────────────────
             if (esNetflix) {
               let botonesAccionNetflix = `
-                <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
-                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  </button>
+                <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end;">
+                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                  ${esSuperAdmin ? `<button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : ""}
+                  <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                  ${esSuperAdmin ? `<button onclick="window.pasarRegistroAHoyMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Pasar registro a hoy" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px; border-radius: 6px; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>` : ""}
+                </div>
               `;
-
-              if (esSuperAdmin) {
-                botonesAccionNetflix += `
-                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  </button>
-                `;
-              }
-
-              botonesAccionNetflix += `
-                <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </button>
-              `;
-
-              if (esSuperAdmin) {
-                botonesAccionNetflix += `
-                  <button onclick="window.pasarRegistroAHoyMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Pasar registro a hoy" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                  </button>
-                `;
-              }
-
-              botonesAccionNetflix += `</div>`;
 
               html += `
-                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                <tr style="background: ${colorFondoFila};">
                   <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
                   <td style="${tdBase}">${celdaCorreo}</td>
                   <td style="${tdBase}">${celdaClave}</td>
                   <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
                   <td style="${tdBase} text-align: center;">${celdaPin}</td>
                   <td style="${tdBase} font-weight: 800; color: #ff9f0a;">${vencVal}</td>
-                  <td style="${tdBase} color: #e4e4e7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${clienteVal}">${clienteVal}</td>
+                  <td style="${tdBase} color: #e4e4e7;" title="${clienteVal}">${clienteVal}</td>
                   <td style="${tdBase}">${celdaTelefono}</td>
                   <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(fechaPagoVal)}</td>
                   <td style="${tdBase} color: #30d158; font-weight: bold;">${valorVal}</td>
-                  <td style="${tdBase} max-width: 100px; overflow: hidden;">
-                    <span style="background: rgba(255,255,255,0.08); padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 90px; vertical-align: middle; color: #bf5af2; font-weight: 700;" title="${pagoVal}">${pagoVal}</span>
-                  </td>
+                  <td style="${tdBase}"><span style="background: rgba(255,255,255,0.08); padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; color: #bf5af2; font-weight: 700;">${pagoVal}</span></td>
                   <td style="${tdBase} text-align: center;">${botonesAccionNetflix}</td>
                 </tr>
               `;
-            }
-            // ─────────────────────────────────────────────────────────────
-            // 2. VISTA REGISTRO VENTAS
-            // ─────────────────────────────────────────────────────────────
-            else if (esVentas) {
-              let platVta =
-                fila.plataformas || fila.descripcion || fila.servicios || "-";
+            } else if (esVentas) {
+              let platVta = fila.plataformas || fila.descripcion || "-";
               let tipoVta = fila.tipo || "Venta";
 
-              let celdaClienteTel = `
-                <div style="display:flex; flex-direction:column; gap:2px;">
-                  <span style="color:#fff; font-weight:700;">${clienteVal}</span>
-                  <span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="color:#a1a1aa; font-family:monospace; font-size:0.75rem; cursor:pointer;" title="Clic para copiar teléfono">${numeroVal}</span>
-                </div>
-              `;
-
-              let botonesAccionVentas = `
-                <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
-                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  </button>
-              `;
-
-              if (esSuperAdmin) {
-                botonesAccionVentas += `
-                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  </button>
-                `;
-              }
-              botonesAccionVentas += `</div>`;
-
               html += `
-                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                <tr style="background: ${colorFondoFila};">
                   <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
-                  <td style="${tdBase}">${celdaClienteTel}</td>
+                  <td style="${tdBase}"><div style="display:flex; flex-direction:column;"><span style="color:#fff; font-weight:700;">${clienteVal}</span><span style="color:#a1a1aa; font-size:0.75rem;">${numeroVal}</span></div></td>
                   <td style="${tdBase} color: #ffffff; font-weight: 600;" title="${platVta}">${platVta}</td>
                   <td style="${tdBase} color: #30d158; font-weight: bold;">${valorVal}</td>
                   <td style="${tdBase} color: #bf5af2; font-weight: 700;">${pagoVal}</td>
                   <td style="${tdBase} text-align: center; color: #a1a1aa;">${tipoVta}</td>
-                  <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionVentas}</td>
+                  <td style="${tdBase} text-align: right; padding-right: 15px;">
+                    <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                  </td>
                 </tr>
               `;
-            }
-            // ─────────────────────────────────────────────────────────────
-            // 3. VISTA GARANTÍAS (HABILITADO BOTÓN COPIAR REPORTE)
-            // ─────────────────────────────────────────────────────────────
-            else if (esGarantias) {
+            } else if (esGarantias) {
               let platGar = (fila.plataforma || "-").toUpperCase();
               let fechaGar = formatearFechaCorta(
                 fila.fecha_compra || fila.fecha || fila.dia || "-",
               );
 
-              let celdaCorreoGar =
-                correoVal !== "-"
-                  ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; cursor: pointer;" title="${correoVal}">${correoVal}</span>`
-                  : "-";
-
-              let celdaClaveGar =
-                claveVal !== "-"
-                  ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; cursor: pointer;" title="${claveVal}">${claveVal}</span>`
-                  : "-";
-
-              let textoReporteGar = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platGar}\n📧 *Correo:* ${correoVal}\n🔑 *Clave:* ${claveVal}\n👤 *Proveedor:* ${provVal}\n📅 *Fecha Compra:* ${fechaGar}`;
-              let textoEscapadoReporteGar = encodeURIComponent(textoReporteGar);
-
-              let botonesAccionGarantias = `
-                <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; white-space: nowrap;">
-                  <button onclick="copiarAccesoMySQL(this, '${textoEscapadoReporteGar}')" title="Copiar Reporte de Garantía" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                    📋 Reporte
-                  </button>
-                  <button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${platGar.toLowerCase()}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                    ✔️ Resolver
-                  </button>
-              `;
-
-              if (esSuperAdmin) {
-                botonesAccionGarantias += `
-                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                `;
-              }
-              botonesAccionGarantias += `</div>`;
-
               html += `
-                <tr style="background: rgba(255, 69, 58, 0.12); border-bottom: 1px solid rgba(255, 69, 58, 0.25);">
+                <tr style="background: rgba(255, 69, 58, 0.12);">
                   <td style="${tdBase} text-align: center; color: #ff453a; font-weight: 800;">${platGar}</td>
                   <td style="${tdBase} color: #ff9f0a; font-weight: 800;">${provVal}</td>
                   <td style="${tdBase} color: #a1a1aa;">${fechaGar}</td>
-                  <td style="${tdBase}">${celdaCorreoGar}</td>
-                  <td style="${tdBase}">${celdaClaveGar}</td>
-                  <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionGarantias}</td>
+                  <td style="${tdBase}">${celdaCorreo}</td>
+                  <td style="${tdBase}">${celdaClave}</td>
+                  <td style="${tdBase} text-align: right; padding-right: 15px;">
+                    <button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${platGar.toLowerCase()}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">✔️ Resolver</button>
+                  </td>
                 </tr>
               `;
-            }
-            // ─────────────────────────────────────────────────────────────
-            // 4. DEMÁS PLATAFORMAS
-            // ─────────────────────────────────────────────────────────────
-            else {
+            } else {
               let botonesAccionDemas = `
-                <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
-                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer; display: inline-flex; align-items: center;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  </button>
+                <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end;">
+                  <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                  ${esSuperAdmin ? `<button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : ""}
+                  <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                  <button onclick="window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">⏳ Temp</button>
+                  <button onclick="window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>
+                </div>
               `;
 
-              if (esSuperAdmin) {
-                botonesAccionDemas += `
-                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; display: inline-flex; align-items: center;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  </button>
-                `;
-              }
-
-              if (isCaida) {
-                botonesAccionDemas += `
-                  <button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${window.tablaMySQLActual}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                    ✔️ Resolver
-                  </button>
-                `;
-              } else {
-                botonesAccionDemas += `
-                  <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  </button>
-                  <button onclick="window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                    ⏳ Temp
-                  </button>
-                  <button onclick="window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                    🚨 Reportar
-                  </button>
-                `;
-              }
-
-              botonesAccionDemas += `</div>`;
-
               html += `
-                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                <tr style="background: ${colorFondoFila};">
                   <td style="${tdBase} color: #ff9f0a; font-weight: 800; text-transform: uppercase;">${provVal}</td>
                   <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
                   <td style="${tdBase}">${celdaCorreo}</td>
                   <td style="${tdBase}">${celdaClave}</td>
                   <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
                   <td style="${tdBase} text-align: center;">${celdaPin}</td>
-                  <td style="${tdBase} color: #e4e4e7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${clienteVal}">${clienteVal}</td>
+                  <td style="${tdBase} color: #e4e4e7;" title="${clienteVal}">${clienteVal}</td>
                   <td style="${tdBase}">${celdaTelefono}</td>
                   <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionDemas}</td>
                 </tr>
@@ -649,8 +666,6 @@ function cargarDatosMySQL() {
           });
         }
         tbody.innerHTML = html;
-      } else if (data.status === "empty") {
-        tbody.innerHTML = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--text-secondary);">${data.message}</td></tr>`;
       } else {
         tbody.innerHTML = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--ios-red); font-weight: 600;">Error: ${data.message}</td></tr>`;
       }
@@ -764,7 +779,6 @@ function guardarNuevoRegistroMySQL(e) {
     });
 }
 
-// 🎯 MODAL EDITAR: SOLO CAMILO PUEDE MODIFICAR EL CAMPO 'DIA'
 function abrirModalEditarMySQL(filaEscapada) {
   if (typeof haptic === "function") haptic();
   const fila = JSON.parse(decodeURIComponent(filaEscapada));
@@ -796,7 +810,6 @@ function abrirModalEditarMySQL(filaEscapada) {
 
   if (iId) iId.value = fila.id || "";
 
-  // 🔒 BLOQUEO EXCLUSIVO: Solo Camilo puede modificar la fecha madre 'dia'
   if (iDia) {
     iDia.value = fila.dia || "";
     iDia.readOnly = !esCamilo;
