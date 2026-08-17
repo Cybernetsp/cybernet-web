@@ -124,12 +124,29 @@ function cambiarTablaMySQL(nombreTabla, btnElement) {
   cargarDatosMySQL();
 }
 
-// 🔍 BOTÓN DE BORRAR BÚSQUEDA DINÁMICO
+// 🔍 BOTÓN DE BORRAR PEAGADO AL TEXTO ESCREITO
 function actualizarBotonBorrarBusquedaMySQL() {
   const input = document.getElementById("inputSearchMySQL");
   if (!input) return;
 
   let btnClear = document.getElementById("btnBorrarSearchMySQL");
+  let measurer = document.getElementById("measurerSearchMySQL");
+
+  if (!measurer) {
+    measurer = document.createElement("span");
+    measurer.id = "measurerSearchMySQL";
+    measurer.style.cssText = `
+      position: absolute;
+      visibility: hidden;
+      height: 0;
+      white-space: pre;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+    `;
+    document.body.appendChild(measurer);
+  }
 
   if (!btnClear && input.parentElement) {
     const container = input.parentElement;
@@ -139,33 +156,48 @@ function actualizarBotonBorrarBusquedaMySQL() {
     btnClear.id = "btnBorrarSearchMySQL";
     btnClear.type = "button";
     btnClear.title = "Borrar texto";
-    btnClear.innerHTML = "✕";
+    btnClear.innerHTML = "✕ Borrar";
     btnClear.style.cssText = `
       position: absolute;
-      right: 12px;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ffffff;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
+      background: rgba(255, 69, 58, 0.2);
+      border: 1px solid rgba(255, 69, 58, 0.4);
+      color: #ff453a;
+      padding: 3px 10px;
+      border-radius: 8px;
       cursor: pointer;
       display: none;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 800;
-      transition: all 0.2s ease;
+      transition: background 0.2s ease, border-color 0.2s ease;
       z-index: 10;
+      white-space: nowrap;
     `;
     btnClear.onclick = window.borrarBusquedaMySQL;
     container.appendChild(btnClear);
   }
 
-  if (btnClear) {
-    btnClear.style.display = input.value.trim().length > 0 ? "flex" : "none";
+  const val = input.value;
+  if (val.length > 0 && btnClear) {
+    const style = window.getComputedStyle(input);
+    measurer.style.fontFamily = style.fontFamily;
+    measurer.style.fontSize = style.fontSize;
+    measurer.style.fontWeight = style.fontWeight;
+    measurer.style.letterSpacing = style.letterSpacing;
+    measurer.textContent = val;
+
+    const paddingLeft = parseFloat(style.paddingLeft) || 35;
+    const textWidth = measurer.offsetWidth;
+    const maxLeft = input.offsetWidth - 85;
+    const calculatedLeft = Math.min(paddingLeft + textWidth + 12, maxLeft);
+
+    btnClear.style.left = `${calculatedLeft}px`;
+    btnClear.style.display = "inline-flex";
+  } else if (btnClear) {
+    btnClear.style.display = "none";
   }
 }
 
@@ -176,7 +208,7 @@ window.borrarBusquedaMySQL = function () {
 
   actualizarBotonBorrarBusquedaMySQL();
 
-  // Restaurar la pestaña que estaba seleccionada previamente
+  // Restaurar la pestaña previa
   window.tablaMySQLActual = window.lastSelectedTab || "netflix";
   document.querySelectorAll(".mysql-tab-btn").forEach((b) => {
     const onclickAttr = b.getAttribute("onclick") || "";
@@ -198,13 +230,11 @@ function filtrarMySQL() {
     const busqueda = busquedaInput ? busquedaInput.value.trim() : "";
 
     if (busqueda !== "") {
-      // 🔍 BÚSQUEDA GLOBAL: Desmarcar todos los botones superiores
       document
         .querySelectorAll(".mysql-tab-btn")
         .forEach((b) => b.classList.remove("active"));
       window.tablaMySQLActual = "todas";
     } else {
-      // 🔄 RESTAURAR PESTAÑA PREVIA SI SE LIMPIÓ EL TEXTO
       window.tablaMySQLActual = window.lastSelectedTab || "netflix";
       document.querySelectorAll(".mysql-tab-btn").forEach((b) => {
         const onclickAttr = b.getAttribute("onclick") || "";
@@ -318,7 +348,6 @@ function cargarDatosMySQL() {
   const thBase =
     "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
 
-  // 1. CONFIGURAR CABECERA SEGÚN MODO DE VISTA (GLOBAL MULTI-TABLA O INDIVIDUAL)
   if (esBusquedaGlobal) {
     thead.innerHTML = `
       <tr>
@@ -413,7 +442,6 @@ function cargarDatosMySQL() {
     </tr>
   `;
 
-  // 2. MODO BÚSQUEDA GLOBAL MULTI-TABLA (CORREO, TELÉFONO, NOMBRE, PIN, O CLAVE)
   if (esBusquedaGlobal) {
     const queryLower = busqueda.toLowerCase().trim();
     const queryDigits = busqueda.replace(/\D/g, "");
@@ -435,12 +463,10 @@ function cargarDatosMySQL() {
     Promise.all(promesas).then((resultadosArrays) => {
       let todosResultados = [].concat(...resultadosArrays);
 
-      // 🧠 FILTRO SMART MULTI-CAMPO (TELÉFONOS CON O SIN ESPACIOS, CORREOS, NOMBRES)
       let filtradosFinales = todosResultados.filter((fila) => {
         let numValRaw = String(fila.numero || fila.telefono || "").trim();
         let numValDigits = numValRaw.replace(/\D/g, "");
 
-        // Coincidencia inteligente por número de teléfono ignorando formatos
         if (queryDigits.length >= 3 && numValDigits.includes(queryDigits)) {
           return true;
         }
@@ -549,7 +575,6 @@ function cargarDatosMySQL() {
     return;
   }
 
-  // 3. MODO INDIVIDUAL POR PESTAÑA
   fetch(
     `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
   )
