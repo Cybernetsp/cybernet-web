@@ -124,7 +124,7 @@ function cambiarTablaMySQL(nombreTabla, btnElement) {
   cargarDatosMySQL();
 }
 
-// 🔍 BOTÓN DE BORRAR PEAGADO AL TEXTO ESCREITO
+// 🔍 BOTÓN DE BORRAR PEGAR AL TEXTO ESCRITO
 function actualizarBotonBorrarBusquedaMySQL() {
   const input = document.getElementById("inputSearchMySQL");
   if (!input) return;
@@ -253,7 +253,32 @@ function filtrarMySQL() {
 // 🗓️ FORMATEADOR DE FECHA CORTA
 function formatearFechaCorta(fStr) {
   if (!fStr || fStr === "-") return "-";
+
+  const mesesAbrev = [
+    "ene",
+    "feb",
+    "mar",
+    "abr",
+    "may",
+    "jun",
+    "jul",
+    "ago",
+    "sep",
+    "oct",
+    "nov",
+    "dic",
+  ];
+
+  if (fStr instanceof Date) {
+    return `${fStr.getDate()}-${mesesAbrev[fStr.getMonth()]}`;
+  }
+
   let str = String(fStr).trim();
+  if (str.toLowerCase() === "hoy") {
+    const hoyObj = new Date();
+    return `${hoyObj.getDate()}-${mesesAbrev[hoyObj.getMonth()]}`;
+  }
+
   if (/^\d{1,2}-[a-z]{3}$/i.test(str)) return str;
 
   let fechaPart = str.split(" ")[0];
@@ -270,20 +295,6 @@ function formatearFechaCorta(fStr) {
       dia = parseInt(partes[0], 10);
       mesNum = parseInt(partes[1], 10) - 1;
     }
-    const mesesAbrev = [
-      "ene",
-      "feb",
-      "mar",
-      "abr",
-      "may",
-      "jun",
-      "jul",
-      "ago",
-      "sep",
-      "oct",
-      "nov",
-      "dic",
-    ];
     if (!isNaN(dia) && !isNaN(mesNum) && mesesAbrev[mesNum]) {
       return `${dia}-${mesesAbrev[mesNum]}`;
     }
@@ -446,7 +457,6 @@ function cargarDatosMySQL() {
     const queryLower = busqueda.toLowerCase().trim();
     const queryDigits = busqueda.replace(/\D/g, "");
 
-    // 🎯 LIMPIEZA INTELIGENTE DE TÉRMINO PARA LA CONSULTA MYSQL EN LA API
     let busquedaAPI = busqueda;
     if (queryDigits.length >= 3 && /^[\d\s\+\-\(\)]+$/.test(busqueda)) {
       busquedaAPI =
@@ -472,7 +482,6 @@ function cargarDatosMySQL() {
     Promise.all(promesas).then((resultadosArrays) => {
       let todosResultados = [].concat(...resultadosArrays);
 
-      // 🧠 FILTRO SMART MULTI-CAMPO (IGNORA ESPACIOS Y FORMATOS DE TELÉFONO)
       let filtradosFinales = todosResultados.filter((fila) => {
         let numValRaw = String(fila.numero || fila.telefono || "").trim();
         let numValDigits = numValRaw.replace(/\D/g, "");
@@ -563,7 +572,7 @@ function cargarDatosMySQL() {
             <button onclick="window.tablaMySQLActual='${tablaOrigen}'; abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
             <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
             <button onclick="window.tablaMySQLActual='${tablaOrigen}'; window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">⏳ Temp</button>
-            <button onclick="window.tablaMySQLActual='${tablaOrigen}'; window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>
+            <button onclick="window.tablaMySQLActual='${tablaOrigen}'; window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}', ${isCaida})" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>
           </div>
         `;
 
@@ -736,20 +745,51 @@ function cargarDatosMySQL() {
               `;
             } else if (esGarantias) {
               let platGar = (fila.plataforma || "-").toUpperCase();
-              let fechaGar = formatearFechaCorta(
-                fila.fecha_compra || fila.fecha || fila.dia || "-",
-              );
+              let fechaGarRaw =
+                fila.fecha_compra || fila.fecha || fila.dia || "-";
+              let fechaGar =
+                fechaGarRaw === "-" || fechaGarRaw.toLowerCase() === "hoy"
+                  ? formatearFechaCorta(new Date())
+                  : formatearFechaCorta(fechaGarRaw);
+
+              let celdaCorreoGar =
+                correoVal !== "-"
+                  ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; cursor: pointer;" title="${correoVal}">${correoVal}</span>`
+                  : "-";
+
+              let celdaClaveGar =
+                claveVal !== "-"
+                  ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; cursor: pointer;" title="${claveVal}">${claveVal}</span>`
+                  : "-";
+
+              let textoReporteGar = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platGar}\n📧 *Correo:* ${correoVal}\n🔑 *Clave:* ${claveVal}\n👤 *Proveedor:* ${provVal}\n📅 *Fecha Compra:* ${fechaGar}`;
+              let textoEscapadoReporteGar = encodeURIComponent(textoReporteGar);
+
+              let botonesAccionGarantias = `
+                <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; white-space: nowrap;">
+                  <button onclick="copiarAccesoMySQL(this, '${textoEscapadoReporteGar}')" title="Copiar Reporte de Garantía" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                    📋 Copiar Reporte
+                  </button>
+                  <button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${platGar.toLowerCase()}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                    ✔️ Resolver
+                  </button>
+              `;
+
+              if (esSuperAdmin) {
+                botonesAccionGarantias += `
+                  <button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                `;
+              }
+              botonesAccionGarantias += `</div>`;
 
               html += `
-                <tr style="background: rgba(255, 69, 58, 0.12);">
+                <tr style="background: rgba(255, 69, 58, 0.12); border-bottom: 1px solid rgba(255, 69, 58, 0.25);">
                   <td style="${tdBase} text-align: center; color: #ff453a; font-weight: 800;">${platGar}</td>
                   <td style="${tdBase} color: #ff9f0a; font-weight: 800;">${provVal}</td>
                   <td style="${tdBase} color: #a1a1aa;">${fechaGar}</td>
-                  <td style="${tdBase}">${celdaCorreo}</td>
-                  <td style="${tdBase}">${celdaClave}</td>
-                  <td style="${tdBase} text-align: right; padding-right: 15px;">
-                    <button onclick="window.abrirModalResolverGarantia('${fila.id}', '${encodeURIComponent(correoVal)}', '${platGar.toLowerCase()}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 5px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">✔️ Resolver</button>
-                  </td>
+                  <td style="${tdBase}">${celdaCorreoGar}</td>
+                  <td style="${tdBase}">${celdaClaveGar}</td>
+                  <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionGarantias}</td>
                 </tr>
               `;
             } else {
@@ -759,7 +799,7 @@ function cargarDatosMySQL() {
                   ${esSuperAdmin ? `<button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(correoVal)}')" title="Eliminar Registro" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : ""}
                   <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
                   <button onclick="window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">⏳ Temp</button>
-                  <button onclick="window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>
+                  <button onclick="window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}', ${isCaida})" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>
                 </div>
               `;
 
@@ -1210,29 +1250,31 @@ window.generarTemp = function (btn, id) {
     });
 };
 
+// 🚨 REPORTAR GARANTÍA (CON PROTECCIÓN CONTRA DUPLICADOS Y COPIADO AUTOMÁTICO)
 window.marcarComoGarantia = function (
   id,
   correoEscapado,
   claveEscapada,
   provEscapado,
   diaEscapado = "",
+  esCaida = false,
 ) {
-  if (
-    !confirm(
-      "⚠️ ¿Estás seguro de enviar esta cuenta a Garantías? Toda la cuenta se marcará como caída (rojo).",
-    )
-  )
-    return;
-  if (typeof haptic === "function") haptic();
-
   const correo = decodeURIComponent(correoEscapado);
   const clave = decodeURIComponent(claveEscapada);
   const prov = decodeURIComponent(provEscapado);
-  const dia = diaEscapado ? decodeURIComponent(diaEscapado) : "";
-  let platNorm = window.tablaMySQLActual.toUpperCase().replace(/_/g, "-");
+  let dia = diaEscapado ? decodeURIComponent(diaEscapado) : "";
 
+  // Formatear la fecha de compra automáticamente a '17-ago' si no viene definida
+  if (!dia || dia.toLowerCase() === "hoy" || dia === "-") {
+    dia = formatearFechaCorta(new Date());
+  } else {
+    dia = formatearFechaCorta(dia);
+  }
+
+  let platNorm = window.tablaMySQLActual.toUpperCase().replace(/_/g, "-");
   let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* ${platNorm}\n📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n👤 *Proveedor:* ${prov}\n📅 *Fecha Compra:* ${dia}`;
 
+  // Copiar siempre el texto del reporte al portapapeles
   navigator.clipboard
     .writeText(textoReporte)
     .then(() => {
@@ -1245,6 +1287,21 @@ window.marcarComoGarantia = function (
     .catch(() => {
       fallbackCopiar(textoReporte, () => {});
     });
+
+  // 🛡️ SI YA ESTÁ CAÍDA / REPORTADA EN GARANTÍAS: NO DUPLICAR
+  if (esCaida) {
+    alert("⚠️ Esta cuenta ya fue reportada anteriormente en Garantías.");
+    return;
+  }
+
+  if (
+    !confirm(
+      "⚠️ ¿Estás seguro de enviar esta cuenta a Garantías? Toda la cuenta se marcará como caída (rojo).",
+    )
+  )
+    return;
+
+  if (typeof haptic === "function") haptic();
 
   const formData = new FormData();
   formData.append("accion", "reportar_garantia");
