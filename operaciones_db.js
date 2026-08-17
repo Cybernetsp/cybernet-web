@@ -32,7 +32,8 @@ window.cargarCortesOperativosNetflix = function () {
   const btnCrearAlias = document.getElementById("btnCrearAliasHeader");
   if (!container) return;
 
-  if (btnCrearAlias) btnCrearAlias.style.display = "none";
+  // 🎯 MANTENER EL BOTÓN SIEMPRE VISIBLE
+  if (btnCrearAlias) btnCrearAlias.style.display = "flex";
 
   container.innerHTML = `
     <div style="text-align: center; padding: 45px 20px; color: #e50914; display: flex; flex-direction: column; align-items: center; gap: 12px;">
@@ -86,13 +87,13 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
   const btnCrearAlias = document.getElementById("btnCrearAliasHeader");
   if (!container) return;
 
+  // 🎯 MANTENER EL BOTÓN SIEMPRE VISIBLE
+  if (btnCrearAlias) btnCrearAlias.style.display = "flex";
+
   if (!cuentas || cuentas.length === 0) {
     window.mostrarEstadoSinCortes();
     return;
   }
-
-  // Ocultar botón de crear si hay cuentas pendientes
-  if (btnCrearAlias) btnCrearAlias.style.display = "none";
 
   let html = "";
   cuentas.forEach((cuenta) => {
@@ -214,7 +215,7 @@ window.generarClaveTVAleatoria = function () {
   return `${palabra}${num}@@`;
 };
 
-// Generación de Modal HTML (Diseño Ajustado a la Imagen)
+// Generación de Modal HTML (Diseño Ajustado)
 window.crearModalNetflixManagerHTML = function () {
   if (document.getElementById("netflixManagerOverlay")) return;
 
@@ -233,8 +234,8 @@ window.crearModalNetflixManagerHTML = function () {
         </div>
 
         <div style="display: flex; flex-direction: column; flex-shrink: 0;">
-          <!-- Botón de crear alias (Oculto por defecto, se muestra si no hay cortes) -->
-          <button id="btnCrearAliasHeader" onclick="window.crearCuentaNetflixAliasExterna()" style="display: none; width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
+          <!-- Botón de crear alias SIEMPRE VISIBLE -->
+          <button id="btnCrearAliasHeader" onclick="window.crearCuentaNetflixAliasExterna()" style="display: flex; width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
             Crear cuenta de Netflix (Usar Alias)
           </button>
