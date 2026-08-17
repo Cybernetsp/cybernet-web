@@ -600,7 +600,26 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
             clienteNombre && clienteNombre !== "Sin Nombre"
               ? " " + clienteNombre
               : "";
-          let fichaTexto = `🌟 *¡Hola${nombreSaludo}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n`;
+
+          // 🎯 DETECCIÓN DE SI ES UNA RENOVACIÓN EXCLUSIVA DE NETFLIX
+          let esSoloNetflixRenovacion = false;
+          if (data.entregados && data.entregados.length === 1) {
+            let itemUnico = data.entregados[0];
+            let tipoItem = (itemUnico.tipo || "").toLowerCase();
+            if (
+              itemUnico.plataforma === "NETFLIX" &&
+              (tipoItem.includes("reno") || tipoItem.includes("renovar"))
+            ) {
+              esSoloNetflixRenovacion = true;
+            }
+          }
+
+          let fichaTexto = "";
+          if (esSoloNetflixRenovacion) {
+            fichaTexto = `🌟 *¡Hola${nombreSaludo}!*\n\nTu cuenta de *NETFLIX PREMIUM* ha sido *RENOVADA* con éxito 🔄✨. Aquí tienes la información de tu servicio:\n`;
+          } else {
+            fichaTexto = `🌟 *¡Hola${nombreSaludo}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n`;
+          }
 
           if (data.entregados && data.entregados.length > 0) {
             data.entregados.forEach((item) => {
@@ -610,27 +629,41 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                 let platFormat = item.plataforma.replace(/_/g, " ");
                 let textoMeses =
                   parseInt(item.meses) > 1 ? ` (${item.meses} Meses)` : "";
-                fichaTexto += `\n🎬 *DETALLES DE ${platFormat}*${textoMeses} ✅\n────────────────────\n`;
-                if (item.plataforma === "NETFLIX")
-                  fichaTexto += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+                let esRenoItem = (item.tipo || "")
+                  .toLowerCase()
+                  .includes("reno");
 
-                let etiquetaUser =
-                  platFormat === "IPTV" || platFormat === "EMBY"
-                    ? "Usuario"
-                    : "Correo";
-                let etiquetaPerfil =
-                  platFormat === "IPTV"
-                    ? "URL"
-                    : platFormat === "EMBY"
-                      ? "Servidor"
-                      : "Perfil";
+                // 🎯 FORMATO ELEGANTE ESPECIAL PARA RENOVACIÓN DE NETFLIX
+                if (item.plataforma === "NETFLIX" && esRenoItem) {
+                  fichaTexto += `\n🔄 *RENOVACIÓN DE NETFLIX PREMIUM*${textoMeses} ✅\n────────────────────\n`;
+                  fichaTexto += `👤 *Correo:* ${item.correo}\n🔐 *Contraseña:* ${item.clave}\n🌐 *Perfil:* ${item.perfil}\n`;
+                  if (item.pin && item.pin !== "" && item.pin !== "-") {
+                    fichaTexto += `📍 *PIN:* ${item.pin}\n`;
+                  }
+                  fichaTexto += `📅 *Nueva Fecha de Vencimiento:* ${item.vencimiento}\n`;
+                } else {
+                  fichaTexto += `\n🎬 *DETALLES DE ${platFormat}*${textoMeses} ✅\n────────────────────\n`;
+                  if (item.plataforma === "NETFLIX")
+                    fichaTexto += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
 
-                fichaTexto += `👤 *${etiquetaUser}:* ${item.correo}\n🔐 *Contraseña:* ${item.clave}\n`;
-                if (item.perfil && item.perfil !== "")
-                  fichaTexto += `🌐 *${etiquetaPerfil}:* ${item.perfil}\n`;
-                if (item.pin && item.pin !== "")
-                  fichaTexto += `📍 *PIN:* ${item.pin}\n`;
-                fichaTexto += `📅 *Vence:* ${item.vencimiento}\n`;
+                  let etiquetaUser =
+                    platFormat === "IPTV" || platFormat === "EMBY"
+                      ? "Usuario"
+                      : "Correo";
+                  let etiquetaPerfil =
+                    platFormat === "IPTV"
+                      ? "URL"
+                      : platFormat === "EMBY"
+                        ? "Servidor"
+                        : "Perfil";
+
+                  fichaTexto += `👤 *${etiquetaUser}:* ${item.correo}\n🔐 *Contraseña:* ${item.clave}\n`;
+                  if (item.perfil && item.perfil !== "")
+                    fichaTexto += `🌐 *${etiquetaPerfil}:* ${item.perfil}\n`;
+                  if (item.pin && item.pin !== "")
+                    fichaTexto += `📍 *PIN:* ${item.pin}\n`;
+                  fichaTexto += `📅 *Vence:* ${item.vencimiento}\n`;
+                }
               }
             });
           }
