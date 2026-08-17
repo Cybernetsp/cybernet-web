@@ -32,7 +32,6 @@ window.cargarCortesOperativosNetflix = function () {
   const btnCrearAlias = document.getElementById("btnCrearAliasHeader");
   if (!container) return;
 
-  // 🎯 MANTENER EL BOTÓN SIEMPRE VISIBLE
   if (btnCrearAlias) btnCrearAlias.style.display = "flex";
 
   container.innerHTML = `
@@ -101,12 +100,31 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     let claveNueva = cuenta.clave_nueva || window.generarClaveTVAleatoria();
     let perfiles = cuenta.perfiles_afectados || "1, 2, 3, 4, 5";
     let idCuenta = cuenta.id || "";
+    let proveedor = cuenta.proveedor || cuenta.prov || "GENERAL";
+    let fechaCompra = cuenta.fecha || cuenta.dia || "";
+
+    let esCaida = cuenta.estado === "caida" || cuenta.es_caida == 1;
+
+    // 🎨 PINTAR TARJETA EN ROJO SI ESTÁ EN GARANTÍA
+    let bgTarjeta = esCaida ? "rgba(255, 69, 58, 0.18)" : "#2a2a2e";
+    let borderTarjeta = esCaida ? "1px solid rgba(255, 69, 58, 0.5)" : "none";
+    let badgeEstadoHeader = esCaida
+      ? `<div style="background: rgba(255, 69, 58, 0.25); color: #ff453a; border: 1px solid rgba(255, 69, 58, 0.5); border-radius: 8px; padding: 4px 10px; font-weight: 800; font-size: 0.72rem; text-transform: uppercase;">🚨 REPORTADA EN GARANTÍA</div>`
+      : "";
+
+    let btnReportarStyle = esCaida
+      ? `background: rgba(255, 69, 58, 0.3); border: 1px solid #ff453a; color: #ffffff; cursor: default;`
+      : `background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; cursor: pointer;`;
+
+    let btnReportarTxt = esCaida ? "🚨 Reportada" : "🚨 Reportar";
 
     html += `
-      <div style="background: #2a2a2e; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; position: relative; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
+      <div style="background: ${bgTarjeta}; border: ${borderTarjeta}; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; position: relative; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: all 0.2s ease;">
           
           <!-- Efecto Glow Rojo Superior -->
           <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #ff3b30, transparent); box-shadow: 0 0 12px #ff3b30; opacity: 0.7;"></div>
+
+          ${badgeEstadoHeader}
 
           <!-- Correo (Clickeable) -->
           <div 
@@ -121,7 +139,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
           <!-- Bloque de Claves -->
           <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; align-items: stretch;">
               
-              <!-- Clave Vencida (Clickeable) -->
+              <!-- Clave Vencida -->
               <div 
                 onclick="copiarTextoLigero('${claveVieja}', this, 'clave')"
                 title="Clic para copiar"
@@ -133,7 +151,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
                   <span style="font-family: monospace; color: #ff3b30; font-weight: 700; font-size: 0.95rem; text-decoration: line-through;">${claveVieja}</span>
               </div>
 
-              <!-- Nueva Clave (Clickeable) -->
+              <!-- Nueva Clave TV -->
               <div 
                 onclick="copiarTextoLigero('${claveNueva}', this, 'clave')"
                 title="Clic para copiar"
@@ -146,7 +164,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
               </div>
           </div>
 
-          <!-- Perfiles y Botón Acción -->
+          <!-- Perfiles y Botones de Acción -->
           <div style="display: flex; flex-direction: column; gap: 14px;">
               <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; color: #ff3b30; background: rgba(255, 59, 48, 0.1); padding: 8px 16px; border-radius: 8px; width: fit-content; border: 1px solid rgba(255, 59, 48, 0.2);">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -156,14 +174,84 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
                   Perfiles a cortar: ${perfiles}
               </div>
               
-              <button onclick="window.ejecutarProcesoCorteExterno('${idCuenta}', '${correo}', '${claveNueva}', this)" style="width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s;">
-                  ✓ Procesar Corte y Subir a Hoy
-              </button>
+              <div style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                <button onclick="window.ejecutarProcesoCorteExterno('${idCuenta}', '${correo}', '${claveNueva}', this)" style="flex: 1; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s;">
+                    ✓ Procesar Corte y Subir a Hoy
+                </button>
+                <button onclick="window.reportarCorteNetGarantia('${idCuenta}', '${encodeURIComponent(correo)}', '${encodeURIComponent(claveVieja)}', '${encodeURIComponent(proveedor)}', '${encodeURIComponent(fechaCompra)}')" style="${btnReportarStyle} padding: 14px 16px; border-radius: 10px; font-weight: 800; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;">
+                    ${btnReportarTxt}
+                </button>
+              </div>
           </div>
       </div>`;
   });
 
   container.innerHTML = html;
+};
+
+// 🚨 ACCIÓN DE REPORTAR DESDE CORTES NETFLIX (CON COPIADO AUTOMÁTICO DE MENSAJE)
+window.reportarCorteNetGarantia = function (
+  id,
+  correoEsc,
+  claveEsc,
+  provEsc,
+  diaEsc,
+) {
+  if (
+    !confirm(
+      "⚠️ ¿Estás seguro de enviar esta cuenta a Garantías? Toda la cuenta se marcará como caída (rojo).",
+    )
+  )
+    return;
+  if (typeof haptic === "function") haptic();
+
+  const correo = decodeURIComponent(correoEsc);
+  const clave = decodeURIComponent(claveEsc);
+  const prov = decodeURIComponent(provEsc);
+  const dia = diaEsc ? decodeURIComponent(diaEsc) : "";
+
+  // 📋 CONSTRUCCIÓN Y COPIADO AUTOMÁTICO DEL FICHERO DE REPORTES
+  let textoReporte = `🚨 *REPORTE DE PROBLEMA*\n📺 *Plataforma:* NETFLIX\n📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n👤 *Proveedor:* ${prov}\n📅 *Fecha Compra:* ${dia || "HOY"}`;
+
+  navigator.clipboard
+    .writeText(textoReporte)
+    .then(() => {
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>¡Reporte copiado al portapapeles!</span></div>`,
+        );
+      }
+    })
+    .catch(() => {
+      if (typeof fallbackCopiar === "function")
+        fallbackCopiar(textoReporte, () => {});
+    });
+
+  const formData = new FormData();
+  formData.append("accion", "reportar_garantia");
+  formData.append("tabla", "netflix");
+  formData.append("id", id);
+  formData.append("correo", correo);
+  formData.append("clave", clave);
+  formData.append("proveedor", prov);
+  formData.append("fecha_compra", dia || "hoy");
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "success") {
+        if (typeof window.cargarCortesOperativosNetflix === "function")
+          window.cargarCortesOperativosNetflix();
+        if (typeof window.cargarDatosMySQL === "function")
+          window.cargarDatosMySQL();
+      } else {
+        alert("❌ Error: " + data.message);
+      }
+    })
+    .catch((err) => console.error("Error al reportar garantía:", err));
 };
 
 // Función auxiliar visual de copiado
@@ -499,10 +587,9 @@ window.crearCuentaNetflixAliasExterna = function () {
 };
 
 /* ==========================================================================
-   📥 MÓDULO DE CARGA MASIVA DE CUENTAS EN LOTE (CON PERSISTENCIA Y REPORTES)
+   📥 MÓDULO DE CARGA MASIVA DE CUENTAS EN LOTE (PERSISTENTE EN EL TURNO)
    ========================================================================== */
 
-// 🔒 INICIALIZAR MEMORIA PERSISTENTE DE CUENTAS CARGADAS EN EL TURNO
 try {
   window.cuentasCargadasEsteTurno = JSON.parse(
     localStorage.getItem("cyber_cargadas_turno") || "[]",
@@ -827,7 +914,7 @@ window.renderizarCargadasEsteTurno = function () {
   container.innerHTML = html;
 };
 
-// 🚨 ACCIÓN DIRECTA DE REPORTAR DESDE LA VISTA DE CUENTAS CARGADAS
+// 🚨 ACCIÓN DIRECTA DE REPORTAR DESDE LA VISTA DE CUENTAS CARGADAS EN LOTE
 window.reportarCuentaCargadaDirecto = function (
   id,
   tablaEsc,
