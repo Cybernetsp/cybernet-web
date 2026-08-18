@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#000000" />
     <link rel="apple-touch-icon" href="icon-192.png" />
 
-    <!-- 🔒 ESCUDO DE SEGURIDAD: REDIRECCIÓN OBLIGATORIA A LOGIN_DISTRIS -->
+    <!-- 🔒 ESCUDO DE SEGURIDAD -->
     <script>
       if (
         !localStorage.getItem("active_distri_tel") &&
@@ -25,10 +25,8 @@
     <link rel="stylesheet" href="distribuidores.css" />
   </head>
   <body>
-    <!-- NOTIFICACIONES TOAST ESTILO APPLE -->
     <div id="appleToast"></div>
 
-    <!-- PANTALLA PRINCIPAL B2B -->
     <div
       id="dashboardSection"
       style="
@@ -43,9 +41,7 @@
         box-sizing: border-box;
       "
     >
-      <!-- =========================================================
-         📱 HEADER COMPACTO Y CONTROLADO PARA MAYORISTAS
-         ========================================================= -->
+      <!-- HEADER COMPACTO -->
       <div
         class="card-ios"
         style="
@@ -61,7 +57,6 @@
           gap: 12px;
         "
       >
-        <!-- LADO IZQUIERDO: Info Distribuidor -->
         <div
           style="
             display: flex;
@@ -120,11 +115,9 @@
           </div>
         </div>
 
-        <!-- LADO DERECHO: Controles (Saldo + Actualizar + Menú) -->
         <div
           style="display: flex; align-items: center; gap: 8px; flex-shrink: 0"
         >
-          <!-- Saldo Fijo Adaptativo -->
           <div
             id="distriBarBalance"
             style="
@@ -142,7 +135,6 @@
             $--
           </div>
 
-          <!-- Botón Refrescar Manual Mini -->
           <button
             id="btnRefrescarSaldoManual"
             onclick="manualRefrescarSaldo()"
@@ -178,7 +170,6 @@
             </svg>
           </button>
 
-          <!-- GRUPO PC -->
           <div
             class="desktop-menu-group"
             style="display: flex; gap: 6px; align-items: center"
@@ -232,7 +223,6 @@
             ></button>
           </div>
 
-          <!-- BOTÓN HAMBURGUESA (MÓVIL) -->
           <button
             class="mobile-menu-trigger"
             onclick="abrirMenuMovil()"
@@ -268,7 +258,7 @@
         </div>
       </div>
 
-      <!-- MENÚ DESPLEGABLE EXCLUSIVO PARA CELULARES -->
+      <!-- MENÚ CELULARES -->
       <div
         class="overlay-modal-code"
         id="modalMenuMovil"
@@ -425,7 +415,7 @@
         </div>
       </div>
 
-      <!-- CATÁLOGO DE PRODUCTOS -->
+      <!-- CATÁLOGO -->
       <div class="tienda-layout">
         <div class="card-ios" style="padding: 20px">
           <div
@@ -457,7 +447,7 @@
         </div>
       </div>
 
-      <!-- ALERTAS DE RENOVACIÓN -->
+      <!-- ALERTAS RENOVACIÓN -->
       <div
         class="card-ios"
         id="widgetRenovaciones"
@@ -489,7 +479,7 @@
       </div>
     </div>
 
-    <!-- BOTÓN CARRITO FLOTANTE -->
+    <!-- BOTÓN CARRITO -->
     <button id="fabCarrito" onclick="abrirCarrito()" style="display: none">
       <svg
         width="26"
@@ -619,7 +609,7 @@
       </div>
     </div>
 
-    <!-- BÓVEDA DE CUENTAS / CASILLERO -->
+    <!-- BÓVEDA CASILLERO -->
     <div class="overlay-modal-code" id="modalBusquedaCuentas">
       <div class="modal-ios" style="max-width: 450px">
         <div
@@ -677,9 +667,9 @@
       </div>
     </div>
 
-    <!-- HISTORIAL DE MOVIMIENTOS -->
+    <!-- HISTORIAL DE MOVIMIENTOS CON SELECTOR DE MES -->
     <div class="overlay-modal-code" id="modalEstadoCuenta">
-      <div class="modal-ios" style="max-width: 500px">
+      <div class="modal-ios" style="max-width: 500px; width: 95%">
         <div
           style="
             display: flex;
@@ -687,11 +677,11 @@
             align-items: center;
             border-bottom: 1px solid rgba(128, 128, 128, 0.2);
             padding-bottom: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
           "
         >
           <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
-            📊 Movimientos y Descuentos
+            📊 Movimientos y Ventas
           </h3>
           <button
             onclick="cerrarModalHistorial()"
@@ -706,7 +696,48 @@
             &times;
           </button>
         </div>
-        <div style="max-height: 60vh; overflow-y: auto">
+
+        <!-- FILTRO DE MES -->
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: var(--input-bg);
+            padding: 8px 12px;
+            border-radius: 14px;
+            border: 1px solid var(--surface-border);
+          "
+        >
+          <span
+            style="
+              font-size: 0.85rem;
+              color: var(--text-secondary);
+              font-weight: 700;
+            "
+          >
+            Filtrar por Mes:
+          </span>
+          <select
+            id="selectMesMovimientos"
+            class="input-ios"
+            onchange="filtrarMovimientosPorMes()"
+            style="
+              padding: 8px 12px;
+              font-size: 0.85rem;
+              font-weight: 700;
+              border-radius: 10px;
+              max-width: 220px;
+              flex: 1;
+            "
+          >
+            <option value="todos">Cargando meses...</option>
+          </select>
+        </div>
+
+        <div style="max-height: 55vh; overflow-y: auto">
           <table
             style="width: 100%; border-collapse: collapse; text-align: left"
           >
@@ -716,7 +747,7 @@
       </div>
     </div>
 
-    <!-- MODAL ÉXITO COMPRA -->
+    <!-- MODAL ÉXITO -->
     <div class="overlay-modal-code" id="successCheckoutOverlay">
       <div class="modal-ios" style="max-width: 400px; text-align: center">
         <h2 style="font-size: 3rem; margin: 0 0 10px">✅</h2>
@@ -772,7 +803,7 @@
       </div>
     </div>
 
-    <!-- CENTRO DE CÓDIGOS -->
+    <!-- CENTRO CÓDIGOS -->
     <div class="overlay-modal-code" id="codesCenterOverlay">
       <div class="modal-ios" style="max-width: 400px; width: 92%">
         <div
@@ -802,8 +833,6 @@
               fill="none"
               stroke="var(--ios-blue)"
               stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
             >
               <path
                 d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
@@ -823,9 +852,6 @@
               border-radius: 50%;
               font-size: 1.2rem;
               cursor: pointer;
-              display: flex;
-              justify-content: center;
-              align-items: center;
             "
           >
             &times;
@@ -956,9 +982,6 @@
                 font-weight: 900;
                 letter-spacing: 6px;
                 color: var(--text-primary);
-                transition:
-                  transform 0.1s ease,
-                  color 0.2s ease;
                 display: inline-block;
                 width: 100%;
               "
@@ -1062,7 +1085,7 @@
       </div>
     </div>
 
-    <!-- SCRIPTS DE INICIALIZACIÓN -->
+    <!-- INITIALIZATION -->
     <script>
       function toggleThemeDistri() {
         if (typeof haptic === "function") haptic();
