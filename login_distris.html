@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Cybernet - Login Mayoristas</title>
+
+    <meta name="theme-color" content="#000000" />
+    <link rel="stylesheet" href="distribuidores.css" />
+  </head>
+  <body>
+    <!-- NOTIFICACIONES TOAST ESTILO APPLE -->
+    <div id="appleToast"></div>
+
+    <!-- CONTENEDOR PRINCIPAL DE LOGIN -->
+    <div
+      style="
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+      "
+    >
+      <div
+        class="modal-ios"
+        style="
+          max-width: 400px;
+          width: 100%;
+          padding: 36px 24px;
+          text-align: center;
+        "
+      >
+        <!-- ICONO Y ENCABEZADO -->
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+          "
+        >
+          <div
+            style="
+              background: rgba(10, 132, 255, 0.15);
+              color: var(--ios-blue);
+              padding: 16px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 16px;
+              border: 1px solid rgba(10, 132, 255, 0.25);
+            "
+          >
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <h2
+            style="
+              color: var(--text-primary);
+              font-size: 1.6rem;
+              font-weight: 800;
+              letter-spacing: -0.5px;
+              margin: 0 0 6px 0;
+            "
+          >
+            Acceso Mayoristas
+          </h2>
+          <p
+            id="lblSubtituloForm"
+            style="
+              font-size: 0.88rem;
+              margin: 0;
+              line-height: 1.4;
+              color: var(--text-secondary);
+            "
+          >
+            Ingresa tu correo o celular registrado y contraseña.
+          </p>
+        </div>
+
+        <!-- PASO 1: FORMULARIO DE LOGIN NORMAL -->
+        <form
+          id="formLoginDistri"
+          on送信="loginDistribuidor(event)"
+          style="display: flex; flex-direction: column; gap: 14px"
+        >
+          <input
+            type="text"
+            id="distriCredencial"
+            class="input-ios"
+            placeholder="Correo o Celular registrado"
+            required
+            style="
+              padding: 15px;
+              text-align: center;
+              font-weight: 700;
+              font-size: 0.95rem;
+            "
+          />
+
+          <input
+            type="password"
+            id="distriPassword"
+            class="input-ios"
+            placeholder="Contraseña"
+            required
+            style="
+              padding: 15px;
+              text-align: center;
+              font-weight: 700;
+              font-size: 0.95rem;
+            "
+          />
+
+          <button
+            type="submit"
+            id="btnLoginSubmit"
+            class="btn-ios btn-primary w-100"
+            style="
+              padding: 15px;
+              font-size: 1rem;
+              font-weight: 800;
+              border-radius: 14px;
+              margin-top: 6px;
+            "
+          >
+            Iniciar Sesión →
+          </button>
+        </form>
+
+        <!-- PASO 2: FORMULARIO DE CAMBIO DE CLAVE OBLIGATORIO (OCULTO POR DEFECTO) -->
+        <form
+          id="formCambioClaveObligatorio"
+          on送信="guardarNuevaPassword(event)"
+          style="display: none; flex-direction: column; gap: 14px"
+        >
+          <div
+            style="
+              background: rgba(255, 159, 10, 0.12);
+              border: 1px solid rgba(255, 159, 10, 0.3);
+              border-radius: 14px;
+              padding: 12px;
+              font-size: 0.82rem;
+              color: var(--ios-orange);
+              font-weight: 700;
+              line-height: 1.4;
+            "
+          >
+            ⚠️ Detectamos que usas la contraseña genérica (123456). Por tu
+            seguridad debes asignarle una nueva clave a tu cuenta para
+            continuar.
+          </div>
+
+          <input
+            type="password"
+            id="distriNuevaClave"
+            class="input-ios"
+            placeholder="Nueva Contraseña"
+            required
+            minlength="4"
+            style="
+              padding: 15px;
+              text-align: center;
+              font-weight: 700;
+              font-size: 0.95rem;
+            "
+          />
+
+          <input
+            type="password"
+            id="distriConfirmarClave"
+            class="input-ios"
+            placeholder="Confirmar Nueva Contraseña"
+            required
+            minlength="4"
+            style="
+              padding: 15px;
+              text-align: center;
+              font-weight: 700;
+              font-size: 0.95rem;
+            "
+          />
+
+          <button
+            type="submit"
+            id="btnCambiarClaveSubmit"
+            class="btn-ios btn-success w-100"
+            style="
+              padding: 15px;
+              font-size: 1rem;
+              font-weight: 800;
+              border-radius: 14px;
+              margin-top: 6px;
+            "
+          >
+            🔒 Actualizar Clave e Ingresar
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- SCRIPT DE LÓGICA DE LOGIN Y CAMBIO DE CLAVE -->
+    <script>
+      const API_URL = "https://api.cybernetsp.com/acciones_distribuidores.php";
+      let tempUserCache = null; // Guardará temporalmente los datos del distribuidor si requiere cambiar clave
+
+      function triggerToast(msgHTML) {
+        const toast = document.getElementById("appleToast");
+        if (!toast) return;
+        toast.innerHTML = msgHTML;
+        toast.style.transform = "translateX(-50%) translateY(0)";
+        toast.style.opacity = "1";
+        setTimeout(() => {
+          toast.style.transform = "translateX(-50%) translateY(100px)";
+          toast.style.opacity = "0";
+        }, 3000);
+      }
+
+      function haptic() {
+        if (navigator.vibrate) navigator.vibrate(15);
+      }
+
+      // 1. INICIAR SESIÓN
+      function loginDistribuidor(e) {
+        e.preventDefault();
+        haptic();
+
+        const credencial = document
+          .getElementById("distriCredencial")
+          .value.trim();
+        const password = document.getElementById("distriPassword").value.trim();
+        const btn = document.getElementById("btnLoginSubmit");
+
+        if (!credencial || !password) {
+          alert("⚠️ Completa todos los campos.");
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = `Verificando...`;
+
+        const formData = new FormData();
+        formData.append("accion", "login_distribuidor");
+        formData.append("credencial", credencial);
+        formData.append("password", password);
+
+        fetch(API_URL, { method: "POST", body: formData })
+          .then((res) => res.json())
+          .then((res) => {
+            btn.disabled = false;
+            btn.innerHTML = "Iniciar Sesión →";
+
+            if (res && res.status === "success" && res.data) {
+              tempUserCache = res.data;
+
+              // Verificación: Si la clave ingresada es '123456' o el servidor solicita cambio
+              if (password === "123456" || res.data.requiere_cambio_pass) {
+                activarFormularioCambioClave();
+              } else {
+                guardarSesionYRedireccionar(res.data);
+              }
+            } else {
+              alert("❌ " + (res.message || "Credenciales incorrectas."));
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            btn.disabled = false;
+            btn.innerHTML = "Iniciar Sesión →";
+            alert("❌ Error conectando con el servidor MySQL.");
+          });
+      }
+
+      // 2. ACTIVAR PASO DE CAMBIO DE CLAVE
+      function activarFormularioCambioClave() {
+        document.getElementById("formLoginDistri").style.display = "none";
+        document.getElementById("formCambioClaveObligatorio").style.display =
+          "flex";
+        document.getElementById("lblSubtituloForm").innerText =
+          "Asigna una contraseña privada para asegurar tu saldo.";
+        triggerToast("⚠️ Actualización de contraseña requerida");
+      }
+
+      // 3. GUARDAR NUEVA CONTRASEÑA EN MYSQL
+      function guardarNuevaPassword(e) {
+        e.preventDefault();
+        haptic();
+
+        const nuevaClave = document
+          .getElementById("distriNuevaClave")
+          .value.trim();
+        const confirmarClave = document
+          .getElementById("distriConfirmarClave")
+          .value.trim();
+        const btn = document.getElementById("btnCambiarClaveSubmit");
+
+        if (nuevaClave.length < 4) {
+          alert("⚠️ La contraseña debe tener al menos 4 caracteres.");
+          return;
+        }
+
+        if (nuevaClave === "123456") {
+          alert("⚠️ No puedes volver a usar la clave genérica 123456.");
+          return;
+        }
+
+        if (nuevaClave !== confirmarClave) {
+          alert("❌ Las contraseñas no coinciden.");
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = `Guardando en MySQL...`;
+
+        const formData = new FormData();
+        formData.append("accion", "cambiar_password_distribuidor");
+        formData.append("id", tempUserCache.id);
+        formData.append("nueva_password", nuevaClave);
+
+        fetch(API_URL, { method: "POST", body: formData })
+          .then((res) => res.json())
+          .then((res) => {
+            btn.disabled = false;
+            btn.innerHTML = "🔒 Actualizar Clave e Ingresar";
+
+            if (res && res.status === "success") {
+              triggerToast("✅ Contraseña actualizada correctamente");
+              guardarSesionYRedireccionar(tempUserCache);
+            } else {
+              alert(
+                "❌ Error: " +
+                  (res.message || "No se pudo actualizar la clave."),
+              );
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            btn.disabled = false;
+            btn.innerHTML = "🔒 Actualizar Clave e Ingresar";
+            alert("❌ Error de comunicación con MySQL.");
+          });
+      }
+
+      // 4. GUARDAR SESIÓN Y ENTRAR A DISTRIBUIDORES.HTML
+      function guardarSesionYRedireccionar(data) {
+        localStorage.setItem("active_distri_id", data.id);
+        localStorage.setItem("active_distri_tel", data.telefono);
+        localStorage.setItem("active_distri_name", data.nombre.toUpperCase());
+        localStorage.setItem("active_distri_saldo", data.saldo);
+
+        setTimeout(() => {
+          window.location.href = "distribuidores.html";
+        }, 500);
+      }
+
+      // Auto-redirección si ya tiene sesión activa
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTel = localStorage.getItem("active_distri_tel");
+        if (savedTel) {
+          window.location.href = "distribuidores.html";
+        }
+      });
+    </script>
+  </body>
+</html>
