@@ -496,78 +496,119 @@ function lanzarErrorCopia(imgElement) {
 }
 
 /* ==========================================================================
-   📩 BANDEJA DE CÓDIGOS DE ACCESO (MYSQL / GMAIL)
+   📩 BANDEJA DE CÓDIGOS DE ACCESO (ESCANEO EN TIEMPO REAL + MYSQL)
    ========================================================================== */
+const URL_SYNC_CODIGOS_GMAIL =
+  "https://api.cybernetsp.com/sync_gmail_codigos.php";
+const URL_OBTENER_CODIGOS_MYSQL =
+  "https://api.cybernetsp.com/obtener_codigos.php";
+
 const oldToggleCodesPanel = window.toggleCodesPanel;
 window.toggleCodesPanel = function () {
   if (oldToggleCodesPanel) oldToggleCodesPanel();
   const overlay = document.getElementById("codesOverlay");
   if (overlay && overlay.classList.contains("open")) {
-    window.cargarBandejaCodigosMySQL();
+    window.cargarBandejaCodigosMySQL(false);
   }
 };
 
-window.cargarBandejaCodigosMySQL = function () {
+// 📥 CONSULTA DE CÓDIGOS (SI forzarSincro = TRUE, EJECUTA ESCANEO DE GMAIL EN VIVO)
+window.cargarBandejaCodigosMySQL = function (forzarSincro = false) {
   const contenedor = document.getElementById("codesScrollArea");
   if (!contenedor) return;
 
-  contenedor.innerHTML =
-    '<div style="text-align: center; color: var(--ios-orange); padding: 40px;"><svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg><br><span style="font-weight: 600;">Sincronizando códigos activos...</span></div>';
+  if (forzarSincro) {
+    contenedor.innerHTML = `
+      <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
+        <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+        <br><span style="font-weight: 700; font-size: 0.9rem; color: #0a84ff;">Escaneando Gmail en vivo...</span>
+      </div>`;
 
-  fetch("https://api.cybernetsp.com/obtener_codigos.php")
-    .then((res) => res.json())
-    .then((res) => {
-      if (res.status === "success") {
-        if (!res.data || res.data.length === 0) {
-          contenedor.innerHTML =
-            '<div style="text-align: center; color: var(--text-secondary); padding: 40px; font-weight: 600;">📭 No hay códigos activos en los últimos 15 minutos.</div>';
-          return;
-        }
+    // 1️⃣ Fuerza la sincronización rápida desde Gmail a MySQL
+    fetch(URL_SYNC_CODIGOS_GMAIL)
+      .then((res) => res.json())
+      .then(() => {
+        // 2️⃣ Lee de inmediato los códigos guardados en MySQL
+        return fetch(URL_OBTENER_CODIGOS_MYSQL);
+      })
+      .then((res) => res.json())
+      .then((res) => renderizarCodigosBandeja(res, contenedor))
+      .catch((err) => {
+        console.error("Error al sincronizar en vivo:", err);
+        fetch(URL_OBTENER_CODIGOS_MYSQL)
+          .then((res) => res.json())
+          .then((res) => renderizarCodigosBandeja(res, contenedor));
+      });
+  } else {
+    contenedor.innerHTML = `
+      <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
+        <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+        <br><span style="font-weight: 600;">Sincronizando códigos...</span>
+      </div>`;
 
-        let html = "";
-        res.data.forEach((item) => {
-          let safeCopiedText = encodeURIComponent(
-            item.copiadoRapido || "",
-          ).replace(/'/g, "%27");
-          html += `
-            <div class="card-ios" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 16px; margin-bottom: 0px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="width: 8px; height: 8px; border-radius: 50%; background: ${item.colorText}; box-shadow: 0 0 10px ${item.colorText};"></span>
-                  <span style="color: var(--text-primary); font-weight: 800; font-size: 0.95rem; text-transform: uppercase; letter-spacing: -0.3px;">${item.plataforma}</span>
-                </div>
-                <span style="color: var(--text-secondary); font-size: 0.75rem; font-family: monospace; font-weight: 600;">${item.hora}</span>
-              </div>
-              <div style="display: flex; flex-direction: column; gap: 8px; padding: 2px 0;">
-                <div style="display: flex; align-items: baseline; gap: 8px;">
-                  <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600;">CLIENTE:</span>
-                  <span style="font-size: 0.88rem; color: var(--text-primary); font-weight: 600; font-family: monospace;">${item.correo}</span>
-                </div>
-                <div style="display: flex; align-items: baseline; gap: 8px;">
-                  <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600;">ACCIÓN:</span>
-                  <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500;">${item.accion}</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-                  <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600;">CÓDIGO:</span>
-                  <span style="font-size: 1.15rem; color: ${item.colorText}; font-weight: 800; font-family: monospace; background: rgba(255, 255, 255, 0.03); padding: 4px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); letter-spacing: 1px;">${item.codigoLink}</span>
-                </div>
-              </div>
-              <button class="btn-ios w-100" onclick="window.copiarPlantillaGlobal(this, '${safeCopiedText}')" style="padding: 12px; background: rgba(255,255,255,0.05); font-weight: 800; font-size: 0.85rem; border-radius: 12px; cursor: pointer; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> COPIAR MENSAJE
-              </button>
-            </div>
-          `;
-        });
-        contenedor.innerHTML = html;
-      } else {
-        contenedor.innerHTML = `<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">Error: ${res.message}</div>`;
-      }
-    })
-    .catch((err) => {
+    fetch(URL_OBTENER_CODIGOS_MYSQL)
+      .then((res) => res.json())
+      .then((res) => renderizarCodigosBandeja(res, contenedor))
+      .catch((err) => {
+        contenedor.innerHTML = `<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">❌ Error de conexión con el servidor MySQL.</div>`;
+      });
+  }
+};
+
+// 🎨 DIBUJAR TARJETAS DE CÓDIGOS
+function renderizarCodigosBandeja(res, contenedor) {
+  if (res && res.status === "success" && res.data) {
+    if (res.data.length === 0) {
       contenedor.innerHTML =
-        '<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">❌ Error de conexión con el servidor MySQL.</div>';
-      console.error(err);
+        '<div style="text-align: center; color: var(--text-secondary); padding: 50px 20px; font-weight: 600;">📭 No hay códigos activos en los últimos 15 minutos.</div>';
+      return;
+    }
+
+    let html = "";
+    res.data.forEach((item) => {
+      let safeCopiedText = encodeURIComponent(item.copiadoRapido || "").replace(
+        /'/g,
+        "%27",
+      );
+      html += `
+        <div class="card-ios" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 16px; margin-bottom: 0px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: ${item.colorText}; box-shadow: 0 0 10px ${item.colorText};"></span>
+              <span style="color: var(--text-primary); font-weight: 800; font-size: 0.95rem; text-transform: uppercase; letter-spacing: -0.3px;">${item.plataforma}</span>
+            </div>
+            <span style="color: var(--text-secondary); font-size: 0.75rem; font-family: monospace; font-weight: 600;">${item.hora}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; padding: 2px 0;">
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600;">CLIENTE:</span>
+              <span style="font-size: 0.88rem; color: var(--text-primary); font-weight: 600; font-family: monospace;">${item.correo}</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600;">ACCIÓN:</span>
+              <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500;">${item.accion}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+              <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600;">CÓDIGO:</span>
+              <span style="font-size: 1.15rem; color: ${item.colorText}; font-weight: 800; font-family: monospace; background: rgba(255, 255, 255, 0.03); padding: 4px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); letter-spacing: 1px;">${item.codigoLink}</span>
+            </div>
+          </div>
+          <button class="btn-ios w-100" onclick="window.copiarPlantillaGlobal(this, '${safeCopiedText}')" style="padding: 12px; background: rgba(255,255,255,0.05); font-weight: 800; font-size: 0.85rem; border-radius: 12px; cursor: pointer; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> COPIAR MENSAJE
+          </button>
+        </div>
+      `;
     });
+    contenedor.innerHTML = html;
+  } else {
+    contenedor.innerHTML = `<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">Error al obtener los códigos.</div>`;
+  }
+}
+
+// 🔄 FUNCIÓN PARA EL BOTÓN REFRESCAR EN EL HTML
+window.refrescarCodigosModal = function () {
+  if (typeof haptic === "function") haptic();
+  window.cargarBandejaCodigosMySQL(true);
 };
 
 window.filtrarCodigosInternos = function () {
