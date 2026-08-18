@@ -288,7 +288,6 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
       </div>`;
   }
 
-  // Sincronizar datos reales desde la base de datos
   cargarPerfilDistribuidor();
   cargarPreciosEnTienda();
   cargarDatosFinancierosYAlertas(telefono || window.distriTelefonoCache);
@@ -349,17 +348,17 @@ function cargarDatosFinancierosYAlertas(tel) {
 
         if (res.historial && res.historial.length > 0) {
           res.historial.forEach((mov) => {
-            let color =
-              mov.monto < 0 || String(mov.monto).includes("-")
-                ? "var(--ios-red)"
-                : "var(--text-primary)";
+            let isPositivo = mov.monto > 0;
+            let color = isPositivo ? "var(--ios-green)" : "var(--ios-red)";
+            let signo = isPositivo ? "+" : "";
+
             trs += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                       <td style="padding: 12px 8px; font-size:0.75rem; color:var(--text-secondary);">${mov.fecha}</td>
                       <td style="padding: 12px 8px; line-height:1.3;">
                         <strong style="color:var(--text-primary); font-size:0.85rem;">${mov.concepto}</strong><br>
                         <span style="color:var(--ios-blue); font-size:0.75rem;">👤 ${mov.cliente}</span>
                       </td>
-                      <td style="padding: 12px 8px; text-align:right; color:${color}; font-weight:bold; font-family:monospace;">${formatMoneda(mov.monto)}</td>
+                      <td style="padding: 12px 8px; text-align:right; color:${color}; font-weight:bold; font-family:monospace;">${signo}${formatMoneda(mov.monto)}</td>
                     </tr>`;
           });
         } else {
