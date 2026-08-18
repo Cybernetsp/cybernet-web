@@ -512,15 +512,15 @@ window.cargarBandejaCodigosMySQL = function () {
   if (!contenedor) return;
 
   contenedor.innerHTML =
-    '<div style="text-align: center; color: var(--ios-orange); padding: 40px;"><svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg><br><span style="font-weight: 600;">Sincronizando bandeja...</span></div>';
+    '<div style="text-align: center; color: var(--ios-orange); padding: 40px;"><svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg><br><span style="font-weight: 600;">Sincronizando códigos activos...</span></div>';
 
   fetch("https://api.cybernetsp.com/obtener_codigos.php")
     .then((res) => res.json())
     .then((res) => {
       if (res.status === "success") {
-        if (res.data.length === 0) {
+        if (!res.data || res.data.length === 0) {
           contenedor.innerHTML =
-            '<div style="text-align: center; color: var(--text-secondary); padding: 40px; font-weight: 600;">No hay códigos recientes en la última hora.</div>';
+            '<div style="text-align: center; color: var(--text-secondary); padding: 40px; font-weight: 600;">📭 No hay códigos activos en los últimos 15 minutos.</div>';
           return;
         }
 
@@ -565,7 +565,7 @@ window.cargarBandejaCodigosMySQL = function () {
     })
     .catch((err) => {
       contenedor.innerHTML =
-        '<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">❌ Error de conexión con PHP (obtener_codigos.php).</div>';
+        '<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">❌ Error de conexión con el servidor MySQL.</div>';
       console.error(err);
     });
 };
