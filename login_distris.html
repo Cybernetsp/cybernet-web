@@ -99,7 +99,7 @@
         <!-- PASO 1: FORMULARIO DE LOGIN NORMAL -->
         <form
           id="formLoginDistri"
-          on送信="loginDistribuidor(event)"
+          onsubmit="loginDistribuidor(event)"
           style="display: flex; flex-direction: column; gap: 14px"
         >
           <input
@@ -146,10 +146,10 @@
           </button>
         </form>
 
-        <!-- PASO 2: FORMULARIO DE CAMBIO DE CLAVE OBLIGATORIO (OCULTO POR DEFECTO) -->
+        <!-- PASO 2: FORMULARIO DE CAMBIO DE CLAVE OBLIGATORIO -->
         <form
           id="formCambioClaveObligatorio"
-          on送信="guardarNuevaPassword(event)"
+          onsubmit="guardarNuevaPassword(event)"
           style="display: none; flex-direction: column; gap: 14px"
         >
           <div
@@ -220,7 +220,7 @@
     <!-- SCRIPT DE LÓGICA DE LOGIN Y CAMBIO DE CLAVE -->
     <script>
       const API_URL = "https://api.cybernetsp.com/acciones_distribuidores.php";
-      let tempUserCache = null; // Guardará temporalmente los datos del distribuidor si requiere cambiar clave
+      let tempUserCache = null;
 
       function triggerToast(msgHTML) {
         const toast = document.getElementById("appleToast");
@@ -271,21 +271,20 @@
             if (res && res.status === "success" && res.data) {
               tempUserCache = res.data;
 
-              // Verificación: Si la clave ingresada es '123456' o el servidor solicita cambio
               if (password === "123456" || res.data.requiere_cambio_pass) {
                 activarFormularioCambioClave();
               } else {
                 guardarSesionYRedireccionar(res.data);
               }
             } else {
-              alert("❌ " + (res.message || "Credenciales incorrectas."));
+              alert("❌ " + (res ? res.message : "Credenciales incorrectas."));
             }
           })
           .catch((err) => {
             console.error(err);
             btn.disabled = false;
             btn.innerHTML = "Iniciar Sesión →";
-            alert("❌ Error conectando con el servidor MySQL.");
+            alert("❌ Error de comunicación con la API. Revisa tu conexión.");
           });
       }
 
@@ -347,7 +346,7 @@
             } else {
               alert(
                 "❌ Error: " +
-                  (res.message || "No se pudo actualizar la clave."),
+                  (res ? res.message : "No se pudo actualizar la clave."),
               );
             }
           })
@@ -368,7 +367,7 @@
 
         setTimeout(() => {
           window.location.href = "distribuidores.html";
-        }, 500);
+        }, 300);
       }
 
       // Auto-redirección si ya tiene sesión activa
