@@ -300,6 +300,9 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   );
 }
 
+// =========================================================================
+// 🏷️ CARGAR PRECIOS DINÁMICOS DESDE MYSQL (TABLA precios_distribuidores)
+// =========================================================================
 function cargarPreciosEnTienda() {
   const formData = new FormData();
   formData.append("accion", "obtener_precios_distribuidor");
@@ -309,14 +312,23 @@ function cargarPreciosEnTienda() {
     .then((res) => {
       if (res && res.status === "success" && res.data) {
         res.data.forEach((itemDb) => {
-          let producto = catálogoProductos.find((p) => p.id === itemDb.codigo);
-          if (producto) producto.precio = parseFloat(itemDb.precio);
+          let producto = catálogoProductos.find(
+            (p) =>
+              p.id === itemDb.codigo ||
+              (p.id === "AMAZON" && itemDb.codigo === "AMAZON-PRIME-VIDEO") ||
+              (p.id === "AMAZON-PRIME-VIDEO" && itemDb.codigo === "AMAZON"),
+          );
+
+          if (producto) {
+            producto.precio = parseFloat(itemDb.precio);
+          }
         });
       }
       renderTienda();
       cargarStockEnTienda();
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error("Error al cargar precios desde MySQL:", err);
       renderTienda();
       cargarStockEnTienda();
     });
@@ -484,7 +496,6 @@ function cargarStockEnTienda() {
 
           if (!badge) return;
 
-          // Verificar si existe stock reportado desde MySQL
           const disponibles =
             res.stock[p.id] !== undefined ? res.stock[p.id] : 99;
 
@@ -524,7 +535,6 @@ function cargarStockEnTienda() {
     })
     .catch((err) => {
       console.error("Error al cargar stock de productos:", err);
-      // Respaldo de contingencia visual en caso de timeout
       catálogoProductos.forEach((p) => {
         const badge = document.getElementById(`stock-badge-${p.id}`);
         if (badge) {
