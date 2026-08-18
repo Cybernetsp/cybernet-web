@@ -211,7 +211,7 @@ function parseFechaCybernet(fechaStr) {
 }
 
 // =========================================================================
-// 👤 CARGA Y SINCRONIZACIÓN DE PERFIL DESDE MYSQL (NOMBRE, TELÉFONO Y SALDO)
+// 👤 CARGA Y SINCRONIZACIÓN DE PERFIL DESDE MYSQL
 // =========================================================================
 function cargarPerfilDistribuidor() {
   const idDistri = localStorage.getItem("active_distri_id") || 0;
@@ -288,9 +288,13 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
       </div>`;
   }
 
+  inicializarOpcionesDeMes();
   cargarPerfilDistribuidor();
   cargarPreciosEnTienda();
-  cargarDatosFinancierosYAlertas(telefono || window.distriTelefonoCache);
+  cargarDatosFinancierosYAlertas(
+    telefono || window.distriTelefonoCache,
+    "todos",
+  );
 
   if (window.cyberIntervaloSaldoFondo)
     clearInterval(window.cyberIntervaloSaldoFondo);
@@ -301,7 +305,56 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
 }
 
 // =========================================================================
-// 🏷️ CARGAR PRECIOS DINÁMICOS DESDE MYSQL (TABLA precios_distribuidores)
+// 📅 POBLAR SELECTOR DE MESES DINÁMICAMENTE
+// =========================================================================
+function inicializarOpcionesDeMes() {
+  const select = document.getElementById("selectMesMovimientos");
+  if (!select) return;
+
+  const nombresMeses = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+
+  let htmlOptions = `<option value="todos">🌐 Todos los Meses</option>`;
+  const fechaActual = new Date();
+
+  // Genera opciones para los últimos 6 meses
+  for (let i = 0; i < 6; i++) {
+    let d = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - i, 1);
+    let yyyy = d.getFullYear();
+    let mm = String(d.getMonth() + 1).padStart(2, "0");
+    let valMes = `${yyyy}-${mm}`;
+    let labelMes = `${nombresMeses[d.getMonth()]} ${yyyy}`;
+
+    htmlOptions += `<option value="${valMes}">${labelMes}</option>`;
+  }
+
+  select.innerHTML = htmlOptions;
+}
+
+function filtrarMovimientosPorMes() {
+  haptic();
+  const select = document.getElementById("selectMesMovimientos");
+  const mesSeleccionado = select ? select.value : "todos";
+  const tel =
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+
+  cargarDatosFinancierosYAlertas(tel, mesSeleccionado);
+}
+
+// =========================================================================
+// 🏷️ CARGAR PRECIOS DINÁMICOS
 // =========================================================================
 function cargarPreciosEnTienda() {
   const formData = new FormData();
@@ -346,16 +399,24 @@ function actualizarSaldoUI() {
   if (cartTotalSaldo) cartTotalSaldo.innerText = f;
 }
 
-function cargarDatosFinancierosYAlertas(tel) {
+// =========================================================================
+// 📊 HISTORIAL DE MOVIMIENTOS Y ALERTAS (CON REGISTRO_VENTAS)
+// =========================================================================
+function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
   const formData = new FormData();
   formData.append("accion", "obtener_dashboard_distribuidor");
   formData.append("telefono", tel);
+  formData.append("mes", mesFiltro);
+
+  const tbody = document.getElementById("tablaHistorialBody");
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 25px; color:var(--text-secondary);"><svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:6px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg><br>Cargando movimientos...</td></tr>`;
+  }
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
-        const tbody = document.getElementById("tablaHistorialBody");
         let trs = "";
 
         if (res.historial && res.historial.length > 0) {
@@ -365,18 +426,18 @@ function cargarDatosFinancierosYAlertas(tel) {
             let signo = isPositivo ? "+" : "";
 
             trs += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                      <td style="padding: 12px 8px; font-size:0.75rem; color:var(--text-secondary);">${mov.fecha}</td>
+                      <td style="padding: 12px 8px; font-size:0.75rem; color:var(--text-secondary); whitespace:nowrap;">${mov.fecha}</td>
                       <td style="padding: 12px 8px; line-height:1.3;">
                         <strong style="color:var(--text-primary); font-size:0.85rem;">${mov.concepto}</strong><br>
                         <span style="color:var(--ios-blue); font-size:0.75rem;">👤 ${mov.cliente}</span>
                       </td>
-                      <td style="padding: 12px 8px; text-align:right; color:${color}; font-weight:bold; font-family:monospace;">${signo}${formatMoneda(mov.monto)}</td>
+                      <td style="padding: 12px 8px; text-align:right; color:${color}; font-weight:bold; font-family:monospace; whitespace:nowrap;">${signo}${formatMoneda(mov.monto)}</td>
                     </tr>`;
           });
         } else {
-          trs = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:var(--text-secondary);">No hay movimientos recientes.</td></tr>`;
+          trs = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--text-secondary);">No se encontraron movimientos registrados para este periodo.</td></tr>`;
         }
-        tbody.innerHTML = trs;
+        if (tbody) tbody.innerHTML = trs;
 
         // Alertas de Renovaciones
         const divRenov = document.getElementById("listaRenovacionesCards");
@@ -417,15 +478,20 @@ function cargarDatosFinancierosYAlertas(tel) {
           });
         }
 
-        if (countExpiran > 0) {
+        if (countExpiran > 0 && widgetCont && divRenov) {
           divRenov.innerHTML = htmlRenov;
           widgetCont.style.display = "block";
-        } else {
+        } else if (widgetCont) {
           widgetCont.style.display = "none";
         }
       }
     })
-    .catch((err) => console.error("Error al cargar historial:", err));
+    .catch((err) => {
+      console.error("Error al cargar historial:", err);
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:var(--ios-red);">Error al conectar con la base de datos.</td></tr>`;
+      }
+    });
 }
 
 function copiarMensajeRenovacion(msgEnc) {
@@ -438,8 +504,15 @@ function copiarMensajeRenovacion(msgEnc) {
 function abrirModalHistorial() {
   haptic();
   bloquearScroll();
+  const select = document.getElementById("selectMesMovimientos");
+  const mesActual = select ? select.value : "todos";
+  const tel =
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+
+  cargarDatosFinancierosYAlertas(tel, mesActual);
   document.getElementById("modalEstadoCuenta").classList.add("open");
 }
+
 function cerrarModalHistorial() {
   haptic();
   desbloquearScroll();
@@ -479,9 +552,6 @@ function renderTienda() {
   container.innerHTML = html;
 }
 
-// =========================================================================
-// 📦 ACTUALIZADOR DE STOCK Y BADGES EN TIENDA (SINCRO DIRECTA)
-// =========================================================================
 function cargarStockEnTienda() {
   const formData = new FormData();
   formData.append("accion", "obtener_stock_plataformas");
@@ -811,7 +881,7 @@ function actualizarCarritoUI() {
 }
 
 // =========================================================================
-// 🛒 PROCESAR COMPRA MAYORISTA EN MYSQL
+// 🛒 PROCESAR COMPRA MAYORISTA
 // =========================================================================
 function procesarCompraDistribuidor() {
   haptic();
@@ -1010,7 +1080,7 @@ function cerrarModalExitoCheckout() {
 }
 
 // =========================================================================
-// 📡 BÓVEDA Y CASILLERO DE CUENTAS EN MYSQL
+// 📡 BÓVEDA Y CASILLERO DE CUENTAS
 // =========================================================================
 function abrirModalBusquedaCuentas() {
   haptic();
@@ -1132,7 +1202,7 @@ function copiarFichaCasillero(btn, dataEncoded) {
 }
 
 // =========================================================================
-// 🤖 CENTRO DE CÓDIGOS DE ACCESO
+// 🤖 CENTRO DE CÓDIGOS
 // =========================================================================
 let codeData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
 
@@ -1240,246 +1310,6 @@ function copiarCodigoResultanteB2B() {
     }, 250);
     triggerToast("📋 Código copiado con éxito");
   });
-}
-
-// =========================================================================
-// 💰 RECARGAS OCR AUTÓNOMAS (TESSERACT AI Y MYSQL)
-// =========================================================================
-function abrirModalInstruccionesRecarga() {
-  haptic();
-  bloquearScroll();
-  document.getElementById("modalInstruccionesRecarga").classList.add("open");
-}
-
-function cerrarModalInstruccionesRecarga() {
-  haptic();
-  desbloquearScroll();
-  document.getElementById("modalInstruccionesRecarga").classList.remove("open");
-}
-
-function abrirModalFormularioRecarga() {
-  haptic();
-  document.getElementById("modalInstruccionesRecarga").classList.remove("open");
-  document.getElementById("modalFormularioRecarga").classList.add("open");
-
-  document.getElementById("recargaComprobante").value = "";
-  document.getElementById("ocrUploadArea").style.display = "block";
-  document.getElementById("ocrInstruccionText").style.display = "block";
-  document.getElementById("ocrLoadingUI").style.display = "none";
-  document.getElementById("ocrResultsUI").style.display = "none";
-}
-
-function cerrarModalFormularioRecarga() {
-  haptic();
-  desbloquearScroll();
-  document.getElementById("modalFormularioRecarga").classList.remove("open");
-}
-
-async function analizarComprobanteIA(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  haptic();
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    window.imagenComprobanteDistri = e.target.result;
-  };
-  reader.readAsDataURL(file);
-
-  const previewImg = document.getElementById("previewComprobante");
-  if (previewImg) {
-    previewImg.src = URL.createObjectURL(file);
-    previewImg.style.display = "inline-block";
-  }
-
-  document
-    .getElementById("ocrUploadArea")
-    .style.setProperty("display", "none", "important");
-  document
-    .getElementById("ocrInstruccionText")
-    .style.setProperty("display", "none", "important");
-  document
-    .getElementById("ocrLoadingUI")
-    .style.setProperty("display", "block", "important");
-  document
-    .getElementById("ocrResultsUI")
-    .style.setProperty("display", "none", "important");
-
-  try {
-    const worker = await Tesseract.createWorker("spa");
-    const ret = await worker.recognize(file);
-    const texto = ret.data.text.toLowerCase();
-    await worker.terminate();
-
-    const hoy = new Date();
-    const nombresMes = [
-      "enero",
-      "febrero",
-      "marzo",
-      "abril",
-      "mayo",
-      "junio",
-      "julio",
-      "agosto",
-      "septiembre",
-      "octubre",
-      "noviembre",
-      "diciembre",
-    ];
-    const fechaHoyFormateada = `${hoy.getDate()} de ${nombresMes[hoy.getMonth()]} de ${hoy.getFullYear()}`;
-
-    // Monto
-    let monto = 0;
-    let matchMonto =
-      texto.match(/¿cuánto\??\s*[\n\r]*\s*\$\s*([\d{1,3}]+(?:[.,]\d{3})*)/i) ||
-      texto.match(/(?:[$s])\s*(\d{1,3}(?:[.,]\d{3})+)/i);
-    if (!matchMonto)
-      matchMonto =
-        texto.match(/\b\d{1,3}([.,]\d{3})+\b/) ||
-        texto.match(
-          /\b(10000|20000|30000|40000|50000|100000|200000|300000|500000)\b/,
-        );
-    if (matchMonto)
-      monto = parseFloat(
-        matchMonto[1]
-          ? matchMonto[1].replace(/[.,]/g, "")
-          : matchMonto[0].replace(/[.,]/g, ""),
-      );
-    if (!monto || isNaN(monto)) monto = 20000;
-
-    // Hora
-    let horaExtr = "";
-    const matchHora = texto.match(/(\d{1,2}):(\d{2})\s*(a\.?m\.?|p\.?m\.?|)/i);
-    if (matchHora) {
-      let hh = parseInt(matchHora[1], 10);
-      let mm = parseInt(matchHora[2], 10);
-      let ampm = matchHora[3] ? matchHora[3].replace(/\./g, "").trim() : "";
-      if (ampm === "pm" && hh < 12) hh += 12;
-      else if (ampm === "am" && hh === 12) hh = 0;
-      horaExtr = `${hh.toString().padStart(2, "0")}:${mm.toString().padStart(2, "0")}`;
-    } else {
-      horaExtr = `${hoy.getHours().toString().padStart(2, "0")}:${hoy.getMinutes().toString().padStart(2, "0")}`;
-    }
-
-    // Referencia
-    let referenciaExtr = "";
-    const matchRefReal =
-      texto.match(/referencia\s*[\n\r]*\s*([a-z0-9]{6,15})/i) ||
-      texto.match(/\b(m\d{6,12}|[a-z0-9]{8,12})\b/i);
-    referenciaExtr = matchRefReal
-      ? (matchRefReal[1] || matchRefReal[0]).toUpperCase().trim()
-      : "M" + hoy.getTime().toString().substring(5);
-
-    // Llave y Origen
-    let llaveExtr = "1007416341";
-    let origenExtr = "Lectura Manual (Imagen)";
-
-    window.ocrValorFinal = monto;
-    window.ocrHoraFinal = horaExtr;
-    window.ocrFechaCompletaFinal = fechaHoyFormateada;
-    window.ocrReferenciaFinal = referenciaExtr;
-    window.ocrLlaveFinal = llaveExtr;
-    window.ocrOrigenFinal = origenExtr;
-
-    document.getElementById("displayOcrValor").innerText =
-      "$" + window.ocrValorFinal.toLocaleString("es-CO");
-    document.getElementById("displayOcrFecha").innerText =
-      window.ocrFechaCompletaFinal;
-    document.getElementById("displayOcrRef").innerText =
-      window.ocrReferenciaFinal;
-    document.getElementById("displayOcrLlave").innerText = window.ocrLlaveFinal;
-    document.getElementById("displayOcrOrigen").innerText =
-      window.ocrOrigenFinal;
-
-    document
-      .getElementById("ocrLoadingUI")
-      .style.setProperty("display", "none", "important");
-    document
-      .getElementById("ocrResultsUI")
-      .style.setProperty("display", "flex", "important");
-  } catch (error) {
-    const hoy = new Date();
-    window.ocrValorFinal = 20000;
-    window.ocrHoraFinal = `${hoy.getHours().toString().padStart(2, "0")}:${hoy.getMinutes().toString().padStart(2, "0")}`;
-    window.ocrFechaCompletaFinal = `${hoy.getDate()}/${hoy.getMonth() + 1}/${hoy.getFullYear()}`;
-    window.ocrReferenciaFinal = "M" + hoy.getTime().toString().substring(5);
-    window.ocrLlaveFinal = "1007416341";
-    window.ocrOrigenFinal = "Lectura de Contingencia";
-
-    document.getElementById("displayOcrValor").innerText = "$20.000";
-    document.getElementById("displayOcrFecha").innerText =
-      window.ocrFechaCompletaFinal;
-    document.getElementById("displayOcrRef").innerText =
-      window.ocrReferenciaFinal;
-    document.getElementById("displayOcrLlave").innerText = window.ocrLlaveFinal;
-    document.getElementById("displayOcrOrigen").innerText =
-      window.ocrOrigenFinal;
-
-    document
-      .getElementById("ocrLoadingUI")
-      .style.setProperty("display", "none", "important");
-    document
-      .getElementById("ocrResultsUI")
-      .style.setProperty("display", "flex", "important");
-  }
-}
-
-function procesarRecargaDistribuidor() {
-  haptic();
-  const nombreInput = document
-    .getElementById("recargaNombre")
-    .value.trim()
-    .toLowerCase();
-
-  if (!nombreInput) {
-    alert("⚠️ Por favor ingresa el nombre o apellido del titular.");
-    return;
-  }
-
-  const btn = document.getElementById("btnVerificarRecarga");
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spin-anim" style="display:inline-block; margin-right:8px;">⏳</span>Validando con MySQL...`;
-
-  const formData = new FormData();
-  formData.append("accion", "recargar_saldo_distribuidor");
-  formData.append(
-    "telefono",
-    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache,
-  );
-  formData.append("monto", window.ocrValorFinal);
-  formData.append("referencia", window.ocrReferenciaFinal);
-  formData.append("titular", nombreInput);
-
-  fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
-      btn.disabled = false;
-      btn.innerHTML = "Validar en Gmail y Cargar Saldo";
-
-      if (res && res.status === "success") {
-        document.getElementById("recargaComprobante").value = "";
-        document.getElementById("recargaNombre").value = "";
-        document.getElementById("ocrResultsUI").style.display = "none";
-
-        window.saldoNumericoActual = parseFloat(res.nuevoSaldo);
-        localStorage.setItem("active_distri_saldo", window.saldoNumericoActual);
-        actualizarSaldoUI();
-
-        cerrarModalFormularioRecarga();
-        alert(
-          `🎉 ¡Pago validado exitosamente!\n\n💰 Nuevo Saldo: ${formatMoneda(window.saldoNumericoActual)}`,
-        );
-      } else {
-        alert("❌ " + (res.message || "Error al procesar la recarga."));
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      btn.disabled = false;
-      btn.innerHTML = "Validar en Gmail y Cargar Saldo";
-      alert("❌ Error de comunicación con MySQL.");
-    });
 }
 
 function refrescarSaldoDistribuidorFondo() {
