@@ -211,214 +211,69 @@ function parseFechaCybernet(fechaStr) {
 }
 
 // =========================================================================
-// 🔒 LOGIN Y SESIÓN DE DISTRIBUIDOR (MYSQL)
+// 👤 CARGA Y SINCRONIZACIÓN DE PERFIL DESDE MYSQL (NOMBRE, TELÉFONO Y SALDO)
 // =========================================================================
-function verificarTelefonoDistribuidor() {
-  haptic();
-  const inputCredencial = document
-    .getElementById("distriLoginTelefono")
-    .value.trim();
-  const btn = document.getElementById("btnVerificarTelefono");
+function cargarPerfilDistribuidor() {
+  const idDistri = localStorage.getItem("active_distri_id") || 0;
+  const telDistri = localStorage.getItem("active_distri_tel") || "";
 
-  if (inputCredencial.length < 5) {
-    alert("⚠️ Ingresa tu celular o correo registrado.");
+  if (!idDistri && !telDistri) {
+    window.location.href = "login_distris.html";
     return;
   }
 
-  btn.disabled = true;
-  btn.innerHTML = `Verificando cuenta...`;
-
   const formData = new FormData();
-  formData.append("accion", "verificar_distribuidor");
-  formData.append("credencial", inputCredencial);
+  formData.append("accion", "obtener_perfil_distribuidor");
+  formData.append("id", idDistri);
+  formData.append("telefono", telDistri);
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
     .then((res) => res.json())
     .then((res) => {
-      btn.disabled = false;
-      btn.innerHTML = "Continuar →";
-
       if (res && res.status === "success" && res.data) {
-        window.distriTelefonoCache = res.data.telefono;
-        window.distriCorreoRegistrado = res.data.correo || "";
+        const d = res.data;
 
-        if (res.data.correo) {
-          // Enviar código de seguridad
-          solicitarEnvioCodigoSeguridad(res.data.correo);
-        } else {
-          document.getElementById("stepTelefono").style.display = "none";
-          document.getElementById("stepCorreoRegistrar").style.display = "flex";
-        }
-      } else {
-        alert("❌ " + (res.message || "Usuario no autorizado en MySQL."));
+        localStorage.setItem("active_distri_id", d.id);
+        localStorage.setItem("active_distri_tel", d.telefono);
+        localStorage.setItem("active_distri_name", d.nombre);
+        localStorage.setItem("active_distri_saldo", d.saldo);
+
+        window.distriTelefonoCache = d.telefono;
+        window.saldoNumericoActual = parseFloat(d.saldo);
+
+        const elemNombre = document.getElementById("distriWelcomeName");
+        const elemTelefono = document.getElementById("distriWelcomePhone");
+
+        if (elemNombre)
+          elemNombre.innerText = `¡Hola, ${d.nombre.toUpperCase()}!`;
+        if (elemTelefono)
+          elemTelefono.innerText = `Distribuidor • Tel: ${d.telefono}`;
+
+        actualizarSaldoUI();
       }
     })
-    .catch((err) => {
-      console.error(err);
-      btn.disabled = false;
-      btn.innerHTML = "Continuar →";
-      alert("❌ Error de comunicación con el servidor MySQL.");
-    });
-}
-
-function solicitarEnvioCodigoSeguridad(correo) {
-  const btn = document.getElementById("btnVerificarTelefono");
-  btn.disabled = true;
-  btn.innerHTML = `Enviando código...`;
-
-  const formData = new FormData();
-  formData.append("accion", "enviar_codigo_distribuidor");
-  formData.append("correo", correo);
-
-  fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
-      btn.disabled = false;
-      btn.innerHTML = "Continuar →";
-
-      if (res && res.status === "success") {
-        document.getElementById("stepTelefono").style.display = "none";
-        let partes = correo.split("@");
-        let maskedEmail =
-          partes[0].substring(0, 2) +
-          "******" +
-          partes[0].substring(partes[0].length - 2) +
-          "@" +
-          partes[1];
-
-        document.getElementById("txtAvisoTokenDespachado").innerText =
-          `Código de 6 dígitos enviado a: ${maskedEmail}`;
-        document.getElementById("stepTokenVerificar").style.display = "flex";
-        document.getElementById("distriLoginTokenInput").focus();
-        triggerToast("📩 Token enviado.");
-      } else {
-        alert("❌ Error al despachar el código.");
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      btn.disabled = false;
-      btn.innerHTML = "Continuar →";
-      alert("❌ Error de comunicación al enviar el código.");
-    });
-}
-
-function registrarEmailYEnviarCodigo() {
-  haptic();
-  const nuevoEmail = document
-    .getElementById("distriCorreoRegistrarInput")
-    .value.trim()
-    .toLowerCase();
-  const btn = document.getElementById("btnRegistrarEmailYEnviar");
-
-  if (nuevoEmail === "" || !nuevoEmail.includes("@")) {
-    alert("⚠️ Correo electrónico inválido.");
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerHTML = `Registrando y enviando...`;
-
-  const formData = new FormData();
-  formData.append("accion", "registrar_correo_distribuidor");
-  formData.append("telefono", window.distriTelefonoCache);
-  formData.append("correo", nuevoEmail);
-
-  fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
-      btn.disabled = false;
-      btn.innerHTML = "Registrar y Enviar Código";
-
-      if (res && res.status === "success") {
-        window.distriCorreoRegistrado = nuevoEmail;
-        solicitarEnvioCodigoSeguridad(nuevoEmail);
-      } else {
-        alert("❌ Error: " + res.message);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      btn.disabled = false;
-      btn.innerHTML = "Registrar y Enviar Código";
-      alert("❌ Error registrando correo.");
-    });
-}
-
-function verificarCodigoDeSeguridadFinal() {
-  haptic();
-  const tokenInput = document
-    .getElementById("distriLoginTokenInput")
-    .value.replace(/\s+/g, "")
-    .trim();
-  const btn = document.getElementById("btnVerificarCodigoFinal");
-
-  if (tokenInput.length !== 6) {
-    alert("⚠️ El código debe ser de 6 dígitos.");
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerHTML = `Validando...`;
-
-  const formData = new FormData();
-  formData.append("accion", "verificar_codigo_distribuidor");
-  formData.append("correo", window.distriCorreoRegistrado);
-  formData.append("codigo", tokenInput);
-
-  fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
-      btn.disabled = false;
-      btn.innerHTML = "Ingresar al Portal";
-
-      if (res && res.status === "success" && res.data) {
-        localStorage.setItem("active_distri_tel", res.data.telefono);
-        localStorage.setItem(
-          "active_distri_name",
-          res.data.nombre.toUpperCase(),
-        );
-        localStorage.setItem("active_distri_saldo", res.data.saldo);
-
-        entrarAlPortalDistribuidor(
-          res.data.nombre.toUpperCase(),
-          res.data.telefono,
-          res.data.saldo,
-        );
-      } else {
-        alert("❌ " + (res.message || "Código incorrecto o caducado."));
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      btn.disabled = false;
-      btn.innerHTML = "Ingresar al Portal";
-      alert("❌ Error validando código de seguridad.");
-    });
-}
-
-function regresarAlPasoInicial() {
-  haptic();
-  document.getElementById("stepTokenVerificar").style.display = "none";
-  document.getElementById("stepCorreoRegistrar").style.display = "none";
-  document.getElementById("stepTelefono").style.display = "flex";
+    .catch((err) => console.error("Error al sincronizar perfil:", err));
 }
 
 // =========================================================================
 // 💼 INTERFAZ Y DASHBOARD B2B
 // =========================================================================
 function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
-  document.getElementById("loginSection").style.display = "none";
-  document.getElementById("dashboardSection").style.display = "flex";
+  const dashSection = document.getElementById("dashboardSection");
+  if (dashSection) dashSection.style.display = "flex";
 
   const btnCarrito = document.getElementById("fabCarrito");
   if (btnCarrito) btnCarrito.style.setProperty("display", "flex", "important");
 
-  let nombreSeguro = nombre ? nombre : "Distribuidor";
-  document.getElementById("distriWelcomeName").innerText =
-    `¡Hola, ${nombreSeguro}!`;
-  document.getElementById("distriWelcomePhone").innerText =
-    `Distribuidor • Tel: ${telefono}`;
+  if (nombre) {
+    const elemNombre = document.getElementById("distriWelcomeName");
+    if (elemNombre) elemNombre.innerText = `¡Hola, ${nombre.toUpperCase()}!`;
+  }
+  if (telefono) {
+    const elemTelefono = document.getElementById("distriWelcomePhone");
+    if (elemTelefono)
+      elemTelefono.innerText = `Distribuidor • Tel: ${telefono}`;
+  }
 
   window.saldoNumericoActual =
     parseFloat(String(saldo).replace(/[^\d.-]/g, "")) || 0;
@@ -433,8 +288,10 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
       </div>`;
   }
 
+  // Sincronizar datos reales desde la base de datos
+  cargarPerfilDistribuidor();
   cargarPreciosEnTienda();
-  cargarDatosFinancierosYAlertas(telefono);
+  cargarDatosFinancierosYAlertas(telefono || window.distriTelefonoCache);
 
   if (window.cyberIntervaloSaldoFondo)
     clearInterval(window.cyberIntervaloSaldoFondo);
@@ -1659,11 +1516,12 @@ function eliminarDelCarrito(id) {
 function cerrarSesionDistribuidor() {
   if (window.cyberIntervaloSaldoFondo)
     clearInterval(window.cyberIntervaloSaldoFondo);
+  localStorage.removeItem("active_distri_id");
   localStorage.removeItem("active_distri_tel");
   localStorage.removeItem("active_distri_name");
   localStorage.removeItem("active_distri_saldo");
   sessionStorage.clear();
-  window.location.reload();
+  window.location.href = "login_distris.html";
 }
 
 function bloquearScroll() {
@@ -1686,13 +1544,19 @@ function cerrarMenuMovil() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  let localDistri = localStorage.getItem("active_distri_tel");
-  if (localDistri) {
-    window.distriTelefonoCache = localDistri;
+  let localDistriId = localStorage.getItem("active_distri_id");
+  let localDistriTel = localStorage.getItem("active_distri_tel");
+  let localDistriName = localStorage.getItem("active_distri_name");
+  let localDistriSaldo = localStorage.getItem("active_distri_saldo");
+
+  if (localDistriId || localDistriTel) {
+    window.distriTelefonoCache = localDistriTel || "";
     entrarAlPortalDistribuidor(
-      localStorage.getItem("active_distri_name"),
-      localDistri,
-      localStorage.getItem("active_distri_saldo"),
+      localDistriName,
+      localDistriTel,
+      localDistriSaldo,
     );
+  } else {
+    window.location.href = "login_distris.html";
   }
 });
