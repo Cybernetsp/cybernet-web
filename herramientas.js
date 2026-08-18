@@ -3,7 +3,7 @@
    ========================================================================== */
 
 /* ==========================================================================
-   💳 CYBERNET OS - MÓDULO MODAL PAGOS BRE-B (MYSQL CON BANCO Y FECHA)
+   💳 CYBERNET OS - MÓDULO MODAL PAGOS BRE-B (DISEÑO PREMIUM CON HORA/FECHA TOP-RIGHT)
    ========================================================================== */
 const URL_PAGOS_BREB_MYSQL =
   "https://api.cybernetsp.com/obtener_pagos_breb.php";
@@ -52,7 +52,7 @@ window.establecerFechaHoyBreBModal = function () {
   }
 };
 
-// 📥 CONSULTA EN TIEMPO REAL A MYSQL (CON BANCO Y FILTRO DE FECHA)
+// 📥 CONSULTA EN TIEMPO REAL A MYSQL (CON NUEVO DISEÑO DE HORA Y FECHA)
 window.cargarPagosBreBModal = function () {
   const contenedor = document.getElementById("breb-lista-modal");
   const totalInlineElem = document.getElementById("breb-monto-total-inline");
@@ -101,23 +101,40 @@ window.cargarPagosBreBModal = function () {
           const bancoOrigen = pago.banco ? pago.banco.toUpperCase() : "BRE-B";
           const refText = pago.referencia || "";
 
+          // 🕒 SEPARAR FECHA Y HORA PARA EL ESQUEMA SUPERIOR DERECHO
+          const partesFecha = fechaHora.trim().split(" ");
+          const fechaOnly = partesFecha[0] || "";
+          const horaOnly = partesFecha.slice(1).join(" ") || "";
+
+          // Badge exclusivo para pagos 'usados'
           const esUsado = pago.estado === "usado";
           const estadoBadge = esUsado
             ? `<div style="margin-top:6px;"><span style="color:#ff453a; font-size:0.72rem; font-weight:800; background:rgba(255,69,58,0.15); padding:3px 10px; border-radius:6px;">USADO</span></div>`
-            : `<div style="margin-top:6px;"><span style="color:#30d158; font-size:0.72rem; font-weight:800; background:rgba(48,209,88,0.15); padding:3px 10px; border-radius:6px;">DISPONIBLE</span></div>`;
+            : "";
 
-          // 🟢 TARJETA iOS DETALLADA CON BANCO Y FECHA
+          // 🟢 TARJETA RE-DISEÑADA (HORA GRANDE ARRIBA DERECHA + SIN 'DISPONIBLE')
           html += `
-            <div class="breb-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 16px; font-size: 0.83rem; line-height: 1.5; color: rgba(255, 255, 255, 0.8); transition: all 0.2s ease; margin-bottom: 8px;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(48, 209, 88, 0.4)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
-              <div style="font-weight: 800; color: #ffffff; font-size: 0.92rem; letter-spacing: 0.3px; text-transform: uppercase;">${cliente}</div>
-              <div style="margin-top: 2px;">
-                <span style="color: rgba(255, 255, 255, 0.6);">envió </span>
-                <span style="color: #30d158; font-weight: 900; font-family: monospace; font-size: 0.95rem;">+$${montoStr}</span>
+            <div class="breb-card" style="position: relative; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px 16px; font-size: 0.83rem; line-height: 1.5; color: rgba(255, 255, 255, 0.8); transition: all 0.2s ease; margin-bottom: 8px;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(48, 209, 88, 0.4)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
+              
+              <!-- ESQUINA SUPERIOR DERECHA: HORA GRANDE Y FECHA ABAJO -->
+              <div style="position: absolute; top: 12px; right: 16px; text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+                <span style="color: #ffffff; font-weight: 900; font-size: 1.05rem; font-family: monospace; letter-spacing: -0.3px;">${horaOnly}</span>
+                <span style="color: rgba(255, 255, 255, 0.45); font-size: 0.72rem; font-weight: 600; font-family: monospace; margin-top: -2px;">${fechaOnly}</span>
               </div>
-              <div style="color: rgba(255, 255, 255, 0.5); font-size: 0.76rem; margin-top: 3px;">
-                (${fechaHora} | desde <b style="color: #0a84ff;">${bancoOrigen}</b> | Ref: <b style="color: #0a84ff;">${refText}</b>)
+
+              <!-- CONTENIDO PRINCIPAL DE LA TARJETA -->
+              <div style="padding-right: 110px;">
+                <div style="font-weight: 800; color: #ffffff; font-size: 0.95rem; letter-spacing: 0.3px; text-transform: uppercase;">${cliente}</div>
+                <div style="margin-top: 3px; display: flex; align-items: center; gap: 5px;">
+                  <span style="color: rgba(255, 255, 255, 0.55); font-size: 0.82rem;">envió</span>
+                  <span style="color: #30d158; font-weight: 900; font-family: monospace; font-size: 0.98rem;">+$${montoStr}</span>
+                </div>
+                <div style="color: rgba(255, 255, 255, 0.5); font-size: 0.76rem; margin-top: 4px;">
+                  desde <b style="color: #0a84ff;">${bancoOrigen}</b> | Ref: <b style="color: #0a84ff;">${refText}</b>
+                </div>
+                ${estadoBadge}
               </div>
-              ${estadoBadge}
+
             </div>`;
         });
 
