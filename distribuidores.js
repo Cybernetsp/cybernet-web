@@ -467,6 +467,9 @@ function renderTienda() {
   container.innerHTML = html;
 }
 
+// =========================================================================
+// 📦 ACTUALIZADOR DE STOCK Y BADGES EN TIENDA (SINCRO DIRECTA)
+// =========================================================================
 function cargarStockEnTienda() {
   const formData = new FormData();
   formData.append("accion", "obtener_stock_plataformas");
@@ -475,61 +478,62 @@ function cargarStockEnTienda() {
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success" && res.stock) {
-        const mapeo = {
-          NETFLIX: "NETFLIX",
-          "DISNEY-PREMIUM": "DISNEY-PREMIUM",
-          AMAZON: "AMAZON",
-          "DISNEY-ESTANDAR": "DISNEY-ESTANDAR",
-          "HBO-MAX": "HBO-MAX",
-          PARAMOUNT: "PARAMOUNT",
-          VIX: "VIX",
-          CRUNCHYROLL: "CRUNCHYROLL",
-          PLEX: "PLEX",
-          "APPLE-TV": "APPLE-TV",
-          UNIVERSAL: "UNIVERSAL",
-        };
+        catálogoProductos.forEach((p) => {
+          const badge = document.getElementById(`stock-badge-${p.id}`);
+          const btnAdd = document.getElementById(`btn-add-${p.id}`);
 
-        Object.keys(mapeo).forEach((key) => {
-          const htmlId = mapeo[key];
-          const badge = document.getElementById(`stock-badge-${htmlId}`);
-          const btnAdd = document.getElementById(`btn-add-${htmlId}`);
-          const disponibles = res.stock[key] !== undefined ? res.stock[key] : 0;
+          if (!badge) return;
 
-          if (badge) {
-            if (disponibles > 0) {
-              badge.innerHTML = `🟢 ${disponibles} Disp.`;
-              badge.style.background = "rgba(48, 209, 88, 0.1)";
-              badge.style.color = "var(--ios-green)";
-              badge.style.borderColor = "rgba(48, 209, 88, 0.2)";
+          // Verificar si existe stock reportado desde MySQL
+          const disponibles =
+            res.stock[p.id] !== undefined ? res.stock[p.id] : 99;
 
-              if (btnAdd) {
-                btnAdd.disabled = false;
-                btnAdd.innerHTML = "+ Añadir";
-                btnAdd.style.background = "var(--ios-blue)";
-                btnAdd.style.color = "white";
-                btnAdd.style.opacity = "1";
-                btnAdd.style.cursor = "pointer";
-              }
-            } else {
-              badge.innerHTML = `🔴 Agotado`;
-              badge.style.background = "rgba(255, 69, 58, 0.1)";
-              badge.style.color = "var(--ios-red)";
-              badge.style.borderColor = "rgba(255, 69, 58, 0.2)";
+          if (disponibles > 0) {
+            let textoDisp =
+              disponibles >= 99 ? "🟢 Disponible" : `🟢 ${disponibles} Disp.`;
+            badge.innerHTML = textoDisp;
+            badge.style.background = "rgba(48, 209, 88, 0.1)";
+            badge.style.color = "var(--ios-green)";
+            badge.style.borderColor = "rgba(48, 209, 88, 0.2)";
 
-              if (btnAdd) {
-                btnAdd.disabled = true;
-                btnAdd.innerHTML = "Sin Stock";
-                btnAdd.style.background = "rgba(255, 255, 255, 0.05)";
-                btnAdd.style.color = "var(--text-secondary)";
-                btnAdd.style.opacity = "0.5";
-                btnAdd.style.cursor = "not-allowed";
-              }
+            if (btnAdd) {
+              btnAdd.disabled = false;
+              btnAdd.innerHTML = "+ Añadir";
+              btnAdd.style.background = "var(--ios-blue)";
+              btnAdd.style.color = "white";
+              btnAdd.style.opacity = "1";
+              btnAdd.style.cursor = "pointer";
+            }
+          } else {
+            badge.innerHTML = `🔴 Agotado`;
+            badge.style.background = "rgba(255, 69, 58, 0.1)";
+            badge.style.color = "var(--ios-red)";
+            badge.style.borderColor = "rgba(255, 69, 58, 0.2)";
+
+            if (btnAdd) {
+              btnAdd.disabled = true;
+              btnAdd.innerHTML = "Sin Stock";
+              btnAdd.style.background = "rgba(255, 255, 255, 0.05)";
+              btnAdd.style.color = "var(--text-secondary)";
+              btnAdd.style.opacity = "0.5";
+              btnAdd.style.cursor = "not-allowed";
             }
           }
         });
       }
     })
-    .catch((err) => console.error("Error al cargar stock:", err));
+    .catch((err) => {
+      console.error("Error al cargar stock de productos:", err);
+      // Respaldo de contingencia visual en caso de timeout
+      catálogoProductos.forEach((p) => {
+        const badge = document.getElementById(`stock-badge-${p.id}`);
+        if (badge) {
+          badge.innerHTML = `🟢 Disponible`;
+          badge.style.background = "rgba(10, 132, 255, 0.1)";
+          badge.style.color = "var(--ios-blue)";
+        }
+      });
+    });
 }
 
 function filtrarTiendaLocal() {
