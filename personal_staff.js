@@ -28,6 +28,23 @@ window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
 
 // ==========================================
+// HELPER PARA LECTURA SEGURA DE JSON (EVITA CRASHES)
+// ==========================================
+async function parsearRespuestaJSONSegura(res) {
+  const text = await res.text();
+  if (!text || text.trim() === "") {
+    throw new Error("El servidor respondió con un texto vacío.");
+  }
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    throw new Error(
+      text.replace(/<[^>]*>?/gm, "").trim() || "Respuesta JSON no válida.",
+    );
+  }
+}
+
+// ==========================================
 // 1. UTILIDADES Y CARGA DE USUARIOS
 // ==========================================
 function obtenerTodosLosAsistentes() {
@@ -58,7 +75,7 @@ function verificarSiEsSuperAdmin() {
 window.cargarUsuariosBaseMySQL = async function () {
   try {
     let res = await fetch(window.URL_OBTENER_USUARIOS);
-    let data = await res.json();
+    let data = await parsearRespuestaJSONSegura(res);
     if (data && data.status === "success") {
       window.usuariosCache = data.data_completa || [];
       if (Array.isArray(data.data) && data.data.length > 0) {
@@ -79,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO EXACTO BASADO EN RELOJ REAL (RESISTENTE A SEGUNDO PLANO Y F5)
+// 2. CRONÓMETRO EXACTO BASADO EN RELOJ REAL
 // ==========================================
 let secCronometroTotal = 0;
 let timerInterval = null;
@@ -94,7 +111,6 @@ function limpiarCacheShift() {
   localStorage.removeItem("cyber_shift_unsaved_sec");
 }
 
-// 🔥 RESTAURACIÓN EXACTA DE TIEMPO REAL
 window.verificarEIniciarTurnoAuto = function () {
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
@@ -155,7 +171,6 @@ function iniciarTurnoTracker(esAuto = false) {
     10,
   );
 
-  // Si cambia de trabajador o no existe timestamp de inicio, se fija el inicio real
   if (savedVendedor !== activeStaff || !startTs) {
     startTs = now;
     lastSavedTs = now;
@@ -185,7 +200,6 @@ function iniciarTurnoTracker(esAuto = false) {
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // 🎯 SINCRO CADA 60 SEGUNDOS REALES A MYSQL
     let unsavedSec = Math.floor((actualNow - lastSavedTs) / 1000);
     if (unsavedSec >= 60) {
       enviarTiempoTrackerAMySQL(
@@ -265,7 +279,7 @@ function enviarTiempoTrackerAMySQL(asistente, tiempoHHMMSS, razon) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `vendedor=${encodeURIComponent(asistente)}&tiempo=${encodeURIComponent(tiempoHHMMSS)}&fecha=hoy`,
   })
-    .then((res) => res.json())
+    .then((res) => parsearRespuestaJSONSegura(res))
     .then((res) => {
       if (
         res.status === "success" &&
@@ -325,7 +339,6 @@ window.cerrarSesionStaff = function () {
   }
 };
 
-// 🚨 RESPALDO INSTANTÁNEO EN CIERRE DE PÁGINA O TAB
 function guardarEmergenciaAlCerrarVentana() {
   if (turnoActivo) {
     const activeStaff = (
@@ -437,18 +450,11 @@ window.cargarHorasDirectasPHP = function () {
   container.innerHTML = `<div style="text-align:center; padding:45px; color:#0a84ff;">Sincronizando con MySQL...</div>`;
 
   const ts = new Date().getTime();
-  fetch(`https://api.cybernetsp.com/obtener_horas.php?nocache=${ts}`, {
+  fetch(`${window.URL_OBTENER_HORAS}?nocache=${ts}`, {
     method: "GET",
     headers: { Accept: "application/json" },
   })
-    .then(async (res) => {
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch (e) {
-        throw new Error("Respuesta no válida del servidor PHP");
-      }
-    })
+    .then((res) => parsearRespuestaJSONSegura(res))
     .then((res) => {
       if (res && res.status === "success") {
         window.currentHorasStock = res.data || [];
@@ -458,7 +464,7 @@ window.cargarHorasDirectasPHP = function () {
       }
     })
     .catch((err) => {
-      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error de Red al conectar con obtener_horas.php</div>`;
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${err.message}</div>`;
     });
 };
 
@@ -831,7 +837,7 @@ window.ejecutarAdelantoDesdeShift = function (e) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `vendedor=${encodeURIComponent(empleado)}&monto=${encodeURIComponent(monto)}`,
   })
-    .then((res) => res.json())
+    .then((res) => parsearRespuestaJSONSegura(res))
     .then((res) => {
       if (btn) {
         btn.disabled = false;
@@ -882,7 +888,7 @@ window.ejecutarGuardadoHorasManual = function (e) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `vendedor=${encodeURIComponent(vendedor)}&tiempo=${encodeURIComponent(tiempo)}&fecha=${encodeURIComponent(fecha)}`,
   })
-    .then((res) => res.json())
+    .then((res) => parsearRespuestaJSONSegura(res))
     .then((res) => {
       if (btn) {
         btn.disabled = false;
@@ -925,11 +931,12 @@ window.modificarTurnoSuperAdmin = function (
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `id=${encodeURIComponent(idTurno)}&tiempo=${encodeURIComponent(nuevoTiempo.trim())}`,
   })
-    .then((res) => res.json())
+    .then((res) => parsearRespuestaJSONSegura(res))
     .then((res) => {
       if (res && res.status === "success") window.cargarHorasDirectasPHP();
       else alert("⚠️ Error: " + (res ? res.message : ""));
-    });
+    })
+    .catch((err) => alert("❌ Error: " + err.message));
 };
 
 window.eliminarTurnoSuperAdmin = function (idTurno) {
@@ -943,10 +950,11 @@ window.eliminarTurnoSuperAdmin = function (idTurno) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `id=${encodeURIComponent(idTurno)}`,
   })
-    .then((res) => res.json())
+    .then((res) => parsearRespuestaJSONSegura(res))
     .then((res) => {
       if (res && res.status === "success") window.cargarHorasDirectasPHP();
-    });
+    })
+    .catch((err) => alert("❌ Error: " + err.message));
 };
 
 window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
@@ -961,13 +969,15 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `id=${encodeURIComponent(id)}`,
-    }).then((res) => res.json()),
+    }).then((res) => parsearRespuestaJSONSegura(res)),
   );
-  Promise.all(peticiones).then(() => window.cargarHorasDirectasPHP());
+  Promise.all(peticiones)
+    .then(() => window.cargarHorasDirectasPHP())
+    .catch((err) => alert("❌ Error eliminando adelantos: " + err.message));
 };
 
 // ==========================================
-// 5. MÓDULO NÓMINA BENTO (DISEÑO HORIZONTAL FLEXBOX REAL)
+// 5. MÓDULO NÓMINA BENTO (DISEÑO HORIZONTAL)
 // ==========================================
 window.abrirTotalNomina = function () {
   const overlay = document.getElementById("nominaOverlay");
@@ -1002,7 +1012,7 @@ window.refrescarTotalNominaEnVivo = async function (btn) {
 
   try {
     let res = await fetch(window.URL_OBTENER_HORAS);
-    let data = await res.json();
+    let data = await parsearRespuestaJSONSegura(res);
     if (data && data.status === "success")
       window.currentHorasStock = data.data || [];
   } catch (e) {
