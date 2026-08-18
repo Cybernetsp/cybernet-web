@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO EXACTO BASADO EN RELOJ REAL
+// 2. CRONÓMETRO EXACTO BASADO EN RELOJ REAL CON DETECCIÓN DE BRECHAS
 // ==========================================
 let secCronometroTotal = 0;
 let timerInterval = null;
@@ -108,7 +108,7 @@ function limpiarCacheShift() {
   localStorage.removeItem("cyber_shift_active");
   localStorage.removeItem("cyber_shift_start_ts");
   localStorage.removeItem("cyber_shift_last_saved_ts");
-  localStorage.removeItem("cyber_shift_accumulated");
+  localStorage.removeItem("cyber_shift_accumulated_sec");
   localStorage.removeItem("cyber_shift_unsaved_sec");
 }
 
@@ -127,7 +127,7 @@ window.verificarEIniciarTurnoAuto = function () {
     return;
   }
 
-  // 🚀 INICIALIZA EL TURNO DE FORMA AUTOMÁTICA
+  // 🚀 INICIALIZA EL TURNO DE FORMA AUTOMÁTICA SI ESTÁ LOGUEADO
   iniciarTurnoTracker(true);
 };
 
@@ -177,6 +177,20 @@ function iniciarTurnoTracker(esAuto = false) {
     localStorage.setItem("cyber_shift_date", todayStr);
     localStorage.setItem("cyber_shift_start_ts", startTs);
     localStorage.setItem("cyber_shift_last_saved_ts", lastSavedTs);
+    localStorage.setItem("cyber_shift_accumulated_sec", "0");
+  }
+
+  // 🛡️ PROTECCIÓN CONTRA TIEMPO DESCONECTADO (SI CERRÓ PÁGINA > 3 MINUTOS)
+  const MAX_GAP_ALLOWED_MS = 180000; // 3 minutos
+  if (lastSavedTs > 0 && now - lastSavedTs > MAX_GAP_ALLOWED_MS) {
+    let secAcumuladosPrevios = parseInt(
+      localStorage.getItem("cyber_shift_accumulated_sec") || "0",
+      10,
+    );
+    startTs = now - secAcumuladosPrevios * 1000;
+    lastSavedTs = now;
+    localStorage.setItem("cyber_shift_start_ts", startTs);
+    localStorage.setItem("cyber_shift_last_saved_ts", lastSavedTs);
   }
 
   if (!lastSavedTs) {
@@ -196,11 +210,12 @@ function iniciarTurnoTracker(esAuto = false) {
   const actualizarRelojReal = () => {
     let actualNow = Date.now();
     secCronometroTotal = Math.max(0, Math.floor((actualNow - startTs) / 1000));
+    localStorage.setItem("cyber_shift_accumulated_sec", secCronometroTotal);
 
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // 🎯 AUTOGUARDADO CADA 60 SEGUNDOS
+    // 🎯 AUTOGUARDADO CADA 60 SEGUNDOS REALES
     let unsavedSec = Math.floor((actualNow - lastSavedTs) / 1000);
     if (unsavedSec >= 60) {
       enviarTiempoTrackerAMySQL(
