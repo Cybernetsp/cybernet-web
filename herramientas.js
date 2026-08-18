@@ -564,14 +564,45 @@ function renderizarCodigosBandeja(res, contenedor) {
       return;
     }
 
+    // 🔥 ORDENAMIENTO EN VIVO: Siempre del más reciente (más nuevo) al más antiguo
+    res.data.sort((a, b) => {
+      function getMins(t) {
+        if (!t) return 0;
+        let p = t.trim().split(" ");
+        let hm = p[0].split(":");
+        let h = parseInt(hm[0], 10);
+        let m = parseInt(hm[1], 10);
+        let ampm = p[1] ? p[1].toUpperCase() : "";
+        if (h === 12) h = 0;
+        if (ampm === "PM") h += 12;
+        return h * 60 + m;
+      }
+
+      let minA = getMins(a.hora);
+      let minB = getMins(b.hora);
+
+      // Margen de seguridad si las horas cruzan la medianoche
+      if (minA - minB > 720) minB += 1440;
+      else if (minB - minA > 720) minA += 1440;
+
+      return minB - minA; // Desendente: Muestra el mayor (más reciente) primero
+    });
+
     let html = "";
     res.data.forEach((item) => {
       let safeCopiedText = encodeURIComponent(item.copiadoRapido || "").replace(
         /'/g,
         "%27",
       );
+
+      // 🔍 DATA-SEARCH: Guarda los datos ocultos para que el buscador los encuentre
+      let searchData =
+        `${item.correo} ${item.plataforma} ${item.accion} ${item.codigoLink}`
+          .toLowerCase()
+          .replace(/"/g, "&quot;");
+
       html += `
-        <div class="card-ios" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 16px; margin-bottom: 0px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <div class="card-ios" data-search="${searchData}" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 16px; margin-bottom: 0px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="width: 8px; height: 8px; border-radius: 50%; background: ${item.colorText}; box-shadow: 0 0 10px ${item.colorText};"></span>
@@ -611,15 +642,18 @@ window.refrescarCodigosModal = function () {
   window.cargarBandejaCodigosMySQL(true);
 };
 
+// 🔍 BUSCADOR EN VIVO DE CÓDIGOS REPARADO
 window.filtrarCodigosInternos = function () {
-  const query = document.getElementById("searchCodesInput").value.toLowerCase();
+  const buscador = document.getElementById("searchCodesInput");
+  const query = buscador ? buscador.value.toLowerCase().trim() : "";
   const cards = document.querySelectorAll("#codesScrollArea .card-ios");
-  for (let i = 0; i < cards.length; i++) {
-    let card = cards[i];
-    card.style.display = card.innerText.toLowerCase().includes(query)
-      ? "flex"
-      : "none";
-  }
+
+  cards.forEach((card) => {
+    // 💡 Busca en los datos invisibles (correo, enlace, etc.) o en el texto visible
+    const contenido =
+      card.getAttribute("data-search") || card.innerText.toLowerCase();
+    card.style.display = contenido.includes(query) ? "flex" : "none";
+  });
 };
 
 /* ==========================================================================
