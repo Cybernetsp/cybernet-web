@@ -3,7 +3,7 @@
    ========================================================================== */
 
 /* ==========================================================================
-   💳 CYBERNET OS - MÓDULO MODAL PAGOS BRE-B (MYSQL ULTRA RÁPIDO)
+   💳 CYBERNET OS - MÓDULO MODAL PAGOS BRE-B (MYSQL CON BANCO Y FECHA)
    ========================================================================== */
 const URL_PAGOS_BREB_MYSQL =
   "https://api.cybernetsp.com/obtener_pagos_breb.php";
@@ -52,7 +52,7 @@ window.establecerFechaHoyBreBModal = function () {
   }
 };
 
-// 📥 CONSULTA EN TIEMPO REAL A MYSQL (ULTRA RÁPIDA - MILISEGUNDOS)
+// 📥 CONSULTA EN TIEMPO REAL A MYSQL (CON BANCO Y FILTRO DE FECHA)
 window.cargarPagosBreBModal = function () {
   const contenedor = document.getElementById("breb-lista-modal");
   const totalInlineElem = document.getElementById("breb-monto-total-inline");
@@ -62,7 +62,7 @@ window.cargarPagosBreBModal = function () {
   contenedor.innerHTML = `
     <div style="color: #0a84ff; text-align: center; padding: 50px 20px; font-weight: 700; font-size: 0.88rem; display: flex; flex-direction: column; align-items: center; gap: 12px;">
       <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-      <span>Sincronizando pagos de MySQL...</span>
+      <span>Buscando pagos registrados en MySQL...</span>
     </div>`;
 
   const inputFecha = document.getElementById("breb-fecha-modal");
@@ -98,22 +98,25 @@ window.cargarPagosBreBModal = function () {
 
           const montoStr = pago.valor || numMonto.toLocaleString("es-CO");
           const fechaHora = pago.fecha || "";
-          const refText = pago.referencia
-            ? ` | Ref: <b style="color:#0a84ff;">${pago.referencia}</b>`
-            : "";
+          const bancoOrigen = pago.banco ? pago.banco.toUpperCase() : "BRE-B";
+          const refText = pago.referencia || "";
 
           const esUsado = pago.estado === "usado";
           const estadoBadge = esUsado
-            ? `<span style="color:#ff453a; font-size:0.7rem; font-weight:800; background:rgba(255,69,58,0.12); padding:2px 6px; border-radius:6px; margin-left:6px;">USADO</span>`
-            : `<span style="color:#30d158; font-size:0.7rem; font-weight:800; background:rgba(48,209,88,0.12); padding:2px 6px; border-radius:6px; margin-left:6px;">DISPONIBLE</span>`;
+            ? `<div style="margin-top:6px;"><span style="color:#ff453a; font-size:0.72rem; font-weight:800; background:rgba(255,69,58,0.15); padding:3px 10px; border-radius:6px;">USADO</span></div>`
+            : `<div style="margin-top:6px;"><span style="color:#30d158; font-size:0.72rem; font-weight:800; background:rgba(48,209,88,0.15); padding:3px 10px; border-radius:6px;">DISPONIBLE</span></div>`;
 
-          // 🟢 FORMATO LINEAL CONTINUO EN UNA SOLA LÍNEA
+          // 🟢 TARJETA iOS DETALLADA CON BANCO Y FECHA
           html += `
-            <div class="breb-card" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px; padding: 10px 14px; font-size: 0.81rem; line-height: 1.4; color: rgba(255, 255, 255, 0.7); transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.borderColor='rgba(48, 209, 88, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.06)';">
-              <strong style="color: #ffffff; font-weight: 800; letter-spacing: 0.2px;">${cliente}</strong>
-              <span style="color: rgba(255, 255, 255, 0.55);"> envió </span>
-              <span style="color: #30d158; font-weight: 900; font-family: monospace; font-size: 0.88rem;">+$${montoStr}</span>
-              <span style="color: rgba(255, 255, 255, 0.45); font-size: 0.73rem;"> (${fechaHora}${refText})</span>
+            <div class="breb-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 16px; font-size: 0.83rem; line-height: 1.5; color: rgba(255, 255, 255, 0.8); transition: all 0.2s ease; margin-bottom: 8px;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(48, 209, 88, 0.4)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
+              <div style="font-weight: 800; color: #ffffff; font-size: 0.92rem; letter-spacing: 0.3px; text-transform: uppercase;">${cliente}</div>
+              <div style="margin-top: 2px;">
+                <span style="color: rgba(255, 255, 255, 0.6);">envió </span>
+                <span style="color: #30d158; font-weight: 900; font-family: monospace; font-size: 0.95rem;">+$${montoStr}</span>
+              </div>
+              <div style="color: rgba(255, 255, 255, 0.5); font-size: 0.76rem; margin-top: 3px;">
+                (${fechaHora} | desde <b style="color: #0a84ff;">${bancoOrigen}</b> | Ref: <b style="color: #0a84ff;">${refText}</b>)
+              </div>
               ${estadoBadge}
             </div>`;
         });
@@ -152,7 +155,7 @@ window.cargarPagosBreBModal = function () {
           totalInlineElem.style.display = "none";
         }
       } else {
-        contenedor.innerHTML = `<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 50px 20px; font-size: 0.85rem; font-weight: 600;">📭 No se detectaron pagos registrados en MySQL</div>`;
+        contenedor.innerHTML = `<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 50px 20px; font-size: 0.85rem; font-weight: 600;">📭 No hay pagos registrados para la fecha seleccionada</div>`;
         if (totalInlineElem) totalInlineElem.style.display = "none";
       }
     })
