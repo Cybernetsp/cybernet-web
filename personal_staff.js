@@ -104,6 +104,7 @@ let turnoActivo = false;
 
 function limpiarCacheShift() {
   localStorage.removeItem("cyber_shift_vendedor");
+  localStorage.removeItem("cyber_shift_date");
   localStorage.removeItem("cyber_shift_active");
   localStorage.removeItem("cyber_shift_start_ts");
   localStorage.removeItem("cyber_shift_last_saved_ts");
@@ -120,19 +121,14 @@ window.verificarEIniciarTurnoAuto = function () {
     .toUpperCase()
     .trim();
 
-  if (!activeStaff || activeStaff === "STAFF" || activeStaff === "CAMILO")
+  // 🔒 EXIGE SIEMPRE INICIAR SESIÓN CON UN TRABAJADOR
+  if (!activeStaff || activeStaff === "STAFF" || activeStaff === "CAMILO") {
+    limpiarCacheShift();
     return;
-
-  let savedVendedor = localStorage.getItem("cyber_shift_vendedor");
-  let activeState = localStorage.getItem("cyber_shift_active");
-
-  if (
-    savedVendedor &&
-    savedVendedor === activeStaff &&
-    activeState === "true"
-  ) {
-    iniciarTurnoTracker(true);
   }
+
+  // 🚀 INICIALIZA EL TURNO DE FORMA AUTOMÁTICA
+  iniciarTurnoTracker(true);
 };
 
 window.toggleTrackerShift = function () {
@@ -152,7 +148,7 @@ function iniciarTurnoTracker(esAuto = false) {
   if (!activeStaff || activeStaff === "STAFF" || activeStaff === "CAMILO") {
     if (!esAuto) {
       alert(
-        "⚠️ Inicia sesión con el nombre de un Asistente para rastrear tu tiempo de trabajo.",
+        "⚠️ Debes iniciar sesión con tu cuenta de trabajador para activar el turno.",
       );
     }
     return;
@@ -161,7 +157,9 @@ function iniciarTurnoTracker(esAuto = false) {
   if (turnoActivo) return;
 
   let now = Date.now();
+  let todayStr = new Date().toLocaleDateString("es-CO");
   let savedVendedor = localStorage.getItem("cyber_shift_vendedor");
+  let savedDate = localStorage.getItem("cyber_shift_date");
   let startTs = parseInt(
     localStorage.getItem("cyber_shift_start_ts") || "0",
     10,
@@ -171,10 +169,12 @@ function iniciarTurnoTracker(esAuto = false) {
     10,
   );
 
-  if (savedVendedor !== activeStaff || !startTs) {
+  // Reset del cronómetro si cambia de día o de trabajador
+  if (savedVendedor !== activeStaff || savedDate !== todayStr || !startTs) {
     startTs = now;
     lastSavedTs = now;
     localStorage.setItem("cyber_shift_vendedor", activeStaff);
+    localStorage.setItem("cyber_shift_date", todayStr);
     localStorage.setItem("cyber_shift_start_ts", startTs);
     localStorage.setItem("cyber_shift_last_saved_ts", lastSavedTs);
   }
@@ -200,6 +200,7 @@ function iniciarTurnoTracker(esAuto = false) {
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
+    // 🎯 AUTOGUARDADO CADA 60 SEGUNDOS
     let unsavedSec = Math.floor((actualNow - lastSavedTs) / 1000);
     if (unsavedSec >= 60) {
       enviarTiempoTrackerAMySQL(
@@ -219,7 +220,7 @@ function iniciarTurnoTracker(esAuto = false) {
 
   if (typeof triggerToast === "function" && !esAuto) {
     triggerToast(
-      `<div style="color:var(--ios-green);">▶ Turno activo para ${activeStaff}. Tiempo real sincronizado.</div>`,
+      `<div style="color:var(--ios-green);">▶ Turno activo para ${activeStaff}. Sincronización en vivo.</div>`,
     );
   }
 }
@@ -268,7 +269,7 @@ function detenerTurnoTracker() {
 
   if (typeof triggerToast === "function") {
     triggerToast(
-      `<div style="color:var(--ios-red);">⏹ Turno pausado y tiempo registrado.</div>`,
+      `<div style="color:var(--ios-red);">⏹ Turno pausado y tiempo guardado.</div>`,
     );
   }
 }
