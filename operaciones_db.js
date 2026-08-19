@@ -83,7 +83,8 @@ window.mostrarEstadoSinCortes = function () {
 
 // 🗓️ HELPER DE LECTURA DE VENCIMIENTO Y CONVERSIÓN A TIMESTAMP
 function parsearFechaCorteMs(fStr) {
-  if (!fStr || fStr === "-" || fStr === "N/A") return 9999999999999;
+  if (!fStr || fStr === "-" || fStr === "N/A" || fStr === "SIN FECHA")
+    return 9999999999999;
   if (fStr instanceof Date) return fStr.getTime();
 
   let str = String(fStr).trim().toUpperCase();
@@ -178,7 +179,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     return;
   }
 
-  // 1. Extraer el vencimiento real desde las propiedades devueltas por MySQL
+  // 1. Extraer el vencimiento real enviado por MySQL
   cuentas.forEach((c) => {
     let rawVenc =
       c.vencimiento ||
@@ -192,10 +193,10 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     c._vencTexto = rawVenc && rawVenc !== "-" ? rawVenc : "Sin Fecha";
   });
 
-  // 2. Encontrar el día de vencimiento más antiguo pendiente
+  // 2. Encontrar el día de vencimiento más antiguo de la lista
   let minTs = Math.min(...cuentas.map((c) => c._tsVenc));
 
-  // 3. Filtrar estrictamente solo las cuentas del lote del día más antiguo
+  // 3. Filtrar estrictamente solo las cuentas pertenecientes al lote del día más antiguo
   let cuentasLoteActual = [];
   if (minTs === 9999999999999) {
     cuentasLoteActual = cuentas;
