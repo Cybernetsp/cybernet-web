@@ -246,3 +246,39 @@ window.toggleYopmailPanel = () => {
   const input = document.getElementById("inputYopmailCorreos");
   if (input) setTimeout(() => input.focus(), 150);
 };
+// 🔒 VERIFICACIÓN DE SUPERADMIN PARA MOSTRAR BOTÓN DE PRECIOS
+document.addEventListener("DOMContentLoaded", () => {
+  // Verifica el usuario guardado (Ajusta 'Camilo' según cómo lo escribas exacto en tu BD)
+  const usuarioActivo =
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "";
+
+  if (usuarioActivo.toUpperCase() === "CAMILO") {
+    const btnPrecios = document.getElementById("menuBtnPrecios");
+    if (btnPrecios) btnPrecios.style.display = "block";
+  }
+});
+
+// 📱 FUNCIÓN PARA ABRIR/CERRAR EL MODAL
+window.togglePreciosPanel = function () {
+  if (typeof haptic === "function") haptic();
+  const overlay = document.getElementById("preciosTiendaOverlay");
+  if (!overlay) return;
+
+  if (overlay.style.display === "flex") {
+    overlay.style.display = "none";
+  } else {
+    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
+    overlay.style.display = "flex";
+    // Aquí puedes llamar a la función que descarga los precios de la BD
+    // cargarPreciosTiendaDesdeMySQL();
+  }
+};
+
+window.guardarPreciosTienda = function () {
+  if (typeof haptic === "function") haptic();
+  alert(
+    "Función lista para conectarse al PHP y actualizar los precios de la tienda.",
+  );
+};
