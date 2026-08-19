@@ -81,17 +81,17 @@ window.mostrarEstadoSinCortes = function () {
     </div>`;
 };
 
-// 🗓️ HELPER ULTRA-ROBUSTO DE LECTURA Y CONVERSIÓN A TIMESTAMP PARA VENCIMIENTO
+// 🗓️ HELPER ULTRA-ESTRICTO PARA CONVERTIR FECHA (EJ: 18DEAGOSTO -> TIMESTAMP)
 function parsearFechaCorteMs(fStr) {
-  if (!fStr) return 0;
+  if (!fStr) return 9999999999999;
   if (fStr instanceof Date) return fStr.getTime();
 
-  let str = String(fStr).trim().toLowerCase();
+  let str = String(fStr).trim().toUpperCase();
 
-  // Limpiar formatos como "18DEAGOSTO", "18-AGOSTO", "18 de agosto"
+  // Normalizar separadores y formatos como "18DEAGOSTO", "18 DE AGOSTO", "18-AGO"
   str = str
-    .replace(/(\d+)\s*de\s*/gi, "$1 ")
-    .replace(/(\d+)de/gi, "$1 ")
+    .replace(/(\d+)\s*DE\s*/gi, "$1 ")
+    .replace(/(\d+)DE/gi, "$1 ")
     .replace(/[\/-]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -99,65 +99,50 @@ function parsearFechaCorteMs(fStr) {
   let hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
-  if (
-    str.includes("antes de ayer") ||
-    str.includes("anteayer") ||
-    str.includes("antes_ayer")
-  ) {
+  if (str.includes("ANTEAYER") || str.includes("ANTES DE AYER")) {
     return hoy.getTime() - 2 * 86400000;
   }
-  if (str.includes("ayer")) {
+  if (str.includes("AYER")) {
     return hoy.getTime() - 86400000;
   }
-  if (str.includes("hoy")) {
+  if (str.includes("HOY")) {
     return hoy.getTime();
   }
 
-  if (/^\d{4}\s+\d{1,2}\s+\d{1,2}/.test(str)) {
-    let p = str.split(" ");
-    return (
-      new Date(
-        parseInt(p[0], 10),
-        parseInt(p[1], 10) - 1,
-        parseInt(p[2], 10),
-      ).getTime() || 0
-    );
-  }
-
   const mesesAbrev = [
-    "ene",
-    "feb",
-    "mar",
-    "abr",
-    "may",
-    "jun",
-    "jul",
-    "ago",
-    "sep",
-    "oct",
-    "nov",
-    "dic",
+    "ENE",
+    "FEB",
+    "MAR",
+    "ABR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AGO",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DIC",
   ];
   const mesesCompletos = [
-    "enero",
-    "febrero",
-    "marzo",
-    "abril",
-    "mayo",
-    "junio",
-    "julio",
-    "agosto",
-    "septiembre",
-    "octubre",
-    "noviembre",
-    "diciembre",
+    "ENERO",
+    "FEBRERO",
+    "MARZO",
+    "ABRIL",
+    "MAYO",
+    "JUNIO",
+    "JULIO",
+    "AGOSTO",
+    "SEPTIEMBRE",
+    "OCTUBRE",
+    "NOVIEMBRE",
+    "DICIEMBRE",
   ];
 
-  let matchDiaMes = str.match(/^(\d{1,2})\s+([a-z0-9]+)(?:\s+(\d{2,4}))?/i);
+  let matchDiaMes = str.match(/^(\d{1,2})\s*([A-Z]+)(?:\s*(\d{2,4}))?/);
 
   if (matchDiaMes) {
     let dia = parseInt(matchDiaMes[1], 10);
-    let mesStr = matchDiaMes[2].toLowerCase();
+    let mesStr = matchDiaMes[2];
     let anio = matchDiaMes[3]
       ? parseInt(matchDiaMes[3], 10)
       : hoy.getFullYear();
@@ -179,7 +164,7 @@ function parsearFechaCorteMs(fStr) {
   }
 
   let d = new Date(fStr);
-  return isNaN(d.getTime()) ? 0 : d.getTime();
+  return isNaN(d.getTime()) ? 9999999999999 : d.getTime();
 }
 
 window.renderizarTarjetasCortesNetflix = function (cuentas) {
@@ -194,24 +179,48 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     return;
   }
 
-  // 🎯 PRIORIDAD VENCIMIENTO: ANTES DE AYER (17) ➔ AYER (18) ➔ HOY (19)
-  cuentas.sort((a, b) => {
-    let fA = parsearFechaCorteMs(
-      a.vencimiento || a.fecha_corte || a.dia || a.fecha || a.created_at || "",
-    );
-    let fB = parsearFechaCorteMs(
-      b.vencimiento || b.fecha_corte || b.dia || b.fecha || b.created_at || "",
-    );
-    return fA - fB; // Menor fecha (más antigua) primero
+  // 1. Asignar marca de tiempo precisa según fecha de vencimiento
+  cuentas.forEach((c) => {
+    let rawVenc = c.vencimiento || c.fecha_corte || c.dia || c.fecha || "";
+    c._tsVenc = parsearFechaCorteMs(rawVenc);
+    c._vencTexto = rawVenc || "Sin Fecha";
   });
 
-  let html = "";
-  cuentas.forEach((cuenta) => {
+  // 2. Obtener el día más antiguo presente en la lista
+  let minTs = Math.min(...cuentas.map((c) => c._tsVenc));
+
+  // 3. Filtrar estrictamente solo las cuentas pertenecientes al día más antiguo
+  let cuentasLoteActual = cuentas.filter((c) => {
+    let dC = new Date(c._tsVenc);
+    let dMin = new Date(minTs);
+    return (
+      dC.getFullYear() === dMin.getFullYear() &&
+      dC.getMonth() === dMin.getMonth() &&
+      dC.getDate() === dMin.getDate()
+    );
+  });
+
+  let fechaCabeceraTexto = cuentasLoteActual[0]._vencTexto;
+
+  let html = `
+    <!-- Encabezado de Lote Activo por Día -->
+    <div style="background: rgba(255, 69, 58, 0.12); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+      <span style="font-size: 0.78rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">
+        🚨 Lote Prioritario: ${fechaCabeceraTexto}
+      </span>
+      <span style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700; font-family: monospace;">
+        Pendientes: ${cuentasLoteActual.length} / ${cuentas.length}
+      </span>
+    </div>
+  `;
+
+  cuentasLoteActual.forEach((cuenta) => {
     let correo = cuenta.correo || "Sin correo";
     let claveVieja = cuenta.clave_actual || cuenta.clave || "fuego41@@";
     let claveNueva = cuenta.clave_nueva || window.generarClaveTVAleatoria();
     let perfiles = cuenta.perfiles_afectados || "1, 2, 3, 4, 5";
     let idCuenta = cuenta.id || "";
+    let vencimientoVer = cuenta._vencTexto;
 
     html += `
       <div style="background: #2a2a2e; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; position: relative; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: all 0.2s ease;">
@@ -219,14 +228,19 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
           <!-- Efecto Glow Rojo Superior -->
           <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #ff3b30, transparent); box-shadow: 0 0 12px #ff3b30; opacity: 0.7;"></div>
 
-          <!-- Correo (Clickeable) -->
-          <div 
-            onclick="copiarTextoLigero('${correo}', this, 'correo')"
-            title="Clic para copiar"
-            style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; padding-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);"
-          >
-              <div style="width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; box-shadow: 0 0 6px #ff3b30;"></div>
-              <span style="font-family: monospace; font-weight: 800; color: #ffffff; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${correo}</span>
+          <!-- Correo y Vencimiento -->
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <div 
+                onclick="copiarTextoLigero('${correo}', this, 'correo')"
+                title="Clic para copiar correo"
+                style="display: flex; align-items: center; gap: 8px; cursor: pointer; flex: 1; overflow: hidden;"
+              >
+                  <div style="width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; box-shadow: 0 0 6px #ff3b30; flex-shrink: 0;"></div>
+                  <span style="font-family: monospace; font-weight: 800; color: #ffffff; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${correo}</span>
+              </div>
+              <span style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">
+                  📅 Vence: ${vencimientoVer}
+              </span>
           </div>
 
           <!-- Bloque de Claves -->
