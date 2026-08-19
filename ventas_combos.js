@@ -3,7 +3,35 @@
    ========================================================================== */
 
 window.stockPlataformasVentas = {};
+window.preciosCotizadorCache = window.preciosCotizadorCache || {};
 let contadorFilasVentas = 0;
+
+// =========================================================================
+// 🔄 SINCRONIZACIÓN DE PRECIOS DESDE MYSQL PARA EL COTIZADOR
+// =========================================================================
+window.sincronizarPreciosCotizador = function () {
+  const formData = new FormData();
+  formData.append("accion", "obtener");
+  formData.append("tipo", "clientes");
+
+  fetch("https://api.cybernetsp.com/api_precios.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.status === "success" && Array.isArray(data.data)) {
+        data.data.forEach((item) => {
+          window.preciosCotizadorCache[item.codigo] =
+            Math.round(parseFloat(item.precio)) || 0;
+        });
+        window.calcularPreciosSistemaCotizador();
+      }
+    })
+    .catch((err) =>
+      console.error("Error al sincronizar precios del cotizador:", err),
+    );
+};
 
 // =========================================================================
 // 📦 CARGA DE STOCK PARA EL PANEL DE VENTAS
@@ -596,7 +624,6 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
         if (data.status === "success" || data.status === "parcial") {
           if (typeof toggleVentasPanel === "function") toggleVentasPanel();
 
-          // 🎯 SALUDO INTELIGENTE: Si no hay nombre real, dice únicamente "🌟 *¡Hola!*"
           let nombreSaludo =
             clienteNombre &&
             clienteNombre !== "Sin Nombre" &&
@@ -604,7 +631,6 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
               ? " " + clienteNombre.trim()
               : "";
 
-          // 🎯 DETECCIÓN DE SI ES UNA RENOVACIÓN EXCLUSIVA DE NETFLIX
           let esSoloNetflixRenovacion = false;
           if (data.entregados && data.entregados.length === 1) {
             let itemUnico = data.entregados[0];
@@ -642,7 +668,6 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                   .toLowerCase()
                   .includes("reno");
 
-                // 🗓️ CÁLCULO DE VENCIMIENTO REFORZADO SI EL SERVIDOR REGRESA NULL
                 let vencVal = item.vencimiento;
                 if (
                   !vencVal ||
@@ -670,7 +695,6 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                   vencVal = dV.getDate() + "DE" + mesesMayus[dV.getMonth()];
                 }
 
-                // 🎯 FORMATO ELEGANTE ESPECIAL PARA RENOVACIÓN DE NETFLIX
                 if (item.plataforma === "NETFLIX" && esRenoItem) {
                   fichaTexto += `\n🔄 *RENOVACIÓN DE NETFLIX PREMIUM*${textoMeses} ✅\n────────────────────\n`;
                   fichaTexto += `👤 *Correo:* ${item.correo || "-"}\n🔐 *Contraseña:* ${item.clave || "-"}\n🌐 *Perfil:* ${item.perfil || "1"}\n`;
@@ -846,12 +870,17 @@ window.cerrarModalVentaGenerada = function () {
 };
 
 // =========================================================================
-// 🧮 COTIZADOR INTELIGENTE (ALGORITMO MAX-BASE)
+// 🧮 COTIZADOR INTELIGENTE (SIN VALORES HARDCODEADOS - BASADO EN MYSQL)
 // =========================================================================
 const oldAbrirCalculadoraCombos = window.abrirCalculadoraCombos;
 window.abrirCalculadoraCombos = function () {
   if (oldAbrirCalculadoraCombos) oldAbrirCalculadoraCombos();
   if (typeof haptic === "function") haptic();
+
+  // Sincronizar precios en vivo desde MySQL al abrir
+  if (typeof window.sincronizarPreciosCotizador === "function") {
+    window.sincronizarPreciosCotizador();
+  }
 
   const container = document.getElementById("contenedorPlataformasCotizador");
 
@@ -864,7 +893,7 @@ window.abrirCalculadoraCombos = function () {
       "border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);";
     iptvRow.innerHTML = `
       <label style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; width: 100%; box-sizing: border-box;">
-          <span style="font-size: 0.9rem; font-weight: 600; color: #30d158">IPTV Smarters ($7k)</span>
+          <span style="font-size: 0.9rem; font-weight: 600; color: #30d158">IPTV Smarters</span>
           <input type="checkbox" class="chk-cotizar-plat" value="IPTV" data-tipo="herramienta" onchange="window.controlarDisneyMutuo(this); window.calcularPreciosSistemaCotizador();" style="accent-color: #0a84ff; width: 18px; height: 18px; cursor: pointer;" />
       </label>
     `;
@@ -883,20 +912,12 @@ window.abrirCalculadoraCombos = function () {
       "border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);";
     dgoRow.innerHTML = `
       <label style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; width: 100%; box-sizing: border-box;">
-          <span style="font-size: 0.9rem; font-weight: 600; color: #00bfff">Directv Go ($30k)</span>
+          <span style="font-size: 0.9rem; font-weight: 600; color: #00bfff">Directv Go</span>
           <input type="checkbox" class="chk-cotizar-plat" value="DIRECTV-GO" data-tipo="herramienta" onchange="window.controlarDisneyMutuo(this); window.calcularPreciosSistemaCotizador();" style="accent-color: #0a84ff; width: 18px; height: 18px; cursor: pointer;" />
       </label>
     `;
     container.appendChild(dgoRow);
   }
-
-  document.querySelectorAll(".row-cotizar-plat label span").forEach((span) => {
-    if (span.innerText.includes("Spotify")) span.innerText = "Spotify ($14k)";
-    if (span.innerText.includes("Deezer")) span.innerText = "Deezer ($12k)";
-    if (span.innerText.includes("Metegol")) span.innerText = "Metegol ($15k)";
-    if (span.innerText.includes("YouTube"))
-      span.innerText = "YouTube Premium ($14k)";
-  });
 
   document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
     if (!row.querySelector(".cotizador-pantallas-wrapper")) {
@@ -1012,25 +1033,102 @@ window.filtrarPlataformasCotizador = function () {
     });
 };
 
+// 🧮 ALGORITMO DINÁMICO REFORZADO - CONSULTA PRECIOS REALES DE MYSQL DE LA CACHE
 window.calcularPreciosSistemaCotizador = function () {
+  const getPrecioDB = (codigo, defecto) => {
+    return window.preciosCotizadorCache &&
+      window.preciosCotizadorCache[codigo] > 0
+      ? window.preciosCotizadorCache[codigo]
+      : defecto;
+  };
+
   const mapValores = {
-    "DISNEY-PREMIUM": { indiv: 15000, combo: 10000, isTier: false },
-    "Amazon Prime": { indiv: 10500, combo: 5000, isTier: true },
-    "Disney Estándar": { indiv: 8500, combo: 4000, isTier: true },
-    Max: { id: "MAX", indiv: 8500, combo: 3000, isTier: true },
-    "Apple TV": { indiv: 8500, combo: 3000, isTier: true },
-    Crunchyroll: { indiv: 8500, combo: 3000, isTier: true },
-    Plex: { indiv: 8500, combo: 3000, isTier: true },
-    "Universal+": { indiv: 8500, combo: 3000, isTier: true },
-    Vix: { indiv: 8500, combo: 3000, isTier: true },
-    "DIRECTV-GO": { indiv: 30000, combo: 25000, isTier: false },
-    "Paramount+": { indiv: 15000, combo: 13000, isTier: false },
-    Metegol: { indiv: 15000, combo: 12000, isTier: false },
-    Spotify: { indiv: 14000, combo: 10000, isTier: false },
-    "YouTube Premium": { indiv: 14000, combo: 14000, isTier: false },
-    Deezer: { indiv: 12000, combo: 8000, isTier: false },
-    "Canva Pro": { indiv: 20000, combo: 20000, isTier: false },
-    IPTV: { indiv: 7000, combo: 7000, isTier: false },
+    "DISNEY-PREMIUM": {
+      indiv: getPrecioDB("DISNEY-PREMIUM", 15000),
+      combo: Math.round(getPrecioDB("DISNEY-PREMIUM", 15000) * 0.66),
+      isTier: false,
+    },
+    "Amazon Prime": {
+      indiv: getPrecioDB("AMAZON-PRIME-VIDEO", 10500),
+      combo: Math.round(getPrecioDB("AMAZON-PRIME-VIDEO", 10500) * 0.48),
+      isTier: true,
+    },
+    "Disney Estándar": {
+      indiv: getPrecioDB("DISNEY-ESTANDAR", 8500),
+      combo: Math.round(getPrecioDB("DISNEY-ESTANDAR", 8500) * 0.47),
+      isTier: true,
+    },
+    Max: {
+      id: "MAX",
+      indiv: getPrecioDB("HBO-MAX", 8500),
+      combo: Math.round(getPrecioDB("HBO-MAX", 8500) * 0.35),
+      isTier: true,
+    },
+    "Apple TV": {
+      indiv: getPrecioDB("APPLE", 8500),
+      combo: Math.round(getPrecioDB("APPLE", 8500) * 0.35),
+      isTier: true,
+    },
+    Crunchyroll: {
+      indiv: getPrecioDB("CRUNCHYROLL", 8500),
+      combo: Math.round(getPrecioDB("CRUNCHYROLL", 8500) * 0.35),
+      isTier: true,
+    },
+    Plex: {
+      indiv: getPrecioDB("PLEX", 8500),
+      combo: Math.round(getPrecioDB("PLEX", 8500) * 0.35),
+      isTier: true,
+    },
+    "Universal+": {
+      indiv: getPrecioDB("UNIVERSAL", 8500),
+      combo: Math.round(getPrecioDB("UNIVERSAL", 8500) * 0.35),
+      isTier: true,
+    },
+    Vix: {
+      indiv: getPrecioDB("VIX", 8500),
+      combo: Math.round(getPrecioDB("VIX", 8500) * 0.35),
+      isTier: true,
+    },
+    "DIRECTV-GO": {
+      indiv: getPrecioDB("DIRECTV-GO", 30000),
+      combo: Math.round(getPrecioDB("DIRECTV-GO", 30000) * 0.83),
+      isTier: false,
+    },
+    "Paramount+": {
+      indiv: getPrecioDB("PARAMOUNT", 15000),
+      combo: Math.round(getPrecioDB("PARAMOUNT", 15000) * 0.86),
+      isTier: false,
+    },
+    Metegol: {
+      indiv: getPrecioDB("METEGOL", 15000),
+      combo: getPrecioDB("METEGOL", 15000),
+      isTier: false,
+    },
+    Spotify: {
+      indiv: getPrecioDB("SPOTIFY", 14000),
+      combo: getPrecioDB("SPOTIFY", 14000),
+      isTier: false,
+    },
+    "YouTube Premium": {
+      indiv: getPrecioDB("YOUTUBE", 14000),
+      combo: getPrecioDB("YOUTUBE", 14000),
+      isTier: false,
+    },
+    Deezer: {
+      indiv: getPrecioDB("DEEZER", 12000),
+      combo: getPrecioDB("DEEZER", 12000),
+      isTier: false,
+    },
+    "Canva Pro": {
+      indiv: getPrecioDB("CANVA", 20000),
+      combo: getPrecioDB("CANVA", 20000),
+      isTier: false,
+    },
+    IPTV: {
+      indiv: getPrecioDB("IPTV", 7000),
+      combo: getPrecioDB("IPTV", 7000),
+      isTier: false,
+    },
   };
 
   let precioBaseUnMes = 0;
@@ -1041,6 +1139,8 @@ window.calcularPreciosSistemaCotizador = function () {
   let countDisneyPremium = 0;
   let countTierEligible = 0;
   let arrayAddonsDirectosYExtras = [];
+
+  let pNet = getPrecioDB("NETFLIX", 15000);
 
   document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
     const cb = row.querySelector(".chk-cotizar-plat");
@@ -1053,11 +1153,15 @@ window.calcularPreciosSistemaCotizador = function () {
 
       if (val === "NETFLIX") {
         tieneNetflix = true;
-        if (pantallas === 1) costoNetflixCalculado = 15000;
-        else if (pantallas === 2) costoNetflixCalculado = 27000;
-        else if (pantallas === 3) costoNetflixCalculado = 37000;
-        else if (pantallas === 4) costoNetflixCalculado = 47000;
-        else if (pantallas >= 5) costoNetflixCalculado = 56000;
+        if (pantallas === 1) costoNetflixCalculado = pNet;
+        else if (pantallas === 2)
+          costoNetflixCalculado = Math.round(pNet * 1.8);
+        else if (pantallas === 3)
+          costoNetflixCalculado = Math.round(pNet * 2.46);
+        else if (pantallas === 4)
+          costoNetflixCalculado = Math.round(pNet * 3.13);
+        else if (pantallas >= 5)
+          costoNetflixCalculado = Math.round(pNet * 3.73);
       } else {
         if (mapValores[val]) {
           for (let i = 0; i < pantallas; i++) allOtherScreens.push(val);
@@ -1079,19 +1183,25 @@ window.calcularPreciosSistemaCotizador = function () {
   if (tieneNetflix) {
     precioBaseUnMes = costoNetflixCalculado;
     if (countDisneyPremium > 0) {
-      if (countTierEligible === 0) precioBaseUnMes += 10500;
-      else if (countTierEligible === 1) precioBaseUnMes += 14500;
-      else if (countTierEligible === 2) precioBaseUnMes += 17500;
+      if (countTierEligible === 0) precioBaseUnMes += Math.round(pNet * 0.7);
+      else if (countTierEligible === 1)
+        precioBaseUnMes += Math.round(pNet * 0.96);
+      else if (countTierEligible === 2)
+        precioBaseUnMes += Math.round(pNet * 1.16);
       else if (countTierEligible >= 3)
-        precioBaseUnMes += 20500 + (countTierEligible - 3) * 3000;
+        precioBaseUnMes +=
+          Math.round(pNet * 1.36) + (countTierEligible - 3) * 3000;
       precioBaseUnMes +=
         (countDisneyPremium - 1) * mapValores["DISNEY-PREMIUM"].combo;
     } else {
       if (countTierEligible === 0) precioBaseUnMes += 0;
-      else if (countTierEligible === 1) precioBaseUnMes += 5500;
-      else if (countTierEligible === 2) precioBaseUnMes += 9500;
+      else if (countTierEligible === 1)
+        precioBaseUnMes += Math.round(pNet * 0.36);
+      else if (countTierEligible === 2)
+        precioBaseUnMes += Math.round(pNet * 0.63);
       else if (countTierEligible >= 3)
-        precioBaseUnMes += 12500 + (countTierEligible - 3) * 3000;
+        precioBaseUnMes +=
+          Math.round(pNet * 0.83) + (countTierEligible - 3) * 3000;
     }
 
     arrayAddonsDirectosYExtras.forEach((plat) => {
