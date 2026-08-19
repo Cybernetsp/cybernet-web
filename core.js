@@ -185,7 +185,6 @@ window.triggerToast = function (mensajeHtml) {
 function cerrarTodasLasVentanas() {
   const overlays = document.querySelectorAll(".overlay-ios");
   overlays.forEach((overlay) => {
-    // <-- Aquí estaba el error (decía overlels)
     overlay.classList.remove("open");
     if (overlay.style.display === "flex") overlay.style.display = "none";
   });
@@ -261,10 +260,11 @@ window.toggleYopmailPanel = () => {
 };
 
 // ==========================================================================
-// 💰 CONTROL DE PRECIOS DE TIENDA (SOLO SUPERADMIN)
+// 💰 CONTROL DE PRECIOS CLIENTES Y DISTRIBUIDORES (SOLO SUPERADMIN)
 // ==========================================================================
 
-// 📱 FUNCIÓN PARA ABRIR/CERRAR EL MODAL Y CARGAR DATOS
+window.tipoPrecioActivo = "clientes"; // 'clientes' o 'distribuidores'
+
 window.togglePreciosPanel = function () {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("preciosTiendaOverlay");
@@ -277,27 +277,63 @@ window.togglePreciosPanel = function () {
     cerrarTodasLasVentanas();
     overlay.style.display = "flex";
     overlay.classList.add("open");
-
-    // Iniciar carga de datos al abrir
-    cargarPreciosTiendaDesdeMySQL();
+    
+    // resetear a clientes por defecto
+    cambiarTabPrecios("clientes");
   }
 };
 
-// 📥 DESCARGAR PRECIOS DESDE MYSQL Y PINTARLOS
+window.cambiarTabPrecios = function (tipo) {
+  if (typeof haptic === "function") haptic();
+  window.tipoPrecioActivo = tipo;
+
+  const btnClientes = document.getElementById("tabPreciosClientes");
+  const btnDistris  = document.getElementById("tabPreciosDistris");
+
+  if (tipo === "clientes") {
+    if (btnClientes) {
+      btnClientes.style.background = "#ff9f0a";
+      btnClientes.style.color = "#000000";
+      btnClientes.style.border = "none";
+    }
+    if (btnDistris) {
+      btnDistris.style.background = "rgba(255, 255, 255, 0.06)";
+      btnDistris.style.color = "#a1a1aa";
+      btnDistris.style.border = "1px solid rgba(255, 255, 255, 0.08)";
+    }
+  } else {
+    if (btnDistris) {
+      btnDistris.style.background = "#ff9f0a";
+      btnDistris.style.color = "#000000";
+      btnDistris.style.border = "none";
+    }
+    if (btnClientes) {
+      btnClientes.style.background = "rgba(255, 255, 255, 0.06)";
+      btnClientes.style.color = "#a1a1aa";
+      btnClientes.style.border = "1px solid rgba(255, 255, 255, 0.08)";
+    }
+  }
+
+  cargarPreciosTiendaDesdeMySQL();
+};
+
 window.cargarPreciosTiendaDesdeMySQL = function () {
   const contenedor = document.getElementById("contenedorListaPrecios");
+  if (!contenedor) return;
+
   contenedor.innerHTML = `
-        <div style="text-align: center; color: #ff9f0a; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-            <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line>
-                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-            </svg>
-            <span style="font-weight: 800; font-size: 0.95rem;">Obteniendo precios en vivo...</span>
-        </div>
-    `;
+    <div style="grid-column: span 2; text-align: center; color: #ff9f0a; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line>
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+        </svg>
+        <span style="font-weight: 800; font-size: 0.95rem;">Cargando precios (${window.tipoPrecioActivo})...</span>
+    </div>
+  `;
 
   const formData = new FormData();
   formData.append("accion", "obtener");
+  formData.append("tipo", window.tipoPrecioActivo);
 
   fetch("https://api.cybernetsp.com/api_precios.php", {
     method: "POST",
@@ -307,53 +343,46 @@ window.cargarPreciosTiendaDesdeMySQL = function () {
     .then((data) => {
       if (data.status === "success") {
         let html = "";
-        let ultimaCategoria = "";
+
+        if (!data.data || data.data.length === 0) {
+          contenedor.innerHTML = `<div style="grid-column: span 2; text-align: center; color: #a1a1aa; padding: 20px;">No hay registros de precios en esta tabla.</div>`;
+          return;
+        }
 
         data.data.forEach((item) => {
-          // Separador visual por Categorías
-          if (item.categoria !== ultimaCategoria) {
-            html += `
-                        <div style="margin-top: 15px; margin-bottom: 5px; font-size: 0.75rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
-                            ${item.categoria || "Otros"}
-                        </div>
-                    `;
-            ultimaCategoria = item.categoria;
-          }
-
-          // Asegurar que el precio se muestre sin decimales inútiles
           let precioLimpio = String(item.precio).replace(".00", "");
+          let titulo = item.nombre_ui || item.nombre || item.codigo || "Plataforma";
 
           html += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <span style="color: #fff; font-weight: 700; font-size: 0.9rem;">${item.nombre_ui}</span>
-                        <div style="display: flex; align-items: center; gap: 6px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 10px; padding: 0 10px;">
-                            <span style="color: #ff9f0a; font-weight: 800;">$</span>
-                            <input 
-                                type="number" 
-                                class="input-precio-tienda" 
-                                data-codigo="${item.codigo}" 
-                                value="${precioLimpio}" 
-                                style="background: transparent; border: none; color: #30d158; font-weight: 900; font-size: 1.05rem; outline: none; width: 80px; padding: 8px 0; font-family: monospace; text-align: right;"
-                            />
-                        </div>
-                    </div>
-                `;
+            <div style="background: #202025; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; border: 1px solid rgba(255, 255, 255, 0.06); text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                <span style="color: #ffffff; font-weight: 800; font-size: 0.95rem; line-height: 1.2;">${titulo}</span>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 10px; padding: 6px 12px; width: fit-content;">
+                    <span style="color: #ff9f0a; font-weight: 800; font-size: 0.9rem;">$</span>
+                    <input 
+                        type="number" 
+                        class="input-precio-tienda" 
+                        data-codigo="${item.codigo}" 
+                        value="${precioLimpio}" 
+                        style="background: transparent; border: none; color: #30d158; font-weight: 900; font-size: 1.1rem; outline: none; width: 85px; font-family: monospace; text-align: center;"
+                    />
+                </div>
+            </div>
+          `;
         });
         contenedor.innerHTML = html;
       } else {
-        contenedor.innerHTML = `<div style="text-align: center; color: #ff453a; font-weight: 800; padding: 20px;">❌ Error al cargar los precios.</div>`;
+        contenedor.innerHTML = `<div style="grid-column: span 2; text-align: center; color: #ff453a; font-weight: 800; padding: 20px;">❌ ${data.message}</div>`;
       }
     })
     .catch((err) => {
-      contenedor.innerHTML = `<div style="text-align: center; color: #ff453a; font-weight: 800; padding: 20px;">❌ Falla de conexión con el servidor.</div>`;
+      console.error(err);
+      contenedor.innerHTML = `<div style="grid-column: span 2; text-align: center; color: #ff453a; font-weight: 800; padding: 20px;">❌ Error de conexión al servidor.</div>`;
     });
 };
 
-// 📤 ENVIAR LOS NUEVOS PRECIOS A MYSQL
 window.guardarPreciosTienda = function () {
   if (typeof haptic === "function") haptic();
 
-  // Recopilar todos los inputs generados
   const inputs = document.querySelectorAll(".input-precio-tienda");
   const preciosActualizados = [];
 
@@ -364,14 +393,14 @@ window.guardarPreciosTienda = function () {
     });
   });
 
-  // Validar si hay datos
   if (preciosActualizados.length === 0) return;
 
   if (typeof triggerToast === "function")
-    triggerToast(`⏳ Guardando precios...`);
+    triggerToast(`⏳ Guardando precios de ${window.tipoPrecioActivo}...`);
 
   const formData = new FormData();
   formData.append("accion", "actualizar");
+  formData.append("tipo", window.tipoPrecioActivo);
   formData.append("precios", JSON.stringify(preciosActualizados));
 
   fetch("https://api.cybernetsp.com/api_precios.php", {
@@ -388,7 +417,6 @@ window.guardarPreciosTienda = function () {
         } else {
           alert(data.message);
         }
-        togglePreciosPanel(); // Cierra el modal al terminar
       } else {
         alert("❌ Error: " + data.message);
       }
