@@ -1596,7 +1596,8 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">CORREO / USUARIO</label>
-              <input type="email" id="addNetCorreoUnico" required style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
+              <!-- 💡 AQUÍ SE CAMBIÓ A type="text" -->
+              <input type="text" id="addNetCorreoUnico" required style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
             </div>
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">CONTRASEÑA</label>
