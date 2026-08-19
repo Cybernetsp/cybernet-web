@@ -265,6 +265,16 @@ window.toggleYopmailPanel = () => {
 
 window.tipoPrecioActivo = "clientes"; // 'clientes' o 'distribuidores'
 
+// 🇨🇴 Helper para formatear números en vivo a COP con puntos
+window.formatearMontoPrecioTienda = function (input) {
+  let val = input.value.replace(/\D/g, "");
+  if (val) {
+    input.value = new Intl.NumberFormat("es-CO").format(parseInt(val, 10));
+  } else {
+    input.value = "";
+  }
+};
+
 window.togglePreciosPanel = function () {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("preciosTiendaOverlay");
@@ -277,8 +287,8 @@ window.togglePreciosPanel = function () {
     cerrarTodasLasVentanas();
     overlay.style.display = "flex";
     overlay.classList.add("open");
-    
-    // resetear a clientes por defecto
+
+    // Resetear a clientes por defecto
     cambiarTabPrecios("clientes");
   }
 };
@@ -288,7 +298,7 @@ window.cambiarTabPrecios = function (tipo) {
   window.tipoPrecioActivo = tipo;
 
   const btnClientes = document.getElementById("tabPreciosClientes");
-  const btnDistris  = document.getElementById("tabPreciosDistris");
+  const btnDistris = document.getElementById("tabPreciosDistris");
 
   if (tipo === "clientes") {
     if (btnClientes) {
@@ -350,8 +360,11 @@ window.cargarPreciosTiendaDesdeMySQL = function () {
         }
 
         data.data.forEach((item) => {
-          let precioLimpio = String(item.precio).replace(".00", "");
-          let titulo = item.nombre_ui || item.nombre || item.codigo || "Plataforma";
+          let numPuro =
+            parseInt(String(item.precio).replace(/\D/g, ""), 10) || 0;
+          let precioFmt = new Intl.NumberFormat("es-CO").format(numPuro);
+          let titulo =
+            item.nombre_ui || item.nombre || item.codigo || "Plataforma";
 
           html += `
             <div style="background: #202025; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; border: 1px solid rgba(255, 255, 255, 0.06); text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
@@ -359,11 +372,12 @@ window.cargarPreciosTiendaDesdeMySQL = function () {
                 <div style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 10px; padding: 6px 12px; width: fit-content;">
                     <span style="color: #ff9f0a; font-weight: 800; font-size: 0.9rem;">$</span>
                     <input 
-                        type="number" 
+                        type="text" 
                         class="input-precio-tienda" 
                         data-codigo="${item.codigo}" 
-                        value="${precioLimpio}" 
-                        style="background: transparent; border: none; color: #30d158; font-weight: 900; font-size: 1.1rem; outline: none; width: 85px; font-family: monospace; text-align: center;"
+                        value="${precioFmt}" 
+                        oninput="formatearMontoPrecioTienda(this)"
+                        style="background: transparent; border: none; color: #30d158; font-weight: 900; font-size: 1.1rem; outline: none; width: 95px; font-family: monospace; text-align: center;"
                     />
                 </div>
             </div>
@@ -387,9 +401,12 @@ window.guardarPreciosTienda = function () {
   const preciosActualizados = [];
 
   inputs.forEach((input) => {
+    // Se eliminan los puntos del formato visual antes de enviar a MySQL
+    let precioPuro = input.value.replace(/\D/g, "");
+
     preciosActualizados.push({
       codigo: input.getAttribute("data-codigo"),
-      precio: input.value,
+      precio: precioPuro,
     });
   });
 
