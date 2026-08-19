@@ -81,6 +81,68 @@ window.mostrarEstadoSinCortes = function () {
     </div>`;
 };
 
+// 🗓️ HELPER DE LECTURA Y CONVERSIÓN A TIMESTAMP PARA ORDENAMIENTO EXACTO
+function parsearFechaCorteMs(fStr) {
+  if (!fStr) return 0;
+  if (fStr instanceof Date) return fStr.getTime();
+
+  let str = String(fStr).trim().toLowerCase();
+  let hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  if (str === "hoy") return hoy.getTime();
+  if (str === "ayer") return hoy.getTime() - 86400000;
+  if (str === "antes de ayer" || str === "anteayer")
+    return hoy.getTime() - 172800000;
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+    return new Date(str.replace(" ", "T")).getTime() || 0;
+  }
+
+  let partes = str.split(" ")[0].split(/[\/-]/);
+  if (partes.length === 3) {
+    if (partes[0].length === 4) {
+      return new Date(
+        parseInt(partes[0], 10),
+        parseInt(partes[1], 10) - 1,
+        parseInt(partes[2], 10),
+      ).getTime();
+    } else {
+      return new Date(
+        parseInt(partes[2], 10),
+        parseInt(partes[1], 10) - 1,
+        parseInt(partes[0], 10),
+      ).getTime();
+    }
+  }
+
+  const mesesAbrev = [
+    "ene",
+    "feb",
+    "mar",
+    "abr",
+    "may",
+    "jun",
+    "jul",
+    "ago",
+    "sep",
+    "oct",
+    "nov",
+    "dic",
+  ];
+  if (/^\d{1,2}-[a-z]{3}$/i.test(str)) {
+    let p = str.split("-");
+    let dia = parseInt(p[0], 10);
+    let mesIdx = mesesAbrev.indexOf(p[1]);
+    if (mesIdx !== -1) {
+      return new Date(hoy.getFullYear(), mesIdx, dia).getTime();
+    }
+  }
+
+  let d = new Date(fStr);
+  return isNaN(d.getTime()) ? 0 : d.getTime();
+}
+
 window.renderizarTarjetasCortesNetflix = function (cuentas) {
   const container = document.getElementById("listaCortesOperativosNetflix");
   const btnCrearAlias = document.getElementById("btnCrearAliasHeader");
@@ -92,6 +154,17 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     window.mostrarEstadoSinCortes();
     return;
   }
+
+  // 🎯 ORDENAMIENTO EXIGIDO: ANTES DE AYER -> AYER -> HOY (Orden cronológico ascendente)
+  cuentas.sort((a, b) => {
+    let fA = parsearFechaCorteMs(
+      a.fecha_corte || a.fecha || a.dia || a.vencimiento || a.created_at || "",
+    );
+    let fB = parsearFechaCorteMs(
+      b.fecha_corte || b.fecha || b.dia || b.vencimiento || b.created_at || "",
+    );
+    return fA - fB; // Menor a mayor: Antes de ayer primero, hoy al final
+  });
 
   let html = "";
   cuentas.forEach((cuenta) => {
