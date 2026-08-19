@@ -32,42 +32,24 @@ const MAPA_DB_A_TIENDA = {
   METEGOL: "metegol",
 };
 
-// 📌 PRECIOS DE REFERENCIA ORIGINALES PARA CÁLCULO DE DELTAS EN COMBOS
-const PRECIOS_BASE_REFERENCIA = {
-  netflix: 15000,
-  disney_prem: 15000,
-  disney_std: 8500,
-  amazon: 10500,
-  max: 8500,
-  paramount: 15000,
-  vix: 8500,
-  plex: 8500,
-  crunchy: 8500,
-  apple: 8500,
-  universal: 8500,
-  canva: 20000,
-  spotify: 14000,
-  yt: 14000,
-  deezer: 12000,
-  metegol: 15000,
-};
-
-// Diccionario Estructural de las Plataformas (Valores Iniciales)
+// 🎯 DICCIONARIO ESTRUCTURAL DE PLATAFORMAS (TODOS LOS PRECIOS INICIAN EN 0 Y SE CARGAN DESDE MYSQL)
 const PLATAFORMAS_INFO = {
-  netflix: { name: "Netflix Colombia", type: "netflix", price: 15000 },
-  disney_prem: { name: "Disney+ Premium", type: "disney_prem", price: 15000 },
-  disney_std: { name: "Disney Estándar", type: "regular", price: 8500 },
-  amazon: { name: "Amazon Prime", type: "regular", price: 10500 },
-  max: { name: "HBO Max", type: "regular", price: 8500 },
-  paramount: { name: "Paramount+", type: "regular", price: 15000 },
-  vix: { name: "Vix+", type: "regular", price: 8500 },
-  plex: { name: "Plex TV", type: "regular", price: 8500 },
-  crunchy: { name: "Crunchyroll", type: "regular", price: 8500 },
-  apple: { name: "Apple TV+", type: "regular", price: 8500 },
-  universal: { name: "Universal+", type: "regular", price: 8500 },
-  canva: { name: "Canva Pro", type: "addon", price: 20000 },
-  spotify: { name: "Spotify Premium", type: "addon", price: 14000 },
-  yt: { name: "YouTube Premium", type: "addon", price: 14000 },
+  netflix: { name: "Netflix Colombia", type: "netflix", price: 0 },
+  disney_prem: { name: "Disney+ Premium", type: "disney_prem", price: 0 },
+  disney_std: { name: "Disney Estándar", type: "regular", price: 0 },
+  amazon: { name: "Amazon Prime", type: "regular", price: 0 },
+  max: { name: "HBO Max", type: "regular", price: 0 },
+  paramount: { name: "Paramount+", type: "regular", price: 0 },
+  vix: { name: "Vix+", type: "regular", price: 0 },
+  plex: { name: "Plex TV", type: "regular", price: 0 },
+  crunchy: { name: "Crunchyroll", type: "regular", price: 0 },
+  apple: { name: "Apple TV+", type: "regular", price: 0 },
+  universal: { name: "Universal+", type: "regular", price: 0 },
+  canva: { name: "Canva Pro", type: "addon", price: 0 },
+  spotify: { name: "Spotify Premium", type: "addon", price: 0 },
+  yt: { name: "YouTube Premium", type: "addon", price: 0 },
+  deezer: { name: "Deezer", type: "addon", price: 0 },
+  metegol: { name: "Metegol", type: "addon", price: 0 },
 };
 
 // Base de Datos de Ofertas Variadas de Retención
@@ -78,7 +60,7 @@ const PROMOS_RELAMPAGO = [
     meses: 2,
     precio: 21000,
     texto:
-      "🎬 <strong>Netflix Premium (2 Meses)</strong> por solo <strong>$21.000</strong> (Normal: $26k) 📺<br><br>¡Llévate un mega descuento exclusivo de retención antes de que expire!",
+      "🎬 <strong>Netflix Premium (2 Meses)</strong> por solo <strong>$21.000</strong> 📺<br><br>¡Llévate un mega descuento exclusivo de retención antes de que expire!",
     msjWhatsapp: "Netflix Premium (2 Meses) a $21.000",
   },
   {
@@ -87,7 +69,7 @@ const PROMOS_RELAMPAGO = [
     meses: 3,
     precio: 32000,
     texto:
-      "🍿 <strong>Netflix Premium (3 Meses)</strong> por solo <strong>$32.000</strong> (Normal: $36k) 🚀<br><br>¡Asegura tu entretenimiento al precio más bajo del mercado!",
+      "🍿 <strong>Netflix Premium (3 Meses)</strong> por solo <strong>$32.000</strong> 🚀<br><br>¡Asegura tu entretenimiento al precio más bajo del mercado!",
     msjWhatsapp: "Netflix Premium (3 Meses) a $32.000",
   },
   {
@@ -96,7 +78,7 @@ const PROMOS_RELAMPAGO = [
     meses: 1,
     precio: 6000,
     texto:
-      "📺 <strong>HBO Max (1 Mes)</strong> por solo <strong>$6.000</strong> (Normal: $8.500) 🎬<br><br>¡Tus series y películas favoritas a precio de liquidación total!",
+      "📺 <strong>HBO Max (1 Mes)</strong> por solo <strong>$6.000</strong> 🎬<br><br>¡Tus series y películas favoritas a precio de liquidación total!",
     msjWhatsapp: "HBO Max (1 Mes) a $6.000",
   },
   {
@@ -105,7 +87,7 @@ const PROMOS_RELAMPAGO = [
     meses: 1,
     precio: 13000,
     texto:
-      "✨ <strong>Disney+ Premium (1 Mes)</strong> por solo <strong>$13.000</strong> (Normal: $15.000) 💠<br><br>¡Acceso Completo con ESPN y Sin Anuncios a precio de locura!",
+      "✨ <strong>Disney+ Premium (1 Mes)</strong> por solo <strong>$13.000</strong> 💠<br><br>¡Acceso Completo con ESPN y Sin Anuncios a precio de locura!",
     msjWhatsapp: "Disney+ Premium (1 Mes) a $13.000",
   },
   {
@@ -114,7 +96,7 @@ const PROMOS_RELAMPAGO = [
     meses: 1,
     precio: 9900,
     texto:
-      "🔥 <strong>HBO Max + Paramount+</strong> por solo <strong>$9.900</strong> (Normal: $16.500) 🚀<br><br>¡Doble plataforma al precio de una, solo por 30 segundos!",
+      "🔥 <strong>HBO Max + Paramount+</strong> por solo <strong>$9.900</strong> 🚀<br><br>¡Doble plataforma al precio de una, solo por 30 segundos!",
     msjWhatsapp: "Dúo HBO Max + Paramount a $9.900",
   },
   {
@@ -123,7 +105,7 @@ const PROMOS_RELAMPAGO = [
     meses: 1,
     precio: 9900,
     texto:
-      "📦 <strong>Amazon Prime Video</strong> por solo <strong>$9.900</strong> (Normal: $10.500) 🍿<br><br>¡Aprovecha este descuento flash y no te quedes sin tus series!",
+      "📦 <strong>Amazon Prime Video</strong> por solo <strong>$9.900</strong> 🍿<br><br>¡Aprovecha este descuento flash y no te quedes sin tus series!",
     msjWhatsapp: "Amazon Prime a $9.900",
   },
   {
@@ -137,9 +119,7 @@ const PROMOS_RELAMPAGO = [
   },
 ];
 
-const PRECIOS_NETFLIX = { 1: 14500, 2: 26000, 3: 36000, 4: 46000, 5: 55000 };
-
-// 🔄 SINCRONIZACIÓN EN VIVO DESDE LA BASE DE DATOS
+// 🔄 SINCRONIZACIÓN EN VIVO DE PRECIOS DESDE MYSQL (SIN BASE HARDCODEADA)
 async function sincronizarPreciosDesdeMySQL() {
   try {
     const formData = new FormData();
@@ -193,11 +173,11 @@ function toggleItem(id, nombre, type, priceBase, btnElement) {
     restaurarBoton("btn_disney_prem");
   }
 
-  // Si se obtuvo un precio actualizado desde la BD, se usa prioritariamente
+  // Se asigna prioritariamente el precio obtenido desde MySQL
   let precioFinal =
     PLATAFORMAS_INFO[id] && PLATAFORMAS_INFO[id].price > 0
       ? PLATAFORMAS_INFO[id].price
-      : parseInt(priceBase);
+      : parseInt(priceBase) || 0;
 
   const index = carrito.findIndex((i) => i.id === id);
   if (index > -1) {
@@ -241,176 +221,87 @@ function ajustarPantallas(id, delta) {
   actualizarCarrito();
 }
 
-// 🧠 SIMULADOR MATEMÁTICO DE VALORES COMBO (AJUSTE DINÁMICO SEGÚN PRECIOS DE MYSQL)
+// 🧮 SIMULADOR DINÁMICO DE COMBOS (BASADO 100% EN PRECIOS REALES DE MYSQL)
 function simularPrecioCart(tempCart, meses) {
-  const itemNetflix = tempCart.find((i) => i.type === "netflix");
-  const itemDisneyPrem = tempCart.find((i) => i.type === "disney_prem");
-
-  // Extracción de plataformas con lógicas de descuento aisladas
-  const itemParamount = tempCart.find((i) => i.id === "paramount");
-
-  const lasEspecialesIds = ["paramount"];
-  const regularPlats = tempCart.filter(
-    (i) => i.type === "regular" && !lasEspecialesIds.includes(i.id),
-  );
+  const streamingItems = tempCart.filter((i) => i.type !== "addon");
   const addonPlats = tempCart.filter((i) => i.type === "addon");
-  const regularCount = regularPlats.length;
+  const numStreaming = streamingItems.length;
 
   let precioBase = 0;
   let nombreC = "";
 
-  if (itemNetflix) {
-    if (itemDisneyPrem) {
-      if (regularCount === 0) {
-        precioBase = 25000;
-        nombreC = "Dúo Premium";
-      } else if (regularCount === 1) {
-        precioBase = 29000;
-        nombreC = "Combo Pro";
-      } else if (regularCount === 2) {
-        precioBase = 32000;
-        nombreC = "Cine Total";
-      } else if (regularCount >= 3) {
-        precioBase = 35000 + (regularCount - 3) * 3000;
-        nombreC = "El Rey del Streaming";
-      }
-    } else {
-      if (regularCount === 0) {
-        precioBase = 14500;
-        nombreC = "Solo Netflix (Básico)";
-      } else if (regularCount === 1) {
-        precioBase = 20000;
-        nombreC = "Netflix + 1 (Top Ventas)";
-      } else if (regularCount === 2) {
-        precioBase = 24000;
-        nombreC = "Netflix + 2 (Ahorro)";
-      } else if (regularCount >= 3) {
-        precioBase = 27000 + (regularCount - 3) * 3000;
-        nombreC = "VIP Gold";
-      }
-    }
-  } else {
-    if (itemDisneyPrem) {
-      if (regularCount === 0) {
-        precioBase = 15000;
-        nombreC = "Solo Disney+ Premium";
-      } else if (regularCount === 1) {
-        precioBase = 20000;
-        nombreC = "Dúo Ideal";
-      } else if (regularCount === 2) {
-        precioBase = 22000;
-        nombreC = "Cine Total";
-      } else if (regularCount >= 3) {
-        precioBase = 24000 + (regularCount - 3) * 3000;
-        nombreC = "Mega VIP";
-      }
-    } else {
-      if (regularCount === 0) {
-        precioBase = 0;
-        nombreC = "";
-      } else if (regularCount === 1) {
-        let singleId = regularPlats[0].id;
-        let dbP =
-          PLATAFORMAS_INFO[singleId] && PLATAFORMAS_INFO[singleId].price > 0
-            ? PLATAFORMAS_INFO[singleId].price
-            : regularPlats[0].price;
-        precioBase = dbP;
-        nombreC = "1 Plataforma Individual";
-      } else if (regularCount === 2) {
-        precioBase = 13000;
-        nombreC = "Promo (2 Plats)";
-      } else if (regularCount === 3) {
-        precioBase = 16000;
-        nombreC = "Gran ahorro (3 Plats)";
-      } else if (regularCount >= 4) {
-        precioBase = 18000 + (regularCount - 4) * 3000;
-        nombreC = "Paquete Familiar";
-      }
-    }
+  // 1. CASO INDIVIDUAL: 1 sola plataforma en el carrito
+  if (numStreaming === 1) {
+    const itemUnico = streamingItems[0];
+    precioBase = PLATAFORMAS_INFO[itemUnico.id].price || itemUnico.price || 0;
+    nombreC = "Solo " + itemUnico.nombre;
   }
-
-  // ⚡ Lógica de Paramount
-  let colaEspeciales = [];
-  if (itemParamount) {
-    let pDbPrice =
-      PLATAFORMAS_INFO["paramount"] && PLATAFORMAS_INFO["paramount"].price > 0
-        ? PLATAFORMAS_INFO["paramount"].price
-        : 15000;
-    let pDelta = pDbPrice - PRECIOS_BASE_REFERENCIA["paramount"];
-    colaEspeciales.push({
-      name: "Paramount",
-      full: pDbPrice,
-      combo: 10000 + pDelta,
-    });
-  }
-
-  colaEspeciales.forEach((esp) => {
-    if (precioBase === 0) {
-      precioBase = esp.full;
-      nombreC = "Solo " + esp.name;
-    } else {
-      precioBase += esp.combo;
-      nombreC += " + " + esp.name;
-    }
-  });
-
-  // 🎯 CÁLCULO DE DELTAS (CUALQUIER VARIACIÓN DE PRECIO EN MYSQL AJUSTA EL COMBO DE MANERA RECURSIVA)
-  let sumaDeltas = 0;
-  const esUnicaRegularSola =
-    !itemNetflix && !itemDisneyPrem && regularCount === 1 && !itemParamount;
-
-  if (!esUnicaRegularSola) {
-    tempCart.forEach((item) => {
-      if (item.type !== "addon" && item.id !== "paramount") {
-        let precioActual =
-          PLATAFORMAS_INFO[item.id] && PLATAFORMAS_INFO[item.id].price > 0
-            ? PLATAFORMAS_INFO[item.id].price
-            : item.price;
-        let precioRef = PRECIOS_BASE_REFERENCIA[item.id] || item.price;
-        let delta = precioActual - precioRef;
-        sumaDeltas += delta;
-      }
-    });
-  }
-
-  precioBase += sumaDeltas;
-  if (precioBase < 0) precioBase = 0;
-
-  let streamingPuroBase = precioBase * meses;
-  let recargoMeses = tempCart
-    .filter((i) => i.type !== "addon")
-    .reduce((sum, item) => {
-      if (item.pantallas > 1) {
-        let extra = item.pantallas - 1;
-        if (item.id === "netflix")
-          return (
-            sum + (PRECIOS_NETFLIX[item.pantallas] - PRECIOS_NETFLIX[1]) * meses
-          );
-        if (item.id === "disney_prem") return sum + extra * 7000 * meses;
-        if (item.id === "paramount") return sum + extra * 8000 * meses;
-        return sum + extra * 4000 * meses;
-      }
-      return sum;
+  // 2. CASO COMBO: 2 o más plataformas de streaming
+  else if (numStreaming >= 2) {
+    // Suma de los precios reales de MySQL para las plataformas seleccionadas
+    let sumaPreciosStreaming = streamingItems.reduce((acc, item) => {
+      const pReal = PLATAFORMAS_INFO[item.id].price || item.price || 0;
+      return acc + pReal;
     }, 0);
 
-  let subtotalStreaming = streamingPuroBase + recargoMeses;
-  let pct = 0;
-  if (meses === 2) pct = 0.15;
-  if (meses === 3) pct = 0.2;
-  if (meses === 4) pct = 0.25;
-  if (meses === 5) pct = 0.3;
+    // Aplicación de porcentaje de descuento dinámico sobre el total real
+    let pctDescuentoCombo = 0.15; // 2 ítems: ~15% dcto
+    if (numStreaming === 3) pctDescuentoCombo = 0.25; // 3 ítems: ~25% dcto
+    if (numStreaming >= 4) pctDescuentoCombo = 0.32; // 4+ ítems: ~32% dcto
 
-  let descVigencia = streamingPuroBase * pct;
+    let descuentoMonto = Math.round(sumaPreciosStreaming * pctDescuentoCombo);
+    precioBase = sumaPreciosStreaming - descuentoMonto;
+
+    // Asignación del nombre comercial del Combo
+    const tieneNetflix = streamingItems.some((i) => i.id === "netflix");
+    const tieneDisneyPrem = streamingItems.some((i) => i.id === "disney_prem");
+
+    if (tieneNetflix && tieneDisneyPrem) {
+      nombreC = numStreaming === 2 ? "Dúo Premium" : "El Rey del Streaming";
+    } else if (tieneNetflix) {
+      nombreC = numStreaming === 2 ? "Netflix + 1 (Top Ventas)" : "VIP Gold";
+    } else if (tieneDisneyPrem) {
+      nombreC = numStreaming === 2 ? "Dúo Ideal" : "Mega VIP";
+    } else {
+      nombreC = numStreaming === 2 ? "Promo (2 Plats)" : "Paquete Familiar";
+    }
+  }
+
+  let streamingPuroBase = precioBase * meses;
+
+  // Recargo por pantallas adicionales (calculado proporcionalmente al precio base de MySQL)
+  let recargoMeses = streamingItems.reduce((sum, item) => {
+    if (item.pantallas > 1) {
+      let extra = item.pantallas - 1;
+      let pUnidad = PLATAFORMAS_INFO[item.id].price || item.price || 0;
+
+      if (item.id === "netflix") {
+        // Pantallas extras de Netflix calculadas sobre la base de MySQL
+        return sum + Math.round(pUnidad * 0.73 * extra) * meses;
+      }
+      return sum + Math.round(pUnidad * 0.5 * extra) * meses;
+    }
+    return sum;
+  }, 0);
+
+  let subtotalStreaming = streamingPuroBase + recargoMeses;
+
+  // Descuento por vigencia (2, 3, 4 o 5 meses)
+  let pctVigencia = 0;
+  if (meses === 2) pctVigencia = 0.15;
+  if (meses === 3) pctVigencia = 0.2;
+  if (meses === 4) pctVigencia = 0.25;
+  if (meses === 5) pctVigencia = 0.3;
+
+  let descVigencia = streamingPuroBase * pctVigencia;
   let netoStreaming = subtotalStreaming - descVigencia;
 
-  // Suma de Addons con precio dinámico
+  // Suma de Addons con precios dinámicos de MySQL
   let precioAddons = addonPlats.reduce((sum, item) => {
-    let dbP =
-      PLATAFORMAS_INFO[item.id] && PLATAFORMAS_INFO[item.id].price > 0
-        ? PLATAFORMAS_INFO[item.id].price
-        : item.price;
-    return sum + dbP * item.pantallas;
+    let pAddon = PLATAFORMAS_INFO[item.id].price || item.price || 0;
+    return sum + pAddon * item.pantallas;
   }, 0);
+
   let netoFinal = netoStreaming + precioAddons;
 
   return {
@@ -425,6 +316,13 @@ function simularPrecioCart(tempCart, meses) {
 
 // 🧮 EL ACTUALIZADOR LOGÍSTICO MATEMÁTICO DEL CARRITO
 function actualizarCarrito() {
+  // Sincronizar precios de ítems en carrito con MySQL
+  carrito.forEach((item) => {
+    if (PLATAFORMAS_INFO[item.id] && PLATAFORMAS_INFO[item.id].price > 0) {
+      item.price = PLATAFORMAS_INFO[item.id].price;
+    }
+  });
+
   let totalBadges = carrito.reduce((sum, item) => sum + item.pantallas, 0);
   const badgeCountEl = document.getElementById("cartBadgeCount");
   if (badgeCountEl) badgeCountEl.innerText = totalBadges;
@@ -1165,14 +1063,14 @@ function appendChatMessage(text, sender) {
 
 window.onload = () => {
   cargarMemoriaTienda();
-  sincronizarPreciosDesdeMySQL(); // ⚡ Descargar y actualizar los precios de la BD al abrir
+  sincronizarPreciosDesdeMySQL(); // ⚡ Descarga inmediata de precios desde la BD
   actualizarCarrito();
   iniciarSistemaPromos();
   cargarEstrenosAleatorios();
 };
 
 // =========================================================================
-// 🛰️ RECEPTOR: SINCRONIZADOR DE STOCK AUTOMÁTICO (ESCUCHA A CAMILO)
+// 🛰️ RECEPTOR: SINCRONIZADOR DE STOCK AUTOMÁTICO
 // =========================================================================
 
 function verificarStockDesdeMemoria() {
@@ -1217,7 +1115,10 @@ function verificarStockDesdeMemoria() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", verificarStockDesdeMemoria);
+document.addEventListener("DOMContentLoaded", () => {
+  verificarStockDesdeMemoria();
+  sincronizarPreciosDesdeMySQL();
+});
 
 window.addEventListener("storage", function (e) {
   if (e.key === "cyber_items_agotados") {
@@ -1273,7 +1174,7 @@ function agregarDesdeEstreno(id, nombre, btnId, priceBase) {
 }
 
 // =========================================================================
-// 🪄 LÓGICA DEL ARMADOR DE COMBOS (7 PREGUNTAS - SOLO VIDEO STREAMING)
+// 🪄 LÓGICA DEL ARMADOR DE COMBOS
 // =========================================================================
 let quizPasoActual = 0;
 let quizRespuestas = {};
@@ -1565,7 +1466,7 @@ const CARTELERA_TENDENCIAS = [
     titulo: "La Casa del Dragón",
     img: "https://tse1.mm.bing.net/th?q=House+of+the+Dragon+HBO+wallpaper",
     btn: "btn_max",
-    precio: 8500,
+    precio: 0,
     badgeStr: 'class="release-badge max-badge"',
   },
   {
@@ -1574,7 +1475,7 @@ const CARTELERA_TENDENCIAS = [
     titulo: "The Last of Us",
     img: "https://tse2.mm.bing.net/th?q=The+Last of+Us+HBO+show+wallpaper",
     btn: "btn_max",
-    precio: 8500,
+    precio: 0,
     badgeStr: 'class="release-badge max-badge"',
   },
   {
@@ -1592,7 +1493,7 @@ const CARTELERA_TENDENCIAS = [
     titulo: "The Boys",
     img: "https://tse1.mm.bing.net/th?q=The+Boys+Amazon+wallpaper",
     btn: "btn_amazon",
-    precio: 10500,
+    precio: 0,
     badgeStr:
       'class="release-badge" style="background: rgba(0, 168, 225, 0.9);"',
   },
@@ -1602,7 +1503,7 @@ const CARTELERA_TENDENCIAS = [
     titulo: "Severance",
     img: "https://tse1.mm.bing.net/th?q=Severance+Apple+TV+wallpaper",
     btn: "apple",
-    precio: 8500,
+    precio: 0,
     badgeStr:
       'class="release-badge" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);"',
   },
@@ -1612,7 +1513,7 @@ const CARTELERA_TENDENCIAS = [
     titulo: "Demon Slayer",
     img: "https://tse1.mm.bing.net/th?q=Demon+Slayer+anime+wallpaper",
     btn: "btn_crunchy",
-    precio: 8500,
+    precio: 0,
     badgeStr: 'class="release-badge" style="background: #F47521;"',
   },
 ];
