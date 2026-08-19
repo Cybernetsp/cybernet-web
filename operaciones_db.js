@@ -81,21 +81,12 @@ window.mostrarEstadoSinCortes = function () {
     </div>`;
 };
 
-// 🗓️ HELPER ULTRA-ESTRICTO PARA CONVERTIR FECHA (EJ: 18DEAGOSTO -> TIMESTAMP)
+// 🗓️ HELPER DE LECTURA DE VENCIMIENTO Y CONVERSIÓN A TIMESTAMP
 function parsearFechaCorteMs(fStr) {
-  if (!fStr) return 9999999999999;
+  if (!fStr || fStr === "-" || fStr === "N/A") return 9999999999999;
   if (fStr instanceof Date) return fStr.getTime();
 
   let str = String(fStr).trim().toUpperCase();
-
-  // Normalizar separadores y formatos como "18DEAGOSTO", "18 DE AGOSTO", "18-AGO"
-  str = str
-    .replace(/(\d+)\s*DE\s*/gi, "$1 ")
-    .replace(/(\d+)DE/gi, "$1 ")
-    .replace(/[\/-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
   let hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
@@ -108,6 +99,14 @@ function parsearFechaCorteMs(fStr) {
   if (str.includes("HOY")) {
     return hoy.getTime();
   }
+
+  // Decodifica formatos como "18DEAGOSTO", "18 DE AGOSTO", "18-AGOSTO"
+  let limpia = str
+    .replace(/(\d+)\s*DE\s*/gi, "$1 ")
+    .replace(/(\d+)DE/gi, "$1 ")
+    .replace(/[\/-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   const mesesAbrev = [
     "ENE",
@@ -138,7 +137,7 @@ function parsearFechaCorteMs(fStr) {
     "DICIEMBRE",
   ];
 
-  let matchDiaMes = str.match(/^(\d{1,2})\s*([A-Z]+)(?:\s*(\d{2,4}))?/);
+  let matchDiaMes = limpia.match(/^(\d{1,2})\s*([A-Z]+)(?:\s*(\d{2,4}))?/);
 
   if (matchDiaMes) {
     let dia = parseInt(matchDiaMes[1], 10);
@@ -179,37 +178,52 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     return;
   }
 
-  // 1. Asignar marca de tiempo precisa según fecha de vencimiento
+  // 1. Extraer el vencimiento real desde las propiedades devueltas por MySQL
   cuentas.forEach((c) => {
-    let rawVenc = c.vencimiento || c.fecha_corte || c.dia || c.fecha || "";
+    let rawVenc =
+      c.vencimiento ||
+      c.venc ||
+      c.fecha_vencimiento ||
+      c.fecha_corte ||
+      c.dia ||
+      c.fecha ||
+      "";
     c._tsVenc = parsearFechaCorteMs(rawVenc);
-    c._vencTexto = rawVenc || "Sin Fecha";
+    c._vencTexto = rawVenc && rawVenc !== "-" ? rawVenc : "Sin Fecha";
   });
 
-  // 2. Obtener el día más antiguo presente en la lista
+  // 2. Encontrar el día de vencimiento más antiguo pendiente
   let minTs = Math.min(...cuentas.map((c) => c._tsVenc));
 
-  // 3. Filtrar estrictamente solo las cuentas pertenecientes al día más antiguo
-  let cuentasLoteActual = cuentas.filter((c) => {
-    let dC = new Date(c._tsVenc);
+  // 3. Filtrar estrictamente solo las cuentas del lote del día más antiguo
+  let cuentasLoteActual = [];
+  if (minTs === 9999999999999) {
+    cuentasLoteActual = cuentas;
+  } else {
     let dMin = new Date(minTs);
-    return (
-      dC.getFullYear() === dMin.getFullYear() &&
-      dC.getMonth() === dMin.getMonth() &&
-      dC.getDate() === dMin.getDate()
-    );
-  });
+    cuentasLoteActual = cuentas.filter((c) => {
+      if (c._tsVenc === 9999999999999) return false;
+      let dC = new Date(c._tsVenc);
+      return (
+        dC.getFullYear() === dMin.getFullYear() &&
+        dC.getMonth() === dMin.getMonth() &&
+        dC.getDate() === dMin.getDate()
+      );
+    });
+  }
 
-  let fechaCabeceraTexto = cuentasLoteActual[0]._vencTexto;
+  let fechaCabeceraTexto = cuentasLoteActual[0]
+    ? cuentasLoteActual[0]._vencTexto
+    : "Pendientes";
 
   let html = `
-    <!-- Encabezado de Lote Activo por Día -->
+    <!-- Encabezado de Lote por Fecha Más Antigua -->
     <div style="background: rgba(255, 69, 58, 0.12); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
       <span style="font-size: 0.78rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">
         🚨 Lote Prioritario: ${fechaCabeceraTexto}
       </span>
       <span style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700; font-family: monospace;">
-        Pendientes: ${cuentasLoteActual.length} / ${cuentas.length}
+        Mostrando ${cuentasLoteActual.length} de ${cuentas.length}
       </span>
     </div>
   `;
@@ -228,7 +242,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
           <!-- Efecto Glow Rojo Superior -->
           <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #ff3b30, transparent); box-shadow: 0 0 12px #ff3b30; opacity: 0.7;"></div>
 
-          <!-- Correo y Vencimiento -->
+          <!-- Correo y Badge Vencimiento -->
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
               <div 
                 onclick="copiarTextoLigero('${correo}', this, 'correo')"
@@ -271,7 +285,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
               </div>
           </div>
 
-          <!-- Perfiles y Botón de Acción Único -->
+          <!-- Perfiles y Botón de Acción -->
           <div style="display: flex; flex-direction: column; gap: 14px;">
               <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; color: #ff3b30; background: rgba(255, 59, 48, 0.1); padding: 8px 16px; border-radius: 8px; width: fit-content; border: 1px solid rgba(255, 59, 48, 0.2);">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
