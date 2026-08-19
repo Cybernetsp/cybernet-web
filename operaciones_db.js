@@ -81,39 +81,35 @@ window.mostrarEstadoSinCortes = function () {
     </div>`;
 };
 
-// 🗓️ HELPER DE LECTURA Y CONVERSIÓN A TIMESTAMP PARA ORDENAMIENTO EXACTO
+// 🗓️ HELPER ULTRA-ROBUSTO DE LECTURA Y CONVERSIÓN A TIMESTAMP PARA ORDENAMIENTO CRONOLÓGICO
 function parsearFechaCorteMs(fStr) {
   if (!fStr) return 0;
   if (fStr instanceof Date) return fStr.getTime();
 
   let str = String(fStr).trim().toLowerCase();
+  // Limpia prefijos "de" pegados (ej: "17deagosto" -> "17 agosto")
+  str = str.replace(/(\d+)\s*de\s*/gi, "$1 ").replace(/(\d+)de/gi, "$1 ");
+
   let hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
-  if (str === "hoy") return hoy.getTime();
-  if (str === "ayer") return hoy.getTime() - 86400000;
-  if (str === "antes de ayer" || str === "anteayer")
-    return hoy.getTime() - 172800000;
-
-  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
-    return new Date(str.replace(" ", "T")).getTime() || 0;
+  if (
+    str.includes("antes de ayer") ||
+    str.includes("anteayer") ||
+    str.includes("antes_ayer")
+  ) {
+    return hoy.getTime() - 2 * 86400000;
+  }
+  if (str.includes("ayer")) {
+    return hoy.getTime() - 86400000;
+  }
+  if (str.includes("hoy")) {
+    return hoy.getTime();
   }
 
-  let partes = str.split(" ")[0].split(/[\/-]/);
-  if (partes.length === 3) {
-    if (partes[0].length === 4) {
-      return new Date(
-        parseInt(partes[0], 10),
-        parseInt(partes[1], 10) - 1,
-        parseInt(partes[2], 10),
-      ).getTime();
-    } else {
-      return new Date(
-        parseInt(partes[2], 10),
-        parseInt(partes[1], 10) - 1,
-        parseInt(partes[0], 10),
-      ).getTime();
-    }
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+    let t = new Date(str.replace(" ", "T")).getTime();
+    if (!isNaN(t)) return t;
   }
 
   const mesesAbrev = [
@@ -130,12 +126,45 @@ function parsearFechaCorteMs(fStr) {
     "nov",
     "dic",
   ];
-  if (/^\d{1,2}-[a-z]{3}$/i.test(str)) {
-    let p = str.split("-");
-    let dia = parseInt(p[0], 10);
-    let mesIdx = mesesAbrev.indexOf(p[1]);
-    if (mesIdx !== -1) {
-      return new Date(hoy.getFullYear(), mesIdx, dia).getTime();
+  const mesesCompletos = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+  ];
+
+  let matchDiaMes = str.match(
+    /^(\d{1,2})\s*(?:de|-|\/)?\s*([a-z0-9]+)(?:\s*(?:de|-|\/)?\s*(\d{2,4}))?/i,
+  );
+
+  if (matchDiaMes) {
+    let dia = parseInt(matchDiaMes[1], 10);
+    let mesStr = matchDiaMes[2].toLowerCase();
+    let anio = matchDiaMes[3]
+      ? parseInt(matchDiaMes[3], 10)
+      : hoy.getFullYear();
+    if (anio < 100) anio += 2000;
+
+    let mesIdx = -1;
+    if (/^\d{1,2}$/.test(mesStr)) {
+      mesIdx = parseInt(mesStr, 10) - 1;
+    } else {
+      mesIdx = mesesAbrev.findIndex((m) => mesStr.startsWith(m));
+      if (mesIdx === -1) {
+        mesIdx = mesesCompletos.findIndex((m) => mesStr.startsWith(m));
+      }
+    }
+
+    if (!isNaN(dia) && mesIdx >= 0 && mesIdx <= 11) {
+      return new Date(anio, mesIdx, dia).getTime();
     }
   }
 
@@ -155,7 +184,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     return;
   }
 
-  // 🎯 ORDENAMIENTO EXIGIDO: ANTES DE AYER -> AYER -> HOY (Orden cronológico ascendente)
+  // 🎯 ORDENAMIENTO GARANTIZADO: ANTES DE AYER ➔ AYER ➔ HOY (Antiguos primero, recientes al final)
   cuentas.sort((a, b) => {
     let fA = parsearFechaCorteMs(
       a.fecha_corte || a.fecha || a.dia || a.vencimiento || a.created_at || "",
@@ -163,7 +192,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     let fB = parsearFechaCorteMs(
       b.fecha_corte || b.fecha || b.dia || b.vencimiento || b.created_at || "",
     );
-    return fA - fB; // Menor a mayor: Antes de ayer primero, hoy al final
+    return fA - fB;
   });
 
   let html = "";
