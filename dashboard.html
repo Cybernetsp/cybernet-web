@@ -9835,7 +9835,7 @@
         ></div>
       </div>
     </div>
-    <!-- 💰 MODAL: GESTIÓN DE PRECIOS DE LA TIENDA (SOLO SUPERADMIN) -->
+    <!-- 💰 MODAL: GESTIÓN DE PRECIOS CLIENTES Y DISTRIBUIDORES -->
     <div
       class="overlay-ios"
       id="preciosTiendaOverlay"
@@ -9858,9 +9858,9 @@
         class="sheet-ios"
         onclick="event.stopPropagation()"
         style="
-          max-width: 600px;
+          max-width: 620px;
           width: 92%;
-          max-height: 85vh;
+          max-height: 88vh;
           display: flex;
           flex-direction: column;
           padding: 0;
@@ -9872,6 +9872,7 @@
           margin: auto;
         "
       >
+        <!-- CABECERA FIJA -->
         <div
           class="sheet-header"
           style="
@@ -9923,7 +9924,7 @@
                 ></path>
               </svg>
             </div>
-            Precios de la Tienda
+            Gestión de Precios
           </h3>
           <button
             class="btn-close-circle"
@@ -9945,37 +9946,81 @@
           </button>
         </div>
 
+        <!-- PESTAÑAS CLIENTES / DISTRIBUIDORES -->
         <div
-          style="padding: 20px; overflow-y: auto; flex-grow: 1"
+          style="
+            display: flex;
+            gap: 10px;
+            padding: 14px 20px 0 20px;
+            background: #141417;
+          "
+        >
+          <button
+            id="tabPreciosClientes"
+            onclick="cambiarTabPrecios('clientes')"
+            style="
+              flex: 1;
+              padding: 10px;
+              border-radius: 12px;
+              font-weight: 800;
+              font-size: 0.85rem;
+              cursor: pointer;
+              background: #ff9f0a;
+              color: #000000;
+              border: none;
+              transition: all 0.2s ease;
+            "
+          >
+            🛒 Precios Clientes
+          </button>
+          <button
+            id="tabPreciosDistris"
+            onclick="cambiarTabPrecios('distribuidores')"
+            style="
+              flex: 1;
+              padding: 10px;
+              border-radius: 12px;
+              font-weight: 800;
+              font-size: 0.85rem;
+              cursor: pointer;
+              background: rgba(255, 255, 255, 0.06);
+              color: #a1a1aa;
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              transition: all 0.2s ease;
+            "
+          >
+            💼 Precios Distris
+          </button>
+        </div>
+
+        <!-- CUERPO PRINCIPAL CON TARJETAS EN GRID -->
+        <div
+          style="padding: 16px 20px 20px 20px; overflow-y: auto; flex-grow: 1"
           class="cyber-custom-scroll"
         >
           <div
+            id="contenedorListaPrecios"
             style="
-              background: rgba(255, 159, 10, 0.05);
-              border: 1px solid rgba(255, 159, 10, 0.2);
-              padding: 12px;
-              border-radius: 12px;
-              margin-bottom: 15px;
-              font-size: 0.82rem;
-              color: #ffb74d;
-              text-align: center;
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 12px;
+              width: 100%;
             "
           >
-            ⚠️ <b>Zona SuperAdmin:</b> Los cambios realizados aquí actualizarán
-            inmediatamente los precios en la tienda pública de los clientes.
-          </div>
-
-          <!-- Contenedor donde se cargarán los inputs de precios mediante JS/PHP -->
-          <div
-            id="contenedorListaPrecios"
-            style="display: flex; flex-direction: column; gap: 10px"
-          >
-            <div style="text-align: center; color: #a1a1aa; padding: 20px">
+            <div
+              style="
+                grid-column: span 2;
+                text-align: center;
+                color: #a1a1aa;
+                padding: 30px;
+              "
+            >
               Cargando lista de precios...
             </div>
           </div>
         </div>
 
+        <!-- PIE DE VENTANA FIJO -->
         <div
           style="
             padding: 16px 20px;
@@ -9987,7 +10032,7 @@
             class="btn-ios btn-primary"
             style="
               width: 100%;
-              background: #ff9f0a;
+              background: #30d158;
               color: #000;
               padding: 14px;
               border-radius: 14px;
@@ -9995,11 +10040,11 @@
               font-size: 0.95rem;
               border: none;
               cursor: pointer;
-              box-shadow: 0 10px 25px rgba(255, 159, 10, 0.25);
+              box-shadow: 0 10px 25px rgba(48, 209, 88, 0.25);
             "
             onclick="guardarPreciosTienda()"
           >
-            💾 Guardar Todos los Precios
+            💾 Guardar Cambios
           </button>
         </div>
       </div>
