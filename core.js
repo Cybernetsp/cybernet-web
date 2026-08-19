@@ -184,7 +184,8 @@ window.triggerToast = function (mensajeHtml) {
    ========================================================================== */
 function cerrarTodasLasVentanas() {
   const overlays = document.querySelectorAll(".overlay-ios");
-  overlels.forEach((overlay) => {
+  overlays.forEach((overlay) => {
+    // <-- Aquí estaba el error (decía overlels)
     overlay.classList.remove("open");
     if (overlay.style.display === "flex") overlay.style.display = "none";
   });
