@@ -32,6 +32,7 @@ const GOOGLE_SCRIPT_URL =
     }
 
     entrarAlSistema(user, rol);
+    verificarModulosSuperAdmin(user, rol);
   });
 })();
 
@@ -53,11 +54,19 @@ function entrarAlSistema(usuario, rol) {
   const btnMenuInventario = document.getElementById("menuBtnInventario");
   if (btnMenuInventario) btnMenuInventario.style.display = "inline-block";
 
-  // 🍎 PROTECCIÓN DE CONTROLES CONTABLES Y TURNOS
+  // Llamadas a módulos externos (protegidas por typeof para no romper si cargan después)
+  if (typeof cargarPagosBreB === "function") cargarPagosBreB();
+  if (typeof cargarPlantillasDesdeSheets === "function")
+    cargarPlantillasDesdeSheets();
+}
+
+// 🔒 GESTIÓN DE PERMISOS PARA SUPERADMIN (CAMILO)
+function verificarModulosSuperAdmin(usuario, rol) {
   const shiftTimer = document.getElementById("shiftTimer");
   const btnCajaFinanzas = document.getElementById("btnCajaFinanzas");
   const btnAdelanto = document.getElementById("btnAdelantoCamilo");
   const btnNomina = document.getElementById("btnNominaCamilo");
+  const btnPrecios = document.getElementById("menuBtnPrecios");
 
   if (rol === "superadmin" || usuario === "CAMILO") {
     // 🔓 PERMISOS SUPERADMIN: Enciende módulos contables, apaga reloj
@@ -69,8 +78,11 @@ function entrarAlSistema(usuario, rol) {
       btnAdelanto.style.setProperty("display", "inline-flex", "important");
     if (btnNomina)
       btnNomina.style.setProperty("display", "inline-flex", "important");
+
+    // Habilita el botón de precios
+    if (btnPrecios) btnPrecios.style.display = "block";
   } else {
-    // 🔒 PERMISOS ASISTENTE: Enciende reloj, oculta contabilidad
+    // 🔒 PERMISOS ASISTENTE: Enciende reloj, oculta contabilidad y precios
     if (shiftTimer)
       shiftTimer.style.setProperty("display", "inline-flex", "important");
     if (btnCajaFinanzas)
@@ -78,14 +90,10 @@ function entrarAlSistema(usuario, rol) {
     if (btnAdelanto)
       btnAdelanto.style.setProperty("display", "none", "important");
     if (btnNomina) btnNomina.style.setProperty("display", "none", "important");
+    if (btnPrecios) btnPrecios.style.display = "none";
 
     if (typeof iniciarRelojTurno === "function") iniciarRelojTurno();
   }
-
-  // Llamadas a módulos externos (protegidas por typeof para no romper si cargan después)
-  if (typeof cargarPagosBreB === "function") cargarPagosBreB();
-  if (typeof cargarPlantillasDesdeSheets === "function")
-    cargarPlantillasDesdeSheets();
 }
 
 /* ==========================================================================
@@ -176,7 +184,7 @@ window.triggerToast = function (mensajeHtml) {
    ========================================================================== */
 function cerrarTodasLasVentanas() {
   const overlays = document.querySelectorAll(".overlay-ios");
-  overlays.forEach((overlay) => {
+  overlels.forEach((overlay) => {
     overlay.classList.remove("open");
     if (overlay.style.display === "flex") overlay.style.display = "none";
   });
@@ -187,12 +195,14 @@ function abrirPanel(idPanel) {
   const panel = document.getElementById(idPanel);
   if (!panel) return;
 
-  if (panel.classList.contains("open")) {
+  if (panel.classList.contains("open") || panel.style.display === "flex") {
     panel.classList.remove("open");
+    panel.style.display = "none";
     if (typeof CyberSonidos !== "undefined") CyberSonidos.play("cerrar");
   } else {
     cerrarTodasLasVentanas();
     panel.classList.add("open");
+    panel.style.display = "flex";
     if (typeof CyberSonidos !== "undefined") CyberSonidos.play("abrir");
   }
 }
@@ -206,7 +216,6 @@ document.addEventListener("keydown", function (e) {
 
 // ==========================================================================
 // 🔗 VINCULACIÓN GLOBAL DE BOTONES A PANELES HTML
-// (Estas funciones mapean el HTML con los paneles)
 // ==========================================================================
 window.toggleVentasPanel = () => abrirPanel("ventasOverlay");
 window.toggleFinanzasPanel = () => abrirPanel("finanzasOverlay");
@@ -219,7 +228,7 @@ window.toggleMysqlPanel = () => {
   const panel = document.getElementById("mysqlOverlay");
   if (
     panel &&
-    panel.classList.contains("open") &&
+    (panel.classList.contains("open") || panel.style.display === "flex") &&
     typeof cargarDatosMySQL === "function"
   ) {
     cargarDatosMySQL();
@@ -233,7 +242,10 @@ window.toggleRecordatoriosPanel = () => abrirPanel("recordatoriosOverlay");
 window.abrirCalculadoraCombos = () => abrirPanel("comboCalcOverlay");
 window.cerrarCalculadoraCombos = () => {
   const panel = document.getElementById("comboCalcOverlay");
-  if (panel) panel.classList.remove("open");
+  if (panel) {
+    panel.classList.remove("open");
+    panel.style.display = "none";
+  }
 };
 
 window.toggleCodesPanel = () => abrirPanel("codesOverlay");
@@ -246,39 +258,141 @@ window.toggleYopmailPanel = () => {
   const input = document.getElementById("inputYopmailCorreos");
   if (input) setTimeout(() => input.focus(), 150);
 };
-// 🔒 VERIFICACIÓN DE SUPERADMIN PARA MOSTRAR BOTÓN DE PRECIOS
-document.addEventListener("DOMContentLoaded", () => {
-  // Verifica el usuario guardado (Ajusta 'Camilo' según cómo lo escribas exacto en tu BD)
-  const usuarioActivo =
-    sessionStorage.getItem("active_staff") ||
-    localStorage.getItem("cyber_saved_staff") ||
-    "";
 
-  if (usuarioActivo.toUpperCase() === "CAMILO") {
-    const btnPrecios = document.getElementById("menuBtnPrecios");
-    if (btnPrecios) btnPrecios.style.display = "block";
-  }
-});
+// ==========================================================================
+// 💰 CONTROL DE PRECIOS DE TIENDA (SOLO SUPERADMIN)
+// ==========================================================================
 
-// 📱 FUNCIÓN PARA ABRIR/CERRAR EL MODAL
+// 📱 FUNCIÓN PARA ABRIR/CERRAR EL MODAL Y CARGAR DATOS
 window.togglePreciosPanel = function () {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("preciosTiendaOverlay");
   if (!overlay) return;
 
-  if (overlay.style.display === "flex") {
+  if (overlay.style.display === "flex" || overlay.classList.contains("open")) {
     overlay.style.display = "none";
+    overlay.classList.remove("open");
   } else {
-    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
+    cerrarTodasLasVentanas();
     overlay.style.display = "flex";
-    // Aquí puedes llamar a la función que descarga los precios de la BD
-    // cargarPreciosTiendaDesdeMySQL();
+    overlay.classList.add("open");
+
+    // Iniciar carga de datos al abrir
+    cargarPreciosTiendaDesdeMySQL();
   }
 };
 
+// 📥 DESCARGAR PRECIOS DESDE MYSQL Y PINTARLOS
+window.cargarPreciosTiendaDesdeMySQL = function () {
+  const contenedor = document.getElementById("contenedorListaPrecios");
+  contenedor.innerHTML = `
+        <div style="text-align: center; color: #ff9f0a; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <svg class="spin-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line>
+                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+            </svg>
+            <span style="font-weight: 800; font-size: 0.95rem;">Obteniendo precios en vivo...</span>
+        </div>
+    `;
+
+  const formData = new FormData();
+  formData.append("accion", "obtener");
+
+  fetch("https://api.cybernetsp.com/api_precios.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "success") {
+        let html = "";
+        let ultimaCategoria = "";
+
+        data.data.forEach((item) => {
+          // Separador visual por Categorías
+          if (item.categoria !== ultimaCategoria) {
+            html += `
+                        <div style="margin-top: 15px; margin-bottom: 5px; font-size: 0.75rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+                            ${item.categoria || "Otros"}
+                        </div>
+                    `;
+            ultimaCategoria = item.categoria;
+          }
+
+          // Asegurar que el precio se muestre sin decimales inútiles
+          let precioLimpio = String(item.precio).replace(".00", "");
+
+          html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                        <span style="color: #fff; font-weight: 700; font-size: 0.9rem;">${item.nombre_ui}</span>
+                        <div style="display: flex; align-items: center; gap: 6px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 10px; padding: 0 10px;">
+                            <span style="color: #ff9f0a; font-weight: 800;">$</span>
+                            <input 
+                                type="number" 
+                                class="input-precio-tienda" 
+                                data-codigo="${item.codigo}" 
+                                value="${precioLimpio}" 
+                                style="background: transparent; border: none; color: #30d158; font-weight: 900; font-size: 1.05rem; outline: none; width: 80px; padding: 8px 0; font-family: monospace; text-align: right;"
+                            />
+                        </div>
+                    </div>
+                `;
+        });
+        contenedor.innerHTML = html;
+      } else {
+        contenedor.innerHTML = `<div style="text-align: center; color: #ff453a; font-weight: 800; padding: 20px;">❌ Error al cargar los precios.</div>`;
+      }
+    })
+    .catch((err) => {
+      contenedor.innerHTML = `<div style="text-align: center; color: #ff453a; font-weight: 800; padding: 20px;">❌ Falla de conexión con el servidor.</div>`;
+    });
+};
+
+// 📤 ENVIAR LOS NUEVOS PRECIOS A MYSQL
 window.guardarPreciosTienda = function () {
   if (typeof haptic === "function") haptic();
-  alert(
-    "Función lista para conectarse al PHP y actualizar los precios de la tienda.",
-  );
+
+  // Recopilar todos los inputs generados
+  const inputs = document.querySelectorAll(".input-precio-tienda");
+  const preciosActualizados = [];
+
+  inputs.forEach((input) => {
+    preciosActualizados.push({
+      codigo: input.getAttribute("data-codigo"),
+      precio: input.value,
+    });
+  });
+
+  // Validar si hay datos
+  if (preciosActualizados.length === 0) return;
+
+  if (typeof triggerToast === "function")
+    triggerToast(`⏳ Guardando precios...`);
+
+  const formData = new FormData();
+  formData.append("accion", "actualizar");
+  formData.append("precios", JSON.stringify(preciosActualizados));
+
+  fetch("https://api.cybernetsp.com/api_precios.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "success") {
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="color:var(--ios-green);">✅ ${data.message}</div>`,
+          );
+        } else {
+          alert(data.message);
+        }
+        togglePreciosPanel(); // Cierra el modal al terminar
+      } else {
+        alert("❌ Error: " + data.message);
+      }
+    })
+    .catch((err) => {
+      alert("❌ Ocurrió un error al guardar los precios.");
+    });
 };
