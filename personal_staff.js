@@ -28,7 +28,7 @@ window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
 
 // ==========================================
-// HELPER PARA LECTURA SEGURA DE JSON (EVITA CRASHES)
+// HELPER PARA LECTURA SEGURA DE JSON
 // ==========================================
 async function parsearRespuestaJSONSegura(res) {
   const text = await res.text();
@@ -87,7 +87,6 @@ window.cargarUsuariosBaseMySQL = async function () {
   }
 };
 
-// ⚡ INICIO Y RESTAURACIÓN AUTOMÁTICA AL CARGAR/RECARGAR PÁGINA
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     window.cargarUsuariosBaseMySQL();
@@ -96,9 +95,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO EXACTO BASADO EN RELOJ REAL CON DETECCIÓN DE BRECHAS
+// 2. CRONÓMETRO EXACTO (SISTEMA DELTA-TICK ANTI-SUSPENSIÓN)
 // ==========================================
 let secCronometroTotal = 0;
+let unsavedSecTotal = 0;
+let lastTickTs = Date.now();
 let timerInterval = null;
 let turnoActivo = false;
 
@@ -106,8 +107,6 @@ function limpiarCacheShift() {
   localStorage.removeItem("cyber_shift_vendedor");
   localStorage.removeItem("cyber_shift_date");
   localStorage.removeItem("cyber_shift_active");
-  localStorage.removeItem("cyber_shift_start_ts");
-  localStorage.removeItem("cyber_shift_last_saved_ts");
   localStorage.removeItem("cyber_shift_accumulated_sec");
   localStorage.removeItem("cyber_shift_unsaved_sec");
 }
@@ -121,13 +120,11 @@ window.verificarEIniciarTurnoAuto = function () {
     .toUpperCase()
     .trim();
 
-  // 🔒 EXIGE SIEMPRE INICIAR SESIÓN CON UN TRABAJADOR
   if (!activeStaff || activeStaff === "STAFF" || activeStaff === "CAMILO") {
     limpiarCacheShift();
     return;
   }
 
-  // 🚀 INICIALIZA EL TURNO DE FORMA AUTOMÁTICA SI ESTÁ LOGUEADO
   iniciarTurnoTracker(true);
 };
 
@@ -156,49 +153,31 @@ function iniciarTurnoTracker(esAuto = false) {
 
   if (turnoActivo) return;
 
-  let now = Date.now();
   let todayStr = new Date().toLocaleDateString("es-CO");
   let savedVendedor = localStorage.getItem("cyber_shift_vendedor");
   let savedDate = localStorage.getItem("cyber_shift_date");
-  let startTs = parseInt(
-    localStorage.getItem("cyber_shift_start_ts") || "0",
-    10,
-  );
-  let lastSavedTs = parseInt(
-    localStorage.getItem("cyber_shift_last_saved_ts") || "0",
-    10,
-  );
 
-  // Reset del cronómetro si cambia de día o de trabajador
-  if (savedVendedor !== activeStaff || savedDate !== todayStr || !startTs) {
-    startTs = now;
-    lastSavedTs = now;
+  // Reset si cambia de día o de trabajador
+  if (savedVendedor !== activeStaff || savedDate !== todayStr) {
+    secCronometroTotal = 0;
+    unsavedSecTotal = 0;
     localStorage.setItem("cyber_shift_vendedor", activeStaff);
     localStorage.setItem("cyber_shift_date", todayStr);
-    localStorage.setItem("cyber_shift_start_ts", startTs);
-    localStorage.setItem("cyber_shift_last_saved_ts", lastSavedTs);
     localStorage.setItem("cyber_shift_accumulated_sec", "0");
-  }
-
-  // 🛡️ PROTECCIÓN CONTRA TIEMPO DESCONECTADO (SI CERRÓ PÁGINA > 3 MINUTOS)
-  const MAX_GAP_ALLOWED_MS = 180000; // 3 minutos
-  if (lastSavedTs > 0 && now - lastSavedTs > MAX_GAP_ALLOWED_MS) {
-    let secAcumuladosPrevios = parseInt(
+    localStorage.setItem("cyber_shift_unsaved_sec", "0");
+  } else {
+    secCronometroTotal = parseInt(
       localStorage.getItem("cyber_shift_accumulated_sec") || "0",
       10,
     );
-    startTs = now - secAcumuladosPrevios * 1000;
-    lastSavedTs = now;
-    localStorage.setItem("cyber_shift_start_ts", startTs);
-    localStorage.setItem("cyber_shift_last_saved_ts", lastSavedTs);
-  }
-
-  if (!lastSavedTs) {
-    lastSavedTs = now;
-    localStorage.setItem("cyber_shift_last_saved_ts", lastSavedTs);
+    unsavedSecTotal = parseInt(
+      localStorage.getItem("cyber_shift_unsaved_sec") || "0",
+      10,
+    );
   }
 
   turnoActivo = true;
+  lastTickTs = Date.now();
   localStorage.setItem("cyber_shift_active", "true");
 
   const dot = document.getElementById("ledConexion");
@@ -207,31 +186,47 @@ function iniciarTurnoTracker(esAuto = false) {
     dot.style.boxShadow = "0 0 8px #30d158";
   }
 
-  const actualizarRelojReal = () => {
-    let actualNow = Date.now();
-    secCronometroTotal = Math.max(0, Math.floor((actualNow - startTs) / 1000));
+  // 🎯 MOTOR INCREMENTAL CON FILTRO DE BRECHAS/SUEÑO
+  const tickRelojExacto = () => {
+    let now = Date.now();
+    let delta = Math.floor((now - lastTickTs) / 1000);
+    lastTickTs = now;
+
+    // Si el tick es normal (entre 1 y 3 segundos), incrementa exacto
+    if (delta > 0 && delta <= 3) {
+      secCronometroTotal += delta;
+      unsavedSecTotal += delta;
+    } else if (delta > 3) {
+      // BRECHA DETECTADA (laptop cerrada, celular bloqueado o pestaña congelada).
+      // Se ignora el salto de tiempo en segundo plano y solo suma 1 segundo activo.
+      secCronometroTotal += 1;
+      unsavedSecTotal += 1;
+    }
+
     localStorage.setItem("cyber_shift_accumulated_sec", secCronometroTotal);
+    localStorage.setItem("cyber_shift_unsaved_sec", unsavedSecTotal);
 
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // 🎯 AUTOGUARDADO CADA 60 SEGUNDOS REALES
-    let unsavedSec = Math.floor((actualNow - lastSavedTs) / 1000);
-    if (unsavedSec >= 60) {
+    // AUTOGUARDADO CADA 60 SEGUNDOS TRABAJADOS REALES
+    if (unsavedSecTotal >= 60) {
+      let secToSave = unsavedSecTotal;
+      unsavedSecTotal = 0;
+      localStorage.setItem("cyber_shift_unsaved_sec", "0");
       enviarTiempoTrackerAMySQL(
         activeStaff,
-        formatoSegundosTracker(unsavedSec),
+        formatoSegundosTracker(secToSave),
         "Autoguardado 1m",
       );
-      lastSavedTs = actualNow;
-      localStorage.setItem("cyber_shift_last_saved_ts", lastSavedTs);
     }
   };
 
-  actualizarRelojReal();
+  const lbl = document.getElementById("shiftTimer");
+  if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
   if (timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(actualizarRelojReal, 1000);
+  timerInterval = setInterval(tickRelojExacto, 1000);
 
   if (typeof triggerToast === "function" && !esAuto) {
     triggerToast(
@@ -261,25 +256,21 @@ function detenerTurnoTracker() {
     dot.style.boxShadow = "0 0 8px #ff453a";
   }
 
-  let now = Date.now();
-  let lastSavedTs = parseInt(
-    localStorage.getItem("cyber_shift_last_saved_ts") || "0",
-    10,
-  );
-  let unsavedSec = lastSavedTs > 0 ? Math.floor((now - lastSavedTs) / 1000) : 0;
-
+  // Guardar los segundos pendientes de sincronizar
   if (
-    unsavedSec > 0 &&
+    unsavedSecTotal > 0 &&
     activeStaff &&
     activeStaff !== "STAFF" &&
     activeStaff !== "CAMILO"
   ) {
+    let secToSave = unsavedSecTotal;
+    unsavedSecTotal = 0;
+    localStorage.setItem("cyber_shift_unsaved_sec", "0");
     enviarTiempoTrackerAMySQL(
       activeStaff,
-      formatoSegundosTracker(unsavedSec),
+      formatoSegundosTracker(secToSave),
       "Pausa/Cierre",
     );
-    localStorage.setItem("cyber_shift_last_saved_ts", now);
   }
 
   if (typeof triggerToast === "function") {
@@ -356,7 +347,7 @@ window.cerrarSesionStaff = function () {
 };
 
 function guardarEmergenciaAlCerrarVentana() {
-  if (turnoActivo) {
+  if (turnoActivo && unsavedSecTotal > 0) {
     const activeStaff = (
       sessionStorage.getItem("active_staff") ||
       localStorage.getItem("cyber_saved_staff") ||
@@ -366,23 +357,16 @@ function guardarEmergenciaAlCerrarVentana() {
       .trim();
 
     if (activeStaff && activeStaff !== "STAFF" && activeStaff !== "CAMILO") {
-      let now = Date.now();
-      let lastSavedTs = parseInt(
-        localStorage.getItem("cyber_shift_last_saved_ts") || "0",
-        10,
-      );
-      let unsavedSec =
-        lastSavedTs > 0 ? Math.floor((now - lastSavedTs) / 1000) : 0;
+      let secToSave = unsavedSecTotal;
+      unsavedSecTotal = 0;
+      localStorage.setItem("cyber_shift_unsaved_sec", "0");
 
-      if (unsavedSec > 0) {
-        const fd = new FormData();
-        fd.append("vendedor", activeStaff);
-        fd.append("tiempo", formatoSegundosTracker(unsavedSec));
-        fd.append("fecha", "hoy");
+      const fd = new FormData();
+      fd.append("vendedor", activeStaff);
+      fd.append("tiempo", formatoSegundosTracker(secToSave));
+      fd.append("fecha", "hoy");
 
-        navigator.sendBeacon(window.URL_GUARDAR_HORAS_MANUAL, fd);
-        localStorage.setItem("cyber_shift_last_saved_ts", now);
-      }
+      navigator.sendBeacon(window.URL_GUARDAR_HORAS_MANUAL, fd);
     }
   }
 }
@@ -521,7 +505,7 @@ window.renderizarHorasEnPantalla = function () {
   const esQ1 = window.filtroQuincenaTurnos === 1;
 
   const inicioDia = esQ1 ? 1 : 16;
-  const finDia = esQ1 ? 15 : new Date(dAnio, dMes + 1, 0).getDate();
+  const finDia = esQ1 ? 1 : new Date(dAnio, dMes + 1, 0).getDate(); // Rango dinámico
   const mesesNombres = [
     "Enero",
     "Febrero",
@@ -632,7 +616,9 @@ window.renderizarHorasEnPantalla = function () {
     for (let o = 0; o < offsetDias; o++)
       celdasCalendario += `<div style="background: transparent;"></div>`;
 
-    for (let dia = inicioDia; dia <= finDia; dia++) {
+    let finDiaIteracion = esQ1 ? 15 : new Date(dAnio, dMes + 1, 0).getDate();
+
+    for (let dia = inicioDia; dia <= finDiaIteracion; dia++) {
       let registrosDia = turnosPorDia[dia] || [];
       let tieneTurno = registrosDia.length > 0;
       let htmlRegistros = "";
@@ -655,10 +641,16 @@ window.renderizarHorasEnPantalla = function () {
           let tStr = reg.tiempo_trabajado || "00:00:00";
           if (tStr !== "00:00:00") {
             let p = tStr.split(":");
-            if (p.length >= 2)
+            if (p.length === 3) {
+              totalHorasSegundos +=
+                (parseInt(p[0], 10) || 0) * 3600 +
+                (parseInt(p[1], 10) || 0) * 60 +
+                (parseInt(p[2], 10) || 0);
+            } else if (p.length === 2) {
               totalHorasSegundos +=
                 (parseInt(p[0], 10) || 0) * 3600 +
                 (parseInt(p[1], 10) || 0) * 60;
+            }
           }
         }
       });
@@ -726,7 +718,8 @@ window.renderizarHorasEnPantalla = function () {
 
     let tHoras = Math.floor(totalHorasSegundos / 3600);
     let tMins = Math.floor((totalHorasSegundos % 3600) / 60);
-    let tiempoFormateadoTotal = `${String(tHoras).padStart(2, "0")}h ${String(tMins).padStart(2, "0")}m`;
+    let tSegs = totalHorasSegundos % 60;
+    let tiempoFormateadoTotal = `${String(tHoras).padStart(2, "0")}h ${String(tMins).padStart(2, "0")}m ${String(tSegs).padStart(2, "0")}s`;
     let pagoFormateadoTotal =
       "$" + Math.round(totalPagoAsistente).toLocaleString("es-CO");
     let colorNetoTotal = totalPagoAsistente < 0 ? "#ff453a" : "#30d158";
@@ -766,7 +759,7 @@ window.renderizarHorasEnPantalla = function () {
 };
 
 // ==========================================
-// 4. MODALES DE FORMULARIOS (INGRESOS / ADELANTOS)
+// 4. MODALES DE FORMULARIOS
 // ==========================================
 window.formatearMontoEnVivoCOP = function (input) {
   let val = input.value.replace(/\D/g, "");
@@ -993,7 +986,7 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
 };
 
 // ==========================================
-// 5. MÓDULO NÓMINA BENTO (DISEÑO HORIZONTAL)
+// 5. MÓDULO NÓMINA BENTO
 // ==========================================
 window.abrirTotalNomina = function () {
   const overlay = document.getElementById("nominaOverlay");
@@ -1186,7 +1179,6 @@ window.renderizarTotalNomina = function () {
   container.innerHTML = htmlFinal;
 };
 
-// 🚫 ANULAR CUALQUIER SOBREESCRITURA
 window.cargarNominaMySQL = window.renderizarTotalNomina;
 
 window.filtrarHorasInternas = function () {
