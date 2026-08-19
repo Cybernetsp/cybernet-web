@@ -329,6 +329,14 @@
           onclick="toggleInventarioPanel()"
           >Inventario</span
         >
+        <!-- 👇 NUEVO BOTÓN DE PRECIOS (Oculto por defecto) 👇 -->
+        <span
+          class="mac-menu-item"
+          id="menuBtnPrecios"
+          style="display: none; color: #ff9f0a; font-weight: 800"
+          onclick="togglePreciosPanel()"
+          >Precios Tienda</span
+        >
         <span
           class="mac-menu-item"
           style="color: #ffffff"
@@ -9825,6 +9833,175 @@
             gap: 8px;
           "
         ></div>
+      </div>
+    </div>
+    <!-- 💰 MODAL: GESTIÓN DE PRECIOS DE LA TIENDA (SOLO SUPERADMIN) -->
+    <div
+      class="overlay-ios"
+      id="preciosTiendaOverlay"
+      style="
+        z-index: 16000;
+        display: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+      "
+    >
+      <div
+        class="sheet-ios"
+        onclick="event.stopPropagation()"
+        style="
+          max-width: 600px;
+          width: 92%;
+          max-height: 85vh;
+          display: flex;
+          flex-direction: column;
+          padding: 0;
+          border-radius: 24px;
+          overflow: hidden;
+          background: #141417;
+          border: 1px solid rgba(255, 159, 10, 0.3);
+          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95);
+          margin: auto;
+        "
+      >
+        <div
+          class="sheet-header"
+          style="
+            padding: 18px 22px;
+            background: #18181c;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          "
+        >
+          <h3
+            style="
+              color: #ffffff;
+              margin: 0;
+              font-size: 1.1rem;
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+            "
+          >
+            <div
+              style="
+                background: rgba(255, 159, 10, 0.15);
+                color: #ff9f0a;
+                width: 36px;
+                height: 36px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(255, 159, 10, 0.3);
+              "
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path
+                  d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                ></path>
+              </svg>
+            </div>
+            Precios de la Tienda
+          </h3>
+          <button
+            class="btn-close-circle"
+            style="
+              background: rgba(255, 255, 255, 0.08);
+              border: none;
+              color: #a1a1aa;
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+            onclick="togglePreciosPanel()"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div
+          style="padding: 20px; overflow-y: auto; flex-grow: 1"
+          class="cyber-custom-scroll"
+        >
+          <div
+            style="
+              background: rgba(255, 159, 10, 0.05);
+              border: 1px solid rgba(255, 159, 10, 0.2);
+              padding: 12px;
+              border-radius: 12px;
+              margin-bottom: 15px;
+              font-size: 0.82rem;
+              color: #ffb74d;
+              text-align: center;
+            "
+          >
+            ⚠️ <b>Zona SuperAdmin:</b> Los cambios realizados aquí actualizarán
+            inmediatamente los precios en la tienda pública de los clientes.
+          </div>
+
+          <!-- Contenedor donde se cargarán los inputs de precios mediante JS/PHP -->
+          <div
+            id="contenedorListaPrecios"
+            style="display: flex; flex-direction: column; gap: 10px"
+          >
+            <div style="text-align: center; color: #a1a1aa; padding: 20px">
+              Cargando lista de precios...
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            padding: 16px 20px;
+            background: #18181c;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+          "
+        >
+          <button
+            class="btn-ios btn-primary"
+            style="
+              width: 100%;
+              background: #ff9f0a;
+              color: #000;
+              padding: 14px;
+              border-radius: 14px;
+              font-weight: 900;
+              font-size: 0.95rem;
+              border: none;
+              cursor: pointer;
+              box-shadow: 0 10px 25px rgba(255, 159, 10, 0.25);
+            "
+            onclick="guardarPreciosTienda()"
+          >
+            💾 Guardar Todos los Precios
+          </button>
+        </div>
       </div>
     </div>
     <!-- Script Lógico Principal (Nuevo Motor) -->
