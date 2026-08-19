@@ -415,15 +415,16 @@ function cargarDatosMySQL() {
     thead.innerHTML = `
       <tr>
         <th style="${thBase} width: 10%; color: #0a84ff;">PLATAFORMA</th>
+        <th style="${thBase} width: 7%; color: #ff9f0a;">PROV</th>
         <th style="${thBase} width: 6%;">FECHA</th>
-        <th style="${thBase} width: 18%;">CORREO / USUARIO</th>
+        <th style="${thBase} width: 16%;">CORREO / USUARIO</th>
         <th style="${thBase} width: 10%;">CONTRASEÑA</th>
         <th style="${thBase} width: 4%; text-align: center;">PERFIL</th>
         <th style="${thBase} width: 4%; text-align: center;">PIN</th>
-        <th style="${thBase} width: 10%;">VENCIMIENTO</th>
-        <th style="${thBase} width: 11%;">CLIENTE</th>
-        <th style="${thBase} width: 10%;">TELÉFONO</th>
-        <th style="${thBase} width: 17%; text-align: right; padding-right: 15px;">ACCIÓN</th>
+        <th style="${thBase} width: 9%;">VENCIMIENTO</th>
+        <th style="${thBase} width: 10%;">CLIENTE</th>
+        <th style="${thBase} width: 9%;">TELÉFONO</th>
+        <th style="${thBase} width: 15%; text-align: right; padding-right: 15px;">ACCIÓN</th>
       </tr>
     `;
   } else {
@@ -560,6 +561,9 @@ function cargarDatosMySQL() {
         ).toLowerCase();
         let perfilVal = String(fila.perfil || "").toLowerCase();
         let pinVal = String(fila.pin || "").toLowerCase();
+        let provSearchVal = String(
+          fila.proveedor || fila.prov || "",
+        ).toLowerCase();
 
         return (
           correoVal.includes(queryLower) ||
@@ -567,6 +571,7 @@ function cargarDatosMySQL() {
           claveVal.includes(queryLower) ||
           perfilVal.includes(queryLower) ||
           pinVal.includes(queryLower) ||
+          provSearchVal.includes(queryLower) ||
           numValRaw.toLowerCase().includes(queryLower)
         );
       });
@@ -582,7 +587,11 @@ function cargarDatosMySQL() {
         let platNombreUI = tablaOrigen.toUpperCase().replace(/_/g, " ");
 
         let diaVal = fila.dia || fila.fecha || "-";
-        let provVal = fila.proveedor || "-";
+
+        // 🛡️ MUESTRA PROVEEDOR SOLO SI NO ES NETFLIX
+        let esTablaNetflix = tablaOrigen.toLowerCase() === "netflix";
+        let provVal = esTablaNetflix ? "-" : fila.proveedor || fila.prov || "-";
+
         let correoVal = fila.correo || fila.usuario || "-";
         let claveVal = fila.clave || fila.contrasena || "-";
         let perfilVal = fila.perfil || "-";
@@ -644,6 +653,7 @@ function cargarDatosMySQL() {
             <td style="${tdBase}">
               <span style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.68rem; text-transform: uppercase;">${platNombreUI}</span>
             </td>
+            <td style="${tdBase} color: #ff9f0a; font-weight: 800; text-transform: uppercase;">${provVal}</td>
             <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
             <td style="${tdBase}">${celdaCorreo}</td>
             <td style="${tdBase}">${celdaClave}</td>
