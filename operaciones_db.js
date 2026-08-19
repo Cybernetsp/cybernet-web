@@ -81,14 +81,20 @@ window.mostrarEstadoSinCortes = function () {
     </div>`;
 };
 
-// 🗓️ HELPER ULTRA-ROBUSTO DE LECTURA Y CONVERSIÓN A TIMESTAMP PARA ORDENAMIENTO CRONOLÓGICO
+// 🗓️ HELPER ULTRA-ROBUSTO DE LECTURA Y CONVERSIÓN A TIMESTAMP PARA VENCIMIENTO
 function parsearFechaCorteMs(fStr) {
   if (!fStr) return 0;
   if (fStr instanceof Date) return fStr.getTime();
 
   let str = String(fStr).trim().toLowerCase();
-  // Limpia prefijos "de" pegados (ej: "17deagosto" -> "17 agosto")
-  str = str.replace(/(\d+)\s*de\s*/gi, "$1 ").replace(/(\d+)de/gi, "$1 ");
+
+  // Limpiar formatos como "18DEAGOSTO", "18-AGOSTO", "18 de agosto"
+  str = str
+    .replace(/(\d+)\s*de\s*/gi, "$1 ")
+    .replace(/(\d+)de/gi, "$1 ")
+    .replace(/[\/-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   let hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
@@ -107,9 +113,15 @@ function parsearFechaCorteMs(fStr) {
     return hoy.getTime();
   }
 
-  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
-    let t = new Date(str.replace(" ", "T")).getTime();
-    if (!isNaN(t)) return t;
+  if (/^\d{4}\s+\d{1,2}\s+\d{1,2}/.test(str)) {
+    let p = str.split(" ");
+    return (
+      new Date(
+        parseInt(p[0], 10),
+        parseInt(p[1], 10) - 1,
+        parseInt(p[2], 10),
+      ).getTime() || 0
+    );
   }
 
   const mesesAbrev = [
@@ -141,9 +153,7 @@ function parsearFechaCorteMs(fStr) {
     "diciembre",
   ];
 
-  let matchDiaMes = str.match(
-    /^(\d{1,2})\s*(?:de|-|\/)?\s*([a-z0-9]+)(?:\s*(?:de|-|\/)?\s*(\d{2,4}))?/i,
-  );
+  let matchDiaMes = str.match(/^(\d{1,2})\s+([a-z0-9]+)(?:\s+(\d{2,4}))?/i);
 
   if (matchDiaMes) {
     let dia = parseInt(matchDiaMes[1], 10);
@@ -184,15 +194,15 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     return;
   }
 
-  // 🎯 ORDENAMIENTO GARANTIZADO: ANTES DE AYER ➔ AYER ➔ HOY (Antiguos primero, recientes al final)
+  // 🎯 PRIORIDAD VENCIMIENTO: ANTES DE AYER (17) ➔ AYER (18) ➔ HOY (19)
   cuentas.sort((a, b) => {
     let fA = parsearFechaCorteMs(
-      a.fecha_corte || a.fecha || a.dia || a.vencimiento || a.created_at || "",
+      a.vencimiento || a.fecha_corte || a.dia || a.fecha || a.created_at || "",
     );
     let fB = parsearFechaCorteMs(
-      b.fecha_corte || b.fecha || b.dia || b.vencimiento || b.created_at || "",
+      b.vencimiento || b.fecha_corte || b.dia || b.fecha || b.created_at || "",
     );
-    return fA - fB;
+    return fA - fB; // Menor fecha (más antigua) primero
   });
 
   let html = "";
