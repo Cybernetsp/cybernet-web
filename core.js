@@ -360,8 +360,8 @@ window.cargarPreciosTiendaDesdeMySQL = function () {
         }
 
         data.data.forEach((item) => {
-          let numPuro =
-            parseInt(String(item.precio).replace(/\D/g, ""), 10) || 0;
+          // Parsear numéricamente evitando multiplicar decimales
+          let numPuro = Math.round(parseFloat(item.precio)) || 0;
           let precioFmt = new Intl.NumberFormat("es-CO").format(numPuro);
           let titulo =
             item.nombre_ui || item.nombre || item.codigo || "Plataforma";
