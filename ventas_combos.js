@@ -707,6 +707,7 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                     fichaTexto += `📍 *PIN:* ${item.pin}\n`;
                   }
                   fichaTexto += `📅 *Nueva Fecha de Vencimiento:* ${vencVal}\n`;
+                  fichaTexto += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n`;
                 } else {
                   fichaTexto += `\n🎬 *DETALLES DE ${platFormat}*${textoMeses} ✅\n────────────────────\n`;
                   if (platFormat.includes("NETFLIX")) {
@@ -742,6 +743,14 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                     fichaTexto += `📍 *PIN:* ${item.pin}\n`;
                   }
                   fichaTexto += `📅 *Vence:* ${vencVal}\n`;
+
+                  // 🤖 AGREGAR NOTA DEL BOT SI LA CUENTA ENTREGADA ES NETFLIX
+                  if (
+                    platFormat.includes("NETFLIX") ||
+                    item.plataforma === "NETFLIX"
+                  ) {
+                    fichaTexto += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n`;
+                  }
                 }
               }
             });
