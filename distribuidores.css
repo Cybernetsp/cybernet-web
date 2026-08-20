@@ -1,5 +1,5 @@
 /* =========================================================================
-   CYBERNET DESIGN SYSTEM - DISTRIBUIDORES (MÁXIMO RENDIMIENTO - SÓLIDO)
+   CYBERNET DESIGN SYSTEM - DISTRIBUIDORES (RESPONSIVE TOTAL & RENDIMIENTO)
    ========================================================================= */
 
 :root {
@@ -12,12 +12,11 @@
   --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
   --success-gradient: linear-gradient(135deg, #30d158 0%, #248a3d 100%);
 
-  /* Transiciones más rápidas y ligeras para evitar lag */
   --transition-fluid: transform 0.15s ease-out;
   --transition-spring: transform 0.15s ease-out, background 0.15s ease-out;
 }
 
-/* 🌙 MODO OSCURO (Sólido, cero transparencias) */
+/* 🌙 MODO OSCURO */
 [data-theme="dark"] {
   --page-bg: #000000;
   --text-primary: #ffffff;
@@ -29,10 +28,10 @@
 
   --card-bg: #1c1c1e;
   --input-bg: #2c2c2e;
-  --overlay-bg: rgba(0, 0, 0, 0.85); /* Sin blur, solo oscurece */
+  --overlay-bg: rgba(0, 0, 0, 0.85);
 }
 
-/* ☀️ MODO CLARO (Sólido, cero transparencias) */
+/* ☀️ MODO CLARO */
 [data-theme="light"] {
   --ios-blue: #007aff;
   --ios-green: #34c759;
@@ -49,7 +48,7 @@
 
   --card-bg: #ffffff;
   --input-bg: #e5e5ea;
-  --overlay-bg: rgba(0, 0, 0, 0.6); /* Sin blur, solo oscurece */
+  --overlay-bg: rgba(0, 0, 0, 0.6);
 }
 
 * {
@@ -73,48 +72,60 @@ body {
   overflow-x: hidden;
 }
 
-/* Desactivamos los orbes para liberar memoria RAM/GPU */
 .bg-orb-1,
 .bg-orb-2 {
   display: none !important;
 }
 
-/* 📱 HEADER SUPERIOR FIJO (SÓLIDO) */
+/* 📱 HEADER SUPERIOR FIJO */
 .global-header {
   position: fixed;
-  top: 16px;
+  top: 12px;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 24px);
+  width: calc(100% - 20px);
   max-width: 1200px;
   background: var(--surface-bg);
   border: var(--surface-border);
   box-shadow: var(--surface-shadow);
   border-radius: 50px;
-  padding: 10px 18px;
+  padding: 10px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 100;
 }
+
 .logo-box {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
+
 .brand-name {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: -0.4px;
 }
 
-/* 🪟 CAJAS Y MODALES (SÓLIDOS) */
-.modal-ios,
-.card-ios {
+/* 🪟 CAJAS Y MODALES */
+.modal-ios {
   background: var(--card-bg);
   border: var(--surface-border);
   box-shadow: var(--surface-shadow);
   border-radius: 24px;
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-ios {
+  background: var(--card-bg);
+  border: var(--surface-border);
+  box-shadow: var(--surface-shadow);
+  border-radius: 20px;
+  padding: 18px;
 }
 
 .input-ios {
@@ -123,17 +134,20 @@ body {
   color: var(--text-primary);
   outline: none;
   border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
   transition: border-color 0.2s ease;
 }
+
 .input-ios:focus {
   border-color: var(--ios-blue);
 }
 
 /* 💊 BOTONES ESTILO APP STORE */
 .btn-ios {
-  padding: 12px 18px;
+  padding: 10px 16px;
   border-radius: 50px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
   border: none;
@@ -141,53 +155,66 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
+  min-height: 42px;
   transition: var(--transition-fluid);
 }
+
 .btn-ios:active {
   transform: scale(0.95);
 }
+
 .btn-primary {
   background: var(--ios-blue);
   color: white;
 }
+
 .btn-success {
   background: var(--ios-green);
   color: white;
 }
+
 .btn-secondary {
   background: var(--input-bg);
   color: var(--text-primary);
 }
 
+.w-100 {
+  width: 100% !important;
+}
+
 /* GRID DE TIENDA Y CATÁLOGO B2B */
 .tienda-layout {
-  margin-top: 20px;
   width: 100%;
 }
+
 .grid-tienda {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px;
 }
+
 .platform-card-shop {
-  padding: 18px 14px;
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 8px;
+  border-radius: 18px;
   transition:
     transform 0.15s ease-out,
     border-color 0.15s ease;
 }
+
 .platform-card-shop:active {
   transform: scale(0.96);
 }
+
 .platform-card-shop:hover {
   border-color: var(--ios-blue);
 }
 
-/* 🛡️ MODALES RÁPIDOS (SIN BLUR) */
+/* 🛡️ MODALES RÁPIDOS */
 .overlay-modal-code {
   position: fixed;
   inset: 0;
@@ -198,20 +225,26 @@ body {
   align-items: center;
   opacity: 0;
   visibility: hidden;
+  padding: 12px;
+  box-sizing: border-box;
   transition:
     opacity 0.2s ease,
     visibility 0.2s ease;
 }
+
 .overlay-modal-code.open {
   opacity: 1;
   visibility: visible;
 }
+
 .overlay-modal-code .modal-ios {
   transform: scale(0.95) translateY(20px);
   transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-  max-height: 90vh;
+  max-height: 88vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
+
 .overlay-modal-code.open .modal-ios {
   transform: scale(1) translateY(0);
 }
@@ -219,23 +252,29 @@ body {
 /* TOAST NATIVO RÁPIDO */
 #appleToast {
   position: fixed;
-  top: 85px;
+  top: 75px;
   left: 50%;
   transform: translateX(-50%) translateY(-100px);
   background: var(--text-primary);
   color: var(--page-bg);
-  padding: 12px 26px;
+  padding: 10px 22px;
   border-radius: 50px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
   opacity: 0;
   visibility: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   transition:
     transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
     opacity 0.3s ease;
   z-index: 99999;
+  max-width: 90%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 #appleToast.show {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
@@ -245,13 +284,13 @@ body {
 /* CARRITO FLOTANTE */
 #fabCarrito {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 64px;
-  height: 64px;
+  bottom: 24px;
+  right: 20px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   background: var(--ios-blue);
-  box-shadow: 0 10px 25px rgba(10, 132, 255, 0.4);
+  box-shadow: 0 8px 22px rgba(10, 132, 255, 0.45);
   border: none;
   display: flex;
   justify-content: center;
@@ -260,6 +299,7 @@ body {
   cursor: pointer;
   transition: transform 0.15s ease;
 }
+
 #fabCarrito:active {
   transform: scale(0.9);
 }
@@ -267,119 +307,146 @@ body {
 .spin-anim {
   animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
   100% {
     transform: rotate(360deg);
   }
 }
 
-/* Scrollbars Invisibles */
+/* SCROLLBARS */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #8e8e93;
   border-radius: 10px;
 }
 
-/* 🪟 CAJAS Y MODALES (SÓLIDOS Y ESPACIOSOS) */
-.modal-ios {
-  background: var(--card-bg);
-  border: var(--surface-border);
-  box-shadow: var(--surface-shadow);
-  border-radius: 24px;
-  padding: 26px 24px; /* 🔥 ESTA ES LA CLAVE: Da espacio interno a todas las ventanas */
-  display: flex;
-  flex-direction: column;
-  gap: 16px; /* 🔥 Separa los elementos internos automáticamente */
-}
-
-.card-ios {
-  background: var(--card-bg);
-  border: var(--surface-border);
-  box-shadow: var(--surface-shadow);
-  border-radius: 24px;
-  padding: 20px;
-}
-
-.input-ios {
-  background: var(--input-bg);
-  border: 1px solid transparent;
-  color: var(--text-primary);
-  outline: none;
-  border-radius: 14px;
-  padding: 14px 16px; /* Campos de texto más amplios */
-  font-size: 1rem;
-  transition: border-color 0.2s ease;
-}
-.input-ios:focus {
-  border-color: var(--ios-blue);
-}
-
-/* =========================================================================
-   🚦 CONTROL RESPONSIVE ADAPTATIVO MÓVIL ESTRICTO
-   ========================================================================= */
-@media (max-width: 860px) {
-  .desktop-menu-group {
-    display: none !important; /* Esconde los menús largos de PC */
-  }
-  .mobile-menu-trigger {
-    display: flex !important; /* Obliga a la hamburguesa a mostrarse */
-  }
-}
-/* =========================================================================
-   📩 ENTRADAS Y BOTONES SIMÉTRICOS PARA EL CENTRO DE CÓDIGOS
-   ========================================================================= */
+/* 📩 PASOS CENTRO DE CÓDIGOS */
 .code-step {
   display: none !important;
   flex-direction: column;
-  align-items: stretch; /* 🔥 CORRECCIÓN: Estira los botones a lo ancho de forma estética */
+  align-items: stretch;
   justify-content: center;
-  gap: 12px; /* Separación limpia entre botones */
+  gap: 10px;
   width: 100%;
   box-sizing: border-box;
-  padding: 10px 4px;
+  padding: 8px 2px;
 }
 
 .code-step.active {
   display: flex !important;
 }
 
-/* Forzar que todos los botones de este módulo tengan la misma altura y radio premium */
 .code-step .btn-ios {
   width: 100% !important;
-  padding: 15px !important;
-  font-size: 1rem !important;
+  padding: 12px !important;
+  font-size: 0.92rem !important;
   font-weight: 700 !important;
-  border-radius: 14px !important; /* Bordes suaves estilo iOS */
+  border-radius: 14px !important;
   box-sizing: border-box;
 }
 
-.code-step.active {
-  display: flex !important;
-}
-/* =========================================================================
-   🪄 MICRO-INTERACCIÓN ELÁSTICA PREMIUM PARA EL BOTÓN AÑADIR
-   ========================================================================= */
+/* 🪄 MICRO-INTERACCIÓN ANIMACIÓN BOTÓN */
 @keyframes appleButtonBounce {
   0% {
     transform: scale(1);
   }
   25% {
     transform: scale(0.86);
-  } /* Se encoge al toque */
+  }
   60% {
     transform: scale(1.06);
-  } /* Rebota expandiéndose un poco */
+  }
   100% {
     transform: scale(1);
-  } /* Regresa a su tamaño original */
+  }
 }
 
 .btn-pop-anim {
   animation: appleButtonBounce 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* =========================================================================
+   🚦 CONTROL RESPONSIVE ADAPTATIVO MÓVIL Y TABLETS
+   ========================================================================= */
+
+@media (max-width: 860px) {
+  .desktop-menu-group {
+    display: none !important;
+  }
+  .mobile-menu-trigger {
+    display: flex !important;
+  }
+}
+
+/* 📱 PANTALLAS MÓVILES (Smartphones de cualquier tamaño) */
+@media (max-width: 520px) {
+  #dashboardSection {
+    padding: 8px !important;
+    gap: 12px !important;
+  }
+
+  .modal-ios {
+    padding: 18px 14px !important;
+    border-radius: 20px !important;
+    gap: 10px !important;
+  }
+
+  .card-ios {
+    padding: 14px 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .grid-tienda {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .platform-card-shop {
+    padding: 12px 8px !important;
+    gap: 6px !important;
+  }
+
+  .platform-card-shop button {
+    font-size: 0.72rem !important;
+    padding: 6px 8px !important;
+    min-height: 36px !important;
+  }
+
+  #codeVal {
+    font-size: 2.4rem !important;
+    letter-spacing: 3px !important;
+  }
+
+  #fabCarrito {
+    width: 52px !important;
+    height: 52px !important;
+    bottom: 18px !important;
+    right: 16px !important;
+  }
+}
+
+/* 📱 MÓVILES MUY PEQUEÑOS (iPhone SE / Dispositivos < 360px) */
+@media (max-width: 360px) {
+  .grid-tienda {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  #distriWelcomeName {
+    font-size: 0.88rem !important;
+  }
+
+  #distriBarBalance {
+    font-size: 0.78rem !important;
+    padding: 5px 8px !important;
+  }
 }
