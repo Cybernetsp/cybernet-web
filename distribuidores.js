@@ -1,1136 +1,1468 @@
-<!doctype html>
-<html lang="es" data-theme="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-    />
-    <title>Cybernet - Portal Mayoristas</title>
+/* =========================================================================
+   CYBERNET OS - PORTAL MAYORISTAS / DISTRIBUIDORES (MYSQL BACKEND)
+   ========================================================================= */
 
-    <link rel="manifest" href="manifest-distri.json" />
-    <meta name="theme-color" content="#000000" />
-    <link rel="apple-touch-icon" href="icon-192.png" />
+const API_MYSQL_URL = "https://api.cybernetsp.com/acciones_distribuidores.php";
 
-    <!-- 🔒 ESCUDO DE SEGURIDAD -->
-    <script>
-      if (
-        !localStorage.getItem("active_distri_tel") &&
-        !localStorage.getItem("active_distri_id")
-      ) {
-        window.location.href = "login_distris.html";
+window.carrito = [];
+window.saldoNumericoActual = 0;
+window.distriTelefonoCache = "";
+window.distriCorreoRegistrado = "";
+window.fichasCheckoutPendientes = "";
+
+// 💡 Plataformas que requieren activación manual por WhatsApp
+const PLATAFORMAS_MANUALES = [
+  "YOUTUBE",
+  "SPOTIFY",
+  "IPTV",
+  "METEGOL",
+  "DEEZER",
+  "MUBI",
+  "CANVA",
+  "CAPCUT",
+];
+
+// =========================================================================
+// 🎨 CATÁLOGO DE PRODUCTOS BASE
+// =========================================================================
+const catálogoProductos = [
+  {
+    id: "NETFLIX",
+    nombre: "Netflix Premium",
+    precio: 10000,
+    color: "#E50914",
+    logo: `<img src="https://img.icons8.com/color/512/netflix.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
+  },
+  {
+    id: "DISNEY-PREMIUM",
+    nombre: "Disney+ Premium",
+    precio: 10000,
+    color: "#1AE1FF",
+    logo: `<img src="https://www.google.com/s2/favicons?domain=disneyplus.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); border-radius: 8px;">`,
+  },
+  {
+    id: "AMAZON",
+    nombre: "Prime Video",
+    precio: 5000,
+    color: "#00A8E1",
+    logo: `<img src="https://img.icons8.com/color/512/amazon-prime-video.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
+  },
+  {
+    id: "DISNEY-ESTANDAR",
+    nombre: "Disney+ Estándar",
+    precio: 4000,
+    color: "#0063e5",
+    logo: `<img src="https://www.google.com/s2/favicons?domain=disneyplus.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); filter: grayscale(1) brightness(0.8); border-radius: 8px;">`,
+  },
+  {
+    id: "HBO-MAX",
+    nombre: "Max (HBO)",
+    precio: 3000,
+    color: "#5856d6",
+    logo: `<img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Max_logo.svg" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
+  },
+  {
+    id: "PARAMOUNT",
+    nombre: "Paramount+",
+    precio: 18000,
+    color: "#0078ff",
+    logo: `<img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
+  },
+  {
+    id: "VIX",
+    nombre: "Vix+",
+    precio: 3000,
+    color: "#ff9500",
+    logo: `<img src="https://www.google.com/s2/favicons?domain=vix.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); border-radius: 8px;">`,
+  },
+  {
+    id: "CRUNCHYROLL",
+    nombre: "Crunchyroll",
+    precio: 3000,
+    color: "#ff5e00",
+    logo: `<img src="https://img.icons8.com/color/512/crunchyroll.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
+  },
+  {
+    id: "PLEX",
+    nombre: "Plex TV",
+    precio: 3000,
+    color: "#ffcc00",
+    logo: `<img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Plex_logo_2022.svg" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
+  },
+  {
+    id: "APPLE-TV",
+    nombre: "Apple TV",
+    precio: 3000,
+    color: "#ffffff",
+    logo: `<img src="https://upload.wikimedia.org/wikipedia/commons/2/28/Apple_TV_Plus_Logo.svg" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85); filter: invert(1);">`,
+  },
+  {
+    id: "UNIVERSAL",
+    nombre: "Universal+",
+    precio: 3000,
+    color: "#00d2ff",
+    logo: `<img src="https://www.google.com/s2/favicons?domain=universalplus.com&sz=128" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.95); border-radius: 8px;">`,
+  },
+  {
+    id: "YOUTUBE",
+    nombre: "YouTube Premium",
+    precio: 10000,
+    color: "#FF0000",
+    logo: `<img src="https://img.icons8.com/color/512/youtube-play.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
+  },
+  {
+    id: "SPOTIFY",
+    nombre: "Spotify Premium",
+    precio: 10000,
+    color: "#1DB954",
+    logo: `<img src="https://img.icons8.com/color/512/spotify.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
+  },
+  {
+    id: "IPTV",
+    nombre: "IPTV Premium",
+    precio: 7000,
+    color: "#ff37a6",
+    logo: `<img src="https://img.icons8.com/color/512/tv.png" style="width: 100%; height: 100%; object-fit: contain; transform: scale(0.85);">`,
+  },
+];
+
+// =========================================================================
+// ⚙️ UTILERÍAS Y HELPERS GLOBALES
+// =========================================================================
+function haptic() {
+  if (navigator.vibrate) navigator.vibrate(15);
+}
+
+function formatMoneda(v) {
+  if (!v) return "$0";
+  if (typeof v === "string" && v.includes("$")) return v;
+  let num =
+    typeof v === "number" ? v : parseFloat(String(v).replace(/[^0-9.-]/g, ""));
+  if (isNaN(num)) return "$0";
+  return (
+    "$" + Math.round(num).toLocaleString("es-CO", { maximumFractionDigits: 0 })
+  );
+}
+
+function triggerToast(msgHTML) {
+  const toast = document.getElementById("appleToast");
+  if (!toast) return;
+  toast.innerHTML = msgHTML;
+  toast.style.transform = "translateX(-50%) translateY(0)";
+  toast.style.opacity = "1";
+  setTimeout(() => {
+    toast.style.transform = "translateX(-50%) translateY(100px)";
+    toast.style.opacity = "0";
+  }, 3000);
+}
+
+function copiarTextoAlToque(elemento, texto) {
+  if (!texto) return;
+  navigator.clipboard.writeText(texto).then(() => {
+    triggerToast(`📋 Copiado al portapapeles`);
+    elemento.style.opacity = "0.4";
+    setTimeout(() => {
+      elemento.style.opacity = "1";
+    }, 150);
+  });
+}
+
+function parseFechaCybernet(fechaStr) {
+  if (!fechaStr || fechaStr === "N/A") return null;
+  let s = String(fechaStr).toUpperCase().replace(/\s+/g, "");
+  let m = s.match(/(\d+)(DE)?([A-Z]+)/);
+  if (!m) return null;
+  let day = parseInt(m[1], 10);
+  let mesStr = m[3];
+  const months = {
+    ENE: 0,
+    ENERO: 0,
+    FEB: 1,
+    FEBRERO: 1,
+    MAR: 2,
+    MARZO: 2,
+    ABR: 3,
+    ABRIL: 3,
+    MAY: 4,
+    MAYO: 4,
+    JUN: 5,
+    JUNIO: 5,
+    JUL: 6,
+    JULIO: 6,
+    AGO: 7,
+    AGOSTO: 7,
+    SEP: 8,
+    SEPTIEMBRE: 8,
+    OCT: 9,
+    OCTUBRE: 9,
+    NOV: 10,
+    NOVIEMBRE: 10,
+    DIC: 11,
+    DICIEMBRE: 11,
+  };
+  let month = months[mesStr];
+  if (month === undefined) return null;
+
+  let now = new Date();
+  let year = now.getFullYear();
+  let d = new Date(year, month, day);
+  if (d < now && now.getMonth() - month > 6) d.setFullYear(year + 1);
+  return d;
+}
+
+// =========================================================================
+// 👤 CARGA Y SINCRONIZACIÓN DE PERFIL DESDE MYSQL
+// =========================================================================
+function cargarPerfilDistribuidor() {
+  const idDistri = localStorage.getItem("active_distri_id") || 0;
+  const telDistri = localStorage.getItem("active_distri_tel") || "";
+
+  if (!idDistri && !telDistri) {
+    window.location.href = "login_distris.html";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("accion", "obtener_perfil_distribuidor");
+  formData.append("id", idDistri);
+  formData.append("telefono", telDistri);
+
+  fetch(API_MYSQL_URL, { method: "POST", body: formData })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success" && res.data) {
+        const d = res.data;
+
+        localStorage.setItem("active_distri_id", d.id);
+        localStorage.setItem("active_distri_tel", d.telefono);
+        localStorage.setItem("active_distri_name", d.nombre);
+        localStorage.setItem("active_distri_saldo", d.saldo);
+
+        window.distriTelefonoCache = d.telefono;
+        window.saldoNumericoActual = parseFloat(d.saldo);
+
+        const elemNombre = document.getElementById("distriWelcomeName");
+        const elemTelefono = document.getElementById("distriWelcomePhone");
+
+        if (elemNombre)
+          elemNombre.innerText = `¡Hola, ${d.nombre.toUpperCase()}!`;
+        if (elemTelefono)
+          elemTelefono.innerText = `Distribuidor • Tel: ${d.telefono}`;
+
+        actualizarSaldoUI();
       }
-    </script>
+    })
+    .catch((err) => console.error("Error al sincronizar perfil:", err));
+}
 
-    <link rel="stylesheet" href="distribuidores.css" />
-  </head>
-  <body>
-    <div id="appleToast"></div>
+// =========================================================================
+// 💼 INTERFAZ Y DASHBOARD B2B
+// =========================================================================
+function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
+  const dashSection = document.getElementById("dashboardSection");
+  if (dashSection) dashSection.style.display = "flex";
 
-    <div
-      id="dashboardSection"
-      style="
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        min-height: 100vh;
-        max-width: 1200px;
-        padding: 12px;
-        gap: 16px;
-        margin: 0 auto;
-        box-sizing: border-box;
-      "
-    >
-      <!-- HEADER COMPACTO Y ADAPTABLE -->
-      <div
-        class="card-ios"
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 10px 14px;
-          position: sticky;
-          top: 8px;
-          z-index: 90;
-          box-sizing: border-box;
-          width: 100%;
-          gap: 8px;
-        "
-      >
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 0;
-            flex: 1;
-            text-align: left;
-          "
-        >
-          <div
-            style="
-              background: rgba(10, 132, 255, 0.15);
-              color: var(--ios-blue);
-              min-width: 38px;
-              height: 38px;
-              border-radius: 12px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 1.1rem;
-              flex-shrink: 0;
-            "
-          >
-            💼
-          </div>
-          <div style="min-width: 0; flex: 1">
-            <h2
-              id="distriWelcomeName"
-              style="
-                margin: 0;
-                font-size: 0.95rem;
-                font-weight: 800;
-                color: var(--text-primary);
-                line-height: 1.2;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              "
-            >
-              Cargando...
-            </h2>
-            <span
-              id="distriWelcomePhone"
-              style="
-                font-size: 0.72rem;
-                color: var(--text-secondary);
-                font-family: monospace;
-                display: block;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              "
-              >Tel: --</span
-            >
-          </div>
+  const btnCarrito = document.getElementById("fabCarrito");
+  if (btnCarrito) btnCarrito.style.setProperty("display", "flex", "important");
+
+  if (nombre) {
+    const elemNombre = document.getElementById("distriWelcomeName");
+    if (elemNombre) elemNombre.innerText = `¡Hola, ${nombre.toUpperCase()}!`;
+  }
+  if (telefono) {
+    const elemTelefono = document.getElementById("distriWelcomePhone");
+    if (elemTelefono)
+      elemTelefono.innerText = `Distribuidor • Tel: ${telefono}`;
+  }
+
+  window.saldoNumericoActual =
+    parseFloat(String(saldo).replace(/[^\d.-]/g, "")) || 0;
+  actualizarSaldoUI();
+
+  const shopContainer = document.getElementById("shopCatalogContainer");
+  if (shopContainer) {
+    shopContainer.innerHTML = `
+      <div style="text-align:center; padding:40px; width:100%; color:var(--text-secondary); grid-column: 1 / -1;">
+        <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" style="margin-bottom:12px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
+        <br>Cargando precios de MySQL...
+      </div>`;
+  }
+
+  inicializarOpcionesDeMes();
+  cargarPerfilDistribuidor();
+  cargarPreciosEnTienda();
+  cargarDatosFinancierosYAlertas(
+    telefono || window.distriTelefonoCache,
+    "todos",
+  );
+
+  if (window.cyberIntervaloSaldoFondo)
+    clearInterval(window.cyberIntervaloSaldoFondo);
+  window.cyberIntervaloSaldoFondo = setInterval(
+    refrescarSaldoDistribuidorFondo,
+    5 * 60 * 1000,
+  );
+}
+
+// =========================================================================
+// 📅 POBLAR SELECTOR DE MESES DINÁMICAMENTE
+// =========================================================================
+function inicializarOpcionesDeMes() {
+  const select = document.getElementById("selectMesMovimientos");
+  if (!select) return;
+
+  const nombresMeses = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+
+  let htmlOptions = `<option value="todos">🌐 Todos los Meses</option>`;
+  const fechaActual = new Date();
+
+  for (let i = 0; i < 6; i++) {
+    let d = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - i, 1);
+    let yyyy = d.getFullYear();
+    let mm = String(d.getMonth() + 1).padStart(2, "0");
+    let valMes = `${yyyy}-${mm}`;
+    let labelMes = `${nombresMeses[d.getMonth()]} ${yyyy}`;
+
+    htmlOptions += `<option value="${valMes}">${labelMes}</option>`;
+  }
+
+  select.innerHTML = htmlOptions;
+}
+
+function filtrarMovimientosPorMes() {
+  haptic();
+  const select = document.getElementById("selectMesMovimientos");
+  const mesSeleccionado = select ? select.value : "todos";
+  const tel =
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+
+  cargarDatosFinancierosYAlertas(tel, mesSeleccionado);
+}
+
+// =========================================================================
+// 🏷️ CARGAR PRECIOS DINÁMICOS
+// =========================================================================
+function cargarPreciosEnTienda() {
+  const formData = new FormData();
+  formData.append("accion", "obtener_precios_distribuidor");
+
+  fetch(API_MYSQL_URL, { method: "POST", body: formData })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success" && res.data) {
+        res.data.forEach((itemDb) => {
+          let producto = catálogoProductos.find(
+            (p) =>
+              p.id === itemDb.codigo ||
+              (p.id === "AMAZON" && itemDb.codigo === "AMAZON-PRIME-VIDEO") ||
+              (p.id === "AMAZON-PRIME-VIDEO" && itemDb.codigo === "AMAZON"),
+          );
+
+          if (producto) {
+            producto.precio = parseFloat(itemDb.precio);
+          }
+        });
+      }
+      renderTienda();
+      cargarStockEnTienda();
+    })
+    .catch((err) => {
+      console.error("Error al cargar precios desde MySQL:", err);
+      renderTienda();
+      cargarStockEnTienda();
+    });
+}
+
+function actualizarSaldoUI() {
+  const f = formatMoneda(window.saldoNumericoActual);
+  const balDesktop = document.getElementById("distriBarBalance");
+  if (balDesktop) balDesktop.innerText = f;
+
+  const balMobile = document.getElementById("distriBarBalanceMobile");
+  if (balMobile) balMobile.innerText = f;
+
+  const cartTotalSaldo = document.getElementById("cartTotalSaldo");
+  if (cartTotalSaldo) cartTotalSaldo.innerText = f;
+}
+
+// =========================================================================
+// 📊 HISTORIAL DE MOVIMIENTOS Y ALERTAS
+// =========================================================================
+function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
+  const telFinal =
+    tel ||
+    localStorage.getItem("active_distri_tel") ||
+    window.distriTelefonoCache ||
+    "";
+
+  const formData = new FormData();
+  formData.append("accion", "obtener_dashboard_distribuidor");
+  formData.append("telefono", telFinal);
+  formData.append("mes", mesFiltro);
+
+  const tbody = document.getElementById("tablaHistorialBody");
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--text-secondary);"><svg class="spin-anim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg><br>Cargando movimientos...</td></tr>`;
+  }
+
+  fetch(API_MYSQL_URL, { method: "POST", body: formData })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success") {
+        let trs = "";
+
+        if (res.historial && res.historial.length > 0) {
+          res.historial.forEach((mov) => {
+            let isPositivo = mov.monto > 0;
+            let color = isPositivo ? "var(--ios-green)" : "var(--ios-red)";
+            let signo = isPositivo ? "+" : "";
+
+            trs += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 12px 8px; font-size:0.75rem; color:var(--text-secondary); white-space:nowrap;">${mov.fecha}</td>
+                      <td style="padding: 12px 8px; line-height:1.3;">
+                        <strong style="color:var(--text-primary); font-size:0.85rem;">${mov.concepto}</strong><br>
+                        <span style="color:var(--ios-blue); font-size:0.75rem;">👤 ${mov.cliente}</span>
+                      </td>
+                      <td style="padding: 12px 8px; text-align:right; color:${color}; font-weight:bold; font-family:monospace; white-space:nowrap;">${signo}${formatMoneda(mov.monto)}</td>
+                    </tr>`;
+          });
+        } else {
+          trs = `<tr><td colspan="3" style="text-align:center; padding: 35px; color:var(--text-secondary);">No se encontraron movimientos registrados para este periodo.</td></tr>`;
+        }
+        if (tbody) tbody.innerHTML = trs;
+
+        // Alertas de Renovaciones
+        const divRenov = document.getElementById("listaRenovacionesCards");
+        const widgetCont = document.getElementById("widgetRenovaciones");
+        let htmlRenov = "";
+        let now = new Date();
+        now.setHours(0, 0, 0, 0);
+
+        let countExpiran = 0;
+        if (res.renovaciones && res.renovaciones.length > 0) {
+          res.renovaciones.forEach((c) => {
+            let fObj = parseFechaCybernet(c.vencimiento);
+            if (fObj) {
+              let diffDias = Math.ceil(
+                (fObj.getTime() - now.getTime()) / (1000 * 3600 * 24),
+              );
+              if (diffDias >= 0 && diffDias <= 3) {
+                countExpiran++;
+                let colorDias =
+                  diffDias === 0 ? "var(--ios-red)" : "var(--ios-orange)";
+                let txtDias =
+                  diffDias === 0 ? "¡Vence HOY!" : `Vence en ${diffDias} días`;
+                let msgCobro = encodeURIComponent(
+                  `¡Hola! Tu cuenta de ${c.plataforma.replace(/-/g, " ")} vence pronto (${c.vencimiento}). ¿Deseas renovarla para no perder el servicio?`,
+                );
+
+                htmlRenov += `
+                   <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,149,0,0.3); border-radius:16px; padding:12px 16px; min-width:200px; display:flex; flex-direction:column; gap:6px;">
+                      <div style="font-weight:800; color:var(--text-primary); font-size:0.9rem;">📺 ${c.plataforma.replace(/-/g, " ")}</div>
+                      <div style="font-size:0.8rem; color:var(--text-secondary);">👤 ${c.cliente}</div>
+                      <div style="font-size:0.8rem; color:${colorDias}; font-weight:700;">${txtDias}</div>
+                      <button class="btn-ios" onclick="copiarMensajeRenovacion('${msgCobro}')" style="background:rgba(255,149,0,0.15); color:var(--ios-orange); border:none; padding:8px; border-radius:30px; font-size:0.75rem; font-weight:700; margin-top:4px;">
+                        📋 Copiar Mensaje
+                      </button>
+                   </div>`;
+              }
+            }
+          });
+        }
+
+        if (countExpiran > 0 && widgetCont && divRenov) {
+          divRenov.innerHTML = htmlRenov;
+          widgetCont.style.display = "block";
+        } else if (widgetCont) {
+          widgetCont.style.display = "none";
+        }
+      } else {
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--text-secondary);">No hay movimientos registrados para esta cuenta.</td></tr>`;
+        }
+      }
+    })
+    .catch((err) => {
+      console.error("Error al cargar historial:", err);
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--ios-red);">Error al conectar con la base de datos.</td></tr>`;
+      }
+    });
+}
+
+function copiarMensajeRenovacion(msgEnc) {
+  haptic();
+  navigator.clipboard.writeText(decodeURIComponent(msgEnc)).then(() => {
+    triggerToast("📋 Mensaje de cobro copiado.");
+  });
+}
+
+function abrirModalHistorial() {
+  haptic();
+  bloquearScroll();
+  const select = document.getElementById("selectMesMovimientos");
+  const mesActual = select ? select.value : "todos";
+  const tel =
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+
+  cargarDatosFinancierosYAlertas(tel, mesActual);
+  document.getElementById("modalEstadoCuenta").classList.add("open");
+}
+
+function cerrarModalHistorial() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("modalEstadoCuenta").classList.remove("open");
+}
+
+// =========================================================================
+// 🛒 E-COMMERCE MAYORISTA & CONTEO EXACTO DE PERFILES EN VIVO
+// =========================================================================
+function abrirCarrito() {
+  haptic();
+  bloquearScroll();
+  document.getElementById("modalCarritoTienda").classList.add("open");
+}
+function cerrarCarrito() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("modalCarritoTienda").classList.remove("open");
+}
+
+function renderTienda() {
+  const container = document.getElementById("shopCatalogContainer");
+  if (!container) return;
+  let html = "";
+  catálogoProductos.forEach((p) => {
+    html += `
+      <div class="card-ios platform-card-shop" data-name="${p.nombre.toLowerCase()}" style="position:relative; padding:18px 14px 14px 14px; margin:0; display:flex; flex-direction:column; align-items:center; gap:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05); text-align:center;">
+        <div id="stock-badge-${p.id}" style="position:absolute; top:8px; right:8px; background:rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size:0.65rem; padding:4px 8px; border-radius:10px; font-weight:700; color:var(--text-secondary);">
+           <svg class="spin-anim" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
         </div>
+        <div style="background: ${p.color}15; color: ${p.color}; width: 44px; height: 44px; border-radius: 14px; display:flex; align-items:center; justify-content:center; border: 1px solid ${p.color}25;">${p.logo}</div>
+        <span style="font-size:0.85rem; font-weight:800; color:var(--text-primary); text-overflow:ellipsis; white-space:nowrap; overflow:hidden; width:100%;">${p.nombre}</span>
+        <span style="font-family:monospace; font-size:0.95rem; font-weight:bold; color:var(--ios-green);">${formatMoneda(p.precio)}</span>
+        <button id="btn-add-${p.id}" onclick="agregarAlCarrito('${p.id}')" class="btn-ios btn-primary" style="margin:4px 0 0 0; padding:6px 12px; font-size:0.75rem; border-radius:30px; font-weight:700; width:100%; transition: all 0.3s;">+ Añadir</button>
+      </div>`;
+  });
+  container.innerHTML = html;
+}
 
-        <div
-          style="display: flex; align-items: center; gap: 6px; flex-shrink: 0"
-        >
-          <div
-            id="distriBarBalance"
-            style="
-              background: rgba(48, 209, 88, 0.12);
-              border: 1px solid rgba(48, 209, 88, 0.25);
-              padding: 6px 12px;
-              border-radius: 50px;
-              font-weight: 800;
-              color: var(--ios-green);
-              font-family: monospace;
-              font-size: 0.85rem;
-              white-space: nowrap;
-            "
-          >
-            $--
-          </div>
+function cargarStockEnTienda() {
+  const formData = new FormData();
+  formData.append("accion", "obtener_stock_plataformas");
 
-          <button
-            id="btnRefrescarSaldoManual"
-            onclick="manualRefrescarSaldo()"
-            class="btn-ios"
-            style="
-              padding: 0;
-              width: 36px;
-              height: 36px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              background: var(--input-bg);
-              border: var(--surface-border);
-              cursor: pointer;
-              color: var(--text-primary);
-              flex-shrink: 0;
-            "
-            title="Actualizar saldo"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="23 4 23 10 17 10"></polyline>
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-            </svg>
-          </button>
+  fetch(API_MYSQL_URL, { method: "POST", body: formData })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success" && res.stock) {
+        catálogoProductos.forEach((p) => {
+          const badge = document.getElementById(`stock-badge-${p.id}`);
+          const btnAdd = document.getElementById(`btn-add-${p.id}`);
 
-          <div
-            class="desktop-menu-group"
-            style="display: flex; gap: 6px; align-items: center"
-          >
-            <button
-              onclick="abrirModalBusquedaCuentas()"
-              class="btn-ios btn-secondary"
-              style="padding: 8px 12px; font-size: 0.85rem"
-            >
-              🔍 Cuentas
-            </button>
-            <button
-              onclick="abrirCentroCodigos()"
-              class="btn-ios btn-secondary"
-              style="padding: 8px 12px; font-size: 0.85rem"
-            >
-              📩 Códigos
-            </button>
-            <button
-              onclick="abrirModalHistorial()"
-              class="btn-ios btn-secondary"
-              style="padding: 8px 12px; font-size: 0.85rem"
-            >
-              📊 Movimientos
-            </button>
-            <button
-              onclick="cerrarSesionDistribuidor()"
-              class="btn-ios"
-              style="
-                background: rgba(255, 69, 58, 0.1);
-                color: var(--ios-red);
-                padding: 8px 12px;
-                font-size: 0.85rem;
-              "
-            >
-              Salir ✕
-            </button>
-            <button
-              id="theme-toggle"
-              class="btn-ios btn-secondary"
-              onclick="toggleThemeDistri()"
-              style="
-                padding: 0;
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            ></button>
-          </div>
+          if (!badge) return;
 
-          <button
-            class="mobile-menu-trigger"
-            onclick="abrirMenuMovil()"
-            style="
-              background: var(--input-bg);
-              border: var(--surface-border);
-              width: 36px;
-              height: 36px;
-              border-radius: 50%;
-              display: none;
-              align-items: center;
-              justify-content: center;
-              color: var(--text-primary);
-              cursor: pointer;
-              padding: 0;
-              flex-shrink: 0;
-            "
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-            >
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-      </div>
+          const disponibles =
+            res.stock[p.id] !== undefined ? parseInt(res.stock[p.id]) : 0;
 
-      <!-- MENÚ CELULARES -->
-      <div
-        class="overlay-modal-code"
-        id="modalMenuMovil"
-        onclick="if (event.target === this) cerrarMenuMovil();"
-      >
-        <div
-          class="modal-ios"
-          style="
-            max-width: 320px;
-            width: 88%;
-            padding: 20px;
-            border-radius: 24px;
-            text-align: left;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            align-self: flex-start;
-            margin-top: 70px;
-            margin-right: 12px;
-            margin-left: auto;
-          "
-        >
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              border-bottom: 1px solid var(--surface-border);
-              padding-bottom: 10px;
-              margin-bottom: 4px;
-            "
-          >
-            <span
-              style="
-                font-weight: 800;
-                font-size: 0.8rem;
-                color: var(--text-secondary);
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-              "
-              >Acciones Mayoristas</span
-            >
-            <button
-              onclick="cerrarMenuMovil()"
-              style="
-                background: transparent;
-                border: none;
-                color: var(--text-secondary);
-                font-size: 1.4rem;
-                cursor: pointer;
-                padding: 0 5px;
-              "
-            >
-              &times;
-            </button>
-          </div>
+          if (disponibles > 0) {
+            badge.innerHTML = `🟢 ${disponibles} Libres`;
+            badge.style.background = "rgba(48, 209, 88, 0.12)";
+            badge.style.color = "var(--ios-green)";
+            badge.style.borderColor = "rgba(48, 209, 88, 0.25)";
 
-          <button
-            onclick="
-              cerrarMenuMovil();
-              abrirModalBusquedaCuentas();
-            "
-            class="btn-ios btn-secondary"
-            style="
-              width: 100%;
-              justify-content: flex-start;
-              padding: 12px 16px;
-              border-radius: 14px;
-            "
-          >
-            🔍 Buscar en Casillero
-          </button>
-          <button
-            onclick="
-              cerrarMenuMovil();
-              abrirCentroCodigos();
-            "
-            class="btn-ios btn-secondary"
-            style="
-              width: 100%;
-              justify-content: flex-start;
-              padding: 12px 16px;
-              border-radius: 14px;
-            "
-          >
-            📩 Centro de Códigos
-          </button>
-          <button
-            onclick="
-              cerrarMenuMovil();
-              abrirModalHistorial();
-            "
-            class="btn-ios btn-secondary"
-            style="
-              width: 100%;
-              justify-content: flex-start;
-              padding: 12px 16px;
-              border-radius: 14px;
-            "
-          >
-            📊 Historial de Movimientos
-          </button>
+            if (btnAdd) {
+              btnAdd.disabled = false;
+              btnAdd.innerHTML = "+ Añadir";
+              btnAdd.style.background = "var(--ios-blue)";
+              btnAdd.style.color = "white";
+              btnAdd.style.opacity = "1";
+              btnAdd.style.cursor = "pointer";
+            }
+          } else {
+            badge.innerHTML = `🔴 Agotado`;
+            badge.style.background = "rgba(255, 69, 58, 0.12)";
+            badge.style.color = "var(--ios-red)";
+            badge.style.borderColor = "rgba(255, 69, 58, 0.25)";
 
-          <div
-            style="
-              border-top: 1px solid var(--surface-border);
-              padding-top: 12px;
-              margin-top: 4px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              width: 100%;
-            "
-          >
-            <span
-              style="
-                font-size: 0.85rem;
-                font-weight: 700;
-                color: var(--text-secondary);
-              "
-              >Cambiar Tema:</span
-            >
-            <button
-              id="theme-toggle-mobile"
-              class="btn-ios btn-secondary"
-              onclick="toggleThemeDistri()"
-              style="
-                padding: 0;
-                width: 40px;
-                height: 36px;
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            ></button>
-          </div>
+            if (btnAdd) {
+              btnAdd.disabled = true;
+              btnAdd.innerHTML = "Sin Stock";
+              btnAdd.style.background = "rgba(255, 255, 255, 0.05)";
+              btnAdd.style.color = "var(--text-secondary)";
+              btnAdd.style.opacity = "0.5";
+              btnAdd.style.cursor = "not-allowed";
+            }
+          }
+        });
+      }
+    })
+    .catch((err) => {
+      console.error("Error al cargar stock de productos desde MySQL:", err);
+    });
+}
 
-          <button
-            onclick="cerrarSesionDistribuidor()"
-            class="btn-ios"
-            style="
-              width: 100%;
-              background: rgba(255, 69, 58, 0.1);
-              color: var(--ios-red);
-              padding: 12px 16px;
-              border-radius: 14px;
-              font-weight: 800;
-              margin-top: 4px;
-            "
-          >
-            Salir de la Cuenta ✕
-          </button>
-        </div>
-      </div>
+function filtrarTiendaLocal() {
+  const query = document
+    .getElementById("searchShopInput")
+    .value.toLowerCase()
+    .trim();
+  document.querySelectorAll(".platform-card-shop").forEach((c) => {
+    c.style.display = c.getAttribute("data-name").includes(query)
+      ? "flex"
+      : "none";
+  });
+}
 
-      <!-- CATÁLOGO -->
-      <div class="tienda-layout">
-        <div class="card-ios" style="padding: 16px">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-              padding-bottom: 12px;
-              gap: 10px;
-              flex-wrap: wrap;
-            "
-          >
-            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800">
-              🛍️ Catálogo Mayorista
-            </h3>
-            <input
-              type="text"
-              id="searchShopInput"
-              class="input-ios"
-              placeholder="Buscar servicio..."
-              oninput="filtrarTiendaLocal()"
-              style="
-                flex: 1;
-                min-width: 140px;
-                max-width: 200px;
-                padding: 8px 12px;
-                font-size: 0.85rem;
-              "
-            />
-          </div>
-          <div
-            class="grid-tienda"
-            id="shopCatalogContainer"
-            style="margin-top: 16px"
-          ></div>
-        </div>
-      </div>
+function agregarAlCarrito(id) {
+  haptic();
+  const prod = catálogoProductos.find((p) => p.id === id);
+  if (!prod) return;
+  const existente = window.carrito.find((item) => item.id === id);
+  if (existente) existente.amount++;
+  else
+    window.carrito.push({
+      id: prod.id,
+      nombre: prod.nombre,
+      precio: prod.precio,
+      amount: 1,
+      tipo: "Nueva",
+      correoReno: "",
+    });
+  triggerToast(`🛒 ${prod.nombre} añadido.`);
+  actualizarCarritoUI();
 
-      <!-- ALERTAS RENOVACIÓN -->
-      <div
-        class="card-ios"
-        id="widgetRenovaciones"
-        style="
-          display: none;
-          border-color: rgba(255, 149, 0, 0.3);
-          padding: 16px;
-        "
-      >
-        <h3
-          style="
-            margin: 0 0 12px 0;
-            font-size: 1rem;
-            font-weight: 800;
-            color: var(--ios-orange);
-          "
-        >
-          ⏰ Alertas de Renovación (Vencen en 3 días o menos)
-        </h3>
-        <div
-          id="listaRenovacionesCards"
-          style="
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            -webkit-overflow-scrolling: touch;
-          "
-        ></div>
-      </div>
-    </div>
+  const btn = document.getElementById(`btn-add-${id}`);
+  if (btn) {
+    const textoOriginal = btn.innerHTML;
+    btn.classList.add("btn-pop-anim");
+    btn.innerHTML = "✓ Añadido";
+    btn.style.setProperty("background", "var(--ios-green)", "important");
+    btn.style.setProperty("color", "#ffffff", "important");
 
-    <!-- BOTÓN CARRITO -->
-    <button id="fabCarrito" onclick="abrirCarrito()" style="display: none">
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="white"
-        stroke-width="2.5"
-      >
-        <circle cx="9" cy="21" r="1"></circle>
-        <circle cx="20" cy="21" r="1"></circle>
-        <path
-          d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
-        ></path>
-      </svg>
-      <span
-        id="fabCartCountBadge"
-        style="
-          position: absolute;
-          top: -3px;
-          right: -3px;
-          background: var(--ios-red);
-          color: white;
-          font-size: 0.72rem;
-          font-weight: 800;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        "
-        >0</span
-      >
-    </button>
+    setTimeout(() => {
+      btn.classList.remove("btn-pop-anim");
+      btn.innerHTML = textoOriginal;
+      btn.style.background = "";
+      btn.style.color = "";
+    }, 800);
+  }
 
-    <!-- CARRITO DE COMPRAS -->
-    <div class="overlay-modal-code" id="modalCarritoTienda">
-      <div class="modal-ios" style="max-width: 400px; width: 92%">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-            padding-bottom: 10px;
-            margin-bottom: 12px;
-          "
-        >
-          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
-            🛒 Mi Carrito
-          </h3>
-          <button
-            onclick="cerrarCarrito()"
-            style="
-              background: transparent;
-              border: none;
-              color: var(--text-secondary);
-              font-size: 1.5rem;
-              cursor: pointer;
-            "
-          >
-            &times;
-          </button>
-        </div>
-        <div
-          id="cartItemsContainer"
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 250px;
-            overflow-y: auto;
-          "
-        ></div>
+  const fab = document.getElementById("fabCarrito");
+  if (fab) {
+    fab.style.transform = "scale(1.1)";
+    setTimeout(() => {
+      fab.style.transform = "scale(1)";
+    }, 150);
+  }
+}
 
-        <input
-          type="text"
-          id="cartClientName"
-          class="input-ios"
-          placeholder="Nombre del Cliente (Opcional)"
-          style="margin-top: 12px; padding: 12px; font-size: 0.9rem"
-        />
+function cambiarCantidad(id, delta) {
+  haptic();
+  const item = window.carrito.find((i) => i.id === id);
+  if (!item) return;
+  item.amount += delta;
+  if (item.amount <= 0)
+    window.carrito = window.carrito.filter((i) => i.id !== id);
+  actualizarCarritoUI();
+}
 
-        <div
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            border-top: 1px solid rgba(128, 128, 128, 0.2);
-            padding-top: 10px;
-            font-size: 0.85rem;
-            margin-top: 8px;
-          "
-        >
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              color: var(--text-secondary);
-            "
-          >
-            <span>Saldo Actual:</span
-            ><span id="cartTotalSaldo" style="font-weight: bold">$0</span>
-          </div>
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              font-size: 1rem;
-              font-weight: 800;
-              margin-top: 2px;
-            "
-          >
-            <span>TOTAL PEDIDO:</span
-            ><span id="cartTotalCost" style="color: var(--ios-blue)">$0</span>
-          </div>
-        </div>
-        <button
-          id="btnCheckoutShop"
-          onclick="procesarCompraDistribuidor()"
-          class="btn-ios btn-primary w-100"
-          style="margin-top: 12px"
-        >
-          CONFIRMAR COMPRA
-        </button>
-      </div>
-    </div>
+window.cuentasActivasB2B = [];
 
-    <!-- BÓVEDA CASILLERO -->
-    <div class="overlay-modal-code" id="modalBusquedaCuentas">
-      <div class="modal-ios" style="max-width: 450px; width: 92%">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-            padding-bottom: 12px;
-            margin-bottom: 12px;
-          "
-        >
-          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
-            🔍 Mis Cuentas en Casillero
-          </h3>
-          <button
-            onclick="cerrarModalBusquedaCuentas()"
-            style="
-              background: transparent;
-              border: none;
-              font-size: 1.5rem;
-              color: var(--text-secondary);
-              cursor: pointer;
-            "
-          >
-            &times;
-          </button>
-        </div>
-        <div style="width: 100%; margin-bottom: 12px">
-          <input
-            type="text"
-            id="inputCasilleroSearch"
-            class="input-ios"
-            placeholder="Buscar por cliente, correo o perfil..."
-            oninput="buscarCasilleroDistri()"
-            style="
-              width: 100%;
-              padding: 12px;
-              font-size: 0.9rem;
-              box-sizing: border-box;
-            "
-          />
-        </div>
-        <div
-          id="contenedorResultadosCasillero"
-          style="
-            max-height: 60vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-          "
-        ></div>
-      </div>
-    </div>
+window.cambiarTipoVentaCarrito = function (id, tipo) {
+  let item = window.carrito.find((i) => i.id === id);
+  if (item) {
+    item.tipo = tipo;
+    if (tipo === "Nueva") {
+      item.correoReno = "";
+      item.amount = 1;
+      document.getElementById("cartClientName").value = "";
+    }
+    actualizarCarritoUI();
+  }
+};
 
-    <!-- HISTORIAL DE MOVIMIENTOS CON SELECTOR DE MES -->
-    <div class="overlay-modal-code" id="modalEstadoCuenta">
-      <div class="modal-ios" style="max-width: 500px; width: 92%">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-            padding-bottom: 12px;
-            margin-bottom: 10px;
-          "
-        >
-          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
-            📊 Movimientos y Ventas
-          </h3>
-          <button
-            onclick="cerrarModalHistorial()"
-            style="
-              background: transparent;
-              border: none;
-              font-size: 1.5rem;
-              color: var(--text-secondary);
-              cursor: pointer;
-            "
-          >
-            &times;
-          </button>
-        </div>
+// =========================================================================
+// 🔄 VENTANA DE RENOVACIONES B2B
+// =========================================================================
+window.abrirModalRenoB2B = function (idItem) {
+  haptic();
+  const telDistri =
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+  const modal = document.getElementById("modalRenovacionDistri");
+  const container = document.getElementById("listaCuentasModalRenoDistri");
 
-        <!-- FILTRO DE MES -->
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            margin-bottom: 12px;
-            background: var(--input-bg);
-            padding: 6px 10px;
-            border-radius: 12px;
-            border: 1px solid var(--surface-border);
-          "
-        >
-          <span
-            style="
-              font-size: 0.8rem;
-              color: var(--text-secondary);
-              font-weight: 700;
-            "
-          >
-            Filtrar por Mes:
-          </span>
-          <select
-            id="selectMesMovimientos"
-            class="input-ios"
-            onchange="filtrarMovimientosPorMes()"
-            style="
-              padding: 6px 10px;
-              font-size: 0.8rem;
-              font-weight: 700;
-              border-radius: 8px;
-              max-width: 180px;
-              flex: 1;
-            "
-          >
-            <option value="todos">Cargando meses...</option>
-          </select>
-        </div>
+  container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line></svg><br>Buscando tus pantallas en MySQL...</div>`;
+  modal.classList.add("open");
 
-        <div style="max-height: 55vh; overflow-y: auto">
-          <table
-            style="width: 100%; border-collapse: collapse; text-align: left"
-          >
-            <tbody id="tablaHistorialBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+  const formData = new FormData();
+  formData.append("accion", "obtener_cuentas_renovacion_distribuidor");
+  formData.append("telefono", telDistri);
 
-    <!-- MODAL ÉXITO -->
-    <div class="overlay-modal-code" id="successCheckoutOverlay">
-      <div
-        class="modal-ios"
-        style="max-width: 400px; width: 92%; text-align: center"
-      >
-        <h2 style="font-size: 2.6rem; margin: 0 0 8px">✅</h2>
-        <h3
-          style="
-            margin: 0 0 12px;
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: var(--ios-green);
-          "
-        >
-          ¡Pedido Procesado!
-        </h3>
-        <div
-          id="cajaTextoFichas"
-          style="
-            background: rgba(128, 128, 128, 0.1);
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 0.78rem;
-            text-align: left;
-            font-family: monospace;
-            margin-bottom: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-          "
-        ></div>
-        <button
-          id="btnCopiarFichasCheckout"
-          class="btn-ios btn-primary w-100"
-          style="margin-bottom: 8px"
-          onclick="copiarCuentasCheckout()"
-        >
-          📋 Copiar Accesos
-        </button>
-        <a
-          id="btnWhatsAppActivacion"
-          href="#"
-          target="_blank"
-          style="display: none; text-decoration: none"
-        >
-          <button class="btn-ios btn-success w-100" style="margin-bottom: 8px">
-            💬 Pedir Activación por Chat
-          </button>
-        </a>
-        <button
-          class="btn-ios btn-secondary w-100"
-          onclick="cerrarModalExitoCheckout()"
-        >
-          Cerrar
-        </button>
-      </div>
-    </div>
+  fetch(API_MYSQL_URL, { method: "POST", body: formData })
+    .then((res) => res.json())
+    .then((res) => {
+      container.innerHTML = "";
+      if (res && res.status === "success" && res.data.length > 0) {
+        window.cuentasActivasB2B = res.data;
 
-    <!-- CENTRO CÓDIGOS -->
-    <div class="overlay-modal-code" id="codesCenterOverlay">
-      <div class="modal-ios" style="max-width: 400px; width: 92%">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--surface-border);
-            padding-bottom: 12px;
-            margin-bottom: 8px;
-          "
-        >
-          <h3
-            style="
-              margin: 0;
-              font-size: 1.15rem;
-              font-weight: 800;
-              display: flex;
-              align-items: center;
-              gap: 8px;
-            "
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--ios-blue)"
-              stroke-width="2.5"
-            >
-              <path
-                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-              ></path>
-              <polyline points="22,6 12,13 2,6"></polyline>
-            </svg>
-            Centro de Códigos
-          </h3>
-          <button
-            onclick="cerrarCentroCodigos()"
-            style="
-              background: var(--input-bg);
-              border: none;
-              color: var(--text-primary);
-              width: 30px;
-              height: 30px;
-              border-radius: 50%;
-              font-size: 1.1rem;
-              cursor: pointer;
-            "
-          >
-            &times;
-          </button>
-        </div>
+        window.cuentasActivasB2B.forEach((cuenta) => {
+          let correoTexto = String(cuenta.correo || "").trim();
+          let perfilTexto = String(cuenta.perfil || "").trim();
+          let clienteTexto = String(cuenta.cliente || "").trim();
 
-        <div id="codeStep1" class="code-step">
-          <button
-            class="btn-ios w-100"
-            style="background: #e50914; color: white"
-            onclick="setCodigoPlat('NETFLIX')"
-          >
-            🍿 Netflix Original
-          </button>
-          <button
-            class="btn-ios w-100"
-            style="background: #007aff; color: white"
-            onclick="setCodigoPlat('DISNEY')"
-          >
-            🔷 Disney+ Premium
-          </button>
-        </div>
+          let div = document.createElement("div");
+          div.className = "card-ios item-reno-b2b";
+          div.style =
+            "padding: 15px; cursor: pointer; background: var(--input-bg); border: var(--surface-border); border-radius: 14px; margin-bottom: 8px; text-align: left;";
+          div.setAttribute(
+            "data-search",
+            correoTexto.toLowerCase() +
+              " " +
+              perfilTexto.toLowerCase() +
+              " " +
+              clienteTexto.toLowerCase(),
+          );
 
-        <div id="codeStep2" class="code-step">
-          <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(1)">
-            📺 Código de Inicio Sesión
-          </button>
-          <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(2)">
-            ✈️ Código 'Estoy de Viaje'
-          </button>
-          <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(3)">
-            🔗 Enlace de Actualización
-          </button>
-        </div>
+          div.innerHTML = `
+              <div style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; word-break: break-all;">${correoTexto}</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+                  <span>Perfil: <b style="color: var(--ios-blue);">${perfilTexto}</b></span>
+                  <span>Cliente: <b style="color: var(--ios-orange);">${clienteTexto || "Sin Nombre"}</b></span>
+              </div>
+          `;
 
-        <div id="codeStep3" class="code-step" style="gap: 14px">
-          <div style="text-align: left; width: 100%">
-            <label
-              style="
-                font-size: 0.75rem;
-                color: var(--text-secondary);
-                margin-bottom: 4px;
-                display: block;
-                font-weight: 700;
-                text-transform: uppercase;
-              "
-              >Correo electrónico de la cuenta</label
-            >
-            <input
-              type="email"
-              id="inputCorreoCodigo"
-              class="input-ios"
-              placeholder="ejemplo@cybernetsp.com o outlook"
-              style="width: 100%; box-sizing: border-box"
-              spellcheck="false"
-            />
-          </div>
-          <button
-            id="btnRastrearCodigo"
-            class="btn-ios btn-success w-100"
-            onclick="rastrearCodigo()"
-          >
-            Rastrear en la Nube →
-          </button>
-        </div>
+          div.onclick = function () {
+            let itemCarrito = window.carrito.find((i) => i.id === idItem);
+            if (itemCarrito) {
+              itemCarrito.correoReno = `${correoTexto} | Perfil: ${perfilTexto}`;
 
-        <div
-          id="codeStep4"
-          class="code-step"
-          style="padding: 16px 0; align-items: center !important"
-        >
-          <svg
-            class="spin-anim"
-            width="34"
-            height="34"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--ios-blue)"
-            stroke-width="3"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 2v4"></path>
-          </svg>
-          <p
-            style="
-              margin: 0;
-              font-weight: 700;
-              font-size: 1rem;
-              color: var(--text-primary);
-            "
-          >
-            Interceptando códigos...
-          </p>
-        </div>
+              let inputNombre = document.getElementById("cartClientName");
+              if (
+                inputNombre &&
+                clienteTexto &&
+                clienteTexto !== "N/A" &&
+                clienteTexto.toLowerCase() !== "cliente"
+              ) {
+                inputNombre.value = clienteTexto;
+              }
 
-        <div id="codeStep5" class="code-step">
-          <h3
-            id="codeResultTitle"
-            style="margin: 0; font-weight: 800; font-size: 1.2rem"
-          ></h3>
-          <p
-            id="codeResultDesc"
-            style="
-              font-size: 0.9rem;
-              color: var(--text-secondary);
-              margin-bottom: 4px;
-            "
-          ></p>
+              let cantidadDetectada = perfilTexto
+                .split(/[-y,]/i)
+                .filter((p) => p.trim() !== "").length;
+              if (cantidadDetectada > 0) itemCarrito.amount = cantidadDetectada;
 
-          <div
-            id="codeResultBox"
-            style="
-              display: none;
-              background: rgba(48, 209, 88, 0.08);
-              padding: 20px 12px;
-              border-radius: 18px;
-              border: 1px dashed var(--ios-green);
-              cursor: pointer;
-              user-select: none;
-              width: 100%;
-            "
-            onclick="copiarCodigoResultanteB2B()"
-          >
-            <div
-              id="codeVal"
-              style="
-                font-size: 3rem;
-                font-weight: 900;
-                letter-spacing: 4px;
-                color: var(--text-primary);
-                display: inline-block;
-                width: 100%;
-              "
-            ></div>
-            <div
-              style="
-                font-size: 0.72rem;
-                color: var(--text-secondary);
-                margin-top: 4px;
-                font-weight: bold;
-              "
-            >
-              👆 Toca el recuadro para copiar el código
-            </div>
-            <div
-              id="codeTimer"
-              style="
-                color: var(--ios-red);
-                font-size: 0.85rem;
-                font-weight: bold;
-                margin-top: 12px;
-              "
-            ></div>
-          </div>
+              actualizarCarritoUI();
+            }
+            modal.classList.remove("open");
+          };
+          container.appendChild(div);
+        });
+      } else {
+        container.innerHTML =
+          "<div style='color:var(--text-secondary); text-align:center; padding: 20px;'>No tienes cuentas activas registradas en MySQL.</div>";
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      container.innerHTML =
+        "<div style='color:var(--ios-red); text-align:center; padding: 20px;'>❌ Error cargando cuentas para renovación.</div>";
+    });
+};
 
-          <div id="linkResultBox" style="display: none; width: 100%">
-            <a
-              id="linkVal"
-              href="#"
-              target="_blank"
-              style="text-decoration: none; width: 100%"
-            >
-              <button class="btn-ios btn-success w-100">
-                Abrir Enlace Oficial
+window.filtrarModalRenovacionB2B = function () {
+  const q = document
+    .getElementById("buscadorModalRenoDistri")
+    .value.toLowerCase()
+    .trim();
+  document.querySelectorAll(".item-reno-b2b").forEach((item) => {
+    const indiceBusqueda = item.getAttribute("data-search") || "";
+    if (indiceBusqueda.includes(q))
+      item.style.setProperty("display", "block", "important");
+    else item.style.setProperty("display", "none", "important");
+  });
+};
+
+function actualizarCarritoUI() {
+  const container = document.getElementById("cartItemsContainer");
+  const countBadge = document.getElementById("cartCountBadge");
+  const fabBadge = document.getElementById("fabCartCountBadge");
+  const totalDisplay = document.getElementById("cartTotalCost");
+  const btnCheckout = document.getElementById("btnCheckoutShop");
+
+  if (!window.carrito || window.carrito.length === 0) {
+    if (container)
+      container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; padding: 30px 0; font-weight: 600;">Tu carrito está vacío.</div>`;
+    if (countBadge) countBadge.innerText = "0";
+    if (fabBadge) fabBadge.innerText = "0";
+    if (totalDisplay) totalDisplay.innerText = "$0";
+    if (btnCheckout) btnCheckout.disabled = true;
+    return;
+  }
+
+  let html = "",
+    totalCost = 0,
+    totalItems = 0;
+
+  window.carrito.forEach((item) => {
+    const subtotal = item.precio * item.amount;
+    totalCost += subtotal;
+    totalItems += item.amount;
+
+    let opcionesReno = "";
+    if (item.id === "NETFLIX") {
+      let isReno = item.tipo === "Reno";
+      let displayBtn = isReno ? "block" : "none";
+      let btnText = item.correoReno ? item.correoReno : "Seleccionar Cuenta";
+      let btnColor = item.correoReno ? "var(--ios-green)" : "var(--ios-orange)";
+
+      opcionesReno = `
+          <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px; width: 100%; border-top: 1px dashed var(--surface-border); padding-top: 10px;">
+              <select class="input-ios" style="margin: 0; padding: 8px; font-size: 0.8rem; border-radius: 10px; font-weight: 600;" onchange="window.cambiarTipoVentaCarrito('${item.id}', this.value)">
+                  <option value="Nueva" ${!isReno ? "selected" : ""}>Crear Pantalla Nueva</option>
+                  <option value="Reno" ${isReno ? "selected" : ""}>Renovar Pantalla Existente</option>
+              </select>
+              <button class="btn-ios" style="display: ${displayBtn}; background: transparent; color: ${btnColor}; border: 1px solid ${btnColor}; padding: 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; width: 100%; text-align: center; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" onclick="window.abrirModalRenoB2B('${item.id}')">
+                  ${btnText}
               </button>
-            </a>
-          </div>
+          </div>`;
+    }
 
-          <button
-            class="btn-ios btn-secondary w-100"
-            style="margin-top: 6px"
-            onclick="changeCodeStep(1)"
-          >
-            Nueva Consulta
-          </button>
+    html += `
+      <div class="cart-item-row" style="display:flex; flex-direction:column; gap:12px; background: var(--input-bg); padding:14px; border-radius:16px; border: 1px solid var(--surface-border);">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="display:flex; flex-direction:column; text-align:left; overflow:hidden; flex-grow:1;">
+              <strong style="font-size:0.95rem; color:var(--text-primary); text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">${item.nombre}</strong>
+              <span style="font-size:0.85rem; color:var(--ios-green); font-family:monospace; font-weight:700;">${formatMoneda(subtotal)} <span style="font-size:0.7rem; color:var(--text-secondary); font-weight:normal;">(${formatMoneda(item.precio)} c/u)</span></span>
+            </div>
+            <div style="display:flex; align-items:center; background: rgba(0,0,0,0.15); border-radius:30px; padding:2px; border:1px solid rgba(255,255,255,0.05);">
+              <button onclick="cambiarCantidad('${item.id}', -1)" style="background:transparent; border:none; color:var(--text-primary); width:26px; height:26px; font-weight:bold; cursor:pointer;">-</button>
+              <span style="font-family:monospace; font-size:0.9rem; font-weight:bold; min-width:20px; text-align:center;">${item.amount}</span>
+              <button onclick="cambiarCantidad('${item.id}', 1)" style="background:transparent; border:none; color:var(--text-primary); width:26px; height:26px; font-weight:bold; cursor:pointer;">+</button>
+            </div>
+            <button onclick="eliminarDelCarrito('${item.id}')" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); color: var(--ios-red); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink:0; font-size: 0.9rem; font-weight: bold; transition: background 0.2s;" title="Eliminar del carrito">
+              ✕
+            </button>
         </div>
-      </div>
-    </div>
+        ${opcionesReno}
+      </div>`;
+  });
 
-    <!-- RENOVACIÓN B2B -->
-    <div class="overlay-modal-code" id="modalRenovacionDistri">
-      <div class="modal-ios" style="max-width: 400px; width: 92%">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-            padding-bottom: 12px;
-            margin-bottom: 12px;
-          "
-        >
-          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
-            🔄 Seleccionar Cuenta
-          </h3>
-          <button
-            onclick="
-              document
-                .getElementById('modalRenovacionDistri')
-                .classList.remove('open')
-            "
-            style="
-              background: transparent;
-              border: none;
-              font-size: 1.5rem;
-              color: var(--text-secondary);
-              cursor: pointer;
-            "
-          >
-            &times;
-          </button>
-        </div>
-        <input
-          type="text"
-          id="buscadorModalRenoDistri"
-          class="input-ios"
-          placeholder="Buscar por correo, perfil o cliente"
-          onkeyup="filtrarModalRenovacionB2B()"
-          style="
-            width: 100%;
-            padding: 12px;
-            font-size: 0.9rem;
-            margin-bottom: 12px;
-          "
-        />
-        <div
-          id="listaCuentasModalRenoDistri"
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 280px;
-            overflow-y: auto;
-          "
-        ></div>
-      </div>
-    </div>
+  if (container) container.innerHTML = html;
+  if (countBadge) countBadge.innerText = totalItems;
+  if (fabBadge) fabBadge.innerText = totalItems;
+  if (totalDisplay) totalDisplay.innerText = formatMoneda(totalCost);
 
-    <!-- INITIALIZATION -->
-    <script>
-      function toggleThemeDistri() {
-        if (typeof haptic === "function") haptic();
-        const currentTheme =
-          document.documentElement.getAttribute("data-theme");
-        const newTheme = currentTheme === "light" ? "dark" : "light";
-        document.documentElement.setAttribute("data-theme", newTheme);
-        localStorage.setItem("cyber_theme_distri", newTheme);
-        updateThemeIconDistri(newTheme);
-      }
+  if (btnCheckout) {
+    if (totalCost > window.saldoNumericoActual) {
+      btnCheckout.disabled = true;
+      btnCheckout.style.background = "var(--ios-red)";
+      btnCheckout.innerText = "SALDO INSUFICIENTE";
+    } else {
+      btnCheckout.disabled = false;
+      btnCheckout.style.background = "var(--ios-blue)";
+      btnCheckout.innerText = "CONFIRMAR COMPRA";
+    }
+  }
+}
 
-      function updateThemeIconDistri(theme) {
-        const btnDesktop = document.getElementById("theme-toggle");
-        const btnMobile = document.getElementById("theme-toggle-mobile");
-        const svgIcon =
-          theme === "light"
-            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
-            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+// =========================================================================
+// 🛒 PROCESAR COMPRA MAYORISTA
+// =========================================================================
+function procesarCompraDistribuidor() {
+  haptic();
+  if (!window.carrito || window.carrito.length === 0) return;
 
-        if (btnDesktop) btnDesktop.innerHTML = svgIcon;
-        if (btnMobile) btnMobile.innerHTML = svgIcon;
-      }
+  let totalCost = window.carrito.reduce(
+    (sum, item) => sum + item.precio * item.amount,
+    0,
+  );
+  if (totalCost > window.saldoNumericoActual) return;
 
-      document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme = localStorage.getItem("cyber_theme_distri") || "dark";
-        document.documentElement.setAttribute("data-theme", savedTheme);
-        updateThemeIconDistri(savedTheme);
+  const btn = document.getElementById("btnCheckoutShop");
+  if (btn.disabled) return;
+
+  const inputNombreCliente = document
+    .getElementById("cartClientName")
+    .value.trim();
+  const nombreParaDb =
+    inputNombreCliente !== ""
+      ? inputNombreCliente
+      : localStorage.getItem("active_distri_name");
+  const telefonoDistribuidor = localStorage.getItem("active_distri_tel");
+
+  let hayRenovacion = false;
+  let correoRenoGlobal = "";
+
+  let fragmentos = window.carrito.map((item) => {
+    if (item.tipo === "Reno") {
+      hayRenovacion = true;
+      correoRenoGlobal = item.correoReno;
+    }
+    return `${item.amount} ${item.id}`;
+  });
+
+  let descripcionLote = fragmentos.join(" + ");
+
+  if (hayRenovacion) {
+    descripcionLote = "RENO: " + descripcionLote;
+    if (correoRenoGlobal === "") {
+      triggerToast(
+        "⚠️ Debes hacer clic en 'Seleccionar Cuenta' en tu carrito para proceder con la renovación.",
+      );
+      return;
+    }
+  }
+
+  desbloquearScroll();
+
+  setTimeout(() => {
+    if (
+      !confirm(
+        `🛒 ¿Confirmar despacho mayorista?\n\n📦 Pedido: ${descripcionLote}\n👤 Cliente: ${nombreParaDb}\n💵 Costo: ${formatMoneda(totalCost)}`,
+      )
+    ) {
+      bloquearScroll();
+      return;
+    }
+
+    bloquearScroll();
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spin-anim" style="display:inline-block; margin-right:8px;">⏳</span>Procesando venta...`;
+
+    const formData = new FormData();
+    formData.append("accion", "procesar_compra_distribuidor");
+    formData.append("nombre_cliente", nombreParaDb);
+    formData.append("telefono_distribuidor", telefonoDistribuidor);
+    formData.append("descripcion", descripcionLote);
+    formData.append("correo_renovacion", correoRenoGlobal);
+    formData.append("monto_total", totalCost);
+    formData.append("carrito_json", JSON.stringify(window.carrito));
+
+    fetch(API_MYSQL_URL, { method: "POST", body: formData })
+      .then((res) => res.json())
+      .then((res) => {
+        btn.disabled = false;
+        btn.innerHTML = "CONFIRMAR COMPRA";
+        actualizarCarritoUI();
+
+        if (res && res.status === "success") {
+          let nombreMensaje =
+            inputNombreCliente !== "" ? inputNombreCliente : "Cliente";
+          let textoFicha = `🌟 ¡Hola, ${nombreMensaje}!\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos: 👇\n\n`;
+
+          const mesesCortos = [
+            "ene",
+            "feb",
+            "mar",
+            "abr",
+            "may",
+            "jun",
+            "jul",
+            "ago",
+            "sep",
+            "oct",
+            "nov",
+            "dic",
+          ];
+          const fechaActual = new Date();
+          const fechaCompraFormateada = `${fechaActual.getDate()}-${mesesCortos[fechaActual.getMonth()]}`;
+
+          if (res.bloques && res.bloques.length > 0) {
+            res.bloques.forEach((bloque) => {
+              textoFicha += `🎬 DETALLES DE ${bloque.id.replace(/-/g, " ").toUpperCase()} ✅\n────────────────────\n📧 Correo: ${bloque.correo}\n🔐 Contraseña: ${bloque.clave}\n`;
+              if (
+                bloque.perfil &&
+                bloque.perfil !== "N/A" &&
+                bloque.perfil !== ""
+              )
+                textoFicha += `👤 Perfil: ${bloque.perfil}\n`;
+              if (bloque.pin && bloque.pin !== "N/A" && bloque.pin !== "")
+                textoFicha += `🔑 Pin del Perfil: ${bloque.pin}\n`;
+              textoFicha += `📅 Fecha de Vencimiento: ${bloque.venc.toLowerCase()}\n🛒 Fecha de Compra: ${fechaCompraFormateada}\n\n`;
+            });
+          } else {
+            textoFicha += `Tus cuentas han sido procesadas correctamente. Míralas en tu casillero.\n\n`;
+          }
+          textoFicha += `📢 INFORMACIÓN IMPORTANTE:\n────────────────────\n💎 Disfruta tu servicio.\n✨ ¡Gracias por elegirnos! ✨`;
+
+          document.getElementById("cajaTextoFichas").innerText = textoFicha;
+          window.fichasCheckoutPendientes = textoFicha;
+
+          const btnWhatsapp = document.getElementById("btnWhatsAppActivacion");
+          const requiresManual = window.carrito.some((item) =>
+            PLATAFORMAS_MANUALES.includes(item.id),
+          );
+
+          if (requiresManual) {
+            const platList = window.carrito
+              .filter((i) => PLATAFORMAS_MANUALES.includes(i.id))
+              .map((i) => i.nombre)
+              .join(", ");
+            const waMsg = encodeURIComponent(
+              `Hola, acabo de adquirir 1 mes de ${platList} para mi cliente, solicito activación. Cliente: ${nombreMensaje}`,
+            );
+            btnWhatsapp.href = `https://wa.me/573127706726?text=${waMsg}`;
+            btnWhatsapp.style.display = "block";
+          } else {
+            btnWhatsapp.style.display = "none";
+          }
+
+          cerrarCarrito();
+          document
+            .getElementById("successCheckoutOverlay")
+            .classList.add("open");
+          bloquearScroll();
+
+          window.carrito = [];
+          document.getElementById("cartClientName").value = "";
+          actualizarCarritoUI();
+
+          if (res.saldoQuedante !== undefined) {
+            window.saldoNumericoActual = parseFloat(res.saldoQuedante);
+          } else {
+            window.saldoNumericoActual -= totalCost;
+          }
+          localStorage.setItem(
+            "active_distri_saldo",
+            window.saldoNumericoActual,
+          );
+
+          actualizarSaldoUI();
+          cargarStockEnTienda();
+          cargarDatosFinancierosYAlertas(telefonoDistribuidor);
+        } else {
+          desbloquearScroll();
+          alert("❌ " + (res ? res.message : "Fallo al procesar la venta."));
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        btn.disabled = false;
+        btn.innerHTML = "CONFIRMAR COMPRA";
+        desbloquearScroll();
+        alert("❌ Error de comunicación con MySQL.");
       });
-    </script>
-    <script src="distribuidores.js"></script>
-  </body>
-</html>
+  }, 50);
+}
+
+function copiarCuentasCheckout() {
+  haptic();
+  const btn = document.getElementById("btnCopiarFichasCheckout");
+  navigator.clipboard.writeText(window.fichasCheckoutPendientes).then(() => {
+    let originalText = btn.innerHTML;
+    btn.innerHTML = `✅ ¡Copiado con éxito!`;
+    triggerToast(`📋 Cuentas copiadas.`);
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+    }, 2000);
+  });
+}
+
+function cerrarModalExitoCheckout() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("successCheckoutOverlay").classList.remove("open");
+}
+
+// =========================================================================
+// 📡 BÓVEDA Y CASILLERO DE CUENTAS (FORMATO EXCLUSIVO B2B SIN BOT)
+// =========================================================================
+function abrirModalBusquedaCuentas() {
+  haptic();
+  bloquearScroll();
+
+  const inputSearch = document.getElementById("inputCasilleroSearch");
+  if (inputSearch) inputSearch.value = "";
+
+  document.getElementById("modalBusquedaCuentas").classList.add("open");
+  buscarCasilleroDistri();
+}
+
+function cerrarModalBusquedaCuentas() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("modalBusquedaCuentas").classList.remove("open");
+}
+
+let timeoutCasilleroLive = null;
+function buscarCasilleroDistri() {
+  clearTimeout(timeoutCasilleroLive);
+
+  timeoutCasilleroLive = setTimeout(() => {
+    const inputSearch = document.getElementById("inputCasilleroSearch");
+    const valQuery = inputSearch ? inputSearch.value.trim().toLowerCase() : "";
+    const contenedor = document.getElementById("contenedorResultadosCasillero");
+    const telefonoDistribuidor =
+      localStorage.getItem("active_distri_tel") ||
+      window.distriTelefonoCache ||
+      "";
+
+    if (!contenedor) return;
+
+    if (
+      valQuery === "" &&
+      !contenedor.innerHTML.includes("cuenta-resultado-card")
+    ) {
+      contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg><br>Cargando tus cuentas...</div>`;
+    }
+
+    const formData = new FormData();
+    formData.append("accion", "buscar_casillero_distribuidor");
+    formData.append("telefono_distribuidor", telefonoDistribuidor);
+    formData.append("busqueda", valQuery);
+
+    fetch(API_MYSQL_URL, { method: "POST", body: formData })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res && res.status === "success") {
+          let htmlCards = "";
+
+          if (res.data && res.data.length > 0) {
+            res.data.forEach((item) => {
+              let pinText =
+                item.pin &&
+                item.pin !== "" &&
+                item.pin !== "N/A" &&
+                item.pin !== "-"
+                  ? ` | PIN: <b>${item.pin}</b>`
+                  : "";
+              let perfilText =
+                item.perfil && item.perfil !== "" && item.perfil !== "N/A"
+                  ? `Perfil: <b>${item.perfil}</b>${pinText}`
+                  : "Cuenta Completa";
+              let subCliente = item.cliente
+                ? `<span style="font-size:0.75rem; color:var(--text-secondary);">Cliente: <b style="color:var(--ios-orange);">${item.cliente}</b></span>`
+                : "";
+              let dataFicha = encodeURIComponent(JSON.stringify(item));
+
+              htmlCards += `
+                <div class="cuenta-resultado-card" style="background:var(--input-bg); border:var(--surface-border); padding:14px; border-radius:16px; margin-bottom:10px; display:flex; flex-direction:column; gap:8px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="color:var(--ios-blue); font-weight:800; text-transform: uppercase;">${item.plataforma.replace(/-/g, " ")}</div>
+                    <div style="color:var(--ios-green); font-family:monospace; font-weight:800; font-size:0.85rem;">${item.vencimiento}</div>
+                  </div>
+                  <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+                     ${perfilText}<br>${subCliente}
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+                    <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.correo}')" style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:10px; font-family:monospace; font-size:0.8rem; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">E: <span style="color:white; font-weight:bold;">${item.correo}</span></div>
+                    <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.clave}')" style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:10px; font-family:monospace; font-size:0.8rem; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">P: <span style="color:white; font-weight:bold;">${item.clave}</span></div>
+                    <button class="btn-ios btn-secondary w-100" style="padding:8px; font-size:0.75rem; margin-top:4px; border-radius:10px;" onclick="copiarFichaCasillero(this, '${dataFicha}')">Copiar Ficha Completa</button>
+                  </div>
+                </div>`;
+            });
+            contenedor.innerHTML = htmlCards;
+          } else {
+            contenedor.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-secondary);">No tienes cuentas registradas que coincidan.</div>`;
+          }
+        } else {
+          contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Error buscando en MySQL.</div>`;
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Error de conexión al servidor.</div>`;
+      });
+  }, 200);
+}
+
+// 📋 COPIADO NATIVO ESTILIZADO DE FICHA EXCLUSIVO PARA REVENDEDORES
+function copiarFichaCasillero(btn, dataEncoded) {
+  haptic();
+  const obj = JSON.parse(decodeURIComponent(dataEncoded));
+
+  let clienteVal = (obj.cliente || "").trim();
+  let tieneNombreReal =
+    clienteVal !== "" &&
+    clienteVal.toUpperCase() !== "N/A" &&
+    clienteVal.toLowerCase() !== "cliente" &&
+    clienteVal.toLowerCase() !== "sin nombre";
+
+  let saludo = tieneNombreReal ? `🌟 *¡Hola ${clienteVal}!*` : `🌟 *¡Hola!*`;
+
+  let platClean = (obj.plataforma || "").toUpperCase().replace(/_/g, "-");
+
+  let isNetflix = platClean.includes("NETFLIX");
+  let isIptvOrEmby = platClean.includes("IPTV") || platClean.includes("EMBY");
+
+  let etiquetaUser = isIptvOrEmby ? "Usuario" : "Correo";
+  let etiquetaPerfil = platClean.includes("IPTV")
+    ? "URL"
+    : platClean.includes("EMBY")
+      ? "Servidor"
+      : "Perfil";
+
+  let txt = `${saludo}\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n🎬 *DETALLES DE ${platClean}* ✅\n────────────────────\n`;
+
+  if (isNetflix) {
+    txt += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+  }
+
+  txt += `👤 *${etiquetaUser}:* ${obj.correo || "-"}\n🔐 *Contraseña:* ${obj.clave || "-"}\n`;
+
+  if (
+    obj.perfil &&
+    obj.perfil !== "N/A" &&
+    obj.perfil !== "-" &&
+    obj.perfil !== ""
+  ) {
+    txt += `🌐 *${etiquetaPerfil}:* ${obj.perfil}\n`;
+  }
+
+  if (obj.pin && obj.pin !== "N/A" && obj.pin !== "-" && obj.pin !== "") {
+    txt += `📍 *PIN:* ${obj.pin}\n`;
+  }
+
+  let venc = (obj.vencimiento || "-").toUpperCase();
+  txt += `📅 *Vence:* ${venc}\n\n`;
+
+  txt += `📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
+
+  navigator.clipboard.writeText(txt).then(() => {
+    let old = btn.innerHTML;
+    btn.innerHTML = `✅ ¡Copiada!`;
+    btn.style.background = "var(--ios-green)";
+    btn.style.color = "white";
+    triggerToast(`📋 Ficha copiada.`);
+    setTimeout(() => {
+      btn.innerHTML = old;
+      btn.style.background = "";
+      btn.style.color = "";
+    }, 1500);
+  });
+}
+
+// =========================================================================
+// 🤖 CENTRO DE CÓDIGOS B2B
+// =========================================================================
+let codeData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
+
+function abrirCentroCodigos() {
+  haptic();
+  bloquearScroll();
+
+  const telDistri =
+    localStorage.getItem("active_distri_tel") ||
+    window.distriTelefonoCache ||
+    "";
+  codeData.telefono = telDistri;
+
+  document.getElementById("codesCenterOverlay").classList.add("open");
+  changeCodeStep(1);
+}
+
+function cerrarCentroCodigos() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("codesCenterOverlay").classList.remove("open");
+}
+
+function changeCodeStep(n) {
+  document
+    .querySelectorAll(".code-step")
+    .forEach((s) => s.classList.remove("active"));
+  document.getElementById("codeStep" + n).classList.add("active");
+}
+
+function setCodigoPlat(p) {
+  haptic();
+  codeData.plataforma = p;
+  changeCodeStep(p === "NETFLIX" ? 2 : 3);
+}
+
+function setCodigoOp(o) {
+  haptic();
+  codeData.opcion = o;
+  changeCodeStep(3);
+}
+
+function rastrearCodigo() {
+  haptic();
+  let m = document
+    .getElementById("inputCorreoCodigo")
+    .value.toLowerCase()
+    .trim();
+
+  if (!m.includes("@")) {
+    alert("⚠️ Escribe un correo electrónico válido.");
+    return;
+  }
+
+  const telDistri =
+    localStorage.getItem("active_distri_tel") ||
+    window.distriTelefonoCache ||
+    "";
+
+  codeData.correo = m;
+  codeData.telefono = telDistri;
+
+  changeCodeStep(4);
+
+  const formData = new FormData();
+  formData.append("accion", "obtener_codigo_acceso");
+  formData.append("correo", m);
+  formData.append("plataforma", codeData.plataforma);
+  formData.append("opcion", codeData.opcion);
+  formData.append("telefono", telDistri);
+
+  fetch(API_MYSQL_URL, { method: "POST", body: formData })
+    .then((res) => res.json())
+    .then((res) => {
+      changeCodeStep(5);
+      document.getElementById("codeResultBox").style.display = "none";
+      document.getElementById("linkResultBox").style.display = "none";
+
+      if (res && res.exito) {
+        document.getElementById("codeResultTitle").innerHTML =
+          `<span style="color:var(--ios-green); font-weight:800;">¡LOCALIZADO!</span>`;
+        document.getElementById("codeResultDesc").innerText =
+          res.msj || "Información recuperada con éxito:";
+
+        if (res.tipo === "codigo") {
+          document.getElementById("codeResultBox").style.display = "block";
+          document.getElementById("codeVal").innerText = res.valor;
+          document.getElementById("codeTimer").innerText =
+            `Fecha / Hora: ${res.tiempo || "Reciente"}`;
+        } else if (res.tipo === "link") {
+          document.getElementById("linkResultBox").style.display = "block";
+          document.getElementById("linkVal").href = res.valor;
+        }
+      } else {
+        document.getElementById("codeResultTitle").innerHTML =
+          `<span style="color:var(--ios-orange); font-weight:800;">SIN RESULTADOS</span>`;
+        document.getElementById("codeResultDesc").innerText =
+          res.msj || "No se detectaron solicitudes recientes para este buzón.";
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      changeCodeStep(5);
+      document.getElementById("codeResultTitle").innerHTML =
+        `<span style="color:var(--ios-red); font-weight:800;">ERROR DE RED</span>`;
+      document.getElementById("codeResultDesc").innerText =
+        "No se pudo establecer comunicación con el servidor central.";
+    });
+}
+
+function copiarCodigoResultanteB2B() {
+  if (typeof haptic === "function") haptic();
+  const codeElement = document.getElementById("codeVal");
+  const codigoText = codeElement.innerText.trim();
+  if (!codigoText) return;
+
+  navigator.clipboard.writeText(codigoText).then(() => {
+    codeElement.style.color = "var(--ios-green)";
+    codeElement.style.transform = "scale(0.93)";
+    setTimeout(() => {
+      codeElement.style.color = "var(--text-primary)";
+      codeElement.style.transform = "scale(1)";
+    }, 250);
+    triggerToast("📋 Código copiado con éxito");
+  });
+}
+
+function refrescarSaldoDistribuidorFondo() {
+  const telActivo =
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+  if (!telActivo) return;
+
+  const btnRefrescar = document.getElementById("btnRefrescarSaldoManual");
+  if (btnRefrescar) btnRefrescar.classList.add("spin-anim");
+
+  const formData = new FormData();
+  formData.append("accion", "obtener_saldo_distribuidor");
+  formData.append("telefono", telActivo);
+
+  fetch(API_MYSQL_URL, { method: "POST", body: formData })
+    .then((res) => res.json())
+    .then((res) => {
+      if (btnRefrescar) btnRefrescar.classList.remove("spin-anim");
+      if (res && res.status === "success" && res.saldo !== undefined) {
+        window.saldoNumericoActual = parseFloat(res.saldo);
+        localStorage.setItem("active_distri_saldo", window.saldoNumericoActual);
+        actualizarSaldoUI();
+      }
+    })
+    .catch(() => {
+      if (btnRefrescar) btnRefrescar.classList.remove("spin-anim");
+    });
+}
+
+function manualRefrescarSaldo() {
+  haptic();
+  refrescarSaldoDistribuidorFondo();
+}
+
+function eliminarDelCarrito(id) {
+  haptic();
+  window.carrito = window.carrito.filter((item) => item.id !== id);
+  const btnTienda = document.getElementById(`btn-add-${id}`);
+  if (btnTienda) {
+    btnTienda.classList.remove("btn-added");
+    btnTienda.innerHTML = "+ Añadir";
+  }
+  actualizarCarritoUI();
+  triggerToast("🗑️ Plataforma removida del carrito");
+}
+
+function cerrarSesionDistribuidor() {
+  if (window.cyberIntervaloSaldoFondo)
+    clearInterval(window.cyberIntervaloSaldoFondo);
+  localStorage.removeItem("active_distri_id");
+  localStorage.removeItem("active_distri_tel");
+  localStorage.removeItem("active_distri_name");
+  localStorage.removeItem("active_distri_saldo");
+  sessionStorage.clear();
+  window.location.href = "login_distris.html";
+}
+
+function bloquearScroll() {
+  document.body.style.overflow = "hidden";
+}
+function desbloquearScroll() {
+  document.body.style.overflow = "";
+}
+
+function abrirMenuMovil() {
+  haptic();
+  bloquearScroll();
+  document.getElementById("modalMenuMovil").classList.add("open");
+}
+
+function cerrarMenuMovil() {
+  haptic();
+  desbloquearScroll();
+  document.getElementById("modalMenuMovil").classList.remove("open");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  let localDistriId = localStorage.getItem("active_distri_id");
+  let localDistriTel = localStorage.getItem("active_distri_tel");
+  let localDistriName = localStorage.getItem("active_distri_name");
+  let localDistriSaldo = localStorage.getItem("active_distri_saldo");
+
+  if (localDistriId || localDistriTel) {
+    window.distriTelefonoCache = localDistriTel || "";
+    entrarAlPortalDistribuidor(
+      localDistriName,
+      localDistriTel,
+      localDistriSaldo,
+    );
+  } else {
+    window.location.href = "login_distris.html";
+  }
+});
