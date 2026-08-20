@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>Cybernet - Portal Mayoristas</title>
 
@@ -35,26 +35,26 @@
         width: 100%;
         min-height: 100vh;
         max-width: 1200px;
-        padding: 20px;
-        gap: 20px;
+        padding: 12px;
+        gap: 16px;
         margin: 0 auto;
         box-sizing: border-box;
       "
     >
-      <!-- HEADER COMPACTO -->
+      <!-- HEADER COMPACTO Y ADAPTABLE -->
       <div
         class="card-ios"
         style="
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 12px 18px;
+          padding: 10px 14px;
           position: sticky;
-          top: 10px;
+          top: 8px;
           z-index: 90;
           box-sizing: border-box;
           width: 100%;
-          gap: 12px;
+          gap: 8px;
         "
       >
         <div
@@ -71,13 +71,13 @@
             style="
               background: rgba(10, 132, 255, 0.15);
               color: var(--ios-blue);
-              min-width: 40px;
-              height: 40px;
+              min-width: 38px;
+              height: 38px;
               border-radius: 12px;
               display: flex;
               align-items: center;
               justify-content: center;
-              font-size: 1.2rem;
+              font-size: 1.1rem;
               flex-shrink: 0;
             "
           >
@@ -88,7 +88,7 @@
               id="distriWelcomeName"
               style="
                 margin: 0;
-                font-size: 1rem;
+                font-size: 0.95rem;
                 font-weight: 800;
                 color: var(--text-primary);
                 line-height: 1.2;
@@ -102,7 +102,7 @@
             <span
               id="distriWelcomePhone"
               style="
-                font-size: 0.75rem;
+                font-size: 0.72rem;
                 color: var(--text-secondary);
                 font-family: monospace;
                 display: block;
@@ -116,19 +116,19 @@
         </div>
 
         <div
-          style="display: flex; align-items: center; gap: 8px; flex-shrink: 0"
+          style="display: flex; align-items: center; gap: 6px; flex-shrink: 0"
         >
           <div
             id="distriBarBalance"
             style="
               background: rgba(48, 209, 88, 0.12);
               border: 1px solid rgba(48, 209, 88, 0.25);
-              padding: 8px 14px;
+              padding: 6px 12px;
               border-radius: 50px;
               font-weight: 800;
               color: var(--ios-green);
               font-family: monospace;
-              font-size: 0.9rem;
+              font-size: 0.85rem;
               white-space: nowrap;
             "
           >
@@ -141,8 +141,8 @@
             class="btn-ios"
             style="
               padding: 0;
-              width: 38px;
-              height: 38px;
+              width: 36px;
+              height: 36px;
               border-radius: 50%;
               display: flex;
               align-items: center;
@@ -156,8 +156,8 @@
             title="Actualizar saldo"
           >
             <svg
-              width="15"
-              height="15"
+              width="14"
+              height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -213,8 +213,8 @@
               onclick="toggleThemeDistri()"
               style="
                 padding: 0;
-                width: 38px;
-                height: 38px;
+                width: 36px;
+                height: 36px;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
@@ -229,8 +229,8 @@
             style="
               background: var(--input-bg);
               border: var(--surface-border);
-              width: 38px;
-              height: 38px;
+              width: 36px;
+              height: 36px;
               border-radius: 50%;
               display: none;
               align-items: center;
@@ -258,7 +258,7 @@
         </div>
       </div>
 
-      <!-- MENÚ CELULARES -->
+      <!-- MENÚ CELULARES DESPLEGABLE -->
       <div
         class="overlay-modal-code"
         id="modalMenuMovil"
@@ -268,16 +268,16 @@
           class="modal-ios"
           style="
             max-width: 320px;
-            width: 85%;
-            padding: 22px 20px;
+            width: 88%;
+            padding: 20px;
             border-radius: 24px;
             text-align: left;
             display: flex;
             flex-direction: column;
             gap: 12px;
             align-self: flex-start;
-            margin-top: 80px;
-            margin-right: 20px;
+            margin-top: 70px;
+            margin-right: 12px;
             margin-left: auto;
           "
         >
@@ -287,7 +287,7 @@
               justify-content: space-between;
               align-items: center;
               border-bottom: 1px solid var(--surface-border);
-              padding-bottom: 12px;
+              padding-bottom: 10px;
               margin-bottom: 4px;
             "
           >
@@ -325,7 +325,7 @@
             style="
               width: 100%;
               justify-content: flex-start;
-              padding: 14px 18px;
+              padding: 12px 16px;
               border-radius: 14px;
             "
           >
@@ -340,7 +340,7 @@
             style="
               width: 100%;
               justify-content: flex-start;
-              padding: 14px 18px;
+              padding: 12px 16px;
               border-radius: 14px;
             "
           >
@@ -355,7 +355,7 @@
             style="
               width: 100%;
               justify-content: flex-start;
-              padding: 14px 18px;
+              padding: 12px 16px;
               border-radius: 14px;
             "
           >
@@ -365,7 +365,7 @@
           <div
             style="
               border-top: 1px solid var(--surface-border);
-              padding-top: 14px;
+              padding-top: 12px;
               margin-top: 4px;
               display: flex;
               justify-content: space-between;
@@ -375,7 +375,7 @@
           >
             <span
               style="
-                font-size: 0.9rem;
+                font-size: 0.85rem;
                 font-weight: 700;
                 color: var(--text-secondary);
               "
@@ -387,7 +387,7 @@
               onclick="toggleThemeDistri()"
               style="
                 padding: 0;
-                width: 44px;
+                width: 40px;
                 height: 36px;
                 border-radius: 10px;
                 display: flex;
@@ -404,7 +404,7 @@
               width: 100%;
               background: rgba(255, 69, 58, 0.1);
               color: var(--ios-red);
-              padding: 14px 18px;
+              padding: 12px 16px;
               border-radius: 14px;
               font-weight: 800;
               margin-top: 4px;
@@ -415,34 +415,42 @@
         </div>
       </div>
 
-      <!-- CATÁLOGO -->
+      <!-- CATÁLOGO MAYORISTA -->
       <div class="tienda-layout">
-        <div class="card-ios" style="padding: 20px">
+        <div class="card-ios" style="padding: 16px">
           <div
             style="
               display: flex;
               justify-content: space-between;
               align-items: center;
               border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-              padding-bottom: 15px;
+              padding-bottom: 12px;
+              gap: 10px;
+              flex-wrap: wrap;
             "
           >
-            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800">
               🛍️ Catálogo Mayorista
             </h3>
             <input
               type="text"
               id="searchShopInput"
               class="input-ios"
-              placeholder="Buscar..."
+              placeholder="Buscar servicio..."
               oninput="filtrarTiendaLocal()"
-              style="max-width: 200px; padding: 10px 14px"
+              style="
+                flex: 1;
+                min-width: 140px;
+                max-width: 200px;
+                padding: 8px 12px;
+                font-size: 0.85rem;
+              "
             />
           </div>
           <div
             class="grid-tienda"
             id="shopCatalogContainer"
-            style="margin-top: 20px"
+            style="margin-top: 16px"
           ></div>
         </div>
       </div>
@@ -454,13 +462,13 @@
         style="
           display: none;
           border-color: rgba(255, 149, 0, 0.3);
-          padding: 20px;
+          padding: 16px;
         "
       >
         <h3
           style="
-            margin: 0 0 16px 0;
-            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-size: 1rem;
             font-weight: 800;
             color: var(--ios-orange);
           "
@@ -471,19 +479,20 @@
           id="listaRenovacionesCards"
           style="
             display: flex;
-            gap: 14px;
+            gap: 12px;
             overflow-x: auto;
             padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
           "
         ></div>
       </div>
     </div>
 
-    <!-- BOTÓN CARRITO -->
+    <!-- BOTÓN CARRITO FLOTANTE -->
     <button id="fabCarrito" onclick="abrirCarrito()" style="display: none">
       <svg
-        width="26"
-        height="26"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         fill="none"
         stroke="white"
@@ -499,14 +508,14 @@
         id="fabCartCountBadge"
         style="
           position: absolute;
-          top: -4px;
-          right: -4px;
+          top: -3px;
+          right: -3px;
           background: var(--ios-red);
           color: white;
-          font-size: 0.75rem;
+          font-size: 0.72rem;
           font-weight: 800;
-          width: 22px;
-          height: 22px;
+          width: 20px;
+          height: 20px;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -518,18 +527,18 @@
 
     <!-- CARRITO DE COMPRAS -->
     <div class="overlay-modal-code" id="modalCarritoTienda">
-      <div class="modal-ios" style="max-width: 400px">
+      <div class="modal-ios" style="max-width: 400px; width: 92%">
         <div
           style="
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-            padding-bottom: 12px;
-            margin-bottom: 15px;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
           "
         >
-          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
             🛒 Mi Carrito
           </h3>
           <button
@@ -538,7 +547,7 @@
               background: transparent;
               border: none;
               color: var(--text-secondary);
-              font-size: 1.6rem;
+              font-size: 1.5rem;
               cursor: pointer;
             "
           >
@@ -561,7 +570,7 @@
           id="cartClientName"
           class="input-ios"
           placeholder="Nombre del Cliente (Opcional)"
-          style="margin-top: 15px; padding: 14px"
+          style="margin-top: 12px; padding: 12px; font-size: 0.9rem"
         />
 
         <div
@@ -570,9 +579,9 @@
             flex-direction: column;
             gap: 6px;
             border-top: 1px solid rgba(128, 128, 128, 0.2);
-            padding-top: 12px;
+            padding-top: 10px;
             font-size: 0.85rem;
-            margin-top: 10px;
+            margin-top: 8px;
           "
         >
           <div
@@ -589,9 +598,9 @@
             style="
               display: flex;
               justify-content: space-between;
-              font-size: 1.05rem;
+              font-size: 1rem;
               font-weight: 800;
-              margin-top: 4px;
+              margin-top: 2px;
             "
           >
             <span>TOTAL PEDIDO:</span
@@ -602,7 +611,7 @@
           id="btnCheckoutShop"
           onclick="procesarCompraDistribuidor()"
           class="btn-ios btn-primary w-100"
-          style="margin-top: 15px"
+          style="margin-top: 12px"
         >
           CONFIRMAR COMPRA
         </button>
@@ -611,18 +620,18 @@
 
     <!-- BÓVEDA CASILLERO -->
     <div class="overlay-modal-code" id="modalBusquedaCuentas">
-      <div class="modal-ios" style="max-width: 450px">
+      <div class="modal-ios" style="max-width: 450px; width: 92%">
         <div
           style="
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
           "
         >
-          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
             🔍 Mis Cuentas en Casillero
           </h3>
           <button
@@ -638,14 +647,19 @@
             &times;
           </button>
         </div>
-        <div style="width: 100%; margin-bottom: 15px">
+        <div style="width: 100%; margin-bottom: 12px">
           <input
             type="text"
             id="inputCasilleroSearch"
             class="input-ios"
             placeholder="Buscar por cliente, correo o perfil..."
             oninput="buscarCasilleroDistri()"
-            style="width: 100%; padding: 14px; box-sizing: border-box"
+            style="
+              width: 100%;
+              padding: 12px;
+              font-size: 0.9rem;
+              box-sizing: border-box;
+            "
           />
         </div>
         <div
@@ -663,18 +677,18 @@
 
     <!-- HISTORIAL DE MOVIMIENTOS CON SELECTOR DE MES -->
     <div class="overlay-modal-code" id="modalEstadoCuenta">
-      <div class="modal-ios" style="max-width: 500px; width: 95%">
+      <div class="modal-ios" style="max-width: 500px; width: 92%">
         <div
           style="
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-            padding-bottom: 15px;
-            margin-bottom: 12px;
+            padding-bottom: 12px;
+            margin-bottom: 10px;
           "
         >
-          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
             📊 Movimientos y Ventas
           </h3>
           <button
@@ -697,17 +711,17 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 12px;
             background: var(--input-bg);
-            padding: 8px 12px;
-            border-radius: 14px;
+            padding: 6px 10px;
+            border-radius: 12px;
             border: 1px solid var(--surface-border);
           "
         >
           <span
             style="
-              font-size: 0.85rem;
+              font-size: 0.8rem;
               color: var(--text-secondary);
               font-weight: 700;
             "
@@ -719,11 +733,11 @@
             class="input-ios"
             onchange="filtrarMovimientosPorMes()"
             style="
-              padding: 8px 12px;
-              font-size: 0.85rem;
+              padding: 6px 10px;
+              font-size: 0.8rem;
               font-weight: 700;
-              border-radius: 10px;
-              max-width: 220px;
+              border-radius: 8px;
+              max-width: 180px;
               flex: 1;
             "
           >
@@ -743,12 +757,15 @@
 
     <!-- MODAL ÉXITO -->
     <div class="overlay-modal-code" id="successCheckoutOverlay">
-      <div class="modal-ios" style="max-width: 400px; text-align: center">
-        <h2 style="font-size: 3rem; margin: 0 0 10px">✅</h2>
+      <div
+        class="modal-ios"
+        style="max-width: 400px; width: 92%; text-align: center"
+      >
+        <h2 style="font-size: 2.6rem; margin: 0 0 8px">✅</h2>
         <h3
           style="
-            margin: 0 0 15px;
-            font-size: 1.2rem;
+            margin: 0 0 12px;
+            font-size: 1.15rem;
             font-weight: 800;
             color: var(--ios-green);
           "
@@ -759,12 +776,12 @@
           id="cajaTextoFichas"
           style="
             background: rgba(128, 128, 128, 0.1);
-            padding: 15px;
+            padding: 12px;
             border-radius: 12px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             text-align: left;
             font-family: monospace;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             max-height: 200px;
             overflow-y: auto;
             white-space: pre-wrap;
@@ -773,7 +790,7 @@
         <button
           id="btnCopiarFichasCheckout"
           class="btn-ios btn-primary w-100"
-          style="margin-bottom: 10px"
+          style="margin-bottom: 8px"
           onclick="copiarCuentasCheckout()"
         >
           📋 Copiar Accesos
@@ -784,7 +801,7 @@
           target="_blank"
           style="display: none; text-decoration: none"
         >
-          <button class="btn-ios btn-success w-100" style="margin-bottom: 10px">
+          <button class="btn-ios btn-success w-100" style="margin-bottom: 8px">
             💬 Pedir Activación por Chat
           </button>
         </a>
@@ -806,14 +823,14 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--surface-border);
-            padding-bottom: 16px;
+            padding-bottom: 12px;
             margin-bottom: 8px;
           "
         >
           <h3
             style="
               margin: 0;
-              font-size: 1.25rem;
+              font-size: 1.15rem;
               font-weight: 800;
               display: flex;
               align-items: center;
@@ -821,8 +838,8 @@
             "
           >
             <svg
-              width="22"
-              height="22"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               fill="none"
               stroke="var(--ios-blue)"
@@ -841,10 +858,10 @@
               background: var(--input-bg);
               border: none;
               color: var(--text-primary);
-              width: 32px;
-              height: 32px;
+              width: 30px;
+              height: 30px;
               border-radius: 50%;
-              font-size: 1.2rem;
+              font-size: 1.1rem;
               cursor: pointer;
             "
           >
@@ -881,13 +898,13 @@
           </button>
         </div>
 
-        <div id="codeStep3" class="code-step" style="gap: 16px">
+        <div id="codeStep3" class="code-step" style="gap: 14px">
           <div style="text-align: left; width: 100%">
             <label
               style="
-                font-size: 0.8rem;
+                font-size: 0.75rem;
                 color: var(--text-secondary);
-                margin-bottom: 6px;
+                margin-bottom: 4px;
                 display: block;
                 font-weight: 700;
                 text-transform: uppercase;
@@ -915,12 +932,12 @@
         <div
           id="codeStep4"
           class="code-step"
-          style="padding: 20px 0; align-items: center !important"
+          style="padding: 16px 0; align-items: center !important"
         >
           <svg
             class="spin-anim"
-            width="38"
-            height="38"
+            width="34"
+            height="34"
             viewBox="0 0 24 24"
             fill="none"
             stroke="var(--ios-blue)"
@@ -933,7 +950,7 @@
             style="
               margin: 0;
               font-weight: 700;
-              font-size: 1.1rem;
+              font-size: 1rem;
               color: var(--text-primary);
             "
           >
@@ -944,14 +961,14 @@
         <div id="codeStep5" class="code-step">
           <h3
             id="codeResultTitle"
-            style="margin: 0; font-weight: 800; font-size: 1.3rem"
+            style="margin: 0; font-weight: 800; font-size: 1.2rem"
           ></h3>
           <p
             id="codeResultDesc"
             style="
-              font-size: 0.95rem;
+              font-size: 0.9rem;
               color: var(--text-secondary);
-              margin-bottom: 5px;
+              margin-bottom: 4px;
             "
           ></p>
 
@@ -960,8 +977,8 @@
             style="
               display: none;
               background: rgba(48, 209, 88, 0.08);
-              padding: 25px 15px;
-              border-radius: 20px;
+              padding: 20px 12px;
+              border-radius: 18px;
               border: 1px dashed var(--ios-green);
               cursor: pointer;
               user-select: none;
@@ -972,9 +989,9 @@
             <div
               id="codeVal"
               style="
-                font-size: 3.5rem;
+                font-size: 3rem;
                 font-weight: 900;
-                letter-spacing: 6px;
+                letter-spacing: 4px;
                 color: var(--text-primary);
                 display: inline-block;
                 width: 100%;
@@ -982,9 +999,9 @@
             ></div>
             <div
               style="
-                font-size: 0.75rem;
+                font-size: 0.72rem;
                 color: var(--text-secondary);
-                margin-top: 6px;
+                margin-top: 4px;
                 font-weight: bold;
               "
             >
@@ -994,9 +1011,9 @@
               id="codeTimer"
               style="
                 color: var(--ios-red);
-                font-size: 0.9rem;
+                font-size: 0.85rem;
                 font-weight: bold;
-                margin-top: 15px;
+                margin-top: 12px;
               "
             ></div>
           </div>
@@ -1016,7 +1033,7 @@
 
           <button
             class="btn-ios btn-secondary w-100"
-            style="margin-top: 8px"
+            style="margin-top: 6px"
             onclick="changeCodeStep(1)"
           >
             Nueva Consulta
@@ -1027,18 +1044,18 @@
 
     <!-- RENOVACIÓN B2B -->
     <div class="overlay-modal-code" id="modalRenovacionDistri">
-      <div class="modal-ios" style="max-width: 400px">
+      <div class="modal-ios" style="max-width: 400px; width: 92%">
         <div
           style="
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
           "
         >
-          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
             🔄 Seleccionar Cuenta
           </h3>
           <button
@@ -1064,15 +1081,20 @@
           class="input-ios"
           placeholder="Buscar por correo, perfil o cliente"
           onkeyup="filtrarModalRenovacionB2B()"
-          style="width: 100%; padding: 12px; margin-bottom: 15px"
+          style="
+            width: 100%;
+            padding: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+          "
         />
         <div
           id="listaCuentasModalRenoDistri"
           style="
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: 300px;
+            gap: 8px;
+            max-height: 280px;
             overflow-y: auto;
           "
         ></div>
