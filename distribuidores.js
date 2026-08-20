@@ -399,7 +399,7 @@ function actualizarSaldoUI() {
 }
 
 // =========================================================================
-// 📊 HISTORIAL DE MOVIMIENTOS Y ALERTAS (OPTIMIZADO Y CONEXIÓN ROBUSTA)
+// 📊 HISTORIAL DE MOVIMIENTOS Y ALERTAS
 // =========================================================================
 function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
   const telFinal =
@@ -529,7 +529,7 @@ function cerrarModalHistorial() {
 }
 
 // =========================================================================
-// 🛒 E-COMMERCE MAYORISTA
+// 🛒 E-COMMERCE MAYORISTA & CONTEO EXACTO DE PERFILES EN VIVO
 // =========================================================================
 function abrirCarrito() {
   haptic();
@@ -576,15 +576,14 @@ function cargarStockEnTienda() {
           if (!badge) return;
 
           const disponibles =
-            res.stock[p.id] !== undefined ? res.stock[p.id] : 99;
+            res.stock[p.id] !== undefined ? parseInt(res.stock[p.id]) : 0;
 
+          // 🚀 Muestra siempre la cantidad exacta de perfiles libres
           if (disponibles > 0) {
-            let textoDisp =
-              disponibles >= 99 ? "🟢 Disponible" : `🟢 ${disponibles} Disp.`;
-            badge.innerHTML = textoDisp;
-            badge.style.background = "rgba(48, 209, 88, 0.1)";
+            badge.innerHTML = `🟢 ${disponibles} Libres`;
+            badge.style.background = "rgba(48, 209, 88, 0.12)";
             badge.style.color = "var(--ios-green)";
-            badge.style.borderColor = "rgba(48, 209, 88, 0.2)";
+            badge.style.borderColor = "rgba(48, 209, 88, 0.25)";
 
             if (btnAdd) {
               btnAdd.disabled = false;
@@ -596,9 +595,9 @@ function cargarStockEnTienda() {
             }
           } else {
             badge.innerHTML = `🔴 Agotado`;
-            badge.style.background = "rgba(255, 69, 58, 0.1)";
+            badge.style.background = "rgba(255, 69, 58, 0.12)";
             badge.style.color = "var(--ios-red)";
-            badge.style.borderColor = "rgba(255, 69, 58, 0.2)";
+            badge.style.borderColor = "rgba(255, 69, 58, 0.25)";
 
             if (btnAdd) {
               btnAdd.disabled = true;
@@ -613,15 +612,7 @@ function cargarStockEnTienda() {
       }
     })
     .catch((err) => {
-      console.error("Error al cargar stock de productos:", err);
-      catálogoProductos.forEach((p) => {
-        const badge = document.getElementById(`stock-badge-${p.id}`);
-        if (badge) {
-          badge.innerHTML = `🟢 Disponible`;
-          badge.style.background = "rgba(10, 132, 255, 0.1)";
-          badge.style.color = "var(--ios-blue)";
-        }
-      });
+      console.error("Error al cargar stock de productos desde MySQL:", err);
     });
 }
 
