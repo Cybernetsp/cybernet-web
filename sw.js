@@ -1,47 +1,62 @@
-const CACHE_NAME = "cybernet-cache-v93"; // Subimos la versión para que fuerce la actualización
+const CACHE_NAME = "cybernet-cache-v95"; // 🚀 Subimos a v95 para eliminar cachés viejas
 
-// ⚡ ARRAY COMBINADO: Aquí guardamos los archivos de TODAS tus páginas
+// ⚡ LISTA DE ARCHIVOS PRINCIPALES DE LA APP
 const assets = [
-  "./", // Carga la raíz (usualmente tu index.html o página principal)
-  
-  // Archivos de tu panel de Administrador
-  "./admin.html",
-  "./global.css",
-  "./logica.js",
-  "./logo.jpeg"
-  
-  // Si tu "otra pag" usa un CSS o JS distinto, agrégalo aquí abajo:
-  // "./otro-estilo.css",
-  // "./otra-logica.js"
+  "./",
+  "./index.html",
+  "./tienda.html",
+  "./tienda.css",
+  "./tienda.js",
+  "./logo.jpeg",
+  "./manifest.json"
 ];
 
+// 1. INSTALACIÓN: Carga archivos base e ignora esperas
 self.addEventListener("install", (e) => {
-  // 1. Obliga a instalarse de inmediato sin esperar
   self.skipWaiting();
 
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(assets))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(assets).catch((err) => console.log("Error precarga caché:", err));
+    })
   );
 });
 
+// 2. ACTIVACIÓN: Borra automáticamente las versiones viejas (v93, v94, etc.)
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys
           .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key)),
+          .map((key) => caches.delete(key))
       );
-    }),
+    })
   );
 
-  // 2. Toma el control de la pantalla en este mismo segundo
   self.clients.claim();
 });
 
+// 3. ESTRATEGIA "NETWORK-FIRST": Busca siempre en internet primero.
+// Si hay conexión, entrega lo más nuevo de GitHub y refresca la memoria.
+// Si está sin internet (offline), entrega la copia de respaldo.
 self.addEventListener("fetch", (e) => {
-  // 3. Estrategia "Cache-First": Busca primero en la memoria, si no está, va a internet
+  // Ignorar peticiones POST/GET de las APIs para no bloquear el backend
+  if (e.request.url.includes("api.cybernetsp.com") || e.request.url.includes("script.google.com")) {
+    return;
+  }
+
   e.respondWith(
-    caches.match(e.request).then((res) => res || fetch(e.request))
+    fetch(e.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && e.request.method === "GET") {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, responseClone));
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(e.request);
+      })
   );
 });
