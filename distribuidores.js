@@ -578,7 +578,6 @@ function cargarStockEnTienda() {
           const disponibles =
             res.stock[p.id] !== undefined ? parseInt(res.stock[p.id]) : 0;
 
-          // 🚀 Muestra siempre la cantidad exacta de perfiles libres
           if (disponibles > 0) {
             badge.innerHTML = `🟢 ${disponibles} Libres`;
             badge.style.background = "rgba(48, 209, 88, 0.12)";
@@ -1080,7 +1079,7 @@ function cerrarModalExitoCheckout() {
 }
 
 // =========================================================================
-// 📡 BÓVEDA Y CASILLERO DE CUENTAS (CARGA Y BÚSQUEDA AUTOMÁTICA EN TIEMPO REAL)
+// 📡 BÓVEDA Y CASILLERO DE CUENTAS (FORMATO EXCLUSIVO B2B SIN BOT)
 // =========================================================================
 function abrirModalBusquedaCuentas() {
   haptic();
@@ -1090,8 +1089,6 @@ function abrirModalBusquedaCuentas() {
   if (inputSearch) inputSearch.value = "";
 
   document.getElementById("modalBusquedaCuentas").classList.add("open");
-
-  // 🚀 Carga automática e inmediata de todas las cuentas registradas
   buscarCasilleroDistri();
 }
 
@@ -1183,17 +1180,57 @@ function buscarCasilleroDistri() {
   }, 200);
 }
 
+// 📋 COPIADO NATIVO ESTILIZADO DE FICHA EXCLUSIVO PARA REVENDEDORES
 function copiarFichaCasillero(btn, dataEncoded) {
   haptic();
   const obj = JSON.parse(decodeURIComponent(dataEncoded));
-  let nombreCliente =
-    obj.cliente && obj.cliente !== "N/A" ? obj.cliente : "Cliente";
-  let txt = `🌟 ¡Hola, ${nombreCliente}!\n\nTu pedido ha sido procesado. Accesos: 👇\n\n🎬 DETALLES DE ${obj.plataforma.replace(/-/g, " ").toUpperCase()} ✅\n────────────────────\n📧 Correo: ${obj.correo}\n🔐 Contraseña: ${obj.clave}\n`;
-  if (obj.perfil && obj.perfil !== "N/A" && obj.perfil !== "")
-    txt += `👤 Perfil: ${obj.perfil}\n`;
-  if (obj.pin && obj.pin !== "N/A" && obj.pin !== "")
-    txt += `🔑 Pin del Perfil: ${obj.pin}\n`;
-  txt += `📅 Fecha de Vencimiento: ${obj.vencimiento.toLowerCase()}\n\n📢 INFORMACIÓN IMPORTANTE:\n────────────────────\n💎 Disfruta tu servicio.\n✨ ¡Gracias por elegirnos! ✨`;
+
+  let clienteVal = (obj.cliente || "").trim();
+  let tieneNombreReal =
+    clienteVal !== "" &&
+    clienteVal.toUpperCase() !== "N/A" &&
+    clienteVal.toLowerCase() !== "cliente" &&
+    clienteVal.toLowerCase() !== "sin nombre";
+
+  let saludo = tieneNombreReal ? `🌟 *¡Hola ${clienteVal}!*` : `🌟 *¡Hola!*`;
+
+  let platClean = (obj.plataforma || "").toUpperCase().replace(/_/g, "-");
+
+  let isNetflix = platClean.includes("NETFLIX");
+  let isIptvOrEmby = platClean.includes("IPTV") || platClean.includes("EMBY");
+
+  let etiquetaUser = isIptvOrEmby ? "Usuario" : "Correo";
+  let etiquetaPerfil = platClean.includes("IPTV")
+    ? "URL"
+    : platClean.includes("EMBY")
+      ? "Servidor"
+      : "Perfil";
+
+  let txt = `${saludo}\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n🎬 *DETALLES DE ${platClean}* ✅\n────────────────────\n`;
+
+  if (isNetflix) {
+    txt += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+  }
+
+  txt += `👤 *${etiquetaUser}:* ${obj.correo || "-"}\n🔐 *Contraseña:* ${obj.clave || "-"}\n`;
+
+  if (
+    obj.perfil &&
+    obj.perfil !== "N/A" &&
+    obj.perfil !== "-" &&
+    obj.perfil !== ""
+  ) {
+    txt += `🌐 *${etiquetaPerfil}:* ${obj.perfil}\n`;
+  }
+
+  if (obj.pin && obj.pin !== "N/A" && obj.pin !== "-" && obj.pin !== "") {
+    txt += `📍 *PIN:* ${obj.pin}\n`;
+  }
+
+  let venc = (obj.vencimiento || "-").toUpperCase();
+  txt += `📅 *Vence:* ${venc}\n\n`;
+
+  txt += `📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
   navigator.clipboard.writeText(txt).then(() => {
     let old = btn.innerHTML;
@@ -1210,7 +1247,7 @@ function copiarFichaCasillero(btn, dataEncoded) {
 }
 
 // =========================================================================
-// 🤖 CENTRO DE CÓDIGOS B2B (AUTOMATIZADO POR TELÉFONO EN SESIÓN)
+// 🤖 CENTRO DE CÓDIGOS B2B
 // =========================================================================
 let codeData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
 
