@@ -12,8 +12,9 @@
   --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
   --success-gradient: linear-gradient(135deg, #30d158 0%, #248a3d 100%);
 
-  --transition-fluid: transform 0.15s ease-out;
-  --transition-spring: transform 0.15s ease-out, background 0.15s ease-out;
+  --transition-fluid:
+    transform 0.15s ease-out, background 0.15s ease-out, opacity 0.15s ease-out;
+  --transition-spring: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* 🌙 MODO OSCURO */
@@ -60,6 +61,13 @@
     "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+input,
+textarea,
+select {
+  user-select: text !important;
 }
 
 body {
@@ -69,7 +77,12 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   overflow-x: hidden;
+}
+
+html {
+  height: -webkit-fill-available;
 }
 
 .bg-orb-1,
@@ -118,6 +131,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  box-sizing: border-box;
 }
 
 .card-ios {
@@ -126,6 +140,7 @@ body {
   box-shadow: var(--surface-shadow);
   border-radius: 20px;
   padding: 18px;
+  box-sizing: border-box;
 }
 
 .input-ios {
@@ -136,7 +151,11 @@ body {
   border-radius: 14px;
   padding: 12px 14px;
   font-size: 0.95rem;
-  transition: border-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .input-ios:focus {
@@ -157,10 +176,12 @@ body {
   gap: 6px;
   min-height: 42px;
   transition: var(--transition-fluid);
+  touch-action: manipulation;
 }
 
 .btn-ios:active {
   transform: scale(0.95);
+  opacity: 0.85;
 }
 
 .btn-primary {
@@ -204,6 +225,7 @@ body {
   transition:
     transform 0.15s ease-out,
     border-color 0.15s ease;
+  will-change: transform;
 }
 
 .platform-card-shop:active {
@@ -239,7 +261,7 @@ body {
 
 .overlay-modal-code .modal-ios {
   transform: scale(0.95) translateY(20px);
-  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: var(--transition-spring);
   max-height: 88vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -273,6 +295,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  pointer-events: none;
 }
 
 #appleToast.show {
@@ -298,6 +321,7 @@ body {
   z-index: 10000;
   cursor: pointer;
   transition: transform 0.15s ease;
+  touch-action: manipulation;
 }
 
 #fabCarrito:active {
@@ -395,13 +419,14 @@ body {
   }
 
   .modal-ios {
-    padding: 18px 14px !important;
+    padding: 16px 14px !important;
     border-radius: 20px !important;
     gap: 10px !important;
+    width: 95% !important;
   }
 
   .card-ios {
-    padding: 14px 12px !important;
+    padding: 12px 10px !important;
     border-radius: 16px !important;
   }
 
@@ -434,19 +459,23 @@ body {
   }
 }
 
-/* 📱 MÓVILES MUY PEQUEÑOS (iPhone SE / Dispositivos < 360px) */
+/* 📱 MÓVILES PEQUEÑOS (iPhone SE / Dispositivos < 360px) */
 @media (max-width: 360px) {
   .grid-tienda {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
   }
 
   #distriWelcomeName {
-    font-size: 0.88rem !important;
+    font-size: 0.85rem !important;
   }
 
   #distriBarBalance {
-    font-size: 0.78rem !important;
-    padding: 5px 8px !important;
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important;
+  }
+
+  .modal-ios {
+    padding: 12px 10px !important;
   }
 }
