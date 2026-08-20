@@ -1089,14 +1089,19 @@ function cerrarModalExitoCheckout() {
 }
 
 // =========================================================================
-// 📡 BÓVEDA Y CASILLERO DE CUENTAS
+// 📡 BÓVEDA Y CASILLERO DE CUENTAS (CARGA Y BÚSQUEDA AUTOMÁTICA EN TIEMPO REAL)
 // =========================================================================
 function abrirModalBusquedaCuentas() {
   haptic();
   bloquearScroll();
+
+  const inputSearch = document.getElementById("inputCasilleroSearch");
+  if (inputSearch) inputSearch.value = "";
+
   document.getElementById("modalBusquedaCuentas").classList.add("open");
-  document.getElementById("contenedorResultadosCasillero").innerHTML =
-    `<div style="text-align:center; color:var(--text-secondary); font-size:0.88rem; padding: 30px 0;">Ingresa un parámetro y presiona buscar. El sistema filtrará tus compras en MySQL.</div>`;
+
+  // 🚀 Carga automática e inmediata de todas las cuentas registradas
+  buscarCasilleroDistri();
 }
 
 function cerrarModalBusquedaCuentas() {
@@ -1105,83 +1110,86 @@ function cerrarModalBusquedaCuentas() {
   document.getElementById("modalBusquedaCuentas").classList.remove("open");
 }
 
+let timeoutCasilleroLive = null;
 function buscarCasilleroDistri() {
-  haptic();
-  const inputSearch = document
-    .getElementById("inputCasilleroSearch")
-    .value.trim()
-    .toLowerCase();
-  const contenedor = document.getElementById("contenedorResultadosCasillero");
-  const btn = document.getElementById("btnBuscarCasillero");
-  const telefonoDistribuidor = localStorage.getItem("active_distri_tel");
+  clearTimeout(timeoutCasilleroLive);
 
-  if (inputSearch === "") {
-    triggerToast("⚠️ Ingresa un parámetro de búsqueda.");
-    return;
-  }
+  timeoutCasilleroLive = setTimeout(() => {
+    const inputSearch = document.getElementById("inputCasilleroSearch");
+    const valQuery = inputSearch ? inputSearch.value.trim().toLowerCase() : "";
+    const contenedor = document.getElementById("contenedorResultadosCasillero");
+    const telefonoDistribuidor =
+      localStorage.getItem("active_distri_tel") ||
+      window.distriTelefonoCache ||
+      "";
 
-  btn.disabled = true;
-  btn.innerHTML = `Buscando...`;
-  contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);">Rastreando en MySQL...</div>`;
+    if (!contenedor) return;
 
-  const formData = new FormData();
-  formData.append("accion", "buscar_casillero_distribuidor");
-  formData.append("telefono_distribuidor", telefonoDistribuidor);
-  formData.append("busqueda", inputSearch);
+    if (
+      valQuery === "" &&
+      !contenedor.innerHTML.includes("cuenta-resultado-card")
+    ) {
+      contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg><br>Cargando tus cuentas...</div>`;
+    }
 
-  fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
-      btn.disabled = false;
-      btn.innerHTML = "Buscar";
+    const formData = new FormData();
+    formData.append("accion", "buscar_casillero_distribuidor");
+    formData.append("telefono_distribuidor", telefonoDistribuidor);
+    formData.append("busqueda", valQuery);
 
-      if (res && res.status === "success") {
-        let htmlCards = "";
-        res.data.forEach((item) => {
-          let pinText =
-            item.pin && item.pin !== "" && item.pin !== "N/A"
-              ? ` | PIN: <b>${item.pin}</b>`
-              : "";
-          let perfilText =
-            item.perfil && item.perfil !== "" && item.perfil !== "N/A"
-              ? `Perfil: <b>${item.perfil}</b>${pinText}`
-              : "Cuenta Completa";
-          let subCliente = item.cliente
-            ? `<span style="font-size:0.75rem; color:var(--text-secondary);">Cliente: <b style="color:var(--ios-orange);">${item.cliente}</b></span>`
-            : "";
-          let dataFicha = encodeURIComponent(JSON.stringify(item));
+    fetch(API_MYSQL_URL, { method: "POST", body: formData })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res && res.status === "success") {
+          let htmlCards = "";
 
-          htmlCards += `
-            <div class="cuenta-resultado-card">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="color:var(--ios-blue); font-weight:800; text-transform: uppercase;">${item.plataforma.replace(/-/g, " ")}</div>
-                <div style="color:var(--ios-green); font-family:monospace; font-weight:800; font-size:0.85rem;">${item.vencimiento}</div>
-              </div>
-              <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
-                 ${perfilText}<br>${subCliente}
-              </div>
-              <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
-                <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.correo}')">E: <span style="color:white;">${item.correo}</span></div>
-                <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.clave}')">P: <span style="color:white;">${item.clave}</span></div>
-                <button class="btn-ios btn-secondary w-100" style="padding:8px; font-size:0.75rem; margin-top:4px;" onclick="copiarFichaCasillero(this, '${dataFicha}')">Copiar Ficha Completa</button>
-              </div>
-            </div>`;
-        });
+          if (res.data && res.data.length > 0) {
+            res.data.forEach((item) => {
+              let pinText =
+                item.pin &&
+                item.pin !== "" &&
+                item.pin !== "N/A" &&
+                item.pin !== "-"
+                  ? ` | PIN: <b>${item.pin}</b>`
+                  : "";
+              let perfilText =
+                item.perfil && item.perfil !== "" && item.perfil !== "N/A"
+                  ? `Perfil: <b>${item.perfil}</b>${pinText}`
+                  : "Cuenta Completa";
+              let subCliente = item.cliente
+                ? `<span style="font-size:0.75rem; color:var(--text-secondary);">Cliente: <b style="color:var(--ios-orange);">${item.cliente}</b></span>`
+                : "";
+              let dataFicha = encodeURIComponent(JSON.stringify(item));
 
-        contenedor.innerHTML =
-          res.data.length === 0
-            ? `<div style="text-align:center; padding:40px; color:var(--text-secondary);">No se encontraron cuentas asociadas.</div>`
-            : htmlCards;
-      } else {
-        contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Error buscando en MySQL.</div>`;
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      btn.disabled = false;
-      btn.innerHTML = "Buscar";
-      contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Error de conexión.</div>`;
-    });
+              htmlCards += `
+                <div class="cuenta-resultado-card" style="background:var(--input-bg); border:var(--surface-border); padding:14px; border-radius:16px; margin-bottom:10px; display:flex; flex-direction:column; gap:8px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="color:var(--ios-blue); font-weight:800; text-transform: uppercase;">${item.plataforma.replace(/-/g, " ")}</div>
+                    <div style="color:var(--ios-green); font-family:monospace; font-weight:800; font-size:0.85rem;">${item.vencimiento}</div>
+                  </div>
+                  <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+                     ${perfilText}<br>${subCliente}
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+                    <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.correo}')" style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:10px; font-family:monospace; font-size:0.8rem; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">E: <span style="color:white; font-weight:bold;">${item.correo}</span></div>
+                    <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.clave}')" style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:10px; font-family:monospace; font-size:0.8rem; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">P: <span style="color:white; font-weight:bold;">${item.clave}</span></div>
+                    <button class="btn-ios btn-secondary w-100" style="padding:8px; font-size:0.75rem; margin-top:4px; border-radius:10px;" onclick="copiarFichaCasillero(this, '${dataFicha}')">Copiar Ficha Completa</button>
+                  </div>
+                </div>`;
+            });
+            contenedor.innerHTML = htmlCards;
+          } else {
+            contenedor.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-secondary);">No tienes cuentas registradas que coincidan.</div>`;
+          }
+        } else {
+          contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Error buscando en MySQL.</div>`;
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Error de conexión al servidor.</div>`;
+      });
+  }, 200);
 }
 
 function copiarFichaCasillero(btn, dataEncoded) {
@@ -1211,7 +1219,7 @@ function copiarFichaCasillero(btn, dataEncoded) {
 }
 
 // =========================================================================
-// 🤖 CENTRO DE CÓDIGOS B2B (MÁXIMA AUTOMATIZACIÓN - SIN PREGUNTAR TELÉFONO)
+// 🤖 CENTRO DE CÓDIGOS B2B (AUTOMATIZADO POR TELÉFONO EN SESIÓN)
 // =========================================================================
 let codeData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
 
