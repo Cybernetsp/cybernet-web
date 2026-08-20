@@ -48,7 +48,6 @@
         box-shadow: 0 10px 25px rgba(10, 132, 255, 0.5);
       }
 
-      /* Burbuja de pensamiento sobre el botón */
       .chat-tooltip-ios {
         position: fixed;
         bottom: 95px;
@@ -176,7 +175,6 @@
         border-bottom-right-radius: 4px;
       }
 
-      /* Panel de Botones Interactivos */
       .chat-options {
         padding: 15px 20px 20px;
         background: rgba(255, 255, 255, 0.02);
@@ -218,7 +216,6 @@
        SISTEMA DE VARIABLES: MODO CLARO Y OSCURO (APPLE ECOSYSTEM)
        ========================================= */
       :root {
-        /* COLORES NATIVOS APPLE (CONSTANTES) */
         --ios-blue: #0a84ff;
         --ios-green: #30d158;
         --ios-red: #ff453a;
@@ -233,13 +230,11 @@
         --text-primary: #ffffff;
         --text-secondary: rgba(235, 235, 245, 0.6);
 
-        /* Liquid Glass Oscuro */
         --glass-bg: rgba(30, 30, 35, 0.45);
         --glass-border: 0.5px solid rgba(255, 255, 255, 0.15);
         --glass-shadow:
           0 24px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
-        /* Modales y Tarjetas */
         --modal-bg: rgba(28, 28, 30, 0.85);
         --card-bg: rgba(44, 44, 46, 0.6);
         --card-border: 0.5px solid rgba(255, 255, 255, 0.08);
@@ -247,20 +242,17 @@
         --card-header-border: 0.5px solid rgba(255, 255, 255, 0.1);
         --card-row-border: 0.5px solid rgba(255, 255, 255, 0.08);
 
-        /* Botones Generales */
         --btn-bg: #2c2c2e;
         --btn-hover: #3a3a3c;
         --btn-icon-bg: rgba(255, 255, 255, 0.12);
         --btn-icon-active: rgba(255, 255, 255, 0.25);
         --btn-transparent-active: rgba(255, 255, 255, 0.08);
 
-        /* Inputs y Buscadores */
         --input-bg: rgba(0, 0, 0, 0.3);
         --input-border: 1px solid rgba(255, 255, 255, 0.1);
         --search-bg: rgba(118, 118, 128, 0.24);
         --search-focus: rgba(118, 118, 128, 0.35);
 
-        /* Orbes */
         --orb-1: rgba(10, 132, 255, 0.2);
         --orb-2: rgba(255, 69, 58, 0.15);
 
@@ -277,14 +269,12 @@
         --text-primary: #000000;
         --text-secondary: rgba(60, 60, 67, 0.6);
 
-        /* Liquid Glass Claro */
         --glass-bg: rgba(255, 255, 255, 0.65);
         --glass-border: 0.5px solid rgba(0, 0, 0, 0.1);
         --glass-shadow:
           0 24px 48px rgba(0, 0, 0, 0.05),
           inset 0 1px 0 rgba(255, 255, 255, 0.5);
 
-        /* Modales y Tarjetas */
         --modal-bg: rgba(255, 255, 255, 0.85);
         --card-bg: #ffffff;
         --card-border: 0.5px solid rgba(0, 0, 0, 0.05);
@@ -292,20 +282,17 @@
         --card-header-border: 0.5px solid rgba(0, 0, 0, 0.05);
         --card-row-border: 0.5px solid rgba(0, 0, 0, 0.05);
 
-        /* Botones Generales */
         --btn-bg: #ffffff;
         --btn-hover: #e5e5ea;
         --btn-icon-bg: rgba(0, 0, 0, 0.05);
         --btn-icon-active: rgba(0, 0, 0, 0.15);
         --btn-transparent-active: rgba(0, 0, 0, 0.05);
 
-        /* Inputs y Buscadores */
         --input-bg: rgba(255, 255, 255, 0.6);
         --input-border: 1px solid rgba(0, 0, 0, 0.1);
         --search-bg: rgba(118, 118, 128, 0.12);
         --search-focus: rgba(118, 118, 128, 0.2);
 
-        /* Orbes */
         --orb-1: rgba(10, 132, 255, 0.1);
         --orb-2: rgba(255, 69, 58, 0.08);
 
@@ -340,7 +327,6 @@
           color 0.4s ease;
       }
 
-      /* BOTÓN CAMBIO DE TEMA DERECHO */
       .theme-toggle-btn {
         position: absolute;
         top: 25px;
@@ -365,11 +351,10 @@
         transform: scale(0.9);
       }
 
-      /* 🛒 NUEVO BOTÓN TIENDA VIRTUAL EN EL NAV SUPERIOR AL LADO DEL TEMA */
       .store-toggle-btn {
         position: absolute;
         top: 25px;
-        right: 80px; /* Posicionado exactamente al lado del de tema */
+        right: 80px;
         width: 45px;
         height: 45px;
         border-radius: 50%;
@@ -388,32 +373,6 @@
         text-decoration: none;
       }
       .store-toggle-btn:active {
-        transform: scale(0.9);
-      }
-
-      /* BOTÓN TRABAJADORES IZQUIERDO */
-      .staff-toggle-btn {
-        position: absolute;
-        top: 25px;
-        left: 25px;
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: var(--glass-border);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 100;
-        transition: var(--transition-spring);
-        color: var(--text-primary);
-        text-decoration: none;
-      }
-      .staff-toggle-btn:active {
         transform: scale(0.9);
       }
 
@@ -731,7 +690,6 @@
         }
       }
 
-      /* CORRECCIÓN DE RENDIMIENTO EN SCROLL */
       #cardsWrapper {
         overflow-y: auto;
         flex-grow: 1;
@@ -897,13 +855,6 @@
         background: var(--btn-icon-active);
       }
 
-      footer {
-        text-align: center;
-        color: var(--text-secondary);
-        font-size: 0.75rem;
-        padding: 30px;
-        font-weight: 400;
-      }
       .back-link {
         display: block;
         margin-top: 25px;
@@ -929,7 +880,6 @@
         border-radius: 10px;
       }
 
-      /* BUSCADOR SPOTLIGHT */
       .search-wrapper {
         width: 100%;
         margin-bottom: 20px;
@@ -1525,8 +1475,8 @@
     </div>
 
     <script>
-      const GOOGLE_URL =
-        "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
+      // 🔗 URL OFICIAL APUNTANDO A TU SERVIDOR MYSQL
+      const MYSQL_BOT_URL = "https://api.cybernetsp.com/api_bot.php";
       let globalData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
 
       window.isDistri = false;
@@ -1773,7 +1723,7 @@
 
         try {
           const resp = await fetch(
-            `${GOOGLE_URL}?accion=verificarDistri&telefono=${t}`,
+            `${MYSQL_BOT_URL}?accion=verificarDistri&telefono=${t}`,
           );
           const data = await resp.json();
           window.isDistri = data.esDistri === true;
@@ -1818,12 +1768,12 @@
         document.body.style.overflow = "hidden";
 
         box.innerHTML =
-          '<div class="loader" style="border-top-color:var(--ios-blue);"></div><p style="text-align:center; color:var(--text-secondary); font-size:0.9rem;">Sincronizando con Cybernet iCloud...</p>';
+          '<div class="loader" style="border-top-color:var(--ios-blue);"></div><p style="text-align:center; color:var(--text-secondary); font-size:0.9rem;">Consultando servicios en MySQL...</p>';
         btnOpen.disabled = true;
 
         try {
           const resp = await fetch(
-            `${GOOGLE_URL}?accion=servicios&telefono=${t}`,
+            `${MYSQL_BOT_URL}?accion=servicios&telefono=${t}`,
           );
           const json = await resp.json();
           if (json.exito && json.servicios.length > 0) {
@@ -1843,11 +1793,11 @@
                 '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>No hay correos registrados.</div>';
           } else {
             box.innerHTML =
-              '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>Sin servicios vinculados.</div>';
+              '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-weight:600;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><br>Sin servicios vinculados a este número.</div>';
           }
         } catch (e) {
           box.innerHTML =
-            '<div style="text-align:center; padding:30px; color:var(--ios-red); font-weight:600;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>Error de conexión.</div>';
+            '<div style="text-align:center; padding:30px; color:var(--ios-red); font-weight:600;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><br>Error de conexión al servidor MySQL.</div>';
         } finally {
           btnOpen.disabled = false;
         }
@@ -1894,23 +1844,21 @@
       }
 
       function copiarCodigoResultante() {
-        haptic(); // Efecto de vibración en celulares
+        haptic();
         const codeElement = document.getElementById("val-code");
         const codigoText = codeElement.innerText.trim();
 
         if (!codigoText) return;
 
         navigator.clipboard.writeText(codigoText).then(() => {
-          // Cambia de color a verde por 1 segundo para dar confirmación visual
           codeElement.style.color = "var(--ios-green)";
-          codeElement.style.transform = "scale(0.95)"; // Pequeño efecto de hundimiento
+          codeElement.style.transform = "scale(0.95)";
 
           setTimeout(() => {
             codeElement.style.color = "var(--text-primary)";
             codeElement.style.transform = "scale(1)";
           }, 300);
 
-          // Lanza la notificación estilo Apple arriba
           triggerToast(
             `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>¡Código copiado!</span></div>`,
           );
@@ -1922,23 +1870,13 @@
         let m = document.getElementById("correo").value.toLowerCase().trim();
         if (!m.includes("@")) return fireError("Correo inválido.");
 
-        if (
-          !window.isDistri &&
-          !m.endsWith("@cybernetsp.com") &&
-          !m.includes("@outlook")
-        ) {
-          return fireError(
-            "Solo disponible para correos @cybernetsp.com o @outlook",
-          );
-        }
-
         const btnTrack = document.getElementById("btn-rastrear");
         globalData.correo = m;
         changeStep(5);
         btnTrack.disabled = true;
         try {
           const query = new URLSearchParams(globalData);
-          const resp = await fetch(`${GOOGLE_URL}?${query.toString()}`);
+          const resp = await fetch(`${MYSQL_BOT_URL}?${query.toString()}`);
           const res = await resp.json();
           changeStep(6);
           document.getElementById("res-box-code").style.display = "none";
@@ -1955,7 +1893,7 @@
               document.getElementById("res-box-code").style.display = "block";
               document.getElementById("val-code").innerText = res.valor;
               document.getElementById("val-timer").innerText =
-                `Vence en: ${res.tiempo}`;
+                `Fecha / Hora: ${res.tiempo}`;
             } else if (res.tipo === "link") {
               document.getElementById("res-box-link").style.display = "block";
               document.getElementById("val-link").href = res.valor;
@@ -1968,7 +1906,8 @@
           }
         } catch (err) {
           changeStep(6);
-          document.getElementById("res-desc").innerText = "Error de conexión.";
+          document.getElementById("res-desc").innerText =
+            "Error de conexión con MySQL.";
         } finally {
           btnTrack.disabled = false;
         }
@@ -1994,7 +1933,7 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("sw.js?v=37.0")
+            .register("sw.js?v=21.0")
             .then((reg) => {
               console.log("Cybernet App lista para instalar");
               reg.update();
