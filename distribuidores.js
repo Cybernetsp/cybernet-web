@@ -329,7 +329,6 @@ function inicializarOpcionesDeMes() {
   let htmlOptions = `<option value="todos">🌐 Todos los Meses</option>`;
   const fechaActual = new Date();
 
-  // Genera opciones para los últimos 6 meses
   for (let i = 0; i < 6; i++) {
     let d = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - i, 1);
     let yyyy = d.getFullYear();
@@ -439,7 +438,6 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
         }
         if (tbody) tbody.innerHTML = trs;
 
-        // Alertas de Renovaciones
         const divRenov = document.getElementById("listaRenovacionesCards");
         const widgetCont = document.getElementById("widgetRenovaciones");
         let htmlRenov = "";
@@ -1202,33 +1200,44 @@ function copiarFichaCasillero(btn, dataEncoded) {
 }
 
 // =========================================================================
-// 🤖 CENTRO DE CÓDIGOS
+// 🤖 CENTRO DE CÓDIGOS B2B (MÁXIMA AUTOMATIZACIÓN - SIN PREGUNTAR TELÉFONO)
 // =========================================================================
 let codeData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
 
 function abrirCentroCodigos() {
   haptic();
   bloquearScroll();
-  codeData.telefono = localStorage.getItem("active_distri_tel");
+
+  // 🚀 Toma automáticamente el teléfono del distribuidor en sesión activa
+  const telDistri =
+    localStorage.getItem("active_distri_tel") ||
+    window.distriTelefonoCache ||
+    "";
+  codeData.telefono = telDistri;
+
   document.getElementById("codesCenterOverlay").classList.add("open");
-  changeCodeStep(1);
+  changeCodeStep(1); // Directo a seleccionar Plataforma
 }
+
 function cerrarCentroCodigos() {
   haptic();
   desbloquearScroll();
   document.getElementById("codesCenterOverlay").classList.remove("open");
 }
+
 function changeCodeStep(n) {
   document
     .querySelectorAll(".code-step")
     .forEach((s) => s.classList.remove("active"));
   document.getElementById("codeStep" + n).classList.add("active");
 }
+
 function setCodigoPlat(p) {
   haptic();
   codeData.plataforma = p;
   changeCodeStep(p === "NETFLIX" ? 2 : 3);
 }
+
 function setCodigoOp(o) {
   haptic();
   codeData.opcion = o;
@@ -1247,7 +1256,14 @@ function rastrearCodigo() {
     return;
   }
 
+  const telDistri =
+    localStorage.getItem("active_distri_tel") ||
+    window.distriTelefonoCache ||
+    "";
+
   codeData.correo = m;
+  codeData.telefono = telDistri;
+
   changeCodeStep(4);
 
   const formData = new FormData();
@@ -1255,6 +1271,7 @@ function rastrearCodigo() {
   formData.append("correo", m);
   formData.append("plataforma", codeData.plataforma);
   formData.append("opcion", codeData.opcion);
+  formData.append("telefono", telDistri); // Pasa el teléfono del distribuidor para validación VIP implícita
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
     .then((res) => res.json())
@@ -1273,7 +1290,7 @@ function rastrearCodigo() {
           document.getElementById("codeResultBox").style.display = "block";
           document.getElementById("codeVal").innerText = res.valor;
           document.getElementById("codeTimer").innerText =
-            `Vence en: ${res.tiempo || "15 min"}`;
+            `Fecha / Hora: ${res.tiempo || "Reciente"}`;
         } else if (res.tipo === "link") {
           document.getElementById("linkResultBox").style.display = "block";
           document.getElementById("linkVal").href = res.valor;
