@@ -623,7 +623,7 @@
           "
         >
           <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800">
-            🔍 Buscar en Casillero
+            🔍 Mis Cuentas en Casillero
           </h3>
           <button
             onclick="cerrarModalBusquedaCuentas()"
@@ -638,21 +638,15 @@
             &times;
           </button>
         </div>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px">
+        <div style="width: 100%; margin-bottom: 15px">
           <input
             type="text"
             id="inputCasilleroSearch"
             class="input-ios"
-            placeholder="Nombre o Teléfono del cliente"
-            style="flex: 1; padding: 12px"
+            placeholder="Buscar por cliente, correo o perfil..."
+            oninput="buscarCasilleroDistri()"
+            style="width: 100%; padding: 14px; box-sizing: border-box"
           />
-          <button
-            id="btnBuscarCasillero"
-            onclick="buscarCasilleroDistri()"
-            class="btn-ios btn-primary"
-          >
-            Buscar
-          </button>
         </div>
         <div
           id="contenedorResultadosCasillero"
