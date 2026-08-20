@@ -399,17 +399,23 @@ function actualizarSaldoUI() {
 }
 
 // =========================================================================
-// 📊 HISTORIAL DE MOVIMIENTOS Y ALERTAS (CON REGISTRO_VENTAS)
+// 📊 HISTORIAL DE MOVIMIENTOS Y ALERTAS (OPTIMIZADO Y CONEXIÓN ROBUSTA)
 // =========================================================================
 function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
+  const telFinal =
+    tel ||
+    localStorage.getItem("active_distri_tel") ||
+    window.distriTelefonoCache ||
+    "";
+
   const formData = new FormData();
   formData.append("accion", "obtener_dashboard_distribuidor");
-  formData.append("telefono", tel);
+  formData.append("telefono", telFinal);
   formData.append("mes", mesFiltro);
 
   const tbody = document.getElementById("tablaHistorialBody");
   if (tbody) {
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 25px; color:var(--text-secondary);"><svg class="spin-anim" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:6px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg><br>Cargando movimientos...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--text-secondary);"><svg class="spin-anim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg><br>Cargando movimientos...</td></tr>`;
   }
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
@@ -425,19 +431,20 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
             let signo = isPositivo ? "+" : "";
 
             trs += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                      <td style="padding: 12px 8px; font-size:0.75rem; color:var(--text-secondary); whitespace:nowrap;">${mov.fecha}</td>
+                      <td style="padding: 12px 8px; font-size:0.75rem; color:var(--text-secondary); white-space:nowrap;">${mov.fecha}</td>
                       <td style="padding: 12px 8px; line-height:1.3;">
                         <strong style="color:var(--text-primary); font-size:0.85rem;">${mov.concepto}</strong><br>
                         <span style="color:var(--ios-blue); font-size:0.75rem;">👤 ${mov.cliente}</span>
                       </td>
-                      <td style="padding: 12px 8px; text-align:right; color:${color}; font-weight:bold; font-family:monospace; whitespace:nowrap;">${signo}${formatMoneda(mov.monto)}</td>
+                      <td style="padding: 12px 8px; text-align:right; color:${color}; font-weight:bold; font-family:monospace; white-space:nowrap;">${signo}${formatMoneda(mov.monto)}</td>
                     </tr>`;
           });
         } else {
-          trs = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--text-secondary);">No se encontraron movimientos registrados para este periodo.</td></tr>`;
+          trs = `<tr><td colspan="3" style="text-align:center; padding: 35px; color:var(--text-secondary);">No se encontraron movimientos registrados para este periodo.</td></tr>`;
         }
         if (tbody) tbody.innerHTML = trs;
 
+        // Alertas de Renovaciones
         const divRenov = document.getElementById("listaRenovacionesCards");
         const widgetCont = document.getElementById("widgetRenovaciones");
         let htmlRenov = "";
@@ -482,12 +489,16 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
         } else if (widgetCont) {
           widgetCont.style.display = "none";
         }
+      } else {
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--text-secondary);">No hay movimientos registrados para esta cuenta.</td></tr>`;
+        }
       }
     })
     .catch((err) => {
       console.error("Error al cargar historial:", err);
       if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:var(--ios-red);">Error al conectar con la base de datos.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--ios-red);">Error al conectar con la base de datos.</td></tr>`;
       }
     });
 }
@@ -1208,7 +1219,6 @@ function abrirCentroCodigos() {
   haptic();
   bloquearScroll();
 
-  // 🚀 Toma automáticamente el teléfono del distribuidor en sesión activa
   const telDistri =
     localStorage.getItem("active_distri_tel") ||
     window.distriTelefonoCache ||
@@ -1216,7 +1226,7 @@ function abrirCentroCodigos() {
   codeData.telefono = telDistri;
 
   document.getElementById("codesCenterOverlay").classList.add("open");
-  changeCodeStep(1); // Directo a seleccionar Plataforma
+  changeCodeStep(1);
 }
 
 function cerrarCentroCodigos() {
@@ -1271,7 +1281,7 @@ function rastrearCodigo() {
   formData.append("correo", m);
   formData.append("plataforma", codeData.plataforma);
   formData.append("opcion", codeData.opcion);
-  formData.append("telefono", telDistri); // Pasa el teléfono del distribuidor para validación VIP implícita
+  formData.append("telefono", telDistri);
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
     .then((res) => res.json())
