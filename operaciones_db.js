@@ -1,6 +1,116 @@
 /* ==========================================================================
-   ⚙️ CYBERNET OS - OPERACIONES Y BASE DE DATOS ESPECIAL (operaciones_db.js)
+   ⚙️ CYBERNET OS - OPERACIONES, DATABASE Y CONTROL DE TIEMPO (operaciones_db.js)
    ========================================================================== */
+
+/* ==========================================================================
+   ⏱️ MÓDULO INTELIGENTE DE CONTROL DE TIEMPO Y TURNO TRABAJADOR
+   ========================================================================== */
+
+window.iniciarControlTiempoTrabajador = function () {
+  const trabajador =
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff");
+
+  if (!trabajador || trabajador === "Desconocido") return;
+
+  // 1. Verificar si existe inicio de turno guardado
+  let horaInicio = localStorage.getItem("cyber_turno_inicio_" + trabajador);
+  if (!horaInicio) {
+    horaInicio = Date.now();
+    localStorage.setItem("cyber_turno_inicio_" + trabajador, horaInicio);
+  } else {
+    horaInicio = parseInt(horaInicio);
+  }
+
+  // 2. Función de cálculo exacto por estampa de tiempo
+  function obtenerSegundosReales() {
+    return Math.floor((Date.now() - horaInicio) / 1000);
+  }
+
+  // 3. Sincronización continua cada 60 segundos a MySQL
+  clearInterval(window.intervaloTurnoTrabajador);
+  window.intervaloTurnoTrabajador = setInterval(() => {
+    window.sincronizarTiempoTrabajadorMySQL(
+      trabajador,
+      obtenerSegundosReales(),
+      false,
+    );
+  }, 60000);
+
+  // Sincronizar inmediatamente al arrancar
+  window.sincronizarTiempoTrabajadorMySQL(
+    trabajador,
+    obtenerSegundosReales(),
+    false,
+  );
+};
+
+window.sincronizarTiempoTrabajadorMySQL = function (
+  trabajador,
+  segundosTotales,
+  esCierreFinal,
+) {
+  if (!trabajador) return;
+
+  const formData = new FormData();
+  formData.append("accion", "guardar_tiempo_trabajador");
+  formData.append("trabajador", trabajador);
+  formData.append("segundos", segundosTotales);
+  formData.append("es_cierre", esCierreFinal ? "1" : "0");
+
+  // Si la pestaña se está cerrando, usar sendBeacon para garantizar el envío
+  if (esCierreFinal && navigator.sendBeacon) {
+    navigator.sendBeacon(
+      "https://api.cybernetsp.com/acciones_mysql.php",
+      formData,
+    );
+  } else {
+    fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+      method: "POST",
+      body: formData,
+      keepalive: true, // Mantiene viva la conexión en segundo plano
+    }).catch((err) => console.error("Error al reportar tiempo:", err));
+  }
+};
+
+// 🔒 RECEPTOR DE CIERRE DE PESTAÑA / NAVEGADOR ('X')
+window.addEventListener("beforeunload", function () {
+  const trabajador =
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff");
+  if (trabajador) {
+    const horaInicio = localStorage.getItem("cyber_turno_inicio_" + trabajador);
+    if (horaInicio) {
+      const segundos = Math.floor((Date.now() - parseInt(horaInicio)) / 1000);
+      window.sincronizarTiempoTrabajadorMySQL(trabajador, segundos, true);
+    }
+  }
+});
+
+// 🚪 CERRAR SESIÓN MANUAL DE TRABAJADOR
+window.cerrarSesionTrabajadorDefinitiva = function () {
+  if (typeof haptic === "function") haptic();
+  const trabajador =
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff");
+
+  if (trabajador) {
+    const horaInicio = localStorage.getItem("cyber_turno_inicio_" + trabajador);
+    if (horaInicio) {
+      const segundos = Math.floor((Date.now() - parseInt(horaInicio)) / 1000);
+      window.sincronizarTiempoTrabajadorMySQL(trabajador, segundos, true);
+    }
+    localStorage.removeItem("cyber_turno_inicio_" + trabajador);
+  }
+
+  sessionStorage.removeItem("active_staff");
+  localStorage.removeItem("cyber_saved_staff");
+  location.reload();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  window.iniciarControlTiempoTrabajador();
+});
 
 /* ==========================================================================
    🍿 MÓDULO DE NETFLIX: CORTES OPERATIVOS
@@ -101,7 +211,6 @@ function parsearFechaCorteMs(fStr) {
     return hoy.getTime();
   }
 
-  // Decodifica formatos como "18DEAGOSTO", "18 DE AGOSTO", "18-AGOSTO"
   let limpia = str
     .replace(/(\d+)\s*DE\s*/gi, "$1 ")
     .replace(/(\d+)DE/gi, "$1 ")
@@ -179,7 +288,6 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     return;
   }
 
-  // 1. Extraer el vencimiento real enviado por MySQL
   cuentas.forEach((c) => {
     let rawVenc =
       c.vencimiento ||
@@ -193,10 +301,8 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     c._vencTexto = rawVenc && rawVenc !== "-" ? rawVenc : "Sin Fecha";
   });
 
-  // 2. Encontrar el día de vencimiento más antiguo de la lista
   let minTs = Math.min(...cuentas.map((c) => c._tsVenc));
 
-  // 3. Filtrar estrictamente solo las cuentas pertenecientes al lote del día más antiguo
   let cuentasLoteActual = [];
   if (minTs === 9999999999999) {
     cuentasLoteActual = cuentas;
@@ -218,7 +324,6 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     : "Pendientes";
 
   let html = `
-    <!-- Encabezado de Lote por Fecha Más Antigua -->
     <div style="background: rgba(255, 69, 58, 0.12); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
       <span style="font-size: 0.78rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">
         🚨 Lote Prioritario: ${fechaCabeceraTexto}
@@ -239,11 +344,8 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
 
     html += `
       <div style="background: #2a2a2e; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; position: relative; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: all 0.2s ease;">
-          
-          <!-- Efecto Glow Rojo Superior -->
           <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #ff3b30, transparent); box-shadow: 0 0 12px #ff3b30; opacity: 0.7;"></div>
 
-          <!-- Correo y Badge Vencimiento -->
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
               <div 
                 onclick="copiarTextoLigero('${correo}', this, 'correo')"
@@ -258,10 +360,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
               </span>
           </div>
 
-          <!-- Bloque de Claves -->
           <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; align-items: stretch;">
-              
-              <!-- Clave Vencida -->
               <div 
                 onclick="copiarTextoLigero('${claveVieja}', this, 'clave')"
                 title="Clic para copiar"
@@ -273,7 +372,6 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
                   <span style="font-family: monospace; color: #ff3b30; font-weight: 700; font-size: 0.95rem; text-decoration: line-through;">${claveVieja}</span>
               </div>
 
-              <!-- Nueva Clave TV -->
               <div 
                 onclick="copiarTextoLigero('${claveNueva}', this, 'clave')"
                 title="Clic para copiar"
@@ -286,7 +384,6 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
               </div>
           </div>
 
-          <!-- Perfiles y Botón de Acción -->
           <div style="display: flex; flex-direction: column; gap: 14px;">
               <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; color: #ff3b30; background: rgba(255, 59, 48, 0.1); padding: 8px 16px; border-radius: 8px; width: fit-content; border: 1px solid rgba(255, 59, 48, 0.2);">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -306,7 +403,6 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
   container.innerHTML = html;
 };
 
-// Función auxiliar visual de copiado
 window.copiarTextoLigero = function (texto, elemento, tipo) {
   if (typeof haptic === "function") haptic();
 
@@ -353,7 +449,6 @@ window.generarClaveTVAleatoria = function () {
   return `${palabra}${num}@@`;
 };
 
-// Generación de Modal HTML
 window.crearModalNetflixManagerHTML = function () {
   if (document.getElementById("netflixManagerOverlay")) return;
 
@@ -930,7 +1025,6 @@ window.renderizarCargadasEsteTurno = function () {
       <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
         <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex-grow: 1;">
           
-          <!-- Badges de Plataforma y Proveedor -->
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
             <span style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 2px 7px; border-radius: 6px; font-weight: 800; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.3px;">
               ${platNombre}
@@ -966,7 +1060,6 @@ window.renderizarCargadasEsteTurno = function () {
   container.innerHTML = html;
 };
 
-// 🚨 ACCIÓN DIRECTA DE REPORTAR DESDE LA VISTA DE CUENTAS CARGADAS EN LOTE
 window.reportarCuentaCargadaDirecto = function (
   id,
   tablaEsc,
@@ -1678,7 +1771,7 @@ window.renderizarTablaNeyop = function () {
   }
 
   html += `</tbody></table>`;
-  contenedor.innerHTML = htmlTabla;
+  container.innerHTML = html;
 };
 
 window.marcarListoNeyop = function (filaIndex, btnElement) {
