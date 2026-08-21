@@ -711,6 +711,7 @@ window.abrirModalRenoB2B = function (idItem) {
   const formData = new FormData();
   formData.append("accion", "obtener_cuentas_renovacion_distribuidor");
   formData.append("telefono", telDistri);
+  formData.append("plataforma", idItem);
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
     .then((res) => res.json())
@@ -773,7 +774,7 @@ window.abrirModalRenoB2B = function (idItem) {
         });
       } else {
         container.innerHTML =
-          "<div style='color:var(--text-secondary); text-align:center; padding: 20px;'>No tienes cuentas activas registradas en MySQL.</div>";
+          "<div style='color:var(--text-secondary); text-align:center; padding: 20px;'>No tienes cuentas activas registradas en MySQL para esta plataforma.</div>";
       }
     })
     .catch((err) => {
@@ -822,24 +823,21 @@ function actualizarCarritoUI() {
     totalCost += subtotal;
     totalItems += item.amount;
 
-    let opcionesReno = "";
-    if (item.id === "NETFLIX") {
-      let isReno = item.tipo === "Reno";
-      let displayBtn = isReno ? "block" : "none";
-      let btnText = item.correoReno ? item.correoReno : "Seleccionar Cuenta";
-      let btnColor = item.correoReno ? "var(--ios-green)" : "var(--ios-orange)";
+    let isReno = item.tipo === "Reno";
+    let displayBtn = isReno ? "block" : "none";
+    let btnText = item.correoReno ? item.correoReno : "Seleccionar Cuenta";
+    let btnColor = item.correoReno ? "var(--ios-green)" : "var(--ios-orange)";
 
-      opcionesReno = `
-          <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px; width: 100%; border-top: 1px dashed var(--surface-border); padding-top: 10px;">
-              <select class="input-ios" style="margin: 0; padding: 8px; font-size: 0.8rem; border-radius: 10px; font-weight: 600;" onchange="window.cambiarTipoVentaCarrito('${item.id}', this.value)">
-                  <option value="Nueva" ${!isReno ? "selected" : ""}>Crear Pantalla Nueva</option>
-                  <option value="Reno" ${isReno ? "selected" : ""}>Renovar Pantalla Existente</option>
-              </select>
-              <button class="btn-ios" style="display: ${displayBtn}; background: transparent; color: ${btnColor}; border: 1px solid ${btnColor}; padding: 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; width: 100%; text-align: center; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" onclick="window.abrirModalRenoB2B('${item.id}')">
-                  ${btnText}
-              </button>
-          </div>`;
-    }
+    let opcionesReno = `
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px; width: 100%; border-top: 1px dashed var(--surface-border); padding-top: 10px;">
+            <select class="input-ios" style="margin: 0; padding: 8px; font-size: 0.8rem; border-radius: 10px; font-weight: 600;" onchange="window.cambiarTipoVentaCarrito('${item.id}', this.value)">
+                <option value="Nueva" ${!isReno ? "selected" : ""}>Crear Pantalla Nueva</option>
+                <option value="Reno" ${isReno ? "selected" : ""}>Renovar Pantalla Existente</option>
+            </select>
+            <button class="btn-ios" style="display: ${displayBtn}; background: transparent; color: ${btnColor}; border: 1px solid ${btnColor}; padding: 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; width: 100%; text-align: center; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" onclick="window.abrirModalRenoB2B('${item.id}')">
+                ${btnText}
+            </button>
+        </div>`;
 
     html += `
       <div class="cart-item-row" style="display:flex; flex-direction:column; gap:12px; background: var(--input-bg); padding:14px; border-radius:16px; border: 1px solid var(--surface-border);">
