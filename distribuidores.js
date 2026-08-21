@@ -1012,10 +1012,6 @@ function procesarCompraDistribuidor() {
                   textoFicha += `📍 *PIN:* ${bloque.pin}\n`;
                 }
                 textoFicha += `📅 *Vence:* ${bloque.venc.toUpperCase()}\n\n`;
-
-                if (isNetflix || platClean.includes("DISNEY")) {
-                  textoFicha += `🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra página para códigos disponible 24/7:\nwww.cybernetsp.com/\n\n`;
-                }
               }
             });
           } else {
@@ -1254,10 +1250,6 @@ function copiarFichaCasillero(btn, dataEncoded) {
 
   let venc = (obj.vencimiento || "-").toUpperCase();
   txt += `📅 *Vence:* ${venc}\n\n`;
-
-  if (isNetflix || platClean.includes("DISNEY")) {
-    txt += `🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra página para códigos disponible 24/7:\nwww.cybernetsp.com/\n\n`;
-  }
 
   txt += `📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
