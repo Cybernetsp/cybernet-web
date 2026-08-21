@@ -77,11 +77,23 @@
               display: flex;
               align-items: center;
               justify-content: center;
-              font-size: 1.1rem;
               flex-shrink: 0;
+              border: 1px solid rgba(10, 132, 255, 0.25);
             "
           >
-            💼
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
           </div>
           <div style="min-width: 0; flex: 1">
             <h2
@@ -179,21 +191,63 @@
               class="btn-ios btn-secondary"
               style="padding: 8px 12px; font-size: 0.85rem"
             >
-              🔍 Cuentas
+              <svg
+                width="15"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              Cuentas
             </button>
             <button
               onclick="abrirCentroCodigos()"
               class="btn-ios btn-secondary"
               style="padding: 8px 12px; font-size: 0.85rem"
             >
-              📩 Códigos
+              <svg
+                width="15"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                ></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              Códigos
             </button>
             <button
               onclick="abrirModalHistorial()"
               class="btn-ios btn-secondary"
               style="padding: 8px 12px; font-size: 0.85rem"
             >
-              📊 Movimientos
+              <svg
+                width="15"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+              Movimientos
             </button>
             <button
               onclick="cerrarSesionDistribuidor()"
@@ -205,7 +259,21 @@
                 font-size: 0.85rem;
               "
             >
-              Salir ✕
+              <svg
+                width="15"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Salir
             </button>
             <button
               id="theme-toggle"
@@ -329,7 +397,20 @@
               border-radius: 14px;
             "
           >
-            🔍 Buscar en Casillero
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Buscar en Casillero
           </button>
           <button
             onclick="
@@ -344,7 +425,22 @@
               border-radius: 14px;
             "
           >
-            📩 Centro de Códigos
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+              ></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            Centro de Códigos
           </button>
           <button
             onclick="
@@ -359,7 +455,21 @@
               border-radius: 14px;
             "
           >
-            📊 Historial de Movimientos
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            Historial de Movimientos
           </button>
 
           <div
@@ -410,7 +520,21 @@
               margin-top: 4px;
             "
           >
-            Salir de la Cuenta ✕
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Salir de la Cuenta
           </button>
         </div>
       </div>
@@ -429,8 +553,33 @@
               flex-wrap: wrap;
             "
           >
-            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800">
-              🛍️ Catálogo Mayorista
+            <h3
+              style="
+                margin: 0;
+                font-size: 1.1rem;
+                font-weight: 800;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              "
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--ios-blue)"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"
+                ></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              Catálogo Mayorista
             </h3>
             <input
               type="text"
@@ -471,9 +620,25 @@
             font-size: 1rem;
             font-weight: 800;
             color: var(--ios-orange);
+            display: flex;
+            align-items: center;
+            gap: 8px;
           "
         >
-          ⏰ Alertas de Renovación (Vencen en 3 días o menos)
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--ios-orange)"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Alertas de Renovación (Vencen en 3 días o menos)
         </h3>
         <div
           id="listaRenovacionesCards"
@@ -497,6 +662,8 @@
         fill="none"
         stroke="white"
         stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       >
         <circle cx="9" cy="21" r="1"></circle>
         <circle cx="20" cy="21" r="1"></circle>
@@ -538,8 +705,33 @@
             margin-bottom: 12px;
           "
         >
-          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
-            🛒 Mi Carrito
+          <h3
+            style="
+              margin: 0;
+              font-size: 1.15rem;
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path
+                d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+              ></path>
+            </svg>
+            Mi Carrito
           </h3>
           <button
             onclick="cerrarCarrito()"
@@ -631,8 +823,30 @@
             margin-bottom: 12px;
           "
         >
-          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
-            🔍 Mis Cuentas en Casillero
+          <h3
+            style="
+              margin: 0;
+              font-size: 1.15rem;
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Mis Cuentas en Casillero
           </h3>
           <button
             onclick="cerrarModalBusquedaCuentas()"
@@ -688,8 +902,31 @@
             margin-bottom: 10px;
           "
         >
-          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
-            📊 Movimientos y Ventas
+          <h3
+            style="
+              margin: 0;
+              font-size: 1.15rem;
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            Movimientos y Ventas
           </h3>
           <button
             onclick="cerrarModalHistorial()"
@@ -761,7 +998,21 @@
         class="modal-ios"
         style="max-width: 400px; width: 92%; text-align: center"
       >
-        <h2 style="font-size: 2.6rem; margin: 0 0 8px">✅</h2>
+        <div style="display: flex; justify-content: center; margin-bottom: 8px">
+          <svg
+            width="50"
+            height="50"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--ios-green)"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
         <h3
           style="
             margin: 0 0 12px;
@@ -793,7 +1044,22 @@
           style="margin-bottom: 8px"
           onclick="copiarCuentasCheckout()"
         >
-          📋 Copiar Accesos
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path
+              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            ></path>
+          </svg>
+          Copiar Accesos
         </button>
         <a
           id="btnWhatsAppActivacion"
@@ -802,7 +1068,21 @@
           style="display: none; text-decoration: none"
         >
           <button class="btn-ios btn-success w-100" style="margin-bottom: 8px">
-            💬 Pedir Activación por Chat
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+              ></path>
+            </svg>
+            Pedir Activación por Chat
           </button>
         </a>
         <button
@@ -844,6 +1124,8 @@
               fill="none"
               stroke="var(--ios-blue)"
               stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <path
                 d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
@@ -875,26 +1157,110 @@
             style="background: #e50914; color: white"
             onclick="setCodigoPlat('NETFLIX')"
           >
-            🍿 Netflix Original
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect
+                x="2"
+                y="2"
+                width="20"
+                height="20"
+                rx="2.18"
+                ry="2.18"
+              ></rect>
+              <line x1="7" y1="2" x2="7" y2="22"></line>
+              <line x1="17" y1="2" x2="17" y2="22"></line>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <line x1="2" y1="7" x2="7" y2="7"></line>
+              <line x1="2" y1="17" x2="7" y2="17"></line>
+              <line x1="17" y1="17" x2="22" y2="17"></line>
+              <line x1="17" y1="7" x2="22" y2="7"></line>
+            </svg>
+            Netflix Original
           </button>
           <button
             class="btn-ios w-100"
             style="background: #007aff; color: white"
             onclick="setCodigoPlat('DISNEY')"
           >
-            🔷 Disney+ Premium
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              ></polygon>
+            </svg>
+            Disney+ Premium
           </button>
         </div>
 
         <div id="codeStep2" class="code-step">
           <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(1)">
-            📺 Código de Inicio Sesión
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+              <polyline points="17 2 12 7 7 2"></polyline>
+            </svg>
+            Código de Inicio Sesión
           </button>
           <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(2)">
-            ✈️ Código 'Estoy de Viaje'
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5 5.3 6.7c-.8-.2-1.6.1-2.1.8l-.2.3c-.4.6-.3 1.4.2 1.9l4.5 4.5-3.5 3.5-2.3-.5c-.4-.1-.8.1-1 .4l-.3.3c-.3.4-.2.9.2 1.2l3 2.5c.3.4.8.5 1.2.2l.3-.3c.3-.2.5-.6.4-1l-.5-2.3 3.5-3.5 4.5 4.5c.5.5 1.3.6 1.9.2l.3-.2c.7-.5 1-.1.8-.9z"
+              ></path>
+            </svg>
+            Código 'Estoy de Viaje'
           </button>
           <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(3)">
-            🔗 Enlace de Actualización
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+              ></path>
+              <path
+                d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+              ></path>
+            </svg>
+            Enlace de Actualización
           </button>
         </div>
 
@@ -1055,8 +1421,30 @@
             margin-bottom: 12px;
           "
         >
-          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800">
-            🔄 Seleccionar Cuenta
+          <h3
+            style="
+              margin: 0;
+              font-size: 1.15rem;
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            Seleccionar Cuenta
           </h3>
           <button
             onclick="
