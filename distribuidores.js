@@ -958,44 +958,71 @@ function procesarCompraDistribuidor() {
         actualizarCarritoUI();
 
         if (res && res.status === "success") {
-          let nombreMensaje =
-            inputNombreCliente !== "" ? inputNombreCliente : "Cliente";
-          let textoFicha = `🌟 ¡Hola, ${nombreMensaje}!\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos: 👇\n\n`;
+          let tieneNombreReal =
+            inputNombreCliente !== "" &&
+            inputNombreCliente.toLowerCase() !== "cliente" &&
+            inputNombreCliente.toLowerCase() !== "sin nombre";
 
-          const mesesCortos = [
-            "ene",
-            "feb",
-            "mar",
-            "abr",
-            "may",
-            "jun",
-            "jul",
-            "ago",
-            "sep",
-            "oct",
-            "nov",
-            "dic",
-          ];
-          const fechaActual = new Date();
-          const fechaCompraFormateada = `${fechaActual.getDate()}-${mesesCortos[fechaActual.getMonth()]}`;
+          let saludo = tieneNombreReal
+            ? `🌟 *¡Hola ${inputNombreCliente}!*`
+            : `🌟 *¡Hola!*`;
+
+          let textoFicha = `${saludo}\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n`;
 
           if (res.bloques && res.bloques.length > 0) {
             res.bloques.forEach((bloque) => {
-              textoFicha += `🎬 DETALLES DE ${bloque.id.replace(/-/g, " ").toUpperCase()} ✅\n────────────────────\n📧 Correo: ${bloque.correo}\n🔐 Contraseña: ${bloque.clave}\n`;
-              if (
-                bloque.perfil &&
-                bloque.perfil !== "N/A" &&
-                bloque.perfil !== ""
-              )
-                textoFicha += `👤 Perfil: ${bloque.perfil}\n`;
-              if (bloque.pin && bloque.pin !== "N/A" && bloque.pin !== "")
-                textoFicha += `🔑 Pin del Perfil: ${bloque.pin}\n`;
-              textoFicha += `📅 Fecha de Vencimiento: ${bloque.venc.toLowerCase()}\n🛒 Fecha de Compra: ${fechaCompraFormateada}\n\n`;
+              let platClean = bloque.id.replace(/-/g, " ").toUpperCase();
+              let isNetflix = platClean.includes("NETFLIX");
+              let isIptvOrEmby =
+                platClean.includes("IPTV") || platClean.includes("EMBY");
+
+              let etiquetaUser = isIptvOrEmby ? "Usuario" : "Correo";
+              let etiquetaPerfil = platClean.includes("IPTV")
+                ? "URL"
+                : platClean.includes("EMBY")
+                  ? "Servidor"
+                  : "Perfil";
+
+              let esRenoBlock = bloque.tipo === "Reno";
+
+              if (esRenoBlock) {
+                textoFicha += `🔄 *PERFIL RENOVADO CON ÉXITO* ✅\n🎬 *DETALLES DE ${platClean}*\n────────────────────\n👤 *${etiquetaUser}:* ${bloque.correo}\n🔐 *Contraseña:* ${bloque.clave}\n`;
+                if (
+                  bloque.perfil &&
+                  bloque.perfil !== "N/A" &&
+                  bloque.perfil !== ""
+                ) {
+                  textoFicha += `🌐 *${etiquetaPerfil}:* ${bloque.perfil}\n`;
+                }
+                textoFicha += `📅 *Nueva Fecha de Vencimiento:* ${bloque.venc.toUpperCase()}\n\n`;
+              } else {
+                textoFicha += `🎬 *DETALLES DE ${platClean}* ✅\n────────────────────\n`;
+                if (isNetflix) {
+                  textoFicha += `⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n`;
+                }
+                textoFicha += `👤 *${etiquetaUser}:* ${bloque.correo}\n🔐 *Contraseña:* ${bloque.clave}\n`;
+                if (
+                  bloque.perfil &&
+                  bloque.perfil !== "N/A" &&
+                  bloque.perfil !== ""
+                ) {
+                  textoFicha += `🌐 *${etiquetaPerfil}:* ${bloque.perfil}\n`;
+                }
+                if (bloque.pin && bloque.pin !== "N/A" && bloque.pin !== "-") {
+                  textoFicha += `📍 *PIN:* ${bloque.pin}\n`;
+                }
+                textoFicha += `📅 *Vence:* ${bloque.venc.toUpperCase()}\n\n`;
+
+                if (isNetflix || platClean.includes("DISNEY")) {
+                  textoFicha += `🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra página para códigos disponible 24/7:\nwww.cybernetsp.com/\n\n`;
+                }
+              }
             });
           } else {
             textoFicha += `Tus cuentas han sido procesadas correctamente. Míralas en tu casillero.\n\n`;
           }
-          textoFicha += `📢 INFORMACIÓN IMPORTANTE:\n────────────────────\n💎 Disfruta tu servicio.\n✨ ¡Gracias por elegirnos! ✨`;
+
+          textoFicha += `📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
           document.getElementById("cajaTextoFichas").innerText = textoFicha;
           window.fichasCheckoutPendientes = textoFicha;
@@ -1011,7 +1038,7 @@ function procesarCompraDistribuidor() {
               .map((i) => i.nombre)
               .join(", ");
             const waMsg = encodeURIComponent(
-              `Hola, acabo de adquirir 1 mes de ${platList} para mi cliente, solicito activación. Cliente: ${nombreMensaje}`,
+              `Hola, acabo de adquirir 1 mes de ${platList} para mi cliente, solicito activación. Cliente: ${inputNombreCliente || "Cliente"}`,
             );
             btnWhatsapp.href = `https://wa.me/573127706726?text=${waMsg}`;
             btnWhatsapp.style.display = "block";
@@ -1227,6 +1254,10 @@ function copiarFichaCasillero(btn, dataEncoded) {
 
   let venc = (obj.vencimiento || "-").toUpperCase();
   txt += `📅 *Vence:* ${venc}\n\n`;
+
+  if (isNetflix || platClean.includes("DISNEY")) {
+    txt += `🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra página para códigos disponible 24/7:\nwww.cybernetsp.com/\n\n`;
+  }
 
   txt += `📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
