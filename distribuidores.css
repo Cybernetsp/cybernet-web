@@ -162,7 +162,7 @@ html {
   border-color: var(--ios-blue);
 }
 
-/* 💊 BOTONES ESTILO APP STORE */
+/* 💊 BOTONES ESTILO APP STORE Y SOPORTE SVG */
 .btn-ios {
   padding: 10px 16px;
   border-radius: 50px;
@@ -173,10 +173,15 @@ html {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   min-height: 42px;
   transition: var(--transition-fluid);
   touch-action: manipulation;
+}
+
+.btn-ios svg {
+  flex-shrink: 0;
+  stroke: currentColor;
 }
 
 .btn-ios:active {
@@ -186,12 +191,12 @@ html {
 
 .btn-primary {
   background: var(--ios-blue);
-  color: white;
+  color: #ffffff;
 }
 
 .btn-success {
   background: var(--ios-green);
-  color: white;
+  color: #ffffff;
 }
 
 .btn-secondary {
