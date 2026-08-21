@@ -333,10 +333,21 @@
         formData.append("password", password);
 
         fetch(API_URL, { method: "POST", body: formData })
-          .then((res) => res.json())
-          .then((res) => {
+          .then((res) => res.text())
+          .then((text) => {
             btn.disabled = false;
             btn.innerHTML = `Iniciar Sesión <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+
+            let res;
+            try {
+              res = JSON.parse(text);
+            } catch (err) {
+              alert(
+                "❌ Error de respuesta PHP:\n\n" +
+                  (text.trim() || "Respuesta vacía del servidor."),
+              );
+              return;
+            }
 
             if (res && res.status === "success" && res.data) {
               tempUserCache = res.data;
@@ -347,14 +358,14 @@
                 guardarSesionYRedireccionar(res.data);
               }
             } else {
-              alert(res ? res.message : "Credenciales incorrectas.");
+              alert("❌ " + (res ? res.message : "Credenciales incorrectas."));
             }
           })
           .catch((err) => {
             console.error(err);
             btn.disabled = false;
             btn.innerHTML = `Iniciar Sesión <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
-            alert("Error de comunicación con la API. Revisa tu conexión.");
+            alert("❌ Error de red / CORS: " + err.message);
           });
       }
 
@@ -405,17 +416,28 @@
         formData.append("nueva_password", nuevaClave);
 
         fetch(API_URL, { method: "POST", body: formData })
-          .then((res) => res.json())
-          .then((res) => {
+          .then((res) => res.text())
+          .then((text) => {
             btn.disabled = false;
             btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Actualizar Clave e Ingresar`;
+
+            let res;
+            try {
+              res = JSON.parse(text);
+            } catch (err) {
+              alert(
+                "❌ Error de respuesta PHP:\n\n" +
+                  (text.trim() || "Respuesta vacía del servidor."),
+              );
+              return;
+            }
 
             if (res && res.status === "success") {
               triggerToast("Contraseña actualizada correctamente");
               guardarSesionYRedireccionar(tempUserCache);
             } else {
               alert(
-                "Error: " +
+                "❌ Error: " +
                   (res ? res.message : "No se pudo actualizar la clave."),
               );
             }
@@ -424,7 +446,7 @@
             console.error(err);
             btn.disabled = false;
             btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Actualizar Clave e Ingresar`;
-            alert("Error de comunicación con MySQL.");
+            alert("❌ Error de comunicación con MySQL.");
           });
       }
 
