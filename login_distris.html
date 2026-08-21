@@ -161,7 +161,20 @@
               margin-top: 4px;
             "
           >
-            Iniciar Sesión →
+            Iniciar Sesión
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
           </button>
         </form>
 
@@ -182,11 +195,33 @@
               font-weight: 700;
               line-height: 1.35;
               text-align: left;
+              display: flex;
+              align-items: flex-start;
+              gap: 8px;
             "
           >
-            ⚠️ Detectamos que usas la contraseña genérica (123456). Por tu
-            seguridad debes asignarle una nueva clave a tu cuenta para
-            continuar.
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="flex-shrink: 0; margin-top: 1px"
+            >
+              <path
+                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+              ></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <div>
+              Detectamos que usas la contraseña genérica (123456). Por tu
+              seguridad debes asignarle una nueva clave a tu cuenta para
+              continuar.
+            </div>
           </div>
 
           <input
@@ -235,7 +270,20 @@
               margin-top: 4px;
             "
           >
-            🔒 Actualizar Clave e Ingresar
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Actualizar Clave e Ingresar
           </button>
         </form>
       </div>
@@ -272,7 +320,7 @@
         const btn = document.getElementById("btnLoginSubmit");
 
         if (!credencial || !password) {
-          alert("⚠️ Completa todos los campos.");
+          alert("Completa todos los campos.");
           return;
         }
 
@@ -288,7 +336,7 @@
           .then((res) => res.json())
           .then((res) => {
             btn.disabled = false;
-            btn.innerHTML = "Iniciar Sesión →";
+            btn.innerHTML = `Iniciar Sesión <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
 
             if (res && res.status === "success" && res.data) {
               tempUserCache = res.data;
@@ -299,14 +347,14 @@
                 guardarSesionYRedireccionar(res.data);
               }
             } else {
-              alert("❌ " + (res ? res.message : "Credenciales incorrectas."));
+              alert(res ? res.message : "Credenciales incorrectas.");
             }
           })
           .catch((err) => {
             console.error(err);
             btn.disabled = false;
-            btn.innerHTML = "Iniciar Sesión →";
-            alert("❌ Error de comunicación con la API. Revisa tu conexión.");
+            btn.innerHTML = `Iniciar Sesión <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+            alert("Error de comunicación con la API. Revisa tu conexión.");
           });
       }
 
@@ -317,7 +365,7 @@
           "flex";
         document.getElementById("lblSubtituloForm").innerText =
           "Asigna una contraseña privada para asegurar tu saldo.";
-        triggerToast("⚠️ Actualización de contraseña requerida");
+        triggerToast("Actualización de contraseña requerida");
       }
 
       // 3. GUARDAR NUEVA CONTRASEÑA EN MYSQL
@@ -334,17 +382,17 @@
         const btn = document.getElementById("btnCambiarClaveSubmit");
 
         if (nuevaClave.length < 4) {
-          alert("⚠️ La contraseña debe tener al menos 4 caracteres.");
+          alert("La contraseña debe tener al menos 4 caracteres.");
           return;
         }
 
         if (nuevaClave === "123456") {
-          alert("⚠️ No puedes volver a usar la clave genérica 123456.");
+          alert("No puedes volver a usar la clave genérica 123456.");
           return;
         }
 
         if (nuevaClave !== confirmarClave) {
-          alert("❌ Las contraseñas no coinciden.");
+          alert("Las contraseñas no coinciden.");
           return;
         }
 
@@ -360,14 +408,14 @@
           .then((res) => res.json())
           .then((res) => {
             btn.disabled = false;
-            btn.innerHTML = "🔒 Actualizar Clave e Ingresar";
+            btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Actualizar Clave e Ingresar`;
 
             if (res && res.status === "success") {
-              triggerToast("✅ Contraseña actualizada correctamente");
+              triggerToast("Contraseña actualizada correctamente");
               guardarSesionYRedireccionar(tempUserCache);
             } else {
               alert(
-                "❌ Error: " +
+                "Error: " +
                   (res ? res.message : "No se pudo actualizar la clave."),
               );
             }
@@ -375,8 +423,8 @@
           .catch((err) => {
             console.error(err);
             btn.disabled = false;
-            btn.innerHTML = "🔒 Actualizar Clave e Ingresar";
-            alert("❌ Error de comunicación con MySQL.");
+            btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Actualizar Clave e Ingresar`;
+            alert("Error de comunicación con MySQL.");
           });
       }
 
