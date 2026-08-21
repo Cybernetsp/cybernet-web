@@ -58,7 +58,6 @@ window.sincronizarTiempoTrabajadorMySQL = function (
   formData.append("segundos", segundosTotales);
   formData.append("es_cierre", esCierreFinal ? "1" : "0");
 
-  // Si la pestaña se está cerrando, usar sendBeacon para garantizar el envío
   if (esCierreFinal && navigator.sendBeacon) {
     navigator.sendBeacon(
       "https://api.cybernetsp.com/acciones_mysql.php",
@@ -68,12 +67,11 @@ window.sincronizarTiempoTrabajadorMySQL = function (
     fetch("https://api.cybernetsp.com/acciones_mysql.php", {
       method: "POST",
       body: formData,
-      keepalive: true, // Mantiene viva la conexión en segundo plano
+      keepalive: true,
     }).catch((err) => console.error("Error al reportar tiempo:", err));
   }
 };
 
-// 🔒 RECEPTOR DE CIERRE DE PESTAÑA / NAVEGADOR ('X')
 window.addEventListener("beforeunload", function () {
   const trabajador =
     sessionStorage.getItem("active_staff") ||
@@ -87,7 +85,6 @@ window.addEventListener("beforeunload", function () {
   }
 });
 
-// 🚪 CERRAR SESIÓN MANUAL DE TRABAJADOR
 window.cerrarSesionTrabajadorDefinitiva = function () {
   if (typeof haptic === "function") haptic();
   const trabajador =
@@ -111,6 +108,214 @@ window.cerrarSesionTrabajadorDefinitiva = function () {
 document.addEventListener("DOMContentLoaded", () => {
   window.iniciarControlTiempoTrabajador();
 });
+
+/* ==========================================================================
+   💳 MÓDULO DE DISTRIBUIDORES: SALDOS, REGISTRO DE CORREO Y ACCESOS
+   ========================================================================== */
+
+window.memoriaDistribuidores = [];
+
+window.cargarDistribuidores = function () {
+  const contenedor = document.getElementById("tablaDistribuidores");
+  if (!contenedor) return;
+
+  contenedor.innerHTML = `
+    <div style="text-align:center; padding:35px; color:#a1a1aa;">
+      <svg class="spin-anim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2.5" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
+      <br>Consultando saldos en MySQL...
+    </div>`;
+
+  const formData = new FormData();
+  formData.append("accion", "obtener_saldos_distribuidores");
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success" && res.data) {
+        window.memoriaDistribuidores = res.data;
+        window.renderizarListaDistribuidores(res.data);
+      } else {
+        contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a;">❌ Error al consultar distribuidores.</div>`;
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a;">❌ Error de conexión al servidor.</div>`;
+    });
+};
+
+window.filtrarTablaRevendedores = function () {
+  window.renderizarListaDistribuidores(window.memoriaDistribuidores);
+};
+
+window.renderizarListaDistribuidores = function (lista) {
+  const contenedor = document.getElementById("tablaDistribuidores");
+  const inputSearch = document.getElementById("searchTablaDistris");
+  if (!contenedor) return;
+
+  const query = inputSearch ? inputSearch.value.toLowerCase().trim() : "";
+
+  let filtrados = lista || [];
+  if (query !== "") {
+    filtrados = filtrados.filter(
+      (d) =>
+        (d.nombre || "").toLowerCase().includes(query) ||
+        (d.telefono || "").toLowerCase().includes(query) ||
+        (d.correo || "").toLowerCase().includes(query),
+    );
+  }
+
+  if (filtrados.length === 0) {
+    contenedor.innerHTML = `<div style="text-align:center; padding:35px; color:#a1a1aa;">No se encontraron distribuidores.</div>`;
+    return;
+  }
+
+  let html = "";
+  filtrados.forEach((d) => {
+    let inicial = (d.nombre || "D").charAt(0).toUpperCase();
+    let tieneCorreo =
+      d.correo && d.correo.trim() !== "" && d.correo.trim() !== "-";
+
+    let subCorreoHTML = tieneCorreo
+      ? `<span style="font-size:0.75rem; color:#0a84ff; font-family:monospace; font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; display:block;">✉️ ${d.correo}</span>`
+      : `<span style="font-size:0.72rem; color:#ff9f0a; font-weight:600; display:block;">⚠️ Sin correo asignado</span>`;
+
+    let botonAccion = tieneCorreo
+      ? `<button onclick="window.copiarAccesoPortalDistri('${(d.nombre || "").replace(/'/g, "\\'")}', '${(d.correo || "").replace(/'/g, "\\\'")}')" class="btn-ios" style="padding:6px 10px; font-size:0.72rem; border-radius:8px; background:rgba(10,132,255,0.15); color:#0a84ff; border:1px solid rgba(10,132,255,0.3); font-weight:700; display:flex; align-items:center; gap:4px; flex-shrink:0; cursor:pointer;" title="Copiar accesos al portal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copiar Acceso
+         </button>`
+      : `<button onclick="window.abrirModalRegistrarCorreo('${d.id}', '${d.telefono}', '${(d.nombre || "").replace(/'/g, "\\\'")}')" class="btn-ios" style="padding:6px 10px; font-size:0.72rem; border-radius:8px; background:rgba(255,159,10,0.15); color:#ff9f0a; border:1px solid rgba(255,159,10,0.3); font-weight:700; display:flex; align-items:center; gap:4px; flex-shrink:0; cursor:pointer;" title="Registrar correo para acceso B2B">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          + Registrar
+         </button>`;
+
+    let saldoFmt =
+      typeof formatMoneda === "function"
+        ? formatMoneda(d.saldo)
+        : "$" + d.saldo;
+
+    html += `
+      <div class="card-ios" style="padding: 12px 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(10, 132, 255, 0.15); color: #0a84ff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; flex-shrink: 0; border: 1px solid rgba(10, 132, 255, 0.25);">
+            ${inicial}
+          </div>
+          <div style="display: flex; flex-direction: column; text-align: left; overflow: hidden;">
+            <span style="font-weight: 800; color: #ffffff; font-size: 0.9rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${d.nombre}</span>
+            <span style="font-size: 0.75rem; color: #a1a1aa; font-family: monospace;">📲 ${d.telefono}</span>
+            ${subCorreoHTML}
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+          <span style="font-family: monospace; font-weight: 800; color: #30d158; background: rgba(48, 209, 88, 0.12); border: 1px solid rgba(48, 209, 88, 0.25); padding: 6px 10px; border-radius: 20px; font-size: 0.85rem;">
+            ${saldoFmt}
+          </span>
+          ${botonAccion}
+        </div>
+      </div>
+    `;
+  });
+
+  contenedor.innerHTML = html;
+};
+
+// 1. Abrir Modal de Registro de Correo
+window.abrirModalRegistrarCorreo = function (id, telefono, nombre) {
+  if (typeof haptic === "function") haptic();
+  document.getElementById("regCorreoDistriId").value = id;
+  document.getElementById("regCorreoDistriTel").value = telefono;
+  document.getElementById("regCorreoDistriNombre").value = nombre;
+  document.getElementById("inputCorreoDistriNuevo").value = "";
+
+  document.getElementById("lblRegCorreoSubtitulo").innerText =
+    `Revendedor: ${nombre} (${telefono})`;
+  document.getElementById("modalRegistrarCorreoDistri").style.display = "flex";
+};
+
+window.cerrarModalRegistrarCorreo = function () {
+  if (typeof haptic === "function") haptic();
+  document.getElementById("modalRegistrarCorreoDistri").style.display = "none";
+};
+
+// 2. Enviar petición a acciones_mysql.php
+window.guardarCorreoDistribuidor = function (e) {
+  e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const id = document.getElementById("regCorreoDistriId").value;
+  const telefono = document.getElementById("regCorreoDistriTel").value;
+  const correo = document.getElementById("inputCorreoDistriNuevo").value.trim();
+  const btn = document.getElementById("btnGuardarCorreoDistri");
+
+  if (!correo) return;
+
+  btn.disabled = true;
+  btn.innerText = "Guardando...";
+
+  const formData = new FormData();
+  formData.append("accion", "registrar_correo_distribuidor");
+  formData.append("id", id);
+  formData.append("telefono", telefono);
+  formData.append("correo", correo);
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      btn.disabled = false;
+      btn.innerText = "Guardar Correo";
+
+      if (res && res.status === "success") {
+        window.cerrarModalRegistrarCorreo();
+        if (typeof window.cargarDistribuidores === "function")
+          window.cargarDistribuidores();
+        if (typeof triggerToast === "function")
+          triggerToast("✅ " + res.message);
+        else alert("✅ " + res.message);
+      } else {
+        alert("❌ " + (res ? res.message : "Error al guardar correo."));
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      btn.disabled = false;
+      btn.innerText = "Guardar Correo";
+      alert("❌ Error de comunicación con MySQL.");
+    });
+};
+
+// 3. Copiar Ficha de Acceso al Portal para el Revendedor
+window.copiarAccesoPortalDistri = function (nombre, correo) {
+  if (typeof haptic === "function") haptic();
+
+  const mensajeAcceso = `🌟 *¡HOLA ${nombre.toUpperCase()}!*
+
+Aquí tienes las credenciales para ingresar a tu panel de revendedor B2B:
+
+🌐 *PÁGINA DE INGRESO:* www.cybernetsp.com/login_distris.html
+📧 *Usuario / Correo:* ${correo}
+🔐 *Contraseña Inicial:* 123456
+
+📌 *PASOS PARA INGRESAR:*
+1. Ingresa al enlace proporcionado.
+2. Escribe tu correo y la clave inicial *123456*.
+3. El sistema te pedirá asignar una contraseña privada por seguridad.
+4. ¡Listo! Tendrás acceso a tu saldo y casillero 24/7.`;
+
+  navigator.clipboard.writeText(mensajeAcceso).then(() => {
+    if (typeof triggerToast === "function") {
+      triggerToast("📋 Accesos copiados al portapapeles.");
+    } else {
+      alert("📋 Ficha e instrucciones de ingreso copiadas al portapapeles.");
+    }
+  });
+};
 
 /* ==========================================================================
    🍿 MÓDULO DE NETFLIX: CORTES OPERATIVOS
@@ -191,7 +396,6 @@ window.mostrarEstadoSinCortes = function () {
     </div>`;
 };
 
-// 🗓️ HELPER DE LECTURA DE VENCIMIENTO Y CONVERSIÓN A TIMESTAMP
 function parsearFechaCorteMs(fStr) {
   if (!fStr || fStr === "-" || fStr === "N/A" || fStr === "SIN FECHA")
     return 9999999999999;
@@ -734,7 +938,7 @@ window.crearCuentaNetflixAliasExterna = function () {
 };
 
 /* ==========================================================================
-   📥 MÓDULO DE CARGA MASIVA DE CUENTAS EN LOTE (PERSISTENTE EN EL TURNO)
+   📥 MÓDULO DE CARGA MASIVA DE CUENTAS EN LOTE
    ========================================================================== */
 
 try {
@@ -1173,7 +1377,7 @@ window.mostrarModalRepetidasCybernet = function (repetidasArray) {
 };
 
 /* ==========================================================================
-   🚫 MÓDULO DE SUSPENDIDAS (PINESMES) & NEYOP (GOOGLE APPS SCRIPT)
+   🚫 MÓDULO DE SUSPENDIDAS (PINESMES) & NEYOP
    ========================================================================== */
 
 window.memoriaSuspendidas = window.memoriaSuspendidas || [];
@@ -1291,30 +1495,14 @@ window.cargarSuspendidas = function (forzar = false) {
 window.estadoRadarSuspendidas = window.estadoRadarSuspendidas || {};
 window.radaresSuspendidas = window.radaresSuspendidas || {};
 
-window.copiarCorreoYBuscarVerificacion = function (btn, correo, filaIndex) {
+window.copiarCorreoYBuscarVerificacion = function (correo, filaIndex) {
   if (typeof haptic === "function") haptic();
-  const originalHTML = btn.innerHTML;
 
-  navigator.clipboard
-    .writeText(correo)
-    .then(() => {
-      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-      setTimeout(() => {
-        btn.innerHTML = originalHTML;
-      }, 1500);
-    })
-    .catch(() => {
-      const txt = document.createElement("textarea");
-      txt.value = correo;
-      document.body.appendChild(txt);
-      txt.select();
-      document.execCommand("copy");
-      txt.remove();
-      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-      setTimeout(() => {
-        btn.innerHTML = originalHTML;
-      }, 1500);
-    });
+  navigator.clipboard.writeText(correo).then(() => {
+    if (typeof triggerToast === "function") {
+      triggerToast("📋 Correo copiado.");
+    }
+  });
 
   window.iniciarRadarSuspendidas(correo, filaIndex);
 };
@@ -1546,7 +1734,7 @@ window.renderizarTablaSuspendidas = function () {
       let celdaVerificarContent = "";
 
       if (esRecarga1 && noTieneFecha) {
-        botonCopiaCorreo = `<button onclick="window.copiarCorreoYBuscarVerificacion(this, '${String(cuenta.correo).replace(/'/g, "\\'")}', '${cuenta.filaIndex}')" title="Copiar correo e iniciar verificación" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>`;
+        botonCopiaCorreo = `<button onclick="window.copiarCorreoYBuscarVerificacion('${String(cuenta.correo).replace(/'/g, "\\'")}', '${cuenta.filaIndex}')" title="Copiar correo e iniciar verificación" style="background: transparent; border: none; color: #71717a; cursor: pointer; padding: 2px 4px; display: inline-flex; align-items: center;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#71717a'"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>`;
 
         if (estadoRadar && estadoRadar.status === "encontrado") {
           celdaVerificarContent = `<a id="btnVerificar_${cuenta.filaIndex}" href="${estadoRadar.link}" target="_blank" class="btn-ios btn-success" style="display: inline-flex; padding: 6px 14px; font-size: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 800; align-items: center; justify-content: center; gap: 6px; margin: 0 auto; border-color: transparent;" onclick="document.getElementById('btnActivar_${cuenta.filaIndex}').style.display='flex';">✉️ Verificar</a>`;
@@ -1622,9 +1810,9 @@ window.cambiarVistaModalDb = function (vista) {
 };
 
 window.cargarNeyop = function (forzar = false) {
-  const container = document.getElementById("contenedorTablaSuspendidas");
+  const contenedor = document.getElementById("contenedorTablaSuspendidas");
   const iconRefrescar = document.getElementById("iconRefrescarSuspendidas");
-  if (!container) return;
+  if (!contenedor) return;
 
   if (forzar && iconRefrescar) {
     iconRefrescar.classList.add("spin-anim");
@@ -1632,7 +1820,7 @@ window.cargarNeyop = function (forzar = false) {
     !forzar &&
     (!window.memoriaNeyop || window.memoriaNeyop.length === 0)
   ) {
-    container.innerHTML = `
+    contenedor.innerHTML = `
       <div style="padding: 60px; text-align: center; color: #ff9f0a;">
         <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg>
         <h3 style="margin-top: 15px; font-size: 1rem;">Conectando a NEYOP en Google Sheets...</h3>
@@ -1655,7 +1843,7 @@ window.cargarNeyop = function (forzar = false) {
         triggerToast("✅ NEYOP actualizado desde Sheets.");
     } else {
       if (window.vistaModalDb === "NEYOP") {
-        container.innerHTML = `<div style="color:#ff453a; text-align:center; padding:40px; font-weight:bold;">❌ Error de conexión: ${res ? res.message : "Desconocido"}</div>`;
+        contenedor.innerHTML = `<div style="color:#ff453a; text-align:center; padding:40px; font-weight:bold;">❌ Error de conexión: ${res ? res.message : "Desconocido"}</div>`;
       }
     }
   };
