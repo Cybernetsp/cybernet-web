@@ -169,7 +169,7 @@ window.renderizarListaDistribuidores = function (lista) {
   }
 
   if (filtrados.length === 0) {
-    contenedor.innerHTML = `<div style="text-align:center; padding:35px; color:#a1a1aa;">No se encontraron distribuidores.</div>`;
+    contenedor.innerHTML = `<div style="text-align:center; padding:35px; color:#a1a1aa; font-size:0.85rem;">No se encontraron distribuidores.</div>`;
     return;
   }
 
@@ -181,15 +181,15 @@ window.renderizarListaDistribuidores = function (lista) {
 
     let subCorreoHTML = tieneCorreo
       ? `<span style="font-size:0.75rem; color:#0a84ff; font-family:monospace; font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; display:block;">✉️ ${d.correo}</span>`
-      : `<span style="font-size:0.72rem; color:#ff9f0a; font-weight:600; display:block;">⚠️ Sin correo asignado</span>`;
+      : `<span style="font-size:0.72rem; color:#ff9f0a; font-weight:700; display:block;">⚠️ Sin correo asignado</span>`;
 
     let botonAccion = tieneCorreo
-      ? `<button onclick="window.copiarAccesoPortalDistri('${(d.nombre || "").replace(/'/g, "\\'")}', '${(d.correo || "").replace(/'/g, "\\\'")}')" class="btn-ios" style="padding:6px 10px; font-size:0.72rem; border-radius:8px; background:rgba(10,132,255,0.15); color:#0a84ff; border:1px solid rgba(10,132,255,0.3); font-weight:700; display:flex; align-items:center; gap:4px; flex-shrink:0; cursor:pointer;" title="Copiar accesos al portal">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+      ? `<button onclick="window.copiarAccesoPortalDistri('${(d.nombre || "").replace(/'/g, "\\'")}', '${(d.correo || "").replace(/'/g, "\\\'")}')" class="btn-ios" style="padding:6px 12px; font-size:0.75rem; border-radius:10px; background:rgba(10,132,255,0.15); color:#0a84ff; border:1px solid rgba(10,132,255,0.3); font-weight:700; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Copiar accesos al portal">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           Copiar Acceso
          </button>`
-      : `<button onclick="window.abrirModalRegistrarCorreo('${d.id}', '${d.telefono}', '${(d.nombre || "").replace(/'/g, "\\\'")}')" class="btn-ios" style="padding:6px 10px; font-size:0.72rem; border-radius:8px; background:rgba(255,159,10,0.15); color:#ff9f0a; border:1px solid rgba(255,159,10,0.3); font-weight:700; display:flex; align-items:center; gap:4px; flex-shrink:0; cursor:pointer;" title="Registrar correo para acceso B2B">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      : `<button onclick="window.abrirModalRegistrarCorreo('${d.id}', '${d.telefono}', '${(d.nombre || "").replace(/'/g, "\\\'")}')" class="btn-ios" style="padding:6px 12px; font-size:0.75rem; border-radius:10px; background:rgba(255,159,10,0.15); color:#ff9f0a; border:1px solid rgba(255,159,10,0.3); font-weight:700; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Registrar correo para acceso B2B">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
           + Registrar
          </button>`;
 
@@ -199,22 +199,31 @@ window.renderizarListaDistribuidores = function (lista) {
         : "$" + d.saldo;
 
     html += `
-      <div class="card-ios" style="padding: 12px 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1;">
-          <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(10, 132, 255, 0.15); color: #0a84ff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; flex-shrink: 0; border: 1px solid rgba(10, 132, 255, 0.25);">
-            ${inicial}
+      <div class="card-ios" style="padding: 14px 16px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 18px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;">
+        <!-- Fila Superior: Avatar + Nombre/Teléfono + Saldo -->
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; text-align: left;">
+            <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(10, 132, 255, 0.15); color: #0a84ff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; flex-shrink: 0; border: 1px solid rgba(10, 132, 255, 0.25);">
+              ${inicial}
+            </div>
+            <div style="display: flex; flex-direction: column; overflow: hidden;">
+              <span style="font-weight: 800; color: #ffffff; font-size: 0.95rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${d.nombre}</span>
+              <span style="font-size: 0.75rem; color: #a1a1aa; font-family: monospace;">📲 ${d.telefono}</span>
+            </div>
           </div>
-          <div style="display: flex; flex-direction: column; text-align: left; overflow: hidden;">
-            <span style="font-weight: 800; color: #ffffff; font-size: 0.9rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${d.nombre}</span>
-            <span style="font-size: 0.75rem; color: #a1a1aa; font-family: monospace;">📲 ${d.telefono}</span>
-            ${subCorreoHTML}
-          </div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-          <span style="font-family: monospace; font-weight: 800; color: #30d158; background: rgba(48, 209, 88, 0.12); border: 1px solid rgba(48, 209, 88, 0.25); padding: 6px 10px; border-radius: 20px; font-size: 0.85rem;">
+          <span style="font-family: monospace; font-weight: 800; color: #30d158; background: rgba(48, 209, 88, 0.12); border: 1px solid rgba(48, 209, 88, 0.25); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; flex-shrink: 0;">
             ${saldoFmt}
           </span>
-          ${botonAccion}
+        </div>
+
+        <!-- Fila Inferior: Correo / Estado + Botón de Acción -->
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; width: 100%;">
+          <div style="overflow: hidden; flex: 1; text-align: left;">
+            ${subCorreoHTML}
+          </div>
+          <div>
+            ${botonAccion}
+          </div>
         </div>
       </div>
     `;
