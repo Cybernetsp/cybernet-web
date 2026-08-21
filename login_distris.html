@@ -4,63 +4,77 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>Cybernet - Login Mayoristas</title>
 
     <meta name="theme-color" content="#000000" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
     <link rel="stylesheet" href="distribuidores.css" />
+
+    <style>
+      body {
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        box-sizing: border-box;
+      }
+      .login-container {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+      }
+      .login-modal {
+        max-width: 400px;
+        width: 92%;
+        padding: 28px 20px;
+        text-align: center;
+        box-sizing: border-box;
+      }
+      @media (max-width: 360px) {
+        .login-modal {
+          padding: 20px 14px;
+        }
+      }
+    </style>
   </head>
   <body>
     <!-- NOTIFICACIONES TOAST ESTILO APPLE -->
     <div id="appleToast"></div>
 
     <!-- CONTENEDOR PRINCIPAL DE LOGIN -->
-    <div
-      style="
-        display: flex;
-        width: 100%;
-        min-height: 100vh;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        box-sizing: border-box;
-      "
-    >
-      <div
-        class="modal-ios"
-        style="
-          max-width: 400px;
-          width: 100%;
-          padding: 36px 24px;
-          text-align: center;
-        "
-      >
+    <div class="login-container">
+      <div class="modal-ios login-modal">
         <!-- ICONO Y ENCABEZADO -->
         <div
           style="
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
           "
         >
           <div
             style="
               background: rgba(10, 132, 255, 0.15);
               color: var(--ios-blue);
-              padding: 16px;
+              padding: 14px;
               border-radius: 50%;
               display: flex;
               align-items: center;
               justify-content: center;
-              margin-bottom: 16px;
+              margin-bottom: 12px;
               border: 1px solid rgba(10, 132, 255, 0.25);
             "
           >
             <svg
-              width="32"
-              height="32"
+              width="28"
+              height="28"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -75,7 +89,7 @@
           <h2
             style="
               color: var(--text-primary);
-              font-size: 1.6rem;
+              font-size: 1.45rem;
               font-weight: 800;
               letter-spacing: -0.5px;
               margin: 0 0 6px 0;
@@ -86,9 +100,9 @@
           <p
             id="lblSubtituloForm"
             style="
-              font-size: 0.88rem;
+              font-size: 0.85rem;
               margin: 0;
-              line-height: 1.4;
+              line-height: 1.35;
               color: var(--text-secondary);
             "
           >
@@ -100,7 +114,7 @@
         <form
           id="formLoginDistri"
           onsubmit="loginDistribuidor(event)"
-          style="display: flex; flex-direction: column; gap: 14px"
+          style="display: flex; flex-direction: column; gap: 12px"
         >
           <input
             type="text"
@@ -108,8 +122,11 @@
             class="input-ios"
             placeholder="Correo o Celular registrado"
             required
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
             style="
-              padding: 15px;
+              padding: 13px 14px;
               text-align: center;
               font-weight: 700;
               font-size: 0.95rem;
@@ -122,8 +139,10 @@
             class="input-ios"
             placeholder="Contraseña"
             required
+            autocomplete="current-password"
+            autocapitalize="none"
             style="
-              padding: 15px;
+              padding: 13px 14px;
               text-align: center;
               font-weight: 700;
               font-size: 0.95rem;
@@ -135,11 +154,11 @@
             id="btnLoginSubmit"
             class="btn-ios btn-primary w-100"
             style="
-              padding: 15px;
-              font-size: 1rem;
+              padding: 13px;
+              font-size: 0.95rem;
               font-weight: 800;
               border-radius: 14px;
-              margin-top: 6px;
+              margin-top: 4px;
             "
           >
             Iniciar Sesión →
@@ -150,18 +169,19 @@
         <form
           id="formCambioClaveObligatorio"
           onsubmit="guardarNuevaPassword(event)"
-          style="display: none; flex-direction: column; gap: 14px"
+          style="display: none; flex-direction: column; gap: 12px"
         >
           <div
             style="
               background: rgba(255, 159, 10, 0.12);
               border: 1px solid rgba(255, 159, 10, 0.3);
               border-radius: 14px;
-              padding: 12px;
-              font-size: 0.82rem;
+              padding: 10px 12px;
+              font-size: 0.8rem;
               color: var(--ios-orange);
               font-weight: 700;
-              line-height: 1.4;
+              line-height: 1.35;
+              text-align: left;
             "
           >
             ⚠️ Detectamos que usas la contraseña genérica (123456). Por tu
@@ -176,8 +196,10 @@
             placeholder="Nueva Contraseña"
             required
             minlength="4"
+            autocomplete="new-password"
+            autocapitalize="none"
             style="
-              padding: 15px;
+              padding: 13px 14px;
               text-align: center;
               font-weight: 700;
               font-size: 0.95rem;
@@ -191,8 +213,10 @@
             placeholder="Confirmar Nueva Contraseña"
             required
             minlength="4"
+            autocomplete="new-password"
+            autocapitalize="none"
             style="
-              padding: 15px;
+              padding: 13px 14px;
               text-align: center;
               font-weight: 700;
               font-size: 0.95rem;
@@ -204,11 +228,11 @@
             id="btnCambiarClaveSubmit"
             class="btn-ios btn-success w-100"
             style="
-              padding: 15px;
-              font-size: 1rem;
+              padding: 13px;
+              font-size: 0.95rem;
               font-weight: 800;
               border-radius: 14px;
-              margin-top: 6px;
+              margin-top: 4px;
             "
           >
             🔒 Actualizar Clave e Ingresar
@@ -226,11 +250,9 @@
         const toast = document.getElementById("appleToast");
         if (!toast) return;
         toast.innerHTML = msgHTML;
-        toast.style.transform = "translateX(-50%) translateY(0)";
-        toast.style.opacity = "1";
+        toast.classList.add("show");
         setTimeout(() => {
-          toast.style.transform = "translateX(-50%) translateY(100px)";
-          toast.style.opacity = "0";
+          toast.classList.remove("show");
         }, 3000);
       }
 
