@@ -21,8 +21,223 @@
 
     <style>
       /* =========================================
-         SISTEMA DE VARIABLES: MODO CLARO Y OSCURO
+         RESET GLOBAL DE BOTONES E INSUMOS TÁCTILES
          ========================================= */
+      button {
+        appearance: none;
+        -webkit-appearance: none;
+        background: none;
+        border: none;
+        outline: none;
+        font-family: inherit;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* =========================================
+         ESTILOS DEL CHATBOT CON BOTONES (QUICK REPLIES)
+         ========================================= */
+      .chat-fab-btn {
+        position: fixed;
+        bottom: calc(env(safe-area-inset-bottom, 20px) + 15px);
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--ai-gradient);
+        color: white;
+        border: none;
+        box-shadow: 0 8px 20px rgba(10, 132, 255, 0.4);
+        cursor: pointer;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-spring);
+      }
+      .chat-fab-btn:active {
+        transform: scale(0.9);
+      }
+      .chat-fab-btn:hover {
+        box-shadow: 0 10px 25px rgba(10, 132, 255, 0.5);
+      }
+
+      .chat-tooltip-ios {
+        position: fixed;
+        bottom: calc(env(safe-area-inset-bottom, 20px) + 80px);
+        right: 20px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: var(--glass-border);
+        padding: 10px 14px;
+        border-radius: 18px;
+        border-bottom-right-radius: 4px;
+        box-shadow: var(--glass-shadow);
+        color: var(--text-primary);
+        font-size: 0.82rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 9998;
+        max-width: calc(100vw - 40px);
+        animation:
+          floatTooltip 3s ease-in-out infinite,
+          appleFadeIn 0.5s ease-out;
+        transition:
+          opacity 0.3s,
+          visibility 0.3s;
+      }
+      .chat-tooltip-ios .close-tooltip {
+        background: rgba(118, 118, 128, 0.2);
+        border: none;
+        color: var(--text-secondary);
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+      }
+      .chat-tooltip-ios .close-tooltip:active {
+        transform: scale(0.9);
+        background: rgba(118, 118, 128, 0.4);
+      }
+      @keyframes floatTooltip {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+
+      .chat-window-ios {
+        position: fixed;
+        bottom: calc(env(safe-area-inset-bottom, 20px) + 15px);
+        right: 20px;
+        width: 360px;
+        max-width: calc(100vw - 30px);
+        height: 520px;
+        max-height: 80vh;
+        background: var(--modal-bg);
+        backdrop-filter: blur(40px) saturate(200%);
+        -webkit-backdrop-filter: blur(40px) saturate(200%);
+        border: var(--glass-border);
+        border-radius: 26px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.95) translateY(20px);
+        transform-origin: bottom right;
+        transition: var(--transition-spring);
+      }
+      @media (max-width: 480px) {
+        .chat-window-ios {
+          left: 15px;
+          right: 15px;
+          width: calc(100vw - 30px);
+          margin: 0 auto;
+        }
+      }
+      .chat-window-ios.open {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1) translateY(0);
+      }
+
+      .chat-header {
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      [data-theme="light"] .chat-header {
+        background: rgba(0, 0, 0, 0.02);
+        border-bottom-color: rgba(0, 0, 0, 0.08);
+      }
+
+      .chat-body {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .chat-bubble {
+        max-width: 88%;
+        padding: 11px 15px;
+        border-radius: 18px;
+        font-size: 0.88rem;
+        line-height: 1.4;
+        animation: appleFadeIn 0.3s ease;
+      }
+      .chat-bubble.bot {
+        align-self: flex-start;
+        background: var(--input-bg);
+        color: var(--text-primary);
+        border-bottom-left-radius: 4px;
+      }
+      .chat-bubble.user {
+        align-self: flex-end;
+        background: var(--ios-blue);
+        color: white;
+        border-bottom-right-radius: 4px;
+      }
+
+      .chat-options {
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.02);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: opacity 0.3s ease;
+      }
+      [data-theme="light"] .chat-options {
+        background: rgba(0, 0, 0, 0.01);
+        border-top-color: rgba(0, 0, 0, 0.08);
+      }
+
+      .chat-option-btn {
+        background: rgba(10, 132, 255, 0.12);
+        color: var(--ios-blue);
+        border: 1px solid rgba(10, 132, 255, 0.25);
+        padding: 11px 14px;
+        border-radius: 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-spring);
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+      }
+      .chat-option-btn:hover {
+        background: rgba(10, 132, 255, 0.18);
+      }
+      .chat-option-btn:active {
+        transform: scale(0.98);
+        background: rgba(10, 132, 255, 0.25);
+      }
+
+      /* =========================================
+       SISTEMA DE VARIABLES: MODO CLARO Y OSCURO (APPLE ECOSYSTEM)
+       ========================================= */
       :root {
         --ios-blue: #0a84ff;
         --ios-green: #30d158;
@@ -108,18 +323,6 @@
 
         --scrollbar-thumb: rgba(0, 0, 0, 0.2);
         --toast-bg: rgba(255, 255, 255, 0.9);
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family:
-          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        -webkit-tap-highlight-color: transparent;
       }
 
       body {
@@ -354,7 +557,6 @@
         justify-content: center;
         gap: 8px;
         transition: var(--transition-spring);
-        -webkit-tap-highlight-color: transparent;
       }
 
       button.btn-general {
@@ -409,7 +611,6 @@
         margin-top: 8px;
         border-radius: 30px;
         padding: 10px 14px;
-        -webkit-tap-highlight-color: transparent;
       }
       .btn-status:active {
         transform: scale(0.97);
@@ -441,7 +642,7 @@
         }
       }
 
-      /* MODAL DESPLEGABLE INFERIOR (CIERRE SOLO POR BOTÓN) */
+      /* MODAL DESPLEGABLE INFERIOR (CIERRE ÚNICAMENTE POR BOTÓN DE CERRAR) */
       .modal-overlay {
         display: none;
         position: fixed;
@@ -1125,7 +1326,7 @@
       </div>
     </div>
 
-    <!-- MODAL DE SERVICIOS (CIERRE ÚNICAMENTE POR BOTÓN FIJO) -->
+    <!-- MODAL DE SERVICIOS (CIERRE ÚNICAMENTE AL PRESIONAR EL BOTÓN) -->
     <div id="modalServices" class="modal-overlay">
       <div class="modal-content" id="modalContentInner">
         <h3
@@ -1367,7 +1568,6 @@
 
     <!-- LÓGICA JAVASCRIPT -->
     <script>
-      // 🔗 URL OFICIAL APUNTANDO A TU SERVIDOR MYSQL
       const MYSQL_BOT_URL = "https://api.cybernetsp.com/api_bot.php";
       let globalData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
 
@@ -1412,7 +1612,7 @@
         if (localStorage.getItem("cyber_email"))
           emailInput.value = localStorage.getItem("cyber_email");
 
-        phoneInput.addEventListener("input", function (e) {
+        phoneInput.addEventListener("input", function () {
           let val = this.value.replace(/\D/g, "");
           if (val.length > 3 && val.length <= 6) {
             val = val.slice(0, 3) + " " + val.slice(3);
@@ -1578,7 +1778,7 @@
         const instCorreo = document.getElementById("instruction-correo");
         if (window.isDistri) {
           instCorreo.innerHTML =
-            "Ingresa el <b>correo</b> de la cuenta <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' style='vertical-align:middle;'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'></path><polyline points='22,6 12,13 2,6'></polyline></svg><br><span style='display:block; margin-top:5px; font-size:0.8rem; color:var(--ios-green); font-weight:700;'>Acceso Distribuidor VIP Activado</span>";
+            "Ingresa el <b>correo</b> de la cuenta <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' style='vertical-align:middle;'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'></path><polyline points='22,6 12,13 2,6'></polyline></svg><br><span style='display:block; margin-top:5px; font-size:0.8rem; color:var(--ios-green); font-weight:700;'>🔓 Acceso Distribuidor VIP Activado</span>";
         } else {
           instCorreo.innerHTML =
             "Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com o @outlook) <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' style='vertical-align:middle;'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'></path><polyline points='22,6 12,13 2,6'></polyline></svg>";
@@ -1806,13 +2006,13 @@
           let botReply = "";
           if (question === "¿Cómo funciona la página?") {
             botReply =
-              "¡Es muy fácil y rápido! Sigue estos 4 pasos:\n\n1. **Tu celular:** Ingresa el número con el que hiciste la compra y dale a 'Continuar'.\n2. **Elige:** Selecciona si tu pantalla es de Netflix o Disney.\n3. **Elige el código:** Toca el tipo de código que te está pidiendo tu TV (Inicio de sesión, Estoy de Viaje o Enlace).\n4. **Tu correo:** Escribe el correo de tu cuenta y dale a 'Rastrear'.\n\n¡Y listo! El sistema te mostrará tu código en pantalla al instante.";
+              "¡Es muy fácil y rápido! Sigue estos 4 pasos:\n\n1️⃣ **Tu celular:** Ingresa el número con el que hiciste la compra y dale a 'Continuar'.\n2️⃣ **Elige:** Selecciona si tu pantalla es de Netflix o Disney.\n3️⃣ **Elige el código:** Toca el tipo de código que te está pidiendo tu TV (Inicio de sesión, Estoy de Viaje o Enlace).\n4️⃣ **Tu correo:** Escribe el correo de tu cuenta y dale a 'Rastrear'.\n\n✨ ¡Y listo! El sistema te mostrará tu código en pantalla al instante.";
           } else if (question === "Mi código dice incorrecto o expirado") {
             botReply =
-              "¡No te preocupes, es normal!\n\nPor seguridad, los códigos de Netflix cambian y **vencen cada 15 minutos**.\n\nSi tu TV dice que es incorrecto, significa que el tiempo se agotó. La solución es muy simple:\n\n👉 Cierra esta ventana, dale clic al botón **'Nueva Consulta'** y vuelve a buscar tu correo. El sistema te dará un código totalmente nuevo y fresco. ¡Inténtalo y escríbelo rápido en tu TV!";
+              "¡No te preocupes, es normal! 😎\n\nPor seguridad, los códigos de Netflix cambian y **vencen cada 15 minutos** ⏰.\n\nSi tu TV dice que es incorrecto, significa que el tiempo se agotó. La solución es muy simple:\n\n👉 Cierra esta ventana, dale clic al botón **'Nueva Consulta'** y vuelve a buscar tu correo. El sistema te dará un código totalmente nuevo y fresco. ¡Inténtalo y escríbelo rápido en tu TV!";
           } else if (question === "No encuentro mi cuenta") {
             botReply =
-              "Si el sistema te dice 'Sin Resultados', suele ser por un pequeño error de escritura.\n\nPor favor verifica esto:\n\n👉 Asegúrate de escribir el correo **exactamente igual** a como te lo entregamos.\n👉 Recuerda que debe terminar en **@cybernetsp.com** (sin espacios al final).\n\nSi estás seguro de que está bien escrito y aún no sale, ponte en contacto con nosotros para ayudarte de inmediato.";
+              "Si el sistema te dice 'Sin Resultados', suele ser por un pequeño error de escritura. 🧐\n\nPor favor verifica esto:\n\n👉 Asegúrate de escribir el correo **exactamente igual** a como te lo entregamos.\n👉 Recuerda que debe terminar en **@cybernetsp.com** (sin espacios al final).\n\nSi estás seguro de que está bien escrito y aún no sale, ponte en contacto con nosotros para ayudarte de inmediato.";
           }
 
           appendChatMessage(botReply, "bot");
