@@ -1106,9 +1106,29 @@ select.select-vigencia-store option {
   transform: scale(0.96);
 }
 
+/* ESTILOS DE LOS ÍCONOS EN LOS BANNERS INTERACTIVOS (CONTRASTE ALTO) */
 .quiz-banner-icon,
 .gift-banner-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.quiz-banner-icon svg,
+.gift-banner-icon svg {
+  stroke: #ffffff !important;
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 .quiz-banner-text h3,
