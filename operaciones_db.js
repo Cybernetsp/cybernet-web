@@ -360,7 +360,7 @@ window.copiarAccesoPortalDistri = function (nombre, correo) {
 
 Aquí tienes las credenciales para ingresar a tu panel de revendedor B2B:
 
-🌐 *PÁGINA DE INGRESO:* www.cybernetsp.com/login_distris.html
+🌐 *PÁGINA DE INGRESO:* www.cybernetsp.com/distribuidores
 📧 *Usuario / Correo:* ${correo}
 🔐 *Contraseña Inicial:* 123456
 
