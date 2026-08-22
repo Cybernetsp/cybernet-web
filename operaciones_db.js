@@ -7,27 +7,37 @@
    ========================================================================== */
 
 window.iniciarControlTiempoTrabajador = function () {
-  const trabajador =
+  const staffRaw =
     sessionStorage.getItem("active_staff") ||
     localStorage.getItem("cyber_saved_staff");
 
-  if (!trabajador || trabajador === "Desconocido") return;
+  if (!staffRaw || staffRaw === "Desconocido") return;
 
-  // 1. Verificar si existe inicio de turno guardado
-  let horaInicio = localStorage.getItem("cyber_turno_inicio_" + trabajador);
-  if (!horaInicio) {
+  // 1. Normalizar nombre para evitar llaves duplicadas en localStorage
+  const trabajador = staffRaw.trim().toUpperCase();
+
+  const keyInicio = "cyber_turno_inicio_" + trabajador;
+  const keyFecha = "cyber_turno_fecha_" + trabajador;
+  const hoyFechaStr = new Date().toDateString();
+
+  let horaInicio = localStorage.getItem(keyInicio);
+  let fechaGuardada = localStorage.getItem(keyFecha);
+
+  // 2. Si no existe marca de inicio o la fecha guardada es de otro día, se inicia turno de hoy
+  if (!horaInicio || fechaGuardada !== hoyFechaStr) {
     horaInicio = Date.now();
-    localStorage.setItem("cyber_turno_inicio_" + trabajador, horaInicio);
+    localStorage.setItem(keyInicio, horaInicio);
+    localStorage.setItem(keyFecha, hoyFechaStr);
   } else {
-    horaInicio = parseInt(horaInicio);
+    horaInicio = parseInt(horaInicio, 10);
   }
 
-  // 2. Función de cálculo exacto por estampa de tiempo
+  // 3. Función de cálculo exacto por estampa de tiempo
   function obtenerSegundosReales() {
     return Math.floor((Date.now() - horaInicio) / 1000);
   }
 
-  // 3. Sincronización continua cada 60 segundos a MySQL
+  // 4. Sincronización continua cada 60 segundos a MySQL
   clearInterval(window.intervaloTurnoTrabajador);
   window.intervaloTurnoTrabajador = setInterval(() => {
     window.sincronizarTiempoTrabajadorMySQL(
@@ -50,7 +60,7 @@ window.sincronizarTiempoTrabajadorMySQL = function (
   segundosTotales,
   esCierreFinal,
 ) {
-  if (!trabajador) return;
+  if (!trabajador || segundosTotales <= 0) return;
 
   const formData = new FormData();
   formData.append("accion", "guardar_tiempo_trabajador");
@@ -58,13 +68,13 @@ window.sincronizarTiempoTrabajadorMySQL = function (
   formData.append("segundos", segundosTotales);
   formData.append("es_cierre", esCierreFinal ? "1" : "0");
 
+  const urlAPI = "https://api.cybernetsp.com/acciones_mysql.php";
+
+  // Si la pestaña se está cerrando, usar sendBeacon para garantizar el envío del último segundo
   if (esCierreFinal && navigator.sendBeacon) {
-    navigator.sendBeacon(
-      "https://api.cybernetsp.com/acciones_mysql.php",
-      formData,
-    );
+    navigator.sendBeacon(urlAPI, formData);
   } else {
-    fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    fetch(urlAPI, {
       method: "POST",
       body: formData,
       keepalive: true,
@@ -72,32 +82,44 @@ window.sincronizarTiempoTrabajadorMySQL = function (
   }
 };
 
-window.addEventListener("beforeunload", function () {
-  const trabajador =
+// 🔒 RECEPTOR DE CIERRE DE PESTAÑA / NAVEGADOR ('X')
+const guardarTiempoFinalAlCerrar = function () {
+  const staffRaw =
     sessionStorage.getItem("active_staff") ||
     localStorage.getItem("cyber_saved_staff");
-  if (trabajador) {
+  if (staffRaw) {
+    const trabajador = staffRaw.trim().toUpperCase();
     const horaInicio = localStorage.getItem("cyber_turno_inicio_" + trabajador);
     if (horaInicio) {
-      const segundos = Math.floor((Date.now() - parseInt(horaInicio)) / 1000);
+      const segundos = Math.floor(
+        (Date.now() - parseInt(horaInicio, 10)) / 1000,
+      );
       window.sincronizarTiempoTrabajadorMySQL(trabajador, segundos, true);
     }
   }
-});
+};
 
+window.addEventListener("beforeunload", guardarTiempoFinalAlCerrar);
+window.addEventListener("pagehide", guardarTiempoFinalAlCerrar);
+
+// 🚪 CERRAR SESIÓN MANUAL DE TRABAJADOR
 window.cerrarSesionTrabajadorDefinitiva = function () {
   if (typeof haptic === "function") haptic();
-  const trabajador =
+  const staffRaw =
     sessionStorage.getItem("active_staff") ||
     localStorage.getItem("cyber_saved_staff");
 
-  if (trabajador) {
+  if (staffRaw) {
+    const trabajador = staffRaw.trim().toUpperCase();
     const horaInicio = localStorage.getItem("cyber_turno_inicio_" + trabajador);
     if (horaInicio) {
-      const segundos = Math.floor((Date.now() - parseInt(horaInicio)) / 1000);
+      const segundos = Math.floor(
+        (Date.now() - parseInt(horaInicio, 10)) / 1000,
+      );
       window.sincronizarTiempoTrabajadorMySQL(trabajador, segundos, true);
     }
     localStorage.removeItem("cyber_turno_inicio_" + trabajador);
+    localStorage.removeItem("cyber_turno_fecha_" + trabajador);
   }
 
   sessionStorage.removeItem("active_staff");
@@ -200,7 +222,6 @@ window.renderizarListaDistribuidores = function (lista) {
 
     html += `
       <div class="card-ios" style="padding: 14px 16px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 18px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;">
-        <!-- Fila Superior: Avatar + Nombre/Teléfono + Saldo -->
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;">
           <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; text-align: left;">
             <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(10, 132, 255, 0.15); color: #0a84ff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; flex-shrink: 0; border: 1px solid rgba(10, 132, 255, 0.25);">
@@ -216,7 +237,6 @@ window.renderizarListaDistribuidores = function (lista) {
           </span>
         </div>
 
-        <!-- Fila Inferior: Correo / Estado + Botón de Acción -->
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; width: 100%;">
           <div style="overflow: hidden; flex: 1; text-align: left;">
             ${subCorreoHTML}
