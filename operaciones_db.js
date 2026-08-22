@@ -13,8 +13,17 @@ window.iniciarControlTiempoTrabajador = function () {
 
   if (!staffRaw || staffRaw === "Desconocido") return;
 
-  // 1. Normalizar nombre para evitar llaves duplicadas en localStorage
   const trabajador = staffRaw.trim().toUpperCase();
+
+  // 🛑 FILTRO DE EXCLUSIÓN: No medir tiempo si es CAMILO o Superadmin
+  const usuarioActivoObj = JSON.parse(
+    sessionStorage.getItem("usuario_activo") || "null",
+  );
+  const rol = usuarioActivoObj ? usuarioActivoObj.rol : null;
+
+  if (trabajador === "CAMILO" || rol === "superadmin") {
+    return; // Cancela el cronómetro para el administrador
+  }
 
   const keyInicio = "cyber_turno_inicio_" + trabajador;
   const keyFecha = "cyber_turno_fecha_" + trabajador;
@@ -23,7 +32,7 @@ window.iniciarControlTiempoTrabajador = function () {
   let horaInicio = localStorage.getItem(keyInicio);
   let fechaGuardada = localStorage.getItem(keyFecha);
 
-  // 2. Si no existe marca de inicio o la fecha guardada es de otro día, se inicia turno de hoy
+  // Si no existe marca de inicio o la fecha guardada es de otro día, se inicia turno de hoy
   if (!horaInicio || fechaGuardada !== hoyFechaStr) {
     horaInicio = Date.now();
     localStorage.setItem(keyInicio, horaInicio);
@@ -32,12 +41,11 @@ window.iniciarControlTiempoTrabajador = function () {
     horaInicio = parseInt(horaInicio, 10);
   }
 
-  // 3. Función de cálculo exacto por estampa de tiempo
   function obtenerSegundosReales() {
     return Math.floor((Date.now() - horaInicio) / 1000);
   }
 
-  // 4. Sincronización continua cada 60 segundos a MySQL
+  // Sincronización continua cada 60 segundos a MySQL
   clearInterval(window.intervaloTurnoTrabajador);
   window.intervaloTurnoTrabajador = setInterval(() => {
     window.sincronizarTiempoTrabajadorMySQL(
@@ -62,6 +70,16 @@ window.sincronizarTiempoTrabajadorMySQL = function (
 ) {
   if (!trabajador || segundosTotales <= 0) return;
 
+  // 🛑 Protección adicional frente a envíos manuales
+  const usuarioActivoObj = JSON.parse(
+    sessionStorage.getItem("usuario_activo") || "null",
+  );
+  const rol = usuarioActivoObj ? usuarioActivoObj.rol : null;
+
+  if (trabajador.trim().toUpperCase() === "CAMILO" || rol === "superadmin") {
+    return;
+  }
+
   const formData = new FormData();
   formData.append("accion", "guardar_tiempo_trabajador");
   formData.append("trabajador", trabajador);
@@ -70,7 +88,6 @@ window.sincronizarTiempoTrabajadorMySQL = function (
 
   const urlAPI = "https://api.cybernetsp.com/acciones_mysql.php";
 
-  // Si la pestaña se está cerrando, usar sendBeacon para garantizar el envío del último segundo
   if (esCierreFinal && navigator.sendBeacon) {
     navigator.sendBeacon(urlAPI, formData);
   } else {
@@ -89,6 +106,13 @@ const guardarTiempoFinalAlCerrar = function () {
     localStorage.getItem("cyber_saved_staff");
   if (staffRaw) {
     const trabajador = staffRaw.trim().toUpperCase();
+    const usuarioActivoObj = JSON.parse(
+      sessionStorage.getItem("usuario_activo") || "null",
+    );
+    const rol = usuarioActivoObj ? usuarioActivoObj.rol : null;
+
+    if (trabajador === "CAMILO" || rol === "superadmin") return;
+
     const horaInicio = localStorage.getItem("cyber_turno_inicio_" + trabajador);
     if (horaInicio) {
       const segundos = Math.floor(
@@ -111,15 +135,24 @@ window.cerrarSesionTrabajadorDefinitiva = function () {
 
   if (staffRaw) {
     const trabajador = staffRaw.trim().toUpperCase();
-    const horaInicio = localStorage.getItem("cyber_turno_inicio_" + trabajador);
-    if (horaInicio) {
-      const segundos = Math.floor(
-        (Date.now() - parseInt(horaInicio, 10)) / 1000,
+    const usuarioActivoObj = JSON.parse(
+      sessionStorage.getItem("usuario_activo") || "null",
+    );
+    const rol = usuarioActivoObj ? usuarioActivoObj.rol : null;
+
+    if (trabajador !== "CAMILO" && rol !== "superadmin") {
+      const horaInicio = localStorage.getItem(
+        "cyber_turno_inicio_" + trabajador,
       );
-      window.sincronizarTiempoTrabajadorMySQL(trabajador, segundos, true);
+      if (horaInicio) {
+        const segundos = Math.floor(
+          (Date.now() - parseInt(horaInicio, 10)) / 1000,
+        );
+        window.sincronizarTiempoTrabajadorMySQL(trabajador, segundos, true);
+      }
+      localStorage.removeItem("cyber_turno_inicio_" + trabajador);
+      localStorage.removeItem("cyber_turno_fecha_" + trabajador);
     }
-    localStorage.removeItem("cyber_turno_inicio_" + trabajador);
-    localStorage.removeItem("cyber_turno_fecha_" + trabajador);
   }
 
   sessionStorage.removeItem("active_staff");
