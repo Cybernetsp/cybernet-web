@@ -396,10 +396,6 @@
         max-width: 90vw;
         text-align: center;
       }
-      [data-theme="light"] .apple-notification-toast {
-        background: rgba(255, 255, 255, 0.92);
-        color: #000000;
-      }
       .apple-notification-toast.show {
         transform: translateX(-50%) translateY(0);
         opacity: 1;
@@ -711,7 +707,22 @@
         }
       }
 
-      // FUNCIÓN ROBUSTA DE PETICIÓN A API (CON RESPETO A CORS / FALLBACK LOCAL)
+      // LIMPIADOR AUTOMÁTICO DE JSON QUE ELIMINA WARNINGS O HTML EXTRA DE PHP
+      function parseCleanJSON(rawText) {
+        if (!rawText) return null;
+        try {
+          return JSON.parse(rawText);
+        } catch (e) {
+          const start = rawText.indexOf("{");
+          const end = rawText.lastIndexOf("}");
+          if (start !== -1 && end !== -1 && end > start) {
+            return JSON.parse(rawText.substring(start, end + 1));
+          }
+          throw e;
+        }
+      }
+
+      // FUNCIÓN DE PETICIÓN CON FALLBACK DE RUTA RELATIVA
       async function postRequestWithFallback(
         primaryUrl,
         fallbackUrl,
@@ -727,7 +738,7 @@
           return await response.text();
         } catch (error) {
           console.warn(
-            "Llamada primaria falló, ejecutando fallback local...",
+            "Llamada primaria falló, probando ruta relativa local...",
             error,
           );
           const fallbackResponse = await fetch(fallbackUrl, {
@@ -774,9 +785,10 @@
 
           let res;
           try {
-            res = JSON.parse(text);
+            res = parseCleanJSON(text);
           } catch (err) {
-            triggerToast("❌ Respuesta no válida del servidor.");
+            console.error("Respuesta original del servidor:", text);
+            triggerToast("❌ Error al procesar datos del servidor.");
             return;
           }
 
@@ -859,9 +871,9 @@
 
           let res;
           try {
-            res = JSON.parse(text);
+            res = parseCleanJSON(text);
           } catch (err) {
-            triggerToast("❌ Error de respuesta del servidor.");
+            triggerToast("❌ Error al procesar respuesta del servidor.");
             return;
           }
 
@@ -938,11 +950,13 @@
             ),
           ]);
 
-          const dataTienda = JSON.parse(textTienda);
-          const dataDistri = JSON.parse(textDistri);
+          const dataTienda = parseCleanJSON(textTienda);
+          const dataDistri = parseCleanJSON(textDistri);
 
           if (
+            dataTienda &&
             dataTienda.status === "success" &&
+            dataDistri &&
             dataDistri.status === "success" &&
             Array.isArray(dataDistri.data)
           ) {
