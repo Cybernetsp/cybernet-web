@@ -1,6 +1,6 @@
-/* =========================================================================
-   CYBERNET OS - PORTAL MAYORISTAS / DISTRIBUIDORES (MYSQL BACKEND)
-   ========================================================================= */
+// =========================================================================
+// 🛒 CYBERNET OS - PORTAL MAYORISTAS / DISTRIBUIDORES (MYSQL BACKEND)
+// =========================================================================
 
 const API_MYSQL_URL = "https://api.cybernetsp.com/acciones_distribuidores.php";
 
@@ -133,6 +133,20 @@ function haptic() {
   if (navigator.vibrate) navigator.vibrate(15);
 }
 
+function parseCleanJSON(rawText) {
+  if (!rawText) return null;
+  try {
+    return JSON.parse(rawText);
+  } catch (e) {
+    const start = rawText.indexOf("{");
+    const end = rawText.lastIndexOf("}");
+    if (start !== -1 && end !== -1 && end > start) {
+      return JSON.parse(rawText.substring(start, end + 1));
+    }
+    throw e;
+  }
+}
+
 function formatMoneda(v) {
   if (!v) return "$0";
   if (typeof v === "string" && v.includes("$")) return v;
@@ -148,18 +162,16 @@ function triggerToast(msgHTML) {
   const toast = document.getElementById("appleToast");
   if (!toast) return;
   toast.innerHTML = msgHTML;
-  toast.style.transform = "translateX(-50%) translateY(0)";
-  toast.style.opacity = "1";
+  toast.classList.add("show");
   setTimeout(() => {
-    toast.style.transform = "translateX(-50%) translateY(100px)";
-    toast.style.opacity = "0";
+    toast.classList.remove("show");
   }, 3000);
 }
 
 function copiarTextoAlToque(elemento, texto) {
   if (!texto) return;
   navigator.clipboard.writeText(texto).then(() => {
-    triggerToast(`📋 Copiado al portapapeles`);
+    triggerToast(`Copiar al portapapeles`);
     elemento.style.opacity = "0.4";
     setTimeout(() => {
       elemento.style.opacity = "1";
@@ -228,8 +240,9 @@ function cargarPerfilDistribuidor() {
   formData.append("telefono", telDistri);
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
+    .then((res) => res.text())
+    .then((text) => {
+      const res = parseCleanJSON(text);
       if (res && res.status === "success" && res.data) {
         const d = res.data;
 
@@ -326,7 +339,7 @@ function inicializarOpcionesDeMes() {
     "Diciembre",
   ];
 
-  let htmlOptions = `<option value="todos">🌐 Todos los Meses</option>`;
+  let htmlOptions = `<option value="todos">Todos los Meses</option>`;
   const fechaActual = new Date();
 
   for (let i = 0; i < 6; i++) {
@@ -360,8 +373,9 @@ function cargarPreciosEnTienda() {
   formData.append("accion", "obtener_precios_distribuidor");
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
+    .then((res) => res.text())
+    .then((text) => {
+      const res = parseCleanJSON(text);
       if (res && res.status === "success" && res.data) {
         res.data.forEach((itemDb) => {
           let producto = catálogoProductos.find(
@@ -419,8 +433,9 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
   }
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
+    .then((res) => res.text())
+    .then((text) => {
+      const res = parseCleanJSON(text);
       if (res && res.status === "success") {
         let trs = "";
 
@@ -434,7 +449,7 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
                       <td style="padding: 12px 8px; font-size:0.75rem; color:var(--text-secondary); white-space:nowrap;">${mov.fecha}</td>
                       <td style="padding: 12px 8px; line-height:1.3;">
                         <strong style="color:var(--text-primary); font-size:0.85rem;">${mov.concepto}</strong><br>
-                        <span style="color:var(--ios-blue); font-size:0.75rem;">👤 ${mov.cliente}</span>
+                        <span style="color:var(--ios-blue); font-size:0.75rem;">Cliente: ${mov.cliente}</span>
                       </td>
                       <td style="padding: 12px 8px; text-align:right; color:${color}; font-weight:bold; font-family:monospace; white-space:nowrap;">${signo}${formatMoneda(mov.monto)}</td>
                     </tr>`;
@@ -471,11 +486,11 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
 
                 htmlRenov += `
                    <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,149,0,0.3); border-radius:16px; padding:12px 16px; min-width:200px; display:flex; flex-direction:column; gap:6px;">
-                      <div style="font-weight:800; color:var(--text-primary); font-size:0.9rem;">📺 ${c.plataforma.replace(/-/g, " ")}</div>
-                      <div style="font-size:0.8rem; color:var(--text-secondary);">👤 ${c.cliente}</div>
+                      <div style="font-weight:800; color:var(--text-primary); font-size:0.9rem;">${c.plataforma.replace(/-/g, " ")}</div>
+                      <div style="font-size:0.8rem; color:var(--text-secondary);">Cliente: ${c.cliente}</div>
                       <div style="font-size:0.8rem; color:${colorDias}; font-weight:700;">${txtDias}</div>
                       <button class="btn-ios" onclick="copiarMensajeRenovacion('${msgCobro}')" style="background:rgba(255,149,0,0.15); color:var(--ios-orange); border:none; padding:8px; border-radius:30px; font-size:0.75rem; font-weight:700; margin-top:4px;">
-                        📋 Copiar Mensaje
+                        Copiar Mensaje
                       </button>
                    </div>`;
               }
@@ -506,7 +521,7 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
 function copiarMensajeRenovacion(msgEnc) {
   haptic();
   navigator.clipboard.writeText(decodeURIComponent(msgEnc)).then(() => {
-    triggerToast("📋 Mensaje de cobro copiado.");
+    triggerToast("Mensaje de cobro copiado.");
   });
 }
 
@@ -566,8 +581,9 @@ function cargarStockEnTienda() {
   formData.append("accion", "obtener_stock_plataformas");
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
+    .then((res) => res.text())
+    .then((text) => {
+      const res = parseCleanJSON(text);
       if (res && res.status === "success" && res.stock) {
         catálogoProductos.forEach((p) => {
           const badge = document.getElementById(`stock-badge-${p.id}`);
@@ -579,7 +595,7 @@ function cargarStockEnTienda() {
             res.stock[p.id] !== undefined ? parseInt(res.stock[p.id]) : 0;
 
           if (disponibles > 0) {
-            badge.innerHTML = `🟢 ${disponibles} Libres`;
+            badge.innerHTML = `${disponibles} Libres`;
             badge.style.background = "rgba(48, 209, 88, 0.12)";
             badge.style.color = "var(--ios-green)";
             badge.style.borderColor = "rgba(48, 209, 88, 0.25)";
@@ -593,7 +609,7 @@ function cargarStockEnTienda() {
               btnAdd.style.cursor = "pointer";
             }
           } else {
-            badge.innerHTML = `🔴 Agotado`;
+            badge.innerHTML = `Agotado`;
             badge.style.background = "rgba(255, 69, 58, 0.12)";
             badge.style.color = "var(--ios-red)";
             badge.style.borderColor = "rgba(255, 69, 58, 0.25)";
@@ -642,7 +658,7 @@ function agregarAlCarrito(id) {
       tipo: "Nueva",
       correoReno: "",
     });
-  triggerToast(`🛒 ${prod.nombre} añadido.`);
+  triggerToast(`${prod.nombre} añadido.`);
   actualizarCarritoUI();
 
   const btn = document.getElementById(`btn-add-${id}`);
@@ -714,8 +730,9 @@ window.abrirModalRenoB2B = function (idItem) {
   formData.append("plataforma", idItem);
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
+    .then((res) => res.text())
+    .then((text) => {
+      const res = parseCleanJSON(text);
       container.innerHTML = "";
       if (res && res.status === "success" && res.data.length > 0) {
         window.cuentasActivasB2B = res.data;
@@ -780,7 +797,7 @@ window.abrirModalRenoB2B = function (idItem) {
     .catch((err) => {
       console.error(err);
       container.innerHTML =
-        "<div style='color:var(--ios-red); text-align:center; padding: 20px;'>❌ Error cargando cuentas para renovación.</div>";
+        "<div style='color:var(--ios-red); text-align:center; padding: 20px;'>Error cargando cuentas para renovación.</div>";
     });
 };
 
@@ -868,7 +885,7 @@ function actualizarCarritoUI() {
     if (totalCost > window.saldoNumericoActual) {
       btnCheckout.disabled = true;
       btnCheckout.style.background = "var(--ios-red)";
-      btnCheckout.innerText = "SALDO INSUFICIENTE";
+      btnCheckout.innerText = "SALDO INSUFICIENTES";
     } else {
       btnCheckout.disabled = false;
       btnCheckout.style.background = "var(--ios-blue)";
@@ -951,8 +968,9 @@ function procesarCompraDistribuidor() {
     formData.append("carrito_json", JSON.stringify(window.carrito));
 
     fetch(API_MYSQL_URL, { method: "POST", body: formData })
-      .then((res) => res.json())
-      .then((res) => {
+      .then((res) => res.text())
+      .then((text) => {
+        const res = parseCleanJSON(text);
         btn.disabled = false;
         btn.innerHTML = "CONFIRMAR COMPRA";
         actualizarCarritoUI();
@@ -1086,7 +1104,7 @@ function copiarCuentasCheckout() {
   navigator.clipboard.writeText(window.fichasCheckoutPendientes).then(() => {
     let originalText = btn.innerHTML;
     btn.innerHTML = `✅ ¡Copiado con éxito!`;
-    triggerToast(`📋 Cuentas copiadas.`);
+    triggerToast(`Cuentas copiadas.`);
     setTimeout(() => {
       btn.innerHTML = originalText;
     }, 2000);
@@ -1147,8 +1165,9 @@ function buscarCasilleroDistri() {
     formData.append("busqueda", valQuery);
 
     fetch(API_MYSQL_URL, { method: "POST", body: formData })
-      .then((res) => res.json())
-      .then((res) => {
+      .then((res) => res.text())
+      .then((text) => {
+        const res = parseCleanJSON(text);
         if (res && res.status === "success") {
           let htmlCards = "";
 
@@ -1191,12 +1210,12 @@ function buscarCasilleroDistri() {
             contenedor.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-secondary);">No tienes cuentas registradas que coincidan.</div>`;
           }
         } else {
-          contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Error buscando en MySQL.</div>`;
+          contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">Error buscando en MySQL.</div>`;
         }
       })
       .catch((err) => {
         console.error(err);
-        contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">❌ Error de conexión al servidor.</div>`;
+        contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">Error de conexión al servidor.</div>`;
       });
   }, 200);
 }
@@ -1258,7 +1277,7 @@ function copiarFichaCasillero(btn, dataEncoded) {
     btn.innerHTML = `✅ ¡Copiada!`;
     btn.style.background = "var(--ios-green)";
     btn.style.color = "white";
-    triggerToast(`📋 Ficha copiada.`);
+    triggerToast(`Ficha copiada.`);
     setTimeout(() => {
       btn.innerHTML = old;
       btn.style.background = "";
@@ -1341,8 +1360,9 @@ function rastrearCodigo() {
   formData.append("telefono", telDistri);
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
+    .then((res) => res.text())
+    .then((text) => {
+      const res = parseCleanJSON(text);
       changeCodeStep(5);
       document.getElementById("codeResultBox").style.display = "none";
       document.getElementById("linkResultBox").style.display = "none";
@@ -1392,7 +1412,7 @@ function copiarCodigoResultanteB2B() {
       codeElement.style.color = "var(--text-primary)";
       codeElement.style.transform = "scale(1)";
     }, 250);
-    triggerToast("📋 Código copiado con éxito");
+    triggerToast("Código copiado con éxito");
   });
 }
 
@@ -1409,8 +1429,9 @@ function refrescarSaldoDistribuidorFondo() {
   formData.append("telefono", telActivo);
 
   fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.json())
-    .then((res) => {
+    .then((res) => res.text())
+    .then((text) => {
+      const res = parseCleanJSON(text);
       if (btnRefrescar) btnRefrescar.classList.remove("spin-anim");
       if (res && res.status === "success" && res.saldo !== undefined) {
         window.saldoNumericoActual = parseFloat(res.saldo);
@@ -1437,7 +1458,7 @@ function eliminarDelCarrito(id) {
     btnTienda.innerHTML = "+ Añadir";
   }
   actualizarCarritoUI();
-  triggerToast("🗑️ Plataforma removida del carrito");
+  triggerToast("Plataforma removida del carrito");
 }
 
 function cerrarSesionDistribuidor() {
@@ -1470,7 +1491,36 @@ function cerrarMenuMovil() {
   document.getElementById("modalMenuMovil").classList.remove("open");
 }
 
+// =========================================================================
+// 🌙 UNIFICACIÓN DE MODO CLARO / OSCURO (CLAVE COMPARTIDA "cyber_theme")
+// =========================================================================
+function toggleThemeDistri() {
+  if (typeof haptic === "function") haptic();
+  const currentTheme = document.documentElement.getAttribute("data-theme");
+  const newTheme = currentTheme === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", newTheme);
+  localStorage.setItem("cyber_theme", newTheme); // Clave unificada
+  updateThemeIconDistri(newTheme);
+}
+
+function updateThemeIconDistri(theme) {
+  const btnDesktop = document.getElementById("theme-toggle");
+  const btnMobile = document.getElementById("theme-toggle-mobile");
+  const svgIcon =
+    theme === "light"
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+
+  if (btnDesktop) btnDesktop.innerHTML = svgIcon;
+  if (btnMobile) btnMobile.innerHTML = svgIcon;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  // Sincronización automática de tema desde la clave global "cyber_theme"
+  const savedTheme = localStorage.getItem("cyber_theme") || "dark";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  updateThemeIconDistri(savedTheme);
+
   let localDistriId = localStorage.getItem("active_distri_id");
   let localDistriTel = localStorage.getItem("active_distri_tel");
   let localDistriName = localStorage.getItem("active_distri_name");
