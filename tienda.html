@@ -81,8 +81,31 @@
         gap: 6px;
       }
 
+      /* ESTILIZACIÓN DE CONTENEDORES PARA ÍCONOS SVG DE BANNERS */
       .quiz-banner-icon,
-      .gift-banner-icon,
+      .gift-banner-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .quiz-banner-icon svg,
+      .gift-banner-icon svg {
+        stroke: #ffffff !important;
+        width: 22px;
+        height: 22px;
+        display: block;
+      }
+
       .bot-avatar-icon {
         display: flex;
         align-items: center;
@@ -553,18 +576,20 @@
         <div class="horizontal-scroll-container" id="contenedorEstrenos"></div>
       </section>
 
-      <!-- 🔥 CONTENEDOR FILA DOBLE DE BANNERS INTERACTIVOS -->
+      <!-- 🔥 CONTENEDOR FILA DOBLE DE BANNERS INTERACTIVOS CON ÍCONOS SVG VISIBLES -->
       <div class="banners-interactive-row">
         <!-- 🪄 1. BANNER ARMADOR DE COMBOS -->
         <div class="quiz-banner" onclick="abrirQuiz()">
           <div class="quiz-banner-icon">
             <svg
-              width="28"
-              height="28"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="var(--ios-blue)"
+              stroke="#ffffff"
               stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <path
                 d="M15 4V2m0 2v2m0-2h2m-2 0h-2m-3 13l-3-3m0 0l-3 3m3-3v8M3 8l3-3m0 0l3 3M6 5v8"
@@ -586,12 +611,14 @@
         >
           <div class="gift-banner-icon">
             <svg
-              width="28"
-              height="28"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#bf5af2"
+              stroke="#ffffff"
               stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <polyline points="20 12 20 22 4 22 4 12"></polyline>
               <rect x="2" y="7" width="20" height="5"></rect>
@@ -1589,8 +1616,7 @@
               Bre-B.
             </p>
             <p>
-              2️⃣
-              <strong>Tómale captura a la foto del pago</strong>
+              2️⃣ <strong>Tómale captura a la foto del pago</strong>
               obligatoriamente.
             </p>
             <p>
