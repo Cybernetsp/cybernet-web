@@ -21,7 +21,7 @@
 
     <style>
       /* =========================================
-         REGULACIÓN TIPOGRÁFICA GLOBAL (LETRA IPHONE / SAN FRANCISCO)
+         REGULACIÓN TIPOGRÁFICA GLOBAL (SAN FRANCISCO / IPHONE)
          ========================================= */
       * {
         margin: 0;
@@ -82,12 +82,12 @@
         --text-primary: #ffffff;
         --text-secondary: rgba(235, 235, 245, 0.65);
 
-        --glass-bg: rgba(26, 26, 30, 0.65);
+        --glass-bg: rgba(30, 30, 35, 0.6);
         --glass-border: 1px solid rgba(255, 255, 255, 0.12);
         --glass-shadow:
           0 24px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
-        --modal-bg: rgba(28, 28, 30, 0.95);
+        --modal-bg: #1c1c1e;
         --card-bg: rgba(44, 44, 46, 0.6);
         --card-border: 0.5px solid rgba(255, 255, 255, 0.1);
         --card-header-bg: rgba(255, 255, 255, 0.05);
@@ -122,13 +122,13 @@
         --text-primary: #000000;
         --text-secondary: rgba(60, 60, 67, 0.65);
 
-        --glass-bg: rgba(255, 255, 255, 0.8);
+        --glass-bg: rgba(255, 255, 255, 0.82);
         --glass-border: 1px solid rgba(0, 0, 0, 0.1);
         --glass-shadow:
           0 24px 48px rgba(0, 0, 0, 0.06),
           inset 0 1px 0 rgba(255, 255, 255, 0.6);
 
-        --modal-bg: rgba(255, 255, 255, 0.95);
+        --modal-bg: #ffffff;
         --card-bg: #ffffff;
         --card-border: 0.5px solid rgba(0, 0, 0, 0.08);
         --card-header-bg: rgba(0, 0, 0, 0.03);
@@ -170,7 +170,7 @@
           color 0.4s ease;
       }
 
-      /* BOTONES FLOTANTES SUPERIORES DE TEMA Y TIENDA */
+      /* BOTONES FLOTANTES SUPERIORES */
       .theme-toggle-btn {
         position: fixed;
         top: calc(env(safe-area-inset-top, 15px) + 5px);
@@ -182,7 +182,7 @@
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: var(--glass-border);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -206,7 +206,7 @@
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: var(--glass-border);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -245,7 +245,7 @@
         transition: background 0.4s ease;
       }
 
-      /* CONTENEDOR TARJETA PRINCIPAL */
+      /* TARJETA PRINCIPAL DE LA INTERFAZ */
       .container {
         background: var(--glass-bg);
         backdrop-filter: blur(40px) saturate(180%);
@@ -259,7 +259,7 @@
         position: relative;
         box-shadow: var(--glass-shadow);
         margin: auto;
-        animation: appleFadeIn 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        animation: appleFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         transition: var(--transition-spring);
       }
 
@@ -337,19 +337,18 @@
         }
       }
 
-      /* ESTILIZACIÓN PERFECTA DE CAMPOS DE ENTRADA (TELÉFONO / CORREO) */
+      /* CAMPOS DE TEXTO E INPUTS CON APLINEACIÓN Y DISEÑO PERFECCIONADO */
       input {
         width: 100%;
-        height: 52px;
-        padding: 0 18px;
+        height: 50px;
+        padding: 0 16px;
         margin-bottom: 20px;
-        border-radius: 16px;
+        border-radius: 14px;
         border: var(--input-border);
         background: var(--input-bg);
         color: #ffffff;
         font-size: 16px !important;
         font-weight: 600;
-        letter-spacing: 0.5px;
         outline: none;
         text-align: center;
         transition:
@@ -366,17 +365,16 @@
         color: var(--text-secondary);
         font-size: 0.95rem;
         font-weight: 400;
-        letter-spacing: normal;
       }
 
-      /* BOTONES DE ACCIÓN MÓVIL Y DESKTOP */
+      /* BOTONES */
       button.btn-general,
       button.btn-primary {
         width: 100%;
         min-height: 50px;
         padding: 14px 18px;
         margin-bottom: 12px;
-        border-radius: 16px;
+        border-radius: 14px;
         font-size: 0.95rem;
         font-weight: 700;
         display: flex;
@@ -468,7 +466,7 @@
         }
       }
 
-      /* MODAL DESPLEGABLE INFERIOR DE SERVICIOS */
+      /* MODAL DE SERVICIOS */
       .modal-overlay {
         display: none;
         position: fixed;
@@ -979,6 +977,7 @@
             fill="none"
             stroke="currentColor"
             stroke-width="2.5"
+            style="vertical-align: middle; margin-left: 2px"
           >
             <path
               d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
@@ -1148,7 +1147,7 @@
       </div>
     </div>
 
-    <!-- MODAL DE SERVICIOS (SÓLO SE CIERRA CON EL BOTÓN) -->
+    <!-- MODAL DE SERVICIOS -->
     <div id="modalServices" class="modal-overlay">
       <div class="modal-content" id="modalContentInner">
         <h3
@@ -1243,7 +1242,7 @@
       </svg>
     </button>
 
-    <!-- VENTANA CHATBOT -->
+    <!-- VENTANA CHATBOT (SE OCULTA Y MUESTRA VÍA DISPLAY NONE/FLEX 100% EFECTIVO) -->
     <div class="chat-window-ios" id="chat-window">
       <div class="chat-header">
         <div style="display: flex; align-items: center; gap: 8px">
@@ -1434,7 +1433,7 @@
         if (localStorage.getItem("cyber_email"))
           emailInput.value = localStorage.getItem("cyber_email");
 
-        phoneInput.addEventListener("input", function (e) {
+        phoneInput.addEventListener("input", function () {
           let val = this.value.replace(/\D/g, "");
           if (val.length > 3 && val.length <= 6) {
             val = val.slice(0, 3) + " " + val.slice(3);
@@ -1828,13 +1827,13 @@
           let botReply = "";
           if (question === "¿Cómo funciona la página?") {
             botReply =
-              "¡Es muy fácil y rápido! Sigue estos 4 pasos:\n\n1. **Tu celular:** Ingresa el número con el que hiciste la compra y dale a 'Continuar'.\n2. **Elige:** Selecciona si tu pantalla es de Netflix o Disney.\n3. **Elige el código:** Toca el tipo de código que te está pidiendo tu TV (Inicio de sesión, Estoy de Viaje o Enlace).\n4. **Tu correo:** Escribe el correo de tu cuenta y dale a 'Rastrear'.\n\n¡Y listo! El sistema te mostrará tu código en pantalla al instante.";
+              "¡Es muy fácil y rápido! Sigue estos 4 pasos:\n\n1️⃣ **Tu celular:** Ingresa el número con el que hiciste la compra y dale a 'Continuar'.\n2️⃣ **Elige:** Selecciona si tu pantalla es de Netflix o Disney.\n3️⃣ **Elige el código:** Toca el tipo de código que te está pidiendo tu TV (Inicio de sesión, Estoy de Viaje o Enlace).\n4️⃣ **Tu correo:** Escribe el correo de tu cuenta y dale a 'Rastrear'.\n\n✨ ¡Y listo! El sistema te mostrará tu código en pantalla al instante.";
           } else if (question === "Mi código dice incorrecto o expirado") {
             botReply =
-              "¡No te preocupes, es normal!\n\nPor seguridad, los códigos de Netflix cambian y **vencen cada 15 minutos**.\n\nSi tu TV dice que es incorrecto, significa que el tiempo se agotó. La solución es muy simple:\n\n👉 Cierra esta ventana, dale clic al botón **'Nueva Consulta'** y vuelve a buscar tu correo. El sistema te dará un código totalmente nuevo y fresco. ¡Inténtalo y escríbelo rápido en tu TV!";
+              "¡No te preocupes, es normal! 😎\n\nPor seguridad, los códigos de Netflix cambian y **vencen cada 15 minutos** ⏰.\n\nSi tu TV dice que es incorrecto, significa que el tiempo se agotó. La solución es muy simple:\n\n👉 Cierra esta ventana, dale clic al botón **'Nueva Consulta'** y vuelve a buscar tu correo. El sistema te dará un código totalmente nuevo y fresco. ¡Inténtalo y escríbelo rápido en tu TV!";
           } else if (question === "No encuentro mi cuenta") {
             botReply =
-              "Si el sistema te dice 'Sin Resultados', suele ser por un pequeño error de escritura.\n\nPor favor verifica esto:\n\n👉 Asegúrate de escribir el correo **exactamente igual** a como te lo entregamos.\n👉 Recuerda que debe terminar en **@cybernetsp.com** (sin espacios al final).\n\nSi estás seguro de que está bien escrito y aún no sale, ponte en contacto con nosotros para ayudarte de inmediato.";
+              "Si el sistema te dice 'Sin Resultados', suele ser por un pequeño error de escritura. 🧐\n\nPor favor verifica esto:\n\n👉 Asegúrate de escribir el correo **exactamente igual** a como te lo entregamos.\n👉 Recuerda que debe terminar en **@cybernetsp.com** (sin espacios al final).\n\nSi estás seguro de que está bien escrito y aún no sale, ponte en contacto con nosotros para ayudarte de inmediato.";
           }
 
           appendChatMessage(botReply, "bot");
