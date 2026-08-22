@@ -119,18 +119,20 @@ const PROMOS_RELAMPAGO = [
   },
 ];
 
-// 🔺 FUNCIÓN DE REDONDEO SUPERIOR INTELIGENTE Y COMERCIAL CYBERNET
+// 🔺 FUNCIÓN DE REDONDEO SUPERIOR INTELIGENTE Y RESPETUOSA DE PRECIOS EXACTOS
 function redondearPrecioArriba(val) {
   if (!val || val <= 0) return 0;
   let entero = Math.floor(val);
   let mil = Math.floor(entero / 1000);
   let residuo = entero % 1000;
 
-  // Si ya es un número cerrado exacto (.000 o .900), se mantiene intacto
-  if (residuo === 0 || residuo === 900) return entero;
-  // Si tiene residuo de hasta 400 (ej: 19.300), sube comercialmente a .900
+  // Respeta precios exactos terminados en .000, .500 o .900 (ej: $10.500, $8.500, $20.000)
+  if (residuo === 0 || residuo === 500 || residuo === 900) return entero;
+
+  // Si tiene residuo de hasta 400 (ej: 19.300), se redondea a .900
   if (residuo <= 400) return mil * 1000 + 900;
-  // Si el residuo supera 400 (ej: 19.500 o 36.847,5), sube al mil superior exacto
+
+  // Si el residuo es superior a 400 (ej: 19.520 o 36.847,5), sube al mil superior
   return (mil + 1) * 1000;
 }
 
@@ -235,7 +237,7 @@ function ajustarPantallas(id, delta) {
   actualizarCarrito();
 }
 
-// 🧮 SIMULADOR DINÁMICO DE COMBOS Y MATEMÁTICA CONSISTENTE DE SUBTOTALES
+// 🧮 SIMULADOR DINÁMICO DE COMBOS CON MATEMÁTICA Y SUBTOTALES UNIFICADOS
 function simularPrecioCart(tempCart, meses) {
   const streamingItems = tempCart.filter((i) => i.type !== "addon");
   const addonPlats = tempCart.filter((i) => i.type === "addon");
@@ -290,9 +292,8 @@ function simularPrecioCart(tempCart, meses) {
     return sum;
   }, 0);
 
-  let subtotalStreaming = redondearPrecioArriba(
-    streamingPuroBase + recargoMeses,
-  );
+  let subtotalStreamingBruto = streamingPuroBase + recargoMeses;
+  let subtotalStreaming = redondearPrecioArriba(subtotalStreamingBruto);
 
   let pctVigencia = 0;
   if (meses === 2) pctVigencia = 0.15;
@@ -300,11 +301,14 @@ function simularPrecioCart(tempCart, meses) {
   if (meses === 4) pctVigencia = 0.25;
   if (meses === 5) pctVigencia = 0.3;
 
-  let descVigenciaBruto = subtotalStreaming * pctVigencia;
-  let netoStreaming = redondearPrecioArriba(
-    subtotalStreaming - descVigenciaBruto,
-  );
-  let descVigencia = subtotalStreaming - netoStreaming;
+  let descVigencia = 0;
+  let netoStreaming = subtotalStreaming;
+
+  if (pctVigencia > 0) {
+    let descBruto = subtotalStreaming * pctVigencia;
+    netoStreaming = redondearPrecioArriba(subtotalStreaming - descBruto);
+    descVigencia = subtotalStreaming - netoStreaming;
+  }
 
   let precioAddons = addonPlats.reduce((sum, item) => {
     let pAddon = PLATAFORMAS_INFO[item.id].price || item.price || 0;
