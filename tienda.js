@@ -119,6 +119,18 @@ const PROMOS_RELAMPAGO = [
   },
 ];
 
+// 🔺 FUNCIÓN DE REDONDEO SUPERIOR INTELIGENTE Y COMERCIAL CYBERNET
+function redondearPrecioArriba(val) {
+  if (!val || val <= 0) return 0;
+  let entero = Math.floor(val);
+  let mil = Math.floor(entero / 1000);
+  let residuo = entero % 1000;
+
+  if (residuo === 0) return entero;
+  if (residuo <= 400) return mil * 1000 + 900;
+  return (mil + 1) * 1000;
+}
+
 // 🔄 SINCRONIZACIÓN EN VIVO DE PRECIOS DESDE MYSQL
 async function sincronizarPreciosDesdeMySQL() {
   try {
@@ -220,7 +232,7 @@ function ajustarPantallas(id, delta) {
   actualizarCarrito();
 }
 
-// 🧮 SIMULADOR DINÁMICO DE COMBOS (BASADO 100% EN PRECIOS REALES DE MYSQL)
+// 🧮 SIMULADOR DINÁMICO DE COMBOS CON REDONDEO SUPERIOR
 function simularPrecioCart(tempCart, meses) {
   const streamingItems = tempCart.filter((i) => i.type !== "addon");
   const addonPlats = tempCart.filter((i) => i.type === "addon");
@@ -275,7 +287,9 @@ function simularPrecioCart(tempCart, meses) {
     return sum;
   }, 0);
 
-  let subtotalStreaming = streamingPuroBase + recargoMeses;
+  let subtotalStreaming = redondearPrecioArriba(
+    streamingPuroBase + recargoMeses,
+  );
 
   let pctVigencia = 0;
   if (meses === 2) pctVigencia = 0.15;
@@ -283,15 +297,15 @@ function simularPrecioCart(tempCart, meses) {
   if (meses === 4) pctVigencia = 0.25;
   if (meses === 5) pctVigencia = 0.3;
 
-  let descVigencia = streamingPuroBase * pctVigencia;
-  let netoStreaming = subtotalStreaming - descVigencia;
+  let descVigencia = Math.round(streamingPuroBase * pctVigencia);
+  let netoStreaming = redondearPrecioArriba(subtotalStreaming - descVigencia);
 
   let precioAddons = addonPlats.reduce((sum, item) => {
     let pAddon = PLATAFORMAS_INFO[item.id].price || item.price || 0;
     return sum + pAddon * item.pantallas;
   }, 0);
 
-  let netoFinal = netoStreaming + precioAddons;
+  let netoFinal = redondearPrecioArriba(netoStreaming + precioAddons);
 
   return {
     netoFinal,
@@ -421,8 +435,9 @@ function actualizarCarrito() {
       });
 
       let resultadoSobrantes = simularPrecioCart(carritoClonado, meses);
-      let totalAlternativoConPromo =
-        resultadoSobrantes.netoFinal + promoAplicadaEnCarrito.precio;
+      let totalAlternativoConPromo = redondearPrecioArriba(
+        resultadoSobrantes.netoFinal + promoAplicadaEnCarrito.precio,
+      );
 
       if (totalAlternativoConPromo < resultadoNormal.netoFinal) {
         descuentoPorPromo =
@@ -534,6 +549,7 @@ function actualizarCarrito() {
         descuentoMisterioso = totalNetoFinal - resultadoSinRegalo.netoFinal;
         totalNetoFinal = resultadoSinRegalo.netoFinal;
       }
+      totalNetoFinal = redondearPrecioArriba(totalNetoFinal);
       if (lblRegalo) {
         lblRegalo.innerText =
           "-$" + descuentoMisterioso.toLocaleString("es-CO");
@@ -555,7 +571,9 @@ function actualizarCarrito() {
     if (rowRegalo) rowRegalo.style.display = "none";
   }
 
+  totalNetoFinal = redondearPrecioArriba(totalNetoFinal);
   const totalFormateado = "$" + totalNetoFinal.toLocaleString("es-CO");
+
   const lblTotalEl = document.getElementById("lblTotal");
   if (lblTotalEl) lblTotalEl.innerText = totalFormateado;
 
