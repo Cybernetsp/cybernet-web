@@ -21,206 +21,8 @@
 
     <style>
       /* =========================================
-         ESTILOS DEL CHATBOT CON BOTONES (QUICK REPLIES)
+         SISTEMA DE VARIABLES: MODO CLARO Y OSCURO
          ========================================= */
-      .chat-fab-btn {
-        position: fixed;
-        bottom: calc(env(safe-area-inset-bottom, 20px) + 15px);
-        right: 20px;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: var(--ai-gradient);
-        color: white;
-        border: none;
-        box-shadow: 0 8px 20px rgba(10, 132, 255, 0.4);
-        cursor: pointer;
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: var(--transition-spring);
-        -webkit-tap-highlight-color: transparent;
-      }
-      .chat-fab-btn:active {
-        transform: scale(0.9);
-      }
-      .chat-fab-btn:hover {
-        box-shadow: 0 10px 25px rgba(10, 132, 255, 0.5);
-      }
-
-      .chat-tooltip-ios {
-        position: fixed;
-        bottom: calc(env(safe-area-inset-bottom, 20px) + 80px);
-        right: 20px;
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: var(--glass-border);
-        padding: 10px 14px;
-        border-radius: 18px;
-        border-bottom-right-radius: 4px;
-        box-shadow: var(--glass-shadow);
-        color: var(--text-primary);
-        font-size: 0.82rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        z-index: 9998;
-        max-width: calc(100vw - 40px);
-        animation:
-          floatTooltip 3s ease-in-out infinite,
-          appleFadeIn 0.5s ease-out;
-        transition:
-          opacity 0.3s,
-          visibility 0.3s;
-      }
-      .chat-tooltip-ios .close-tooltip {
-        background: rgba(118, 118, 128, 0.2);
-        border: none;
-        color: var(--text-secondary);
-        border-radius: 50%;
-        width: 22px;
-        height: 22px;
-        font-size: 0.75rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.2s;
-      }
-      .chat-tooltip-ios .close-tooltip:active {
-        transform: scale(0.9);
-        background: rgba(118, 118, 128, 0.4);
-      }
-      @keyframes floatTooltip {
-        0%,
-        100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-6px);
-        }
-      }
-
-      .chat-window-ios {
-        position: fixed;
-        bottom: calc(env(safe-area-inset-bottom, 20px) + 10px);
-        right: 15px;
-        left: 15px;
-        width: calc(100vw - 30px);
-        max-width: 420px;
-        height: 75vh;
-        max-height: 560px;
-        margin: 0 auto;
-        background: var(--modal-bg);
-        backdrop-filter: blur(40px) saturate(200%);
-        -webkit-backdrop-filter: blur(40px) saturate(200%);
-        border: var(--glass-border);
-        border-radius: 26px;
-        box-shadow: var(--glass-shadow);
-        z-index: 9998;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        opacity: 0;
-        visibility: hidden;
-        transform: scale(0.95) translateY(20px);
-        transform-origin: bottom right;
-        transition: var(--transition-spring);
-      }
-      .chat-window-ios.open {
-        opacity: 1;
-        visibility: visible;
-        transform: scale(1) translateY(0);
-      }
-
-      .chat-header {
-        padding: 14px 18px;
-        background: rgba(255, 255, 255, 0.03);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      [data-theme="light"] .chat-header {
-        background: rgba(0, 0, 0, 0.02);
-        border-bottom-color: rgba(0, 0, 0, 0.08);
-      }
-
-      .chat-body {
-        flex: 1;
-        padding: 16px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .chat-bubble {
-        max-width: 88%;
-        padding: 11px 15px;
-        border-radius: 18px;
-        font-size: 0.88rem;
-        line-height: 1.4;
-        animation: appleFadeIn 0.3s ease;
-      }
-      .chat-bubble.bot {
-        align-self: flex-start;
-        background: var(--input-bg);
-        color: var(--text-primary);
-        border-bottom-left-radius: 4px;
-      }
-      .chat-bubble.user {
-        align-self: flex-end;
-        background: var(--ios-blue);
-        color: white;
-        border-bottom-right-radius: 4px;
-      }
-
-      .chat-options {
-        padding: 12px 16px;
-        background: rgba(255, 255, 255, 0.02);
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        transition: opacity 0.3s ease;
-      }
-      [data-theme="light"] .chat-options {
-        background: rgba(0, 0, 0, 0.01);
-        border-top-color: rgba(0, 0, 0, 0.08);
-      }
-
-      .chat-option-btn {
-        background: rgba(10, 132, 255, 0.1);
-        color: var(--ios-blue);
-        border: 1px solid rgba(10, 132, 255, 0.3);
-        padding: 11px 14px;
-        border-radius: 16px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: var(--transition-spring);
-        text-align: left;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .chat-option-btn:hover {
-        background: rgba(10, 132, 255, 0.15);
-      }
-      .chat-option-btn:active {
-        transform: scale(0.98);
-        background: rgba(10, 132, 255, 0.2);
-      }
-
-      /* =========================================
-       SISTEMA DE VARIABLES: MODO CLARO Y OSCURO (APPLE ECOSYSTEM)
-       ========================================= */
       :root {
         --ios-blue: #0a84ff;
         --ios-green: #30d158;
@@ -242,7 +44,7 @@
         --glass-shadow:
           0 24px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
-        --modal-bg: rgba(28, 28, 30, 0.92);
+        --modal-bg: rgba(28, 28, 30, 0.95);
         --card-bg: rgba(44, 44, 46, 0.6);
         --card-border: 0.5px solid rgba(255, 255, 255, 0.08);
         --card-header-bg: rgba(255, 255, 255, 0.05);
@@ -283,7 +85,7 @@
           0 24px 48px rgba(0, 0, 0, 0.05),
           inset 0 1px 0 rgba(255, 255, 255, 0.5);
 
-        --modal-bg: rgba(255, 255, 255, 0.92);
+        --modal-bg: rgba(255, 255, 255, 0.95);
         --card-bg: #ffffff;
         --card-border: 0.5px solid rgba(0, 0, 0, 0.05);
         --card-header-bg: rgba(0, 0, 0, 0.02);
@@ -639,7 +441,7 @@
         }
       }
 
-      /* MODAL DESPLEGABLE INFERIOR (BOTTOM SHEET PARA MÓVIL) */
+      /* MODAL DESPLEGABLE INFERIOR (CIERRE SOLO POR BOTÓN) */
       .modal-overlay {
         display: none;
         position: fixed;
@@ -647,9 +449,9 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(0, 0, 0, 0.7);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         justify-content: center;
         align-items: flex-end;
         z-index: 10000;
@@ -661,33 +463,19 @@
         backdrop-filter: blur(50px) saturate(200%);
         -webkit-backdrop-filter: blur(50px) saturate(200%);
         border: var(--glass-border);
-        padding: 32px 18px 20px 18px;
+        padding: 24px 18px 20px 18px;
         border-radius: 28px 28px 0 0;
         width: 100%;
         max-width: 520px;
         max-height: 88vh;
-        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
         animation: sheetSlideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         position: relative;
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        transition:
-          background 0.3s ease,
-          transform 0.1s linear;
       }
 
-      .modal-grip {
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 38px;
-        height: 5px;
-        background: var(--text-secondary);
-        border-radius: 10px;
-        opacity: 0.4;
-      }
       @keyframes sheetSlideUp {
         from {
           opacity: 0;
@@ -847,16 +635,20 @@
 
       .btn-close-modal {
         width: 100%;
-        min-height: 46px;
+        min-height: 48px;
         border-radius: 14px;
         border: none;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
         font-weight: 700;
         cursor: pointer;
         background: var(--btn-icon-bg);
         color: var(--text-primary);
         transition: var(--transition-spring);
         margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
       }
       .btn-close-modal:active {
         transform: scale(0.97);
@@ -1155,7 +947,21 @@
 
       <div id="step-4" class="step">
         <p class="instruction" id="instruction-correo">
-          Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com o @outlook) 📧
+          Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com o @outlook)
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            style="vertical-align: middle; margin-left: 2px"
+          >
+            <path
+              d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+            ></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
         </p>
         <input
           type="email"
@@ -1230,9 +1036,28 @@
               color: var(--text-secondary);
               margin-top: 6px;
               font-weight: 500;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 4px;
             "
           >
-            👆 Toca el número para copiarlo
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"
+              ></path>
+              <path
+                d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.9-2.2L2.3 15.7a1.2 1.2 0 0 1 0-1.7l.8-.8a1.2 1.2 0 0 1 1.7 0l2.7 2.7V6"
+              ></path>
+            </svg>
+            Toca el número para copiarlo
           </div>
           <div
             id="val-timer"
@@ -1300,9 +1125,9 @@
       </div>
     </div>
 
+    <!-- MODAL DE SERVICIOS (CIERRE ÚNICAMENTE POR BOTÓN FIJO) -->
     <div id="modalServices" class="modal-overlay">
       <div class="modal-content" id="modalContentInner">
-        <div class="modal-grip"></div>
         <h3
           style="
             margin-bottom: 18px;
@@ -1324,11 +1149,25 @@
         </div>
         <div id="cardsWrapper"></div>
         <button class="btn-close-modal" onclick="closeModal()">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
           Cerrar Ventana
         </button>
       </div>
     </div>
 
+    <!-- TOOLTIP CHATBOT -->
     <div id="chat-tooltip" class="chat-tooltip-ios">
       <span style="display: flex; align-items: center; gap: 6px">
         <svg
@@ -1349,10 +1188,21 @@
         class="close-tooltip"
         onclick="document.getElementById('chat-tooltip').style.display = 'none'"
       >
-        ✕
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
       </button>
     </div>
 
+    <!-- BOTÓN CHATBOT FLOTANTE -->
     <button id="chat-fab" class="chat-fab-btn" onclick="toggleChat()">
       <svg
         width="22"
@@ -1370,6 +1220,7 @@
       </svg>
     </button>
 
+    <!-- VENTANA CHATBOT -->
     <div class="chat-window-ios" id="chat-window">
       <div class="chat-header">
         <div style="display: flex; align-items: center; gap: 8px">
@@ -1424,10 +1275,23 @@
             color: var(--text-primary);
             font-size: 1rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           "
           onclick="toggleChat()"
         >
-          ✕
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
 
@@ -1501,6 +1365,7 @@
       </div>
     </div>
 
+    <!-- LÓGICA JAVASCRIPT -->
     <script>
       // 🔗 URL OFICIAL APUNTANDO A TU SERVIDOR MYSQL
       const MYSQL_BOT_URL = "https://api.cybernetsp.com/api_bot.php";
@@ -1561,48 +1426,6 @@
 
         emailInput.addEventListener("input", function () {
           localStorage.setItem("cyber_email", this.value);
-        });
-
-        let startY = 0;
-        let currentY = 0;
-        const modalContent = document.getElementById("modalContentInner");
-        const cardsWrapper = document.getElementById("cardsWrapper");
-
-        modalContent.addEventListener(
-          "touchstart",
-          (e) => {
-            if (cardsWrapper.scrollTop <= 0) {
-              startY = e.touches[0].clientY;
-            } else {
-              startY = 0;
-            }
-          },
-          { passive: true },
-        );
-
-        modalContent.addEventListener(
-          "touchmove",
-          (e) => {
-            if (!startY) return;
-            currentY = e.touches[0].clientY;
-            let diff = currentY - startY;
-            if (diff > 0) {
-              modalContent.style.transform = `translateY(${diff}px)`;
-              modalContent.style.transition = "none";
-            }
-          },
-          { passive: true },
-        );
-
-        modalContent.addEventListener("touchend", (e) => {
-          if (!startY) return;
-          let diff = currentY - startY;
-          modalContent.style.transition =
-            "transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)";
-          if (diff > 120) closeModal();
-          modalContent.style.transform = "";
-          startY = 0;
-          currentY = 0;
         });
       });
 
@@ -1694,12 +1517,6 @@
         const date = clean(dMatch ? dMatch[1] : "");
         if (!mail.includes("@")) return "";
 
-        const charCode = String.fromCharCode(96);
-        const safeRaw = raw
-          .split(charCode)
-          .join("\\" + charCode)
-          .split("$")
-          .join("\\$");
         const encodedRaw = encodeURIComponent(raw);
         const encodedMail = encodeURIComponent(mail);
         const encodedPass = encodeURIComponent(pass);
@@ -1761,10 +1578,10 @@
         const instCorreo = document.getElementById("instruction-correo");
         if (window.isDistri) {
           instCorreo.innerHTML =
-            "Ingresa el <b>correo</b> de la cuenta 📧<br><span style='display:block; margin-top:5px; font-size:0.8rem; color:var(--ios-green); font-weight:700;'>🔓 Acceso Distribuidor VIP Activado</span>";
+            "Ingresa el <b>correo</b> de la cuenta <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' style='vertical-align:middle;'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'></path><polyline points='22,6 12,13 2,6'></polyline></svg><br><span style='display:block; margin-top:5px; font-size:0.8rem; color:var(--ios-green); font-weight:700;'>Acceso Distribuidor VIP Activado</span>";
         } else {
           instCorreo.innerHTML =
-            "Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com o @outlook) 📧";
+            "Ingresa el <b>correo</b> de tu cuenta (@cybernetsp.com o @outlook) <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' style='vertical-align:middle;'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'></path><polyline points='22,6 12,13 2,6'></polyline></svg>";
         }
 
         btn.disabled = false;
@@ -1835,9 +1652,7 @@
         document.getElementById("modalServices").style.display = "none";
         document.body.style.overflow = "";
       }
-      window.onclick = (e) => {
-        if (e.target == document.getElementById("modalServices")) closeModal();
-      };
+
       window.addEventListener("keydown", (e) => {
         if (e.key === "Escape") closeModal();
       });
@@ -1960,7 +1775,7 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("sw.js?v=100.0")
+            .register("sw.js?v=21.0")
             .then((reg) => {
               console.log("Cybernet App lista para instalar");
               reg.update();
@@ -1991,13 +1806,13 @@
           let botReply = "";
           if (question === "¿Cómo funciona la página?") {
             botReply =
-              "¡Es muy fácil y rápido! 🚀 Sigue estos 4 pasos:\n\n1️⃣ **Tu celular:** Ingresa el número con el que hiciste la compra y dale a 'Continuar'.\n2️⃣ **Elige:** Selecciona si tu pantalla es de Netflix o Disney.\n3️⃣ **Elige el código:** Toca el tipo de código que te está pidiendo tu TV (Inicio de sesión, Estoy de Viaje o Enlace).\n4️⃣ **Tu correo:** Escribe el correo de tu cuenta y dale a 'Rastrear'.\n\n✨ ¡Y listo! El sistema te mostrará tu código en pantalla al instante.";
+              "¡Es muy fácil y rápido! Sigue estos 4 pasos:\n\n1. **Tu celular:** Ingresa el número con el que hiciste la compra y dale a 'Continuar'.\n2. **Elige:** Selecciona si tu pantalla es de Netflix o Disney.\n3. **Elige el código:** Toca el tipo de código que te está pidiendo tu TV (Inicio de sesión, Estoy de Viaje o Enlace).\n4. **Tu correo:** Escribe el correo de tu cuenta y dale a 'Rastrear'.\n\n¡Y listo! El sistema te mostrará tu código en pantalla al instante.";
           } else if (question === "Mi código dice incorrecto o expirado") {
             botReply =
-              "¡No te preocupes, es normal! 😎\n\nPor seguridad, los códigos de Netflix cambian y **vencen cada 15 minutos** ⏰.\n\nSi tu TV dice que es incorrecto, significa que el tiempo se agotó. La solución es muy simple:\n\n👉 Cierra esta ventana, dale clic al botón **'Nueva Consulta'** y vuelve a buscar tu correo. El sistema te dará un código totalmente nuevo y fresco. ¡Inténtalo y escríbelo rápido en tu TV! 📺🏃‍♂️";
+              "¡No te preocupes, es normal!\n\nPor seguridad, los códigos de Netflix cambian y **vencen cada 15 minutos**.\n\nSi tu TV dice que es incorrecto, significa que el tiempo se agotó. La solución es muy simple:\n\n👉 Cierra esta ventana, dale clic al botón **'Nueva Consulta'** y vuelve a buscar tu correo. El sistema te dará un código totalmente nuevo y fresco. ¡Inténtalo y escríbelo rápido en tu TV!";
           } else if (question === "No encuentro mi cuenta") {
             botReply =
-              "Si el sistema te dice 'Sin Resultados', suele ser por un pequeño error de escritura. 🧐\n\nPor favor verifica esto:\n\n👉 Asegúrate de escribir el correo **exactamente igual** a como te lo entregamos.\n👉 Recuerda que debe terminar en **@cybernetsp.com** 📧 (sin espacios al final).\n\nSi estás seguro de que está bien escrito y aún no sale, ponte en contacto con nosotros para ayudarte de inmediato. 🛠️";
+              "Si el sistema te dice 'Sin Resultados', suele ser por un pequeño error de escritura.\n\nPor favor verifica esto:\n\n👉 Asegúrate de escribir el correo **exactamente igual** a como te lo entregamos.\n👉 Recuerda que debe terminar en **@cybernetsp.com** (sin espacios al final).\n\nSi estás seguro de que está bien escrito y aún no sale, ponte en contacto con nosotros para ayudarte de inmediato.";
           }
 
           appendChatMessage(botReply, "bot");
