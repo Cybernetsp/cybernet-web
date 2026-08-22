@@ -539,7 +539,7 @@
 
       .card-platform-header {
         background: var(--card-header-bg);
-        padding: 14px 18px;
+        padding: 12px 16px;
         border-bottom: var(--card-header-border);
         display: flex;
         align-items: center;
@@ -1793,10 +1793,8 @@
           }
         }
 
-        // SALUDO PERSONALIZADO SEGÚN REGLA
         const greeting = userName ? `🌟 *¡Hola ${userName}!*` : `🌟 *¡Hola!*`;
 
-        // PLANTILLA OFICIAL DE COPIADO DE TEXTO
         let customCopyText = `${greeting}\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n\n🎬 *DETALLES DE ${plat.toUpperCase()}* ✅\n────────────────────\n⚠️ *Para iniciar sesión:* Cuando te pida un código, selecciona *Obtener ayuda* y después *Usar contraseña*.\n\n👤 *Correo:* ${mail}\n🔐 *Contraseña:* ${pass}${profilesTextForCopy}\n📅 *Vence:* ${date || "A CONVENIR"}\n\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n\n📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
         const encodedRaw = encodeURIComponent(customCopyText);
@@ -1956,11 +1954,16 @@
         globalData.opcion = o;
         changeStep(4);
       }
+
+      let searchAttempts = 0;
+
       function reloadAll() {
+        searchAttempts = 0;
         document.getElementById("telefono").value = "";
         document.getElementById("correo").value = "";
         changeStep(1);
       }
+
       function fireError(m) {
         haptic();
         triggerToast(
@@ -1990,6 +1993,7 @@
         });
       }
 
+      /* RASTREO CON TEMPORIZADOR MÍNIMO DE 5 SEGUNDOS Y LÓGICA DE 4 INTENTOS */
       async function executeSearch() {
         haptic();
         let m = document.getElementById("correo").value.toLowerCase().trim();
@@ -1997,16 +2001,32 @@
 
         const btnTrack = document.getElementById("btn-rastrear");
         globalData.correo = m;
+        searchAttempts++;
+
         changeStep(5);
         btnTrack.disabled = true;
+
+        const loaderText = document.querySelector("#step-5 p");
+        if (loaderText) {
+          loaderText.innerText = `Rastreando código en Cybernet... (Intento ${searchAttempts}/4)\nEspera unos segundos...`;
+        }
+
+        const minWait = new Promise((resolve) => setTimeout(resolve, 5000));
+
         try {
           const query = new URLSearchParams(globalData);
-          const resp = await fetch(`${MYSQL_BOT_URL}?${query.toString()}`);
+          const [resp] = await Promise.all([
+            fetch(`${MYSQL_BOT_URL}?${query.toString()}`),
+            minWait,
+          ]);
           const res = await resp.json();
+
           changeStep(6);
           document.getElementById("res-box-code").style.display = "none";
           document.getElementById("res-box-link").style.display = "none";
+
           if (res.exito) {
+            searchAttempts = 0;
             document.getElementById("res-title").innerHTML =
               `<span style="color:var(--ios-green); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> ¡LOCALIZADO!</span>`;
             let finalMsg =
@@ -2014,6 +2034,7 @@
                 ? res.msj
                 : "Información recuperada:";
             document.getElementById("res-desc").innerText = finalMsg;
+
             if (res.tipo === "codigo") {
               document.getElementById("res-box-code").style.display = "block";
               document.getElementById("val-code").innerText = res.valor;
@@ -2024,15 +2045,39 @@
               document.getElementById("val-link").href = res.valor;
             }
           } else {
-            document.getElementById("res-title").innerHTML =
-              `<span style="color:var(--ios-orange); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> SIN RESULTADOS</span>`;
-            document.getElementById("res-desc").innerText =
-              res.msj || "No hay datos para este correo.";
+            if (searchAttempts >= 4) {
+              document.getElementById("res-title").innerHTML =
+                `<span style="color:var(--ios-red); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> ATENCIÓN REQUERIDA</span>`;
+              document.getElementById("res-desc").innerHTML =
+                `Se han realizado <b>4 intentos de búsqueda</b> y el código aún no se registra.<br><br>Por favor, <b>comunícate con nuestros asesores vía WhatsApp</b> para brindarte soporte inmediato.`;
+
+              document.getElementById("res-box-link").style.display = "block";
+              document.getElementById("val-link").href =
+                "https://api.whatsapp.com/send?text=Hola%20Cybernet,%20realice%204%20intentos%20de%20busqueda%20de%20codigo%20y%20no%20aparece.";
+              const linkBtn = document.querySelector("#val-link button");
+              if (linkBtn) {
+                linkBtn.style.background = "#25D366";
+                linkBtn.style.boxShadow = "0 4px 15px rgba(37, 211, 102, 0.4)";
+                linkBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Contactar Asesor por WhatsApp`;
+              }
+            } else {
+              document.getElementById("res-title").innerHTML =
+                `<span style="color:var(--ios-orange); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> CÓDIGO AÚN NO DISPONIBLE</span>`;
+              document.getElementById("res-desc").innerHTML =
+                `El código aún no ha cargado en el sistema (Intento ${searchAttempts} de 4).<br><br>Por favor, presiona el botón <b>'Reintentar Búsqueda'</b> para consultar de nuevo.`;
+            }
           }
         } catch (err) {
           changeStep(6);
-          document.getElementById("res-desc").innerText =
-            "Error de conexión con MySQL.";
+          if (searchAttempts >= 4) {
+            document.getElementById("res-title").innerHTML =
+              `<span style="color:var(--ios-red);">ERROR DE CONEXIÓN</span>`;
+            document.getElementById("res-desc").innerHTML =
+              `Se alcanzaron 4 intentos. Por favor comunícate con nuestros asesores vía WhatsApp.`;
+          } else {
+            document.getElementById("res-desc").innerText =
+              `Error de conexión. Presiona 'Reintentar Búsqueda' (Intento ${searchAttempts} de 4).`;
+          }
         } finally {
           btnTrack.disabled = false;
         }
