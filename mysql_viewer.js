@@ -355,14 +355,78 @@ function formatearFechaCorta(fStr) {
   return fechaPart;
 }
 
-function formatearMontoMoneda(vStr) {
+// =========================================================================
+// 💸 FORMATEADORES Y AYUDANTES DE CALENDARIO Y TEXTO EN VIVO
+// =========================================================================
+window.formatearMontoMoneda = function (vStr) {
   if (!vStr || vStr === "-") return "-";
-  let str = String(vStr).trim();
-  if (str.startsWith("$")) return str;
-  let num = parseFloat(str.replace(/\D/g, ""));
-  if (isNaN(num) || num === 0) return str;
+  let num = parseFloat(String(vStr).replace(/\D/g, ""));
+  if (isNaN(num) || num === 0) return String(vStr).trim();
   return "$" + num.toLocaleString("es-CO");
-}
+};
+
+window.formatearMontoCOP = function (input) {
+  let num = input.value.replace(/\D/g, "");
+  if (!num) {
+    input.value = "";
+    return;
+  }
+  input.value = "$" + parseInt(num, 10).toLocaleString("es-CO");
+};
+
+window.convertirPickerAFechaCorta = function (picker, targetId) {
+  if (!picker.value) return;
+  const partes = picker.value.split("-");
+  if (partes.length === 3) {
+    const mesIdx = parseInt(partes[1], 10) - 1;
+    const dia = parseInt(partes[2], 10);
+    const mesesAbrev = [
+      "ene",
+      "feb",
+      "mar",
+      "abr",
+      "may",
+      "jun",
+      "jul",
+      "ago",
+      "sep",
+      "oct",
+      "nov",
+      "dic",
+    ];
+    const target = document.getElementById(targetId);
+    if (target && mesesAbrev[mesIdx]) {
+      target.value = `${dia}-${mesesAbrev[mesIdx]}`;
+    }
+  }
+};
+
+window.convertirPickerAVencimiento = function (picker, targetId) {
+  if (!picker.value) return;
+  const partes = picker.value.split("-");
+  if (partes.length === 3) {
+    const mesIdx = parseInt(partes[1], 10) - 1;
+    const dia = parseInt(partes[2], 10);
+    const mesesMayus = [
+      "ENERO",
+      "FEBRERO",
+      "MARZO",
+      "ABRIL",
+      "MAYO",
+      "JUNIO",
+      "JULIO",
+      "AGOSTO",
+      "SEPTIEMBRE",
+      "OCTUBRE",
+      "NOVIEMBRE",
+      "DICIEMBRE",
+    ];
+    const target = document.getElementById(targetId);
+    if (target && mesesMayus[mesIdx]) {
+      target.value = `${dia}DE${mesesMayus[mesIdx]}`;
+    }
+  }
+};
 
 function cargarDatosMySQL() {
   actualizarBotonBorrarBusquedaMySQL();
@@ -588,7 +652,6 @@ function cargarDatosMySQL() {
 
         let diaVal = fila.dia || fila.fecha || "-";
 
-        // 🛡️ MUESTRA PROVEEDOR SOLO SI NO ES NETFLIX
         let esTablaNetflix = tablaOrigen.toLowerCase() === "netflix";
         let provVal = esTablaNetflix ? "-" : fila.proveedor || fila.prov || "-";
 
@@ -1061,16 +1124,23 @@ function abrirModalEditarMySQL(filaEscapada) {
   if (iClave) iClave.value = fila.clave || fila.contrasena || "";
   if (iPerfil) iPerfil.value = fila.perfil || "";
   if (iPin) iPin.value = fila.pin || "";
-  if (iVenc) iVenc.value = fila.vencimiento || "";
+  if (iVenc) {
+    iVenc.value = (fila.vencimiento || "").replace(/\s+/g, "").toUpperCase();
+  }
   if (iNombre) iNombre.value = fila.nombre || fila.cliente || "";
-  if (iNumero) iNumero.value = fila.numero || fila.telefono || "";
+  if (iNumero) {
+    iNumero.value = (fila.numero || fila.telefono || "").replace(/\s+/g, "");
+  }
   if (iFechaPago) iFechaPago.value = fila.fecha || "";
-  if (iValor)
-    iValor.value =
+  if (iValor) {
+    let rawVal =
       fila.pago_total || fila.valor || fila.monto_cobrado || fila.monto || "";
-  if (iPago)
+    iValor.value = window.formatearMontoMoneda(rawVal);
+  }
+  if (iPago) {
     iPago.value =
       fila.pago || fila.metodo || fila.banco || fila.medio_pago || "";
+  }
 
   const modal = document.getElementById("modalEditarMySQL");
   if (modal) modal.style.display = "flex";
@@ -1091,6 +1161,8 @@ function guardarEdicionMySQL(e) {
   const iFechaPago = document.getElementById("editMySQLFechaPago");
   const iValor = document.getElementById("editMySQLValor");
   const iPago = document.getElementById("editMySQLPago");
+  const iNumero = document.getElementById("editMySQLNumero");
+  const iVenc = document.getElementById("editMySQLVencimiento");
 
   const formData = new FormData();
   formData.append("accion", "editar");
@@ -1113,7 +1185,7 @@ function guardarEdicionMySQL(e) {
   formData.append("pin", document.getElementById("editMySQLPin").value.trim());
   formData.append(
     "vencimiento",
-    document.getElementById("editMySQLVencimiento").value.trim(),
+    iVenc ? iVenc.value.replace(/\s+/g, "").toUpperCase().trim() : "",
   );
   formData.append(
     "nombre",
@@ -1121,7 +1193,7 @@ function guardarEdicionMySQL(e) {
   );
   formData.append(
     "numero",
-    document.getElementById("editMySQLNumero").value.trim(),
+    iNumero ? iNumero.value.replace(/\s+/g, "").trim() : "",
   );
   formData.append("fecha", iFechaPago ? iFechaPago.value.trim() : "");
   formData.append("valor", iValor ? iValor.value.trim() : "");
@@ -1545,19 +1617,7 @@ window.pasarRegistroAHoyMySQL = function (id, correoEscapado = "") {
 };
 
 // =========================================================================
-// 💸 FORMATEADOR EN VIVO DE PESOS COLOMBIANOS (COP)
-// =========================================================================
-window.formatearMontoCOP = function (input) {
-  let num = input.value.replace(/\D/g, "");
-  if (!num) {
-    input.value = "";
-    return;
-  }
-  input.value = "$" + parseInt(num, 10).toLocaleString("es-CO");
-};
-
-// =========================================================================
-// ➕ VENTANA MODAL DE REGISTRO ÚNICO
+// ➕ VENTANA MODAL DE REGISTRO ÚNICO (CON CALENDARIO Y MÉTODOS DE PAGO)
 // =========================================================================
 window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
   if (typeof haptic === "function") haptic();
@@ -1606,7 +1666,6 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">CORREO / USUARIO</label>
-              <!-- 💡 AQUÍ SE CAMBIÓ A type="text" -->
               <input type="text" id="addNetCorreoUnico" required style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
             </div>
             <div>
@@ -1627,7 +1686,11 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
             </div>
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">VENCIMIENTO</label>
-              <input type="text" id="addNetVencimientoUnico" value="${vencDefault}" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.8rem; font-family: monospace; outline: none;">
+              <div style="position: relative; display: flex; align-items: center;">
+                <input type="text" id="addNetVencimientoUnico" value="${vencDefault}" oninput="this.value = this.value.replace(/\s+/g, '').toUpperCase()" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 30px 10px 12px; border-radius: 10px; font-size: 0.8rem; font-family: monospace; outline: none;">
+                <input type="date" onchange="window.convertirPickerAVencimiento(this, 'addNetVencimientoUnico')" style="position: absolute; right: 4px; width: 26px; height: 26px; opacity: 0; cursor: pointer; z-index: 5;">
+                <span style="position: absolute; right: 8px; pointer-events: none; font-size: 0.85rem;">📅</span>
+              </div>
             </div>
           </div>
 
@@ -1639,7 +1702,7 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
             </div>
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">TELÉFONO</label>
-              <input type="text" id="addNetTelefonoUnico" value="" placeholder="" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
+              <input type="text" id="addNetTelefonoUnico" value="" oninput="this.value = this.value.replace(/\s+/g, '')" placeholder="" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
             </div>
           </div>
 
@@ -1647,7 +1710,11 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">FECHA PAGO</label>
-              <input type="text" id="addNetFechaPagoUnico" value="${fechaContable}" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
+              <div style="position: relative; display: flex; align-items: center;">
+                <input type="text" id="addNetFechaPagoUnico" value="${fechaContable}" style="width: 100%; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 10px 30px 10px 12px; border-radius: 10px; font-size: 0.85rem; font-family: monospace; outline: none;">
+                <input type="date" onchange="window.convertirPickerAFechaCorta(this, 'addNetFechaPagoUnico')" style="position: absolute; right: 4px; width: 26px; height: 26px; opacity: 0; cursor: pointer; z-index: 5;">
+                <span style="position: absolute; right: 8px; pointer-events: none; font-size: 0.85rem;">📅</span>
+              </div>
             </div>
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">VALOR</label>
@@ -1656,11 +1723,12 @@ window.abrirModalAnadirUnPerfilNet = function (fechaEscapada) {
             <div>
               <label style="display: block; font-size: 0.68rem; font-weight: 800; color: #a1a1aa; margin-bottom: 6px; letter-spacing: 0.5px;">MÉTODO PAGO</label>
               <select id="addNetMetodoPagoUnico" style="width: 100%; height: 38px; box-sizing: border-box; background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 8px 10px; border-radius: 10px; font-size: 0.85rem; outline: none; cursor: pointer;">
-                <option value="">-</option>
+                <option value="-">-</option>
                 <option value="Nequi">Nequi</option>
-                <option value="Daviplata">Daviplata</option>
                 <option value="Bancolombia">Bancolombia</option>
                 <option value="Bre-B">Bre-B</option>
+                <option value="Daviplata">Daviplata</option>
+                <option value="Saldo Distribuidor">Saldo Distribuidor</option>
                 <option value="Dale">Dale</option>
                 <option value="Efectivo">Efectivo</option>
               </select>
@@ -1695,9 +1763,14 @@ window.guardarRegistroUnicoMySQL = function (e, fechaContable) {
   const pin = document.getElementById("addNetPinUnico").value.trim();
   const vencimiento = document
     .getElementById("addNetVencimientoUnico")
-    .value.trim();
+    .value.replace(/\s+/g, "")
+    .toUpperCase()
+    .trim();
   const cliente = document.getElementById("addNetClienteUnico").value.trim();
-  const telefono = document.getElementById("addNetTelefonoUnico").value.trim();
+  const telefono = document
+    .getElementById("addNetTelefonoUnico")
+    .value.replace(/\s+/g, "")
+    .trim();
   const fechaPago = document
     .getElementById("addNetFechaPagoUnico")
     .value.trim();
