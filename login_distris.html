@@ -21,7 +21,7 @@
 
     <style>
       /* =========================================
-         REGULACIÓN TIPOGRÁFICA GLOBAL Y VARIABLES
+         SISTEMA TIPOGRÁFICO Y VARIABLES MOBILE
          ========================================= */
       * {
         margin: 0;
@@ -61,6 +61,8 @@
         border: none;
         outline: none;
         cursor: pointer;
+        touch-action: manipulation;
+        user-select: none;
       }
 
       :root {
@@ -134,8 +136,9 @@
         flex-direction: column;
         align-items: center;
         min-height: 100vh;
-        padding: calc(env(safe-area-inset-top, 15px) + 20px) 15px
-          calc(env(safe-area-inset-bottom, 20px) + 30px) 15px;
+        min-height: 100dvh;
+        padding: calc(env(safe-area-inset-top, 15px) + 15px) 14px
+          calc(env(safe-area-inset-bottom, 20px) + 25px) 14px;
         position: relative;
         overflow-x: hidden;
         transition:
@@ -146,10 +149,10 @@
       /* FONDOS AMBIENTALES ORB */
       .bg-orb-1 {
         position: fixed;
-        top: -10vw;
-        left: -10vw;
-        width: 70vw;
-        height: 70vw;
+        top: -15vw;
+        left: -15vw;
+        width: 80vw;
+        height: 80vw;
         border-radius: 50%;
         background: radial-gradient(circle, var(--orb-1) 0%, transparent 70%);
         z-index: -1;
@@ -158,10 +161,10 @@
       }
       .bg-orb-2 {
         position: fixed;
-        bottom: -10vw;
-        right: -10vw;
-        width: 80vw;
-        height: 80vw;
+        bottom: -15vw;
+        right: -15vw;
+        width: 90vw;
+        height: 90vw;
         border-radius: 50%;
         background: radial-gradient(circle, var(--orb-2) 0%, transparent 70%);
         z-index: -1;
@@ -174,8 +177,8 @@
         position: fixed;
         top: calc(env(safe-area-inset-top, 15px) + 5px);
         right: 15px;
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         background: var(--glass-bg);
         backdrop-filter: blur(20px);
@@ -194,30 +197,29 @@
         transform: scale(0.9);
       }
 
-      /* CONTENEDOR PRINCIPAL */
+      /* CONTENEDOR PRINCIPAL MOBILE */
       .main-login-workspace {
         width: 100%;
-        max-width: 700px;
+        max-width: 440px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 32px;
+        gap: 24px;
         margin: auto;
       }
 
-      /* MODAL LOGIN / GLASSMORPHISM */
+      /* MODAL LOGIN GLASSMORPHISM */
       .login-modal {
         background: var(--glass-bg);
         backdrop-filter: blur(40px) saturate(180%);
         -webkit-backdrop-filter: blur(40px) saturate(180%);
         border: var(--glass-border);
         border-radius: 28px;
-        padding: 36px 24px;
+        padding: 30px 20px;
         width: 100%;
-        max-width: 420px;
         text-align: center;
         box-shadow: var(--glass-shadow);
-        animation: appleFadeIn 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        animation: appleFadeIn 0.4s cubic-bezier(0.25, 1, 0.5, 1);
       }
 
       @keyframes appleFadeIn {
@@ -233,13 +235,13 @@
 
       .input-ios {
         width: 100%;
-        height: 50px;
+        height: 52px;
         padding: 0 16px;
-        border-radius: 14px;
+        border-radius: 16px;
         border: var(--input-border);
         background: var(--input-bg);
         color: var(--text-primary);
-        font-size: 16px !important;
+        font-size: 16px !important; /* Evita zoom automático en iOS */
         font-weight: 600;
         outline: none;
         text-align: center;
@@ -258,9 +260,9 @@
       }
 
       .btn-ios {
-        min-height: 50px;
+        min-height: 52px;
         padding: 14px 18px;
-        border-radius: 14px;
+        border-radius: 16px;
         font-size: 0.95rem;
         font-weight: 800;
         display: inline-flex;
@@ -286,13 +288,13 @@
         width: 100%;
       }
 
-      /* SECCIÓN DE PRECIOS REVENDEDOR */
+      /* SECCIÓN DE PRECIOS REVENDEDOR RESPONSIVA */
       .profit-section {
         width: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 16px;
+        gap: 14px;
       }
 
       .profit-title-box {
@@ -300,17 +302,17 @@
       }
 
       .profit-badge {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 800;
-        letter-spacing: 1px;
+        letter-spacing: 0.8px;
         color: var(--ios-blue);
         text-transform: uppercase;
-        margin-bottom: 4px;
+        margin-bottom: 3px;
         display: block;
       }
 
       .profit-title-box h3 {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
         font-weight: 900;
         letter-spacing: -0.5px;
         color: var(--text-primary);
@@ -323,7 +325,8 @@
         border: var(--glass-border);
         border-radius: 24px;
         width: 100%;
-        overflow: hidden;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
         box-shadow: var(--glass-shadow);
       }
 
@@ -335,21 +338,23 @@
 
       .profit-table th {
         background: var(--card-header-bg);
-        padding: 14px 16px;
-        font-size: 0.72rem;
+        padding: 12px 10px;
+        font-size: 0.68rem;
         font-weight: 800;
         color: var(--text-secondary);
         text-transform: uppercase;
         letter-spacing: 0.5px;
         border-bottom: var(--card-row-border);
+        white-space: nowrap;
       }
 
       .profit-table td {
-        padding: 14px 16px;
-        font-size: 0.9rem;
+        padding: 12px 10px;
+        font-size: 0.84rem;
         font-weight: 600;
         color: var(--text-primary);
         border-bottom: var(--card-row-border);
+        white-space: nowrap;
       }
 
       .profit-table tr:last-child td {
@@ -360,24 +365,26 @@
         color: var(--ios-green) !important;
         font-weight: 800 !important;
         font-family: monospace !important;
+        font-size: 0.88rem !important;
       }
 
       .profit-strike-val {
         color: var(--text-secondary);
         text-decoration: line-through;
         font-family: monospace;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
       }
 
       .profit-price-val {
         font-family: monospace;
         font-weight: 700;
+        font-size: 0.85rem;
       }
 
-      /* TOAST APPLE FLOTANTE */
+      /* TOAST APPLE FLOTANTE EN NATIVE SAFE-AREA */
       .apple-notification-toast {
         position: fixed;
-        top: calc(env(safe-area-inset-top, 15px) + 15px);
+        top: calc(env(safe-area-inset-top, 15px) + 12px);
         left: 50%;
         transform: translateX(-50%) translateY(-90px);
         background: rgba(30, 30, 30, 0.92);
@@ -385,7 +392,7 @@
         color: #ffffff;
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        padding: 12px 24px;
+        padding: 12px 22px;
         border-radius: 22px;
         font-size: 0.85rem;
         font-weight: 600;
@@ -396,23 +403,13 @@
         max-width: 90vw;
         text-align: center;
       }
+      [data-theme="light"] .apple-notification-toast {
+        background: rgba(255, 255, 255, 0.92);
+        color: #000000;
+      }
       .apple-notification-toast.show {
         transform: translateX(-50%) translateY(0);
         opacity: 1;
-      }
-
-      @media (max-width: 480px) {
-        .login-modal {
-          padding: 28px 18px;
-        }
-        .profit-table th,
-        .profit-table td {
-          padding: 12px 10px;
-          font-size: 0.82rem;
-        }
-        .profit-title-box h3 {
-          font-size: 1.3rem;
-        }
       }
     </style>
   </head>
@@ -441,15 +438,15 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
           "
         >
           <div
             style="
               background: rgba(10, 132, 255, 0.15);
               color: var(--ios-blue);
-              width: 56px;
-              height: 56px;
+              width: 52px;
+              height: 52px;
               border-radius: 50%;
               display: flex;
               align-items: center;
@@ -459,8 +456,8 @@
             "
           >
             <svg
-              width="28"
-              height="28"
+              width="26"
+              height="26"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -472,14 +469,19 @@
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
           </div>
-          <h2>Acceso Mayoristas</h2>
+          <h2
+            style="font-size: 1.35rem; font-weight: 800; letter-spacing: -0.4px"
+          >
+            Acceso Mayoristas
+          </h2>
           <p
             id="lblSubtituloForm"
             style="
-              font-size: 0.88rem;
+              font-size: 0.84rem;
               color: var(--text-secondary);
               margin-top: 4px;
               font-weight: 500;
+              line-height: 1.35;
             "
           >
             Ingresa tu correo o celular registrado y contraseña.
@@ -490,7 +492,7 @@
         <form
           id="formLoginDistri"
           onsubmit="loginDistribuidor(event)"
-          style="display: flex; flex-direction: column; gap: 14px"
+          style="display: flex; flex-direction: column; gap: 12px"
         >
           <input
             type="text"
@@ -539,7 +541,7 @@
         <form
           id="formCambioClaveObligatorio"
           onsubmit="guardarNuevaPassword(event)"
-          style="display: none; flex-direction: column; gap: 14px"
+          style="display: none; flex-direction: column; gap: 12px"
         >
           <div
             style="
@@ -547,7 +549,7 @@
               border: 1px solid rgba(255, 159, 10, 0.3);
               border-radius: 14px;
               padding: 12px 14px;
-              font-size: 0.82rem;
+              font-size: 0.8rem;
               color: var(--ios-orange);
               font-weight: 700;
               line-height: 1.35;
