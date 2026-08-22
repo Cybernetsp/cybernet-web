@@ -27,9 +27,9 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
-          "SF Pro Text", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial,
-          sans-serif !important;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+          "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         -webkit-tap-highlight-color: transparent;
@@ -49,9 +49,9 @@
       h5,
       h6,
       a {
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
-          "SF Pro Text", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial,
-          sans-serif !important;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+          "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
       }
 
       button {
@@ -70,8 +70,9 @@
         --ios-orange: #ff9f0a;
         --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
         --success-gradient: linear-gradient(135deg, #30d158 0%, #248a3d 100%);
-        --transition-spring: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1),
-          background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        --transition-spring:
+          transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease,
+          color 0.3s ease, border-color 0.3s ease;
       }
 
       [data-theme="dark"] {
@@ -81,8 +82,8 @@
 
         --glass-bg: rgba(26, 26, 30, 0.65);
         --glass-border: 1px solid rgba(255, 255, 255, 0.12);
-        --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.5),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        --glass-shadow:
+          0 24px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
         --modal-bg: #1c1c1e;
         --card-bg: rgba(44, 44, 46, 0.6);
@@ -94,7 +95,7 @@
 
         --orb-1: rgba(10, 132, 255, 0.22);
         --orb-2: rgba(255, 69, 58, 0.18);
-        --toast-bg: rgba(44, 44, 46, 0.9);
+        --toast-bg: rgba(44, 44, 46, 0.95);
       }
 
       [data-theme="light"] {
@@ -109,7 +110,8 @@
 
         --glass-bg: rgba(255, 255, 255, 0.82);
         --glass-border: 1px solid rgba(0, 0, 0, 0.1);
-        --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.06),
+        --glass-shadow:
+          0 24px 48px rgba(0, 0, 0, 0.06),
           inset 0 1px 0 rgba(255, 255, 255, 0.6);
 
         --modal-bg: #ffffff;
@@ -136,7 +138,9 @@
           calc(env(safe-area-inset-bottom, 20px) + 30px) 15px;
         position: relative;
         overflow-x: hidden;
-        transition: background-color 0.4s ease, color 0.4s ease;
+        transition:
+          background-color 0.4s ease,
+          color 0.4s ease;
       }
 
       /* FONDOS AMBIENTALES ORB */
@@ -239,7 +243,9 @@
         font-weight: 600;
         outline: none;
         text-align: center;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        transition:
+          border-color 0.3s ease,
+          box-shadow 0.3s ease;
         caret-color: var(--ios-blue);
       }
       .input-ios:focus {
@@ -368,7 +374,7 @@
         font-weight: 700;
       }
 
-      /* TOAST APPLE */
+      /* TOAST APPLE FLOTANTE */
       .apple-notification-toast {
         position: fixed;
         top: calc(env(safe-area-inset-top, 15px) + 15px);
@@ -379,16 +385,20 @@
         color: #ffffff;
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        padding: 10px 22px;
+        padding: 12px 24px;
         border-radius: 22px;
         font-size: 0.85rem;
         font-weight: 600;
         opacity: 0;
         transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        z-index: 20000;
+        z-index: 200000;
         box-shadow: var(--glass-shadow);
         max-width: 90vw;
         text-align: center;
+      }
+      [data-theme="light"] .apple-notification-toast {
+        background: rgba(255, 255, 255, 0.92);
+        color: #000000;
       }
       .apple-notification-toast.show {
         transform: translateX(-50%) translateY(0);
@@ -467,7 +477,15 @@
             </svg>
           </div>
           <h2>Acceso Mayoristas</h2>
-          <p id="lblSubtituloForm" class="instruction" style="margin-bottom: 0">
+          <p
+            id="lblSubtituloForm"
+            style="
+              font-size: 0.88rem;
+              color: var(--text-secondary);
+              margin-top: 4px;
+              font-weight: 500;
+            "
+          >
             Ingresa tu correo o celular registrado y contraseña.
           </p>
         </div>
@@ -631,7 +649,14 @@
             </thead>
             <tbody id="tablaProfitBody">
               <tr>
-                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                <td
+                  colspan="4"
+                  style="
+                    text-align: center;
+                    color: var(--text-secondary);
+                    padding: 20px;
+                  "
+                >
                   Cargando precios en tiempo real desde MySQL...
                 </td>
               </tr>
@@ -641,16 +666,21 @@
       </section>
     </div>
 
-    <!-- SCRIPT DE LÓGICA -->
+    <!-- SCRIPT DE LÓGICA DE LOGIN Y CONEXIONES A MYSQL -->
     <script>
-      const API_URL = "https://api.cybernetsp.com/acciones_distribuidores.php";
-      const API_PRECIOS_URL = "https://api.cybernetsp.com/api_precios.php";
+      const API_PRIMARY_URL =
+        "https://api.cybernetsp.com/acciones_distribuidores.php";
+      const API_FALLBACK_URL = "acciones_distribuidores.php";
+
+      const API_PRECIOS_PRIMARY = "https://api.cybernetsp.com/api_precios.php";
+      const API_PRECIOS_FALLBACK = "api_precios.php";
+
       let tempUserCache = null;
 
-      function triggerToast(msgHTML) {
+      function triggerToast(msgText) {
         const toast = document.getElementById("appleToast");
         if (!toast) return;
-        toast.innerHTML = msgHTML;
+        toast.innerHTML = msgText;
         toast.classList.add("show");
         setTimeout(() => {
           toast.classList.remove("show");
@@ -663,7 +693,8 @@
 
       function toggleTheme() {
         haptic();
-        const currentTheme = document.documentElement.getAttribute("data-theme");
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme");
         const newTheme = currentTheme === "light" ? "dark" : "light";
         document.documentElement.setAttribute("data-theme", newTheme);
         localStorage.setItem("cyber_theme", newTheme);
@@ -680,8 +711,35 @@
         }
       }
 
+      // FUNCIÓN ROBUSTA DE PETICIÓN A API (CON RESPETO A CORS / FALLBACK LOCAL)
+      async function postRequestWithFallback(
+        primaryUrl,
+        fallbackUrl,
+        formData,
+      ) {
+        try {
+          const response = await fetch(primaryUrl, {
+            method: "POST",
+            body: formData,
+            mode: "cors",
+          });
+          if (!response.ok) throw new Error("HTTP error " + response.status);
+          return await response.text();
+        } catch (error) {
+          console.warn(
+            "Llamada primaria falló, ejecutando fallback local...",
+            error,
+          );
+          const fallbackResponse = await fetch(fallbackUrl, {
+            method: "POST",
+            body: formData,
+          });
+          return await fallbackResponse.text();
+        }
+      }
+
       // 1. INICIAR SESIÓN
-      function loginDistribuidor(e) {
+      async function loginDistribuidor(e) {
         e.preventDefault();
         haptic();
 
@@ -692,7 +750,7 @@
         const btn = document.getElementById("btnLoginSubmit");
 
         if (!credencial || !password) {
-          alert("Completa todos los campos.");
+          triggerToast("⚠️ Completa todos los campos obligatorios.");
           return;
         }
 
@@ -704,41 +762,43 @@
         formData.append("credencial", credencial);
         formData.append("password", password);
 
-        fetch(API_URL, { method: "POST", body: formData })
-          .then((res) => res.text())
-          .then((text) => {
-            btn.disabled = false;
-            btn.innerHTML = `Iniciar Sesión <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+        try {
+          const text = await postRequestWithFallback(
+            API_PRIMARY_URL,
+            API_FALLBACK_URL,
+            formData,
+          );
 
-            let res;
-            try {
-              res = JSON.parse(text);
-            } catch (err) {
-              alert(
-                "❌ Error de respuesta PHP:\n\n" +
-                  (text.trim() || "Respuesta vacía del servidor."),
-              );
-              return;
-            }
+          btn.disabled = false;
+          btn.innerHTML = `Iniciar Sesión <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
 
-            if (res && res.status === "success" && res.data) {
-              tempUserCache = res.data;
+          let res;
+          try {
+            res = JSON.parse(text);
+          } catch (err) {
+            triggerToast("❌ Respuesta no válida del servidor.");
+            return;
+          }
 
-              if (password === "123456" || res.data.requiere_cambio_pass) {
-                activarFormularioCambioClave();
-              } else {
-                guardarSesionYRedireccionar(res.data);
-              }
+          if (res && res.status === "success" && res.data) {
+            tempUserCache = res.data;
+
+            if (password === "123456" || res.data.requiere_cambio_pass) {
+              activarFormularioCambioClave();
             } else {
-              alert("❌ " + (res ? res.message : "Credenciales incorrectas."));
+              guardarSesionYRedireccionar(res.data);
             }
-          })
-          .catch((err) => {
-            console.error(err);
-            btn.disabled = false;
-            btn.innerHTML = `Iniciar Sesión <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
-            alert("❌ Error de red / CORS: " + err.message);
-          });
+          } else {
+            triggerToast(
+              "❌ " + (res ? res.message : "Credenciales incorrectas."),
+            );
+          }
+        } catch (err) {
+          console.error(err);
+          btn.disabled = false;
+          btn.innerHTML = `Iniciar Sesión <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+          triggerToast("❌ Error de comunicación con el servidor.");
+        }
       }
 
       // 2. ACTIVAR PASO DE CAMBIO DE CLAVE
@@ -752,7 +812,7 @@
       }
 
       // 3. GUARDAR NUEVA CONTRASEÑA EN MYSQL
-      function guardarNuevaPassword(e) {
+      async function guardarNuevaPassword(e) {
         e.preventDefault();
         haptic();
 
@@ -765,17 +825,17 @@
         const btn = document.getElementById("btnCambiarClaveSubmit");
 
         if (nuevaClave.length < 4) {
-          alert("La contraseña debe tener al menos 4 caracteres.");
+          triggerToast("⚠️ La contraseña debe tener al menos 4 caracteres.");
           return;
         }
 
         if (nuevaClave === "123456") {
-          alert("No puedes volver a usar la clave genérica 123456.");
+          triggerToast("⚠️ No puedes volver a usar la clave genérica 123456.");
           return;
         }
 
         if (nuevaClave !== confirmarClave) {
-          alert("Las contraseñas no coinciden.");
+          triggerToast("⚠️ Las contraseñas no coinciden.");
           return;
         }
 
@@ -787,39 +847,38 @@
         formData.append("id", tempUserCache.id);
         formData.append("nueva_password", nuevaClave);
 
-        fetch(API_URL, { method: "POST", body: formData })
-          .then((res) => res.text())
-          .then((text) => {
-            btn.disabled = false;
-            btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Actualizar Clave e Ingresar`;
+        try {
+          const text = await postRequestWithFallback(
+            API_PRIMARY_URL,
+            API_FALLBACK_URL,
+            formData,
+          );
 
-            let res;
-            try {
-              res = JSON.parse(text);
-            } catch (err) {
-              alert(
-                "❌ Error de respuesta PHP:\n\n" +
-                  (text.trim() || "Respuesta vacía del servidor."),
-              );
-              return;
-            }
+          btn.disabled = false;
+          btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Actualizar Clave e Ingresar`;
 
-            if (res && res.status === "success") {
-              triggerToast("Contraseña actualizada correctamente");
-              guardarSesionYRedireccionar(tempUserCache);
-            } else {
-              alert(
-                "❌ Error: " +
-                  (res ? res.message : "No se pudo actualizar la clave."),
-              );
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-            btn.disabled = false;
-            btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Actualizar Clave e Ingresar`;
-            alert("❌ Error de comunicación con MySQL.");
-          });
+          let res;
+          try {
+            res = JSON.parse(text);
+          } catch (err) {
+            triggerToast("❌ Error de respuesta del servidor.");
+            return;
+          }
+
+          if (res && res.status === "success") {
+            triggerToast("Contraseña actualizada correctamente");
+            guardarSesionYRedireccionar(tempUserCache);
+          } else {
+            triggerToast(
+              "❌ " + (res ? res.message : "No se pudo actualizar la clave."),
+            );
+          }
+        } catch (err) {
+          console.error(err);
+          btn.disabled = false;
+          btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Actualizar Clave e Ingresar`;
+          triggerToast("❌ Error de comunicación con MySQL.");
+        }
       }
 
       // 4. GUARDAR SESIÓN Y ENTRAR A DISTRIBUIDORES.HTML
@@ -834,7 +893,7 @@
         }, 300);
       }
 
-      // 5. NOMBRES BONITOS DE SERVICIOS
+      // 5. MAPA DE NOMBRES DE SERVICIOS
       const NOMBRES_SERVICIOS = {
         NETFLIX: "Netflix Colombia",
         "DISNEY-PREMIUM": "Disney+ Premium",
@@ -849,7 +908,7 @@
         UNIVERSAL: "Universal+",
         CANVA: "Canva Pro",
         SPOTIFY: "Spotify Premium",
-        YOUTUBE: "YouTube Premium"
+        YOUTUBE: "YouTube Premium",
       };
 
       // 6. CARGAR TABLA COMPARATIVA DE PRECIOS Y MÁRGENES DESDE MYSQL
@@ -866,13 +925,21 @@
           formDistri.append("accion", "obtener");
           formDistri.append("tipo", "distribuidores");
 
-          const [resTienda, resDistri] = await Promise.all([
-            fetch(API_PRECIOS_URL, { method: "POST", body: formTienda }),
-            fetch(API_PRECIOS_URL, { method: "POST", body: formDistri })
+          const [textTienda, textDistri] = await Promise.all([
+            postRequestWithFallback(
+              API_PRECIOS_PRIMARY,
+              API_PRECIOS_FALLBACK,
+              formTienda,
+            ),
+            postRequestWithFallback(
+              API_PRECIOS_PRIMARY,
+              API_PRECIOS_FALLBACK,
+              formDistri,
+            ),
           ]);
 
-          const dataTienda = await resTienda.json();
-          const dataDistri = await resDistri.json();
+          const dataTienda = JSON.parse(textTienda);
+          const dataDistri = JSON.parse(textDistri);
 
           if (
             dataTienda.status === "success" &&
@@ -889,11 +956,13 @@
             let htmlTable = "";
             dataDistri.data.forEach((item) => {
               const precioDistri = parseFloat(item.precio) || 0;
-              const precioSugerido = mapaTienda[item.codigo] || (precioDistri * 1.8);
+              const precioSugerido =
+                mapaTienda[item.codigo] || precioDistri * 1.8;
               const ganancia = precioSugerido - precioDistri;
 
               if (precioDistri > 0) {
-                const nombreMostrar = NOMBRES_SERVICIOS[item.codigo] || item.codigo;
+                const nombreMostrar =
+                  NOMBRES_SERVICIOS[item.codigo] || item.codigo;
                 htmlTable += `
                   <tr>
                     <td>${nombreMostrar}</td>
@@ -905,11 +974,14 @@
               }
             });
 
-            tbody.innerHTML = htmlTable || '<tr><td colspan="4" style="text-align:center; padding:20px;">Sin datos disponibles.</td></tr>';
+            tbody.innerHTML =
+              htmlTable ||
+              '<tr><td colspan="4" style="text-align:center; padding:20px;">Sin datos disponibles.</td></tr>';
           }
         } catch (err) {
           console.error("Error al cargar comparativa de precios:", err);
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--ios-red); padding:20px;">Error al conectar con la base de datos de precios.</td></tr>';
+          tbody.innerHTML =
+            '<tr><td colspan="4" style="text-align:center; color: var(--ios-red); padding:20px;">Error al conectar con la base de datos de precios.</td></tr>';
         }
       }
 
