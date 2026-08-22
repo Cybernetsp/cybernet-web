@@ -126,8 +126,11 @@ function redondearPrecioArriba(val) {
   let mil = Math.floor(entero / 1000);
   let residuo = entero % 1000;
 
-  if (residuo === 0) return entero;
+  // Si ya es un número cerrado exacto (.000 o .900), se mantiene intacto
+  if (residuo === 0 || residuo === 900) return entero;
+  // Si tiene residuo de hasta 400 (ej: 19.300), sube comercialmente a .900
   if (residuo <= 400) return mil * 1000 + 900;
+  // Si el residuo supera 400 (ej: 19.500 o 36.847,5), sube al mil superior exacto
   return (mil + 1) * 1000;
 }
 
@@ -232,7 +235,7 @@ function ajustarPantallas(id, delta) {
   actualizarCarrito();
 }
 
-// 🧮 SIMULADOR DINÁMICO DE COMBOS CON REDONDEO SUPERIOR
+// 🧮 SIMULADOR DINÁMICO DE COMBOS Y MATEMÁTICA CONSISTENTE DE SUBTOTALES
 function simularPrecioCart(tempCart, meses) {
   const streamingItems = tempCart.filter((i) => i.type !== "addon");
   const addonPlats = tempCart.filter((i) => i.type === "addon");
@@ -297,8 +300,11 @@ function simularPrecioCart(tempCart, meses) {
   if (meses === 4) pctVigencia = 0.25;
   if (meses === 5) pctVigencia = 0.3;
 
-  let descVigencia = Math.round(streamingPuroBase * pctVigencia);
-  let netoStreaming = redondearPrecioArriba(subtotalStreaming - descVigencia);
+  let descVigenciaBruto = subtotalStreaming * pctVigencia;
+  let netoStreaming = redondearPrecioArriba(
+    subtotalStreaming - descVigenciaBruto,
+  );
+  let descVigencia = subtotalStreaming - netoStreaming;
 
   let precioAddons = addonPlats.reduce((sum, item) => {
     let pAddon = PLATAFORMAS_INFO[item.id].price || item.price || 0;
@@ -1709,7 +1715,7 @@ function animarYAbrirCaja() {
                 ⏱️ El regalo expira en: <span id="giftClock">15:00</span>
             </div>
             
-            <button class="btn-ios btn-success w-100" style="margin-top:25px; padding:14px;" onclick="aplicarRegaloYIrAlCarrito()">Reclamar y activar descuento</button>
+            <button class="btn-ios btn-success w-100" style="margin-top:25px; padding:14px; width: 100%; display: flex; align-items: center; justify-content: center;" onclick="aplicarRegaloYIrAlCarrito()">Reclamar y activar descuento</button>
         `;
 
     iniciarRelojRegalo();
