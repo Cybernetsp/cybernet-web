@@ -8,47 +8,426 @@
     />
     <title>Cybernet - Login Mayoristas</title>
 
+    <link rel="icon" type="image/jpeg" href="logo.jpeg" />
+    <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#000000" />
-    <link rel="apple-touch-icon" href="icon-192.png" />
-    <link rel="stylesheet" href="distribuidores.css" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Cybernet" />
+    <link rel="apple-touch-icon" href="logo.jpeg" />
 
     <style>
+      /* =========================================
+         REGULACIÓN TIPOGRÁFICA GLOBAL Y VARIABLES
+         ========================================= */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+          "SF Pro Text", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial,
+          sans-serif !important;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button,
+      input,
+      select,
+      textarea,
+      span,
+      div,
+      p,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      a {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+          "SF Pro Text", "SF Pro", "Segoe UI", Roboto, Helvetica, Arial,
+          sans-serif !important;
+      }
+
+      button {
+        appearance: none;
+        -webkit-appearance: none;
+        background: none;
+        border: none;
+        outline: none;
+        cursor: pointer;
+      }
+
+      :root {
+        --ios-blue: #0a84ff;
+        --ios-green: #30d158;
+        --ios-red: #ff453a;
+        --ios-orange: #ff9f0a;
+        --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
+        --success-gradient: linear-gradient(135deg, #30d158 0%, #248a3d 100%);
+        --transition-spring: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1),
+          background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+
+      [data-theme="dark"] {
+        --page-bg: #000000;
+        --text-primary: #ffffff;
+        --text-secondary: rgba(235, 235, 245, 0.65);
+
+        --glass-bg: rgba(26, 26, 30, 0.65);
+        --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+        --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+        --modal-bg: #1c1c1e;
+        --card-bg: rgba(44, 44, 46, 0.6);
+        --card-header-bg: rgba(255, 255, 255, 0.05);
+        --card-row-border: 1px solid rgba(255, 255, 255, 0.08);
+
+        --input-bg: rgba(0, 0, 0, 0.5);
+        --input-border: 1px solid rgba(255, 255, 255, 0.15);
+
+        --orb-1: rgba(10, 132, 255, 0.22);
+        --orb-2: rgba(255, 69, 58, 0.18);
+        --toast-bg: rgba(44, 44, 46, 0.9);
+      }
+
+      [data-theme="light"] {
+        --ios-blue: #007aff;
+        --ios-green: #34c759;
+        --ios-red: #ff3b30;
+        --ios-orange: #ff9500;
+
+        --page-bg: #f2f2f7;
+        --text-primary: #000000;
+        --text-secondary: rgba(60, 60, 67, 0.65);
+
+        --glass-bg: rgba(255, 255, 255, 0.82);
+        --glass-border: 1px solid rgba(0, 0, 0, 0.1);
+        --glass-shadow: 0 24px 48px rgba(0, 0, 0, 0.06),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+        --modal-bg: #ffffff;
+        --card-bg: #ffffff;
+        --card-header-bg: rgba(0, 0, 0, 0.03);
+        --card-row-border: 1px solid rgba(0, 0, 0, 0.06);
+
+        --input-bg: rgba(255, 255, 255, 0.85);
+        --input-border: 1px solid rgba(0, 0, 0, 0.15);
+
+        --orb-1: rgba(10, 132, 255, 0.12);
+        --orb-2: rgba(255, 69, 58, 0.1);
+        --toast-bg: rgba(255, 255, 255, 0.95);
+      }
+
       body {
+        background-color: var(--page-bg);
+        color: var(--text-primary);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         min-height: 100vh;
-        min-height: -webkit-fill-available;
+        padding: calc(env(safe-area-inset-top, 15px) + 20px) 15px
+          calc(env(safe-area-inset-bottom, 20px) + 30px) 15px;
+        position: relative;
+        overflow-x: hidden;
+        transition: background-color 0.4s ease, color 0.4s ease;
+      }
+
+      /* FONDOS AMBIENTALES ORB */
+      .bg-orb-1 {
+        position: fixed;
+        top: -10vw;
+        left: -10vw;
+        width: 70vw;
+        height: 70vw;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--orb-1) 0%, transparent 70%);
+        z-index: -1;
+        pointer-events: none;
+        transition: background 0.4s ease;
+      }
+      .bg-orb-2 {
+        position: fixed;
+        bottom: -10vw;
+        right: -10vw;
+        width: 80vw;
+        height: 80vw;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--orb-2) 0%, transparent 70%);
+        z-index: -1;
+        pointer-events: none;
+        transition: background 0.4s ease;
+      }
+
+      /* BOTÓN FLOTANTE MODO CLARO / OSCURO */
+      .theme-toggle-btn {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 15px) + 5px);
+        right: 15px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: var(--glass-border);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 12px;
-        box-sizing: border-box;
+        cursor: pointer;
+        z-index: 100;
+        transition: var(--transition-spring);
+        color: var(--text-primary);
       }
-      .login-container {
-        display: flex;
+      .theme-toggle-btn:active {
+        transform: scale(0.9);
+      }
+
+      /* CONTENEDOR PRINCIPAL */
+      .main-login-workspace {
         width: 100%;
+        max-width: 700px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+        margin: auto;
+      }
+
+      /* MODAL LOGIN / GLASSMORPHISM */
+      .login-modal {
+        background: var(--glass-bg);
+        backdrop-filter: blur(40px) saturate(180%);
+        -webkit-backdrop-filter: blur(40px) saturate(180%);
+        border: var(--glass-border);
+        border-radius: 28px;
+        padding: 36px 24px;
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+        box-shadow: var(--glass-shadow);
+        animation: appleFadeIn 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+
+      @keyframes appleFadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.96) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .input-ios {
+        width: 100%;
+        height: 50px;
+        padding: 0 16px;
+        border-radius: 14px;
+        border: var(--input-border);
+        background: var(--input-bg);
+        color: var(--text-primary);
+        font-size: 16px !important;
+        font-weight: 600;
+        outline: none;
+        text-align: center;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        caret-color: var(--ios-blue);
+      }
+      .input-ios:focus {
+        border-color: var(--ios-blue);
+        box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25);
+      }
+      .input-ios::placeholder {
+        color: var(--text-secondary);
+        font-weight: 400;
+      }
+
+      .btn-ios {
+        min-height: 50px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        box-sizing: border-box;
+        gap: 8px;
+        transition: var(--transition-spring);
       }
-      .login-modal {
-        max-width: 400px;
-        width: 92%;
-        padding: 28px 20px;
+      .btn-ios:active {
+        transform: scale(0.97);
+      }
+      .btn-primary {
+        background: var(--ai-gradient);
+        color: #ffffff;
+        box-shadow: 0 6px 20px rgba(10, 132, 255, 0.35);
+      }
+      .btn-success {
+        background: var(--success-gradient);
+        color: #ffffff;
+        box-shadow: 0 6px 20px rgba(48, 209, 88, 0.35);
+      }
+      .w-100 {
+        width: 100%;
+      }
+
+      /* SECCIÓN DE PRECIOS REVENDEDOR */
+      .profit-section {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .profit-title-box {
         text-align: center;
-        box-sizing: border-box;
       }
-      @media (max-width: 360px) {
+
+      .profit-badge {
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: var(--ios-blue);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        display: block;
+      }
+
+      .profit-title-box h3 {
+        font-size: 1.5rem;
+        font-weight: 900;
+        letter-spacing: -0.5px;
+        color: var(--text-primary);
+      }
+
+      .profit-table-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        border: var(--glass-border);
+        border-radius: 24px;
+        width: 100%;
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+      }
+
+      .profit-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+      }
+
+      .profit-table th {
+        background: var(--card-header-bg);
+        padding: 14px 16px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: var(--card-row-border);
+      }
+
+      .profit-table td {
+        padding: 14px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        border-bottom: var(--card-row-border);
+      }
+
+      .profit-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .profit-gain-val {
+        color: var(--ios-green) !important;
+        font-weight: 800 !important;
+        font-family: monospace !important;
+      }
+
+      .profit-strike-val {
+        color: var(--text-secondary);
+        text-decoration: line-through;
+        font-family: monospace;
+        font-size: 0.85rem;
+      }
+
+      .profit-price-val {
+        font-family: monospace;
+        font-weight: 700;
+      }
+
+      /* TOAST APPLE */
+      .apple-notification-toast {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 15px) + 15px);
+        left: 50%;
+        transform: translateX(-50%) translateY(-90px);
+        background: rgba(30, 30, 30, 0.92);
+        border: var(--glass-border);
+        color: #ffffff;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        padding: 10px 22px;
+        border-radius: 22px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 20000;
+        box-shadow: var(--glass-shadow);
+        max-width: 90vw;
+        text-align: center;
+      }
+      .apple-notification-toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+
+      @media (max-width: 480px) {
         .login-modal {
-          padding: 20px 14px;
+          padding: 28px 18px;
+        }
+        .profit-table th,
+        .profit-table td {
+          padding: 12px 10px;
+          font-size: 0.82rem;
+        }
+        .profit-title-box h3 {
+          font-size: 1.3rem;
         }
       }
     </style>
   </head>
   <body>
-    <!-- NOTIFICACIONES TOAST ESTILO APPLE -->
-    <div id="appleToast"></div>
+    <!-- BOTÓN TEMA -->
+    <button
+      id="theme-toggle"
+      class="theme-toggle-btn"
+      onclick="toggleTheme()"
+      aria-label="Cambiar tema"
+    ></button>
 
-    <!-- CONTENEDOR PRINCIPAL DE LOGIN -->
-    <div class="login-container">
+    <!-- FONDOS AMBIENTALES -->
+    <div class="bg-orb-1"></div>
+    <div class="bg-orb-2"></div>
+
+    <!-- NOTIFICACIONES TOAST -->
+    <div id="appleToast" class="apple-notification-toast"></div>
+
+    <div class="main-login-workspace">
+      <!-- CONTENEDOR LOGIN -->
       <div class="modal-ios login-modal">
         <!-- ICONO Y ENCABEZADO -->
         <div
@@ -56,14 +435,15 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
           "
         >
           <div
             style="
               background: rgba(10, 132, 255, 0.15);
               color: var(--ios-blue);
-              padding: 14px;
+              width: 56px;
+              height: 56px;
               border-radius: 50%;
               display: flex;
               align-items: center;
@@ -86,26 +466,8 @@
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
           </div>
-          <h2
-            style="
-              color: var(--text-primary);
-              font-size: 1.45rem;
-              font-weight: 800;
-              letter-spacing: -0.5px;
-              margin: 0 0 6px 0;
-            "
-          >
-            Acceso Mayoristas
-          </h2>
-          <p
-            id="lblSubtituloForm"
-            style="
-              font-size: 0.85rem;
-              margin: 0;
-              line-height: 1.35;
-              color: var(--text-secondary);
-            "
-          >
+          <h2>Acceso Mayoristas</h2>
+          <p id="lblSubtituloForm" class="instruction" style="margin-bottom: 0">
             Ingresa tu correo o celular registrado y contraseña.
           </p>
         </div>
@@ -114,7 +476,7 @@
         <form
           id="formLoginDistri"
           onsubmit="loginDistribuidor(event)"
-          style="display: flex; flex-direction: column; gap: 12px"
+          style="display: flex; flex-direction: column; gap: 14px"
         >
           <input
             type="text"
@@ -125,12 +487,6 @@
             autocomplete="username"
             autocapitalize="none"
             spellcheck="false"
-            style="
-              padding: 13px 14px;
-              text-align: center;
-              font-weight: 700;
-              font-size: 0.95rem;
-            "
           />
 
           <input
@@ -141,25 +497,12 @@
             required
             autocomplete="current-password"
             autocapitalize="none"
-            style="
-              padding: 13px 14px;
-              text-align: center;
-              font-weight: 700;
-              font-size: 0.95rem;
-            "
           />
 
           <button
             type="submit"
             id="btnLoginSubmit"
             class="btn-ios btn-primary w-100"
-            style="
-              padding: 13px;
-              font-size: 0.95rem;
-              font-weight: 800;
-              border-radius: 14px;
-              margin-top: 4px;
-            "
           >
             Iniciar Sesión
             <svg
@@ -182,15 +525,15 @@
         <form
           id="formCambioClaveObligatorio"
           onsubmit="guardarNuevaPassword(event)"
-          style="display: none; flex-direction: column; gap: 12px"
+          style="display: none; flex-direction: column; gap: 14px"
         >
           <div
             style="
               background: rgba(255, 159, 10, 0.12);
               border: 1px solid rgba(255, 159, 10, 0.3);
               border-radius: 14px;
-              padding: 10px 12px;
-              font-size: 0.8rem;
+              padding: 12px 14px;
+              font-size: 0.82rem;
               color: var(--ios-orange);
               font-weight: 700;
               line-height: 1.35;
@@ -233,12 +576,6 @@
             minlength="4"
             autocomplete="new-password"
             autocapitalize="none"
-            style="
-              padding: 13px 14px;
-              text-align: center;
-              font-weight: 700;
-              font-size: 0.95rem;
-            "
           />
 
           <input
@@ -250,25 +587,12 @@
             minlength="4"
             autocomplete="new-password"
             autocapitalize="none"
-            style="
-              padding: 13px 14px;
-              text-align: center;
-              font-weight: 700;
-              font-size: 0.95rem;
-            "
           />
 
           <button
             type="submit"
             id="btnCambiarClaveSubmit"
             class="btn-ios btn-success w-100"
-            style="
-              padding: 13px;
-              font-size: 0.95rem;
-              font-weight: 800;
-              border-radius: 14px;
-              margin-top: 4px;
-            "
           >
             <svg
               width="18"
@@ -287,11 +611,40 @@
           </button>
         </form>
       </div>
+
+      <!-- TABLA DE PRECIOS REVENDEDOR Y MÁRGENES DE GANANCIA -->
+      <section class="profit-section">
+        <div class="profit-title-box">
+          <span class="profit-badge">Precios de Revendedor</span>
+          <h3>Cuánto ganás por cuenta</h3>
+        </div>
+
+        <div class="profit-table-card">
+          <table class="profit-table">
+            <thead>
+              <tr>
+                <th>Servicio</th>
+                <th style="text-align: right">Tu Precio</th>
+                <th style="text-align: right">Sugerido</th>
+                <th style="text-align: right">Ganás</th>
+              </tr>
+            </thead>
+            <tbody id="tablaProfitBody">
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                  Cargando precios en tiempo real desde MySQL...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
 
-    <!-- SCRIPT DE LÓGICA DE LOGIN Y CAMBIO DE CLAVE -->
+    <!-- SCRIPT DE LÓGICA -->
     <script>
       const API_URL = "https://api.cybernetsp.com/acciones_distribuidores.php";
+      const API_PRECIOS_URL = "https://api.cybernetsp.com/api_precios.php";
       let tempUserCache = null;
 
       function triggerToast(msgHTML) {
@@ -306,6 +659,25 @@
 
       function haptic() {
         if (navigator.vibrate) navigator.vibrate(15);
+      }
+
+      function toggleTheme() {
+        haptic();
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "light" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("cyber_theme", newTheme);
+        updateThemeIcon(newTheme);
+      }
+
+      function updateThemeIcon(theme) {
+        const btn = document.getElementById("theme-toggle");
+        if (!btn) return;
+        if (theme === "light") {
+          btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+        } else {
+          btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        }
       }
 
       // 1. INICIAR SESIÓN
@@ -325,7 +697,7 @@
         }
 
         btn.disabled = true;
-        btn.innerHTML = `Verificando...`;
+        btn.innerText = "Verificando...";
 
         const formData = new FormData();
         formData.append("accion", "login_distribuidor");
@@ -408,7 +780,7 @@
         }
 
         btn.disabled = true;
-        btn.innerHTML = `Guardando en MySQL...`;
+        btn.innerText = "Guardando en MySQL...";
 
         const formData = new FormData();
         formData.append("accion", "cambiar_password_distribuidor");
@@ -462,11 +834,95 @@
         }, 300);
       }
 
-      // Auto-redirección si ya tiene sesión activa
+      // 5. NOMBRES BONITOS DE SERVICIOS
+      const NOMBRES_SERVICIOS = {
+        NETFLIX: "Netflix Colombia",
+        "DISNEY-PREMIUM": "Disney+ Premium",
+        "DISNEY-ESTANDAR": "Disney Estándar",
+        "AMAZON-PRIME-VIDEO": "Amazon Prime",
+        "HBO-MAX": "HBO Max",
+        PARAMOUNT: "Paramount+",
+        VIX: "Vix+",
+        PLEX: "Plex TV",
+        CRUNCHYROLL: "Crunchyroll",
+        APPLE: "Apple TV+",
+        UNIVERSAL: "Universal+",
+        CANVA: "Canva Pro",
+        SPOTIFY: "Spotify Premium",
+        YOUTUBE: "YouTube Premium"
+      };
+
+      // 6. CARGAR TABLA COMPARATIVA DE PRECIOS Y MÁRGENES DESDE MYSQL
+      async function cargarTablaComparativaPrecios() {
+        const tbody = document.getElementById("tablaProfitBody");
+        if (!tbody) return;
+
+        try {
+          const formTienda = new FormData();
+          formTienda.append("accion", "obtener");
+          formTienda.append("tipo", "clientes");
+
+          const formDistri = new FormData();
+          formDistri.append("accion", "obtener");
+          formDistri.append("tipo", "distribuidores");
+
+          const [resTienda, resDistri] = await Promise.all([
+            fetch(API_PRECIOS_URL, { method: "POST", body: formTienda }),
+            fetch(API_PRECIOS_URL, { method: "POST", body: formDistri })
+          ]);
+
+          const dataTienda = await resTienda.json();
+          const dataDistri = await resDistri.json();
+
+          if (
+            dataTienda.status === "success" &&
+            dataDistri.status === "success" &&
+            Array.isArray(dataDistri.data)
+          ) {
+            const mapaTienda = {};
+            if (Array.isArray(dataTienda.data)) {
+              dataTienda.data.forEach((i) => {
+                mapaTienda[i.codigo] = parseFloat(i.precio) || 0;
+              });
+            }
+
+            let htmlTable = "";
+            dataDistri.data.forEach((item) => {
+              const precioDistri = parseFloat(item.precio) || 0;
+              const precioSugerido = mapaTienda[item.codigo] || (precioDistri * 1.8);
+              const ganancia = precioSugerido - precioDistri;
+
+              if (precioDistri > 0) {
+                const nombreMostrar = NOMBRES_SERVICIOS[item.codigo] || item.codigo;
+                htmlTable += `
+                  <tr>
+                    <td>${nombreMostrar}</td>
+                    <td style="text-align: right;" class="profit-price-val">$${Math.round(precioDistri).toLocaleString("es-CO")}</td>
+                    <td style="text-align: right;" class="profit-strike-val">$${Math.round(precioSugerido).toLocaleString("es-CO")}</td>
+                    <td style="text-align: right;" class="profit-gain-val">+$${Math.round(ganancia).toLocaleString("es-CO")}</td>
+                  </tr>
+                `;
+              }
+            });
+
+            tbody.innerHTML = htmlTable || '<tr><td colspan="4" style="text-align:center; padding:20px;">Sin datos disponibles.</td></tr>';
+          }
+        } catch (err) {
+          console.error("Error al cargar comparativa de precios:", err);
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--ios-red); padding:20px;">Error al conectar con la base de datos de precios.</td></tr>';
+        }
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("cyber_theme") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        updateThemeIcon(savedTheme);
+
         const savedTel = localStorage.getItem("active_distri_tel");
         if (savedTel) {
           window.location.href = "distribuidores.html";
+        } else {
+          cargarTablaComparativaPrecios();
         }
       });
     </script>
