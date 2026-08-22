@@ -21,7 +21,7 @@
 
     <style>
       /* =========================================
-         REGULACIÓN TIPOGRÁFICA GLOBAL (LETRA IPHONE SAN FRANCISCO)
+         REGULACIÓN TIPOGRÁFICA GLOBAL (SAN FRANCISCO / IPHONE)
          ========================================= */
       * {
         margin: 0;
@@ -29,7 +29,7 @@
         box-sizing: border-box;
         font-family:
           -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-          "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+          "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         -webkit-tap-highlight-color: transparent;
@@ -51,7 +51,7 @@
       a {
         font-family:
           -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-          "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+          "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
       }
 
       button {
@@ -337,7 +337,7 @@
         }
       }
 
-      /* CAMPOS DE ENTRADA (Móvil & Escritorio) */
+      /* CAMPOS DE ENTRADA */
       input {
         width: 100%;
         height: 50px;
@@ -466,7 +466,7 @@
         }
       }
 
-      /* MODAL DESPLEGABLE INFERIOR DE SERVICIOS */
+      /* MODAL DE SERVICIOS */
       .modal-overlay {
         display: none;
         position: fixed;
@@ -761,7 +761,7 @@
       }
 
       /* =========================================
-         ESTILOS CORREGIDOS DEL CHATBOT ASISTENTE
+         ESTILOS CORREGIDOS Y PERFECCIONADOS DEL CHATBOT
          ========================================= */
       .chat-fab-btn {
         position: fixed;
@@ -821,7 +821,7 @@
         justify-content: center;
       }
 
-      /* CONTROL REESTRUCTURADO DEL CUADRO DEL CHAT (DISPLAY NONE EN REPOSO) */
+      /* ESTRUCTURA PERFECTA Y AISLADA DE LA VENTANA DE CHAT */
       .chat-window-ios {
         position: fixed;
         bottom: calc(env(safe-area-inset-bottom, 20px) + 15px);
@@ -837,14 +837,180 @@
         border-radius: 26px;
         box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
         z-index: 99999;
-        display: none !important; /* Totalmente invisible cuando está cerrado */
+        display: none !important;
         flex-direction: column;
         overflow: hidden;
       }
 
       .chat-window-ios.open {
-        display: flex !important; /* Visibilidad limpia cuando abre */
+        display: flex !important;
         animation: appleFadeIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+
+      .chat-header {
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        flex-shrink: 0;
+      }
+
+      .chat-header-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .chat-header-avatar {
+        width: 32px;
+        height: 32px;
+        background: var(--ai-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        flex-shrink: 0;
+      }
+
+      .chat-header-titles {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+      }
+
+      .chat-header-titles h4 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.2;
+      }
+
+      .chat-header-titles span {
+        font-size: 0.7rem;
+        color: var(--ios-green);
+        font-weight: 700;
+        line-height: 1.2;
+      }
+
+      .chat-close-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: var(--text-primary);
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+        flex-shrink: 0;
+      }
+
+      .chat-close-btn:active {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(0.92);
+      }
+
+      .chat-body {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        -webkit-overflow-scrolling: touch;
+        background: transparent;
+      }
+
+      .chat-bubble {
+        max-width: 88%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        animation: appleFadeIn 0.3s ease;
+        word-break: break-word;
+      }
+
+      .chat-bubble.bot {
+        align-self: flex-start;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        border-bottom-left-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      [data-theme="light"] .chat-bubble.bot {
+        background: rgba(0, 0, 0, 0.06);
+        color: #000000;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .chat-bubble.user {
+        align-self: flex-end;
+        background: var(--ios-blue);
+        color: #ffffff;
+        border-bottom-right-radius: 4px;
+        font-weight: 500;
+      }
+
+      .chat-options {
+        padding: 14px 16px;
+        background: rgba(0, 0, 0, 0.25);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+
+      [data-theme="light"] .chat-options {
+        background: rgba(0, 0, 0, 0.03);
+        border-top-color: rgba(0, 0, 0, 0.08);
+      }
+
+      .chat-option-btn {
+        background: rgba(10, 132, 255, 0.15);
+        color: #389fff;
+        border: 1px solid rgba(10, 132, 255, 0.35);
+        padding: 12px 14px;
+        border-radius: 14px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-spring);
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+      }
+
+      [data-theme="light"] .chat-option-btn {
+        background: rgba(0, 122, 255, 0.08);
+        color: #007aff;
+        border-color: rgba(0, 122, 255, 0.25);
+      }
+
+      .chat-option-btn svg {
+        flex-shrink: 0;
+        stroke: currentColor;
+      }
+
+      .chat-option-btn:hover {
+        background: rgba(10, 132, 255, 0.25);
+      }
+
+      .chat-option-btn:active {
+        transform: scale(0.98);
+        background: rgba(10, 132, 255, 0.35);
       }
 
       @media (max-width: 480px) {
@@ -1334,22 +1500,11 @@
       </svg>
     </button>
 
-    <!-- VENTANA CHATBOT -->
+    <!-- VENTANA CHATBOT CORREGIDA CON ESTRUCTURA PERFECTA -->
     <div class="chat-window-ios" id="chat-window">
       <div class="chat-header">
-        <div style="display: flex; align-items: center; gap: 8px">
-          <div
-            style="
-              width: 28px;
-              height: 28px;
-              background: var(--ai-gradient);
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-            "
-          >
+        <div class="chat-header-info">
+          <div class="chat-header-avatar">
             <svg
               width="16"
               height="16"
@@ -1366,42 +1521,25 @@
               <path d="M5 8h14"></path>
             </svg>
           </div>
-          <div>
-            <h4
-              style="margin: 0; font-size: 0.92rem; color: var(--text-primary)"
-            >
-              Asistente Cybernet
-            </h4>
-            <span
-              style="
-                font-size: 0.68rem;
-                color: var(--ios-green);
-                font-weight: 700;
-              "
-              >En línea</span
-            >
+          <div class="chat-header-titles">
+            <h4>Asistente Cybernet</h4>
+            <span>En línea</span>
           </div>
         </div>
         <button
-          style="
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          "
+          class="chat-close-btn"
           onclick="toggleChat()"
+          aria-label="Cerrar chat"
         >
           <svg
-            width="18"
-            height="18"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1919,13 +2057,13 @@
           let botReply = "";
           if (question === "¿Cómo funciona la página?") {
             botReply =
-              "¡Es muy fácil y rápido! Sigue estos 4 pasos:\n\n1️⃣ **Tu celular:** Ingresa el número con el que hiciste la compra y dale a 'Continuar'.\n2️⃣ **Elige:** Selecciona si tu pantalla es de Netflix o Disney.\n3️⃣ **Elige el código:** Toca el tipo de código que te está pidiendo tu TV (Inicio de sesión, Estoy de Viaje o Enlace).\n4️⃣ **Tu correo:** Escribe el correo de tu cuenta y dale a 'Rastrear'.\n\n✨ ¡Y listo! El sistema te mostrará tu código en pantalla al instante.";
+              "¡Es muy fácil y rápido! Sigue estos 4 pasos:\n\n1. **Tu celular:** Ingresa el número con el que hiciste la compra y dale a 'Continuar'.\n2. **Elige:** Selecciona si tu pantalla es de Netflix o Disney.\n3. **Elige el código:** Toca el tipo de código que te está pidiendo tu TV (Inicio de sesión, Estoy de Viaje o Enlace).\n4. **Tu correo:** Escribe el correo de tu cuenta y dale a 'Rastrear'.\n\n¡Y listo! El sistema te mostrará tu código en pantalla al instante.";
           } else if (question === "Mi código dice incorrecto o expirado") {
             botReply =
-              "¡No te preocupes, es normal! 😎\n\nPor seguridad, los códigos de Netflix cambian y **vencen cada 15 minutos** ⏰.\n\nSi tu TV dice que es incorrecto, significa que el tiempo se agotó. La solución es muy simple:\n\n👉 Cierra esta ventana, dale clic al botón **'Nueva Consulta'** y vuelve a buscar tu correo. El sistema te dará un código totalmente nuevo y fresco. ¡Inténtalo y escríbelo rápido en tu TV!";
+              "¡No te preocupes, es normal!\n\nPor seguridad, los códigos de Netflix cambian y **vencen cada 15 minutos**.\n\nSi tu TV dice que es incorrecto, significa que el tiempo se agotó. La solución es muy simple:\n\n👉 Cierra esta ventana, dale clic al botón **'Nueva Consulta'** y vuelve a buscar tu correo. El sistema te dará un código totalmente nuevo y fresco. ¡Inténtalo y escríbelo rápido en tu TV!";
           } else if (question === "No encuentro mi cuenta") {
             botReply =
-              "Si el sistema te dice 'Sin Resultados', suele ser por un pequeño error de escritura. 🧐\n\nPor favor verifica esto:\n\n👉 Asegúrate de escribir el correo **exactamente igual** a como te lo entregamos.\n👉 Recuerda que debe terminar en **@cybernetsp.com** (sin espacios al final).\n\nSi estás seguro de que está bien escrito y aún no sale, ponte en contacto con nosotros para ayudarte de inmediato.";
+              "Si el sistema te dice 'Sin Resultados', suele ser por un pequeño error de escritura.\n\nPor favor verifica esto:\n\n👉 Asegúrate de escribir el correo **exactamente igual** a como te lo entregamos.\n👉 Recuerda que debe terminar en **@cybernetsp.com** (sin espacios al final).\n\nSi estás seguro de que está bien escrito y aún no sale, ponte en contacto con nosotros para ayudarte de inmediato.";
           }
 
           appendChatMessage(botReply, "bot");
