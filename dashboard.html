@@ -2058,19 +2058,54 @@
                 "
                 >VENCIMIENTO</label
               >
-              <input
-                type="text"
-                id="editMySQLVencimiento"
-                class="input-ios"
-                style="
-                  background: rgba(0, 0, 0, 0.4) !important;
-                  padding: 7px 10px !important;
-                  font-size: 0.82rem !important;
-                  border-radius: 10px !important;
-                  margin: 0 !important;
-                  height: 34px !important;
-                "
-              />
+              <div
+                style="position: relative; display: flex; align-items: center"
+              >
+                <input
+                  type="text"
+                  id="editMySQLVencimiento"
+                  class="input-ios"
+                  oninput="
+                    this.value = this.value.replace(/\s+/g, '').toUpperCase()
+                  "
+                  style="
+                    background: rgba(0, 0, 0, 0.4) !important;
+                    padding: 7px 28px 7px 10px !important;
+                    font-size: 0.82rem !important;
+                    border-radius: 10px !important;
+                    margin: 0 !important;
+                    height: 34px !important;
+                    width: 100%;
+                  "
+                />
+                <input
+                  type="date"
+                  onchange="
+                    window.convertirPickerAVencimiento(
+                      this,
+                      'editMySQLVencimiento',
+                    )
+                  "
+                  style="
+                    position: absolute;
+                    right: 4px;
+                    width: 24px;
+                    height: 24px;
+                    opacity: 0;
+                    cursor: pointer;
+                    z-index: 5;
+                  "
+                />
+                <span
+                  style="
+                    position: absolute;
+                    right: 6px;
+                    pointer-events: none;
+                    font-size: 0.8rem;
+                  "
+                  >📅</span
+                >
+              </div>
             </div>
           </div>
 
@@ -2120,6 +2155,7 @@
                 type="text"
                 id="editMySQLNumero"
                 class="input-ios"
+                oninput="this.value = this.value.replace(/\s+/g, '')"
                 style="
                   background: rgba(0, 0, 0, 0.4) !important;
                   padding: 7px 10px !important;
@@ -2152,20 +2188,52 @@
                 "
                 >FECHA PAGO</label
               >
-              <input
-                type="text"
-                id="editMySQLFechaPago"
-                class="input-ios"
-                placeholder="14-ago"
-                style="
-                  background: rgba(0, 0, 0, 0.4) !important;
-                  padding: 7px 10px !important;
-                  font-size: 0.82rem !important;
-                  border-radius: 10px !important;
-                  margin: 0 !important;
-                  height: 34px !important;
-                "
-              />
+              <div
+                style="position: relative; display: flex; align-items: center"
+              >
+                <input
+                  type="text"
+                  id="editMySQLFechaPago"
+                  class="input-ios"
+                  placeholder="14-ago"
+                  style="
+                    background: rgba(0, 0, 0, 0.4) !important;
+                    padding: 7px 28px 7px 10px !important;
+                    font-size: 0.82rem !important;
+                    border-radius: 10px !important;
+                    margin: 0 !important;
+                    height: 34px !important;
+                    width: 100%;
+                  "
+                />
+                <input
+                  type="date"
+                  onchange="
+                    window.convertirPickerAFechaCorta(
+                      this,
+                      'editMySQLFechaPago',
+                    )
+                  "
+                  style="
+                    position: absolute;
+                    right: 4px;
+                    width: 24px;
+                    height: 24px;
+                    opacity: 0;
+                    cursor: pointer;
+                    z-index: 5;
+                  "
+                />
+                <span
+                  style="
+                    position: absolute;
+                    right: 6px;
+                    pointer-events: none;
+                    font-size: 0.8rem;
+                  "
+                  >📅</span
+                >
+              </div>
             </div>
             <div>
               <label
@@ -2184,6 +2252,7 @@
                 id="editMySQLValor"
                 class="input-ios"
                 placeholder="$15.000"
+                oninput="window.formatearMontoCOP(this)"
                 style="
                   background: rgba(0, 0, 0, 0.4) !important;
                   padding: 7px 10px !important;
@@ -2191,6 +2260,8 @@
                   border-radius: 10px !important;
                   margin: 0 !important;
                   height: 34px !important;
+                  color: #30d158 !important;
+                  font-weight: bold;
                 "
               />
             </div>
@@ -2206,11 +2277,9 @@
                 "
                 >MÉTODO PAGO</label
               >
-              <input
-                type="text"
+              <select
                 id="editMySQLPago"
                 class="input-ios"
-                placeholder="Bre-B"
                 style="
                   background: rgba(0, 0, 0, 0.4) !important;
                   padding: 7px 10px !important;
@@ -2218,8 +2287,20 @@
                   border-radius: 10px !important;
                   margin: 0 !important;
                   height: 34px !important;
+                  color: #ffffff !important;
+                  outline: none;
+                  cursor: pointer;
                 "
-              />
+              >
+                <option value="-">-</option>
+                <option value="Nequi">Nequi</option>
+                <option value="Bancolombia">Bancolombia</option>
+                <option value="Bre-B">Bre-B</option>
+                <option value="Daviplata">Daviplata</option>
+                <option value="Saldo Distribuidor">Saldo Distribuidor</option>
+                <option value="Dale">Dale</option>
+                <option value="Efectivo">Efectivo</option>
+              </select>
             </div>
           </div>
 
