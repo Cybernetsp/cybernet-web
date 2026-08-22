@@ -1,5 +1,5 @@
 // =========================================================================
-// 🛒 MOTOR INTELIGENTE DE INTERACCIONES, COMBOS Y OFERTAS - CYBERNET
+// 🛒 MOTOR INTELIGENTE DE INTERACCIONES, COMBOS Y OFERTAS - CYBERNET STORE
 // =========================================================================
 
 const NUMERO_WHATSAPP_NEGOCIO = "573127706726";
@@ -32,7 +32,7 @@ const MAPA_DB_A_TIENDA = {
   METEGOL: "metegol",
 };
 
-// 🎯 DICCIONARIO ESTRUCTURAL DE PLATAFORMAS (TODOS LOS PRECIOS INICIAN EN 0 Y SE CARGAN DESDE MYSQL)
+// 🎯 DICCIONARIO ESTRUCTURAL DE PLATAFORMAS
 const PLATAFORMAS_INFO = {
   netflix: { name: "Netflix Colombia", type: "netflix", price: 0 },
   disney_prem: { name: "Disney+ Premium", type: "disney_prem", price: 0 },
@@ -119,7 +119,7 @@ const PROMOS_RELAMPAGO = [
   },
 ];
 
-// 🔄 SINCRONIZACIÓN EN VIVO DE PRECIOS DESDE MYSQL (SIN BASE HARDCODEADA)
+// 🔄 SINCRONIZACIÓN EN VIVO DE PRECIOS DESDE MYSQL
 async function sincronizarPreciosDesdeMySQL() {
   try {
     const formData = new FormData();
@@ -173,7 +173,6 @@ function toggleItem(id, nombre, type, priceBase, btnElement) {
     restaurarBoton("btn_disney_prem");
   }
 
-  // Se asigna prioritariamente el precio obtenido desde MySQL
   let precioFinal =
     PLATAFORMAS_INFO[id] && PLATAFORMAS_INFO[id].price > 0
       ? PLATAFORMAS_INFO[id].price
@@ -230,29 +229,23 @@ function simularPrecioCart(tempCart, meses) {
   let precioBase = 0;
   let nombreC = "";
 
-  // 1. CASO INDIVIDUAL: 1 sola plataforma en el carrito
   if (numStreaming === 1) {
     const itemUnico = streamingItems[0];
     precioBase = PLATAFORMAS_INFO[itemUnico.id].price || itemUnico.price || 0;
     nombreC = "Solo " + itemUnico.nombre;
-  }
-  // 2. CASO COMBO: 2 o más plataformas de streaming
-  else if (numStreaming >= 2) {
-    // Suma de los precios reales de MySQL para las plataformas seleccionadas
+  } else if (numStreaming >= 2) {
     let sumaPreciosStreaming = streamingItems.reduce((acc, item) => {
       const pReal = PLATAFORMAS_INFO[item.id].price || item.price || 0;
       return acc + pReal;
     }, 0);
 
-    // Aplicación de porcentaje de descuento dinámico sobre el total real
-    let pctDescuentoCombo = 0.15; // 2 ítems: ~15% dcto
-    if (numStreaming === 3) pctDescuentoCombo = 0.25; // 3 ítems: ~25% dcto
-    if (numStreaming >= 4) pctDescuentoCombo = 0.32; // 4+ ítems: ~32% dcto
+    let pctDescuentoCombo = 0.15;
+    if (numStreaming === 3) pctDescuentoCombo = 0.25;
+    if (numStreaming >= 4) pctDescuentoCombo = 0.32;
 
     let descuentoMonto = Math.round(sumaPreciosStreaming * pctDescuentoCombo);
     precioBase = sumaPreciosStreaming - descuentoMonto;
 
-    // Asignación del nombre comercial del Combo
     const tieneNetflix = streamingItems.some((i) => i.id === "netflix");
     const tieneDisneyPrem = streamingItems.some((i) => i.id === "disney_prem");
 
@@ -269,14 +262,12 @@ function simularPrecioCart(tempCart, meses) {
 
   let streamingPuroBase = precioBase * meses;
 
-  // Recargo por pantallas adicionales (calculado proporcionalmente al precio base de MySQL)
   let recargoMeses = streamingItems.reduce((sum, item) => {
     if (item.pantallas > 1) {
       let extra = item.pantallas - 1;
       let pUnidad = PLATAFORMAS_INFO[item.id].price || item.price || 0;
 
       if (item.id === "netflix") {
-        // Pantallas extras de Netflix calculadas sobre la base de MySQL
         return sum + Math.round(pUnidad * 0.73 * extra) * meses;
       }
       return sum + Math.round(pUnidad * 0.5 * extra) * meses;
@@ -286,7 +277,6 @@ function simularPrecioCart(tempCart, meses) {
 
   let subtotalStreaming = streamingPuroBase + recargoMeses;
 
-  // Descuento por vigencia (2, 3, 4 o 5 meses)
   let pctVigencia = 0;
   if (meses === 2) pctVigencia = 0.15;
   if (meses === 3) pctVigencia = 0.2;
@@ -296,7 +286,6 @@ function simularPrecioCart(tempCart, meses) {
   let descVigencia = streamingPuroBase * pctVigencia;
   let netoStreaming = subtotalStreaming - descVigencia;
 
-  // Suma de Addons con precios dinámicos de MySQL
   let precioAddons = addonPlats.reduce((sum, item) => {
     let pAddon = PLATAFORMAS_INFO[item.id].price || item.price || 0;
     return sum + pAddon * item.pantallas;
@@ -316,7 +305,6 @@ function simularPrecioCart(tempCart, meses) {
 
 // 🧮 EL ACTUALIZADOR LOGÍSTICO MATEMÁTICO DEL CARRITO
 function actualizarCarrito() {
-  // Sincronizar precios de ítems en carrito con MySQL
   carrito.forEach((item) => {
     if (PLATAFORMAS_INFO[item.id] && PLATAFORMAS_INFO[item.id].price > 0) {
       item.price = PLATAFORMAS_INFO[item.id].price;
@@ -350,7 +338,7 @@ function actualizarCarrito() {
   carrito.forEach((item) => {
     let labelTipo = item.type === "addon" ? "Adicional" : "Pantalla(s)";
     if (item.id === "netflix" && item.pantallas === 5)
-      labelTipo = "¡Cuenta Completa! 👑";
+      labelTipo = "¡Cuenta Completa!";
 
     htmlItems += `
         <div class="cart-item-row" style="display: flex; flex-direction: column; gap: 8px; align-items: stretch; margin-bottom: 8px;">
@@ -454,7 +442,7 @@ function actualizarCarrito() {
       rowNombreCombo.style.display = "flex";
       const lblNombreComboEl = document.getElementById("lblNombreCombo");
       if (lblNombreComboEl)
-        lblNombreComboEl.innerText = "✨ " + resultadoNormal.nombreC;
+        lblNombreComboEl.innerText = resultadoNormal.nombreC;
     } else {
       rowNombreCombo.style.display = "none";
     }
@@ -520,8 +508,8 @@ function actualizarCarrito() {
         lblRegalo.style.color = "var(--ios-orange)";
       }
       if (rowRegalo)
-        rowRegalo.querySelector(".td-cell").innerHTML =
-          "🎁 Regalo (No acumulable con Oferta Relámpago)";
+        rowRegalo.querySelector(".td-cell").innerText =
+          "Regalo (No acumulable con Oferta Relámpago)";
       descuentoMisterioso = 0;
     } else if (productosPrincipalesEnCarrito > 0) {
       if (window.regaloMisteriosoAplicado.tipo === "descuento") {
@@ -552,16 +540,16 @@ function actualizarCarrito() {
         lblRegalo.style.color = "var(--ios-green)";
       }
       if (rowRegalo)
-        rowRegalo.querySelector(".td-cell").innerHTML =
-          "🎁 Regalo de la Caja (Activo)";
+        rowRegalo.querySelector(".td-cell").innerText =
+          "Regalo de la Caja (Activo)";
     } else {
       if (lblRegalo) {
         lblRegalo.innerText = "Inactivo";
         lblRegalo.style.color = "var(--ios-red)";
       }
       if (rowRegalo)
-        rowRegalo.querySelector(".td-cell").innerHTML =
-          "🎁 Regalo (Añade otra plataforma para activar)";
+        rowRegalo.querySelector(".td-cell").innerText =
+          "Regalo (Añade otra plataforma para activar)";
     }
   } else {
     if (rowRegalo) rowRegalo.style.display = "none";
@@ -650,7 +638,7 @@ function copiarLlave() {
       btn.style.color = "var(--ios-green)";
       triggerToast("Llave Bre-B copiada");
       setTimeout(() => {
-        btn.innerText = "📋 Copiar";
+        btn.innerText = "Copiar";
         btn.style.color = "var(--text-primary)";
       }, 2000);
     }
@@ -702,7 +690,7 @@ function copyLlaveTutorial() {
       btn.style.color = "var(--ios-green)";
       triggerToast("Llave Bre-B copiada");
       setTimeout(() => {
-        btn.innerText = "📋 Copiar";
+        btn.innerText = "Copiar";
         btn.style.color = "var(--text-primary)";
       }, 2000);
     }
@@ -748,7 +736,7 @@ function copiarNequi() {
       btn.style.color = "var(--ios-green)";
       triggerToast("Número Nequi/Daviplata copiado");
       setTimeout(() => {
-        btn.innerText = "📋 Copiar";
+        btn.innerText = "Copiar";
         btn.style.color = "var(--text-primary)";
       }, 2000);
     }
@@ -916,7 +904,7 @@ function enviarPedidoWhatsApp() {
     mensaje += `\n📅 *Vigencia Solicitada:* ${meses} Mes(es)\n`;
     const rowNombreCombo = document.getElementById("row_combo_desc");
     if (rowNombreCombo && rowNombreCombo.style.display !== "none") {
-      mensaje += `🎁 *Combo Aplicado:* ${nombreCombo.replace("✨ ", "")}\n`;
+      mensaje += `🎁 *Combo Aplicado:* ${nombreCombo}\n`;
     }
     mensaje += `\n📺 *Servicios de Streaming:*\n${streamingTexto.join("\n")}\n`;
   }
@@ -1025,22 +1013,27 @@ function sendQuickReply(question) {
     let botReply = "";
     if (question.includes("Cómo comprar")) {
       botReply =
-        "🛒 <strong>¿CÓMO COMPRAR EN LA PÁGINA?</strong> 🛍️<br><br>" +
+        "<strong>¿CÓMO COMPRAR EN LA PÁGINA?</strong><br><br>" +
         "1️⃣ <strong>Selecciona:</strong> Ve añadiendo las plataformas que desees directamente desde las tarjetas de la tienda.<br>" +
         "2️⃣ <strong>Configura:</strong> Abre tu carrito abajo a la derecha para elegir los meses de vigencia o si es una renovación.<br>" +
         "3️⃣ <strong>Transfiere:</strong> Toca en 'Anuncio de Pago' para ver los datos de transferencia.<br>" +
-        "4️⃣ <strong>Despacha:</strong> Recuerda siempre <strong>tomarle captura a la foto del pago, después darle al botón 'Ya realicé el pago'</strong> y <strong>enviar la foto con el texto</strong> por WhatsApp. ¡Y listo! 🍿";
+        "4️⃣ <strong>Despacha:</strong> Recuerda siempre <strong>tomarle captura a la foto del pago, después darle al botón 'Ya realicé el pago'</strong> y <strong>enviar la foto con el texto</strong> por WhatsApp.";
     } else if (question.includes("medios de pago")) {
       botReply =
-        "💳 <strong>¿CÓMO REALIZAR TU PAGO?</strong> 🏦<br><br>" +
+        "<strong>¿CÓMO REALIZAR TU PAGO?</strong><br><br>" +
         "Para activar o renovar tu servicio, los pasos son súper sencillos:<br><br>" +
         "1️⃣ <strong>Realiza tu pago:</strong> Al abrir tu carrito y tocar en 'Anuncio de Pago', el sistema te desplegará los datos de nuestra llave comercial de la red principal <strong>Bre-B</strong> y las opciones alternativas de <strong>Nequi o Daviplata</strong>.<br><br>" +
-        "2️⃣ <strong>Tómale captura a la foto del pago</strong> obligatoriamente una vez sea exitoso 📸.<br><br>" +
+        "2️⃣ <strong>Tómale captura a la foto del pago</strong> obligatoriamente una vez sea exitoso.<br><br>" +
         "3️⃣ <strong>Después, regresa a la tienda y dale al botón 'Ya realicé el pago'</strong> dentro del panel.<br><br>" +
-        "4️⃣ Al abrirse WhatsApp, <strong>envía la foto del pago junto con el texto</strong> generado automáticamente para tu entrega inmediata. ¡Activación al instante apenas se valide! 🚀🍿";
+        "4️⃣ Al abrirse WhatsApp, <strong>envía la foto del pago junto con el texto</strong> generado automáticamente para tu entrega inmediata.";
     } else if (question.includes("Beneficios")) {
       botReply =
-        "🚀 <strong>BENEFICIOS EXCLUSIVOS AL COMPRAR EN CYBERNET:</strong><br><br>⚡ <strong>Verificación y Entrega:</strong> Una vez envías tu pago, este entra a revisión y se realiza la entrega de tus accesos apenas sea validado.<br>🤖 <strong>Bot de Códigos TV 24/7:</strong> Si adquieres Netflix, podrás generar tus códigos de acceso a tu televisor de manera automática desde el botón superior '🔑 Códigos', sin esperas ni intermediarios.<br>🔒 <strong>Cuentas 100% Estables:</strong> Garantizamos perfiles privados, estables y un servicio original sin caídas rústicas.<br>🎉 <strong>Ahorro Automatizado:</strong> El carrito calcula y te aplica tus combos favoritos de forma automática para darte siempre el precio más bajo.<br>🛠 <strong>Soporte Garantizado:</strong> Te acompañamos con atención rápida y efectiva durante todo tu mes de vigencia.";
+        "<strong>BENEFICIOS EXCLUSIVOS AL COMPRAR EN CYBERNET:</strong><br><br>" +
+        "⚡ <strong>Verificación y Entrega:</strong> Una vez envías tu pago, este entra a revisión y se realiza la entrega de tus accesos apenas sea validado.<br>" +
+        "🤖 <strong>Bot de Códigos TV 24/7:</strong> Si adquieres Netflix, podrás generar tus códigos de acceso a tu televisor de manera automática desde el botón superior 'Códigos', sin esperas ni intermediarios.<br>" +
+        "🔒 <strong>Cuentas 100% Estables:</strong> Garantizamos perfiles privados, estables y un servicio original sin caídas.<br>" +
+        "🎉 <strong>Ahorro Automatizado:</strong> El carrito calcula y te aplica tus combos favoritos de forma automática.<br>" +
+        "🛠 <strong>Soporte Garantizado:</strong> Te acompañamos con atención rápida y efectiva durante todo tu mes de vigencia.";
     }
 
     appendChatMessage(botReply, "bot");
@@ -1063,7 +1056,7 @@ function appendChatMessage(text, sender) {
 
 window.onload = () => {
   cargarMemoriaTienda();
-  sincronizarPreciosDesdeMySQL(); // ⚡ Descarga inmediata de precios desde la BD
+  sincronizarPreciosDesdeMySQL();
   actualizarCarrito();
   iniciarSistemaPromos();
   cargarEstrenosAleatorios();
@@ -1167,9 +1160,9 @@ function agregarDesdeEstreno(id, nombre, btnId, priceBase) {
       : "regular";
 
     toggleItem(id, nombre, tipoReal, priceBase, btnReal);
-    triggerToast(`🍿 ¡${nombre} añadido al carrito!`);
+    triggerToast(`¡${nombre} añadido al carrito!`);
   } else {
-    triggerToast(`⚡ ${nombre} ya estaba en tu carrito.`);
+    triggerToast(`${nombre} ya estaba en tu carrito.`);
   }
 }
 
@@ -1419,7 +1412,7 @@ function procesarResultadoQuiz() {
     cerrarQuiz();
 
     setTimeout(() => {
-      triggerToast("✨ ¡Combos añadidos a tu carrito!");
+      triggerToast("¡Combos añadidos a tu carrito!");
       abrirCarrito();
     }, 400);
   }, 1800);
@@ -1640,7 +1633,7 @@ function abrirModalRegalo() {
   haptic();
   const hoy = new Date().toLocaleDateString("es-CO");
   if (localStorage.getItem("cyber_gift_claimed_date") === hoy) {
-    triggerToast("⚠️ Ya reclamaste tu regalo de hoy. ¡Vuelve mañana!");
+    triggerToast("Ya reclamaste tu regalo de hoy. ¡Vuelve mañana!");
     return;
   }
 
@@ -1664,7 +1657,7 @@ function animarYAbrirCaja() {
 
   setTimeout(() => {
     caja.classList.remove("box-shake-animation");
-    caja.innerText = "🎉";
+    caja.innerHTML = `<svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#bf5af2" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line></svg>`;
     caja.style.transform = "scale(1.2)";
 
     const premioGanado =
@@ -1698,7 +1691,7 @@ function animarYAbrirCaja() {
                 ⏱️ El regalo expira en: <span id="giftClock">15:00</span>
             </div>
             
-            <button class="btn-ios btn-success w-100" style="margin-top:25px; padding:14px;" onclick="aplicarRegaloYIrAlCarrito()">🔥 Reclamar y activar descuento</button>
+            <button class="btn-ios btn-success w-100" style="margin-top:25px; padding:14px;" onclick="aplicarRegaloYIrAlCarrito()">Reclamar y activar descuento</button>
         `;
 
     iniciarRelojRegalo();
@@ -1725,7 +1718,7 @@ function iniciarRelojRegalo() {
       localStorage.removeItem("cyber_active_gift");
       localStorage.removeItem("cyber_gift_expires_at");
       actualizarCarrito();
-      triggerToast("⏰ Tu regalo diario ha expirado.");
+      triggerToast("Tu regalo diario ha expirado.");
     }
   }, 1000);
 }
@@ -1767,9 +1760,9 @@ function aplicarRegaloYIrAlCarrito() {
   }).length;
 
   if (productosReales > 0) {
-    triggerToast("🎁 ¡Regalo activado y aplicado con éxito!");
+    triggerToast("¡Regalo activado y aplicado con éxito!");
   } else {
-    triggerToast("⚠️ ¡Regalo preparado! Añade otra plataforma para activarlo.");
+    triggerToast("¡Regalo preparado! Añade otra plataforma para activarlo.");
   }
 }
 
