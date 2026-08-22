@@ -6,7 +6,6 @@
    📈 MÓDULO PRINCIPAL DE FINANZAS Y CAJA REAL
    ========================================================================== */
 
-// 🚪 FUNCIÓN DISPARADORA PARA ABRIR Y CERRAR EL PANEL DE FINANZAS
 window.toggleFinanzasPanel = function () {
   if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("finanzasOverlay");
@@ -791,10 +790,10 @@ window.renderDashboard = function () {
     document.getElementById("valTotalFondosNegocio").innerText =
       formatMoneda(totalFondosEmpresa);
 
-  // 5. CÁLCULO DE TU GANANCIA
+  // 5. CÁLCULO DE TU GANANCIA (60% Ahorro | 40% Otros/Libre)
   const miGananciaNeta = Math.round(ingNum * 0.28);
-  const ahorroCalculado = Math.round(miGananciaNeta * 0.5);
-  const otrosCalculado = miGananciaNeta - ahorroCalculado;
+  const ahorroCalculado = Math.round(miGananciaNeta * 0.6); // 60% para Ahorro
+  const otrosCalculado = miGananciaNeta - ahorroCalculado; // 40% restante para Otros/Libre
 
   const gananciaTotalMasJeisson = miGananciaNeta + montoJeissonExtraido;
 
@@ -988,7 +987,7 @@ window.confirmarOperacionPrestamoModal = function (e) {
   }
 };
 
-// 🎯 HISTORIAL DE MOVIMIENTOS OPTIMIZADO (SIN CORTE SUPERIOR Y LLENADO COMPLETO)
+// 🎯 HISTORIAL DE MOVIMIENTOS OPTIMIZADO
 window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
   const contenedor =
     document.getElementById("listaDesgloseGastos") ||
