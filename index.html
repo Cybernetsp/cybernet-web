@@ -71,6 +71,7 @@
         --ios-green: #30d158;
         --ios-red: #ff453a;
         --ios-orange: #ff9f0a;
+        --ios-purple: #bf5af2;
         --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
         --transition-spring:
           transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease,
@@ -117,6 +118,7 @@
         --ios-green: #34c759;
         --ios-red: #ff3b30;
         --ios-orange: #ff9500;
+        --ios-purple: #af52de;
 
         --page-bg: #f2f2f7;
         --text-primary: #000000;
@@ -217,6 +219,31 @@
         text-decoration: none;
       }
       .store-toggle-btn:active {
+        transform: scale(0.9);
+      }
+
+      .distri-toggle-btn {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 15px) + 5px);
+        right: 115px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: var(--glass-border);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100;
+        transition: var(--transition-spring);
+        color: var(--ios-purple);
+        text-decoration: none;
+      }
+      .distri-toggle-btn:active {
         transform: scale(0.9);
       }
 
@@ -1058,6 +1085,7 @@
     </style>
   </head>
   <body>
+    <!-- BOTÓN CAMBIAR TEMA -->
     <button
       id="theme-toggle"
       class="theme-toggle-btn"
@@ -1065,11 +1093,13 @@
       aria-label="Cambiar tema"
     ></button>
 
+    <!-- BOTÓN IR A LA TIENDA CLIENTES -->
     <a
       href="tienda.html"
       class="store-toggle-btn"
       onclick="haptic()"
       aria-label="Ir a la tienda"
+      title="Ir a la Tienda de Clientes"
     >
       <svg
         width="20"
@@ -1086,6 +1116,29 @@
         <path
           d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
         ></path>
+      </svg>
+    </a>
+
+    <!-- ⚡ NUEVO BOTÓN IR AL PORTAL DE MAYORISTAS / DISTRIBUIDORES -->
+    <a
+      href="https://cybernetsp.com/distribuidores"
+      class="distri-toggle-btn"
+      onclick="haptic()"
+      aria-label="Portal Mayoristas"
+      title="Portal Mayoristas / Distribuidores"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
       </svg>
     </a>
 
