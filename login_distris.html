@@ -172,7 +172,7 @@
         transition: background 0.4s ease;
       }
 
-      /* BOTÓN FLOTANTE MODO CLARO / OSCURO */
+      /* BOTONES FLOTANTES SUPERIORES */
       .theme-toggle-btn {
         position: fixed;
         top: calc(env(safe-area-inset-top, 15px) + 5px);
@@ -194,6 +194,56 @@
         color: var(--text-primary);
       }
       .theme-toggle-btn:active {
+        transform: scale(0.9);
+      }
+
+      .store-toggle-btn {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 15px) + 5px);
+        right: 65px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: var(--glass-border);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100;
+        transition: var(--transition-spring);
+        color: var(--ios-blue);
+        text-decoration: none;
+      }
+      .store-toggle-btn:active {
+        transform: scale(0.9);
+      }
+
+      .codes-toggle-btn {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 15px) + 5px);
+        right: 115px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: var(--glass-border);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100;
+        transition: var(--transition-spring);
+        color: var(--ios-orange);
+        text-decoration: none;
+      }
+      .codes-toggle-btn:active {
         transform: scale(0.9);
       }
 
@@ -421,6 +471,56 @@
       onclick="toggleTheme()"
       aria-label="Cambiar tema"
     ></button>
+
+    <!-- BOTÓN TIENDA -->
+    <a
+      href="tienda.html"
+      class="store-toggle-btn"
+      onclick="haptic()"
+      aria-label="Ir a la Tienda"
+      title="Ir a la Tienda Oficial"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path
+          d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+        ></path>
+      </svg>
+    </a>
+
+    <!-- BOTÓN CÓDIGOS -->
+    <a
+      href="index.html"
+      class="codes-toggle-btn"
+      onclick="haptic()"
+      aria-label="Centro de Códigos"
+      title="Centro de Códigos"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"
+        ></path>
+      </svg>
+    </a>
 
     <!-- FONDOS AMBIENTALES -->
     <div class="bg-orb-1"></div>
