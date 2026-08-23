@@ -689,6 +689,7 @@
         if (navigator.vibrate) navigator.vibrate(15);
       }
 
+      /* ⚡ UNIFICACIÓN TOTAL DE CLAVE DE TEMA ("cyber_theme") */
       function toggleTheme() {
         haptic();
         const currentTheme =
@@ -708,6 +709,14 @@
           btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
         }
       }
+
+      // ESCUCHADOR EN TIEMPO REAL PARA CAMBIOS EN OTRAS PESTAÑAS (SINCRONIZACIÓN AUTOMÁTICA)
+      window.addEventListener("storage", (e) => {
+        if (e.key === "cyber_theme" && e.newValue) {
+          document.documentElement.setAttribute("data-theme", e.newValue);
+          updateThemeIcon(e.newValue);
+        }
+      });
 
       // LIMPIADOR AUTOMÁTICO DE JSON QUE ELIMINA WARNINGS O HTML EXTRA DE PHP
       function parseCleanJSON(rawText) {
@@ -1021,6 +1030,7 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
+        // Carga unificada de tema desde la clave global "cyber_theme"
         const savedTheme = localStorage.getItem("cyber_theme") || "dark";
         document.documentElement.setAttribute("data-theme", savedTheme);
         updateThemeIcon(savedTheme);
