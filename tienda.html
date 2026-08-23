@@ -75,22 +75,26 @@
       .btn-header-codigos {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 50%;
+        text-decoration: none;
       }
 
       .btn-header-mayoristas {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 50%;
         text-decoration: none;
-        padding: 6px 11px;
-        font-size: 0.78rem;
-        border-radius: 20px;
-        font-weight: 800;
         color: var(--ios-purple) !important;
         background: rgba(191, 90, 242, 0.12) !important;
         border: 0.5px solid rgba(191, 90, 242, 0.25) !important;
-        white-space: nowrap;
       }
 
       .cart-trigger-btn {
@@ -171,18 +175,27 @@
           class="btn-ios btn-secondary"
           onclick="toggleTheme()"
           aria-label="Cambiar tema"
-          style="padding: 6px 10px; border-radius: 50px"
+          style="
+            padding: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
         >
           <!-- Icono se inyectará por JS -->
         </button>
         <a
           href="index.html"
           class="btn-ios btn-secondary btn-header-codigos"
-          style="padding: 6px 11px; font-size: 0.78rem"
+          aria-label="Códigos"
+          title="Centro de Códigos"
         >
           <svg
-            width="15"
-            height="15"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -194,15 +207,16 @@
               d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"
             ></path>
           </svg>
-          Códigos
         </a>
         <a
           href="https://cybernetsp.com/distribuidores"
           class="btn-ios btn-header-mayoristas"
+          aria-label="Portal Mayoristas"
+          title="Portal Mayoristas / Distribuidores"
         >
           <svg
-            width="15"
-            height="15"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -213,7 +227,6 @@
             <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
             <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
           </svg>
-          Mayoristas
         </a>
       </div>
     </header>
