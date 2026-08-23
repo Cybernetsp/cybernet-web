@@ -241,7 +241,7 @@
         border: var(--input-border);
         background: var(--input-bg);
         color: var(--text-primary);
-        font-size: 16px !important; /* Evita zoom automático en iOS */
+        font-size: 16px !important;
         font-weight: 600;
         outline: none;
         text-align: center;
@@ -907,25 +907,29 @@
         }, 300);
       }
 
-      // 5. MAPA DE NOMBRES DE SERVICIOS
+      // 5. MAPA EXTENDIDO DE NOMBRES DE SERVICIOS
       const NOMBRES_SERVICIOS = {
         NETFLIX: "Netflix Colombia",
         "DISNEY-PREMIUM": "Disney+ Premium",
         "DISNEY-ESTANDAR": "Disney Estándar",
         "AMAZON-PRIME-VIDEO": "Amazon Prime",
+        AMAZON: "Amazon Prime",
         "HBO-MAX": "HBO Max",
         PARAMOUNT: "Paramount+",
         VIX: "Vix+",
         PLEX: "Plex TV",
         CRUNCHYROLL: "Crunchyroll",
         APPLE: "Apple TV+",
+        "APPLE-TV": "Apple TV+",
         UNIVERSAL: "Universal+",
         CANVA: "Canva Pro",
         SPOTIFY: "Spotify Premium",
         YOUTUBE: "YouTube Premium",
+        IPTV: "IPTV Premium",
+        "DIRECTV-GO": "DirecTV Go",
       };
 
-      // 6. CARGAR TABLA COMPARATIVA DE PRECIOS Y MÁRGENES DESDE MYSQL
+      // 6. CARGAR TABLA COMPARATIVA DE PRECIOS CON HOMOLOGACIÓN DE CÓDIGOS
       async function cargarTablaComparativaPrecios() {
         const tbody = document.getElementById("tablaProfitBody");
         if (!tbody) return;
@@ -965,20 +969,35 @@
             const mapaTienda = {};
             if (Array.isArray(dataTienda.data)) {
               dataTienda.data.forEach((i) => {
-                mapaTienda[i.codigo] = parseFloat(i.precio) || 0;
+                const cod = (i.codigo || "").toUpperCase().trim();
+                const p = parseFloat(i.precio) || 0;
+                mapaTienda[cod] = p;
+
+                // Homologación cruzada entre alias de la BD de la tienda y distribuidores
+                if (cod === "APPLE") mapaTienda["APPLE-TV"] = p;
+                if (cod === "APPLE-TV") mapaTienda["APPLE"] = p;
+                if (cod === "AMAZON") mapaTienda["AMAZON-PRIME-VIDEO"] = p;
+                if (cod === "AMAZON-PRIME-VIDEO") mapaTienda["AMAZON"] = p;
               });
             }
 
             let htmlTable = "";
             dataDistri.data.forEach((item) => {
+              const codDistri = (item.codigo || "").toUpperCase().trim();
               const precioDistri = parseFloat(item.precio) || 0;
+
+              // Búsqueda del precio sugerido de la tienda o cálculo del 80% adicional en caso de no existir
               const precioSugerido =
-                mapaTienda[item.codigo] || precioDistri * 1.8;
+                mapaTienda[codDistri] || Math.round(precioDistri * 1.8);
               const ganancia = precioSugerido - precioDistri;
 
               if (precioDistri > 0) {
                 const nombreMostrar =
-                  NOMBRES_SERVICIOS[item.codigo] || item.codigo;
+                  NOMBRES_SERVICIOS[codDistri] ||
+                  item.nombre ||
+                  item.nombre_ui ||
+                  item.codigo;
+
                 htmlTable += `
                   <tr>
                     <td>${nombreMostrar}</td>
