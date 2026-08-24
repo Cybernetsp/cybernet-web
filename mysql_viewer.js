@@ -6,66 +6,67 @@
   const style = document.createElement("style");
   style.id = "css-fix-scroll-mysql";
   style.innerHTML = `
-    /* Modal de MySQL / Bóveda contenedor de altura fija */
+    /* Modal contenedor centrado */
     #mysqlOverlay {
       align-items: center !important;
       justify-content: center !important;
     }
 
+    /* Modal contenedor flex de altura adaptativa */
     #mysqlOverlay > div,
     #mysqlOverlay .modal-ios,
     .modal-ios-mysql {
-      height: 88vh !important;
-      max-height: 88vh !important;
+      height: 90vh !important;
+      max-height: 90vh !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
       box-sizing: border-box !important;
-      padding-bottom: 12px !important;
+      padding-bottom: 20px !important;
     }
 
-    /* Contenedor envolvente directo de la tabla */
+    /* Envolvente principal de la tabla con scroll fluido */
     #contenedorTablaMySQL, 
     .tabla-container, 
     .visor-mysql-body,
     .mysql-table-wrapper,
     #mysqlOverlay .mysql-table-wrapper {
-      flex: 1 !important;
+      flex: 1 1 auto !important;
       min-height: 0 !important;
-      max-height: calc(88vh - 160px) !important;
+      height: 100% !important;
       overflow-y: auto !important;
       overflow-x: auto !important;
       -webkit-overflow-scrolling: touch !important;
       border-radius: 12px !important;
       margin-bottom: 10px !important;
+      padding-bottom: 15px !important;
     }
 
-    /* Barra de scroll azul neón visible siempre */
+    /* Barra de desplazamiento estilo Dark Glass (Elegante y no invasiva) */
     #mysqlOverlay ::-webkit-scrollbar,
     .mysql-table-wrapper::-webkit-scrollbar,
     #contenedorTablaMySQL::-webkit-scrollbar {
-      width: 9px !important;
-      height: 9px !important;
+      width: 7px !important;
+      height: 7px !important;
       display: block !important;
     }
     #mysqlOverlay ::-webkit-scrollbar-track,
     .mysql-table-wrapper::-webkit-scrollbar-track,
     #contenedorTablaMySQL::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.08) !important;
+      background: rgba(0, 0, 0, 0.3) !important;
       border-radius: 10px !important;
     }
     #mysqlOverlay ::-webkit-scrollbar-thumb,
     .mysql-table-wrapper::-webkit-scrollbar-thumb,
     #contenedorTablaMySQL::-webkit-scrollbar-thumb {
-      background: #0a84ff !important;
+      background: rgba(255, 255, 255, 0.22) !important;
       border-radius: 10px !important;
-      border: 2px solid transparent !important;
-      background-clip: padding-box !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
     #mysqlOverlay ::-webkit-scrollbar-thumb:hover,
     .mysql-table-wrapper::-webkit-scrollbar-thumb:hover,
     #contenedorTablaMySQL::-webkit-scrollbar-thumb:hover {
-      background: #30d158 !important;
+      background: rgba(255, 255, 255, 0.45) !important;
     }
   `;
   document.head.appendChild(style);
@@ -471,10 +472,11 @@ function cargarDatosMySQL() {
     styleSticky.id = "css-sticky-hover-mysql";
     styleSticky.innerHTML = `
       .mysql-table-wrapper {
-        max-height: calc(82vh - 160px) !important;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
         overflow-y: auto !important;
         overflow-x: auto !important;
-        padding-bottom: 20px !important;
+        padding-bottom: 25px !important;
       }
       #tablaMySQLCabecera th { 
         position: sticky !important; 
@@ -488,9 +490,9 @@ function cargarDatosMySQL() {
       .tr-mysql-row:hover { background-color: rgba(255, 255, 255, 0.04) !important; }
       .tr-mysql-row.tr-caida { background-color: rgba(255, 69, 58, 0.18) !important; }
       .tr-mysql-row.tr-caida:hover { background-color: rgba(255, 69, 58, 0.28) !important; }
-      table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: fixed !important; width: 100% !important; min-width: 1100px !important; background-color: #111216 !important; margin-bottom: 20px !important; }
+      table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: fixed !important; width: 100% !important; min-width: 1100px !important; background-color: #111216 !important; margin-bottom: 30px !important; }
       th, td { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-      tbody tr:last-child td { padding-bottom: 20px !important; }
+      tbody tr:last-child td { padding-bottom: 25px !important; }
     `;
     document.head.appendChild(styleSticky);
   }
