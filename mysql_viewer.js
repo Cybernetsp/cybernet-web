@@ -1,5 +1,6 @@
 window.tablaMySQLActual = "netflix";
 window.lastSelectedTab = "netflix";
+window.mesFiltroVentas = ""; // Variable para el filtro de mes en Registro de Ventas
 let searchTimeoutMySQL = null;
 
 // Lista de todas las tablas de MySQL para la búsqueda global inteligente
@@ -256,6 +257,19 @@ function filtrarMySQL() {
   }, 300);
 }
 
+// 🗓️ FUNCIONES DEL FILTRO DE MES DE VENTAS
+window.filtrarPorMesVentas = function (val) {
+  if (typeof haptic === "function") haptic();
+  window.mesFiltroVentas = val;
+  cargarDatosMySQL();
+};
+
+window.limpiarFiltroMesVentas = function () {
+  if (typeof haptic === "function") haptic();
+  window.mesFiltroVentas = "";
+  cargarDatosMySQL();
+};
+
 // 🗓️ FORMATEADOR DE FECHA CORTA
 function formatearFechaCorta(fStr) {
   if (!fStr || fStr === "-") return "-";
@@ -427,6 +441,34 @@ function cargarDatosMySQL() {
   const busqueda = busquedaInput ? busquedaInput.value.trim() : "";
   const esBusquedaGlobal = window.tablaMySQLActual === "todas";
 
+  const tablaLower = window.tablaMySQLActual.toLowerCase();
+  const esVentas = tablaLower === "registro_ventas";
+
+  // Inyección / control del filtro de mes para la pestaña Registro de Ventas
+  let containerFiltro = document.getElementById("contenedorFiltroMesVentas");
+  if (esVentas) {
+    if (!containerFiltro && tableNode && tableNode.parentElement) {
+      containerFiltro = document.createElement("div");
+      containerFiltro.id = "contenedorFiltroMesVentas";
+      containerFiltro.style.cssText =
+        "display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 6px 12px; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); border-radius: 10px; flex-shrink: 0;";
+      tableNode.parentElement.insertBefore(containerFiltro, tableNode);
+    }
+    const elemFiltro = document.getElementById("contenedorFiltroMesVentas");
+    if (elemFiltro) {
+      elemFiltro.style.display = "flex";
+      elemFiltro.innerHTML = `
+        <span style="font-size: 0.78rem; font-weight: 800; color: #30d158; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+          📅 Filtrar Mes de Ventas:
+        </span>
+        <input type="month" id="inputMesVentas" value="${window.mesFiltroVentas || ""}" onchange="window.filtrarPorMesVentas(this.value)" style="background: #000000; border: 1px solid #27272a; color: #ffffff; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-family: monospace; outline: none; cursor: pointer; color-scheme: dark;">
+        ${window.mesFiltroVentas ? `<button type="button" onclick="window.limpiarFiltroMesVentas()" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 4px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">✕ Ver Todos los Meses</button>` : ""}
+      `;
+    }
+  } else if (containerFiltro) {
+    containerFiltro.style.display = "none";
+  }
+
   // Normalización inteligente de teléfono si el texto ingresado contiene dígitos
   const queryDigits = busqueda.replace(/\D/g, "");
   let busquedaAPI = busqueda;
@@ -457,10 +499,8 @@ function cargarDatosMySQL() {
       </tr>
     `;
   } else {
-    const tablaLower = window.tablaMySQLActual.toLowerCase();
     const esNetflix = tablaLower === "netflix";
     const esGarantias = tablaLower === "garantias";
-    const esVentas = tablaLower === "registro_ventas";
 
     if (esNetflix) {
       thead.innerHTML = `
@@ -694,7 +734,7 @@ function cargarDatosMySQL() {
 
   // Petición a la tabla actual usando el término de búsqueda normalizado
   fetch(
-    `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busquedaAPI)}`,
+    `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busquedaAPI)}&mes=${encodeURIComponent(window.mesFiltroVentas || "")}`,
   )
     .then((res) => res.json())
     .then((data) => {
@@ -703,11 +743,47 @@ function cargarDatosMySQL() {
         if (!data.data || data.data.length === 0) {
           html = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--ios-red); font-weight: 600;">No se encontraron registros en esta tabla.</td></tr>`;
         } else {
+          // Filtrado cliente-servidor de mes para Registro de Ventas
+          if (esVentas && window.mesFiltroVentas) {
+            const [, targetMonth] = window.mesFiltroVentas.split("-");
+            const mesesMap = {
+              ene: "01",
+              feb: "02",
+              mar: "03",
+              abr: "04",
+              may: "05",
+              jun: "06",
+              jul: "07",
+              ago: "08",
+              sep: "09",
+              oct: "10",
+              nov: "11",
+              dic: "12",
+            };
+
+            data.data = data.data.filter((fila) => {
+              let fStr = String(fila.fecha || fila.dia || "").trim();
+              if (!fStr || fStr === "-") return false;
+              if (fStr.includes(window.mesFiltroVentas)) return true;
+
+              let fechaCorta = formatearFechaCorta(fStr).toLowerCase();
+              let partesFC = fechaCorta.split("-");
+              if (partesFC.length === 2) {
+                let mesNum = mesesMap[partesFC[1]];
+                if (mesNum === targetMonth) return true;
+              }
+              return false;
+            });
+
+            if (data.data.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--ios-red); font-weight: 600;">No hay ventas registradas para el mes seleccionado (${window.mesFiltroVentas}).</td></tr>`;
+              return;
+            }
+          }
+
           let fechaGrupoActual = null;
-          const tablaLower = window.tablaMySQLActual.toLowerCase();
           const esNetflix = tablaLower === "netflix";
           const esGarantias = tablaLower === "garantias";
-          const esVentas = tablaLower === "registro_ventas";
 
           data.data.forEach((fila, idx) => {
             let diaVal = fila.dia || fila.fecha || "-";
@@ -825,6 +901,11 @@ function cargarDatosMySQL() {
               let platVta = fila.plataformas || fila.descripcion || "-";
               let tipoVta = fila.tipo || "Venta";
 
+              // Botón exclusivo para que el SuperAdmin pueda borrar ventas
+              let btnBorrarVenta = esSuperAdmin
+                ? `<button onclick="eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(clienteVal)}')" title="Eliminar Registro de Venta" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; margin-left: 4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`
+                : "";
+
               html += `
                 <tr style="background: ${colorFondoFila};">
                   <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
@@ -834,7 +915,8 @@ function cargarDatosMySQL() {
                   <td style="${tdBase} color: #bf5af2; font-weight: 700;">${pagoVal}</td>
                   <td style="${tdBase} text-align: center; color: #a1a1aa;">${tipoVta}</td>
                   <td style="${tdBase} text-align: right; padding-right: 15px;">
-                    <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                    <button onclick="abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Registro" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                    ${btnBorrarVenta}
                   </td>
                 </tr>
               `;
@@ -1194,11 +1276,14 @@ function cerrarModalEditarMySQL() {
   if (modal) modal.style.display = "none";
 }
 
-function eliminarRegistroMySQL(id) {
-  if (
-    !confirm("⚠️ ¿Estás seguro de que deseas eliminar este registro de MySQL?")
-  )
-    return;
+function eliminarRegistroMySQL(id, nombreFilaEscapada = "") {
+  const nombreFila = decodeURIComponent(nombreFilaEscapada);
+  let msjConfirm = `⚠️ ¿Estás seguro de que deseas eliminar este registro de MySQL?`;
+  if (nombreFila) {
+    msjConfirm = `⚠️ ¿Estás seguro de que deseas eliminar el registro de '${nombreFila}'?`;
+  }
+
+  if (!confirm(msjConfirm)) return;
   if (typeof haptic === "function") haptic();
 
   const formData = new FormData();
