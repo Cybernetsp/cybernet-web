@@ -6,31 +6,48 @@
   const style = document.createElement("style");
   style.id = "css-fix-scroll-mysql";
   style.innerHTML = `
+    /* Modal de MySQL / Bóveda */
+    #mysqlOverlay .modal-ios,
+    .modal-ios-mysql {
+      max-height: 92vh !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+      padding-bottom: 15px !important;
+    }
+
     /* Contenedor principal de la tabla */
     #contenedorTablaMySQL, 
     .tabla-container, 
-    .visor-mysql-body {
-      max-height: calc(100vh - 180px) !important;
+    .visor-mysql-body,
+    .mysql-table-wrapper {
+      max-height: calc(85vh - 170px) !important;
       overflow-y: auto !important;
       overflow-x: auto !important;
       -webkit-overflow-scrolling: touch !important;
       border-radius: 12px !important;
+      margin-bottom: 10px !important;
+      padding-bottom: 15px !important;
     }
 
     /* Personalización de la barra de desplazamiento macOS / iOS */
-    #contenedorTablaMySQL::-webkit-scrollbar {
+    #contenedorTablaMySQL::-webkit-scrollbar,
+    .mysql-table-wrapper::-webkit-scrollbar {
       width: 8px;
       height: 8px;
     }
-    #contenedorTablaMySQL::-webkit-scrollbar-track {
+    #contenedorTablaMySQL::-webkit-scrollbar-track,
+    .mysql-table-wrapper::-webkit-scrollbar-track {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 10px;
     }
-    #contenedorTablaMySQL::-webkit-scrollbar-thumb {
+    #contenedorTablaMySQL::-webkit-scrollbar-thumb,
+    .mysql-table-wrapper::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.18);
       border-radius: 10px;
     }
-    #contenedorTablaMySQL::-webkit-scrollbar-thumb:hover {
+    #contenedorTablaMySQL::-webkit-scrollbar-thumb:hover,
+    .mysql-table-wrapper::-webkit-scrollbar-thumb:hover {
       background: rgba(10, 132, 255, 0.5);
     }
   `;
@@ -279,25 +296,17 @@ function filtrarMySQL() {
   actualizarBotonBorrarBusquedaMySQL();
   clearTimeout(searchTimeoutMySQL);
   searchTimeoutMySQL = setTimeout(() => {
-    const busquedaInput = document.getElementById("inputSearchMySQL");
-    const busqueda = busquedaInput ? busquedaInput.value.trim() : "";
+    // Mantiene la pestaña actual seleccionada para buscar dentro de ella exclusivamente
+    window.tablaMySQLActual = window.lastSelectedTab || "netflix";
 
-    if (busqueda !== "") {
-      document
-        .querySelectorAll(".mysql-tab-btn")
-        .forEach((b) => b.classList.remove("active"));
-      window.tablaMySQLActual = "todas";
-    } else {
-      window.tablaMySQLActual = window.lastSelectedTab || "netflix";
-      document.querySelectorAll(".mysql-tab-btn").forEach((b) => {
-        const onclickAttr = b.getAttribute("onclick") || "";
-        if (onclickAttr.includes(`'${window.tablaMySQLActual}'`)) {
-          b.classList.add("active");
-        } else {
-          b.classList.remove("active");
-        }
-      });
-    }
+    document.querySelectorAll(".mysql-tab-btn").forEach((b) => {
+      const onclickAttr = b.getAttribute("onclick") || "";
+      if (onclickAttr.includes(`'${window.tablaMySQLActual}'`)) {
+        b.classList.add("active");
+      } else {
+        b.classList.remove("active");
+      }
+    });
 
     cargarDatosMySQL();
   }, 300);
@@ -445,9 +454,10 @@ function cargarDatosMySQL() {
     styleSticky.id = "css-sticky-hover-mysql";
     styleSticky.innerHTML = `
       .mysql-table-wrapper {
-        max-height: calc(90vh - 120px) !important;
+        max-height: calc(85vh - 170px) !important;
         overflow-y: auto !important;
         overflow-x: auto !important;
+        padding-bottom: 15px !important;
       }
       #tablaMySQLCabecera th { 
         position: sticky !important; 
@@ -461,16 +471,16 @@ function cargarDatosMySQL() {
       .tr-mysql-row:hover { background-color: rgba(255, 255, 255, 0.04) !important; }
       .tr-mysql-row.tr-caida { background-color: rgba(255, 69, 58, 0.18) !important; }
       .tr-mysql-row.tr-caida:hover { background-color: rgba(255, 69, 58, 0.28) !important; }
-      table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: fixed !important; width: 100% !important; min-width: 1100px !important; background-color: #111216 !important; }
+      table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: fixed !important; width: 100% !important; min-width: 1100px !important; background-color: #111216 !important; margin-bottom: 15px !important; }
       th, td { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+      tbody tr:last-child td { padding-bottom: 15px !important; }
     `;
     document.head.appendChild(styleSticky);
   }
 
   const busquedaInput = document.getElementById("inputSearchMySQL");
   const busqueda = busquedaInput ? busquedaInput.value.trim() : "";
-  const esBusquedaGlobal =
-    window.tablaMySQLActual === "todas" || busqueda !== "";
+  const esBusquedaGlobal = window.tablaMySQLActual === "todas";
 
   const thBase =
     "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
