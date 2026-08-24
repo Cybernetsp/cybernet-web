@@ -766,7 +766,7 @@
 
     <!-- SCRIPT DE LÓGICA DE LOGIN Y CONEXIONES A MYSQL -->
     <script>
-      /* ⚡ DIRECCIONAMIENTO DIRECTO AL ENDPOINT DE LOGIN EXCLUSIVO */
+      /* ⚡ REDIRECCIÓN EXCLUSIVA A LOGIN_DISTRIBUIDOR.PHP */
       const API_PRIMARY_URL =
         "https://api.cybernetsp.com/login_distribuidor.php";
       const API_FALLBACK_URL = "login_distribuidor.php";
@@ -1031,7 +1031,7 @@
         "DIRECTV-GO": "DirecTV Go",
       };
 
-      // 6. CARGAR TABLA COMPARATIVA DE PRECIOS
+      // 6. CARGAR TABLA COMPARATIVA DE PRECIOS CON HOMOLOGACIÓN DE CÓDIGOS
       async function cargarTablaComparativaPrecios() {
         const tbody = document.getElementById("tablaProfitBody");
         if (!tbody) return;
