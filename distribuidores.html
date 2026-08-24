@@ -2147,16 +2147,172 @@
               else if (diffDays === -1) categoria = "AYER";
               else if (diffDays === 0) categoria = "HOY";
               else if (diffDays === 1) categoria = "MANANA";
-              else if (diffDays >= 2 && diffDays <= 3) categoria = "TRES_DIAS";
+              else if (diffDays === 3) categoria = "TRES_DIAS";
             }
 
             return { ...item, diffDays, categoria };
           })
-          .filter((item) =>
-            ["ANTEAYER", "AYER", "HOY", "MANANA", "TRES_DIAS"].includes(
-              item.categoria,
-            ),
+          .filter(
+            (item) =>
+              item.plataforma === "NETFLIX" &&
+              item.correo &&
+              item.correo.includes("@") &&
+              ["ANTEAYER", "AYER", "HOY", "MANANA", "TRES_DIAS"].includes(
+                item.categoria,
+              ),
           );
+      }
+
+      /* 🤖 MOTOR DINÁMICO CLIENTE ANTISPAM WHATSAPP */
+      function pick(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function generarTokenUnicidad() {
+        const chars = ["\u200B", "\u200C", "\u200D", "\uFEFF"];
+        let token = "\n ";
+        const len = Math.floor(Math.random() * 8) + 8;
+        for (let i = 0; i < len; i++) {
+          token += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return token;
+      }
+
+      function generarMensajeRecordatorioAntispam(item) {
+        let tieneClienteReal =
+          item.cliente &&
+          item.cliente !== "-" &&
+          item.cliente.trim() !== "" &&
+          item.cliente.trim().toLowerCase() !== "sin nombre";
+
+        let clienteNombre = tieneClienteReal ? item.cliente.trim() : "";
+        let n = clienteNombre ? " " + clienteNombre : "";
+
+        const emojisSal = [
+          "🌈✨",
+          "👋🔥",
+          "😊🚀",
+          "🙌💎",
+          "☀️🍀",
+          "💫🎯",
+          "✨✌️",
+          "🌟🔥",
+          "😎🤙",
+          "🎉💫",
+          "🌸✨",
+          "💥🚀",
+          "🥳🎉",
+          "🤩👋",
+          "✌️🌈",
+        ];
+        const emojisUrg = [
+          "🚨⏳",
+          "⚠️🔥",
+          "🔔⚡",
+          "📢💥",
+          "⏰💥",
+          "⌛❗",
+          "🔴🔔",
+          "🧨🔥",
+          "🛑🔔",
+          "⏱️⚡",
+        ];
+        const emojisFut = [
+          "⏳🗓️",
+          "🔔✨",
+          "🍿🎬",
+          "🚀🌈",
+          "📅⚡",
+          "📌⏳",
+          "🗓️🚀",
+          "⚠️🗓️",
+          "💡📅",
+        ];
+        const emojisCierre = [
+          "📲💥",
+          "⚡💎",
+          "🔥🚀",
+          "🚀🙌",
+          "🟢✨",
+          "📲✨",
+          "💬🚀",
+          "💬✨",
+          "💎📩",
+        ];
+
+        const saludos = [
+          `¡Hola${n}! ${pick(emojisSal)}`,
+          `¡Qué tal${n}! ${pick(emojisSal)}`,
+          `¡Hey${n}! ${pick(emojisSal)}`,
+          `¡Un saludo${n}! ${pick(emojisSal)}`,
+          `¡Excelente día${n}! ${pick(emojisSal)}`,
+          `¡Buenas${n}! ${pick(emojisSal)}`,
+          `¡Buen día${n}! ${pick(emojisSal)}`,
+          `¡Hola, hola${n}! ${pick(emojisSal)}`,
+          `¡Gusto en saludarte${n}! ${pick(emojisSal)}`,
+          `¡Muy buenas${n}! ${pick(emojisSal)}`,
+          `¡Qué gusto saludarte${n}! ${pick(emojisSal)}`,
+          `¡Paso a saludarte${n}! ${pick(emojisSal)}`,
+          `¡Te envío un cordial saludo${n}! ${pick(emojisSal)}`,
+        ];
+
+        const perfil = item.perfil ? `Perfil ${item.perfil}` : "Perfil 1";
+        const pin = item.pin && item.pin !== "-" ? ` (PIN: ${item.pin})` : "";
+        const correo = item.correo;
+        const servicio = item.plataforma || "NETFLIX";
+        const fechaTxt = item.vencimiento;
+
+        let recordatorios = [];
+        if (item.categoria === "HOY") {
+          recordatorios = [
+            `Te recordamos que hoy *${fechaTxt}* se vence tu cuenta de *${servicio}* en el correo *${correo}* (${perfil}${pin}) ${pick(emojisUrg)}`,
+            `Te informamos que hoy *${fechaTxt}* vence tu pantalla de *${servicio}* asociada al correo *${correo}* (${perfil}${pin}) ${pick(emojisUrg)}`,
+            `Paso a avisarte que hoy *${fechaTxt}* se cumple el mes de tu servicio de *${servicio}* en *${correo}* (${perfil}${pin}) ${pick(emojisUrg)}`,
+            `Te escribimos para recordarte que hoy *${fechaTxt}* vence tu acceso a *${servicio}* en el correo *${correo}* (${perfil}${pin}) ${pick(emojisUrg)}`,
+            `Atención: hoy *${fechaTxt}* caduca tu plan de *${servicio}* en el correo *${correo}* (${perfil}${pin}) ${pick(emojisUrg)}`,
+            `Recuerda que hoy *${fechaTxt}* finaliza la mensualidad activa de *${servicio}* en *${correo}* (${perfil}${pin}) ${pick(emojisUrg)}`,
+          ];
+        } else if (
+          item.categoria === "MANANA" ||
+          item.categoria === "TRES_DIAS"
+        ) {
+          recordatorios = [
+            `Te recordamos que el *${fechaTxt}* vence tu cuenta de *${servicio}* en el correo *${correo}* (${perfil}${pin}) ${pick(emojisFut)}`,
+            `Te notificamos que el día *${fechaTxt}* se vencerá tu pantalla de *${servicio}* asociada a *${correo}* (${perfil}${pin}) ${pick(emojisFut)}`,
+            `Paso a avisarte que el *${fechaTxt}* se cumple el mes de tu servicio de *${servicio}* en *${correo}* (${perfil}${pin}) ${pick(emojisFut)}`,
+            `Te escribimos para recordarte que el *${fechaTxt}* vence tu acceso a *${servicio}* en el correo *${correo}* (${perfil}${pin}) ${pick(emojisFut)}`,
+            `Te avisamos con tiempo: tu plan de *${servicio}* en *${correo}* (${perfil}${pin}) caduca el *${fechaTxt}* ${pick(emojisFut)}`,
+          ];
+        } else {
+          // AYER O ANTEAYER
+          recordatorios = [
+            `Te recordamos que el pasado *${fechaTxt}* se venció tu cuenta de *${servicio}* en el correo *${correo}* (${perfil}${pin}) ${pick(emojisUrg)}`,
+            `Te informamos que tu pantalla de *${servicio}* en el correo *${correo}* (${perfil}${pin}) venció el *${fechaTxt}* ${pick(emojisUrg)}`,
+            `Notamos en el sistema que el pasado *${fechaTxt}* caducó tu acceso a *${servicio}* en *${correo}* (${perfil}${pin}) ${pick(emojisUrg)}`,
+            `Tu plan de *${servicio}* asociado a *${correo}* (${perfil}${pin}) finalizó el *${fechaTxt}* ${pick(emojisUrg)}`,
+            `Paso a avisarte que tu mensualidad de *${servicio}* en *${correo}* (${perfil}${pin}) expiró el pasado *${fechaTxt}* ${pick(emojisUrg)}`,
+          ];
+        }
+
+        const renovaciones = [
+          "Recuerda renovar a tiempo para que puedas seguir disfrutando con tu mismo correo, perfil e historial sin cortes.",
+          "Recuerda realizar tu renovación a tiempo para conservar tu mismo correo y perfil sin interrupciones.",
+          "Renueva a tiempo para que continúes con tu mismo correo e historial intacto.",
+          "Renueva a tiempo y mantén tu mismo correo, perfil y recomendaciones sin perder tu avance.",
+          "Recuerda hacer tu pago a tiempo para conservar tu mismo correo, contraseña y avance de series.",
+          "Asegura tu mismo correo y perfil renovando dentro de la fecha límite sin cortes en la señal.",
+        ];
+
+        const despedidas = [
+          `¡Quedamos atentos a tu mensaje para ayudarte! ${pick(emojisCierre)}`,
+          `¡Escríbenos y con gusto te colaboramos con la renovación! ${pick(emojisCierre)}`,
+          `¡Esperamos tu respuesta para dejar tu pantalla activa! ${pick(emojisCierre)}`,
+          `¡Avísanos cuando estés listo para enviarte los datos de pago! ${pick(emojisCierre)}`,
+          `¡Esperamos tu mensaje para activar tu servicio de inmediato! ${pick(emojisCierre)}`,
+          `¡Nos escribes y te ayudamos en un par de minutos! ${pick(emojisCierre)}`,
+        ];
+
+        return `${pick(saludos)}\n\n${pick(recordatorios)}\n\n${pick(renovaciones)}\n\n${pick(despedidas)}${generarTokenUnicidad()}`;
       }
 
       function renderizarVencimientosB2B() {
@@ -2174,12 +2330,12 @@
 
         if (lista.length === 0) {
           container.innerHTML = `
-      <div style="text-align: center; padding: 40px 10px; color: var(--text-secondary);">
-        <span style="font-size: 2rem; display: block; margin-bottom: 8px;">🎉</span>
-        <p style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">¡Sin vencimientos pendientes!</p>
-        <p style="font-size: 0.8rem; margin-top: 4px;">No hay cuentas en esta categoría para la ventana de días seleccionada.</p>
-      </div>
-    `;
+            <div style="text-align: center; padding: 40px 10px; color: var(--text-secondary);">
+              <span style="font-size: 2rem; display: block; margin-bottom: 8px;">🎉</span>
+              <p style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">¡Sin vencimientos pendientes!</p>
+              <p style="font-size: 0.8rem; margin-top: 4px;">No hay cuentas de Netflix en esta categoría.</p>
+            </div>
+          `;
           return;
         }
 
@@ -2213,11 +2369,7 @@
 
         let html = "";
         lista.forEach((item) => {
-          const b = catBadgeMap[item.categoria] || {
-            label: item.vencimiento,
-            color: "var(--ios-blue)",
-            bg: "rgba(10, 132, 255, 0.15)",
-          };
+          const b = catBadgeMap[item.categoria];
 
           // Validación de nombre real
           let tieneClienteReal =
@@ -2229,57 +2381,162 @@
           const clienteCardDisplay = tieneClienteReal
             ? item.cliente.trim()
             : "Sin Nombre";
-          const saludoCliente = tieneClienteReal
-            ? `¡Hola ${item.cliente.trim()}! 👋`
-            : `¡Hola! 👋`;
 
-          const perfil = item.perfil ? `Perfil ${item.perfil}` : "";
+          const perfil = item.perfil ? `Perfil ${item.perfil}` : "Perfil 1";
           const pin = item.pin && item.pin !== "-" ? ` (PIN: ${item.pin})` : "";
 
-          // Construcción del recordatorio limpio sin Cybernet y con saludo condicional
-          const rawRecordatorio = `🌟 *Recordatorio de Vencimiento*\n\n${saludoCliente}\n\nTe informamos que tu servicio de *${item.plataforma}* (${item.correo}) vence el *${item.vencimiento}* ${perfil}${pin}.\n\n🎬 *¿Deseas renovar tu pantalla?*\nRespóndenos este mensaje para renovarla de inmediato y mantener todos tus perfiles sin interrupciones.\n\n✨ ¡Gracias por elegirnos! ✨`;
-
+          // Generar mensaje aleatorio Antispam
+          const rawRecordatorio = generarMensajeRecordatorioAntispam(item);
           const encodedRecordatorio = encodeURIComponent(rawRecordatorio);
 
           html += `
-      <div class="venc-card-item">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-weight: 800; font-size: 0.9rem; color: var(--ios-blue); display: flex; align-items: center; gap: 6px;">
-            🎬 ${item.plataforma}
-          </span>
-          <span style="background: ${b.bg}; color: ${b.color}; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800;">
-            ${b.label}
-          </span>
-        </div>
+            <div class="venc-card-item">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 800; font-size: 0.9rem; color: var(--ios-blue); display: flex; align-items: center; gap: 6px;">
+                  🎬 ${item.plataforma}
+                </span>
+                <span style="background: ${b.bg}; color: ${b.color}; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800;">
+                  ${b.label}
+                </span>
+              </div>
 
-        <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; color: var(--text-primary); margin-top: 2px;">
-          <div>👤 <strong>Cliente:</strong> ${clienteCardDisplay}</div>
-          <div>📧 <strong>Correo:</strong> <span style="font-family: monospace; color: var(--ios-blue);">${item.correo}</span></div>
-          <div>🔐 <strong>Acceso:</strong> Clave: <span style="font-family: monospace;">${item.clave}</span> ${perfil ? `| ${perfil}` : ""} ${pin}</div>
-        </div>
+              <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; color: var(--text-primary); margin-top: 2px;">
+                <div>👤 <strong>Cliente:</strong> ${clienteCardDisplay}</div>
+                <div>📧 <strong>Correo:</strong> <span style="font-family: monospace; color: var(--ios-blue);">${item.correo}</span></div>
+                <div>🔐 <strong>Acceso:</strong> Clave: <span style="font-family: monospace;">${item.clave}</span> | ${perfil} ${pin}</div>
+              </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
-          <button class="btn-ios" onclick="renovarDesdeVencimiento('${item.plataforma}', '${encodeURIComponent(item.correo)}')" style="background: var(--ai-gradient); color: white; padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
-            🔄 Renovar
-          </button>
-          <button class="btn-ios" onclick="copiarRecordatorioVencimiento(this, '${encodedRecordatorio}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--surface-border); color: var(--text-primary); padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
-            📋 Copiar Recordatorio
-          </button>
-        </div>
-      </div>
-    `;
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
+                <button class="btn-ios" onclick="procesarRenovacionUnSoloClic('${item.plataforma}', '${encodeURIComponent(item.correo)}', '${item.perfil || "1"}', '${encodeURIComponent(clienteCardDisplay)}')" style="background: var(--ai-gradient); color: white; padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
+                  🔄 Renovar
+                </button>
+                <button class="btn-ios" onclick="copiarRecordatorioVencimiento(this, '${encodedRecordatorio}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--surface-border); color: var(--text-primary); padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
+                  📋 Copiar Recordatorio
+                </button>
+              </div>
+            </div>
+          `;
         });
 
         container.innerHTML = html;
       }
 
-      function renovarDesdeVencimiento(plataforma, correoEscapado) {
-        cerrarModalVencimientos();
+      /* ⚡ LÓGICA AUTOMÁTICA DE RENOVACIÓN A UN CLIC */
+      async function procesarRenovacionUnSoloClic(
+        plataforma,
+        correoEscapado,
+        perfil,
+        clienteEscapado,
+      ) {
         const correo = decodeURIComponent(correoEscapado);
-        if (typeof abrirModalRenovacionB2B === "function") {
-          abrirModalRenovacionB2B(plataforma, correo);
-        } else {
-          alert(`Iniciando renovación para ${plataforma} (${correo})`);
+        const cliente = decodeURIComponent(clienteEscapado);
+
+        if (
+          !confirm(
+            `¿Confirmas la renovación de la pantalla de Netflix (${correo} - Perfil ${perfil})?\nEl costo se descontará automáticamente de tu saldo.`,
+          )
+        )
+          return;
+
+        if (typeof triggerToast === "function") {
+          triggerToast(`⏳ Conectando con la base de datos...`);
+        }
+
+        try {
+          // 1. Obtener precio actualizado de Netflix
+          const fdPrecios = new FormData();
+          fdPrecios.append("accion", "obtener_precios_distribuidor");
+          const resPrecios = await fetch(
+            "https://api.cybernetsp.com/acciones_distribuidores.php",
+            { method: "POST", body: fdPrecios },
+          ).then((r) => r.json());
+
+          let precioReno = 0;
+          if (resPrecios.status === "success") {
+            const platData = resPrecios.data.find(
+              (p) => p.codigo.toLowerCase() === "netflix",
+            );
+            if (platData) precioReno = parseFloat(platData.precio);
+          }
+
+          if (precioReno === 0) {
+            alert(
+              "❌ No se pudo obtener el precio de Netflix. Intenta desde el carrito.",
+            );
+            return;
+          }
+
+          // 2. Construir paquete de renovación
+          const telDistri = localStorage.getItem("active_distri_tel");
+          const carritoMock = [
+            {
+              id: "netflix",
+              name: "Netflix Original",
+              precio: precioReno,
+              amount: 1,
+              tipo: "Reno",
+              correoReno: `${correo}|Perfil: ${perfil}`,
+            },
+          ];
+
+          const fdCompra = new FormData();
+          fdCompra.append("accion", "procesar_compra_distribuidor");
+          fdCompra.append("telefono_distribuidor", telDistri);
+          fdCompra.append(
+            "nombre_cliente",
+            cliente !== "Sin Nombre" ? cliente : "",
+          );
+          fdCompra.append("descripcion", "RENO: 1 NETFLIX");
+          fdCompra.append("monto_total", precioReno);
+          fdCompra.append("carrito_json", JSON.stringify(carritoMock));
+
+          const resCompra = await fetch(
+            "https://api.cybernetsp.com/acciones_distribuidores.php",
+            { method: "POST", body: fdCompra },
+          ).then((r) => r.json());
+
+          if (resCompra.status === "success") {
+            // 3. Flujo visual de éxito
+            cerrarModalVencimientos();
+
+            // Actualizar Saldo visualmente
+            const divSaldo = document.getElementById("distriBarBalance");
+            if (divSaldo)
+              divSaldo.innerText =
+                "$" +
+                parseFloat(resCompra.saldoQuedante).toLocaleString("es-CO");
+
+            // Formatear el ticket y mostrar Modal de éxito
+            let textoFichas = "";
+            resCompra.bloques.forEach((b) => {
+              textoFichas +=
+                construirMensajeFicha(
+                  b.id,
+                  b.correo,
+                  b.clave,
+                  b.perfil,
+                  b.pin,
+                  b.venc,
+                  cliente,
+                ) + "\n\n";
+            });
+
+            const boxFichas = document.getElementById("cajaTextoFichas");
+            if (boxFichas) boxFichas.innerText = textoFichas.trim();
+
+            const modalExito = document.getElementById(
+              "successCheckoutOverlay",
+            );
+            if (modalExito) modalExito.classList.add("open");
+
+            // Recargar el casillero de fondo
+            if (typeof cargarDatosMySQL === "function") cargarDatosMySQL();
+          } else {
+            alert("❌ Error al renovar: " + resCompra.message);
+          }
+        } catch (error) {
+          console.error(error);
+          alert("❌ Ocurrió un error de conexión al procesar la renovación.");
         }
       }
 
