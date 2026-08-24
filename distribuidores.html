@@ -177,6 +177,11 @@
         transition: background 0.4s ease;
       }
 
+      /* REGLA DE SOBRESCRITURA DE MODALES PARA APERTURA GARANTIZADA */
+      .overlay-modal-code.open {
+        display: flex !important;
+      }
+
       /* INPUTS PREVENCIÓN ZOOM IOS */
       .input-ios {
         font-size: 16px !important;
@@ -978,11 +983,7 @@
     </div>
 
     <!-- MODAL VENCIMIENTOS DE CUENTAS -->
-    <div
-      class="overlay-modal-code"
-      id="modalVencimientos"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="modalVencimientos">
       <div
         class="modal-ios"
         style="
@@ -1153,11 +1154,7 @@
     </button>
 
     <!-- CARRITO DE COMPRAS -->
-    <div
-      class="overlay-modal-code"
-      id="modalCarritoTienda"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="modalCarritoTienda">
       <div class="modal-ios" style="max-width: 400px; width: 92%">
         <div
           style="
@@ -1277,11 +1274,7 @@
     </div>
 
     <!-- BÓVEDA CASILLERO -->
-    <div
-      class="overlay-modal-code"
-      id="modalBusquedaCuentas"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="modalBusquedaCuentas">
       <div class="modal-ios" style="max-width: 450px; width: 92%">
         <div
           style="
@@ -1365,11 +1358,7 @@
     </div>
 
     <!-- HISTORIAL DE MOVIMIENTOS CON SELECTOR DE MES -->
-    <div
-      class="overlay-modal-code"
-      id="modalEstadoCuenta"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="modalEstadoCuenta">
       <div class="modal-ios" style="max-width: 500px; width: 92%">
         <div
           style="
@@ -1480,11 +1469,7 @@
     </div>
 
     <!-- MODAL ÉXITO COMPRA -->
-    <div
-      class="overlay-modal-code"
-      id="successCheckoutOverlay"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="successCheckoutOverlay">
       <div
         class="modal-ios"
         style="max-width: 400px; width: 92%; text-align: center"
@@ -1587,11 +1572,7 @@
     </div>
 
     <!-- CENTRO CÓDIGOS B2B -->
-    <div
-      class="overlay-modal-code"
-      id="codesCenterOverlay"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="codesCenterOverlay">
       <div class="modal-ios" style="max-width: 400px; width: 92%">
         <div
           style="
@@ -1915,11 +1896,7 @@
     </div>
 
     <!-- RENOVACIÓN B2B -->
-    <div
-      class="overlay-modal-code"
-      id="modalRenovacionDistri"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="modalRenovacionDistri">
       <div class="modal-ios" style="max-width: 400px; width: 92%">
         <div
           style="
@@ -1956,13 +1933,7 @@
             </svg>
             Seleccionar Cuenta
           </h3>
-          <button
-            class="btn-close-circle"
-            onclick="
-              document.getElementById('modalRenovacionDistri').style.display =
-                'none'
-            "
-          >
+          <button class="btn-close-circle" onclick="cerrarModalRenovacionB2B()">
             <svg
               width="14"
               height="14"
@@ -2042,11 +2013,109 @@
         if (btnMobile) btnMobile.innerHTML = svgIcon;
       }
 
-      /* 🛡️ CIERRE EXPLÍCITO DE MODALES */
+      /* 🛡️ MANEJO GARANTIZADO DE APERTURA/CIERRA DE TODOS LOS MODALES */
+      function abrirModalVencimientos() {
+        if (typeof haptic === "function") haptic();
+        const modal = document.getElementById("modalVencimientos");
+        if (modal) {
+          modal.style.display = "flex";
+          modal.classList.add("open");
+        }
+        cargarVencimientosB2B();
+      }
+
+      function cerrarModalVencimientos() {
+        if (typeof haptic === "function") haptic();
+        const modal = document.getElementById("modalVencimientos");
+        if (modal) {
+          modal.style.display = "none";
+          modal.classList.remove("open");
+        }
+      }
+
+      function abrirModalBusquedaCuentas() {
+        if (typeof haptic === "function") haptic();
+        const m = document.getElementById("modalBusquedaCuentas");
+        if (m) {
+          m.style.display = "flex";
+          m.classList.add("open");
+        }
+        if (typeof buscarCasilleroDistri === "function")
+          buscarCasilleroDistri();
+      }
+
+      function cerrarModalBusquedaCuentas() {
+        if (typeof haptic === "function") haptic();
+        const m = document.getElementById("modalBusquedaCuentas");
+        if (m) {
+          m.style.display = "none";
+          m.classList.remove("open");
+        }
+      }
+
+      function abrirModalHistorial() {
+        if (typeof haptic === "function") haptic();
+        const m = document.getElementById("modalEstadoCuenta");
+        if (m) {
+          m.style.display = "flex";
+          m.classList.add("open");
+        }
+        if (typeof cargarHistorialMovimientosB2B === "function")
+          cargarHistorialMovimientosB2B();
+      }
+
+      function cerrarModalHistorial() {
+        if (typeof haptic === "function") haptic();
+        const m = document.getElementById("modalEstadoCuenta");
+        if (m) {
+          m.style.display = "none";
+          m.classList.remove("open");
+        }
+      }
+
+      function abrirCarrito() {
+        if (typeof haptic === "function") haptic();
+        const m = document.getElementById("modalCarritoTienda");
+        if (m) {
+          m.style.display = "flex";
+          m.classList.add("open");
+        }
+      }
+
+      function cerrarCarrito() {
+        if (typeof haptic === "function") haptic();
+        const m = document.getElementById("modalCarritoTienda");
+        if (m) {
+          m.style.display = "none";
+          m.classList.remove("open");
+        }
+      }
+
+      function abrirMenuMovil() {
+        if (typeof haptic === "function") haptic();
+        const m = document.getElementById("modalMenuMovil");
+        if (m) {
+          m.style.display = "flex";
+          m.classList.add("open");
+        }
+      }
+
+      function cerrarMenuMovil() {
+        if (typeof haptic === "function") haptic();
+        const m = document.getElementById("modalMenuMovil");
+        if (m) {
+          m.style.display = "none";
+          m.classList.remove("open");
+        }
+      }
+
       window.cerrarModalExitoCheckout = function () {
         if (typeof haptic === "function") haptic();
         const modal = document.getElementById("successCheckoutOverlay");
-        if (modal) modal.classList.remove("open");
+        if (modal) {
+          modal.style.display = "none";
+          modal.classList.remove("open");
+        }
       };
 
       window.copiarCuentasCheckout = function () {
@@ -2061,6 +2130,124 @@
           });
         }
       };
+
+      /* 🔄 MODAL SELECCIONAR CUENTA PARA RENOVACIÓN */
+      window.cuentasRenovacionCache = [];
+
+      function abrirModalRenovacionB2B(platKey) {
+        if (typeof haptic === "function") haptic();
+        window.platRenovacionActual = platKey || "NETFLIX";
+        const modal = document.getElementById("modalRenovacionDistri");
+        if (modal) {
+          modal.style.display = "flex";
+          modal.classList.add("open");
+        }
+        cargarCuentasParaRenovarB2B(window.platRenovacionActual);
+      }
+
+      function cerrarModalRenovacionB2B() {
+        if (typeof haptic === "function") haptic();
+        const modal = document.getElementById("modalRenovacionDistri");
+        if (modal) {
+          modal.style.display = "none";
+          modal.classList.remove("open");
+        }
+      }
+
+      async function cargarCuentasParaRenovarB2B(platKey) {
+        const container = document.getElementById(
+          "listaCuentasModalRenoDistri",
+        );
+        if (!container) return;
+
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">Cargando cuentas para renovar...</div>`;
+
+        const telDistri = localStorage.getItem("active_distri_tel") || "";
+        const formData = new FormData();
+        formData.append("accion", "obtener_cuentas_renovacion_distribuidor");
+        formData.append("telefono", telDistri);
+        formData.append("plataforma", platKey || "");
+
+        try {
+          const resp = await fetch(
+            "https://api.cybernetsp.com/acciones_distribuidores.php",
+            {
+              method: "POST",
+              body: formData,
+              mode: "cors",
+            },
+          );
+          const text = await resp.text();
+          const res = parseCleanJSON(text);
+
+          if (res && res.status === "success" && Array.isArray(res.data)) {
+            window.cuentasRenovacionCache = res.data;
+            renderizarCuentasModalRenovacion(res.data);
+          } else {
+            container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">No tienes cuentas registradas para esta plataforma.</div>`;
+          }
+        } catch (e) {
+          console.error(e);
+          container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--ios-red); font-size:0.85rem;">Error al cargar cuentas de renovación.</div>`;
+        }
+      }
+
+      function renderizarCuentasModalRenovacion(lista) {
+        const container = document.getElementById(
+          "listaCuentasModalRenoDistri",
+        );
+        if (!container) return;
+
+        if (!lista || lista.length === 0) {
+          container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">Sin cuentas disponibles.</div>`;
+          return;
+        }
+
+        let html = "";
+        lista.forEach((item) => {
+          const clienteTxt = item.cliente ? ` (${item.cliente})` : "";
+          const vencTxt = item.vencimiento
+            ? ` - Vence: ${item.vencimiento}`
+            : "";
+          html += `
+            <button class="btn-ios btn-secondary w-100" style="justify-content: flex-start; text-align: left; padding: 10px 12px; font-size: 0.8rem; border-radius: 12px;" onclick="seleccionarCuentaRenovarB2B('${item.correo}', '${item.perfil}')">
+              <div>
+                <strong style="color: var(--ios-blue);">${item.correo}</strong>${clienteTxt}<br>
+                <span style="font-size: 0.72rem; color: var(--text-secondary);">Perfil ${item.perfil}${vencTxt}</span>
+              </div>
+            </button>
+          `;
+        });
+        container.innerHTML = html;
+      }
+
+      function filtrarModalRenovacionB2B() {
+        const q = (
+          document.getElementById("buscadorModalRenoDistri")?.value || ""
+        )
+          .toLowerCase()
+          .trim();
+        const filtradas = window.cuentasRenovacionCache.filter(
+          (i) =>
+            (i.correo || "").toLowerCase().includes(q) ||
+            (i.cliente || "").toLowerCase().includes(q) ||
+            (i.perfil || "").toString().toLowerCase().includes(q),
+        );
+        renderizarCuentasModalRenovacion(filtradas);
+      }
+
+      function seleccionarCuentaRenovarB2B(correo, perfil) {
+        if (typeof haptic === "function") haptic();
+        cerrarModalRenovacionB2B();
+
+        if (typeof window.asignarCuentaRenovacionAlCarrito === "function") {
+          window.asignarCuentaRenovacionAlCarrito(correo, perfil);
+        } else if (typeof triggerToast === "function") {
+          triggerToast(
+            "Cuenta seleccionada: " + correo + " | Perfil " + perfil,
+          );
+        }
+      }
 
       /* 📦 CARGA Y VINCULACIÓN EN TIEMPO REAL DEL STOCK EN LAS TARJETAS */
       async function cargarStockPlataformasB2B() {
@@ -2097,7 +2284,7 @@
         }
       }
 
-      /* 📩 LÓGICA RASTREO Y BÚSQUEDA DE CÓDIGOS ROBUSTA */
+      /* 📩 LÓGICA RASTREO Y BÚSQUEDA DE CÓDIGOS ROBUSTA (16 MINUTOS MAX) */
       window.codigoB2BCapturado = "";
 
       function setCodigoPlat(plat) {
@@ -2122,14 +2309,20 @@
       function abrirCentroCodigos() {
         if (typeof haptic === "function") haptic();
         const overlay = document.getElementById("codesCenterOverlay");
-        if (overlay) overlay.classList.add("open");
+        if (overlay) {
+          overlay.style.display = "flex";
+          overlay.classList.add("open");
+        }
         changeCodeStep(1);
       }
 
       function cerrarCentroCodigos() {
         if (typeof haptic === "function") haptic();
         const overlay = document.getElementById("codesCenterOverlay");
-        if (overlay) overlay.classList.remove("open");
+        if (overlay) {
+          overlay.style.display = "none";
+          overlay.classList.remove("open");
+        }
       }
 
       async function rastrearCodigo() {
@@ -2258,19 +2451,6 @@
       /* LÓGICA DE CONTROL Y RENDERIZADO DE VENCIMIENTOS */
       window.vencimientosDataCache = [];
       window.vencimientoFiltroActual = "TODOS";
-
-      function abrirModalVencimientos() {
-        if (typeof haptic === "function") haptic();
-        const modal = document.getElementById("modalVencimientos");
-        if (modal) modal.classList.add("open");
-        cargarVencimientosB2B();
-      }
-
-      function cerrarModalVencimientos() {
-        if (typeof haptic === "function") haptic();
-        const modal = document.getElementById("modalVencimientos");
-        if (modal) modal.classList.remove("open");
-      }
 
       function filtrarVencimientosTab(filtro, btn) {
         if (typeof haptic === "function") haptic();
