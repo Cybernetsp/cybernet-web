@@ -2174,12 +2174,12 @@
 
         if (lista.length === 0) {
           container.innerHTML = `
-            <div style="text-align: center; padding: 40px 10px; color: var(--text-secondary);">
-              <span style="font-size: 2rem; display: block; margin-bottom: 8px;">🎉</span>
-              <p style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">¡Sin vencimientos pendientes!</p>
-              <p style="font-size: 0.8rem; margin-top: 4px;">No hay cuentas en esta categoría para la ventana de días seleccionada.</p>
-            </div>
-          `;
+      <div style="text-align: center; padding: 40px 10px; color: var(--text-secondary);">
+        <span style="font-size: 2rem; display: block; margin-bottom: 8px;">🎉</span>
+        <p style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">¡Sin vencimientos pendientes!</p>
+        <p style="font-size: 0.8rem; margin-top: 4px;">No hay cuentas en esta categoría para la ventana de días seleccionada.</p>
+      </div>
+    `;
           return;
         }
 
@@ -2218,44 +2218,56 @@
             color: "var(--ios-blue)",
             bg: "rgba(10, 132, 255, 0.15)",
           };
-          const cliente =
-            item.cliente && item.cliente !== "-"
-              ? item.cliente
-              : "Cliente General";
+
+          // Validación de nombre real
+          let tieneClienteReal =
+            item.cliente &&
+            item.cliente !== "-" &&
+            item.cliente.trim() !== "" &&
+            item.cliente.trim().toLowerCase() !== "sin nombre";
+
+          const clienteCardDisplay = tieneClienteReal
+            ? item.cliente.trim()
+            : "Sin Nombre";
+          const saludoCliente = tieneClienteReal
+            ? `¡Hola ${item.cliente.trim()}! 👋`
+            : `¡Hola! 👋`;
+
           const perfil = item.perfil ? `Perfil ${item.perfil}` : "";
           const pin = item.pin && item.pin !== "-" ? ` (PIN: ${item.pin})` : "";
 
-          const rawRecordatorio = `🌟 *Recordatorio de Vencimiento Cybernet*\n\n¡Hola ${cliente}! 👋\n\nTe informamos que tu servicio de *${item.plataforma}* (${item.correo}) vence el *${item.vencimiento}* ${perfil}${pin}.\n\n🎬 *¿Deseas renovar tu pantalla?*\nRespóndenos este mensaje para renovarla de inmediato y mantener todos tus perfiles sin interrupciones.\n\n✨ ¡Gracias por elegir Cybernet! ✨`;
+          // Construcción del recordatorio limpio sin Cybernet y con saludo condicional
+          const rawRecordatorio = `🌟 *Recordatorio de Vencimiento*\n\n${saludoCliente}\n\nTe informamos que tu servicio de *${item.plataforma}* (${item.correo}) vence el *${item.vencimiento}* ${perfil}${pin}.\n\n🎬 *¿Deseas renovar tu pantalla?*\nRespóndenos este mensaje para renovarla de inmediato y mantener todos tus perfiles sin interrupciones.\n\n✨ ¡Gracias por elegirnos! ✨`;
 
           const encodedRecordatorio = encodeURIComponent(rawRecordatorio);
 
           html += `
-            <div class="venc-card-item">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: 800; font-size: 0.9rem; color: var(--ios-blue); display: flex; align-items: center; gap: 6px;">
-                  🎬 ${item.plataforma}
-                </span>
-                <span style="background: ${b.bg}; color: ${b.color}; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800;">
-                  ${b.label}
-                </span>
-              </div>
+      <div class="venc-card-item">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 800; font-size: 0.9rem; color: var(--ios-blue); display: flex; align-items: center; gap: 6px;">
+            🎬 ${item.plataforma}
+          </span>
+          <span style="background: ${b.bg}; color: ${b.color}; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800;">
+            ${b.label}
+          </span>
+        </div>
 
-              <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; color: var(--text-primary); margin-top: 2px;">
-                <div>👤 <strong>Cliente:</strong> ${cliente}</div>
-                <div>📧 <strong>Correo:</strong> <span style="font-family: monospace; color: var(--ios-blue);">${item.correo}</span></div>
-                <div>🔐 <strong>Acceso:</strong> Clave: <span style="font-family: monospace;">${item.clave}</span> ${perfil ? `| ${perfil}` : ""} ${pin}</div>
-              </div>
+        <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; color: var(--text-primary); margin-top: 2px;">
+          <div>👤 <strong>Cliente:</strong> ${clienteCardDisplay}</div>
+          <div>📧 <strong>Correo:</strong> <span style="font-family: monospace; color: var(--ios-blue);">${item.correo}</span></div>
+          <div>🔐 <strong>Acceso:</strong> Clave: <span style="font-family: monospace;">${item.clave}</span> ${perfil ? `| ${perfil}` : ""} ${pin}</div>
+        </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
-                <button class="btn-ios" onclick="renovarDesdeVencimiento('${item.plataforma}', '${encodeURIComponent(item.correo)}')" style="background: var(--ai-gradient); color: white; padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
-                  🔄 Renovar
-                </button>
-                <button class="btn-ios" onclick="copiarRecordatorioVencimiento(this, '${encodedRecordatorio}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--surface-border); color: var(--text-primary); padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
-                  📋 Copiar Recordatorio
-                </button>
-              </div>
-            </div>
-          `;
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
+          <button class="btn-ios" onclick="renovarDesdeVencimiento('${item.plataforma}', '${encodeURIComponent(item.correo)}')" style="background: var(--ai-gradient); color: white; padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
+            🔄 Renovar
+          </button>
+          <button class="btn-ios" onclick="copiarRecordatorioVencimiento(this, '${encodedRecordatorio}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--surface-border); color: var(--text-primary); padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
+            📋 Copiar Recordatorio
+          </button>
+        </div>
+      </div>
+    `;
         });
 
         container.innerHTML = html;
