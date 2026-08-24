@@ -1,54 +1,70 @@
 /* =========================================================================
-   🛠️ REPARACIÓN DE SCROLL AUTOMÁTICO, BARRA DE NAVEGACIÓN Y BÚSQUEDA
+   🛠️ REPARACIÓN DE SCROLL AUTOMÁTICO, ALTURA Y BARRA DE NAVEGACIÓN EN MYSQL
    ========================================================================= */
 (function repararScrollVisorMySQL() {
   if (document.getElementById("css-fix-scroll-mysql")) return;
   const style = document.createElement("style");
   style.id = "css-fix-scroll-mysql";
   style.innerHTML = `
-    /* Modal de MySQL / Bóveda */
+    /* Modal de MySQL / Bóveda contenedor de altura fija */
+    #mysqlOverlay {
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    #mysqlOverlay > div,
     #mysqlOverlay .modal-ios,
     .modal-ios-mysql {
-      max-height: 90vh !important;
+      height: 88vh !important;
+      max-height: 88vh !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
-      padding-bottom: 10px !important;
+      box-sizing: border-box !important;
+      padding-bottom: 12px !important;
     }
 
-    /* Contenedor principal de la tabla */
+    /* Contenedor envolvente directo de la tabla */
     #contenedorTablaMySQL, 
     .tabla-container, 
     .visor-mysql-body,
-    .mysql-table-wrapper {
-      max-height: calc(82vh - 160px) !important;
+    .mysql-table-wrapper,
+    #mysqlOverlay .mysql-table-wrapper {
+      flex: 1 !important;
+      min-height: 0 !important;
+      max-height: calc(88vh - 160px) !important;
       overflow-y: auto !important;
       overflow-x: auto !important;
       -webkit-overflow-scrolling: touch !important;
       border-radius: 12px !important;
-      margin-bottom: 8px !important;
+      margin-bottom: 10px !important;
     }
 
-    /* Personalización de la barra de desplazamiento clara estilo iOS (Azul Neón para visibilidad) */
-    #contenedorTablaMySQL::-webkit-scrollbar,
-    .mysql-table-wrapper::-webkit-scrollbar {
-      width: 8px !important;
-      height: 8px !important;
+    /* Barra de scroll azul neón visible siempre */
+    #mysqlOverlay ::-webkit-scrollbar,
+    .mysql-table-wrapper::-webkit-scrollbar,
+    #contenedorTablaMySQL::-webkit-scrollbar {
+      width: 9px !important;
+      height: 9px !important;
+      display: block !important;
     }
-    #contenedorTablaMySQL::-webkit-scrollbar-track,
-    .mysql-table-wrapper::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.06) !important;
+    #mysqlOverlay ::-webkit-scrollbar-track,
+    .mysql-table-wrapper::-webkit-scrollbar-track,
+    #contenedorTablaMySQL::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.08) !important;
       border-radius: 10px !important;
     }
-    #contenedorTablaMySQL::-webkit-scrollbar-thumb,
-    .mysql-table-wrapper::-webkit-scrollbar-thumb {
+    #mysqlOverlay ::-webkit-scrollbar-thumb,
+    .mysql-table-wrapper::-webkit-scrollbar-thumb,
+    #contenedorTablaMySQL::-webkit-scrollbar-thumb {
       background: #0a84ff !important;
       border-radius: 10px !important;
       border: 2px solid transparent !important;
       background-clip: padding-box !important;
     }
-    #contenedorTablaMySQL::-webkit-scrollbar-thumb:hover,
-    .mysql-table-wrapper::-webkit-scrollbar-thumb:hover {
+    #mysqlOverlay ::-webkit-scrollbar-thumb:hover,
+    .mysql-table-wrapper::-webkit-scrollbar-thumb:hover,
+    #contenedorTablaMySQL::-webkit-scrollbar-thumb:hover {
       background: #30d158 !important;
     }
   `;
@@ -447,7 +463,7 @@ function cargarDatosMySQL() {
 
   const tableNode = thead.closest("table");
   if (tableNode && tableNode.parentElement) {
-    tableNode.parentElement.style.overflowX = "auto";
+    tableNode.parentElement.classList.add("mysql-table-wrapper");
   }
 
   if (!document.getElementById("css-sticky-hover-mysql")) {
