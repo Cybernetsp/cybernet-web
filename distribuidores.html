@@ -978,7 +978,11 @@
     </div>
 
     <!-- MODAL VENCIMIENTOS DE CUENTAS -->
-    <div class="overlay-modal-code" id="modalVencimientos">
+    <div
+      class="overlay-modal-code"
+      id="modalVencimientos"
+      style="display: none"
+    >
       <div
         class="modal-ios"
         style="
@@ -1149,7 +1153,11 @@
     </button>
 
     <!-- CARRITO DE COMPRAS -->
-    <div class="overlay-modal-code" id="modalCarritoTienda">
+    <div
+      class="overlay-modal-code"
+      id="modalCarritoTienda"
+      style="display: none"
+    >
       <div class="modal-ios" style="max-width: 400px; width: 92%">
         <div
           style="
@@ -1269,7 +1277,11 @@
     </div>
 
     <!-- BÓVEDA CASILLERO -->
-    <div class="overlay-modal-code" id="modalBusquedaCuentas">
+    <div
+      class="overlay-modal-code"
+      id="modalBusquedaCuentas"
+      style="display: none"
+    >
       <div class="modal-ios" style="max-width: 450px; width: 92%">
         <div
           style="
@@ -1353,7 +1365,11 @@
     </div>
 
     <!-- HISTORIAL DE MOVIMIENTOS CON SELECTOR DE MES -->
-    <div class="overlay-modal-code" id="modalEstadoCuenta">
+    <div
+      class="overlay-modal-code"
+      id="modalEstadoCuenta"
+      style="display: none"
+    >
       <div class="modal-ios" style="max-width: 500px; width: 92%">
         <div
           style="
@@ -1464,7 +1480,11 @@
     </div>
 
     <!-- MODAL ÉXITO COMPRA -->
-    <div class="overlay-modal-code" id="successCheckoutOverlay">
+    <div
+      class="overlay-modal-code"
+      id="successCheckoutOverlay"
+      style="display: none"
+    >
       <div
         class="modal-ios"
         style="max-width: 400px; width: 92%; text-align: center"
@@ -1567,7 +1587,11 @@
     </div>
 
     <!-- CENTRO CÓDIGOS B2B -->
-    <div class="overlay-modal-code" id="codesCenterOverlay">
+    <div
+      class="overlay-modal-code"
+      id="codesCenterOverlay"
+      style="display: none"
+    >
       <div class="modal-ios" style="max-width: 400px; width: 92%">
         <div
           style="
@@ -1890,6 +1914,95 @@
       </div>
     </div>
 
+    <!-- RENOVACIÓN B2B -->
+    <div
+      class="overlay-modal-code"
+      id="modalRenovacionDistri"
+      style="display: none"
+    >
+      <div class="modal-ios" style="max-width: 400px; width: 92%">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+          "
+        >
+          <h3
+            style="
+              margin: 0;
+              font-size: 1.15rem;
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-blue)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            Seleccionar Cuenta
+          </h3>
+          <button
+            class="btn-close-circle"
+            onclick="
+              document.getElementById('modalRenovacionDistri').style.display =
+                'none'
+            "
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <input
+          type="text"
+          id="buscadorModalRenoDistri"
+          class="input-ios"
+          placeholder="Buscar por correo, perfil o cliente"
+          onkeyup="filtrarModalRenovacionB2B()"
+          style="
+            width: 100%;
+            padding: 12px;
+            font-size: 16px !important;
+            margin-bottom: 12px;
+          "
+        />
+        <div
+          id="listaCuentasModalRenoDistri"
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+          "
+        ></div>
+      </div>
+    </div>
+
     <!-- INITIALIZATION -->
     <script>
       function toggleThemeDistri() {
@@ -1924,7 +2037,7 @@
       window.cerrarModalExitoCheckout = function () {
         if (typeof haptic === "function") haptic();
         const modal = document.getElementById("successCheckoutOverlay");
-        if (modal) modal.classList.remove("open");
+        if (modal) modal.style.display = "none";
       };
 
       window.copiarCuentasCheckout = function () {
@@ -1947,14 +2060,14 @@
       function abrirModalVencimientos() {
         if (typeof haptic === "function") haptic();
         const modal = document.getElementById("modalVencimientos");
-        if (modal) modal.classList.add("open");
+        if (modal) modal.style.display = "flex";
         cargarVencimientosB2B();
       }
 
       function cerrarModalVencimientos() {
         if (typeof haptic === "function") haptic();
         const modal = document.getElementById("modalVencimientos");
-        if (modal) modal.classList.remove("open");
+        if (modal) modal.style.display = "none";
       }
 
       function filtrarVencimientosTab(filtro, btn) {
@@ -2340,11 +2453,8 @@
                 <div>🔐 <strong>Acceso:</strong> Clave: <span style="font-family: monospace;">${item.clave}</span> | ${perfil} ${pin}</div>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
-                <button class="btn-ios" onclick="procesarRenovacionUnSoloClic('${item.plataforma}', '${encodeURIComponent(item.correo)}', '${item.perfil || "1"}', '${encodeURIComponent(clienteCardDisplay)}')" style="background: var(--ai-gradient); color: white; padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
-                  🔄 Renovar
-                </button>
-                <button class="btn-ios" onclick="copiarRecordatorioVencimiento(this, '${encodedRecordatorio}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--surface-border); color: var(--text-primary); padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
+              <div style="margin-top: 6px;">
+                <button class="btn-ios w-100" onclick="copiarRecordatorioVencimiento(this, '${encodedRecordatorio}')" style="background: var(--ai-gradient); color: white; padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
                   📋 Copiar Recordatorio
                 </button>
               </div>
@@ -2355,152 +2465,14 @@
         container.innerHTML = html;
       }
 
-      /* ⚡ LÓGICA AUTOMÁTICA DE RENOVACIÓN A UN CLIC */
-      async function procesarRenovacionUnSoloClic(
-        plataforma,
-        correoEscapado,
-        perfil,
-        clienteEscapado,
-      ) {
-        const correo = decodeURIComponent(correoEscapado);
-        const cliente = decodeURIComponent(clienteEscapado);
-
-        if (
-          !confirm(
-            `¿Confirmas la renovación de la pantalla de Netflix (${correo} - Perfil ${perfil})?\nEl costo se descontará automáticamente de tu saldo.`,
-          )
-        )
-          return;
-
-        if (typeof triggerToast === "function") {
-          triggerToast(`⏳ Conectando con la base de datos...`);
-        }
-
-        try {
-          // 1. Obtener precio actualizado de Netflix
-          const fdPrecios = new FormData();
-          fdPrecios.append("accion", "obtener_precios_distribuidor");
-          const resReq = await fetch(
-            "https://api.cybernetsp.com/acciones_distribuidores.php",
-            { method: "POST", body: fdPrecios },
-          );
-          const resPreciosText = await resReq.text();
-          let resPrecios;
-          try {
-            resPrecios = JSON.parse(resPreciosText);
-          } catch (e) {
-            throw new Error("Respuesta inválida de precios: " + resPreciosText);
-          }
-
-          let precioReno = 0;
-          if (resPrecios.status === "success") {
-            const platData = resPrecios.data.find(
-              (p) => p.codigo.toLowerCase() === "netflix",
-            );
-            if (platData) precioReno = parseFloat(platData.precio);
-          }
-
-          if (precioReno === 0) {
-            alert(
-              "❌ No se pudo obtener el precio de Netflix. Intenta desde el carrito.",
-            );
-            return;
-          }
-
-          // 2. Construir paquete de renovación
-          const telDistri = localStorage.getItem("active_distri_tel");
-          const carritoMock = [
-            {
-              id: "netflix",
-              name: "Netflix Original",
-              precio: precioReno,
-              amount: 1,
-              tipo: "Reno",
-              correoReno: `${correo}|Perfil: ${perfil}`,
-            },
-          ];
-
-          const fdCompra = new FormData();
-          fdCompra.append("accion", "procesar_compra_distribuidor");
-          fdCompra.append("telefono_distribuidor", telDistri);
-          fdCompra.append(
-            "nombre_cliente",
-            cliente !== "Sin Nombre" ? cliente : "",
-          );
-          fdCompra.append("descripcion", "RENO: 1 NETFLIX");
-          fdCompra.append("monto_total", precioReno);
-          fdCompra.append("carrito_json", JSON.stringify(carritoMock));
-
-          const resCompraReq = await fetch(
-            "https://api.cybernetsp.com/acciones_distribuidores.php",
-            { method: "POST", body: fdCompra },
-          );
-          const resCompraText = await resCompraReq.text();
-          let resCompra;
-          try {
-            resCompra = JSON.parse(resCompraText);
-          } catch (e) {
-            throw new Error("Error en JSON de compra: " + resCompraText);
-          }
-
-          if (resCompra.status === "success") {
-            // 3. Flujo visual de éxito
-            cerrarModalVencimientos();
-
-            // Actualizar Saldo visualmente
-            const divSaldo = document.getElementById("distriBarBalance");
-            if (divSaldo)
-              divSaldo.innerText =
-                "$" +
-                parseFloat(resCompra.saldoQuedante).toLocaleString("es-CO");
-
-            // Formatear el ticket y mostrar Modal de éxito
-            let textoFichas = "";
-
-            if (resCompra.bloques && Array.isArray(resCompra.bloques)) {
-              resCompra.bloques.forEach((b) => {
-                textoFichas +=
-                  construirMensajeFicha(
-                    b.id,
-                    b.correo,
-                    b.clave,
-                    b.perfil,
-                    b.pin,
-                    b.venc,
-                    cliente,
-                  ) + "\n\n";
-              });
-            } else {
-              textoFichas =
-                "Renovación aplicada correctamente. Revisa el listado.";
-            }
-
-            const boxFichas = document.getElementById("cajaTextoFichas");
-            if (boxFichas) boxFichas.innerText = textoFichas.trim();
-
-            const modalExito = document.getElementById(
-              "successCheckoutOverlay",
-            );
-            if (modalExito) modalExito.classList.add("open");
-
-            // Recargar el casillero de fondo
-            if (typeof cargarDatosMySQL === "function") cargarDatosMySQL();
-          } else {
-            alert("❌ Error al renovar: " + resCompra.message);
-          }
-        } catch (error) {
-          console.error(error);
-          alert("❌ Ocurrió un error en la nube:\n\n" + error.message);
-        }
-      }
-
       function copiarRecordatorioVencimiento(btn, textEncoded) {
         if (typeof haptic === "function") haptic();
         const text = decodeURIComponent(textEncoded);
         navigator.clipboard.writeText(text).then(() => {
           const oldText = btn.innerHTML;
           btn.innerHTML = `✅ Recordatorio Copiado`;
-          btn.style.color = "var(--ios-green)";
+          btn.style.color = "#000000";
+          btn.style.background = "var(--ios-green)";
 
           if (typeof triggerToast === "function") {
             triggerToast(
@@ -2510,7 +2482,8 @@
 
           setTimeout(() => {
             btn.innerHTML = oldText;
-            btn.style.color = "var(--text-primary)";
+            btn.style.color = "white";
+            btn.style.background = "var(--ai-gradient)";
           }, 1800);
         });
       }
