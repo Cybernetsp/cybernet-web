@@ -1892,6 +1892,21 @@
 
     <!-- INITIALIZATION -->
     <script>
+      // 🧹 LIMPIADOR AUTOMÁTICO DE JSON QUE ELIMINA AVISOS O ESPACIOS
+      function parseCleanJSON(rawText) {
+        if (!rawText) return null;
+        try {
+          return JSON.parse(rawText);
+        } catch (e) {
+          const start = rawText.indexOf("{");
+          const end = rawText.lastIndexOf("}");
+          if (start !== -1 && end !== -1 && end > start) {
+            return JSON.parse(rawText.substring(start, end + 1));
+          }
+          throw e;
+        }
+      }
+
       function toggleThemeDistri() {
         if (typeof haptic === "function") haptic();
         const currentTheme =
@@ -1914,12 +1929,6 @@
         if (btnMobile) btnMobile.innerHTML = svgIcon;
       }
 
-      document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme = localStorage.getItem("cyber_theme_distri") || "dark";
-        document.documentElement.setAttribute("data-theme", savedTheme);
-        updateThemeIconDistri(savedTheme);
-      });
-
       /* 🛡️ CIERRE EXPLÍCITO DE MODALES */
       window.cerrarModalExitoCheckout = function () {
         if (typeof haptic === "function") haptic();
@@ -1939,6 +1948,41 @@
           });
         }
       };
+
+      /* 📦 CARGA Y VINCULACIÓN EN TIEMPO REAL DEL STOCK EN LAS TARJETAS */
+      async function cargarStockPlataformasB2B() {
+        const formData = new FormData();
+        formData.append("accion", "obtener_stock_plataformas");
+
+        try {
+          const response = await fetch(
+            "https://api.cybernetsp.com/acciones_distribuidores.php",
+            {
+              method: "POST",
+              body: formData,
+            },
+          );
+          const text = await response.text();
+          const res = parseCleanJSON(text);
+
+          if (res && res.status === "success" && res.stock) {
+            Object.keys(res.stock).forEach((platKey) => {
+              const cantidad = res.stock[platKey];
+              const badge =
+                document.querySelector(`[data-stock-plat="${platKey}"]`) ||
+                document.getElementById(`stock-${platKey}`);
+
+              if (badge) {
+                badge.innerText = cantidad;
+                badge.style.color =
+                  cantidad > 0 ? "var(--ios-green)" : "var(--ios-red)";
+              }
+            });
+          }
+        } catch (err) {
+          console.error("Error al cargar el stock desde MySQL:", err);
+        }
+      }
 
       /* LÓGICA DE CONTROL Y RENDERIZADO DE VENCIMIENTOS */
       window.vencimientosDataCache = [];
@@ -1993,9 +2037,17 @@
           method: "POST",
           body: formData,
         })
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.status === "success" && Array.isArray(res.data)) {
+          .then((r) => r.text())
+          .then((text) => {
+            let res;
+            try {
+              res = parseCleanJSON(text);
+            } catch (err) {
+              console.error("Respuesta original del servidor:", text);
+              throw err;
+            }
+
+            if (res && res.status === "success" && Array.isArray(res.data)) {
               window.vencimientosDataCache = procesarYClasificarVencimientos(
                 res.data,
               );
@@ -2004,7 +2056,8 @@
               container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.85rem;">No se encontraron cuentas activas.</div>`;
             }
           })
-          .catch(() => {
+          .catch((err) => {
+            console.error("Error al cargar vencimientos:", err);
             container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red); font-size:0.85rem;">Error al conectar con la base de datos de vencimientos.</div>`;
           });
       }
@@ -2374,6 +2427,13 @@
           }, 1800);
         });
       }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("cyber_theme_distri") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        updateThemeIconDistri(savedTheme);
+        cargarStockPlataformasB2B();
+      });
     </script>
     <script src="distribuidores.js"></script>
   </body>
