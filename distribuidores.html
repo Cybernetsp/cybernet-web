@@ -1892,7 +1892,7 @@
 
     <!-- INITIALIZATION -->
     <script>
-      // 🧹 LIMPIADOR AUTOMÁTICO DE JSON QUE ELIMINA AVISOS O ESPACIOS
+      // 🧹 LIMPIADOR AUTOMÁTICO DE JSON
       function parseCleanJSON(rawText) {
         if (!rawText) return null;
         try {
@@ -1982,6 +1982,164 @@
         } catch (err) {
           console.error("Error al cargar el stock desde MySQL:", err);
         }
+      }
+
+      /* 📩 LÓGICA RASTREO Y BÚSQUEDA DE CÓDIGOS ROBUSTA */
+      window.codigoB2BCapturado = "";
+
+      function setCodigoPlat(plat) {
+        if (typeof haptic === "function") haptic();
+        window.selectedPlatB2B = plat;
+        changeCodeStep(2);
+      }
+
+      function setCodigoOp(op) {
+        if (typeof haptic === "function") haptic();
+        window.selectedOpB2B = op;
+        changeCodeStep(3);
+      }
+
+      function changeCodeStep(step) {
+        for (let i = 1; i <= 5; i++) {
+          const el = document.getElementById("codeStep" + i);
+          if (el) el.style.display = i === step ? "flex" : "none";
+        }
+      }
+
+      function abrirCentroCodigos() {
+        if (typeof haptic === "function") haptic();
+        const overlay = document.getElementById("codesCenterOverlay");
+        if (overlay) overlay.classList.add("open");
+        changeCodeStep(1);
+      }
+
+      function cerrarCentroCodigos() {
+        if (typeof haptic === "function") haptic();
+        const overlay = document.getElementById("codesCenterOverlay");
+        if (overlay) overlay.classList.remove("open");
+      }
+
+      async function rastrearCodigo() {
+        if (typeof haptic === "function") haptic();
+        const input = document.getElementById("inputCorreoCodigo");
+        if (!input) return;
+
+        const correo = input.value.trim().toLowerCase();
+        if (!correo || !correo.includes("@")) {
+          alert("Por favor ingresa un correo electrónico válido.");
+          return;
+        }
+
+        changeCodeStep(4);
+
+        try {
+          const formData = new FormData();
+          formData.append("correo", correo);
+
+          const resp = await fetch(
+            "https://api.cybernetsp.com/obtener_codigos.php",
+            {
+              method: "POST",
+              body: formData,
+              mode: "cors",
+            },
+          );
+
+          const text = await resp.text();
+          const res = parseCleanJSON(text);
+
+          if (
+            res &&
+            res.status === "success" &&
+            Array.isArray(res.data) &&
+            res.data.length > 0
+          ) {
+            let match = res.data.find(
+              (item) =>
+                (item.correo || "").toLowerCase().trim().includes(correo) ||
+                correo.includes((item.correo || "").toLowerCase().trim()),
+            );
+
+            if (!match) {
+              match = res.data[0];
+            }
+
+            mostrarResultadoCodigo(match);
+          } else {
+            mostrarSinResultados();
+          }
+        } catch (err) {
+          console.error("Error al rastrear código:", err);
+          mostrarSinResultados();
+        }
+      }
+
+      function mostrarResultadoCodigo(data) {
+        changeCodeStep(5);
+
+        const titleEl = document.getElementById("codeResultTitle");
+        const descEl = document.getElementById("codeResultDesc");
+        const boxCode = document.getElementById("codeResultBox");
+        const boxLink = document.getElementById("linkResultBox");
+        const codeVal = document.getElementById("codeVal");
+        const linkVal = document.getElementById("linkVal");
+
+        if (titleEl) {
+          titleEl.innerText =
+            (data.plataforma || "SERVICIO") +
+            " - " +
+            (data.accion || "CÓDIGO DE ACCESO");
+          titleEl.style.color = "var(--text-primary)";
+        }
+        if (descEl)
+          descEl.innerText =
+            "Correo: " + data.correo + " (" + (data.hora || "Reciente") + ")";
+
+        const val = data.codigoLink || data.copiadoRapido || "";
+        window.codigoB2BCapturado = val;
+
+        if (val.startsWith("http://") || val.startsWith("https://")) {
+          if (boxCode) boxCode.style.display = "none";
+          if (boxLink) boxLink.style.display = "block";
+          if (linkVal) linkVal.href = val;
+        } else {
+          if (boxLink) boxLink.style.display = "none";
+          if (boxCode) boxCode.style.display = "block";
+          if (codeVal) codeVal.innerText = val;
+        }
+      }
+
+      function mostrarSinResultados() {
+        changeCodeStep(5);
+
+        const titleEl = document.getElementById("codeResultTitle");
+        const descEl = document.getElementById("codeResultDesc");
+        const boxCode = document.getElementById("codeResultBox");
+        const boxLink = document.getElementById("linkResultBox");
+
+        if (titleEl) {
+          titleEl.innerText = "SIN RESULTADOS";
+          titleEl.style.color = "var(--ios-orange)";
+        }
+        if (descEl)
+          descEl.innerText =
+            "No se detectaron solicitudes recientes para este buzón.";
+
+        if (boxCode) boxCode.style.display = "none";
+        if (boxLink) boxLink.style.display = "none";
+      }
+
+      function copiarCodigoResultanteB2B() {
+        if (typeof haptic === "function") haptic();
+        if (!window.codigoB2BCapturado) return;
+
+        navigator.clipboard.writeText(window.codigoB2BCapturado).then(() => {
+          if (typeof triggerToast === "function") {
+            triggerToast("✅ Código copiado al portapapeles");
+          } else {
+            alert("✅ Código copiado: " + window.codigoB2BCapturado);
+          }
+        });
       }
 
       /* LÓGICA DE CONTROL Y RENDERIZADO DE VENCIMIENTOS */
@@ -2358,7 +2516,6 @@
         lista.forEach((item) => {
           const b = catBadgeMap[item.categoria];
 
-          // Validación de nombre real
           let tieneClienteReal =
             item.cliente &&
             item.cliente !== "-" &&
@@ -2372,7 +2529,6 @@
           const perfil = item.perfil ? `Perfil ${item.perfil}` : "Perfil 1";
           const pin = item.pin && item.pin !== "-" ? ` (PIN: ${item.pin})` : "";
 
-          // Generar mensaje aleatorio Antispam
           const rawRecordatorio = generarMensajeRecordatorioAntispam(item);
           const encodedRecordatorio = encodeURIComponent(rawRecordatorio);
 
