@@ -1,6 +1,6 @@
-/* ==========================================================================
-   🛠️ REPARACIÓN DE SCROLL AUTOMÁTICO Y ALTURA MÁXIMA EN VISOR MYSQL
-   ========================================================================== */
+/* =========================================================================
+   🛠️ REPARACIÓN DE SCROLL AUTOMÁTICO, BARRA DE NAVEGACIÓN Y BÚSQUEDA
+   ========================================================================= */
 (function repararScrollVisorMySQL() {
   if (document.getElementById("css-fix-scroll-mysql")) return;
   const style = document.createElement("style");
@@ -9,11 +9,11 @@
     /* Modal de MySQL / Bóveda */
     #mysqlOverlay .modal-ios,
     .modal-ios-mysql {
-      max-height: 92vh !important;
+      max-height: 90vh !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
-      padding-bottom: 15px !important;
+      padding-bottom: 10px !important;
     }
 
     /* Contenedor principal de la tabla */
@@ -21,34 +21,35 @@
     .tabla-container, 
     .visor-mysql-body,
     .mysql-table-wrapper {
-      max-height: calc(85vh - 170px) !important;
+      max-height: calc(82vh - 160px) !important;
       overflow-y: auto !important;
       overflow-x: auto !important;
       -webkit-overflow-scrolling: touch !important;
       border-radius: 12px !important;
-      margin-bottom: 10px !important;
-      padding-bottom: 15px !important;
+      margin-bottom: 8px !important;
     }
 
-    /* Personalización de la barra de desplazamiento macOS / iOS */
+    /* Personalización de la barra de desplazamiento clara estilo iOS (Azul Neón para visibilidad) */
     #contenedorTablaMySQL::-webkit-scrollbar,
     .mysql-table-wrapper::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 8px !important;
+      height: 8px !important;
     }
     #contenedorTablaMySQL::-webkit-scrollbar-track,
     .mysql-table-wrapper::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06) !important;
+      border-radius: 10px !important;
     }
     #contenedorTablaMySQL::-webkit-scrollbar-thumb,
     .mysql-table-wrapper::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.18);
-      border-radius: 10px;
+      background: #0a84ff !important;
+      border-radius: 10px !important;
+      border: 2px solid transparent !important;
+      background-clip: padding-box !important;
     }
     #contenedorTablaMySQL::-webkit-scrollbar-thumb:hover,
     .mysql-table-wrapper::-webkit-scrollbar-thumb:hover {
-      background: rgba(10, 132, 255, 0.5);
+      background: #30d158 !important;
     }
   `;
   document.head.appendChild(style);
@@ -454,10 +455,10 @@ function cargarDatosMySQL() {
     styleSticky.id = "css-sticky-hover-mysql";
     styleSticky.innerHTML = `
       .mysql-table-wrapper {
-        max-height: calc(85vh - 170px) !important;
+        max-height: calc(82vh - 160px) !important;
         overflow-y: auto !important;
         overflow-x: auto !important;
-        padding-bottom: 15px !important;
+        padding-bottom: 20px !important;
       }
       #tablaMySQLCabecera th { 
         position: sticky !important; 
@@ -471,9 +472,9 @@ function cargarDatosMySQL() {
       .tr-mysql-row:hover { background-color: rgba(255, 255, 255, 0.04) !important; }
       .tr-mysql-row.tr-caida { background-color: rgba(255, 69, 58, 0.18) !important; }
       .tr-mysql-row.tr-caida:hover { background-color: rgba(255, 69, 58, 0.28) !important; }
-      table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: fixed !important; width: 100% !important; min-width: 1100px !important; background-color: #111216 !important; margin-bottom: 15px !important; }
+      table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: fixed !important; width: 100% !important; min-width: 1100px !important; background-color: #111216 !important; margin-bottom: 20px !important; }
       th, td { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-      tbody tr:last-child td { padding-bottom: 15px !important; }
+      tbody tr:last-child td { padding-bottom: 20px !important; }
     `;
     document.head.appendChild(styleSticky);
   }
@@ -481,6 +482,16 @@ function cargarDatosMySQL() {
   const busquedaInput = document.getElementById("inputSearchMySQL");
   const busqueda = busquedaInput ? busquedaInput.value.trim() : "";
   const esBusquedaGlobal = window.tablaMySQLActual === "todas";
+
+  // Normalización inteligente de teléfono si el texto ingresado contiene dígitos
+  const queryDigits = busqueda.replace(/\D/g, "");
+  let busquedaAPI = busqueda;
+  if (queryDigits.length >= 3 && /^[\d\s\+\-\(\)]+$/.test(busqueda)) {
+    busquedaAPI =
+      queryDigits.length === 12 && queryDigits.startsWith("57")
+        ? queryDigits.substring(2)
+        : queryDigits;
+  }
 
   const thBase =
     "padding: 12px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
@@ -582,15 +593,6 @@ function cargarDatosMySQL() {
 
   if (esBusquedaGlobal) {
     const queryLower = busqueda.toLowerCase().trim();
-    const queryDigits = busqueda.replace(/\D/g, "");
-
-    let busquedaAPI = busqueda;
-    if (queryDigits.length >= 3 && /^[\d\s\+\-\(\)]+$/.test(busqueda)) {
-      busquedaAPI =
-        queryDigits.length === 12 && queryDigits.startsWith("57")
-          ? queryDigits.substring(2)
-          : queryDigits;
-    }
 
     const promesas = LISTA_TABLAS_GLOBALES.map((tb) =>
       fetch(
@@ -746,8 +748,9 @@ function cargarDatosMySQL() {
     return;
   }
 
+  // Petición a la tabla actual usando el término de búsqueda normalizado
   fetch(
-    `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busqueda)}`,
+    `https://api.cybernetsp.com/obtener_tabla_mysql.php?tabla=${encodeURIComponent(window.tablaMySQLActual)}&busqueda=${encodeURIComponent(busquedaAPI)}`,
   )
     .then((res) => res.json())
     .then((data) => {
