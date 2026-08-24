@@ -184,13 +184,42 @@ function copiarTextoAlToque(elemento, texto) {
 }
 
 function parseFechaCybernet(fechaStr) {
-  if (!fechaStr || fechaStr === "N/A") return null;
-  let s = String(fechaStr).toUpperCase().replace(/\s+/g, "");
-  let m = s.match(/(\d+)(DE)?([A-Z]+)/);
-  if (!m) return null;
-  let day = parseInt(m[1], 10);
-  let mesStr = m[3];
-  const months = {
+  if (
+    !fechaStr ||
+    fechaStr === "-" ||
+    fechaStr === "Activa" ||
+    fechaStr === "SIN FECHA"
+  )
+    return null;
+
+  const str = String(fechaStr).toUpperCase().trim();
+
+  // 1. Formato YYYY-MM-DD o YYYY/MM/DD
+  let matchIso = str.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if (matchIso) {
+    return new Date(
+      parseInt(matchIso[1], 10),
+      parseInt(matchIso[2], 10) - 1,
+      parseInt(matchIso[3], 10),
+    );
+  }
+
+  // 2. Formato DD/MM/YYYY o DD-MM-YYYY
+  let matchNum = str.match(/^(\d{1,2})[-\/](\d{1,2})(?:[-\/](\d{2,4}))?/);
+  if (matchNum) {
+    let dia = parseInt(matchNum[1], 10);
+    let mes = parseInt(matchNum[2], 10) - 1;
+    let anio = matchNum[3]
+      ? parseInt(matchNum[3], 10)
+      : new Date().getFullYear();
+    if (anio < 100) anio += 2000;
+    if (mes >= 0 && mes <= 11 && dia >= 1 && dia <= 31) {
+      return new Date(anio, mes, dia);
+    }
+  }
+
+  // 3. Formato texto: 26DEAGOSTO, 26 DE AGOSTO, 26-AGO
+  const mesesMap = {
     ENE: 0,
     ENERO: 0,
     FEB: 1,
@@ -208,6 +237,7 @@ function parseFechaCybernet(fechaStr) {
     AGO: 7,
     AGOSTO: 7,
     SEP: 8,
+    SEPT: 8,
     SEPTIEMBRE: 8,
     OCT: 9,
     OCTUBRE: 9,
@@ -216,14 +246,31 @@ function parseFechaCybernet(fechaStr) {
     DIC: 11,
     DICIEMBRE: 11,
   };
-  let month = months[mesStr];
-  if (month === undefined) return null;
 
-  let now = new Date();
-  let year = now.getFullYear();
-  let d = new Date(year, month, day);
-  if (d < now && now.getMonth() - month > 6) d.setFullYear(year + 1);
-  return d;
+  let strClean = str.replace(/DE/g, "").replace(/[\s-]/g, "");
+  let matchText = strClean.match(/^(\d{1,2})([A-Z]+)(?:(\d{2,4}))?/);
+  if (matchText) {
+    let dia = parseInt(matchText[1], 10);
+    let mesTxt = matchText[2];
+    let anio = matchText[3]
+      ? parseInt(matchText[3], 10)
+      : new Date().getFullYear();
+    if (anio < 100) anio += 2000;
+
+    let mesNum = -1;
+    for (let k in mesesMap) {
+      if (mesTxt.startsWith(k) || mesTxt === k) {
+        mesNum = mesesMap[k];
+        break;
+      }
+    }
+
+    if (mesNum !== -1 && dia >= 1 && dia <= 31) {
+      return new Date(anio, mesNum, dia);
+    }
+  }
+
+  return null;
 }
 
 function bloquearScroll() {
@@ -1565,7 +1612,10 @@ function cargarVencimientosB2B() {
     </div>
   `;
 
-  const telDistri = localStorage.getItem("active_distri_tel") || "";
+  const telDistri =
+    localStorage.getItem("active_distri_tel") ||
+    window.distriTelefonoCache ||
+    "";
   const formData = new FormData();
   formData.append("accion", "buscar_casillero_distribuidor");
   formData.append("telefono_distribuidor", telDistri);
@@ -1581,8 +1631,8 @@ function cargarVencimientosB2B() {
       try {
         res = parseCleanJSON(text);
       } catch (err) {
-        console.error("Respuesta original del servidor:", text);
-        throw err;
+        console.error("Respuesta cruda del servidor:", text);
+        res = null;
       }
 
       if (res && res.status === "success" && Array.isArray(res.data)) {
@@ -1591,76 +1641,24 @@ function cargarVencimientosB2B() {
         );
         renderizarVencimientosB2B();
       } else {
-        container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.85rem;">No se encontraron cuentas activas.</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.85rem;">No se encontraron cuentas activas en tu casillero.</div>`;
       }
     })
     .catch((err) => {
       console.error("Error al cargar vencimientos:", err);
-      container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red); font-size:0.85rem;">Error al conectar con la base de datos de vencimientos.</div>`;
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red); font-size:0.85rem;">Error al procesar los vencimientos. Reintenta nuevamente.</div>`;
     });
-}
-
-function parseVencimientoString(vencStr) {
-  if (!vencStr || vencStr === "-" || vencStr === "Activa") return null;
-  const mesesMap = {
-    ENE: 0,
-    ENERO: 0,
-    FEB: 1,
-    FEBRERO: 1,
-    MAR: 2,
-    MARZO: 2,
-    ABR: 3,
-    ABRIL: 3,
-    MAY: 4,
-    MAYO: 4,
-    JUN: 5,
-    JUNIO: 5,
-    JUL: 6,
-    JULIO: 6,
-    AGO: 7,
-    AGOSTO: 7,
-    SEP: 8,
-    SEPT: 8,
-    SEPTIEMBRE: 8,
-    OCT: 9,
-    OCTUBRE: 9,
-    NOV: 10,
-    NOVIEMBRE: 10,
-    DIC: 11,
-    DICIEMBRE: 11,
-  };
-
-  const str = String(vencStr)
-    .toUpperCase()
-    .replace(/\s+/g, "")
-    .replace(/DE/g, "");
-  const match = str.match(/^(\d{1,2})([A-Z]+)/);
-  if (match) {
-    const dia = parseInt(match[1], 10);
-    const mesTxt = match[2];
-    let mesNum = -1;
-    for (let k in mesesMap) {
-      if (mesTxt.startsWith(k)) {
-        mesNum = mesesMap[k];
-        break;
-      }
-    }
-    if (mesNum !== -1) {
-      const now = new Date();
-      let year = now.getFullYear();
-      return new Date(year, mesNum, dia);
-    }
-  }
-  return null;
 }
 
 function procesarYClasificarVencimientos(lista) {
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
+  if (!Array.isArray(lista)) return [];
+
   return lista
     .map((item) => {
-      const dateObj = parseVencimientoString(item.vencimiento);
+      const dateObj = parseFechaCybernet(item.vencimiento);
       let diffDays = null;
       let categoria = "OTRO";
 
@@ -1668,24 +1666,16 @@ function procesarYClasificarVencimientos(lista) {
         const diffTime = dateObj.getTime() - hoy.getTime();
         diffDays = Math.round(diffTime / (1000 * 3600 * 24));
 
-        if (diffDays === -2) categoria = "ANTEAYER";
+        if (diffDays <= -2) categoria = "ANTEAYER";
         else if (diffDays === -1) categoria = "AYER";
         else if (diffDays === 0) categoria = "HOY";
         else if (diffDays === 1) categoria = "MANANA";
-        else if (diffDays === 3) categoria = "TRES_DIAS";
+        else if (diffDays >= 2) categoria = "TRES_DIAS";
       }
 
       return { ...item, diffDays, categoria };
     })
-    .filter(
-      (item) =>
-        (item.plataforma || "").toUpperCase().includes("NETFLIX") &&
-        item.correo &&
-        item.correo.includes("@") &&
-        ["ANTEAYER", "AYER", "HOY", "MANANA", "TRES_DIAS"].includes(
-          item.categoria,
-        ),
-    );
+    .filter((item) => item && item.correo && item.correo.includes("@"));
 }
 
 function renderizarVencimientosB2B() {
@@ -1693,18 +1683,21 @@ function renderizarVencimientosB2B() {
   if (!container) return;
 
   let lista = window.vencimientosDataCache || [];
-  if (window.vencimientoFiltroActual !== "TODOS") {
+  if (
+    window.vencimientoFiltroActual &&
+    window.vencimientoFiltroActual !== "TODOS"
+  ) {
     lista = lista.filter(
       (item) => item.categoria === window.vencimientoFiltroActual,
     );
   }
 
-  if (lista.length === 0) {
+  if (!lista || lista.length === 0) {
     container.innerHTML = `
       <div style="text-align: center; padding: 40px 10px; color: var(--text-secondary);">
         <span style="font-size: 2rem; display: block; margin-bottom: 8px;">🎉</span>
         <p style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">¡Sin vencimientos pendientes!</p>
-        <p style="font-size: 0.8rem; margin-top: 4px;">No hay cuentas de Netflix en esta categoría.</p>
+        <p style="font-size: 0.8rem; margin-top: 4px;">No hay cuentas registradas en esta categoría.</p>
       </div>
     `;
     return;
@@ -1732,15 +1725,20 @@ function renderizarVencimientosB2B() {
       bg: "rgba(10, 132, 255, 0.15)",
     },
     TRES_DIAS: {
-      label: "📅 Vence en 3 días",
+      label: "📅 En 3 Días",
       color: "var(--ios-green)",
       bg: "rgba(48, 209, 88, 0.15)",
+    },
+    OTRO: {
+      label: "📅 Activa",
+      color: "var(--ios-blue)",
+      bg: "rgba(10, 132, 255, 0.15)",
     },
   };
 
   let html = "";
   lista.forEach((item) => {
-    const b = catBadgeMap[item.categoria];
+    const b = catBadgeMap[item.categoria] || catBadgeMap.OTRO;
 
     let tieneClienteReal =
       item.cliente &&
@@ -1762,7 +1760,7 @@ function renderizarVencimientosB2B() {
       <div class="venc-card-item">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span style="font-weight: 800; font-size: 0.9rem; color: var(--ios-blue); display: flex; align-items: center; gap: 6px;">
-            🎬 ${item.plataforma}
+            🎬 ${item.plataforma || "SERVICIO"}
           </span>
           <span style="background: ${b.bg}; color: ${b.color}; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800;">
             ${b.label}
@@ -1771,8 +1769,9 @@ function renderizarVencimientosB2B() {
 
         <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; color: var(--text-primary); margin-top: 2px;">
           <div>👤 <strong>Cliente:</strong> ${clienteCardDisplay}</div>
-          <div>📧 <strong>Correo:</strong> <span style="font-family: monospace; color: var(--ios-blue);">${item.correo}</span></div>
-          <div>🔐 <strong>Acceso:</strong> Clave: <span style="font-family: monospace;">${item.clave}</span> | ${perfil} ${pin}</div>
+          <div>📧 <strong>Correo:</strong> <span style="font-family: monospace; color: var(--ios-blue);">${item.correo || "-"}</span></div>
+          <div>🔐 <strong>Acceso:</strong> Clave: <span style="font-family: monospace;">${item.clave || "-"}</span> | ${perfil} ${pin}</div>
+          <div>📅 <strong>Vencimiento:</strong> ${item.vencimiento || "Activa"}</div>
         </div>
 
         <div style="margin-top: 6px;">
@@ -1808,6 +1807,114 @@ function copiarRecordatorioVencimiento(btn, textEncoded) {
       btn.style.background = "var(--ai-gradient)";
     }, 1800);
   });
+}
+
+/* 🤖 MOTOR DINÁMICO CLIENTE ANTISPAM WHATSAPP */
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generarTokenUnicidad() {
+  const chars = ["\u200B", "\u200C", "\u200D", "\uFEFF"];
+  let token = "\n ";
+  const len = Math.floor(Math.random() * 8) + 8;
+  for (let i = 0; i < len; i++) {
+    token += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return token;
+}
+
+function generarMensajeRecordatorioAntispam(item) {
+  let tieneClienteReal =
+    item.cliente &&
+    item.cliente !== "-" &&
+    item.cliente.trim() !== "" &&
+    item.cliente.trim().toLowerCase() !== "sin nombre";
+
+  let clienteNombre = tieneClienteReal ? item.cliente.trim() : "";
+  let n = clienteNombre ? " " + clienteNombre : "";
+
+  const emojisSal = [
+    "🌈✨",
+    "👋🔥",
+    "😊🚀",
+    "🙌💎",
+    "☀️🍀",
+    "💫🎯",
+    "✨✌️",
+    "🌟🔥",
+    "😎🤙",
+    "🎉💫",
+    "🌸✨",
+    "💥🚀",
+    "🥳🎉",
+    "🤩👋",
+    "✌️🌈",
+  ];
+  const emojisUrg = [
+    "🚨⏳",
+    "⚠️🔥",
+    "🔔⚡",
+    "📢💥",
+    "⏰💥",
+    "⌛❗",
+    "🔴🔔",
+    "🧨🔥",
+    "🛑🔔",
+    "⏱️⚡",
+  ];
+  const emojisFut = [
+    "⏳🗓️",
+    "🔔✨",
+    "🍿🎬",
+    "🚀🌈",
+    "📅⚡",
+    "📌⏳",
+    "🗓️🚀",
+    "⚠️🗓️",
+    "💡📅",
+  ];
+  const emojisCierre = [
+    "📲💥",
+    "⚡💎",
+    "🔥🚀",
+    "🚀🙌",
+    "🟢✨",
+    "📲✨",
+    "💬🚀",
+    "💬✨",
+    "💎📩",
+  ];
+
+  const saludos = [
+    `¡Hola${n}! ${pick(emojisSal)}`,
+    `¡Qué tal${n}! ${pick(emojisSal)}`,
+    `¡Hey${n}! ${pick(emojisSal)}`,
+    `¡Un saludo${n}! ${pick(emojisSal)}`,
+    `¡Excelente día${n}! ${pick(emojisSal)}`,
+    `¡Buenas${n}! ${pick(emojisSal)}`,
+    `¡Buen día${n}! ${pick(emojisSal)}`,
+  ];
+
+  const perfil = item.perfil ? `Perfil ${item.perfil}` : "Perfil 1";
+  const pin = item.pin && item.pin !== "-" ? ` (PIN: ${item.pin})` : "";
+  const correo = item.correo;
+  const servicio = item.plataforma || "SERVICIO";
+  const fechaTxt = item.vencimiento;
+
+  let recordatorios = [
+    `Te recordamos que tu cuenta de *${servicio}* en el correo *${correo}* (${perfil}${pin}) registra vencimiento *${fechaTxt}* ${pick(emojisUrg)}`,
+  ];
+
+  const renovaciones = [
+    "Recuerda renovar a tiempo para que puedas seguir disfrutando con tu mismo correo e historial sin cortes.",
+  ];
+
+  const despedidas = [
+    `¡Quedamos atentos a tu mensaje para ayudarte! ${pick(emojisCierre)}`,
+  ];
+
+  return `${pick(saludos)}\n\n${pick(recordatorios)}\n\n${pick(renovaciones)}\n\n${pick(despedidas)}${generarTokenUnicidad()}`;
 }
 
 function refrescarSaldoDistribuidorFondo() {
