@@ -766,7 +766,7 @@
 
     <!-- SCRIPT DE LÓGICA DE LOGIN Y CONEXIONES A MYSQL -->
     <script>
-      /* ⚡ REDIRECCIÓN EXCLUSIVA A LOGIN_DISTRIBUIDOR.PHP */
+      /* ⚡ DIRECCIONAMIENTO DIRECTO Y UNIFICADO A LOGIN_DISTRIBUIDOR.PHP */
       const API_PRIMARY_URL =
         "https://api.cybernetsp.com/login_distribuidor.php";
       const API_FALLBACK_URL = "login_distribuidor.php";
@@ -874,6 +874,7 @@
         btn.innerText = "Verificando...";
 
         const formData = new FormData();
+        formData.append("accion", "login_distribuidor");
         formData.append("credencial", credencial);
         formData.append("password", password);
 
@@ -965,8 +966,8 @@
 
         try {
           const text = await postRequestWithFallback(
-            "https://api.cybernetsp.com/acciones_distribuidores.php",
-            "acciones_distribuidores.php",
+            API_PRIMARY_URL,
+            API_FALLBACK_URL,
             formData,
           );
 
@@ -1031,7 +1032,7 @@
         "DIRECTV-GO": "DirecTV Go",
       };
 
-      // 6. CARGAR TABLA COMPARATIVA DE PRECIOS CON HOMOLOGACIÓN DE CÓDIGOS
+      // 6. CARGAR TABLA COMPARATIVA DE PRECIOS
       async function cargarTablaComparativaPrecios() {
         const tbody = document.getElementById("tablaProfitBody");
         if (!tbody) return;
