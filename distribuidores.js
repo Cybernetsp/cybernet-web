@@ -10,6 +10,9 @@ window.saldoNumericoActual = 0;
 window.distriTelefonoCache = "";
 window.distriCorreoRegistrado = "";
 window.fichasCheckoutPendientes = "";
+window.vencimientosDataCache = [];
+window.vencimientoFiltroActual = "TODOS";
+window.cuentasRenovacionCache = [];
 
 // 💡 Plataformas que requieren activación manual por WhatsApp
 const PLATAFORMAS_MANUALES = [
@@ -223,6 +226,259 @@ function parseFechaCybernet(fechaStr) {
   return d;
 }
 
+function bloquearScroll() {
+  document.body.style.overflow = "hidden";
+}
+
+function desbloquearScroll() {
+  document.body.style.overflow = "";
+}
+
+// =========================================================================
+// 🚪 APERTURA Y CIERRE DE MODALES EXCLUSIVO VÍA BOTÓN X
+// =========================================================================
+window.abrirModalVencimientos = function () {
+  haptic();
+  bloquearScroll();
+  const modal = document.getElementById("modalVencimientos");
+  if (modal) {
+    modal.style.display = "flex";
+    modal.classList.add("open");
+  }
+  cargarVencimientosB2B();
+};
+
+window.cerrarModalVencimientos = function () {
+  haptic();
+  desbloquearScroll();
+  const modal = document.getElementById("modalVencimientos");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("open");
+  }
+};
+
+window.abrirModalBusquedaCuentas = function () {
+  haptic();
+  bloquearScroll();
+  const inputSearch = document.getElementById("inputCasilleroSearch");
+  if (inputSearch) inputSearch.value = "";
+
+  const modal = document.getElementById("modalBusquedaCuentas");
+  if (modal) {
+    modal.style.display = "flex";
+    modal.classList.add("open");
+  }
+  buscarCasilleroDistri();
+};
+
+window.cerrarModalBusquedaCuentas = function () {
+  haptic();
+  desbloquearScroll();
+  const modal = document.getElementById("modalBusquedaCuentas");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("open");
+  }
+};
+
+window.abrirModalHistorial = function () {
+  haptic();
+  bloquearScroll();
+  const select = document.getElementById("selectMesMovimientos");
+  const mesActual = select ? select.value : "todos";
+  const tel =
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+
+  cargarDatosFinancierosYAlertas(tel, mesActual);
+  const m = document.getElementById("modalEstadoCuenta");
+  if (m) {
+    m.style.display = "flex";
+    m.classList.add("open");
+  }
+};
+
+window.cerrarModalHistorial = function () {
+  haptic();
+  desbloquearScroll();
+  const m = document.getElementById("modalEstadoCuenta");
+  if (m) {
+    m.style.display = "none";
+    m.classList.remove("open");
+  }
+};
+
+window.abrirCarrito = function () {
+  haptic();
+  bloquearScroll();
+  const m = document.getElementById("modalCarritoTienda");
+  if (m) {
+    m.style.display = "flex";
+    m.classList.add("open");
+  }
+};
+
+window.cerrarCarrito = function () {
+  haptic();
+  desbloquearScroll();
+  const m = document.getElementById("modalCarritoTienda");
+  if (m) {
+    m.style.display = "none";
+    m.classList.remove("open");
+  }
+};
+
+window.abrirMenuMovil = function () {
+  haptic();
+  bloquearScroll();
+  const m = document.getElementById("modalMenuMovil");
+  if (m) {
+    m.style.display = "flex";
+    m.classList.add("open");
+  }
+};
+
+window.cerrarMenuMovil = function () {
+  haptic();
+  desbloquearScroll();
+  const m = document.getElementById("modalMenuMovil");
+  if (m) {
+    m.style.display = "none";
+    m.classList.remove("open");
+  }
+};
+
+window.abrirCentroCodigos = function () {
+  haptic();
+  bloquearScroll();
+  const overlay = document.getElementById("codesCenterOverlay");
+  if (overlay) {
+    overlay.style.display = "flex";
+    overlay.classList.add("open");
+  }
+  changeCodeStep(1);
+};
+
+window.cerrarCentroCodigos = function () {
+  haptic();
+  desbloquearScroll();
+  const overlay = document.getElementById("codesCenterOverlay");
+  if (overlay) {
+    overlay.style.display = "none";
+    overlay.classList.remove("open");
+  }
+};
+
+window.cerrarModalExitoCheckout = function () {
+  haptic();
+  desbloquearScroll();
+  const modal = document.getElementById("successCheckoutOverlay");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("open");
+  }
+};
+
+window.abrirModalRenovacionB2B = window.abrirModalRenoB2B = function (idItem) {
+  haptic();
+  const telDistri =
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+  const modal = document.getElementById("modalRenovacionDistri");
+  const container = document.getElementById("listaCuentasModalRenoDistri");
+
+  if (!modal || !container) return;
+
+  container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line></svg><br>Buscando tus pantallas en MySQL...</div>`;
+  modal.style.display = "flex";
+  modal.classList.add("open");
+
+  const formData = new FormData();
+  formData.append("accion", "obtener_cuentas_renovacion_distribuidor");
+  formData.append("telefono", telDistri);
+  formData.append("plataforma", idItem);
+
+  fetch(API_MYSQL_URL, { method: "POST", body: formData })
+    .then((res) => res.text())
+    .then((text) => {
+      const res = parseCleanJSON(text);
+      container.innerHTML = "";
+      if (res && res.status === "success" && res.data && res.data.length > 0) {
+        window.cuentasActivasB2B = res.data;
+
+        window.cuentasActivasB2B.forEach((cuenta) => {
+          let correoTexto = String(cuenta.correo || "").trim();
+          let perfilTexto = String(cuenta.perfil || "").trim();
+          let clienteTexto = String(cuenta.cliente || "").trim();
+
+          let div = document.createElement("div");
+          div.className = "card-ios item-reno-b2b";
+          div.style =
+            "padding: 15px; cursor: pointer; background: var(--input-bg); border: var(--surface-border); border-radius: 14px; margin-bottom: 8px; text-align: left;";
+          div.setAttribute(
+            "data-search",
+            correoTexto.toLowerCase() +
+              " " +
+              perfilTexto.toLowerCase() +
+              " " +
+              clienteTexto.toLowerCase(),
+          );
+
+          div.innerHTML = `
+              <div style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; word-break: break-all;">${correoTexto}</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+                  <span>Perfil: <b style="color: var(--ios-blue);">${perfilTexto}</b></span>
+                  <span>Cliente: <b style="color: var(--ios-orange);">${clienteTexto || "Sin Nombre"}</b></span>
+              </div>
+          `;
+
+          div.onclick = function () {
+            let itemCarrito = window.carrito.find((i) => i.id === idItem);
+            if (itemCarrito) {
+              itemCarrito.correoReno = `${correoTexto} | Perfil: ${perfilTexto}`;
+
+              let inputNombre = document.getElementById("cartClientName");
+              if (
+                inputNombre &&
+                clienteTexto &&
+                clienteTexto !== "N/A" &&
+                clienteTexto.toLowerCase() !== "cliente"
+              ) {
+                inputNombre.value = clienteTexto;
+              }
+
+              let cantidadDetectada = perfilTexto
+                .split(/[-y,]/i)
+                .filter((p) => p.trim() !== "").length;
+              if (cantidadDetectada > 0) itemCarrito.amount = cantidadDetectada;
+
+              actualizarCarritoUI();
+            }
+            cerrarModalRenovacionB2B();
+          };
+          container.appendChild(div);
+        });
+      } else {
+        container.innerHTML =
+          "<div style='color:var(--text-secondary); text-align:center; padding: 20px;'>No tienes cuentas activas registradas en MySQL para esta plataforma.</div>";
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      container.innerHTML =
+        "<div style='color:var(--ios-red); text-align:center; padding: 20px;'>Error cargando cuentas para renovación.</div>";
+    });
+};
+
+window.cerrarModalRenovacionB2B = function () {
+  haptic();
+  desbloquearScroll();
+  const modal = document.getElementById("modalRenovacionDistri");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("open");
+  }
+};
+
 // =========================================================================
 // 👤 CARGA Y SINCRONIZACIÓN DE PERFIL DESDE MYSQL
 // =========================================================================
@@ -269,9 +525,6 @@ function cargarPerfilDistribuidor() {
     .catch((err) => console.error("Error al sincronizar perfil:", err));
 }
 
-// =========================================================================
-// 💼 INTERFAZ Y DASHBOARD B2B
-// =========================================================================
 function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   const dashSection = document.getElementById("dashboardSection");
   if (dashSection) dashSection.style.display = "flex";
@@ -319,7 +572,7 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
 }
 
 // =========================================================================
-// 📅 POBLAR SELECTOR DE MESES DINÁMICAMENTE
+// 📅 SELECTOR DE MESES
 // =========================================================================
 function inicializarOpcionesDeMes() {
   const select = document.getElementById("selectMesMovimientos");
@@ -367,7 +620,7 @@ function filtrarMovimientosPorMes() {
 }
 
 // =========================================================================
-// 🏷️ CARGAR PRECIOS Y RENDERIZAR TIENDA
+// 🏷️ PRECIOS Y STOCK DE TIENDA
 // =========================================================================
 function cargarPreciosEnTienda() {
   const formData = new FormData();
@@ -525,55 +778,9 @@ function copiarMensajeRenovacion(msgEnc) {
   });
 }
 
-function abrirModalHistorial() {
-  haptic();
-  bloquearScroll();
-  const select = document.getElementById("selectMesMovimientos");
-  const mesActual = select ? select.value : "todos";
-  const tel =
-    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
-
-  cargarDatosFinancierosYAlertas(tel, mesActual);
-  const m = document.getElementById("modalEstadoCuenta");
-  if (m) {
-    m.style.display = "flex";
-    m.classList.add("open");
-  }
-}
-
-function cerrarModalHistorial() {
-  haptic();
-  desbloquearScroll();
-  const m = document.getElementById("modalEstadoCuenta");
-  if (m) {
-    m.style.display = "none";
-    m.classList.remove("open");
-  }
-}
-
 // =========================================================================
-// 🛒 E-COMMERCE MAYORISTA & CONTEO EXACTO DE PERFILES EN VIVO
+// 🛒 E-COMMERCE MAYORISTA & CARRITO
 // =========================================================================
-function abrirCarrito() {
-  haptic();
-  bloquearScroll();
-  const m = document.getElementById("modalCarritoTienda");
-  if (m) {
-    m.style.display = "flex";
-    m.classList.add("open");
-  }
-}
-
-function cerrarCarrito() {
-  haptic();
-  desbloquearScroll();
-  const m = document.getElementById("modalCarritoTienda");
-  if (m) {
-    m.style.display = "none";
-    m.classList.remove("open");
-  }
-}
-
 function renderTienda() {
   const container = document.getElementById("shopCatalogContainer");
   if (!container) return;
@@ -726,100 +933,6 @@ window.cambiarTipoVentaCarrito = function (id, tipo) {
     }
     actualizarCarritoUI();
   }
-};
-
-// =========================================================================
-// 🔄 VENTANA DE RENOVACIONES B2B
-// =========================================================================
-window.abrirModalRenoB2B = function (idItem) {
-  haptic();
-  const telDistri =
-    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
-  const modal = document.getElementById("modalRenovacionDistri");
-  const container = document.getElementById("listaCuentasModalRenoDistri");
-
-  if (!modal || !container) return;
-
-  container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line></svg><br>Buscando tus pantallas en MySQL...</div>`;
-  modal.style.display = "flex";
-  modal.classList.add("open");
-
-  const formData = new FormData();
-  formData.append("accion", "obtener_cuentas_renovacion_distribuidor");
-  formData.append("telefono", telDistri);
-  formData.append("plataforma", idItem);
-
-  fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.text())
-    .then((text) => {
-      const res = parseCleanJSON(text);
-      container.innerHTML = "";
-      if (res && res.status === "success" && res.data && res.data.length > 0) {
-        window.cuentasActivasB2B = res.data;
-
-        window.cuentasActivasB2B.forEach((cuenta) => {
-          let correoTexto = String(cuenta.correo || "").trim();
-          let perfilTexto = String(cuenta.perfil || "").trim();
-          let clienteTexto = String(cuenta.cliente || "").trim();
-
-          let div = document.createElement("div");
-          div.className = "card-ios item-reno-b2b";
-          div.style =
-            "padding: 15px; cursor: pointer; background: var(--input-bg); border: var(--surface-border); border-radius: 14px; margin-bottom: 8px; text-align: left;";
-          div.setAttribute(
-            "data-search",
-            correoTexto.toLowerCase() +
-              " " +
-              perfilTexto.toLowerCase() +
-              " " +
-              clienteTexto.toLowerCase(),
-          );
-
-          div.innerHTML = `
-              <div style="color: var(--text-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; word-break: break-all;">${correoTexto}</div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
-                  <span>Perfil: <b style="color: var(--ios-blue);">${perfilTexto}</b></span>
-                  <span>Cliente: <b style="color: var(--ios-orange);">${clienteTexto || "Sin Nombre"}</b></span>
-              </div>
-          `;
-
-          div.onclick = function () {
-            let itemCarrito = window.carrito.find((i) => i.id === idItem);
-            if (itemCarrito) {
-              itemCarrito.correoReno = `${correoTexto} | Perfil: ${perfilTexto}`;
-
-              let inputNombre = document.getElementById("cartClientName");
-              if (
-                inputNombre &&
-                clienteTexto &&
-                clienteTexto !== "N/A" &&
-                clienteTexto.toLowerCase() !== "cliente"
-              ) {
-                inputNombre.value = clienteTexto;
-              }
-
-              let cantidadDetectada = perfilTexto
-                .split(/[-y,]/i)
-                .filter((p) => p.trim() !== "").length;
-              if (cantidadDetectada > 0) itemCarrito.amount = cantidadDetectada;
-
-              actualizarCarritoUI();
-            }
-            modal.style.display = "none";
-            modal.classList.remove("open");
-          };
-          container.appendChild(div);
-        });
-      } else {
-        container.innerHTML =
-          "<div style='color:var(--text-secondary); text-align:center; padding: 20px;'>No tienes cuentas activas registradas en MySQL para esta plataforma.</div>";
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      container.innerHTML =
-        "<div style='color:var(--ios-red); text-align:center; padding: 20px;'>Error cargando cuentas para renovación.</div>";
-    });
 };
 
 window.filtrarModalRenovacionB2B = function () {
@@ -1137,44 +1250,9 @@ function copiarCuentasCheckout() {
   });
 }
 
-function cerrarModalExitoCheckout() {
-  haptic();
-  desbloquearScroll();
-  const modal = document.getElementById("successCheckoutOverlay");
-  if (modal) {
-    modal.style.display = "none";
-    modal.classList.remove("open");
-  }
-}
-
 // =========================================================================
-// 📡 BÓVEDA Y CASILLERO DE CUENTAS (FORMATO EXCLUSIVO B2B SIN BOT)
+// 📡 BÓVEDA Y CASILLERO DE CUENTAS
 // =========================================================================
-function abrirModalBusquedaCuentas() {
-  haptic();
-  bloquearScroll();
-
-  const inputSearch = document.getElementById("inputCasilleroSearch");
-  if (inputSearch) inputSearch.value = "";
-
-  const modal = document.getElementById("modalBusquedaCuentas");
-  if (modal) {
-    modal.style.display = "flex";
-    modal.classList.add("open");
-  }
-  buscarCasilleroDistri();
-}
-
-function cerrarModalBusquedaCuentas() {
-  haptic();
-  desbloquearScroll();
-  const modal = document.getElementById("modalBusquedaCuentas");
-  if (modal) {
-    modal.style.display = "none";
-    modal.classList.remove("open");
-  }
-}
-
 let timeoutCasilleroLive = null;
 function buscarCasilleroDistri() {
   clearTimeout(timeoutCasilleroLive);
@@ -1258,7 +1336,6 @@ function buscarCasilleroDistri() {
   }, 200);
 }
 
-// 📋 COPIADO NATIVO ESTILIZADO DE FICHA EXCLUSIVO PARA REVENDEDORES
 function copiarFichaCasillero(btn, dataEncoded) {
   haptic();
   const obj = JSON.parse(decodeURIComponent(dataEncoded));
@@ -1327,27 +1404,6 @@ function copiarFichaCasillero(btn, dataEncoded) {
 // =========================================================================
 // 🤖 CENTRO DE CÓDIGOS B2B
 // =========================================================================
-function abrirCentroCodigos() {
-  haptic();
-  bloquearScroll();
-  const overlay = document.getElementById("codesCenterOverlay");
-  if (overlay) {
-    overlay.style.display = "flex";
-    overlay.classList.add("open");
-  }
-  changeCodeStep(1);
-}
-
-function cerrarCentroCodigos() {
-  haptic();
-  desbloquearScroll();
-  const overlay = document.getElementById("codesCenterOverlay");
-  if (overlay) {
-    overlay.style.display = "none";
-    overlay.classList.remove("open");
-  }
-}
-
 function changeCodeStep(n) {
   document
     .querySelectorAll(".code-step")
@@ -1482,6 +1538,278 @@ function copiarCodigoResultanteB2B() {
   });
 }
 
+// =========================================================================
+// 📅 CONTROL Y RENDERIZADO DE VENCIMIENTOS
+// =========================================================================
+function filtrarVencimientosTab(filtro, btn) {
+  if (typeof haptic === "function") haptic();
+  window.vencimientoFiltroActual = filtro;
+  document
+    .querySelectorAll(".venc-tab-btn")
+    .forEach((b) => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  renderizarVencimientosB2B();
+}
+
+function cargarVencimientosB2B() {
+  const container = document.getElementById("contenedorVencimientosCards");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="text-align: center; padding: 35px 10px; color: var(--text-secondary);">
+      <svg class="spin-anim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-orange)" stroke-width="2.5" style="margin-bottom: 8px;">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 2v4"></path>
+      </svg>
+      <p style="font-weight: 700; font-size: 0.85rem;">Analizando casillero de cuentas...</p>
+    </div>
+  `;
+
+  const telDistri = localStorage.getItem("active_distri_tel") || "";
+  const formData = new FormData();
+  formData.append("accion", "buscar_casillero_distribuidor");
+  formData.append("telefono_distribuidor", telDistri);
+  formData.append("busqueda", "");
+
+  fetch(API_MYSQL_URL, {
+    method: "POST",
+    body: formData,
+  })
+    .then((r) => r.text())
+    .then((text) => {
+      let res;
+      try {
+        res = parseCleanJSON(text);
+      } catch (err) {
+        console.error("Respuesta original del servidor:", text);
+        throw err;
+      }
+
+      if (res && res.status === "success" && Array.isArray(res.data)) {
+        window.vencimientosDataCache = procesarYClasificarVencimientos(
+          res.data,
+        );
+        renderizarVencimientosB2B();
+      } else {
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.85rem;">No se encontraron cuentas activas.</div>`;
+      }
+    })
+    .catch((err) => {
+      console.error("Error al cargar vencimientos:", err);
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red); font-size:0.85rem;">Error al conectar con la base de datos de vencimientos.</div>`;
+    });
+}
+
+function parseVencimientoString(vencStr) {
+  if (!vencStr || vencStr === "-" || vencStr === "Activa") return null;
+  const mesesMap = {
+    ENE: 0,
+    ENERO: 0,
+    FEB: 1,
+    FEBRERO: 1,
+    MAR: 2,
+    MARZO: 2,
+    ABR: 3,
+    ABRIL: 3,
+    MAY: 4,
+    MAYO: 4,
+    JUN: 5,
+    JUNIO: 5,
+    JUL: 6,
+    JULIO: 6,
+    AGO: 7,
+    AGOSTO: 7,
+    SEP: 8,
+    SEPT: 8,
+    SEPTIEMBRE: 8,
+    OCT: 9,
+    OCTUBRE: 9,
+    NOV: 10,
+    NOVIEMBRE: 10,
+    DIC: 11,
+    DICIEMBRE: 11,
+  };
+
+  const str = String(vencStr)
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .replace(/DE/g, "");
+  const match = str.match(/^(\d{1,2})([A-Z]+)/);
+  if (match) {
+    const dia = parseInt(match[1], 10);
+    const mesTxt = match[2];
+    let mesNum = -1;
+    for (let k in mesesMap) {
+      if (mesTxt.startsWith(k)) {
+        mesNum = mesesMap[k];
+        break;
+      }
+    }
+    if (mesNum !== -1) {
+      const now = new Date();
+      let year = now.getFullYear();
+      return new Date(year, mesNum, dia);
+    }
+  }
+  return null;
+}
+
+function procesarYClasificarVencimientos(lista) {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  return lista
+    .map((item) => {
+      const dateObj = parseVencimientoString(item.vencimiento);
+      let diffDays = null;
+      let categoria = "OTRO";
+
+      if (dateObj) {
+        const diffTime = dateObj.getTime() - hoy.getTime();
+        diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+
+        if (diffDays === -2) categoria = "ANTEAYER";
+        else if (diffDays === -1) categoria = "AYER";
+        else if (diffDays === 0) categoria = "HOY";
+        else if (diffDays === 1) categoria = "MANANA";
+        else if (diffDays === 3) categoria = "TRES_DIAS";
+      }
+
+      return { ...item, diffDays, categoria };
+    })
+    .filter(
+      (item) =>
+        (item.plataforma || "").toUpperCase().includes("NETFLIX") &&
+        item.correo &&
+        item.correo.includes("@") &&
+        ["ANTEAYER", "AYER", "HOY", "MANANA", "TRES_DIAS"].includes(
+          item.categoria,
+        ),
+    );
+}
+
+function renderizarVencimientosB2B() {
+  const container = document.getElementById("contenedorVencimientosCards");
+  if (!container) return;
+
+  let lista = window.vencimientosDataCache || [];
+  if (window.vencimientoFiltroActual !== "TODOS") {
+    lista = lista.filter(
+      (item) => item.categoria === window.vencimientoFiltroActual,
+    );
+  }
+
+  if (lista.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px 10px; color: var(--text-secondary);">
+        <span style="font-size: 2rem; display: block; margin-bottom: 8px;">🎉</span>
+        <p style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">¡Sin vencimientos pendientes!</p>
+        <p style="font-size: 0.8rem; margin-top: 4px;">No hay cuentas de Netflix en esta categoría.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const catBadgeMap = {
+    ANTEAYER: {
+      label: "🚨 Venció Anteayer",
+      color: "var(--ios-red)",
+      bg: "rgba(255, 69, 58, 0.15)",
+    },
+    AYER: {
+      label: "⚠️ Venció Ayer",
+      color: "var(--ios-red)",
+      bg: "rgba(255, 69, 58, 0.15)",
+    },
+    HOY: {
+      label: "🔔 Vence Hoy",
+      color: "var(--ios-orange)",
+      bg: "rgba(255, 159, 10, 0.15)",
+    },
+    MANANA: {
+      label: "⏳ Vence Mañana",
+      color: "var(--ios-blue)",
+      bg: "rgba(10, 132, 255, 0.15)",
+    },
+    TRES_DIAS: {
+      label: "📅 Vence en 3 días",
+      color: "var(--ios-green)",
+      bg: "rgba(48, 209, 88, 0.15)",
+    },
+  };
+
+  let html = "";
+  lista.forEach((item) => {
+    const b = catBadgeMap[item.categoria];
+
+    let tieneClienteReal =
+      item.cliente &&
+      item.cliente !== "-" &&
+      item.cliente.trim() !== "" &&
+      item.cliente.trim().toLowerCase() !== "sin nombre";
+
+    const clienteCardDisplay = tieneClienteReal
+      ? item.cliente.trim()
+      : "Sin Nombre";
+
+    const perfil = item.perfil ? `Perfil ${item.perfil}` : "Perfil 1";
+    const pin = item.pin && item.pin !== "-" ? ` (PIN: ${item.pin})` : "";
+
+    const rawRecordatorio = generarMensajeRecordatorioAntispam(item);
+    const encodedRecordatorio = encodeURIComponent(rawRecordatorio);
+
+    html += `
+      <div class="venc-card-item">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 800; font-size: 0.9rem; color: var(--ios-blue); display: flex; align-items: center; gap: 6px;">
+            🎬 ${item.plataforma}
+          </span>
+          <span style="background: ${b.bg}; color: ${b.color}; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800;">
+            ${b.label}
+          </span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; color: var(--text-primary); margin-top: 2px;">
+          <div>👤 <strong>Cliente:</strong> ${clienteCardDisplay}</div>
+          <div>📧 <strong>Correo:</strong> <span style="font-family: monospace; color: var(--ios-blue);">${item.correo}</span></div>
+          <div>🔐 <strong>Acceso:</strong> Clave: <span style="font-family: monospace;">${item.clave}</span> | ${perfil} ${pin}</div>
+        </div>
+
+        <div style="margin-top: 6px;">
+          <button class="btn-ios w-100" onclick="copiarRecordatorioVencimiento(this, '${encodedRecordatorio}')" style="background: var(--ai-gradient); color: white; padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
+            📋 Copiar Recordatorio
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function copiarRecordatorioVencimiento(btn, textEncoded) {
+  if (typeof haptic === "function") haptic();
+  const text = decodeURIComponent(textEncoded);
+  navigator.clipboard.writeText(text).then(() => {
+    const oldText = btn.innerHTML;
+    btn.innerHTML = `✅ Recordatorio Copiado`;
+    btn.style.color = "#000000";
+    btn.style.background = "var(--ios-green)";
+
+    if (typeof triggerToast === "function") {
+      triggerToast(
+        `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><span>Recordatorio listo para enviar</span></div>`,
+      );
+    }
+
+    setTimeout(() => {
+      btn.innerHTML = oldText;
+      btn.style.color = "white";
+      btn.style.background = "var(--ai-gradient)";
+    }, 1800);
+  });
+}
+
 function refrescarSaldoDistribuidorFondo() {
   const telActivo =
     localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
@@ -1536,34 +1864,6 @@ function cerrarSesionDistribuidor() {
   localStorage.removeItem("active_distri_saldo");
   sessionStorage.clear();
   window.location.href = "login_distris.html";
-}
-
-function bloquearScroll() {
-  document.body.style.overflow = "hidden";
-}
-
-function desbloquearScroll() {
-  document.body.style.overflow = "";
-}
-
-function abrirMenuMovil() {
-  haptic();
-  bloquearScroll();
-  const m = document.getElementById("modalMenuMovil");
-  if (m) {
-    m.style.display = "flex";
-    m.classList.add("open");
-  }
-}
-
-function cerrarMenuMovil() {
-  haptic();
-  desbloquearScroll();
-  const m = document.getElementById("modalMenuMovil");
-  if (m) {
-    m.style.display = "none";
-    m.classList.remove("open");
-  }
 }
 
 // =========================================================================
