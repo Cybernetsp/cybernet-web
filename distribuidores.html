@@ -232,6 +232,34 @@
         opacity: 1;
       }
 
+      /* ESTILOS PESTAÑAS DE VENCIMIENTOS */
+      .venc-tab-btn {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--surface-border);
+        color: var(--text-secondary);
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: var(--transition-spring);
+      }
+      .venc-tab-btn.active {
+        background: var(--ios-orange);
+        color: #000000;
+        border-color: var(--ios-orange);
+      }
+      .venc-card-item {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--surface-border);
+        border-radius: 16px;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
       @media (max-width: 768px) {
         .desktop-menu-group {
           display: none !important;
@@ -412,6 +440,28 @@
             class="desktop-menu-group"
             style="display: flex; gap: 6px; align-items: center"
           >
+            <button
+              onclick="abrirModalVencimientos()"
+              class="btn-ios btn-secondary"
+              style="padding: 8px 12px; font-size: 0.85rem"
+            >
+              <svg
+                width="15"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--ios-orange)"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Vencimientos
+            </button>
             <button
               onclick="abrirModalBusquedaCuentas()"
               class="btn-ios btn-secondary"
@@ -610,6 +660,37 @@
               </svg>
             </button>
           </div>
+
+          <button
+            onclick="
+              cerrarMenuMovil();
+              abrirModalVencimientos();
+            "
+            class="btn-ios btn-secondary"
+            style="
+              width: 100%;
+              justify-content: flex-start;
+              padding: 12px 16px;
+              border-radius: 14px;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-orange)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Control de Vencimientos
+          </button>
 
           <button
             onclick="
@@ -890,6 +971,137 @@
             gap: 12px;
             overflow-x: auto;
             padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+          "
+        ></div>
+      </div>
+    </div>
+
+    <!-- MODAL VENCIMIENTOS DE CUENTAS -->
+    <div class="overlay-modal-code" id="modalVencimientos">
+      <div
+        class="modal-ios"
+        style="
+          max-width: 580px;
+          width: 92%;
+          max-height: 85vh;
+          display: flex;
+          flex-direction: column;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--surface-border);
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+          "
+        >
+          <h3
+            style="
+              margin: 0;
+              font-size: 1.15rem;
+              font-weight: 800;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--ios-orange)"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Control de Vencimientos
+          </h3>
+          <button class="btn-close-circle" onclick="cerrarModalVencimientos()">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- FILTROS DE TIMELINE -->
+        <div
+          id="vencimientosFilterTabs"
+          style="
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+          "
+        >
+          <button
+            class="venc-tab-btn active"
+            onclick="filtrarVencimientosTab('TODOS', this)"
+          >
+            Todos
+          </button>
+          <button
+            class="venc-tab-btn"
+            onclick="filtrarVencimientosTab('ANTEAYER', this)"
+          >
+            🚨 Anteayer
+          </button>
+          <button
+            class="venc-tab-btn"
+            onclick="filtrarVencimientosTab('AYER', this)"
+          >
+            ⚠️ Ayer
+          </button>
+          <button
+            class="venc-tab-btn"
+            onclick="filtrarVencimientosTab('HOY', this)"
+          >
+            🔔 Hoy
+          </button>
+          <button
+            class="venc-tab-btn"
+            onclick="filtrarVencimientosTab('MANANA', this)"
+          >
+            ⏳ Mañana
+          </button>
+          <button
+            class="venc-tab-btn"
+            onclick="filtrarVencimientosTab('TRES_DIAS', this)"
+          >
+            📅 En 3 Días
+          </button>
+        </div>
+
+        <!-- TARJETAS DE VENCIMIENTO -->
+        <div
+          id="contenedorVencimientosCards"
+          style="
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 4px;
             -webkit-overflow-scrolling: touch;
           "
         ></div>
@@ -1793,6 +2005,292 @@
         document.documentElement.setAttribute("data-theme", savedTheme);
         updateThemeIconDistri(savedTheme);
       });
+
+      /* LÓGICA DE CONTROL Y RENDERIZADO DE VENCIMIENTOS */
+      window.vencimientosDataCache = [];
+      window.vencimientoFiltroActual = "TODOS";
+
+      function abrirModalVencimientos() {
+        if (typeof haptic === "function") haptic();
+        const modal = document.getElementById("modalVencimientos");
+        if (modal) modal.classList.add("open");
+        cargarVencimientosB2B();
+      }
+
+      function cerrarModalVencimientos() {
+        if (typeof haptic === "function") haptic();
+        const modal = document.getElementById("modalVencimientos");
+        if (modal) modal.classList.remove("open");
+      }
+
+      function filtrarVencimientosTab(filtro, btn) {
+        if (typeof haptic === "function") haptic();
+        window.vencimientoFiltroActual = filtro;
+        document
+          .querySelectorAll(".venc-tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        renderizarVencimientosB2B();
+      }
+
+      function cargarVencimientosB2B() {
+        const container = document.getElementById(
+          "contenedorVencimientosCards",
+        );
+        if (!container) return;
+
+        container.innerHTML = `
+          <div style="text-align: center; padding: 35px 10px; color: var(--text-secondary);">
+            <svg class="spin-anim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-orange)" stroke-width="2.5" style="margin-bottom: 8px;">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 2v4"></path>
+            </svg>
+            <p style="font-weight: 700; font-size: 0.85rem;">Analizando casillero de cuentas...</p>
+          </div>
+        `;
+
+        const telDistri = localStorage.getItem("active_distri_tel") || "";
+        const formData = new FormData();
+        formData.append("accion", "buscar_casillero_distribuidor");
+        formData.append("telefono_distribuidor", telDistri);
+        formData.append("busqueda", "");
+
+        fetch("https://api.cybernetsp.com/acciones_distribuidores.php", {
+          method: "POST",
+          body: formData,
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.status === "success" && Array.isArray(res.data)) {
+              window.vencimientosDataCache = procesarYClasificarVencimientos(
+                res.data,
+              );
+              renderizarVencimientosB2B();
+            } else {
+              container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.85rem;">No se encontraron cuentas activas.</div>`;
+            }
+          })
+          .catch(() => {
+            container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red); font-size:0.85rem;">Error al conectar con la base de datos de vencimientos.</div>`;
+          });
+      }
+
+      function parseVencimientoString(vencStr) {
+        if (!vencStr || vencStr === "-" || vencStr === "Activa") return null;
+        const mesesMap = {
+          ENE: 0,
+          ENERO: 0,
+          FEB: 1,
+          FEBRERO: 1,
+          MAR: 2,
+          MARZO: 2,
+          ABR: 3,
+          ABRIL: 3,
+          MAY: 4,
+          MAYO: 4,
+          JUN: 5,
+          JUNIO: 5,
+          JUL: 6,
+          JULIO: 6,
+          AGO: 7,
+          AGOSTO: 7,
+          SEP: 8,
+          SEPT: 8,
+          SEPTIEMBRE: 8,
+          OCT: 9,
+          OCTUBRE: 9,
+          NOV: 10,
+          NOVIEMBRE: 10,
+          DIC: 11,
+          DICIEMBRE: 11,
+        };
+
+        const str = String(vencStr)
+          .toUpperCase()
+          .replace(/\s+/g, "")
+          .replace(/DE/g, "");
+        const match = str.match(/^(\d{1,2})([A-Z]+)/);
+        if (match) {
+          const dia = parseInt(match[1], 10);
+          const mesTxt = match[2];
+          let mesNum = -1;
+          for (let k in mesesMap) {
+            if (mesTxt.startsWith(k)) {
+              mesNum = mesesMap[k];
+              break;
+            }
+          }
+          if (mesNum !== -1) {
+            const now = new Date();
+            let year = now.getFullYear();
+            return new Date(year, mesNum, dia);
+          }
+        }
+        return null;
+      }
+
+      function procesarYClasificarVencimientos(lista) {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        return lista
+          .map((item) => {
+            const dateObj = parseVencimientoString(item.vencimiento);
+            let diffDays = null;
+            let categoria = "OTRO";
+
+            if (dateObj) {
+              const diffTime = dateObj.getTime() - hoy.getTime();
+              diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+
+              if (diffDays === -2) categoria = "ANTEAYER";
+              else if (diffDays === -1) categoria = "AYER";
+              else if (diffDays === 0) categoria = "HOY";
+              else if (diffDays === 1) categoria = "MANANA";
+              else if (diffDays >= 2 && diffDays <= 3) categoria = "TRES_DIAS";
+            }
+
+            return { ...item, diffDays, categoria };
+          })
+          .filter((item) =>
+            ["ANTEAYER", "AYER", "HOY", "MANANA", "TRES_DIAS"].includes(
+              item.categoria,
+            ),
+          );
+      }
+
+      function renderizarVencimientosB2B() {
+        const container = document.getElementById(
+          "contenedorVencimientosCards",
+        );
+        if (!container) return;
+
+        let lista = window.vencimientosDataCache || [];
+        if (window.vencimientoFiltroActual !== "TODOS") {
+          lista = lista.filter(
+            (item) => item.categoria === window.vencimientoFiltroActual,
+          );
+        }
+
+        if (lista.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 40px 10px; color: var(--text-secondary);">
+              <span style="font-size: 2rem; display: block; margin-bottom: 8px;">🎉</span>
+              <p style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">¡Sin vencimientos pendientes!</p>
+              <p style="font-size: 0.8rem; margin-top: 4px;">No hay cuentas en esta categoría para la ventana de días seleccionada.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const catBadgeMap = {
+          ANTEAYER: {
+            label: "🚨 Venció Anteayer",
+            color: "var(--ios-red)",
+            bg: "rgba(255, 69, 58, 0.15)",
+          },
+          AYER: {
+            label: "⚠️ Venció Ayer",
+            color: "var(--ios-red)",
+            bg: "rgba(255, 69, 58, 0.15)",
+          },
+          HOY: {
+            label: "🔔 Vence Hoy",
+            color: "var(--ios-orange)",
+            bg: "rgba(255, 159, 10, 0.15)",
+          },
+          MANANA: {
+            label: "⏳ Vence Mañana",
+            color: "var(--ios-blue)",
+            bg: "rgba(10, 132, 255, 0.15)",
+          },
+          TRES_DIAS: {
+            label: "📅 Vence en 3 días",
+            color: "var(--ios-green)",
+            bg: "rgba(48, 209, 88, 0.15)",
+          },
+        };
+
+        let html = "";
+        lista.forEach((item) => {
+          const b = catBadgeMap[item.categoria] || {
+            label: item.vencimiento,
+            color: "var(--ios-blue)",
+            bg: "rgba(10, 132, 255, 0.15)",
+          };
+          const cliente =
+            item.cliente && item.cliente !== "-"
+              ? item.cliente
+              : "Cliente General";
+          const perfil = item.perfil ? `Perfil ${item.perfil}` : "";
+          const pin = item.pin && item.pin !== "-" ? ` (PIN: ${item.pin})` : "";
+
+          const rawRecordatorio = `🌟 *Recordatorio de Vencimiento Cybernet*\n\n¡Hola ${cliente}! 👋\n\nTe informamos que tu servicio de *${item.plataforma}* (${item.correo}) vence el *${item.vencimiento}* ${perfil}${pin}.\n\n🎬 *¿Deseas renovar tu pantalla?*\nRespóndenos este mensaje para renovarla de inmediato y mantener todos tus perfiles sin interrupciones.\n\n✨ ¡Gracias por elegir Cybernet! ✨`;
+
+          const encodedRecordatorio = encodeURIComponent(rawRecordatorio);
+
+          html += `
+            <div class="venc-card-item">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 800; font-size: 0.9rem; color: var(--ios-blue); display: flex; align-items: center; gap: 6px;">
+                  🎬 ${item.plataforma}
+                </span>
+                <span style="background: ${b.bg}; color: ${b.color}; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800;">
+                  ${b.label}
+                </span>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; color: var(--text-primary); margin-top: 2px;">
+                <div>👤 <strong>Cliente:</strong> ${cliente}</div>
+                <div>📧 <strong>Correo:</strong> <span style="font-family: monospace; color: var(--ios-blue);">${item.correo}</span></div>
+                <div>🔐 <strong>Acceso:</strong> Clave: <span style="font-family: monospace;">${item.clave}</span> ${perfil ? `| ${perfil}` : ""} ${pin}</div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
+                <button class="btn-ios" onclick="renovarDesdeVencimiento('${item.plataforma}', '${encodeURIComponent(item.correo)}')" style="background: var(--ai-gradient); color: white; padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
+                  🔄 Renovar
+                </button>
+                <button class="btn-ios" onclick="copiarRecordatorioVencimiento(this, '${encodedRecordatorio}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--surface-border); color: var(--text-primary); padding: 8px; border-radius: 12px; font-size: 0.78rem; font-weight: 800; min-height: 38px;">
+                  📋 Copiar Recordatorio
+                </button>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      }
+
+      function renovarDesdeVencimiento(plataforma, correoEscapado) {
+        cerrarModalVencimientos();
+        const correo = decodeURIComponent(correoEscapado);
+        if (typeof abrirModalRenovacionB2B === "function") {
+          abrirModalRenovacionB2B(plataforma, correo);
+        } else {
+          alert(`Iniciando renovación para ${plataforma} (${correo})`);
+        }
+      }
+
+      function copiarRecordatorioVencimiento(btn, textEncoded) {
+        if (typeof haptic === "function") haptic();
+        const text = decodeURIComponent(textEncoded);
+        navigator.clipboard.writeText(text).then(() => {
+          const oldText = btn.innerHTML;
+          btn.innerHTML = `✅ Recordatorio Copiado`;
+          btn.style.color = "var(--ios-green)";
+
+          if (typeof triggerToast === "function") {
+            triggerToast(
+              `<div style="display:flex; align-items:center; gap:8px; color:var(--ios-green);"><span>Recordatorio listo para enviar</span></div>`,
+            );
+          }
+
+          setTimeout(() => {
+            btn.innerHTML = oldText;
+            btn.style.color = "var(--text-primary)";
+          }, 1800);
+        });
+      }
     </script>
     <script src="distribuidores.js"></script>
   </body>
