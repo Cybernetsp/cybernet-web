@@ -8,24 +8,33 @@
   style.innerHTML = `
     /* Modal contenedor centrado */
     #mysqlOverlay {
+      display: flex !important;
       align-items: center !important;
       justify-content: center !important;
     }
 
-    /* Modal contenedor flex de altura adaptativa */
+    /* Modal contenedor flex de altura fija responsiva */
     #mysqlOverlay > div,
     #mysqlOverlay .modal-ios,
     .modal-ios-mysql {
-      height: 90vh !important;
-      max-height: 90vh !important;
+      height: 92vh !important;
+      max-height: 92vh !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
       box-sizing: border-box !important;
-      padding-bottom: 20px !important;
+      padding-bottom: 10px !important;
     }
 
-    /* Envolvente principal de la tabla con scroll fluido */
+    /* Elementos superiores fijos para no comprimir la tabla */
+    #mysqlOverlay .modal-header,
+    #mysqlOverlay .mysql-tabs-container,
+    #mysqlOverlay .search-wrapper,
+    #mysqlOverlay .profit-title-box {
+      flex-shrink: 0 !important;
+    }
+
+    /* Envolvente principal de la tabla: Ocupa el 100% del alto restante y permite scroll completo */
     #contenedorTablaMySQL, 
     .tabla-container, 
     .visor-mysql-body,
@@ -39,10 +48,9 @@
       -webkit-overflow-scrolling: touch !important;
       border-radius: 12px !important;
       margin-bottom: 10px !important;
-      padding-bottom: 15px !important;
     }
 
-    /* Barra de desplazamiento estilo Dark Glass (Elegante y no invasiva) */
+    /* Barra de desplazamiento discreta estilo Dark Glass (Elegante y no invasiva) */
     #mysqlOverlay ::-webkit-scrollbar,
     .mysql-table-wrapper::-webkit-scrollbar,
     #contenedorTablaMySQL::-webkit-scrollbar {
@@ -53,20 +61,20 @@
     #mysqlOverlay ::-webkit-scrollbar-track,
     .mysql-table-wrapper::-webkit-scrollbar-track,
     #contenedorTablaMySQL::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.3) !important;
+      background: rgba(0, 0, 0, 0.25) !important;
       border-radius: 10px !important;
     }
     #mysqlOverlay ::-webkit-scrollbar-thumb,
     .mysql-table-wrapper::-webkit-scrollbar-thumb,
     #contenedorTablaMySQL::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.22) !important;
+      background: rgba(255, 255, 255, 0.2) !important;
       border-radius: 10px !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
     #mysqlOverlay ::-webkit-scrollbar-thumb:hover,
     .mysql-table-wrapper::-webkit-scrollbar-thumb:hover,
     #contenedorTablaMySQL::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.45) !important;
+      background: rgba(255, 255, 255, 0.4) !important;
     }
   `;
   document.head.appendChild(style);
@@ -492,7 +500,7 @@ function cargarDatosMySQL() {
       .tr-mysql-row.tr-caida:hover { background-color: rgba(255, 69, 58, 0.28) !important; }
       table { border-collapse: separate !important; border-spacing: 0 !important; table-layout: fixed !important; width: 100% !important; min-width: 1100px !important; background-color: #111216 !important; margin-bottom: 30px !important; }
       th, td { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-      tbody tr:last-child td { padding-bottom: 25px !important; }
+      tbody tr:last-child td { padding-bottom: 30px !important; }
     `;
     document.head.appendChild(styleSticky);
   }
