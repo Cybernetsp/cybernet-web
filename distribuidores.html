@@ -978,11 +978,7 @@
     </div>
 
     <!-- MODAL VENCIMIENTOS DE CUENTAS -->
-    <div
-      class="overlay-modal-code"
-      id="modalVencimientos"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="modalVencimientos">
       <div
         class="modal-ios"
         style="
@@ -1153,11 +1149,7 @@
     </button>
 
     <!-- CARRITO DE COMPRAS -->
-    <div
-      class="overlay-modal-code"
-      id="modalCarritoTienda"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="modalCarritoTienda">
       <div class="modal-ios" style="max-width: 400px; width: 92%">
         <div
           style="
@@ -1277,11 +1269,7 @@
     </div>
 
     <!-- BÓVEDA CASILLERO -->
-    <div
-      class="overlay-modal-code"
-      id="modalBusquedaCuentas"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="modalBusquedaCuentas">
       <div class="modal-ios" style="max-width: 450px; width: 92%">
         <div
           style="
@@ -1365,11 +1353,7 @@
     </div>
 
     <!-- HISTORIAL DE MOVIMIENTOS CON SELECTOR DE MES -->
-    <div
-      class="overlay-modal-code"
-      id="modalEstadoCuenta"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="modalEstadoCuenta">
       <div class="modal-ios" style="max-width: 500px; width: 92%">
         <div
           style="
@@ -1480,11 +1464,7 @@
     </div>
 
     <!-- MODAL ÉXITO COMPRA -->
-    <div
-      class="overlay-modal-code"
-      id="successCheckoutOverlay"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="successCheckoutOverlay">
       <div
         class="modal-ios"
         style="max-width: 400px; width: 92%; text-align: center"
@@ -1587,11 +1567,7 @@
     </div>
 
     <!-- CENTRO CÓDIGOS B2B -->
-    <div
-      class="overlay-modal-code"
-      id="codesCenterOverlay"
-      style="display: none"
-    >
+    <div class="overlay-modal-code" id="codesCenterOverlay">
       <div class="modal-ios" style="max-width: 400px; width: 92%">
         <div
           style="
@@ -1948,7 +1924,7 @@
       window.cerrarModalExitoCheckout = function () {
         if (typeof haptic === "function") haptic();
         const modal = document.getElementById("successCheckoutOverlay");
-        if (modal) modal.style.display = "none";
+        if (modal) modal.classList.remove("open");
       };
 
       window.copiarCuentasCheckout = function () {
@@ -1971,14 +1947,14 @@
       function abrirModalVencimientos() {
         if (typeof haptic === "function") haptic();
         const modal = document.getElementById("modalVencimientos");
-        if (modal) modal.style.display = "flex";
+        if (modal) modal.classList.add("open");
         cargarVencimientosB2B();
       }
 
       function cerrarModalVencimientos() {
         if (typeof haptic === "function") haptic();
         const modal = document.getElementById("modalVencimientos");
-        if (modal) modal.style.display = "none";
+        if (modal) modal.classList.remove("open");
       }
 
       function filtrarVencimientosTab(filtro, btn) {
@@ -2505,7 +2481,7 @@
             const modalExito = document.getElementById(
               "successCheckoutOverlay",
             );
-            if (modalExito) modalExito.style.display = "flex";
+            if (modalExito) modalExito.classList.add("open");
 
             // Recargar el casillero de fondo
             if (typeof cargarDatosMySQL === "function") cargarDatosMySQL();
