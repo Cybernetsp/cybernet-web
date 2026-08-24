@@ -12,7 +12,8 @@
   --ai-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
   --success-gradient: linear-gradient(135deg, #30d158 0%, #248a3d 100%);
 
-  --transition-fluid: transform 0.15s ease-out, background 0.15s ease-out, opacity 0.15s ease-out;
+  --transition-fluid:
+    transform 0.15s ease-out, background 0.15s ease-out, opacity 0.15s ease-out;
   --transition-spring: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
@@ -27,11 +28,14 @@
   --surface-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 
   --card-bg: rgba(28, 28, 30, 0.85);
+  --modal-bg: #1c1c1e;
   --input-bg: rgba(44, 44, 46, 0.8);
+  --input-border: 1px solid rgba(255, 255, 255, 0.15);
   --overlay-bg: rgba(0, 0, 0, 0.85);
 
   --orb-1: rgba(10, 132, 255, 0.22);
   --orb-2: rgba(255, 69, 58, 0.18);
+  --toast-bg: rgba(44, 44, 46, 0.95);
 }
 
 /* ☀️ MODO CLARO */
@@ -39,6 +43,7 @@
   --ios-blue: #007aff;
   --ios-green: #34c759;
   --ios-red: #ff3b30;
+  --ios-purple: #af52de;
   --ios-orange: #ff9500;
 
   --page-bg: #f2f2f7;
@@ -50,11 +55,14 @@
   --surface-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 
   --card-bg: rgba(255, 255, 255, 0.95);
+  --modal-bg: #ffffff;
   --input-bg: rgba(229, 229, 234, 0.8);
+  --input-border: 1px solid rgba(0, 0, 0, 0.15);
   --overlay-bg: rgba(0, 0, 0, 0.6);
 
   --orb-1: rgba(10, 132, 255, 0.12);
   --orb-2: rgba(255, 69, 58, 0.1);
+  --toast-bg: rgba(255, 255, 255, 0.95);
 }
 
 /* =========================================
@@ -64,7 +72,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
     "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -87,7 +96,9 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
 }
 
 html {
@@ -95,7 +106,7 @@ html {
 }
 
 /* =========================================
-   FONDOS AMBIENTALES ORB (ESTILO TIENDA / INDEX)
+   FONDOS AMBIENTALES ORB
    ========================================= */
 .bg-orb-1 {
   position: fixed;
@@ -190,7 +201,9 @@ html {
   border-radius: 14px;
   padding: 12px 14px;
   font-size: 16px !important; /* Previene auto-zoom de Safari iOS */
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
   width: 100%;
   box-sizing: border-box;
   caret-color: var(--ios-blue);
@@ -281,7 +294,9 @@ html {
   text-align: center;
   gap: 8px;
   border-radius: 20px;
-  transition: transform 0.15s ease-out, border-color 0.15s ease;
+  transition:
+    transform 0.15s ease-out,
+    border-color 0.15s ease;
   will-change: transform;
 }
 
@@ -293,7 +308,7 @@ html {
   border-color: var(--ios-blue);
 }
 
-/* 🛡️ MODALES RÁPIDOS CON GLASSMORPHISM */
+/* 🛡️ MODALES RÁPIDOS CON GLASSMORPHISM Y APERTURA GARANTIZADA */
 .overlay-modal-code {
   position: fixed;
   inset: 0;
@@ -301,19 +316,23 @@ html {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   z-index: 12000;
-  display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
   opacity: 0;
   visibility: hidden;
   padding: 12px;
   box-sizing: border-box;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
 }
 
 .overlay-modal-code.open {
-  opacity: 1;
-  visibility: visible;
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 .overlay-modal-code .modal-ios {
@@ -330,6 +349,7 @@ html {
 }
 
 /* TOAST NATIVO RÁPIDO */
+.apple-notification-toast,
 #appleToast {
   position: fixed;
   top: calc(env(safe-area-inset-top, 15px) + 12px);
@@ -347,7 +367,9 @@ html {
   opacity: 0;
   visibility: hidden;
   box-shadow: var(--surface-shadow);
-  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  transition:
+    transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    opacity 0.3s ease;
   z-index: 99999;
   max-width: 90vw;
   text-align: center;
@@ -357,10 +379,41 @@ html {
   pointer-events: none;
 }
 
+.apple-notification-toast.show,
 #appleToast.show {
   transform: translateX(-50%) translateY(0);
-  opacity: 1;
-  visibility: visible;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* ESTILOS PESTAÑAS Y TARJETAS DE VENCIMIENTOS */
+.venc-tab-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition-spring);
+}
+
+.venc-tab-btn.active {
+  background: var(--ios-orange);
+  color: #000000;
+  border-color: var(--ios-orange);
+}
+
+.venc-card-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* CARRITO FLOTANTE */
