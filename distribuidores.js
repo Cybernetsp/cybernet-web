@@ -3,6 +3,7 @@
 // =========================================================================
 
 const API_MYSQL_URL = "https://api.cybernetsp.com/acciones_distribuidores.php";
+const API_CODIGOS_URL = "https://api.cybernetsp.com/obtener_codigos.php";
 
 window.carrito = [];
 window.saldoNumericoActual = 0;
@@ -171,7 +172,7 @@ function triggerToast(msgHTML) {
 function copiarTextoAlToque(elemento, texto) {
   if (!texto) return;
   navigator.clipboard.writeText(texto).then(() => {
-    triggerToast(`Copiar al portapapeles`);
+    triggerToast(`Copiado al portapapeles`);
     elemento.style.opacity = "0.4";
     setTimeout(() => {
       elemento.style.opacity = "1";
@@ -204,7 +205,7 @@ function parseFechaCybernet(fechaStr) {
     AGO: 7,
     AGOSTO: 7,
     SEP: 8,
-    SEPTIEMBRE: 8,
+    SEPTPIEMBRE: 8,
     OCT: 9,
     OCTUBRE: 9,
     NOV: 10,
@@ -459,7 +460,6 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
         }
         if (tbody) tbody.innerHTML = trs;
 
-        // Alertas de Renovaciones
         const divRenov = document.getElementById("listaRenovacionesCards");
         const widgetCont = document.getElementById("widgetRenovaciones");
         let htmlRenov = "";
@@ -722,6 +722,7 @@ window.abrirModalRenoB2B = function (idItem) {
   const container = document.getElementById("listaCuentasModalRenoDistri");
 
   container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line></svg><br>Buscando tus pantallas en MySQL...</div>`;
+  modal.style.display = "flex";
   modal.classList.add("open");
 
   const formData = new FormData();
@@ -785,6 +786,7 @@ window.abrirModalRenoB2B = function (idItem) {
 
               actualizarCarritoUI();
             }
+            modal.style.display = "none";
             modal.classList.remove("open");
           };
           container.appendChild(div);
@@ -885,7 +887,7 @@ function actualizarCarritoUI() {
     if (totalCost > window.saldoNumericoActual) {
       btnCheckout.disabled = true;
       btnCheckout.style.background = "var(--ios-red)";
-      btnCheckout.innerText = "SALDO INSUFICIENTES";
+      btnCheckout.innerText = "SALDO INSUFICIENTE";
     } else {
       btnCheckout.disabled = false;
       btnCheckout.style.background = "var(--ios-blue)";
@@ -1061,9 +1063,13 @@ function procesarCompraDistribuidor() {
           }
 
           cerrarCarrito();
-          document
-            .getElementById("successCheckoutOverlay")
-            .classList.add("open");
+          const overlayExito = document.getElementById(
+            "successCheckoutOverlay",
+          );
+          if (overlayExito) {
+            overlayExito.style.display = "flex";
+            overlayExito.classList.add("open");
+          }
           bloquearScroll();
 
           window.carrito = [];
@@ -1114,7 +1120,11 @@ function copiarCuentasCheckout() {
 function cerrarModalExitoCheckout() {
   haptic();
   desbloquearScroll();
-  document.getElementById("successCheckoutOverlay").classList.remove("open");
+  const modal = document.getElementById("successCheckoutOverlay");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("open");
+  }
 }
 
 // =========================================================================
@@ -1127,14 +1137,22 @@ function abrirModalBusquedaCuentas() {
   const inputSearch = document.getElementById("inputCasilleroSearch");
   if (inputSearch) inputSearch.value = "";
 
-  document.getElementById("modalBusquedaCuentas").classList.add("open");
+  const modal = document.getElementById("modalBusquedaCuentas");
+  if (modal) {
+    modal.style.display = "flex";
+    modal.classList.add("open");
+  }
   buscarCasilleroDistri();
 }
 
 function cerrarModalBusquedaCuentas() {
   haptic();
   desbloquearScroll();
-  document.getElementById("modalBusquedaCuentas").classList.remove("open");
+  const modal = document.getElementById("modalBusquedaCuentas");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("open");
+  }
 }
 
 let timeoutCasilleroLive = null;
@@ -1196,7 +1214,7 @@ function buscarCasilleroDistri() {
                     <div style="color:var(--ios-green); font-family:monospace; font-weight:800; font-size:0.85rem;">${item.vencimiento}</div>
                   </div>
                   <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
-                     ${perfilText}<br>${subCliente}
+                       ${perfilText}<br>${subCliente}
                   </div>
                   <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
                     <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.correo}')" style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:10px; font-family:monospace; font-size:0.8rem; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">E: <span style="color:white; font-weight:bold;">${item.correo}</span></div>
@@ -1289,114 +1307,122 @@ function copiarFichaCasillero(btn, dataEncoded) {
 // =========================================================================
 // 🤖 CENTRO DE CÓDIGOS B2B
 // =========================================================================
-let codeData = { telefono: "", plataforma: "", opcion: 1, correo: "" };
-
 function abrirCentroCodigos() {
   haptic();
   bloquearScroll();
-
-  const telDistri =
-    localStorage.getItem("active_distri_tel") ||
-    window.distriTelefonoCache ||
-    "";
-  codeData.telefono = telDistri;
-
-  document.getElementById("codesCenterOverlay").classList.add("open");
+  const overlay = document.getElementById("codesCenterOverlay");
+  if (overlay) {
+    overlay.style.display = "flex";
+    overlay.classList.add("open");
+  }
   changeCodeStep(1);
 }
 
 function cerrarCentroCodigos() {
   haptic();
   desbloquearScroll();
-  document.getElementById("codesCenterOverlay").classList.remove("open");
+  const overlay = document.getElementById("codesCenterOverlay");
+  if (overlay) {
+    overlay.style.display = "none";
+    overlay.classList.remove("open");
+  }
 }
 
 function changeCodeStep(n) {
   document
     .querySelectorAll(".code-step")
-    .forEach((s) => s.classList.remove("active"));
-  document.getElementById("codeStep" + n).classList.add("active");
+    .forEach((s) => (s.style.display = "none"));
+  const currentStep = document.getElementById("codeStep" + n);
+  if (currentStep) currentStep.style.display = "flex";
 }
 
 function setCodigoPlat(p) {
   haptic();
-  codeData.plataforma = p;
-  changeCodeStep(p === "NETFLIX" ? 2 : 3);
+  changeCodeStep(2);
 }
 
 function setCodigoOp(o) {
   haptic();
-  codeData.opcion = o;
   changeCodeStep(3);
 }
 
-function rastrearCodigo() {
+async function rastrearCodigo() {
   haptic();
-  let m = document
-    .getElementById("inputCorreoCodigo")
-    .value.toLowerCase()
-    .trim();
+  const input = document.getElementById("inputCorreoCodigo");
+  if (!input) return;
 
-  if (!m.includes("@")) {
+  let correo = input.value.trim().toLowerCase();
+  if (!correo || !correo.includes("@")) {
     alert("⚠️ Escribe un correo electrónico válido.");
     return;
   }
 
-  const telDistri =
-    localStorage.getItem("active_distri_tel") ||
-    window.distriTelefonoCache ||
-    "";
-
-  codeData.correo = m;
-  codeData.telefono = telDistri;
-
   changeCodeStep(4);
 
-  const formData = new FormData();
-  formData.append("accion", "obtener_codigo_acceso");
-  formData.append("correo", m);
-  formData.append("plataforma", codeData.plataforma);
-  formData.append("opcion", codeData.opcion);
-  formData.append("telefono", telDistri);
+  try {
+    const formData = new FormData();
+    formData.append("correo", correo);
 
-  fetch(API_MYSQL_URL, { method: "POST", body: formData })
-    .then((res) => res.text())
-    .then((text) => {
-      const res = parseCleanJSON(text);
-      changeCodeStep(5);
-      document.getElementById("codeResultBox").style.display = "none";
-      document.getElementById("linkResultBox").style.display = "none";
-
-      if (res && res.exito) {
-        document.getElementById("codeResultTitle").innerHTML =
-          `<span style="color:var(--ios-green); font-weight:800;">¡LOCALIZADO!</span>`;
-        document.getElementById("codeResultDesc").innerText =
-          res.msj || "Información recuperada con éxito:";
-
-        if (res.tipo === "codigo") {
-          document.getElementById("codeResultBox").style.display = "block";
-          document.getElementById("codeVal").innerText = res.valor;
-          document.getElementById("codeTimer").innerText =
-            `Fecha / Hora: ${res.tiempo || "Reciente"}`;
-        } else if (res.tipo === "link") {
-          document.getElementById("linkResultBox").style.display = "block";
-          document.getElementById("linkVal").href = res.valor;
-        }
-      } else {
-        document.getElementById("codeResultTitle").innerHTML =
-          `<span style="color:var(--ios-orange); font-weight:800;">SIN RESULTADOS</span>`;
-        document.getElementById("codeResultDesc").innerText =
-          res.msj || "No se detectaron solicitudes recientes para este buzón.";
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      changeCodeStep(5);
-      document.getElementById("codeResultTitle").innerHTML =
-        `<span style="color:var(--ios-red); font-weight:800;">ERROR DE RED</span>`;
-      document.getElementById("codeResultDesc").innerText =
-        "No se pudo establecer comunicación con el servidor central.";
+    const resp = await fetch("https://api.cybernetsp.com/obtener_codigos.php", {
+      method: "POST",
+      body: formData,
+      mode: "cors",
     });
+
+    const text = await resp.text();
+    const res = parseCleanJSON(text);
+
+    changeCodeStep(5);
+    document.getElementById("codeResultBox").style.display = "none";
+    document.getElementById("linkResultBox").style.display = "none";
+
+    if (
+      res &&
+      res.status === "success" &&
+      Array.isArray(res.data) &&
+      res.data.length > 0
+    ) {
+      let match = res.data.find(
+        (item) =>
+          (item.correo || "").toLowerCase().trim().includes(correo) ||
+          correo.includes((item.correo || "").toLowerCase().trim()),
+      );
+
+      if (!match) {
+        match = res.data[0];
+      }
+
+      document.getElementById("codeResultTitle").innerHTML =
+        `<span style="color:var(--ios-green); font-weight:800;">${match.plataforma || "SERVICIO"} - ${match.accion || "CÓDIGO"}</span>`;
+      document.getElementById("codeResultDesc").innerText =
+        `Correo: ${match.correo} (${match.hora || "Reciente"})`;
+
+      const val = match.codigoLink || match.copiadoRapido || "";
+      window.codigoB2BCapturado = val;
+
+      if (val.startsWith("http://") || val.startsWith("https://")) {
+        document.getElementById("linkResultBox").style.display = "block";
+        document.getElementById("linkVal").href = val;
+      } else {
+        document.getElementById("codeResultBox").style.display = "block";
+        document.getElementById("codeVal").innerText = val;
+        document.getElementById("codeTimer").innerText =
+          `Vigencia máxima: 16 minutos`;
+      }
+    } else {
+      document.getElementById("codeResultTitle").innerHTML =
+        `<span style="color:var(--ios-orange); font-weight:800;">SIN RESULTADOS</span>`;
+      document.getElementById("codeResultDesc").innerText =
+        "No se detectaron solicitudes recientes para este buzón en los últimos 16 minutos.";
+    }
+  } catch (err) {
+    console.error(err);
+    changeCodeStep(5);
+    document.getElementById("codeResultTitle").innerHTML =
+      `<span style="color:var(--ios-red); font-weight:800;">ERROR DE RED</span>`;
+    document.getElementById("codeResultDesc").innerText =
+      "No se pudo establecer comunicación con el servidor central.";
+  }
 }
 
 function copiarCodigoResultanteB2B() {
@@ -1482,41 +1508,24 @@ function desbloquearScroll() {
 function abrirMenuMovil() {
   haptic();
   bloquearScroll();
-  document.getElementById("modalMenuMovil").classList.add("open");
+  const m = document.getElementById("modalMenuMovil");
+  if (m) {
+    m.style.display = "flex";
+    m.classList.add("open");
+  }
 }
 
 function cerrarMenuMovil() {
   haptic();
   desbloquearScroll();
-  document.getElementById("modalMenuMovil").classList.remove("open");
-}
-
-// =========================================================================
-// 🌙 UNIFICACIÓN DE MODO CLARO / OSCURO (CLAVE COMPARTIDA "cyber_theme")
-// =========================================================================
-function toggleThemeDistri() {
-  if (typeof haptic === "function") haptic();
-  const currentTheme = document.documentElement.getAttribute("data-theme");
-  const newTheme = currentTheme === "light" ? "dark" : "light";
-  document.documentElement.setAttribute("data-theme", newTheme);
-  localStorage.setItem("cyber_theme", newTheme); // Clave unificada
-  updateThemeIconDistri(newTheme);
-}
-
-function updateThemeIconDistri(theme) {
-  const btnDesktop = document.getElementById("theme-toggle");
-  const btnMobile = document.getElementById("theme-toggle-mobile");
-  const svgIcon =
-    theme === "light"
-      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
-      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
-
-  if (btnDesktop) btnDesktop.innerHTML = svgIcon;
-  if (btnMobile) btnMobile.innerHTML = svgIcon;
+  const m = document.getElementById("modalMenuMovil");
+  if (m) {
+    m.style.display = "none";
+    m.classList.remove("open");
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Sincronización automática de tema desde la clave global "cyber_theme"
   const savedTheme = localStorage.getItem("cyber_theme") || "dark";
   document.documentElement.setAttribute("data-theme", savedTheme);
   updateThemeIconDistri(savedTheme);
