@@ -1670,7 +1670,9 @@ function procesarYClasificarVencimientos(lista) {
         else if (diffDays === -1) categoria = "AYER";
         else if (diffDays === 0) categoria = "HOY";
         else if (diffDays === 1) categoria = "MANANA";
-        else if (diffDays >= 2) categoria = "TRES_DIAS";
+        else if (diffDays >= 2 && diffDays <= 3)
+          categoria = "TRES_DIAS"; // ⚡ Solución: Rango estricto de 2 a 3 días
+        else categoria = "OTRO";
       }
 
       return { ...item, diffDays, categoria };
@@ -1863,37 +1865,11 @@ function generarMensajeRecordatorioAntispam(item) {
     "🛑🔔",
     "⏱️⚡",
   ];
-  const emojisFut = [
-    "⏳🗓️",
-    "🔔✨",
-    "🍿🎬",
-    "🚀🌈",
-    "📅⚡",
-    "📌⏳",
-    "🗓️🚀",
-    "⚠️🗓️",
-    "💡📅",
-  ];
-  const emojisCierre = [
-    "📲💥",
-    "⚡💎",
-    "🔥🚀",
-    "🚀🙌",
-    "🟢✨",
-    "📲✨",
-    "💬🚀",
-    "💬✨",
-    "💎📩",
-  ];
 
   const saludos = [
     `¡Hola${n}! ${pick(emojisSal)}`,
     `¡Qué tal${n}! ${pick(emojisSal)}`,
     `¡Hey${n}! ${pick(emojisSal)}`,
-    `¡Un saludo${n}! ${pick(emojisSal)}`,
-    `¡Excelente día${n}! ${pick(emojisSal)}`,
-    `¡Buenas${n}! ${pick(emojisSal)}`,
-    `¡Buen día${n}! ${pick(emojisSal)}`,
   ];
 
   const perfil = item.perfil ? `Perfil ${item.perfil}` : "Perfil 1";
@@ -1910,9 +1886,7 @@ function generarMensajeRecordatorioAntispam(item) {
     "Recuerda renovar a tiempo para que puedas seguir disfrutando con tu mismo correo e historial sin cortes.",
   ];
 
-  const despedidas = [
-    `¡Quedamos atentos a tu mensaje para ayudarte! ${pick(emojisCierre)}`,
-  ];
+  const despedidas = [`¡Quedamos atentos a tu mensaje para ayudarte!`];
 
   return `${pick(saludos)}\n\n${pick(recordatorios)}\n\n${pick(renovaciones)}\n\n${pick(despedidas)}${generarTokenUnicidad()}`;
 }
