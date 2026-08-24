@@ -26,7 +26,7 @@ const PLATAFORMAS_MANUALES = [
 // =========================================================================
 // 🎨 CATÁLOGO DE PRODUCTOS BASE
 // =========================================================================
-const catálogoProductos = [
+const catalogoProductos = [
   {
     id: "NETFLIX",
     nombre: "Netflix Premium",
@@ -149,7 +149,7 @@ function parseCleanJSON(rawText) {
 }
 
 function formatMoneda(v) {
-  if (!v) return "$0";
+  if (!v && v !== 0) return "$0";
   if (typeof v === "string" && v.includes("$")) return v;
   let num =
     typeof v === "number" ? v : parseFloat(String(v).replace(/[^0-9.-]/g, ""));
@@ -205,7 +205,7 @@ function parseFechaCybernet(fechaStr) {
     AGO: 7,
     AGOSTO: 7,
     SEP: 8,
-    SEPTPIEMBRE: 8,
+    SEPTIEMBRE: 8,
     OCT: 9,
     OCTUBRE: 9,
     NOV: 10,
@@ -249,17 +249,17 @@ function cargarPerfilDistribuidor() {
 
         localStorage.setItem("active_distri_id", d.id);
         localStorage.setItem("active_distri_tel", d.telefono);
-        localStorage.setItem("active_distri_name", d.nombre);
-        localStorage.setItem("active_distri_saldo", d.saldo);
+        localStorage.setItem("active_distri_name", d.nombre || "Distribuidor");
+        localStorage.setItem("active_distri_saldo", d.saldo || 0);
 
         window.distriTelefonoCache = d.telefono;
-        window.saldoNumericoActual = parseFloat(d.saldo);
+        window.saldoNumericoActual = parseFloat(d.saldo || 0);
 
         const elemNombre = document.getElementById("distriWelcomeName");
         const elemTelefono = document.getElementById("distriWelcomePhone");
 
         if (elemNombre)
-          elemNombre.innerText = `¡Hola, ${d.nombre.toUpperCase()}!`;
+          elemNombre.innerText = `¡Hola, ${(d.nombre || "Distribuidor").toUpperCase()}!`;
         if (elemTelefono)
           elemTelefono.innerText = `Distribuidor • Tel: ${d.telefono}`;
 
@@ -279,18 +279,18 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
   const btnCarrito = document.getElementById("fabCarrito");
   if (btnCarrito) btnCarrito.style.setProperty("display", "flex", "important");
 
-  if (nombre) {
-    const elemNombre = document.getElementById("distriWelcomeName");
-    if (elemNombre) elemNombre.innerText = `¡Hola, ${nombre.toUpperCase()}!`;
+  const elemNombre = document.getElementById("distriWelcomeName");
+  if (elemNombre) {
+    elemNombre.innerText = `¡Hola, ${(nombre || "DISTRIBUIDOR").toUpperCase()}!`;
   }
-  if (telefono) {
-    const elemTelefono = document.getElementById("distriWelcomePhone");
-    if (elemTelefono)
-      elemTelefono.innerText = `Distribuidor • Tel: ${telefono}`;
+
+  const elemTelefono = document.getElementById("distriWelcomePhone");
+  if (elemTelefono) {
+    elemTelefono.innerText = `Distribuidor • Tel: ${telefono || "--"}`;
   }
 
   window.saldoNumericoActual =
-    parseFloat(String(saldo).replace(/[^\d.-]/g, "")) || 0;
+    parseFloat(String(saldo || 0).replace(/[^\d.-]/g, "")) || 0;
   actualizarSaldoUI();
 
   const shopContainer = document.getElementById("shopCatalogContainer");
@@ -298,7 +298,7 @@ function entrarAlPortalDistribuidor(nombre, telefono, saldo) {
     shopContainer.innerHTML = `
       <div style="text-align:center; padding:40px; width:100%; color:var(--text-secondary); grid-column: 1 / -1;">
         <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5" style="margin-bottom:12px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
-        <br>Cargando precios de MySQL...
+        <br>Cargando catálogo de MySQL...
       </div>`;
   }
 
@@ -367,7 +367,7 @@ function filtrarMovimientosPorMes() {
 }
 
 // =========================================================================
-// 🏷️ CARGAR PRECIOS DINÁMICOS
+// 🏷️ CARGAR PRECIOS Y RENDERIZAR TIENDA
 // =========================================================================
 function cargarPreciosEnTienda() {
   const formData = new FormData();
@@ -379,7 +379,7 @@ function cargarPreciosEnTienda() {
       const res = parseCleanJSON(text);
       if (res && res.status === "success" && res.data) {
         res.data.forEach((itemDb) => {
-          let producto = catálogoProductos.find(
+          let producto = catalogoProductos.find(
             (p) =>
               p.id === itemDb.codigo ||
               (p.id === "AMAZON" && itemDb.codigo === "AMAZON-PRIME-VIDEO") ||
@@ -450,7 +450,7 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
                       <td style="padding: 12px 8px; font-size:0.75rem; color:var(--text-secondary); white-space:nowrap;">${mov.fecha}</td>
                       <td style="padding: 12px 8px; line-height:1.3;">
                         <strong style="color:var(--text-primary); font-size:0.85rem;">${mov.concepto}</strong><br>
-                        <span style="color:var(--ios-blue); font-size:0.75rem;">Cliente: ${mov.cliente}</span>
+                        <span style="color:var(--ios-blue); font-size:0.75rem;">Cliente: ${mov.cliente || "Sin Nombre"}</span>
                       </td>
                       <td style="padding: 12px 8px; text-align:right; color:${color}; font-weight:bold; font-family:monospace; white-space:nowrap;">${signo}${formatMoneda(mov.monto)}</td>
                     </tr>`;
@@ -487,7 +487,7 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
                 htmlRenov += `
                    <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,149,0,0.3); border-radius:16px; padding:12px 16px; min-width:200px; display:flex; flex-direction:column; gap:6px;">
                       <div style="font-weight:800; color:var(--text-primary); font-size:0.9rem;">${c.plataforma.replace(/-/g, " ")}</div>
-                      <div style="font-size:0.8rem; color:var(--text-secondary);">Cliente: ${c.cliente}</div>
+                      <div style="font-size:0.8rem; color:var(--text-secondary);">Cliente: ${c.cliente || "Sin Nombre"}</div>
                       <div style="font-size:0.8rem; color:${colorDias}; font-weight:700;">${txtDias}</div>
                       <button class="btn-ios" onclick="copiarMensajeRenovacion('${msgCobro}')" style="background:rgba(255,149,0,0.15); color:var(--ios-orange); border:none; padding:8px; border-radius:30px; font-size:0.75rem; font-weight:700; margin-top:4px;">
                         Copiar Mensaje
@@ -534,13 +534,21 @@ function abrirModalHistorial() {
     localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
 
   cargarDatosFinancierosYAlertas(tel, mesActual);
-  document.getElementById("modalEstadoCuenta").classList.add("open");
+  const m = document.getElementById("modalEstadoCuenta");
+  if (m) {
+    m.style.display = "flex";
+    m.classList.add("open");
+  }
 }
 
 function cerrarModalHistorial() {
   haptic();
   desbloquearScroll();
-  document.getElementById("modalEstadoCuenta").classList.remove("open");
+  const m = document.getElementById("modalEstadoCuenta");
+  if (m) {
+    m.style.display = "none";
+    m.classList.remove("open");
+  }
 }
 
 // =========================================================================
@@ -549,22 +557,31 @@ function cerrarModalHistorial() {
 function abrirCarrito() {
   haptic();
   bloquearScroll();
-  document.getElementById("modalCarritoTienda").classList.add("open");
+  const m = document.getElementById("modalCarritoTienda");
+  if (m) {
+    m.style.display = "flex";
+    m.classList.add("open");
+  }
 }
+
 function cerrarCarrito() {
   haptic();
   desbloquearScroll();
-  document.getElementById("modalCarritoTienda").classList.remove("open");
+  const m = document.getElementById("modalCarritoTienda");
+  if (m) {
+    m.style.display = "none";
+    m.classList.remove("open");
+  }
 }
 
 function renderTienda() {
   const container = document.getElementById("shopCatalogContainer");
   if (!container) return;
   let html = "";
-  catálogoProductos.forEach((p) => {
+  catalogoProductos.forEach((p) => {
     html += `
       <div class="card-ios platform-card-shop" data-name="${p.nombre.toLowerCase()}" style="position:relative; padding:18px 14px 14px 14px; margin:0; display:flex; flex-direction:column; align-items:center; gap:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05); text-align:center;">
-        <div id="stock-badge-${p.id}" style="position:absolute; top:8px; right:8px; background:rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size:0.65rem; padding:4px 8px; border-radius:10px; font-weight:700; color:var(--text-secondary);">
+        <div id="stock-badge-${p.id}" data-stock-plat="${p.id}" style="position:absolute; top:8px; right:8px; background:rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size:0.65rem; padding:4px 8px; border-radius:10px; font-weight:700; color:var(--text-secondary);">
            <svg class="spin-anim" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
         </div>
         <div style="background: ${p.color}15; color: ${p.color}; width: 44px; height: 44px; border-radius: 14px; display:flex; align-items:center; justify-content:center; border: 1px solid ${p.color}25;">${p.logo}</div>
@@ -585,7 +602,7 @@ function cargarStockEnTienda() {
     .then((text) => {
       const res = parseCleanJSON(text);
       if (res && res.status === "success" && res.stock) {
-        catálogoProductos.forEach((p) => {
+        catalogoProductos.forEach((p) => {
           const badge = document.getElementById(`stock-badge-${p.id}`);
           const btnAdd = document.getElementById(`btn-add-${p.id}`);
 
@@ -632,9 +649,8 @@ function cargarStockEnTienda() {
 }
 
 function filtrarTiendaLocal() {
-  const query = document
-    .getElementById("searchShopInput")
-    .value.toLowerCase()
+  const query = (document.getElementById("searchShopInput")?.value || "")
+    .toLowerCase()
     .trim();
   document.querySelectorAll(".platform-card-shop").forEach((c) => {
     c.style.display = c.getAttribute("data-name").includes(query)
@@ -645,7 +661,7 @@ function filtrarTiendaLocal() {
 
 function agregarAlCarrito(id) {
   haptic();
-  const prod = catálogoProductos.find((p) => p.id === id);
+  const prod = catalogoProductos.find((p) => p.id === id);
   if (!prod) return;
   const existente = window.carrito.find((item) => item.id === id);
   if (existente) existente.amount++;
@@ -705,7 +721,8 @@ window.cambiarTipoVentaCarrito = function (id, tipo) {
     if (tipo === "Nueva") {
       item.correoReno = "";
       item.amount = 1;
-      document.getElementById("cartClientName").value = "";
+      const inputClient = document.getElementById("cartClientName");
+      if (inputClient) inputClient.value = "";
     }
     actualizarCarritoUI();
   }
@@ -721,6 +738,8 @@ window.abrirModalRenoB2B = function (idItem) {
   const modal = document.getElementById("modalRenovacionDistri");
   const container = document.getElementById("listaCuentasModalRenoDistri");
 
+  if (!modal || !container) return;
+
   container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line></svg><br>Buscando tus pantallas en MySQL...</div>`;
   modal.style.display = "flex";
   modal.classList.add("open");
@@ -735,7 +754,7 @@ window.abrirModalRenoB2B = function (idItem) {
     .then((text) => {
       const res = parseCleanJSON(text);
       container.innerHTML = "";
-      if (res && res.status === "success" && res.data.length > 0) {
+      if (res && res.status === "success" && res.data && res.data.length > 0) {
         window.cuentasActivasB2B = res.data;
 
         window.cuentasActivasB2B.forEach((cuenta) => {
@@ -804,9 +823,8 @@ window.abrirModalRenoB2B = function (idItem) {
 };
 
 window.filtrarModalRenovacionB2B = function () {
-  const q = document
-    .getElementById("buscadorModalRenoDistri")
-    .value.toLowerCase()
+  const q = (document.getElementById("buscadorModalRenoDistri")?.value || "")
+    .toLowerCase()
     .trim();
   document.querySelectorAll(".item-reno-b2b").forEach((item) => {
     const indiceBusqueda = item.getAttribute("data-search") || "";
@@ -910,11 +928,11 @@ function procesarCompraDistribuidor() {
   if (totalCost > window.saldoNumericoActual) return;
 
   const btn = document.getElementById("btnCheckoutShop");
-  if (btn.disabled) return;
+  if (!btn || btn.disabled) return;
 
-  const inputNombreCliente = document
-    .getElementById("cartClientName")
-    .value.trim();
+  const inputNombreCliente = (
+    document.getElementById("cartClientName")?.value || ""
+  ).trim();
   const nombreParaDb =
     inputNombreCliente !== ""
       ? inputNombreCliente
@@ -1040,7 +1058,8 @@ function procesarCompraDistribuidor() {
 
           textoFicha += `📢 *INFORMACIÓN IMPORTANTE:* \n────────────────────\n⚠️ *Garantía activa:* Tu servicio cuenta con respaldo total durante su vigencia. \n🆘 *Soporte:* Si presentas algún inconveniente, *infórmanos de inmediato* para brindarte una solución rápida.\n\n💎 *Disfruta tu servicio.*\n✨ *¡Gracias por elegirnos!* ✨`;
 
-          document.getElementById("cajaTextoFichas").innerText = textoFicha;
+          const cajaFichas = document.getElementById("cajaTextoFichas");
+          if (cajaFichas) cajaFichas.innerText = textoFicha;
           window.fichasCheckoutPendientes = textoFicha;
 
           const btnWhatsapp = document.getElementById("btnWhatsAppActivacion");
@@ -1048,7 +1067,7 @@ function procesarCompraDistribuidor() {
             PLATAFORMAS_MANUALES.includes(item.id),
           );
 
-          if (requiresManual) {
+          if (requiresManual && btnWhatsapp) {
             const platList = window.carrito
               .filter((i) => PLATAFORMAS_MANUALES.includes(i.id))
               .map((i) => i.nombre)
@@ -1058,7 +1077,7 @@ function procesarCompraDistribuidor() {
             );
             btnWhatsapp.href = `https://wa.me/573127706726?text=${waMsg}`;
             btnWhatsapp.style.display = "block";
-          } else {
+          } else if (btnWhatsapp) {
             btnWhatsapp.style.display = "none";
           }
 
@@ -1073,7 +1092,8 @@ function procesarCompraDistribuidor() {
           bloquearScroll();
 
           window.carrito = [];
-          document.getElementById("cartClientName").value = "";
+          const inputClient = document.getElementById("cartClientName");
+          if (inputClient) inputClient.value = "";
           actualizarCarritoUI();
 
           if (res.saldoQuedante !== undefined) {
@@ -1108,11 +1128,11 @@ function copiarCuentasCheckout() {
   haptic();
   const btn = document.getElementById("btnCopiarFichasCheckout");
   navigator.clipboard.writeText(window.fichasCheckoutPendientes).then(() => {
-    let originalText = btn.innerHTML;
-    btn.innerHTML = `✅ ¡Copiado con éxito!`;
+    let originalText = btn ? btn.innerHTML : "";
+    if (btn) btn.innerHTML = `✅ ¡Copiado con éxito!`;
     triggerToast(`Cuentas copiadas.`);
     setTimeout(() => {
-      btn.innerHTML = originalText;
+      if (btn) btn.innerHTML = originalText;
     }, 2000);
   });
 }
@@ -1363,7 +1383,7 @@ async function rastrearCodigo() {
     const formData = new FormData();
     formData.append("correo", correo);
 
-    const resp = await fetch("https://api.cybernetsp.com/obtener_codigos.php", {
+    const resp = await fetch(API_CODIGOS_URL, {
       method: "POST",
       body: formData,
       mode: "cors",
@@ -1373,8 +1393,10 @@ async function rastrearCodigo() {
     const res = parseCleanJSON(text);
 
     changeCodeStep(5);
-    document.getElementById("codeResultBox").style.display = "none";
-    document.getElementById("linkResultBox").style.display = "none";
+    const boxCode = document.getElementById("codeResultBox");
+    const boxLink = document.getElementById("linkResultBox");
+    if (boxCode) boxCode.style.display = "none";
+    if (boxLink) boxLink.style.display = "none";
 
     if (
       res &&
@@ -1392,42 +1414,60 @@ async function rastrearCodigo() {
         match = res.data[0];
       }
 
-      document.getElementById("codeResultTitle").innerHTML =
-        `<span style="color:var(--ios-green); font-weight:800;">${match.plataforma || "SERVICIO"} - ${match.accion || "CÓDIGO"}</span>`;
-      document.getElementById("codeResultDesc").innerText =
-        `Correo: ${match.correo} (${match.hora || "Reciente"})`;
+      const titleEl = document.getElementById("codeResultTitle");
+      const descEl = document.getElementById("codeResultDesc");
+
+      if (titleEl) {
+        titleEl.innerHTML = `<span style="color:var(--ios-green); font-weight:800;">${match.plataforma || "SERVICIO"} - ${match.accion || "CÓDIGO"}</span>`;
+      }
+      if (descEl) {
+        descEl.innerText = `Correo: ${match.correo} (${match.hora || "Reciente"})`;
+      }
 
       const val = match.codigoLink || match.copiadoRapido || "";
       window.codigoB2BCapturado = val;
 
       if (val.startsWith("http://") || val.startsWith("https://")) {
-        document.getElementById("linkResultBox").style.display = "block";
-        document.getElementById("linkVal").href = val;
+        if (boxLink) boxLink.style.display = "block";
+        const linkVal = document.getElementById("linkVal");
+        if (linkVal) linkVal.href = val;
       } else {
-        document.getElementById("codeResultBox").style.display = "block";
-        document.getElementById("codeVal").innerText = val;
-        document.getElementById("codeTimer").innerText =
-          `Vigencia máxima: 16 minutos`;
+        if (boxCode) boxCode.style.display = "block";
+        const codeVal = document.getElementById("codeVal");
+        if (codeVal) codeVal.innerText = val;
+        const codeTimer = document.getElementById("codeTimer");
+        if (codeTimer) codeTimer.innerText = "Vigencia máxima: 16 minutos";
       }
     } else {
-      document.getElementById("codeResultTitle").innerHTML =
-        `<span style="color:var(--ios-orange); font-weight:800;">SIN RESULTADOS</span>`;
-      document.getElementById("codeResultDesc").innerText =
-        "No se detectaron solicitudes recientes para este buzón en los últimos 16 minutos.";
+      const titleEl = document.getElementById("codeResultTitle");
+      const descEl = document.getElementById("codeResultDesc");
+      if (titleEl) {
+        titleEl.innerHTML = `<span style="color:var(--ios-orange); font-weight:800;">SIN RESULTADOS</span>`;
+      }
+      if (descEl) {
+        descEl.innerText =
+          "No se detectaron solicitudes recientes para este buzón en los últimos 16 minutos.";
+      }
     }
   } catch (err) {
     console.error(err);
     changeCodeStep(5);
-    document.getElementById("codeResultTitle").innerHTML =
-      `<span style="color:var(--ios-red); font-weight:800;">ERROR DE RED</span>`;
-    document.getElementById("codeResultDesc").innerText =
-      "No se pudo establecer comunicación con el servidor central.";
+    const titleEl = document.getElementById("codeResultTitle");
+    const descEl = document.getElementById("codeResultDesc");
+    if (titleEl) {
+      titleEl.innerHTML = `<span style="color:var(--ios-red); font-weight:800;">ERROR DE RED</span>`;
+    }
+    if (descEl) {
+      descEl.innerText =
+        "No se pudo establecer comunicación con el servidor central.";
+    }
   }
 }
 
 function copiarCodigoResultanteB2B() {
   if (typeof haptic === "function") haptic();
   const codeElement = document.getElementById("codeVal");
+  if (!codeElement) return;
   const codigoText = codeElement.innerText.trim();
   if (!codigoText) return;
 
@@ -1501,6 +1541,7 @@ function cerrarSesionDistribuidor() {
 function bloquearScroll() {
   document.body.style.overflow = "hidden";
 }
+
 function desbloquearScroll() {
   document.body.style.overflow = "";
 }
@@ -1523,6 +1564,30 @@ function cerrarMenuMovil() {
     m.style.display = "none";
     m.classList.remove("open");
   }
+}
+
+// =========================================================================
+// 🌙 UNIFICACIÓN DE MODO CLARO / OSCURO
+// =========================================================================
+function toggleThemeDistri() {
+  if (typeof haptic === "function") haptic();
+  const currentTheme = document.documentElement.getAttribute("data-theme");
+  const newTheme = currentTheme === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", newTheme);
+  localStorage.setItem("cyber_theme", newTheme);
+  updateThemeIconDistri(newTheme);
+}
+
+function updateThemeIconDistri(theme) {
+  const btnDesktop = document.getElementById("theme-toggle");
+  const btnMobile = document.getElementById("theme-toggle-mobile");
+  const svgIcon =
+    theme === "light"
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+
+  if (btnDesktop) btnDesktop.innerHTML = svgIcon;
+  if (btnMobile) btnMobile.innerHTML = svgIcon;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
