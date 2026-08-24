@@ -766,9 +766,10 @@
 
     <!-- SCRIPT DE LÓGICA DE LOGIN Y CONEXIONES A MYSQL -->
     <script>
+      /* ⚡ DIRECCIONAMIENTO DIRECTO AL ENDPOINT DE LOGIN EXCLUSIVO */
       const API_PRIMARY_URL =
-        "https://api.cybernetsp.com/acciones_distribuidores.php";
-      const API_FALLBACK_URL = "acciones_distribuidores.php";
+        "https://api.cybernetsp.com/login_distribuidor.php";
+      const API_FALLBACK_URL = "login_distribuidor.php";
 
       const API_PRECIOS_PRIMARY = "https://api.cybernetsp.com/api_precios.php";
       const API_PRECIOS_FALLBACK = "api_precios.php";
@@ -789,7 +790,6 @@
         if (navigator.vibrate) navigator.vibrate(15);
       }
 
-      /* ⚡ UNIFICACIÓN TOTAL DE CLAVE DE TEMA ("cyber_theme") */
       function toggleTheme() {
         haptic();
         const currentTheme =
@@ -810,7 +810,6 @@
         }
       }
 
-      // ESCUCHADOR EN TIEMPO REAL PARA CAMBIOS EN OTRAS PESTAÑAS (SINCRONIZACIÓN AUTOMÁTICA)
       window.addEventListener("storage", (e) => {
         if (e.key === "cyber_theme" && e.newValue) {
           document.documentElement.setAttribute("data-theme", e.newValue);
@@ -818,7 +817,6 @@
         }
       });
 
-      // LIMPIADOR AUTOMÁTICO DE JSON QUE ELIMINA WARNINGS O HTML EXTRA DE PHP
       function parseCleanJSON(rawText) {
         if (!rawText) return null;
         try {
@@ -833,7 +831,6 @@
         }
       }
 
-      // FUNCIÓN DE PETICIÓN CON FALLBACK DE RUTA RELATIVA
       async function postRequestWithFallback(
         primaryUrl,
         fallbackUrl,
@@ -848,10 +845,7 @@
           if (!response.ok) throw new Error("HTTP error " + response.status);
           return await response.text();
         } catch (error) {
-          console.warn(
-            "Llamada primaria falló, probando ruta relativa local...",
-            error,
-          );
+          console.warn("Ruta principal no disponible, reintentando...", error);
           const fallbackResponse = await fetch(fallbackUrl, {
             method: "POST",
             body: formData,
@@ -880,7 +874,6 @@
         btn.innerText = "Verificando...";
 
         const formData = new FormData();
-        formData.append("accion", "login_distribuidor");
         formData.append("credencial", credencial);
         formData.append("password", password);
 
@@ -972,8 +965,8 @@
 
         try {
           const text = await postRequestWithFallback(
-            API_PRIMARY_URL,
-            API_FALLBACK_URL,
+            "https://api.cybernetsp.com/acciones_distribuidores.php",
+            "acciones_distribuidores.php",
             formData,
           );
 
@@ -1038,7 +1031,7 @@
         "DIRECTV-GO": "DirecTV Go",
       };
 
-      // 6. CARGAR TABLA COMPARATIVA DE PRECIOS CON HOMOLOGACIÓN DE CÓDIGOS
+      // 6. CARGAR TABLA COMPARATIVA DE PRECIOS
       async function cargarTablaComparativaPrecios() {
         const tbody = document.getElementById("tablaProfitBody");
         if (!tbody) return;
@@ -1082,7 +1075,6 @@
                 const p = parseFloat(i.precio) || 0;
                 mapaTienda[cod] = p;
 
-                // Homologación cruzada entre alias de la BD de la tienda y distribuidores
                 if (cod === "APPLE") mapaTienda["APPLE-TV"] = p;
                 if (cod === "APPLE-TV") mapaTienda["APPLE"] = p;
                 if (cod === "AMAZON") mapaTienda["AMAZON-PRIME-VIDEO"] = p;
@@ -1095,7 +1087,6 @@
               const codDistri = (item.codigo || "").toUpperCase().trim();
               const precioDistri = parseFloat(item.precio) || 0;
 
-              // Búsqueda del precio sugerido de la tienda o cálculo del 80% adicional en caso de no existir
               const precioSugerido =
                 mapaTienda[codDistri] || Math.round(precioDistri * 1.8);
               const ganancia = precioSugerido - precioDistri;
@@ -1130,7 +1121,6 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        // Carga unificada de tema desde la clave global "cyber_theme"
         const savedTheme = localStorage.getItem("cyber_theme") || "dark";
         document.documentElement.setAttribute("data-theme", savedTheme);
         updateThemeIcon(savedTheme);
