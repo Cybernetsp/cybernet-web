@@ -301,7 +301,7 @@
       .instruction {
         color: var(--text-secondary);
         font-size: 0.92rem;
-        margin-bottom: 24px;
+        margin-bottom: 14px;
         line-height: 1.45;
         font-weight: 500;
         display: flex;
@@ -309,6 +309,23 @@
         justify-content: center;
         gap: 6px;
         flex-wrap: wrap;
+      }
+
+      .notice-badge {
+        font-size: 0.8rem;
+        color: var(--ios-orange);
+        margin-bottom: 22px;
+        font-weight: 600;
+        line-height: 1.4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        background: rgba(255, 159, 10, 0.12);
+        padding: 10px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 159, 10, 0.25);
+        text-align: center;
       }
 
       #error-toast {
@@ -1069,7 +1086,7 @@
         }
         .instruction {
           font-size: 0.88rem;
-          margin-bottom: 22px;
+          margin-bottom: 12px;
         }
         #val-code {
           font-size: clamp(2.2rem, 10vw, 3.2rem) !important;
@@ -1167,6 +1184,16 @@
             ></path>
           </svg>
         </p>
+
+        <!-- ⏱️ AVISO INFORMATIVO DE ESPERA -->
+        <div class="notice-badge">
+          ⏱️
+          <span
+            ><b>Importante:</b> Solicita el código en tu pantalla y espera 1
+            minuto antes de buscarlo.</span
+          >
+        </div>
+
         <input
           type="tel"
           id="telefono"
