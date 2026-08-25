@@ -496,8 +496,10 @@ function lanzarErrorCopia(imgElement) {
 }
 
 /* ==========================================================================
-   📩 BANDEJA DE CÓDIGOS DE ACCESO (LECTURA ULTRA-RÁPIDA VÍA OBTENER_CODIGOS.PHP)
+   📩 BANDEJA DE CÓDIGOS DE ACCESO (FORZAR SINCRO APPS SCRIPT -> MYSQL)
    ========================================================================== */
+const URL_APPS_SCRIPT_CODIGOS =
+  "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 const URL_OBTENER_CODIGOS_MYSQL =
   "https://api.cybernetsp.com/obtener_codigos.php";
 
@@ -506,28 +508,55 @@ window.toggleCodesPanel = function () {
   if (oldToggleCodesPanel) oldToggleCodesPanel();
   const overlay = document.getElementById("codesOverlay");
   if (overlay && overlay.classList.contains("open")) {
-    window.cargarBandejaCodigosMySQL();
+    window.cargarBandejaCodigosMySQL(false); // Carga normal al abrir
   }
 };
 
-// 📥 CONSULTA INSTANTÁNEA A OBTENER_CODIGOS.PHP
-window.cargarBandejaCodigosMySQL = function () {
+// 📥 CONSULTA DE CÓDIGOS
+// forzarSincro = true -> Dispara sincronización manual en Apps Script antes de leer MySQL
+window.cargarBandejaCodigosMySQL = function (forzarSincro = false) {
   const contenedor = document.getElementById("codesScrollArea");
   if (!contenedor) return;
 
-  contenedor.innerHTML = `
-    <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
-      <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-      <br><span style="font-weight: 700; font-size: 0.9rem; color: #0a84ff;">Cargando códigos...</span>
-    </div>`;
+  if (forzarSincro) {
+    contenedor.innerHTML = `
+      <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
+        <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+        <br><span style="font-weight: 700; font-size: 0.9rem; color: #0a84ff;">Escaneando Gmail en vivo y sincronizando...</span>
+      </div>`;
 
-  fetch(URL_OBTENER_CODIGOS_MYSQL)
-    .then((res) => res.json())
-    .then((res) => renderizarCodigosBandeja(res, contenedor))
-    .catch((err) => {
-      console.error("Error consultando obtener_codigos.php:", err);
-      contenedor.innerHTML = `<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">❌ Error de conexión con el servidor de códigos.</div>`;
-    });
+    // 1️⃣ Llama a Apps Script para ejecutar sincronizarCodigosAMySQL() inmediatamente
+    fetch(`${URL_APPS_SCRIPT_CODIGOS}?action=sincronizarCodigos`, {
+      mode: "no-cors",
+    })
+      .then(() => {
+        // 2️⃣ Obtiene los códigos recién guardados en MySQL
+        return fetch(URL_OBTENER_CODIGOS_MYSQL);
+      })
+      .then((res) => res.json())
+      .then((res) => renderizarCodigosBandeja(res, contenedor))
+      .catch((err) => {
+        console.error("Error sincronizando en vivo:", err);
+        fetch(URL_OBTENER_CODIGOS_MYSQL)
+          .then((res) => res.json())
+          .then((res) => renderizarCodigosBandeja(res, contenedor));
+      });
+  } else {
+    // Lectura directa y rápida de MySQL
+    contenedor.innerHTML = `
+      <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
+        <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+        <br><span style="font-weight: 700; font-size: 0.9rem; color: #0a84ff;">Cargando códigos...</span>
+      </div>`;
+
+    fetch(URL_OBTENER_CODIGOS_MYSQL)
+      .then((res) => res.json())
+      .then((res) => renderizarCodigosBandeja(res, contenedor))
+      .catch((err) => {
+        console.error("Error consultando obtener_codigos.php:", err);
+        contenedor.innerHTML = `<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">❌ Error de conexión con el servidor de códigos.</div>`;
+      });
+  }
 };
 
 // 🎨 DIBUJAR TARJETAS DE CÓDIGOS
@@ -539,7 +568,6 @@ function renderizarCodigosBandeja(res, contenedor) {
       return;
     }
 
-    // 🔥 ORDENAMIENTO EN VIVO: Siempre del más reciente al más antiguo
     res.data.sort((a, b) => {
       function getMins(t) {
         if (!t) return 0;
@@ -574,7 +602,6 @@ function renderizarCodigosBandeja(res, contenedor) {
           .toLowerCase()
           .replace(/"/g, "&quot;");
 
-      // 🔑 VERIFICAR SI ES UNA ACCIÓN DE RESTABLECER CONTRASEÑA
       let esRestablecer =
         item.accion && item.accion.toLowerCase().includes("restablecer");
 
@@ -626,10 +653,10 @@ function renderizarCodigosBandeja(res, contenedor) {
   }
 }
 
-// 🔄 BOTÓN REFRESCAR
+// 🔄 BOTÓN REFRESCAR: Dispara la sincronización forzada en Apps Script
 window.refrescarCodigosModal = function () {
   if (typeof haptic === "function") haptic();
-  window.cargarBandejaCodigosMySQL();
+  window.cargarBandejaCodigosMySQL(true);
 };
 
 // 🔍 BUSCADOR EN VIVO
