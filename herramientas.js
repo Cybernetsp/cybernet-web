@@ -496,49 +496,48 @@ function lanzarErrorCopia(imgElement) {
 }
 
 /* ==========================================================================
-   📩 BANDEJA DE CÓDIGOS DE ACCESO (ESCANEO EN TIEMPO REAL + APPS SCRIPT & MYSQL)
+   📩 BANDEJA DE CÓDIGOS DE ACCESO (ESCANEO DIRECTO VÍA APPS SCRIPT JSONP)
    ========================================================================== */
 const URL_APPS_SCRIPT_CODIGOS =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
-const URL_OBTENER_CODIGOS_MYSQL =
-  "https://api.cybernetsp.com/obtener_codigos.php";
 
 const oldToggleCodesPanel = window.toggleCodesPanel;
 window.toggleCodesPanel = function () {
   if (oldToggleCodesPanel) oldToggleCodesPanel();
   const overlay = document.getElementById("codesOverlay");
   if (overlay && overlay.classList.contains("open")) {
-    window.cargarBandejaCodigosMySQL(true);
+    window.cargarBandejaCodigosDirecto();
   }
 };
 
-// 📥 CONSULTA DE CÓDIGOS CON DISPARADOR AUTOMÁTICO EN SEGUNDO PLANO VÍA APPS SCRIPT
-window.cargarBandejaCodigosMySQL = function (forzarSincro = true) {
+// 📥 CONSULTA Y ESCANEO DIRECTO A GOOGLE APPS SCRIPT (action=obtenerCodigos VIA JSONP)
+window.cargarBandejaCodigosDirecto = function () {
   const contenedor = document.getElementById("codesScrollArea");
   if (!contenedor) return;
 
   contenedor.innerHTML = `
     <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
       <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-      <br><span style="font-weight: 700; font-size: 0.9rem; color: #0a84ff;">Escaneando y sincronizando códigos...</span>
+      <br><span style="font-weight: 700; font-size: 0.9rem; color: #0a84ff;">Escaneando Gmail en vivo...</span>
     </div>`;
 
-  // 1️⃣ Dispara la sincronización en Google Apps Script (segundo plano)
-  fetch(`${URL_APPS_SCRIPT_CODIGOS}?action=sincronizarCodigos`, {
-    mode: "no-cors",
-  })
-    .then(() => {
-      // 2️⃣ Carga inmediata desde MySQL
-      return fetch(URL_OBTENER_CODIGOS_MYSQL);
-    })
-    .then((res) => res.json())
-    .then((res) => renderizarCodigosBandeja(res, contenedor))
-    .catch((err) => {
-      console.error("Error sincronizando en vivo:", err);
-      fetch(URL_OBTENER_CODIGOS_MYSQL)
-        .then((res) => res.json())
-        .then((res) => renderizarCodigosBandeja(res, contenedor));
-    });
+  // Callback global para recibir la respuesta JSONP de Apps Script
+  window.callbackCodigosDirectoAppsScript = function (res) {
+    renderizarCodigosBandeja(res, contenedor);
+  };
+
+  // Eliminar script anterior si existía para evitar colisiones
+  const oldScript = document.getElementById("jsonp-obtener-codigos-script");
+  if (oldScript) oldScript.remove();
+
+  // Crear tag script dinámico JSONP
+  const script = document.createElement("script");
+  script.id = "jsonp-obtener-codigos-script";
+  script.src = `${URL_APPS_SCRIPT_CODIGOS}?action=obtenerCodigos&callback=callbackCodigosDirectoAppsScript&_=${Date.now()}`;
+  script.onerror = function () {
+    contenedor.innerHTML = `<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">❌ Error de conexión con Google Apps Script.</div>`;
+  };
+  document.body.appendChild(script);
 };
 
 // 🎨 DIBUJAR TARJETAS DE CÓDIGOS
@@ -550,8 +549,12 @@ function renderizarCodigosBandeja(res, contenedor) {
       return;
     }
 
-    // 🔥 ORDENAMIENTO EN VIVO: Siempre del más reciente (más nuevo) al más antiguo
+    // 🔥 ORDENAMIENTO EN VIVO: Siempre del más reciente al más antiguo
     res.data.sort((a, b) => {
+      let tA = a.fechaOriginal || 0;
+      let tB = b.fechaOriginal || 0;
+      if (tA && tB) return tB - tA;
+
       function getMins(t) {
         if (!t) return 0;
         let p = t.trim().split(" ");
@@ -567,11 +570,10 @@ function renderizarCodigosBandeja(res, contenedor) {
       let minA = getMins(a.hora);
       let minB = getMins(b.hora);
 
-      // Margen de seguridad si las horas cruzan la medianoche
       if (minA - minB > 720) minB += 1440;
       else if (minB - minA > 720) minA += 1440;
 
-      return minB - minA; // Desendente: Muestra el mayor (más reciente) primero
+      return minB - minA;
     });
 
     let html = "";
@@ -581,7 +583,6 @@ function renderizarCodigosBandeja(res, contenedor) {
         "%27",
       );
 
-      // 🔍 DATA-SEARCH: Guarda los datos ocultos para que el buscador los encuentre
       let searchData =
         `${item.correo} ${item.plataforma} ${item.accion} ${item.codigoLink}`
           .toLowerCase()
@@ -625,7 +626,7 @@ function renderizarCodigosBandeja(res, contenedor) {
 // 🔄 FUNCIÓN PARA EL BOTÓN REFRESCAR EN EL HTML
 window.refrescarCodigosModal = function () {
   if (typeof haptic === "function") haptic();
-  window.cargarBandejaCodigosMySQL(true);
+  window.cargarBandejaCodigosDirecto();
 };
 
 // 🔍 BUSCADOR EN VIVO DE CÓDIGOS REPARADO
@@ -635,7 +636,6 @@ window.filtrarCodigosInternos = function () {
   const cards = document.querySelectorAll("#codesScrollArea .card-ios");
 
   cards.forEach((card) => {
-    // 💡 Busca en los datos invisibles (correo, enlace, etc.) o en el texto visible
     const contenido =
       card.getAttribute("data-search") || card.innerText.toLowerCase();
     card.style.display = contenido.includes(query) ? "flex" : "none";
