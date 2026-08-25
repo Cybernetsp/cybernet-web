@@ -496,7 +496,7 @@ function lanzarErrorCopia(imgElement) {
 }
 
 /* ==========================================================================
-   📩 BANDEJA DE CÓDIGOS DE ACCESO (FORZAR SINCRO APPS SCRIPT -> MYSQL)
+   📩 BANDEJA DE CÓDIGOS DE ACCESO (SINCRO SILENCIOSA Y ORDEN CRONOLÓGICO)
    ========================================================================== */
 const URL_APPS_SCRIPT_CODIGOS =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
@@ -508,58 +508,48 @@ window.toggleCodesPanel = function () {
   if (oldToggleCodesPanel) oldToggleCodesPanel();
   const overlay = document.getElementById("codesOverlay");
   if (overlay && overlay.classList.contains("open")) {
-    window.cargarBandejaCodigosMySQL(false); // Carga normal al abrir
+    window.cargarBandejaCodigosMySQL();
   }
 };
 
-// 📥 CONSULTA DE CÓDIGOS
-// forzarSincro = true -> Dispara sincronización manual en Apps Script antes de leer MySQL
-window.cargarBandejaCodigosMySQL = function (forzarSincro = false) {
+// 📥 CONSULTA Y SINCRONIZACIÓN DE CÓDIGOS SILENCIOSA EN SEGUNDO PLANO
+window.cargarBandejaCodigosMySQL = function () {
   const contenedor = document.getElementById("codesScrollArea");
   if (!contenedor) return;
 
-  if (forzarSincro) {
-    contenedor.innerHTML = `
-      <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
-        <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-        <br><span style="font-weight: 700; font-size: 0.9rem; color: #0a84ff;">Escaneando Gmail en vivo y sincronizando...</span>
-      </div>`;
+  const tieneTarjetas = contenedor.querySelectorAll(".card-ios").length > 0;
 
-    // 1️⃣ Llama a Apps Script para ejecutar sincronizarCodigosAMySQL() inmediatamente
-    fetch(`${URL_APPS_SCRIPT_CODIGOS}?action=sincronizarCodigos`, {
-      mode: "no-cors",
-    })
-      .then(() => {
-        // 2️⃣ Obtiene los códigos recién guardados en MySQL
-        return fetch(URL_OBTENER_CODIGOS_MYSQL);
-      })
-      .then((res) => res.json())
-      .then((res) => renderizarCodigosBandeja(res, contenedor))
-      .catch((err) => {
-        console.error("Error sincronizando en vivo:", err);
-        fetch(URL_OBTENER_CODIGOS_MYSQL)
-          .then((res) => res.json())
-          .then((res) => renderizarCodigosBandeja(res, contenedor));
-      });
-  } else {
-    // Lectura directa y rápida de MySQL
+  // 1. Mostrar pantalla de carga ÚNICAMENTE si la ventana está completamente vacía
+  if (!tieneTarjetas) {
     contenedor.innerHTML = `
       <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
         <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
         <br><span style="font-weight: 700; font-size: 0.9rem; color: #0a84ff;">Cargando códigos...</span>
       </div>`;
-
-    fetch(URL_OBTENER_CODIGOS_MYSQL)
-      .then((res) => res.json())
-      .then((res) => renderizarCodigosBandeja(res, contenedor))
-      .catch((err) => {
-        console.error("Error consultando obtener_codigos.php:", err);
-        contenedor.innerHTML = `<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">❌ Error de conexión con el servidor de códigos.</div>`;
-      });
   }
+
+  // 2. Consulta rápida e inmediata a MySQL para mostrar lo que ya existe guardado
+  fetch(URL_OBTENER_CODIGOS_MYSQL)
+    .then((res) => res.json())
+    .then((res) => renderizarCodigosBandeja(res, contenedor))
+    .catch((err) => console.error("Error consultando MySQL inicial:", err));
+
+  // 3. Dispara la sincronización en vivo en Apps Script silenciosamente en segundo plano
+  fetch(`${URL_APPS_SCRIPT_CODIGOS}?action=sincronizarCodigos`, {
+    mode: "no-cors",
+  })
+    .then(() => {
+      // 4. Una vez procesado Apps Script, actualiza la lista con cualquier nuevo código
+      return fetch(URL_OBTENER_CODIGOS_MYSQL);
+    })
+    .then((res) => res.json())
+    .then((res) => renderizarCodigosBandeja(res, contenedor))
+    .catch((err) =>
+      console.error("Error en sincronización silenciosa Apps Script:", err),
+    );
 };
 
-// 🎨 DIBUJAR TARJETAS DE CÓDIGOS
+// 🎨 DIBUJAR TARJETAS DE CÓDIGOS (ORDENADO CRONOLÓGICAMENTE)
 function renderizarCodigosBandeja(res, contenedor) {
   if (res && res.status === "success" && res.data) {
     if (res.data.length === 0) {
@@ -568,7 +558,15 @@ function renderizarCodigosBandeja(res, contenedor) {
       return;
     }
 
+    // 🔥 ORDENAMIENTO EN VIVO: Del más reciente (arriba) al más antiguo (abajo)
     res.data.sort((a, b) => {
+      if (a.id && b.id) {
+        return parseInt(b.id, 10) - parseInt(a.id, 10);
+      }
+      if (a.fecha_registro && b.fecha_registro) {
+        return new Date(b.fecha_registro) - new Date(a.fecha_registro);
+      }
+
       function getMins(t) {
         if (!t) return 0;
         let p = t.trim().split(" ");
@@ -605,7 +603,7 @@ function renderizarCodigosBandeja(res, contenedor) {
       let esRestablecer =
         item.accion && item.accion.toLowerCase().includes("restablecer");
 
-      // ✂️ CORTE DE ENLACE: Si es una URL, muestra solo los primeros 22 caracteres + '...'
+      // ✂️ CORTE DE ENLACE: Muestra solo los primeros 22 caracteres + '...' para mantener la tarjeta compacta
       let esEnlaceUrl =
         item.codigoLink &&
         (item.codigoLink.startsWith("http://") ||
@@ -663,10 +661,10 @@ function renderizarCodigosBandeja(res, contenedor) {
   }
 }
 
-// 🔄 BOTÓN REFRESCAR: Dispara la sincronización forzada en Apps Script
+// 🔄 BOTÓN REFRESCAR: Dispara la actualización silenciosa
 window.refrescarCodigosModal = function () {
   if (typeof haptic === "function") haptic();
-  window.cargarBandejaCodigosMySQL(true);
+  window.cargarBandejaCodigosMySQL();
 };
 
 // 🔍 BUSCADOR EN VIVO
