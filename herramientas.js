@@ -574,6 +574,25 @@ function renderizarCodigosBandeja(res, contenedor) {
           .toLowerCase()
           .replace(/"/g, "&quot;");
 
+      // 🔑 VERIFICAR SI ES UNA ACCIÓN DE RESTABLECER CONTRASEÑA
+      let esRestablecer =
+        item.accion && item.accion.toLowerCase().includes("restablecer");
+
+      let botonHtml = "";
+      if (esRestablecer) {
+        botonHtml = `
+          <button class="btn-ios w-100" onclick="window.open('${item.codigoLink}', '_blank')" style="padding: 12px; background: rgba(229, 9, 20, 0.2); font-weight: 800; font-size: 0.85rem; border-radius: 12px; cursor: pointer; color: #ffffff; border: 1px solid rgba(229, 9, 20, 0.5); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> RESTABLECER CONTRASEÑA
+          </button>
+        `;
+      } else {
+        botonHtml = `
+          <button class="btn-ios w-100" onclick="window.copiarPlantillaGlobal(this, '${safeCopiedText}')" style="padding: 12px; background: rgba(255,255,255,0.05); font-weight: 800; font-size: 0.85rem; border-radius: 12px; cursor: pointer; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> COPIAR MENSAJE
+          </button>
+        `;
+      }
+
       html += `
         <div class="card-ios" data-search="${searchData}" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 16px; margin-bottom: 0px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -594,12 +613,10 @@ function renderizarCodigosBandeja(res, contenedor) {
             </div>
             <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
               <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600;">CÓDIGO:</span>
-              <span style="font-size: 1.15rem; color: ${item.colorText}; font-weight: 800; font-family: monospace; background: rgba(255, 255, 255, 0.03); padding: 4px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); letter-spacing: 1px;">${item.codigoLink}</span>
+              <span style="font-size: 1.15rem; color: ${item.colorText}; font-weight: 800; font-family: monospace; background: rgba(255, 255, 255, 0.03); padding: 4px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); letter-spacing: 1px; word-break: break-all;">${item.codigoLink}</span>
             </div>
           </div>
-          <button class="btn-ios w-100" onclick="window.copiarPlantillaGlobal(this, '${safeCopiedText}')" style="padding: 12px; background: rgba(255,255,255,0.05); font-weight: 800; font-size: 0.85rem; border-radius: 12px; cursor: pointer; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> COPIAR MENSAJE
-          </button>
+          ${botonHtml}
         </div>
       `;
     });
