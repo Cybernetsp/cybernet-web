@@ -496,10 +496,10 @@ function lanzarErrorCopia(imgElement) {
 }
 
 /* ==========================================================================
-   📩 BANDEJA DE CÓDIGOS DE ACCESO (ESCANEO EN TIEMPO REAL + MYSQL)
+   📩 BANDEJA DE CÓDIGOS DE ACCESO (ESCANEO EN TIEMPO REAL + APPS SCRIPT & MYSQL)
    ========================================================================== */
-const URL_SYNC_CODIGOS_GMAIL =
-  "https://api.cybernetsp.com/sync_gmail_codigos.php";
+const URL_APPS_SCRIPT_CODIGOS =
+  "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 const URL_OBTENER_CODIGOS_MYSQL =
   "https://api.cybernetsp.com/obtener_codigos.php";
 
@@ -508,51 +508,37 @@ window.toggleCodesPanel = function () {
   if (oldToggleCodesPanel) oldToggleCodesPanel();
   const overlay = document.getElementById("codesOverlay");
   if (overlay && overlay.classList.contains("open")) {
-    window.cargarBandejaCodigosMySQL(false);
+    window.cargarBandejaCodigosMySQL(true);
   }
 };
 
-// 📥 CONSULTA DE CÓDIGOS (SI forzarSincro = TRUE, EJECUTA ESCANEO DE GMAIL EN VIVO)
-window.cargarBandejaCodigosMySQL = function (forzarSincro = false) {
+// 📥 CONSULTA DE CÓDIGOS CON DISPARADOR AUTOMÁTICO EN SEGUNDO PLANO VÍA APPS SCRIPT
+window.cargarBandejaCodigosMySQL = function (forzarSincro = true) {
   const contenedor = document.getElementById("codesScrollArea");
   if (!contenedor) return;
 
-  if (forzarSincro) {
-    contenedor.innerHTML = `
-      <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
-        <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-        <br><span style="font-weight: 700; font-size: 0.9rem; color: #0a84ff;">Escaneando Gmail en vivo...</span>
-      </div>`;
+  contenedor.innerHTML = `
+    <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
+      <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+      <br><span style="font-weight: 700; font-size: 0.9rem; color: #0a84ff;">Escaneando y sincronizando códigos...</span>
+    </div>`;
 
-    // 1️⃣ Fuerza la sincronización rápida desde Gmail a MySQL
-    fetch(URL_SYNC_CODIGOS_GMAIL)
-      .then((res) => res.json())
-      .then(() => {
-        // 2️⃣ Lee de inmediato los códigos guardados en MySQL
-        return fetch(URL_OBTENER_CODIGOS_MYSQL);
-      })
-      .then((res) => res.json())
-      .then((res) => renderizarCodigosBandeja(res, contenedor))
-      .catch((err) => {
-        console.error("Error al sincronizar en vivo:", err);
-        fetch(URL_OBTENER_CODIGOS_MYSQL)
-          .then((res) => res.json())
-          .then((res) => renderizarCodigosBandeja(res, contenedor));
-      });
-  } else {
-    contenedor.innerHTML = `
-      <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
-        <svg class="spin-anim" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:12px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-        <br><span style="font-weight: 600;">Sincronizando códigos...</span>
-      </div>`;
-
-    fetch(URL_OBTENER_CODIGOS_MYSQL)
-      .then((res) => res.json())
-      .then((res) => renderizarCodigosBandeja(res, contenedor))
-      .catch((err) => {
-        contenedor.innerHTML = `<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">❌ Error de conexión con el servidor MySQL.</div>`;
-      });
-  }
+  // 1️⃣ Dispara la sincronización en Google Apps Script (segundo plano)
+  fetch(`${URL_APPS_SCRIPT_CODIGOS}?action=sincronizarCodigos`, {
+    mode: "no-cors",
+  })
+    .then(() => {
+      // 2️⃣ Carga inmediata desde MySQL
+      return fetch(URL_OBTENER_CODIGOS_MYSQL);
+    })
+    .then((res) => res.json())
+    .then((res) => renderizarCodigosBandeja(res, contenedor))
+    .catch((err) => {
+      console.error("Error sincronizando en vivo:", err);
+      fetch(URL_OBTENER_CODIGOS_MYSQL)
+        .then((res) => res.json())
+        .then((res) => renderizarCodigosBandeja(res, contenedor));
+    });
 };
 
 // 🎨 DIBUJAR TARJETAS DE CÓDIGOS
