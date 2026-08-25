@@ -363,7 +363,7 @@
         </div>
       </div>
 
-      <!-- MENÚ CELULARES DESPLEGABLE CON VECTORES SVG -->
+      <!-- MENÚ CELULARES DESPLEGABLE -->
       <div
         class="overlay-modal-code"
         id="modalMenuMovil"
@@ -1329,7 +1329,7 @@
 
     <!-- CENTRO CÓDIGOS B2B -->
     <div class="overlay-modal-code" id="codesCenterOverlay">
-      <div class="modal-ios" style="max-width: 400px; width: 92%">
+      <div class="modal-ios" style="max-width: 420px; width: 92%">
         <div
           style="
             display: flex;
@@ -1337,7 +1337,7 @@
             align-items: center;
             border-bottom: 1px solid var(--surface-border);
             padding-bottom: 12px;
-            margin-bottom: 8px;
+            margin-bottom: 16px;
           "
         >
           <h3
@@ -1348,6 +1348,7 @@
               display: flex;
               align-items: center;
               gap: 8px;
+              color: var(--text-primary);
             "
           >
             <svg
@@ -1382,10 +1383,40 @@
           </button>
         </div>
 
-        <div id="codeStep1" class="code-step">
+        <!-- PASO 1: SELECCIONAR PLATAFORMA -->
+        <div
+          id="codeStep1"
+          class="code-step"
+          style="display: flex; flex-direction: column; gap: 12px; width: 100%"
+        >
+          <p
+            style="
+              color: var(--text-secondary);
+              font-size: 0.9rem;
+              font-weight: 600;
+              text-align: center;
+              margin-bottom: 4px;
+            "
+          >
+            ¿Qué plataforma deseas gestionar hoy?
+          </p>
           <button
             class="btn-ios w-100"
-            style="background: #e50914; color: white"
+            style="
+              background: #e50914;
+              color: white;
+              padding: 14px;
+              border-radius: 14px;
+              font-weight: 800;
+              font-size: 0.95rem;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              border: none;
+              box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+            "
             onclick="setCodigoPlat('NETFLIX')"
           >
             <svg
@@ -1406,7 +1437,21 @@
           </button>
           <button
             class="btn-ios w-100"
-            style="background: #007aff; color: white"
+            style="
+              background: #007aff;
+              color: white;
+              padding: 14px;
+              border-radius: 14px;
+              font-weight: 800;
+              font-size: 0.95rem;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              border: none;
+              box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+            "
             onclick="setCodigoPlat('DISNEY')"
           >
             <svg
@@ -1427,8 +1472,37 @@
           </button>
         </div>
 
-        <div id="codeStep2" class="code-step">
-          <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(1)">
+        <!-- PASO 2: SOLICITUD DE NETFLIX -->
+        <div
+          id="codeStep2"
+          class="code-step"
+          style="display: none; flex-direction: column; gap: 10px; width: 100%"
+        >
+          <p
+            style="
+              color: var(--text-secondary);
+              font-size: 0.9rem;
+              font-weight: 600;
+              text-align: center;
+              margin-bottom: 4px;
+            "
+          >
+            Selecciona el tipo de solicitud
+          </p>
+          <button
+            class="btn-ios btn-secondary w-100"
+            style="
+              padding: 12px;
+              border-radius: 12px;
+              font-weight: 700;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+            "
+            onclick="setCodigoOp(1)"
+          >
             <svg
               width="18"
               height="18"
@@ -1444,7 +1518,20 @@
             </svg>
             Código de Inicio Sesión
           </button>
-          <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(2)">
+          <button
+            class="btn-ios btn-secondary w-100"
+            style="
+              padding: 12px;
+              border-radius: 12px;
+              font-weight: 700;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+            "
+            onclick="setCodigoOp(2)"
+          >
             <svg
               width="18"
               height="18"
@@ -1461,7 +1548,20 @@
             </svg>
             Código 'Estoy de Viaje'
           </button>
-          <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(3)">
+          <button
+            class="btn-ios btn-secondary w-100"
+            style="
+              padding: 12px;
+              border-radius: 12px;
+              font-weight: 700;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+            "
+            onclick="setCodigoOp(3)"
+          >
             <svg
               width="18"
               height="18"
@@ -1481,15 +1581,33 @@
             </svg>
             Enlace de Actualización
           </button>
+          <span
+            onclick="changeCodeStep(1)"
+            style="
+              color: var(--ios-blue);
+              font-size: 0.88rem;
+              font-weight: 700;
+              cursor: pointer;
+              margin-top: 8px;
+              text-align: center;
+              display: block;
+            "
+            >← Volver al inicio</span
+          >
         </div>
 
-        <div id="codeStep3" class="code-step" style="gap: 14px">
+        <!-- PASO 3: INGRESAR CORREO -->
+        <div
+          id="codeStep3"
+          class="code-step"
+          style="display: none; flex-direction: column; gap: 14px; width: 100%"
+        >
           <div style="text-align: left; width: 100%">
             <label
               style="
-                font-size: 0.75rem;
+                font-size: 0.78rem;
                 color: var(--text-secondary);
-                margin-bottom: 4px;
+                margin-bottom: 6px;
                 display: block;
                 font-weight: 700;
                 text-transform: uppercase;
@@ -1506,6 +1624,7 @@
                 width: 100%;
                 box-sizing: border-box;
                 font-size: 16px !important;
+                text-align: center;
               "
               spellcheck="false"
             />
@@ -1513,16 +1632,43 @@
           <button
             id="btnRastrearCodigo"
             class="btn-ios btn-success w-100"
+            style="
+              padding: 14px;
+              border-radius: 14px;
+              font-weight: 800;
+              font-size: 0.95rem;
+            "
             onclick="rastrearCodigo()"
           >
             Rastrear en la Nube →
           </button>
+          <span
+            onclick="changeCodeStep(1)"
+            style="
+              color: var(--ios-blue);
+              font-size: 0.88rem;
+              font-weight: 700;
+              cursor: pointer;
+              text-align: center;
+              display: block;
+            "
+            >← Volver al inicio</span
+          >
         </div>
 
+        <!-- PASO 4: CARGANDO -->
         <div
           id="codeStep4"
           class="code-step"
-          style="padding: 16px 0; align-items: center !important"
+          style="
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 24px 0;
+            width: 100%;
+          "
         >
           <svg
             class="spin-anim"
@@ -1540,25 +1686,46 @@
             style="
               margin: 0;
               font-weight: 700;
-              font-size: 1rem;
+              font-size: 0.95rem;
               color: var(--text-primary);
+              text-align: center;
             "
           >
-            Interceptando códigos...
+            Interceptando códigos...<br />
+            <span
+              style="
+                font-size: 0.8rem;
+                color: var(--text-secondary);
+                font-weight: 500;
+              "
+              >Sincronizando con Gmail en vivo...</span
+            >
           </p>
         </div>
 
-        <div id="codeStep5" class="code-step">
+        <!-- PASO 5: RESULTADO -->
+        <div
+          id="codeStep5"
+          class="code-step"
+          style="display: none; flex-direction: column; gap: 14px; width: 100%"
+        >
           <h3
             id="codeResultTitle"
-            style="margin: 0; font-weight: 800; font-size: 1.2rem"
+            style="
+              margin: 0;
+              font-weight: 800;
+              font-size: 1.15rem;
+              text-align: center;
+            "
           ></h3>
           <p
             id="codeResultDesc"
             style="
-              font-size: 0.9rem;
+              margin: 0;
+              font-size: 0.88rem;
               color: var(--text-secondary);
-              margin-bottom: 4px;
+              font-weight: 600;
+              text-align: center;
             "
           ></p>
 
@@ -1573,13 +1740,14 @@
               cursor: pointer;
               user-select: none;
               width: 100%;
+              text-align: center;
             "
             onclick="copiarCodigoResultanteB2B()"
           >
             <div
               id="codeVal"
               style="
-                font-size: 3rem;
+                font-size: 2.8rem;
                 font-weight: 900;
                 letter-spacing: 4px;
                 color: var(--text-primary);
@@ -1614,15 +1782,15 @@
                   d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.9-2.2L2.3 15.7a1.2 1.2 0 0 1 0-1.7l.8-.8a1.2 1.2 0 0 1 1.7 0l2.7 2.7V6"
                 ></path>
               </svg>
-              Toca el recuadro para copiar el código
+              Toca para copiar código
             </div>
             <div
               id="codeTimer"
               style="
                 color: var(--ios-red);
-                font-size: 0.85rem;
+                font-size: 0.82rem;
                 font-weight: bold;
-                margin-top: 12px;
+                margin-top: 10px;
               "
             ></div>
           </div>
@@ -1634,7 +1802,15 @@
               target="_blank"
               style="text-decoration: none; width: 100%"
             >
-              <button class="btn-ios btn-success w-100">
+              <button
+                class="btn-ios btn-success w-100"
+                style="
+                  padding: 14px;
+                  border-radius: 14px;
+                  font-weight: 800;
+                  font-size: 0.95rem;
+                "
+              >
                 Abrir Enlace Oficial
               </button>
             </a>
@@ -1642,11 +1818,28 @@
 
           <button
             class="btn-ios btn-secondary w-100"
-            style="margin-top: 6px"
-            onclick="changeCodeStep(1)"
+            style="
+              margin-top: 6px;
+              padding: 12px;
+              border-radius: 12px;
+              font-weight: 700;
+            "
+            onclick="rastrearCodigo()"
           >
-            Nueva Consulta
+            Reintentar Búsqueda
           </button>
+          <span
+            onclick="changeCodeStep(1)"
+            style="
+              color: var(--ios-blue);
+              font-size: 0.88rem;
+              font-weight: 700;
+              cursor: pointer;
+              text-align: center;
+              display: block;
+            "
+            >Nueva Consulta</span
+          >
         </div>
       </div>
     </div>
