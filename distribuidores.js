@@ -1467,80 +1467,103 @@ function asegurarEstructuraCentroCodigos() {
   if (!overlay) return;
 
   let modalInner =
+    overlay.querySelector(".modal-ios") ||
     overlay.querySelector(".modal-content") ||
     overlay.querySelector(".codes-modal-content") ||
     overlay.querySelector(".card-ios");
 
   if (!modalInner) {
-    overlay.innerHTML = `<div class="modal-content" style="background: var(--modal-bg); backdrop-filter: blur(40px); border: var(--glass-border); padding: 24px 18px; border-radius: 28px 28px 0 0; width: 100%; max-width: 480px; margin: auto; display: flex; flex-direction: column; align-items: center; position: relative;"></div>`;
-    modalInner = overlay.querySelector(".modal-content");
+    overlay.innerHTML = `<div class="modal-ios" style="max-width: 420px; width: 92%;"></div>`;
+    modalInner = overlay.querySelector(".modal-ios");
   }
 
   if (!modalInner.querySelector("#codeStep1")) {
     modalInner.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);">
-        <h3 style="margin:0; font-weight:800; color:var(--text-primary); font-size:1.15rem; display:flex; align-items:center; gap:8px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--surface-border, rgba(255,255,255,0.1));">
+        <h3 style="margin:0; font-weight:800; color:var(--text-primary, #fff); font-size:1.15rem; display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue, #0a84ff)" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
           Centro de Códigos
         </h3>
-        <button onclick="cerrarCentroCodigos()" style="background:rgba(255,255,255,0.1); border:none; color:var(--text-primary); width:30px; height:30px; border-radius:50%; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+        <button class="btn-close-circle" onclick="cerrarCentroCodigos()" style="background:rgba(255,255,255,0.1); border:none; color:var(--text-primary, #fff); width:30px; height:30px; border-radius:50%; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
       </div>
 
       <!-- PASO 1: SELECCIONAR PLATAFORMA -->
       <div id="codeStep1" class="code-step" style="display:flex; flex-direction:column; gap:12px; width:100%;">
-        <p style="color:var(--text-secondary); font-size:0.9rem; font-weight:600; margin-bottom:6px;">¿Qué plataforma deseas gestionar hoy?</p>
+        <p style="color:var(--text-secondary, rgba(255,255,255,0.7)); font-size:0.9rem; font-weight:600; text-align:center; margin-bottom:4px;">¿Qué plataforma deseas gestionar hoy?</p>
         <button class="btn-ios w-100" onclick="setCodigoPlat('NETFLIX')" style="padding:14px; background:#e50914; color:white; border:none; border-radius:14px; font-weight:800; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 15px rgba(229,9,20,0.3);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
-          Netflix
+          Netflix Original
         </button>
-        <button class="btn-ios w-100" onclick="setCodigoPlat('DISNEY')" style="padding:14px; background:rgba(255,255,255,0.08); color:var(--ios-blue); border:1px solid rgba(10,132,255,0.3); border-radius:14px; font-weight:800; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
-          Disney Premium
+        <button class="btn-ios w-100" onclick="setCodigoPlat('DISNEY')" style="padding:14px; background:#007aff; color:white; border:none; border-radius:14px; font-weight:800; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 15px rgba(0,122,255,0.3);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          Disney+ Premium
         </button>
       </div>
 
       <!-- PASO 2: SOLICITUD DE NETFLIX -->
       <div id="codeStep2" class="code-step" style="display:none; flex-direction:column; gap:10px; width:100%;">
-        <p style="color:var(--text-secondary); font-size:0.9rem; font-weight:600; margin-bottom:6px;">Selecciona el tipo de solicitud</p>
-        <button class="btn-ios w-100" onclick="setCodigoOp(1)" style="padding:12px; background:rgba(255,255,255,0.06); color:var(--text-primary); border:var(--surface-border); border-radius:12px; font-weight:700; cursor:pointer;">Código de Inicio Sesión</button>
-        <button class="btn-ios w-100" onclick="setCodigoOp(2)" style="padding:12px; background:rgba(255,255,255,0.06); color:var(--text-primary); border:var(--surface-border); border-radius:12px; font-weight:700; cursor:pointer;">Código 'Estoy de Viaje'</button>
-        <button class="btn-ios w-100" onclick="setCodigoOp(3)" style="padding:12px; background:rgba(255,255,255,0.06); color:var(--text-primary); border:var(--surface-border); border-radius:12px; font-weight:700; cursor:pointer;">Enlace de Inicio</button>
-        <span onclick="changeCodeStep(1)" style="color:var(--ios-blue); font-size:0.85rem; font-weight:700; cursor:pointer; margin-top:8px;">← Volver</span>
+        <p style="color:var(--text-secondary, rgba(255,255,255,0.7)); font-size:0.9rem; font-weight:600; text-align:center; margin-bottom:4px;">Selecciona el tipo de solicitud</p>
+        <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(1)" style="padding:12px; border-radius:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">Código de Inicio Sesión</button>
+        <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(2)" style="padding:12px; border-radius:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">Código 'Estoy de Viaje'</button>
+        <button class="btn-ios btn-secondary w-100" onclick="setCodigoOp(3)" style="padding:12px; border-radius:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">Enlace de Actualización</button>
+        <span onclick="changeCodeStep(1)" style="color:var(--ios-blue, #0a84ff); font-size:0.88rem; font-weight:700; cursor:pointer; margin-top:8px; text-align:center; display:block;">← Volver al inicio</span>
       </div>
 
       <!-- PASO 3: INGRESAR CORREO -->
-      <div id="codeStep3" class="code-step" style="display:none; flex-direction:column; gap:12px; width:100%;">
-        <p style="color:var(--text-secondary); font-size:0.9rem; font-weight:600;">Ingresa el correo de la cuenta</p>
-        <input type="email" id="inputCorreoCodigo" placeholder="ejemplo@cybernetsp.com" style="width:100%; height:48px; padding:0 14px; border-radius:12px; border:var(--input-border); background:var(--input-bg); color:var(--text-primary); font-size:0.95rem; text-align:center; outline:none;" />
-        <button class="btn-ios w-100" onclick="rastrearCodigo()" style="padding:14px; background:var(--ios-red); color:white; border:none; border-radius:14px; font-weight:800; font-size:0.95rem; cursor:pointer;">Rastrear Código</button>
-        <span onclick="changeCodeStep(1)" style="color:var(--ios-blue); font-size:0.85rem; font-weight:700; cursor:pointer; margin-top:4px;">← Volver</span>
+      <div id="codeStep3" class="code-step" style="display:none; flex-direction:column; gap:14px; width:100%;">
+        <div style="text-align: left; width: 100%">
+          <label style="font-size:0.78rem; color:var(--text-secondary, rgba(255,255,255,0.7)); margin-bottom:6px; display:block; font-weight:700; text-transform:uppercase;">
+            Correo electrónico de la cuenta
+          </label>
+          <input type="email" id="inputCorreoCodigo" class="input-ios" placeholder="ejemplo@cybernetsp.com o outlook" style="width:100%; box-sizing:border-box; font-size:16px !important; text-align:center;" spellcheck="false" />
+        </div>
+        <button id="btnRastrearCodigo" class="btn-ios btn-success w-100" style="padding:14px; border-radius:14px; font-weight:800; font-size:0.95rem;" onclick="rastrearCodigo()">
+          Rastrear en la Nube →
+        </button>
+        <span onclick="changeCodeStep(1)" style="color:var(--ios-blue, #0a84ff); font-size:0.88rem; font-weight:700; cursor:pointer; text-align:center; display:block;">← Volver al inicio</span>
       </div>
 
       <!-- PASO 4: CARGANDO -->
-      <div id="codeStep4" class="code-step" style="display:none; flex-direction:column; align-items:center; gap:12px; padding:30px 0; width:100%;">
-        <svg class="spin-anim" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
-        <span style="color:var(--text-secondary); font-size:0.9rem; font-weight:600; text-align:center;">Rastreando código en Cybernet...<br>Espera unos segundos...</span>
+      <div id="codeStep4" class="code-step" style="display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:24px 0; width:100%;">
+        <svg class="spin-anim" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue, #0a84ff)" stroke-width="3">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 2v4"></path>
+        </svg>
+        <p style="margin:0; font-weight:700; font-size:0.95rem; color:var(--text-primary, #fff); text-align:center;">
+          Interceptando códigos...<br>
+          <span style="font-size:0.8rem; color:var(--text-secondary, rgba(255,255,255,0.7)); font-weight:500;">Sincronizando con Gmail en vivo...</span>
+        </p>
       </div>
 
       <!-- PASO 5: RESULTADO -->
       <div id="codeStep5" class="code-step" style="display:none; flex-direction:column; gap:14px; width:100%;">
-        <h4 id="codeResultTitle" style="margin:0; font-size:1.1rem; font-weight:800; color:var(--ios-green); text-align:center;">¡LOCALIZADO!</h4>
-        <p id="codeResultDesc" style="margin:0; font-size:0.85rem; color:var(--text-secondary); font-weight:600; text-align:center;"></p>
-        
-        <div id="codeResultBox" style="display:none; background:rgba(255,69,58,0.1); border:1px dashed var(--ios-red); padding:18px; border-radius:16px; text-align:center;">
-          <div id="codeVal" onclick="copiarCodigoResultanteB2B()" style="font-size:2.5rem; font-weight:800; color:var(--text-primary); letter-spacing:4px; cursor:pointer;" title="Toca para copiar"></div>
-          <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">Toca el número para copiarlo</div>
-          <div id="codeTimer" style="color:var(--ios-red); font-size:0.8rem; font-weight:700; margin-top:8px;"></div>
+        <h3 id="codeResultTitle" style="margin:0; font-weight:800; font-size:1.15rem; text-align:center;"></h3>
+        <p id="codeResultDesc" style="margin:0; font-size:0.88rem; color:var(--text-secondary, rgba(255,255,255,0.7)); font-weight:600; text-align:center;"></p>
+
+        <div id="codeResultBox" style="display:none; background:rgba(48,209,88,0.08); padding:20px 12px; border-radius:18px; border:1px dashed var(--ios-green, #30d158); cursor:pointer; user-select:none; width:100%; text-align:center;" onclick="copiarCodigoResultanteB2B()">
+          <div id="codeVal" style="font-size:2.8rem; font-weight:900; letter-spacing:4px; color:var(--text-primary, #fff); display:inline-block; width:100%;"></div>
+          <div style="font-size:0.72rem; color:var(--text-secondary, rgba(255,255,255,0.7)); margin-top:6px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path>
+              <path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.9-2.2L2.3 15.7a1.2 1.2 0 0 1 0-1.7l.8-.8a1.2 1.2 0 0 1 1.7 0l2.7 2.7V6"></path>
+            </svg>
+            Toca para copiar código
+          </div>
+          <div id="codeTimer" style="color:var(--ios-red, #ff453a); font-size:0.82rem; font-weight:bold; margin-top:10px;"></div>
         </div>
 
-        <div id="linkResultBox" style="display:none;">
-          <a id="linkVal" href="#" target="_blank" style="text-decoration:none;">
-            <button class="btn-ios w-100" style="padding:14px; background:var(--ios-green); color:white; border:none; border-radius:14px; font-weight:800; font-size:0.95rem; cursor:pointer;">Autorizar Acceso</button>
+        <div id="linkResultBox" style="display:none; width:100%">
+          <a id="linkVal" href="#" target="_blank" style="text-decoration:none; width:100%">
+            <button class="btn-ios btn-success w-100" style="padding:14px; border-radius:14px; font-weight:800; font-size:0.95rem;">
+              Abrir Enlace Oficial
+            </button>
           </a>
         </div>
 
-        <button class="btn-ios w-100" onclick="rastrearCodigo()" style="padding:12px; background:var(--btn-bg); color:var(--text-primary); border:var(--surface-border); border-radius:12px; font-weight:700; cursor:pointer;">Reintentar Búsqueda</button>
-        <span onclick="changeCodeStep(1)" style="color:var(--ios-blue); font-size:0.85rem; font-weight:700; cursor:pointer; text-align:center;">Nueva Consulta</span>
+        <button class="btn-ios btn-secondary w-100" style="margin-top:6px; padding:12px; border-radius:12px; font-weight:700;" onclick="rastrearCodigo()">
+          Reintentar Búsqueda
+        </button>
+        <span onclick="changeCodeStep(1)" style="color:var(--ios-blue, #0a84ff); font-size:0.88rem; font-weight:700; cursor:pointer; text-align:center; display:block;">Nueva Consulta</span>
       </div>
     `;
   }
@@ -1548,10 +1571,16 @@ function asegurarEstructuraCentroCodigos() {
 
 function changeCodeStep(n) {
   document
-    .querySelectorAll(".code-step")
+    .querySelectorAll("#codesCenterOverlay .code-step")
     .forEach((s) => (s.style.display = "none"));
+
   const currentStep = document.getElementById("codeStep" + n);
-  if (currentStep) currentStep.style.display = "flex";
+  if (currentStep) {
+    currentStep.style.display = "flex";
+    currentStep.style.flexDirection = "column";
+    currentStep.style.gap = "12px";
+    currentStep.style.width = "100%";
+  }
 }
 
 function setCodigoPlat(p) {
