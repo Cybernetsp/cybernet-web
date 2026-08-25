@@ -4,6 +4,8 @@
 
 const API_MYSQL_URL = "https://api.cybernetsp.com/acciones_distribuidores.php";
 const API_CODIGOS_URL = "https://api.cybernetsp.com/obtener_codigos.php";
+const URL_APPS_SCRIPT_CODIGOS =
+  "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 
 window.carrito = [];
 window.saldoNumericoActual = 0;
@@ -137,6 +139,14 @@ function haptic() {
   if (navigator.vibrate) navigator.vibrate(15);
 }
 
+function dispararSincronizacionGAS() {
+  fetch(`${URL_APPS_SCRIPT_CODIGOS}?action=sincronizarCodigos`, {
+    mode: "no-cors",
+  }).catch((err) =>
+    console.error("Error disparando sincronización silenciosa:", err),
+  );
+}
+
 function parseCleanJSON(rawText) {
   if (!rawText) return null;
   try {
@@ -194,7 +204,6 @@ function parseFechaCybernet(fechaStr) {
 
   const str = String(fechaStr).toUpperCase().trim();
 
-  // 1. Formato YYYY-MM-DD o YYYY/MM/DD
   let matchIso = str.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
   if (matchIso) {
     return new Date(
@@ -204,7 +213,6 @@ function parseFechaCybernet(fechaStr) {
     );
   }
 
-  // 2. Formato DD/MM/YYYY o DD-MM-YYYY
   let matchNum = str.match(/^(\d{1,2})[-\/](\d{1,2})(?:[-\/](\d{2,4}))?/);
   if (matchNum) {
     let dia = parseInt(matchNum[1], 10);
@@ -218,7 +226,6 @@ function parseFechaCybernet(fechaStr) {
     }
   }
 
-  // 3. Formato texto: 26DEAGOSTO, 26 DE AGOSTO, 26-AGO
   const mesesMap = {
     ENE: 0,
     ENERO: 0,
@@ -282,7 +289,7 @@ function desbloquearScroll() {
 }
 
 // =========================================================================
-// 🚪 APERTURA Y CIERRE DE MODALES EXCLUSIVO VÍA BOTÓN X
+// 🚪 APERTURA Y CIERRE DE MODALES
 // =========================================================================
 window.abrirModalVencimientos = function () {
   haptic();
@@ -398,6 +405,10 @@ window.cerrarMenuMovil = function () {
 window.abrirCentroCodigos = function () {
   haptic();
   bloquearScroll();
+  dispararSincronizacionGAS();
+
+  asegurarEstructuraCentroCodigos();
+
   const overlay = document.getElementById("codesCenterOverlay");
   if (overlay) {
     overlay.style.display = "flex";
@@ -1449,8 +1460,92 @@ function copiarFichaCasillero(btn, dataEncoded) {
 }
 
 // =========================================================================
-// 🤖 CENTRO DE CÓDIGOS B2B
+// 🤖 CENTRO DE CÓDIGOS B2B (CON INYECCIÓN AUTOMÁTICA DE PASOS)
 // =========================================================================
+function asegurarEstructuraCentroCodigos() {
+  const overlay = document.getElementById("codesCenterOverlay");
+  if (!overlay) return;
+
+  let modalInner =
+    overlay.querySelector(".modal-content") ||
+    overlay.querySelector(".codes-modal-content") ||
+    overlay.querySelector(".card-ios");
+
+  if (!modalInner) {
+    overlay.innerHTML = `<div class="modal-content" style="background: var(--modal-bg); backdrop-filter: blur(40px); border: var(--glass-border); padding: 24px 18px; border-radius: 28px 28px 0 0; width: 100%; max-width: 480px; margin: auto; display: flex; flex-direction: column; align-items: center; position: relative;"></div>`;
+    modalInner = overlay.querySelector(".modal-content");
+  }
+
+  if (!modalInner.querySelector("#codeStep1")) {
+    modalInner.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);">
+        <h3 style="margin:0; font-weight:800; color:var(--text-primary); font-size:1.15rem; display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          Centro de Códigos
+        </h3>
+        <button onclick="cerrarCentroCodigos()" style="background:rgba(255,255,255,0.1); border:none; color:var(--text-primary); width:30px; height:30px; border-radius:50%; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+      </div>
+
+      <!-- PASO 1: SELECCIONAR PLATAFORMA -->
+      <div id="codeStep1" class="code-step" style="display:flex; flex-direction:column; gap:12px; width:100%;">
+        <p style="color:var(--text-secondary); font-size:0.9rem; font-weight:600; margin-bottom:6px;">¿Qué plataforma deseas gestionar hoy?</p>
+        <button class="btn-ios w-100" onclick="setCodigoPlat('NETFLIX')" style="padding:14px; background:#e50914; color:white; border:none; border-radius:14px; font-weight:800; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 15px rgba(229,9,20,0.3);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+          Netflix
+        </button>
+        <button class="btn-ios w-100" onclick="setCodigoPlat('DISNEY')" style="padding:14px; background:rgba(255,255,255,0.08); color:var(--ios-blue); border:1px solid rgba(10,132,255,0.3); border-radius:14px; font-weight:800; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+          Disney Premium
+        </button>
+      </div>
+
+      <!-- PASO 2: SOLICITUD DE NETFLIX -->
+      <div id="codeStep2" class="code-step" style="display:none; flex-direction:column; gap:10px; width:100%;">
+        <p style="color:var(--text-secondary); font-size:0.9rem; font-weight:600; margin-bottom:6px;">Selecciona el tipo de solicitud</p>
+        <button class="btn-ios w-100" onclick="setCodigoOp(1)" style="padding:12px; background:rgba(255,255,255,0.06); color:var(--text-primary); border:var(--surface-border); border-radius:12px; font-weight:700; cursor:pointer;">Código de Inicio Sesión</button>
+        <button class="btn-ios w-100" onclick="setCodigoOp(2)" style="padding:12px; background:rgba(255,255,255,0.06); color:var(--text-primary); border:var(--surface-border); border-radius:12px; font-weight:700; cursor:pointer;">Código 'Estoy de Viaje'</button>
+        <button class="btn-ios w-100" onclick="setCodigoOp(3)" style="padding:12px; background:rgba(255,255,255,0.06); color:var(--text-primary); border:var(--surface-border); border-radius:12px; font-weight:700; cursor:pointer;">Enlace de Inicio</button>
+        <span onclick="changeCodeStep(1)" style="color:var(--ios-blue); font-size:0.85rem; font-weight:700; cursor:pointer; margin-top:8px;">← Volver</span>
+      </div>
+
+      <!-- PASO 3: INGRESAR CORREO -->
+      <div id="codeStep3" class="code-step" style="display:none; flex-direction:column; gap:12px; width:100%;">
+        <p style="color:var(--text-secondary); font-size:0.9rem; font-weight:600;">Ingresa el correo de la cuenta</p>
+        <input type="email" id="inputCorreoCodigo" placeholder="ejemplo@cybernetsp.com" style="width:100%; height:48px; padding:0 14px; border-radius:12px; border:var(--input-border); background:var(--input-bg); color:var(--text-primary); font-size:0.95rem; text-align:center; outline:none;" />
+        <button class="btn-ios w-100" onclick="rastrearCodigo()" style="padding:14px; background:var(--ios-red); color:white; border:none; border-radius:14px; font-weight:800; font-size:0.95rem; cursor:pointer;">Rastrear Código</button>
+        <span onclick="changeCodeStep(1)" style="color:var(--ios-blue); font-size:0.85rem; font-weight:700; cursor:pointer; margin-top:4px;">← Volver</span>
+      </div>
+
+      <!-- PASO 4: CARGANDO -->
+      <div id="codeStep4" class="code-step" style="display:none; flex-direction:column; align-items:center; gap:12px; padding:30px 0; width:100%;">
+        <svg class="spin-anim" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>
+        <span style="color:var(--text-secondary); font-size:0.9rem; font-weight:600; text-align:center;">Rastreando código en Cybernet...<br>Espera unos segundos...</span>
+      </div>
+
+      <!-- PASO 5: RESULTADO -->
+      <div id="codeStep5" class="code-step" style="display:none; flex-direction:column; gap:14px; width:100%;">
+        <h4 id="codeResultTitle" style="margin:0; font-size:1.1rem; font-weight:800; color:var(--ios-green); text-align:center;">¡LOCALIZADO!</h4>
+        <p id="codeResultDesc" style="margin:0; font-size:0.85rem; color:var(--text-secondary); font-weight:600; text-align:center;"></p>
+        
+        <div id="codeResultBox" style="display:none; background:rgba(255,69,58,0.1); border:1px dashed var(--ios-red); padding:18px; border-radius:16px; text-align:center;">
+          <div id="codeVal" onclick="copiarCodigoResultanteB2B()" style="font-size:2.5rem; font-weight:800; color:var(--text-primary); letter-spacing:4px; cursor:pointer;" title="Toca para copiar"></div>
+          <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">Toca el número para copiarlo</div>
+          <div id="codeTimer" style="color:var(--ios-red); font-size:0.8rem; font-weight:700; margin-top:8px;"></div>
+        </div>
+
+        <div id="linkResultBox" style="display:none;">
+          <a id="linkVal" href="#" target="_blank" style="text-decoration:none;">
+            <button class="btn-ios w-100" style="padding:14px; background:var(--ios-green); color:white; border:none; border-radius:14px; font-weight:800; font-size:0.95rem; cursor:pointer;">Autorizar Acceso</button>
+          </a>
+        </div>
+
+        <button class="btn-ios w-100" onclick="rastrearCodigo()" style="padding:12px; background:var(--btn-bg); color:var(--text-primary); border:var(--surface-border); border-radius:12px; font-weight:700; cursor:pointer;">Reintentar Búsqueda</button>
+        <span onclick="changeCodeStep(1)" style="color:var(--ios-blue); font-size:0.85rem; font-weight:700; cursor:pointer; text-align:center;">Nueva Consulta</span>
+      </div>
+    `;
+  }
+}
+
 function changeCodeStep(n) {
   document
     .querySelectorAll(".code-step")
@@ -1461,7 +1556,12 @@ function changeCodeStep(n) {
 
 function setCodigoPlat(p) {
   haptic();
-  changeCodeStep(2);
+  dispararSincronizacionGAS();
+  if (p === "NETFLIX") {
+    changeCodeStep(2);
+  } else {
+    changeCodeStep(3);
+  }
 }
 
 function setCodigoOp(o) {
@@ -1471,6 +1571,8 @@ function setCodigoOp(o) {
 
 async function rastrearCodigo() {
   haptic();
+  dispararSincronizacionGAS();
+
   const input = document.getElementById("inputCorreoCodigo");
   if (!input) return;
 
@@ -1530,14 +1632,18 @@ async function rastrearCodigo() {
       const val = match.codigoLink || match.copiadoRapido || "";
       window.codigoB2BCapturado = val;
 
-      if (val.startsWith("http://") || val.startsWith("https://")) {
+      let esEnlace = val.startsWith("http://") || val.startsWith("https://");
+      let codigoMostrar =
+        esEnlace && val.length > 25 ? val.substring(0, 22) + "..." : val;
+
+      if (esEnlace) {
         if (boxLink) boxLink.style.display = "block";
         const linkVal = document.getElementById("linkVal");
         if (linkVal) linkVal.href = val;
       } else {
         if (boxCode) boxCode.style.display = "block";
         const codeVal = document.getElementById("codeVal");
-        if (codeVal) codeVal.innerText = val;
+        if (codeVal) codeVal.innerText = codigoMostrar;
         const codeTimer = document.getElementById("codeTimer");
         if (codeTimer) codeTimer.innerText = "Vigencia máxima: 16 minutos";
       }
@@ -1571,7 +1677,7 @@ function copiarCodigoResultanteB2B() {
   if (typeof haptic === "function") haptic();
   const codeElement = document.getElementById("codeVal");
   if (!codeElement) return;
-  const codigoText = codeElement.innerText.trim();
+  const codigoText = window.codigoB2BCapturado || codeElement.innerText.trim();
   if (!codigoText) return;
 
   navigator.clipboard.writeText(codigoText).then(() => {
@@ -1670,8 +1776,7 @@ function procesarYClasificarVencimientos(lista) {
         else if (diffDays === -1) categoria = "AYER";
         else if (diffDays === 0) categoria = "HOY";
         else if (diffDays === 1) categoria = "MANANA";
-        else if (diffDays >= 2 && diffDays <= 3)
-          categoria = "TRES_DIAS"; // ⚡ Solución: Rango estricto de 2 a 3 días
+        else if (diffDays >= 2 && diffDays <= 3) categoria = "TRES_DIAS";
         else categoria = "OTRO";
       }
 
