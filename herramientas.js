@@ -605,6 +605,16 @@ function renderizarCodigosBandeja(res, contenedor) {
       let esRestablecer =
         item.accion && item.accion.toLowerCase().includes("restablecer");
 
+      // ✂️ CORTE DE ENLACE: Si es una URL, muestra solo los primeros 22 caracteres + '...'
+      let esEnlaceUrl =
+        item.codigoLink &&
+        (item.codigoLink.startsWith("http://") ||
+          item.codigoLink.startsWith("https://"));
+      let codigoMostrar =
+        esEnlaceUrl && item.codigoLink.length > 25
+          ? item.codigoLink.substring(0, 22) + "..."
+          : item.codigoLink;
+
       let botonHtml = "";
       if (esRestablecer) {
         botonHtml = `
@@ -640,7 +650,7 @@ function renderizarCodigosBandeja(res, contenedor) {
             </div>
             <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
               <span style="font-size: 0.78rem; color: var(--text-secondary); min-width: 105px; flex-shrink: 0; text-transform: uppercase; font-weight: 600;">CÓDIGO:</span>
-              <span style="font-size: 1.15rem; color: ${item.colorText}; font-weight: 800; font-family: monospace; background: rgba(255, 255, 255, 0.03); padding: 4px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); letter-spacing: 1px; word-break: break-all;">${item.codigoLink}</span>
+              <span style="font-size: 1.15rem; color: ${item.colorText}; font-weight: 800; font-family: monospace; background: rgba(255, 255, 255, 0.03); padding: 4px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); letter-spacing: 1px; word-break: break-all;" title="${item.codigoLink}">${codigoMostrar}</span>
             </div>
           </div>
           ${botonHtml}
