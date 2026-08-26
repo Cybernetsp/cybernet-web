@@ -496,12 +496,14 @@ function lanzarErrorCopia(imgElement) {
 }
 
 /* ==========================================================================
-   📩 BANDEJA DE CÓDIGOS DE ACCESO (SINCRO SILENCIOSA Y ORDEN CRONOLÓGICO)
+   📩 BANDEJA DE CÓDIGOS DE ACCESO (VIGENCIA 15 MIN EN TIEMPO REAL)
    ========================================================================== */
 const URL_APPS_SCRIPT_CODIGOS =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
 const URL_OBTENER_CODIGOS_MYSQL =
   "https://api.cybernetsp.com/obtener_codigos.php";
+
+window.timerIntervalCodigos = null;
 
 const oldToggleCodesPanel = window.toggleCodesPanel;
 window.toggleCodesPanel = function () {
@@ -509,7 +511,75 @@ window.toggleCodesPanel = function () {
   const overlay = document.getElementById("codesOverlay");
   if (overlay && overlay.classList.contains("open")) {
     window.cargarBandejaCodigosMySQL();
+  } else {
+    if (window.timerIntervalCodigos) {
+      clearInterval(window.timerIntervalCodigos);
+      window.timerIntervalCodigos = null;
+    }
   }
+};
+
+// ⏱️ HELPER: Obtener el timestamp de expiración (Inicio + 15 min)
+function calcularExpiracionCodigoMs(item) {
+  let inicioMs = 0;
+
+  if (item.fecha_registro) {
+    let parsed = new Date(item.fecha_registro).getTime();
+    if (!isNaN(parsed) && parsed > 0) inicioMs = parsed;
+  }
+
+  if (!inicioMs && item.hora) {
+    const hoy = new Date();
+    let p = item.hora.trim().split(" ");
+    let hm = p[0].split(":");
+    let h = parseInt(hm[0], 10) || 0;
+    let m = parseInt(hm[1], 10) || 0;
+    let ampm = p[1] ? p[1].toUpperCase() : "";
+    if (h === 12) h = 0;
+    if (ampm === "PM") h += 12;
+    hoy.setHours(h, m, 0, 0);
+    inicioMs = hoy.getTime();
+  }
+
+  if (!inicioMs) inicioMs = Date.now();
+  return inicioMs + 15 * 60 * 1000; // 15 minutos de vigencia
+}
+
+// ⏱️ TIMER EN TIEMPO REAL: Actualiza todas las insignias de vigencia cada segundo
+window.iniciarTimerCodigosTiempoReal = function () {
+  if (window.timerIntervalCodigos) clearInterval(window.timerIntervalCodigos);
+
+  window.timerIntervalCodigos = setInterval(() => {
+    const badges = document.querySelectorAll(".badge-vigencia-codigo");
+    badges.forEach((badge) => {
+      const expMs = parseInt(badge.getAttribute("data-expiracion"), 10);
+      if (!expMs) return;
+
+      const diffMs = expMs - Date.now();
+      if (diffMs > 0) {
+        const mins = Math.floor(diffMs / 60000);
+        const secs = Math.floor((diffMs % 60000) / 1000);
+        const secsFmt = secs < 10 ? `0${secs}` : secs;
+
+        badge.innerText = `⏳ Quedan ${mins}:${secsFmt} min`;
+
+        if (mins < 3) {
+          badge.style.color = "#ff453a";
+          badge.style.background = "rgba(255, 69, 58, 0.15)";
+          badge.style.borderColor = "rgba(255, 69, 58, 0.3)";
+        } else {
+          badge.style.color = "#30d158";
+          badge.style.background = "rgba(48, 209, 88, 0.15)";
+          badge.style.borderColor = "rgba(48, 209, 88, 0.3)";
+        }
+      } else {
+        badge.innerText = "⚠️ Código Expirado";
+        badge.style.color = "#ff453a";
+        badge.style.background = "rgba(255, 69, 58, 0.15)";
+        badge.style.borderColor = "rgba(255, 69, 58, 0.3)";
+      }
+    });
+  }, 1000);
 };
 
 // 📥 CONSULTA Y SINCRONIZACIÓN DE CÓDIGOS SILENCIOSA EN SEGUNDO PLANO
@@ -519,7 +589,6 @@ window.cargarBandejaCodigosMySQL = function () {
 
   const tieneTarjetas = contenedor.querySelectorAll(".card-ios").length > 0;
 
-  // 1. Mostrar pantalla de carga ÚNICAMENTE si la ventana está completamente vacía
   if (!tieneTarjetas) {
     contenedor.innerHTML = `
       <div style="text-align: center; color: var(--ios-orange); padding: 50px 20px;">
@@ -528,20 +597,15 @@ window.cargarBandejaCodigosMySQL = function () {
       </div>`;
   }
 
-  // 2. Consulta rápida e inmediata a MySQL para mostrar lo que ya existe guardado
   fetch(URL_OBTENER_CODIGOS_MYSQL)
     .then((res) => res.json())
     .then((res) => renderizarCodigosBandeja(res, contenedor))
     .catch((err) => console.error("Error consultando MySQL inicial:", err));
 
-  // 3. Dispara la sincronización en vivo en Apps Script silenciosamente en segundo plano
   fetch(`${URL_APPS_SCRIPT_CODIGOS}?action=sincronizarCodigos`, {
     mode: "no-cors",
   })
-    .then(() => {
-      // 4. Una vez procesado Apps Script, actualiza la lista con cualquier nuevo código
-      return fetch(URL_OBTENER_CODIGOS_MYSQL);
-    })
+    .then(() => fetch(URL_OBTENER_CODIGOS_MYSQL))
     .then((res) => res.json())
     .then((res) => renderizarCodigosBandeja(res, contenedor))
     .catch((err) =>
@@ -549,7 +613,7 @@ window.cargarBandejaCodigosMySQL = function () {
     );
 };
 
-// 🎨 DIBUJAR TARJETAS DE CÓDIGOS (ORDENADO CRONOLÓGICAMENTE)
+// 🎨 DIBUJAR TARJETAS DE CÓDIGOS CON VIGENCIA EN VIVO
 function renderizarCodigosBandeja(res, contenedor) {
   if (res && res.status === "success" && res.data) {
     if (res.data.length === 0) {
@@ -558,7 +622,6 @@ function renderizarCodigosBandeja(res, contenedor) {
       return;
     }
 
-    // 🔥 ORDENAMIENTO EN VIVO: Del más reciente (arriba) al más antiguo (abajo)
     res.data.sort((a, b) => {
       if (a.id && b.id) {
         return parseInt(b.id, 10) - parseInt(a.id, 10);
@@ -603,7 +666,6 @@ function renderizarCodigosBandeja(res, contenedor) {
       let esRestablecer =
         item.accion && item.accion.toLowerCase().includes("restablecer");
 
-      // ✂️ CORTE DE ENLACE: Muestra solo los primeros 22 caracteres + '...' para mantener la tarjeta compacta
       let esEnlaceUrl =
         item.codigoLink &&
         (item.codigoLink.startsWith("http://") ||
@@ -612,6 +674,9 @@ function renderizarCodigosBandeja(res, contenedor) {
         esEnlaceUrl && item.codigoLink.length > 25
           ? item.codigoLink.substring(0, 22) + "..."
           : item.codigoLink;
+
+      // ⏱️ Cálculo de expiración
+      const expMs = calcularExpiracionCodigoMs(item);
 
       let botonHtml = "";
       if (esRestablecer) {
@@ -622,7 +687,7 @@ function renderizarCodigosBandeja(res, contenedor) {
         `;
       } else {
         botonHtml = `
-          <button class="btn-ios w-100" onclick="window.copiarPlantillaGlobal(this, '${safeCopiedText}')" style="padding: 12px; background: rgba(255,255,255,0.05); font-weight: 800; font-size: 0.85rem; border-radius: 12px; cursor: pointer; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
+          <button class="btn-ios w-100" onclick="window.copiarCodigoConVigencia(this, '${safeCopiedText}', ${expMs})" style="padding: 12px; background: rgba(255,255,255,0.05); font-weight: 800; font-size: 0.85rem; border-radius: 12px; cursor: pointer; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> COPIAR MENSAJE
           </button>
         `;
@@ -630,12 +695,15 @@ function renderizarCodigosBandeja(res, contenedor) {
 
       html += `
         <div class="card-ios" data-search="${searchData}" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 16px; margin-bottom: 0px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="width: 8px; height: 8px; border-radius: 50%; background: ${item.colorText}; box-shadow: 0 0 10px ${item.colorText};"></span>
               <span style="color: var(--text-primary); font-weight: 800; font-size: 0.95rem; text-transform: uppercase; letter-spacing: -0.3px;">${item.plataforma}</span>
             </div>
-            <span style="color: var(--text-secondary); font-size: 0.75rem; font-family: monospace; font-weight: 600;">${item.hora}</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="badge-vigencia-codigo" data-expiracion="${expMs}" style="font-size: 0.72rem; font-weight: 800; font-family: monospace; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(48, 209, 88, 0.3); background: rgba(48, 209, 88, 0.15); color: #30d158;">⏳ Calculando...</span>
+              <span style="color: var(--text-secondary); font-size: 0.75rem; font-family: monospace; font-weight: 600;">${item.hora}</span>
+            </div>
           </div>
           <div style="display: flex; flex-direction: column; gap: 8px; padding: 2px 0;">
             <div style="display: flex; align-items: baseline; gap: 8px;">
@@ -656,10 +724,30 @@ function renderizarCodigosBandeja(res, contenedor) {
       `;
     });
     contenedor.innerHTML = html;
+    window.iniciarTimerCodigosTiempoReal();
   } else {
     contenedor.innerHTML = `<div style="text-align: center; color: var(--ios-red); padding: 20px; font-weight: bold;">Error al obtener los códigos.</div>`;
   }
 }
+
+// 📋 COPIAR MENSAJE ADICIONANDO LA VIGENCIA RESTANTE EN TIEMPO REAL
+window.copiarCodigoConVigencia = function (btn, textoOriginalEncoded, expMs) {
+  const textoOriginal = decodeURIComponent(textoOriginalEncoded);
+  const diffMs = expMs - Date.now();
+  let tiempoTexto = "";
+
+  if (diffMs > 0) {
+    const mins = Math.floor(diffMs / 60000);
+    const secs = Math.floor((diffMs % 60000) / 1000);
+    const secsFmt = secs < 10 ? `0${secs}` : secs;
+    tiempoTexto = `\n\n⏳ *Vigencia restante del código:* ${mins}:${secsFmt} min (Válido por 15 minutos desde su emisión)`;
+  } else {
+    tiempoTexto = `\n\n⚠️ *Nota:* Este código ha superado los 15 minutos de vigencia recomendados.`;
+  }
+
+  const textoFinal = textoOriginal + tiempoTexto;
+  window.copiarPlantillaDirecta(btn, textoFinal);
+};
 
 // 🔄 BOTÓN REFRESCAR: Dispara la actualización silenciosa
 window.refrescarCodigosModal = function () {
