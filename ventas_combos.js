@@ -389,7 +389,7 @@ window.guardarCuentaInternacional = function () {
     "NOVIEMBRE",
     "DICIEMBRE",
   ];
-  let vencStr = dateFact.getDate() + "DE" + mesesLong[dateFact.getMonth() + 1];
+  let vencStr = dateFact.getDate() + "DE" + mesesLong[dateFact.getMonth()]; // Fix index month
   formData.append("vencimiento", vencStr);
 
   fetch("https://api.cybernetsp.com/guardar_netflix.php", {
@@ -870,7 +870,10 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                 tipoItem.includes("internacional"))
             ) {
               esSoloNetflixRenovacion = true;
-              if (itemUnico.plataforma === "NETFLIX INTERNACIONAL") {
+              if (
+                itemUnico.plataforma === "NETFLIX INTERNACIONAL" ||
+                tipoItem.includes("internacional")
+              ) {
                 titlePlatFicha = "NETFLIX INTERNACIONAL";
               }
             }
@@ -934,9 +937,11 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                     platFormat === "NETFLIX INTERNACIONAL") &&
                   esRenoItem
                 ) {
-                  let platDisplay = platFormat.includes("INTERNACIONAL")
-                    ? "NETFLIX INTERNACIONAL"
-                    : "NETFLIX PREMIUM";
+                  let platDisplay =
+                    platFormat.includes("INTERNACIONAL") ||
+                    (item.tipo || "").toLowerCase().includes("internacional")
+                      ? "NETFLIX INTERNACIONAL"
+                      : "NETFLIX PREMIUM";
                   fichaTexto += `\n🔄 *CUENTA DE ${platDisplay}*${textoMeses} ✅\n────────────────────\n`;
                   fichaTexto += `👤 *Correo:* ${item.correo || "-"}\n🔐 *Contraseña:* ${item.clave || "-"}\n🌐 *Perfil:* ${item.perfil || "1"}\n`;
                   if (
@@ -948,7 +953,11 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                     fichaTexto += `📍 *PIN:* ${item.pin}\n`;
                   }
                   fichaTexto += `📅 *Vencimiento:* ${vencVal}\n`;
-                  fichaTexto += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n`;
+
+                  // 🔥 Solo poner mensaje del BOT si NO es Internacional
+                  if (!platDisplay.includes("INTERNACIONAL")) {
+                    fichaTexto += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n`;
+                  }
                 } else {
                   fichaTexto += `\n🎬 *DETALLES DE ${platFormat}*${textoMeses} ✅\n────────────────────\n`;
                   if (platFormat.includes("NETFLIX")) {
@@ -985,12 +994,17 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                   }
                   fichaTexto += `📅 *Vence:* ${vencVal}\n`;
 
-                  // 🤖 AGREGAR NOTA DEL BOT SI LA CUENTA ENTREGADA ES NETFLIX
+                  // 🤖 AGREGAR NOTA DEL BOT SI LA CUENTA ENTREGADA ES NETFLIX (y no Internacional)
                   if (
                     platFormat.includes("NETFLIX") ||
                     item.plataforma === "NETFLIX"
                   ) {
-                    fichaTexto += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n`;
+                    if (
+                      !platFormat.includes("INTERNACIONAL") &&
+                      item.plataforma !== "NETFLIX INTERNACIONAL"
+                    ) {
+                      fichaTexto += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n`;
+                    }
                   }
                 }
               }
