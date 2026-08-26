@@ -1152,6 +1152,32 @@ window.abrirCalculadoraCombos = function () {
 
   const container = document.getElementById("contenedorPlataformasCotizador");
 
+  // INYECTAR NETFLIX INTERNACIONAL SI NO EXISTE
+  if (
+    container &&
+    !document.querySelector('.chk-cotizar-plat[value="NETFLIX INTERNACIONAL"]')
+  ) {
+    const netIntRow = document.createElement("div");
+    netIntRow.className = "row-cotizar-plat";
+    netIntRow.setAttribute("data-nombre", "netflix internacional");
+    netIntRow.style.cssText =
+      "border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);";
+    netIntRow.innerHTML = `
+      <label style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; width: 100%; box-sizing: border-box;">
+          <span style="font-size: 0.9rem; font-weight: 700; color: #e50914">Netflix Internacional</span>
+          <input type="checkbox" class="chk-cotizar-plat" value="NETFLIX INTERNACIONAL" data-tipo="netflix_int" onchange="window.controlarDisneyMutuo(this); window.calcularPreciosSistemaCotizador();" style="accent-color: #0a84ff; width: 18px; height: 18px; cursor: pointer;" />
+      </label>
+    `;
+    const rowNetflix = container.querySelector(
+      '.row-cotizar-plat[data-nombre*="netflix premium"]',
+    );
+    if (rowNetflix && rowNetflix.nextSibling) {
+      container.insertBefore(netIntRow, rowNetflix.nextSibling);
+    } else {
+      container.appendChild(netIntRow);
+    }
+  }
+
   // INYECTAR IPTV SI NO EXISTE
   if (container && !document.querySelector('.chk-cotizar-plat[value="IPTV"]')) {
     const iptvRow = document.createElement("div");
@@ -1263,6 +1289,22 @@ window.controlarDisneyMutuo = function (checkbox) {
         dp.checked = false;
         window.controlarDisneyMutuo(dp);
       }
+    } else if (tipo === "netflix") {
+      const ni = document.querySelector(
+        '.chk-cotizar-plat[data-tipo="netflix_int"]',
+      );
+      if (ni && ni.checked) {
+        ni.checked = false;
+        window.controlarDisneyMutuo(ni);
+      }
+    } else if (tipo === "netflix_int") {
+      const n = document.querySelector(
+        '.chk-cotizar-plat[data-tipo="netflix"]',
+      );
+      if (n && n.checked) {
+        n.checked = false;
+        window.controlarDisneyMutuo(n);
+      }
     }
   }
 
@@ -1270,9 +1312,15 @@ window.controlarDisneyMutuo = function (checkbox) {
   if (row) {
     let selectWrapper = row.querySelector(".cotizador-pantallas-wrapper");
     if (selectWrapper) {
-      selectWrapper.style.display = checkbox.checked ? "flex" : "none";
-      if (!checkbox.checked) {
-        selectWrapper.querySelector("select").value = "1";
+      if (tipo === "netflix_int") {
+        selectWrapper.style.display = "none";
+        let sel = selectWrapper.querySelector("select");
+        if (sel) sel.value = "1";
+      } else {
+        selectWrapper.style.display = checkbox.checked ? "flex" : "none";
+        if (!checkbox.checked) {
+          selectWrapper.querySelector("select").value = "1";
+        }
       }
     }
   }
@@ -1421,15 +1469,27 @@ window.calcularPreciosSistemaCotizador = function () {
 
       if (val === "NETFLIX" || val === "NETFLIX INTERNACIONAL") {
         tieneNetflix = true;
-        if (pantallas === 1) costoNetflixCalculado = pNet;
-        else if (pantallas === 2)
-          costoNetflixCalculado = Math.round(pNet * 1.8);
-        else if (pantallas === 3)
-          costoNetflixCalculado = Math.round(pNet * 2.46);
-        else if (pantallas === 4)
-          costoNetflixCalculado = Math.round(pNet * 3.13);
-        else if (pantallas >= 5)
-          costoNetflixCalculado = Math.round(pNet * 3.73);
+        if (val === "NETFLIX INTERNACIONAL") {
+          pNet = getPrecioDB(
+            "NETFLIX-INTERNACIONAL",
+            getPrecioDB(
+              "NETFLIX_INTERNACIONAL",
+              getPrecioDB("NETFLIX INTERNACIONAL", 15000),
+            ),
+          );
+          costoNetflixCalculado = pNet; // Fijo a 1 pantalla
+        } else {
+          pNet = getPrecioDB("NETFLIX", 15000);
+          if (pantallas === 1) costoNetflixCalculado = pNet;
+          else if (pantallas === 2)
+            costoNetflixCalculado = Math.round(pNet * 1.8);
+          else if (pantallas === 3)
+            costoNetflixCalculado = Math.round(pNet * 2.46);
+          else if (pantallas === 4)
+            costoNetflixCalculado = Math.round(pNet * 3.13);
+          else if (pantallas >= 5)
+            costoNetflixCalculado = Math.round(pNet * 3.73);
+        }
       } else {
         if (mapValores[val]) {
           for (let i = 0; i < pantallas; i++) allOtherScreens.push(val);
