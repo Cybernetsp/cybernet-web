@@ -6,6 +6,9 @@ window.stockPlataformasVentas = {};
 window.preciosCotizadorCache = window.preciosCotizadorCache || {};
 let contadorFilasVentas = 0;
 
+// Helper global para redondear hacia abajo a centenas exactas (Ej: $24.450 -> $24.400 / $32.680 -> $32.600)
+const redondearCentenas = (valor) => Math.floor(valor / 100) * 100;
+
 // =========================================================================
 // 🔄 SINCRONIZACIÓN DE PRECIOS DESDE MYSQL PARA EL COTIZADOR
 // =========================================================================
@@ -752,6 +755,7 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
         const correoReno = fila.getAttribute("data-correo-reno") || "";
         const perfilReno = fila.getAttribute("data-perfil-reno") || "";
 
+        // Datos específicos de "Internacional" guardados en la fila
         const claveInt = fila.getAttribute("data-clave-int") || "";
         const pinInt = fila.getAttribute("data-pin-int") || "";
 
@@ -1528,6 +1532,9 @@ window.calcularPreciosSistemaCotizador = function () {
     }
   }
 
+  // Redondear a centenas hacia abajo para evitar fracciones en precios base
+  precioBaseUnMes = redondearCentenas(precioBaseUnMes);
+
   const monthSelect = document.getElementById("calcMonths");
   const meses = parseFloat(monthSelect.value) || 1;
   const porcDesc =
@@ -1535,8 +1542,8 @@ window.calcularPreciosSistemaCotizador = function () {
       monthSelect.options[monthSelect.selectedIndex].getAttribute("data-desc"),
     ) || 0;
 
-  const subtotal = precioBaseUnMes * meses;
-  const montoDescuento = Math.round(subtotal * (porcDesc / 100));
+  const subtotal = redondearCentenas(precioBaseUnMes * meses);
+  const montoDescuento = redondearCentenas(subtotal * (porcDesc / 100));
 
   const esClienteFiel = document.getElementById("calcFidelidad")
     ? document.getElementById("calcFidelidad").checked
@@ -1559,6 +1566,7 @@ window.calcularPreciosSistemaCotizador = function () {
     0,
     subtotal - montoDescuento - descuentoFielTotal,
   );
+  totalA_Cobrar = redondearCentenas(totalA_Cobrar);
 
   const elBasePrice = document.getElementById("calcBasePriceDisplay");
   if (elBasePrice)
@@ -1628,7 +1636,7 @@ window.copiarCotizacionCombo = function (btn) {
     ? document.getElementById("calcFidelidad").checked
     : false;
 
-  // Lectura directa de las cifras exactas calculadas en pantalla
+  // Lectura directa de las cifras calculadas en pantalla
   const subtotalText = document.getElementById("calcSubtotal")
     ? document.getElementById("calcSubtotal").innerText
     : "$0";
@@ -1658,7 +1666,7 @@ window.copiarCotizacionCombo = function (btn) {
 
   mensajeVIP = `${tituloHeader}\n${listaPlatFormateada}\n`;
 
-  // Desglose cuando hay más de 1 mes o cuando está activo Cliente Fiel (incluso para 1 mes)
+  // Desglose cuando hay más de 1 mes o cuando está activo Cliente Fiel
   if (meses > 1 || esClienteFiel) {
     mensajeVIP += `\n💵 *Valor Comercial:* ${subtotalText}`;
     if (meses > 1 && porcDesc > 0) {
