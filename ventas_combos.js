@@ -60,7 +60,7 @@ window.actualizarOpcionesStockDropdown = function () {
     const valorSeleccionado = select.value;
     Array.from(select.options).forEach((opt) => {
       const val = opt.value;
-      if (val && val !== "RECARGA") {
+      if (val && val !== "RECARGA" && val !== "NETFLIX INTERNACIONAL") {
         const cant =
           window.stockPlataformasVentas[val] !== undefined
             ? window.stockPlataformasVentas[val]
@@ -133,6 +133,7 @@ window.agregarFilaServicioCombo = function () {
         <option value="" disabled selected>— Elige servicio —</option>
         <option value="RECARGA">💼 Recarga de Saldo</option>
         <option value="NETFLIX">${getTxt("NETFLIX")}</option>
+        <option value="NETFLIX INTERNACIONAL">NETFLIX INTERNACIONAL</option>
         <option value="DIRECTV GO">${getTxt("DIRECTV GO")}</option>
         <option value="AMAZON">${getTxt("AMAZON")}</option>
         <option value="DISNEY PREMIUM">${getTxt("DISNEY PREMIUM")}</option>
