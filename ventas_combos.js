@@ -239,6 +239,7 @@ window.alCambiarServicioVenta = function (idFila, valServicio) {
     }
   } else if (valServicio === "NETFLIX INTERNACIONAL") {
     selServicio.style.flex = "2";
+
     selPantallas.style.display = "none";
     selPantallas.value = "1";
     selMeses.style.display = "none";
@@ -1280,6 +1281,14 @@ window.controlarDisneyMutuo = function (checkbox) {
         window.controlarDisneyMutuo(n);
       }
     }
+
+    // 🧹 BORRAR BÚSQUEDA Y REENFOCAR INPUT AL SELECCIONAR CUALQUIER PLATAFORMA
+    const inputSearch = document.getElementById("buscarPlataformaCotizador");
+    if (inputSearch) {
+      inputSearch.value = "";
+      window.filtrarPlataformasCotizador();
+      inputSearch.focus();
+    }
   }
 
   const row = checkbox.closest(".row-cotizar-plat");
@@ -1312,7 +1321,7 @@ window.filtrarPlataformasCotizador = function () {
       const checkbox = fila.querySelector('input[type="checkbox"]');
 
       if (query === "") {
-        fila.style.display = checkbox && checkbox.checked ? "block" : "none";
+        fila.style.display = "block";
       } else {
         if (nombrePlat.includes(query) || (checkbox && checkbox.checked)) {
           fila.style.display = "block";
@@ -1649,7 +1658,7 @@ window.copiarCotizacionCombo = function (btn) {
 
   mensajeVIP = `${tituloHeader}\n${listaPlatFormateada}\n`;
 
-  // Desglose si hay descuentos aplicados por meses o Cliente Fiel
+  // Desglose cuando hay más de 1 mes o cuando está activo Cliente Fiel (incluso para 1 mes)
   if (meses > 1 || esClienteFiel) {
     mensajeVIP += `\n💵 *Valor Comercial:* ${subtotalText}`;
     if (meses > 1 && porcDesc > 0) {
@@ -1665,7 +1674,7 @@ window.copiarCotizacionCombo = function (btn) {
 
   // Beneficio del Bot (Exclusivo para Netflix Premium normal)
   if (hasNetNormal && !hasNetInt) {
-    mensajeVIP += `\n\n⚡ *¡BENEFICIO EXCLUSIVO!*\nTu cuenta de *NETFLIX* includes acceso para generar códigos *24/7 de forma automática*. ¡Sin hacer filas en el chat! 🤖🔓`;
+    mensajeVIP += `\n\n⚡ *¡BENEFICIO EXCLUSIVO!*\nTu cuenta de *NETFLIX* incluye acceso para generar códigos *24/7 de forma automática*. ¡Sin hacer filas en el chat! 🤖🔓`;
   }
 
   mensajeVIP += `\n\n👇 _Dime si te agrada la oferta para enviarte los medios de pago y activarte de inmediato._`;
