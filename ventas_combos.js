@@ -364,64 +364,73 @@ window.guardarCuentaInternacional = function () {
   btn.disabled = true;
   btn.innerHTML = "⏳ Conectando...";
 
-  // 1. Enviamos los datos a MySQL directamente a guardar_netflix.php
   const formData = new FormData();
-  formData.append("accion", "guardar"); // Acción genérica de guardado
+  formData.append("accion", "guardar_internacional");
   formData.append("correo", correo);
   formData.append("clave", clave);
+  formData.append("perfil", perfil);
+  formData.append("pin", pin);
 
-  // Establecemos fecha de facturación a 30 días para no dejarla vacía en DB
+  // Calcula automáticamente el vencimiento a 30 días
   let dateFact = new Date();
   dateFact.setDate(dateFact.getDate() + 30);
-  formData.append("fecha_facturacion", dateFact.toISOString().split("T")[0]);
-
-  // Simulamos que llena los 5 perfiles pero prioriza el escrito en el input
-  formData.append("p1", perfil);
-  formData.append("pin1", pin);
-  formData.append("p2", "Libre");
-  formData.append("pin2", "");
-  formData.append("p3", "Libre");
-  formData.append("pin3", "");
-  formData.append("p4", "Libre");
-  formData.append("pin4", "");
-  formData.append("p5", "Libre");
-  formData.append("pin5", "");
+  const mesesLong = [
+    "",
+    "ENERO",
+    "FEBRERO",
+    "MARZO",
+    "ABRIL",
+    "MAYO",
+    "JUNIO",
+    "JULIO",
+    "AGOSTO",
+    "SEPTIEMBRE",
+    "OCTUBRE",
+    "NOVIEMBRE",
+    "DICIEMBRE",
+  ];
+  let vencStr = dateFact.getDate() + "DE" + mesesLong[dateFact.getMonth() + 1];
+  formData.append("vencimiento", vencStr);
 
   fetch("https://api.cybernetsp.com/guardar_netflix.php", {
     method: "POST",
     body: formData,
   })
-    .then((res) => res.text())
-    .then((text) => {
+    .then((res) => res.json())
+    .then((data) => {
       btn.disabled = false;
       btn.innerHTML = oldText;
 
-      // 2. Cerramos modal y preparamos la fila del carrito
-      const fila = document.getElementById(idFila);
-      if (fila) {
-        fila.setAttribute("data-correo-reno", correo);
-        fila.setAttribute("data-perfil-reno", perfil);
-        fila.setAttribute("data-clave-int", clave);
-        fila.setAttribute("data-pin-int", pin);
+      if (data.status === "success") {
+        const fila = document.getElementById(idFila);
+        if (fila) {
+          fila.setAttribute("data-correo-reno", correo);
+          fila.setAttribute("data-perfil-reno", perfil);
+          fila.setAttribute("data-clave-int", clave);
+          fila.setAttribute("data-pin-int", pin);
 
-        const selTipo = fila.querySelector(".sel-tipo-netflix");
-        if (selTipo) {
-          selTipo.innerHTML = `<option value="Internacional">Internacional</option>`;
-          selTipo.value = "Internacional";
+          const selTipo = fila.querySelector(".sel-tipo-netflix");
+          if (selTipo) {
+            selTipo.innerHTML = `<option value="Internacional">Internacional</option>`;
+            selTipo.value = "Internacional";
+          }
+
+          const inputCorreoUi = fila.querySelector(".input-correo-vta");
+          if (inputCorreoUi) {
+            inputCorreoUi.value = `${correo} | Perfil: ${perfil}`;
+            inputCorreoUi.style.background = "rgba(48, 209, 88, 0.1)";
+            inputCorreoUi.style.borderColor = "rgba(48, 209, 88, 0.3)";
+            inputCorreoUi.style.color = "#30d158";
+          }
         }
 
-        const inputCorreoUi = fila.querySelector(".input-correo-vta");
-        if (inputCorreoUi) {
-          inputCorreoUi.value = `${correo} | Perfil: ${perfil}`;
-          inputCorreoUi.style.background = "rgba(48, 209, 88, 0.1)";
-          inputCorreoUi.style.borderColor = "rgba(48, 209, 88, 0.3)";
-          inputCorreoUi.style.color = "#30d158";
-        }
+        document.getElementById("modalNetflixIntOverlay").style.display =
+          "none";
+        if (typeof triggerToast === "function")
+          triggerToast("✅ Cuenta almacenada en MySQL y lista para venta.");
+      } else {
+        alert("❌ " + data.message);
       }
-
-      document.getElementById("modalNetflixIntOverlay").style.display = "none";
-      if (typeof triggerToast === "function")
-        triggerToast("✅ Cuenta almacenada en MySQL y lista para venta.");
     })
     .catch((err) => {
       console.error(err);
