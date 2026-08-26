@@ -241,9 +241,13 @@ window.alCambiarServicioVenta = function (idFila, valServicio) {
     }
   } else if (valServicio === "NETFLIX INTERNACIONAL") {
     selServicio.style.flex = "2";
-    selPantallas.style.display = "none"; // Se asume 1 pantalla para las internacionales
+
+    // 🔒 BLOQUEO ESTRICTO: Ocultar y forzar obligatoriamente a 1 Pantalla y 1 Mes
+    selPantallas.style.display = "none";
     selPantallas.value = "1";
-    selMeses.style.display = "block";
+    selMeses.style.display = "none";
+    selMeses.value = "1";
+
     selBono.style.display = "none";
     rowNetflix.style.display = "flex";
 
@@ -389,7 +393,7 @@ window.guardarCuentaInternacional = function () {
     "NOVIEMBRE",
     "DICIEMBRE",
   ];
-  let vencStr = dateFact.getDate() + "DE" + mesesLong[dateFact.getMonth()]; // Fix index month
+  let vencStr = dateFact.getDate() + "DE" + mesesLong[dateFact.getMonth() + 1];
   formData.append("vencimiento", vencStr);
 
   fetch("https://api.cybernetsp.com/guardar_netflix.php", {
