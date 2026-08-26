@@ -73,6 +73,7 @@ window.actualizarOpcionesStockDropdown = function () {
 };
 
 window.obtenerTextoOptionStock = function (plat) {
+  if (plat === "NETFLIX INTERNACIONAL") return "NETFLIX INTERNACIONAL";
   const cant =
     window.stockPlataformasVentas[plat] !== undefined
       ? window.stockPlataformasVentas[plat]
@@ -104,6 +105,7 @@ window.toggleVentasPanel = function () {
     if (contenedor) contenedor.innerHTML = "";
     contadorFilasVentas = 0;
 
+    window.asegurarModalNetflixInternacional();
     window.agregarFilaServicioCombo();
     window.cargarStockParaPanelVentas();
   }
@@ -201,6 +203,14 @@ window.alCambiarServicioVenta = function (idFila, valServicio) {
   const selMeses = fila.querySelector(".sel-meses");
   const selBono = fila.querySelector(".sel-bono");
   const rowNetflix = fila.querySelector(".row-netflix-tipo");
+  const selTipo = fila.querySelector(".sel-tipo-netflix");
+  const inputCorreo = fila.querySelector(".input-correo-vta");
+
+  // Resetear estados por defecto para nueva selección
+  fila.removeAttribute("data-correo-reno");
+  fila.removeAttribute("data-perfil-reno");
+  fila.removeAttribute("data-clave-int");
+  fila.removeAttribute("data-pin-int");
 
   if (!valServicio) {
     selServicio.style.flex = "1";
@@ -214,6 +224,42 @@ window.alCambiarServicioVenta = function (idFila, valServicio) {
     selMeses.style.display = "block";
     selBono.style.display = "none";
     rowNetflix.style.display = "flex";
+    if (selTipo) {
+      selTipo.style.display = "block";
+      selTipo.innerHTML = `<option value="Nueva">Nueva</option><option value="Renovar">Renovar</option>`;
+      selTipo.value = "Nueva";
+    }
+    if (inputCorreo) {
+      inputCorreo.style.display = "none";
+      inputCorreo.value = "";
+      inputCorreo.onclick = function () {
+        window.abrirModalRenovacionNet(idFila);
+      };
+      inputCorreo.style.background = "rgba(10, 132, 255, 0.1)";
+      inputCorreo.style.borderColor = "rgba(10, 132, 255, 0.3)";
+      inputCorreo.style.color = "#0a84ff";
+    }
+  } else if (valServicio === "NETFLIX INTERNACIONAL") {
+    selServicio.style.flex = "2";
+    selPantallas.style.display = "none"; // Se asume 1 pantalla para las internacionales
+    selPantallas.value = "1";
+    selMeses.style.display = "block";
+    selBono.style.display = "none";
+    rowNetflix.style.display = "flex";
+
+    if (selTipo) selTipo.style.display = "none";
+    if (inputCorreo) {
+      inputCorreo.style.display = "block";
+      inputCorreo.style.flex = "1";
+      inputCorreo.value = "👉 Toca para ingresar datos";
+      inputCorreo.onclick = function () {
+        window.abrirModalInternacionalNet(idFila);
+      };
+      inputCorreo.style.background = "rgba(10, 132, 255, 0.1)";
+      inputCorreo.style.borderColor = "rgba(10, 132, 255, 0.3)";
+      inputCorreo.style.color = "#0a84ff";
+    }
+    window.abrirModalInternacionalNet(idFila);
   } else if (valServicio === "RECARGA") {
     selServicio.style.flex = "2";
     selPantallas.style.display = "none";
@@ -227,6 +273,162 @@ window.alCambiarServicioVenta = function (idFila, valServicio) {
     selBono.style.display = "none";
     rowNetflix.style.display = "none";
   }
+};
+
+// =========================================================================
+// 🌐 CREACIÓN Y GUARDADO DE NETFLIX INTERNACIONAL
+// =========================================================================
+window.asegurarModalNetflixInternacional = function () {
+  if (!document.getElementById("modalNetflixIntOverlay")) {
+    const modalHtml = `
+      <div class="overlay-ios" id="modalNetflixIntOverlay" style="display: none; z-index: 999999; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); align-items: center; justify-content: center;">
+          <div class="modal-ios" style="max-width: 400px; width: 92%; background: #141418; border: 1px solid rgba(10,132,255,0.3); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 30px 70px rgba(0,0,0,0.9);">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+                  <h3 style="margin: 0; color: #fff; font-size: 1.1rem; font-weight: 800; display:flex; align-items:center; gap:8px;">
+                      <span style="background:rgba(10,132,255,0.15); color:#0a84ff; padding:6px; border-radius:10px;">🌐</span>
+                      Netflix Internacional
+                  </h3>
+              </div>
+              <p style="color: #a1a1aa; font-size: 0.85rem; margin: 0;">Ingresa los datos de la cuenta internacional. Se registrará en la base de datos y luego se le asignará el cliente en la venta.</p>
+              <input type="hidden" id="intFilaDestino" />
+              <input type="email" id="intCorreo" class="input-ios" placeholder="Correo de la cuenta..." style="width:100%; background:rgba(0,0,0,0.4) !important; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.1) !important; color:#fff !important; outline:none;" />
+              <input type="text" id="intClave" class="input-ios" placeholder="Contraseña..." style="width:100%; background:rgba(0,0,0,0.4) !important; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.1) !important; color:#fff !important; outline:none;" />
+              <div style="display:flex; gap:10px;">
+                  <input type="text" id="intPerfil" class="input-ios" placeholder="Perfil (Ej: 1 o Nombre)" style="flex:1; background:rgba(0,0,0,0.4) !important; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.1) !important; color:#fff !important; outline:none;" />
+                  <input type="text" id="intPin" class="input-ios" placeholder="PIN (Opcional)" style="flex:1; background:rgba(0,0,0,0.4) !important; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.1) !important; color:#fff !important; outline:none;" />
+              </div>
+              <div style="display:flex; gap:10px; margin-top:8px;">
+                  <button class="btn-ios" onclick="cerrarModalInternacional()" style="flex:1; background:rgba(255,255,255,0.1); padding:12px; border-radius:12px; color:#fff; font-weight:700; border:none; cursor:pointer;">Cancelar</button>
+                  <button id="btnGuardarInt" class="btn-ios" onclick="guardarCuentaInternacional()" style="flex:1; background:#0a84ff; padding:12px; border-radius:12px; color:#fff; font-weight:800; border:none; cursor:pointer;">Continuar</button>
+              </div>
+          </div>
+      </div>`;
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
+  }
+};
+
+window.abrirModalInternacionalNet = function (idFila) {
+  if (typeof haptic === "function") haptic();
+  window.asegurarModalNetflixInternacional();
+
+  const fila = document.getElementById(idFila);
+  const correoPrevio = fila ? fila.getAttribute("data-correo-reno") : "";
+
+  document.getElementById("intFilaDestino").value = idFila;
+  document.getElementById("intCorreo").value = correoPrevio || "";
+  document.getElementById("intClave").value = fila
+    ? fila.getAttribute("data-clave-int") || ""
+    : "";
+  document.getElementById("intPerfil").value = fila
+    ? fila.getAttribute("data-perfil-reno") || ""
+    : "";
+  document.getElementById("intPin").value = fila
+    ? fila.getAttribute("data-pin-int") || ""
+    : "";
+
+  const modal = document.getElementById("modalNetflixIntOverlay");
+  modal.style.display = "flex";
+};
+
+window.cerrarModalInternacional = function () {
+  if (typeof haptic === "function") haptic();
+  const modal = document.getElementById("modalNetflixIntOverlay");
+  if (modal) modal.style.display = "none";
+
+  const idFila = document.getElementById("intFilaDestino").value;
+  const fila = document.getElementById(idFila);
+  if (fila && !fila.getAttribute("data-correo-reno")) {
+    const selPlat = fila.querySelector(".sel-servicio");
+    if (selPlat) selPlat.value = "";
+    window.alCambiarServicioVenta(idFila, "");
+  }
+};
+
+window.guardarCuentaInternacional = function () {
+  if (typeof haptic === "function") haptic();
+  const correo = document.getElementById("intCorreo").value.trim();
+  const clave = document.getElementById("intClave").value.trim();
+  const perfil = document.getElementById("intPerfil").value.trim();
+  const pin = document.getElementById("intPin").value.trim();
+  const idFila = document.getElementById("intFilaDestino").value;
+
+  if (!correo || !clave || !perfil) {
+    alert(
+      "⚠️ Correo, Clave y Perfil son obligatorios para registrarla en MySQL.",
+    );
+    return;
+  }
+
+  const btn = document.getElementById("btnGuardarInt");
+  const oldText = btn.innerText;
+  btn.disabled = true;
+  btn.innerHTML = "⏳ Conectando...";
+
+  // 1. Enviamos los datos a MySQL directamente a guardar_netflix.php
+  const formData = new FormData();
+  formData.append("accion", "guardar"); // Acción genérica de guardado
+  formData.append("correo", correo);
+  formData.append("clave", clave);
+
+  // Establecemos fecha de facturación a 30 días para no dejarla vacía en DB
+  let dateFact = new Date();
+  dateFact.setDate(dateFact.getDate() + 30);
+  formData.append("fecha_facturacion", dateFact.toISOString().split("T")[0]);
+
+  // Simulamos que llena los 5 perfiles pero prioriza el escrito en el input
+  formData.append("p1", perfil);
+  formData.append("pin1", pin);
+  formData.append("p2", "Libre");
+  formData.append("pin2", "");
+  formData.append("p3", "Libre");
+  formData.append("pin3", "");
+  formData.append("p4", "Libre");
+  formData.append("pin4", "");
+  formData.append("p5", "Libre");
+  formData.append("pin5", "");
+
+  fetch("https://api.cybernetsp.com/guardar_netflix.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.text())
+    .then((text) => {
+      btn.disabled = false;
+      btn.innerHTML = oldText;
+
+      // 2. Cerramos modal y preparamos la fila del carrito
+      const fila = document.getElementById(idFila);
+      if (fila) {
+        fila.setAttribute("data-correo-reno", correo);
+        fila.setAttribute("data-perfil-reno", perfil);
+        fila.setAttribute("data-clave-int", clave);
+        fila.setAttribute("data-pin-int", pin);
+
+        const selTipo = fila.querySelector(".sel-tipo-netflix");
+        if (selTipo) {
+          selTipo.innerHTML = `<option value="Internacional">Internacional</option>`;
+          selTipo.value = "Internacional";
+        }
+
+        const inputCorreoUi = fila.querySelector(".input-correo-vta");
+        if (inputCorreoUi) {
+          inputCorreoUi.value = `${correo} | Perfil: ${perfil}`;
+          inputCorreoUi.style.background = "rgba(48, 209, 88, 0.1)";
+          inputCorreoUi.style.borderColor = "rgba(48, 209, 88, 0.3)";
+          inputCorreoUi.style.color = "#30d158";
+        }
+      }
+
+      document.getElementById("modalNetflixIntOverlay").style.display = "none";
+      if (typeof triggerToast === "function")
+        triggerToast("✅ Cuenta almacenada en MySQL y lista para venta.");
+    })
+    .catch((err) => {
+      console.error(err);
+      btn.disabled = false;
+      btn.innerHTML = oldText;
+      alert("❌ Error de red al intentar inyectar la cuenta en MySQL.");
+    });
 };
 
 // =========================================================================
@@ -342,8 +544,9 @@ window.alCambiarTipoVenta = function (idFila) {
   const telNum = celInput ? celInput.value.replace(/\D/g, "").trim() : "";
 
   if (selPlat && selPlat.value !== "NETFLIX") {
-    if (selectTipo) selectTipo.value = "Nueva";
-    if (inputCorreo) {
+    if (selectTipo && selPlat.value !== "NETFLIX INTERNACIONAL")
+      selectTipo.value = "Nueva";
+    if (inputCorreo && selPlat.value !== "NETFLIX INTERNACIONAL") {
       inputCorreo.style.display = "none";
       inputCorreo.value = "";
     }
@@ -464,7 +667,12 @@ window.seleccionarCuentaModalNet = function (
     fila.setAttribute("data-correo-reno", correo);
     fila.setAttribute("data-perfil-reno", perfil);
     const inputCorreo = fila.querySelector(".input-correo-vta");
-    if (inputCorreo) inputCorreo.value = `${correo} | Perfil: ${perfil}`;
+    if (inputCorreo) {
+      inputCorreo.value = `${correo} | Perfil: ${perfil}`;
+      inputCorreo.style.background = "rgba(10, 132, 255, 0.1)";
+      inputCorreo.style.borderColor = "rgba(10, 132, 255, 0.3)";
+      inputCorreo.style.color = "#0a84ff";
+    }
   }
   const modal = document.getElementById("modalRenovacionFlotante");
   if (modal) modal.remove();
@@ -536,6 +744,10 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
         const correoReno = fila.getAttribute("data-correo-reno") || "";
         const perfilReno = fila.getAttribute("data-perfil-reno") || "";
 
+        // Datos específicos de "Internacional" guardados en la fila
+        const claveInt = fila.getAttribute("data-clave-int") || "";
+        const pinInt = fila.getAttribute("data-pin-int") || "";
+
         servicios.push({
           plataforma: platVal,
           pantallas: numPantallas,
@@ -547,6 +759,8 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
               ? `${correoReno} | Perfil: ${perfilReno}`
               : correoReno,
           perfil: perfilReno,
+          claveInt: claveInt,
+          pinInt: pinInt,
         });
 
         if (platVal === "RECARGA") {
@@ -555,7 +769,8 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
           );
         } else {
           let txtTipo =
-            tipoServicio === "Renovar" && correoReno !== ""
+            (tipoServicio === "Renovar" || tipoServicio === "Internacional") &&
+            correoReno !== ""
               ? `Reno: ${correoReno}`
               : tipoServicio;
           resumenConfirmarArray.push(
@@ -633,20 +848,28 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
               : "";
 
           let esSoloNetflixRenovacion = false;
+          let titlePlatFicha = "NETFLIX PREMIUM";
+
           if (data.entregados && data.entregados.length === 1) {
             let itemUnico = data.entregados[0];
             let tipoItem = (itemUnico.tipo || "").toLowerCase();
             if (
-              itemUnico.plataforma === "NETFLIX" &&
-              (tipoItem.includes("reno") || tipoItem.includes("renovar"))
+              (itemUnico.plataforma === "NETFLIX" ||
+                itemUnico.plataforma === "NETFLIX INTERNACIONAL") &&
+              (tipoItem.includes("reno") ||
+                tipoItem.includes("renovar") ||
+                tipoItem.includes("internacional"))
             ) {
               esSoloNetflixRenovacion = true;
+              if (itemUnico.plataforma === "NETFLIX INTERNACIONAL") {
+                titlePlatFicha = "NETFLIX INTERNACIONAL";
+              }
             }
           }
 
           let fichaTexto = "";
           if (esSoloNetflixRenovacion) {
-            fichaTexto = `🌟 *¡Hola${nombreSaludo}!*\n\nTu cuenta de *NETFLIX PREMIUM* ha sido *RENOVADA* con éxito 🔄✨. Aquí tienes la información de tu servicio:\n`;
+            fichaTexto = `🌟 *¡Hola${nombreSaludo}!*\n\nTu cuenta de *${titlePlatFicha}* ha sido procesada con éxito 🔄✨. Aquí tienes la información de tu servicio:\n`;
           } else {
             fichaTexto = `🌟 *¡Hola${nombreSaludo}!*\n\nTu pedido ha sido procesado con éxito. Aquí tienes tus accesos:\n`;
           }
@@ -665,9 +888,9 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
 
                 let textoMeses =
                   parseInt(item.meses) > 1 ? ` (${item.meses} Meses)` : "";
-                let esRenoItem = (item.tipo || "")
-                  .toLowerCase()
-                  .includes("reno");
+                let esRenoItem =
+                  (item.tipo || "").toLowerCase().includes("reno") ||
+                  (item.tipo || "").toLowerCase().includes("internacional");
 
                 let vencVal = item.vencimiento;
                 if (
@@ -693,11 +916,19 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                     "NOVIEMBRE",
                     "DICIEMBRE",
                   ];
-                  vencVal = dV.getDate() + "DE" + mesesMayus[dV.getMonth()];
+                  vencVal = dV.getDate() + " DE " + mesesMayus[dV.getMonth()];
                 }
 
-                if (item.plataforma === "NETFLIX" && esRenoItem) {
-                  fichaTexto += `\n🔄 *RENOVACIÓN DE NETFLIX PREMIUM*${textoMeses} ✅\n────────────────────\n`;
+                if (
+                  (platFormat === "NETFLIX" ||
+                    platFormat === "NETFLIX-INTERNACIONAL" ||
+                    platFormat === "NETFLIX INTERNACIONAL") &&
+                  esRenoItem
+                ) {
+                  let platDisplay = platFormat.includes("INTERNACIONAL")
+                    ? "NETFLIX INTERNACIONAL"
+                    : "NETFLIX PREMIUM";
+                  fichaTexto += `\n🔄 *CUENTA DE ${platDisplay}*${textoMeses} ✅\n────────────────────\n`;
                   fichaTexto += `👤 *Correo:* ${item.correo || "-"}\n🔐 *Contraseña:* ${item.clave || "-"}\n🌐 *Perfil:* ${item.perfil || "1"}\n`;
                   if (
                     item.pin &&
@@ -707,7 +938,7 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
                   ) {
                     fichaTexto += `📍 *PIN:* ${item.pin}\n`;
                   }
-                  fichaTexto += `📅 *Nueva Fecha de Vencimiento:* ${vencVal}\n`;
+                  fichaTexto += `📅 *Vencimiento:* ${vencVal}\n`;
                   fichaTexto += `\n🤖 *¿NECESITAS UN CÓDIGO?* Puedes usar nuestra pagina para codigos disponible 24/7: www.cybernetsp.com/\n`;
                 } else {
                   fichaTexto += `\n🎬 *DETALLES DE ${platFormat}*${textoMeses} ✅\n────────────────────\n`;
@@ -1161,7 +1392,7 @@ window.calcularPreciosSistemaCotizador = function () {
         ? parseInt(selectPantallas.value) || 1
         : 1;
 
-      if (val === "NETFLIX") {
+      if (val === "NETFLIX" || val === "NETFLIX INTERNACIONAL") {
         tieneNetflix = true;
         if (pantallas === 1) costoNetflixCalculado = pNet;
         else if (pantallas === 2)
