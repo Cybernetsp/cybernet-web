@@ -205,7 +205,6 @@ window.alCambiarServicioVenta = function (idFila, valServicio) {
   const selTipo = fila.querySelector(".sel-tipo-netflix");
   const inputCorreo = fila.querySelector(".input-correo-vta");
 
-  // Resetear estados por defecto para nueva selección
   fila.removeAttribute("data-correo-reno");
   fila.removeAttribute("data-perfil-reno");
   fila.removeAttribute("data-clave-int");
@@ -240,8 +239,6 @@ window.alCambiarServicioVenta = function (idFila, valServicio) {
     }
   } else if (valServicio === "NETFLIX INTERNACIONAL") {
     selServicio.style.flex = "2";
-
-    // 🔒 BLOQUEO ESTRICTO: Ocultar y forzar obligatoriamente a 1 Pantalla y 1 Mes
     selPantallas.style.display = "none";
     selPantallas.value = "1";
     selMeses.style.display = "none";
@@ -374,7 +371,6 @@ window.guardarCuentaInternacional = function () {
   formData.append("perfil", perfil);
   formData.append("pin", pin);
 
-  // Calcula automáticamente el vencimiento a 30 días
   let dateFact = new Date();
   dateFact.setDate(dateFact.getDate() + 30);
   const mesesLong = [
@@ -534,7 +530,6 @@ window.verificarCelularTrabajadorVenta = function (inputCelular) {
   }, 350);
 };
 
-// Listener para el celular en el modal de venta
 document.addEventListener("DOMContentLoaded", () => {
   const inputCelular = document.getElementById("vendedorClienteCelular");
   if (inputCelular) {
@@ -756,7 +751,6 @@ window.ejecutarVentaFinal = function (e, permitirSeparados = false) {
         const correoReno = fila.getAttribute("data-correo-reno") || "";
         const perfilReno = fila.getAttribute("data-perfil-reno") || "";
 
-        // Datos específicos de "Internacional" guardados en la fila
         const claveInt = fila.getAttribute("data-clave-int") || "";
         const pinInt = fila.getAttribute("data-pin-int") || "";
 
@@ -1552,20 +1546,21 @@ window.calcularPreciosSistemaCotizador = function () {
     if (rowDescFiel) rowDescFiel.style.display = "none";
   }
 
-  let totalA_Cobrar = Math.max(0, subtotal - montoDescuento - descuentoFielTotal);
+  let totalA_Cobrar = Math.max(
+    0,
+    subtotal - montoDescuento - descuentoFielTotal,
+  );
 
   const elBasePrice = document.getElementById("calcBasePriceDisplay");
   if (elBasePrice)
     elBasePrice.value = "$" + precioBaseUnMes.toLocaleString("es-CO");
   const elSubtotal = document.getElementById("calcSubtotal");
-  if (elSubtotal)
-    elSubtotal.innerText = "$" + subtotal.toLocaleString("es-CO");
+  if (elSubtotal) elSubtotal.innerText = "$" + subtotal.toLocaleString("es-CO");
   const elDiscount = document.getElementById("calcDiscount");
   if (elDiscount)
     elDiscount.innerText = "-$" + montoDescuento.toLocaleString("es-CO");
   const elTotal = document.getElementById("calcTotal");
-  if (elTotal)
-    elTotal.innerText = "$" + totalA_Cobrar.toLocaleString("es-CO");
+  if (elTotal) elTotal.innerText = "$" + totalA_Cobrar.toLocaleString("es-CO");
 };
 
 window.copiarCotizacionCombo = function (btn) {
@@ -1575,8 +1570,6 @@ window.copiarCotizacionCombo = function (btn) {
   let hasNetNormal = false;
   let hasNetInt = false;
   let hasDisneyPre = false;
-  let hasParamount = false;
-  let countExtrasEstandar = 0;
 
   document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
     const cb = row.querySelector(".chk-cotizar-plat");
@@ -1607,10 +1600,6 @@ window.copiarCotizacionCombo = function (btn) {
         valUpper === "DISNEY PREMIUM"
       ) {
         hasDisneyPre = true;
-      } else if (valUpper === "PARAMOUNT+" || valUpper === "PARAMOUNT") {
-        hasParamount = true;
-      } else {
-        countExtrasEstandar += pantallas;
       }
     }
   });
@@ -1630,7 +1619,7 @@ window.copiarCotizacionCombo = function (btn) {
     ? document.getElementById("calcFidelidad").checked
     : false;
 
-  // Lectura directa de las cifras calculadas en pantalla
+  // Lectura directa de las cifras exactas calculadas en pantalla
   const subtotalText = document.getElementById("calcSubtotal")
     ? document.getElementById("calcSubtotal").innerText
     : "$0";
@@ -1647,80 +1636,39 @@ window.copiarCotizacionCombo = function (btn) {
   let mensajeVIP = "";
   let listaPlatFormateada = plataformasSeleccionadas.join("\n");
 
-  let numCombo =
-    1 +
-    (hasDisneyPre ? 3 : 0) +
-    countExtrasEstandar +
-    (hasParamount ? 1 : 0);
-  let numEmoji = numCombo <= 9 ? `${numCombo}️⃣` : "🔥";
-
-  let descCombo = hasNetInt ? "Netflix Internacional" : "Netflix";
-  if (hasDisneyPre) descCombo += " + Disney P.";
-  if (hasParamount) descCombo += " + Paramount+";
-  if (countExtrasEstandar > 0)
-    descCombo += ` + ${countExtrasEstandar} Extra(s)`;
-
-  let starEmoji = hasDisneyPre ? " ⭐" : "";
-
+  let tituloHeader = "💻 *TU COMBO STREAMING CYBERNET* 🚀📺";
   if (hasNetInt) {
-    // 🌐 NETFLIX INTERNACIONAL
-    let tituloHeader = hasDisneyPre
+    tituloHeader = hasDisneyPre
       ? "🌐 *TU COMBO NETFLIX INTERNACIONAL VIP* 🍿"
       : "🌐 *TU COMBO NETFLIX INTERNACIONAL* 🍿";
-
-    mensajeVIP = `${tituloHeader}\n${listaPlatFormateada}\n\n${numEmoji} *${descCombo}* ➡️ *${totalText}*${starEmoji} 🗓️ (${meses} Mes${meses > 1 ? "es" : ""})`;
-
-    if (meses > 1 || esClienteFiel) {
-      mensajeVIP += `\n\n💵 *Valor Comercial:* ${subtotalText}`;
-      if (meses > 1) {
-        mensajeVIP += `\n🎁 *Descuento Duración (${porcDesc}%):* ${discountComboText}`;
-      }
-      if (esClienteFiel) {
-        mensajeVIP += `\n✨ *Descuento Cliente Fiel:* ${discountFielText}`;
-      }
-      mensajeVIP += `\n───────────────────────\n💰 *TOTAL NETO A PAGAR: ${totalText}* 🔥✨`;
-    }
-
-    mensajeVIP += `\n\n👇 _Dime si te agrada la oferta para enviarte los medios de pago y activarte de inmediato._`;
-
   } else if (hasNetNormal) {
-    // 💻 NETFLIX PREMIUM NORMAL
-    let tituloHeader = hasDisneyPre
+    tituloHeader = hasDisneyPre
       ? "💎 *TU COMBO NETFLIX PREMIUM VIP* 🍿"
       : "💻 *TU COMBO NETFLIX PREMIUM* 🍿";
-
-    mensajeVIP = `${tituloHeader}\n${listaPlatFormateada}\n\n${numEmoji} *${descCombo}* ➡️ *${totalText}*${starEmoji} 🗓️ (${meses} Mes${meses > 1 ? "es" : ""})`;
-
-    if (meses > 1 || esClienteFiel) {
-      mensajeVIP += `\n\n💵 *Valor Comercial:* ${subtotalText}`;
-      if (meses > 1) {
-        mensajeVIP += `\n🎁 *Descuento Duración (${porcDesc}%):* ${discountComboText}`;
-      }
-      if (esClienteFiel) {
-        mensajeVIP += `\n✨ *Descuento Cliente Fiel:* ${discountFielText}`;
-      }
-      mensajeVIP += `\n───────────────────────\n💰 *TOTAL NETO A PAGAR: ${totalText}* 🔥✨`;
-    }
-
-    mensajeVIP += `\n\n⚡ *¡BENEFICIO EXCLUSIVO!*\nTu cuenta de *NETFLIX* incluye acceso para generar códigos *24/7 de forma automática*. ¡Sin hacer filas en el chat! 🤖🔓\n\n👇 _Dime si te agrada la oferta para enviarte los medios de pago y activarte de inmediato._`;
-
-  } else {
-    // 📺 COMBOS GENERALES SIN NETFLIX
-    mensajeVIP = `💻 *TU COMBO STREAMING CYBERNET* 🚀📺\n${listaPlatFormateada}\n\n💰 *TOTAL A PAGAR: ${totalText}* 🔥🍿 🗓️ (${meses} Mes${meses > 1 ? "es" : ""})`;
-
-    if (meses > 1 || esClienteFiel) {
-      mensajeVIP += `\n\n💵 *Valor Comercial:* ${subtotalText}`;
-      if (meses > 1) {
-        mensajeVIP += `\n🎁 *Descuento Duración (${porcDesc}%):* ${discountComboText}`;
-      }
-      if (esClienteFiel) {
-        mensajeVIP += `\n✨ *Descuento Cliente Fiel:* ${discountFielText}`;
-      }
-      mensajeVIP += `\n───────────────────────\n💰 *TOTAL NETO A PAGAR: ${totalText}* 🔥✨`;
-    }
-
-    mensajeVIP += `\n\n👇 _Dime si te agrada la oferta para enviarte los medios de pago y activarte de inmediato._`;
   }
+
+  mensajeVIP = `${tituloHeader}\n${listaPlatFormateada}\n`;
+
+  // Desglose si hay descuentos aplicados por meses o Cliente Fiel
+  if (meses > 1 || esClienteFiel) {
+    mensajeVIP += `\n💵 *Valor Comercial:* ${subtotalText}`;
+    if (meses > 1 && porcDesc > 0) {
+      mensajeVIP += `\n🎁 *Descuento Duración (${porcDesc}%):* ${discountComboText}`;
+    }
+    if (esClienteFiel) {
+      mensajeVIP += `\n✨ *Descuento Cliente Fiel:* ${discountFielText}`;
+    }
+    mensajeVIP += `\n───────────────────────\n💰 *TOTAL NETO A PAGAR: ${totalText}* 🔥✨`;
+  } else {
+    mensajeVIP += `\n───────────────────────\n💰 *TOTAL A PAGAR: ${totalText}* 🔥🍿`;
+  }
+
+  // Beneficio del Bot (Exclusivo para Netflix Premium normal)
+  if (hasNetNormal && !hasNetInt) {
+    mensajeVIP += `\n\n⚡ *¡BENEFICIO EXCLUSIVO!*\nTu cuenta de *NETFLIX* includes acceso para generar códigos *24/7 de forma automática*. ¡Sin hacer filas en el chat! 🤖🔓`;
+  }
+
+  mensajeVIP += `\n\n👇 _Dime si te agrada la oferta para enviarte los medios de pago y activarte de inmediato._`;
 
   navigator.clipboard.writeText(mensajeVIP).then(() => {
     const originalHTML = btn.innerHTML;
