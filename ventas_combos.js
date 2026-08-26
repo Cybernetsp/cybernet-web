@@ -136,7 +136,6 @@ window.agregarFilaServicioCombo = function () {
         <option value="RECARGA">💼 Recarga de Saldo</option>
         <option value="NETFLIX">${getTxt("NETFLIX")}</option>
         <option value="NETFLIX INTERNACIONAL">NETFLIX INTERNACIONAL</option>
-        <option value="DIRECTV GO">${getTxt("DIRECTV GO")}</option>
         <option value="AMAZON">${getTxt("AMAZON")}</option>
         <option value="DISNEY PREMIUM">${getTxt("DISNEY PREMIUM")}</option>
         <option value="DISNEY ESTANDAR">${getTxt("DISNEY ESTANDAR")}</option>
@@ -1194,25 +1193,6 @@ window.abrirCalculadoraCombos = function () {
     container.appendChild(iptvRow);
   }
 
-  // INYECTAR DIRECTV GO SI NO EXISTE
-  if (
-    container &&
-    !document.querySelector('.chk-cotizar-plat[value="DIRECTV-GO"]')
-  ) {
-    const dgoRow = document.createElement("div");
-    dgoRow.className = "row-cotizar-plat";
-    dgoRow.setAttribute("data-nombre", "directv go dgo");
-    dgoRow.style.cssText =
-      "border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);";
-    dgoRow.innerHTML = `
-      <label style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; width: 100%; box-sizing: border-box;">
-          <span style="font-size: 0.9rem; font-weight: 600; color: #00bfff">Directv Go</span>
-          <input type="checkbox" class="chk-cotizar-plat" value="DIRECTV-GO" data-tipo="herramienta" onchange="window.controlarDisneyMutuo(this); window.calcularPreciosSistemaCotizador();" style="accent-color: #0a84ff; width: 18px; height: 18px; cursor: pointer;" />
-      </label>
-    `;
-    container.appendChild(dgoRow);
-  }
-
   document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
     if (!row.querySelector(".cotizador-pantallas-wrapper")) {
       let wrapper = document.createElement("div");
@@ -1405,11 +1385,6 @@ window.calcularPreciosSistemaCotizador = function () {
       combo: Math.round(getPrecioDB("VIX", 8500) * 0.35),
       isTier: true,
     },
-    "DIRECTV-GO": {
-      indiv: getPrecioDB("DIRECTV-GO", 30000),
-      combo: Math.round(getPrecioDB("DIRECTV-GO", 30000) * 0.83),
-      isTier: false,
-    },
     "Paramount+": {
       indiv: getPrecioDB("PARAMOUNT", 15000),
       combo: Math.round(getPrecioDB("PARAMOUNT", 15000) * 0.86),
@@ -1474,7 +1449,7 @@ window.calcularPreciosSistemaCotizador = function () {
             "NETFLIX-INTERNACIONAL",
             getPrecioDB(
               "NETFLIX_INTERNACIONAL",
-              getPrecioDB("NETFLIX INTERNACIONAL", 15000),
+              getPrecioDB("NETFLIX INTERNACIONAL", 18000),
             ),
           );
           costoNetflixCalculado = pNet; // Fijo a 1 pantalla
@@ -1589,23 +1564,46 @@ window.copiarCotizacionCombo = function (btn) {
   if (typeof haptic === "function") haptic();
 
   let plataformasSeleccionadas = [];
+  let hasNetNormal = false;
+  let hasNetInt = false;
+  let hasDisneyPre = false;
+  let hasParamount = false;
+  let countExtrasEstandar = 0;
+
   document.querySelectorAll(".row-cotizar-plat").forEach((row) => {
     const cb = row.querySelector(".chk-cotizar-plat");
     if (cb && cb.checked) {
+      const val = cb.value;
+      const valUpper = val.toUpperCase();
       const selectPantallas = row.querySelector(".sel-pantallas-cotizador");
       const pantallas = selectPantallas
         ? parseInt(selectPantallas.value) || 1
         : 1;
+
       let textoPantallas = "";
       if (pantallas > 1) {
         textoPantallas =
-          pantallas >= 5 && cb.value === "NETFLIX"
+          pantallas >= 5 && valUpper === "NETFLIX"
             ? " (Cuenta Completa)"
             : ` (${pantallas} Pantallas)`;
       }
-      plataformasSeleccionadas.push(
-        `    • 📺 *${cb.value.toUpperCase()}*${textoPantallas}`,
-      );
+
+      plataformasSeleccionadas.push(`    • 📺 *${valUpper}*${textoPantallas}`);
+
+      if (valUpper === "NETFLIX") {
+        hasNetNormal = true;
+      } else if (valUpper === "NETFLIX INTERNACIONAL") {
+        hasNetInt = true;
+      } else if (
+        valUpper === "DISNEY-PREMIUM" ||
+        valUpper === "DISNEY PREMIUM"
+      ) {
+        hasDisneyPre = true;
+      } else if (valUpper === "PARAMOUNT+" || valUpper === "PARAMOUNT") {
+        hasParamount = true;
+      } else {
+        countExtrasEstandar += pantallas;
+      }
     }
   });
 
@@ -1615,33 +1613,94 @@ window.copiarCotizacionCombo = function (btn) {
   }
 
   const monthSelect = document.getElementById("calcMonths");
-  const meses = monthSelect.value;
-  const porcDesc =
-    monthSelect.options[monthSelect.selectedIndex].getAttribute("data-desc");
-  const esClienteFiel = document.getElementById("calcFidelidad").checked;
+  const meses = parseInt(monthSelect.value) || 1;
+  const esClienteFiel = document.getElementById("calcFidelidad")
+    ? document.getElementById("calcFidelidad").checked
+    : false;
 
-  const subtotalText = document.getElementById("calcSubtotal").innerText;
-  const discountText = document.getElementById("calcDiscount").innerText;
-  const totalText = document.getElementById("calcTotal").innerText;
-
+  let mensajeVIP = "";
   let listaPlatFormateada = plataformasSeleccionadas.join("\n");
-  let mensajeVIP = `💻 *¡TU COMBO STREAMING CYBERNET ESTÁ LISTO!* 🚀📺\n\n🔥 *Servicios Incluidos:*\n${listaPlatFormateada}\n\n🗓️ *Vigencia contratada:* ${meses} Mes(es) Garantizados\n`;
 
-  if (parseInt(meses) > 1 || esClienteFiel) {
-    mensajeVIP += `\n💵 Valor Comercial: ${subtotalText}\n`;
-    if (parseInt(meses) > 1) {
-      mensajeVIP += `🎁 *Descuento Especial (${porcDesc}%):* ${discountText}\n`;
+  if (hasNetInt) {
+    // 🌐 NETFLIX INTERNACIONAL (Base 18k + DisneyPre 10k + Paramount 6k + Extras 4k c/u)
+    let tituloHeader = hasDisneyPre
+      ? "🌐 *TU COMBO NETFLIX INTERNACIONAL VIP* 🍿"
+      : "🌐 *TU COMBO NETFLIX INTERNACIONAL* 🍿";
+
+    let totalUnMes =
+      18000 +
+      (hasDisneyPre ? 10000 : 0) +
+      (hasParamount ? 6000 : 0) +
+      countExtrasEstandar * 4000;
+    let totalFinal = totalUnMes * meses;
+    if (esClienteFiel) totalFinal = Math.max(0, totalFinal - 1000 * meses);
+
+    let numCombo =
+      1 + (hasDisneyPre ? 3 : 0) + countExtrasEstandar + (hasParamount ? 1 : 0);
+    let numEmoji = numCombo <= 9 ? `${numCombo}️⃣` : "🔥";
+
+    let descCombo = "Netflix Internacional";
+    if (hasDisneyPre) descCombo += " + Disney P.";
+    if (hasParamount) descCombo += " + Paramount+";
+    if (countExtrasEstandar > 0)
+      descCombo += ` + ${countExtrasEstandar} Extra(s)`;
+
+    let starEmoji = hasDisneyPre ? " ⭐" : "";
+
+    mensajeVIP = `${tituloHeader}\n${listaPlatFormateada}\n\n${numEmoji} *${descCombo}* ➡️ *$${totalFinal.toLocaleString("es-CO")}*${starEmoji} 🗓️ (${meses} Mes${meses > 1 ? "es" : ""})\n\n👇 _Dime si te agrada la oferta para enviarte los medios de pago y activarte de inmediato._`;
+  } else if (hasNetNormal) {
+    // 💻 NETFLIX PREMIUM NORMAL
+    let tituloHeader = hasDisneyPre
+      ? "💎 *TU COMBO NETFLIX PREMIUM VIP* 🍿"
+      : "💻 *TU COMBO NETFLIX PREMIUM* 🍿";
+
+    let totalUnMes = 0;
+    let numCombo = 0;
+    let descCombo = "Netflix";
+
+    if (hasDisneyPre) {
+      numCombo = 4 + countExtrasEstandar;
+      if (countExtrasEstandar === 0) totalUnMes = 25000;
+      else if (countExtrasEstandar === 1) totalUnMes = 29000;
+      else if (countExtrasEstandar === 2) totalUnMes = 32000;
+      else if (countExtrasEstandar === 3) totalUnMes = 35000;
+      else totalUnMes = 35000 + (countExtrasEstandar - 3) * 4000;
+
+      descCombo += " + Disney P.";
+      if (countExtrasEstandar > 0)
+        descCombo += ` + ${countExtrasEstandar} Extra(s)`;
+    } else {
+      numCombo = countExtrasEstandar;
+      if (countExtrasEstandar === 0) totalUnMes = 15000;
+      else if (countExtrasEstandar === 1) totalUnMes = 20000;
+      else if (countExtrasEstandar === 2) totalUnMes = 24000;
+      else if (countExtrasEstandar === 3) totalUnMes = 27000;
+      else totalUnMes = 27000 + (countExtrasEstandar - 3) * 4000;
+
+      if (countExtrasEstandar > 0)
+        descCombo += ` + ${countExtrasEstandar} Extra(s)`;
     }
-    if (esClienteFiel) {
-      let descFielAcumulado = 1000 * parseInt(meses);
-      mensajeVIP += `✨ *Descuento Cliente Fiel:* -$${descFielAcumulado.toLocaleString("es-CO")} _(¡Por tu lealtad con la casa!)_\n`;
+
+    if (hasParamount) {
+      totalUnMes += 6000;
+      descCombo += " + Paramount+";
+      numCombo += 1;
     }
-    mensajeVIP += `───────────────────────\n💰 *TOTAL NETO A PAGAR: ${totalText}* 🔥✨\n`;
+
+    let totalFinal = totalUnMes * meses;
+    if (esClienteFiel) totalFinal = Math.max(0, totalFinal - 1000 * meses);
+
+    let numEmoji = numCombo <= 9 ? `${numCombo}️⃣` : "🔥";
+    let starEmoji = hasDisneyPre ? " ⭐" : "";
+
+    mensajeVIP = `${tituloHeader}\n${listaPlatFormateada}\n\n${numEmoji} *${descCombo}* ➡️ *$${totalFinal.toLocaleString("es-CO")}*${starEmoji} 🗓️ (${meses} Mes${meses > 1 ? "es" : ""})\n\n⚡ *¡BENEFICIO EXCLUSIVO!*\nTu cuenta de *NETFLIX* incluye acceso para generar códigos *24/7 de forma automática*. ¡Sin hacer filas en el chat! 🤖🔓\n\n👇 _Dime si te agrada la oferta para enviarte los medios de pago y activarte de inmediato._`;
   } else {
-    mensajeVIP += `───────────────────────\n💰 *TOTAL A PAGAR: ${totalText}* 🔥🍿\n`;
+    // 📺 COMBOS GENERALES SIN NETFLIX
+    const totalText = document.getElementById("calcTotal")
+      ? document.getElementById("calcTotal").innerText
+      : "$0";
+    mensajeVIP = `💻 *TU COMBO STREAMING CYBERNET* 🚀📺\n${listaPlatFormateada}\n\n💰 *TOTAL A PAGAR: ${totalText}* 🔥🍿 🗓️ (${meses} Mes${meses > 1 ? "es" : ""})\n\n👇 _Dime si te agrada la oferta para enviarte los medios de pago y activarte de inmediato._`;
   }
-
-  mensajeVIP += `\n\n¿Te agrada la oferta para enviarte los medios de pago y activarte de inmediato? ⚡🍿`;
 
   navigator.clipboard.writeText(mensajeVIP).then(() => {
     const originalHTML = btn.innerHTML;
