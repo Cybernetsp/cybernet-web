@@ -496,7 +496,7 @@ function lanzarErrorCopia(imgElement) {
 }
 
 /* ==========================================================================
-   📩 BANDEJA DE CÓDIGOS DE ACCESO (VIGENCIA 15 MIN EN TIEMPO REAL)
+   📩 BANDEJA DE CÓDIGOS DE ACCESO (VIGENCIA 15 MIN EN TIEMPO REAL PRECISO)
    ========================================================================== */
 const URL_APPS_SCRIPT_CODIGOS =
   "https://script.google.com/macros/s/AKfycbxqKpMcC5BI0H6PHnImu5Lkw3ryiuFO0fW0KJAhQ_45kzglYn9CpN1O2fCjezXM5oMi/exec";
@@ -519,33 +519,39 @@ window.toggleCodesPanel = function () {
   }
 };
 
-// ⏱️ HELPER: Obtener el timestamp de expiración (Inicio + 15 min)
+// ⏱️ HELPER PREACABADO: Obtener el timestamp de expiración (Llegada exacta ISO + 15 min)
 function calcularExpiracionCodigoMs(item) {
   let inicioMs = 0;
 
+  // 1. Normalización estricta ISO para iOS, Safari y Chrome (Reemplazar espacios por 'T')
   if (item.fecha_registro) {
-    let parsed = new Date(item.fecha_registro).getTime();
+    let isoStr = String(item.fecha_registro).trim().replace(" ", "T");
+    let parsed = new Date(isoStr).getTime();
     if (!isNaN(parsed) && parsed > 0) inicioMs = parsed;
   }
 
+  // 2. Respaldo para hora formateada corta con segundos opcionales (Ej: 13:19 o 13:19:25)
   if (!inicioMs && item.hora) {
     const hoy = new Date();
     let p = item.hora.trim().split(" ");
     let hm = p[0].split(":");
     let h = parseInt(hm[0], 10) || 0;
     let m = parseInt(hm[1], 10) || 0;
+    let s = hm[2] ? parseInt(hm[2], 10) : 0;
     let ampm = p[1] ? p[1].toUpperCase() : "";
-    if (h === 12) h = 0;
-    if (ampm === "PM") h += 12;
-    hoy.setHours(h, m, 0, 0);
+
+    if (h === 12 && ampm === "AM") h = 0;
+    if (ampm === "PM" && h < 12) h += 12;
+
+    hoy.setHours(h, m, s, 0);
     inicioMs = hoy.getTime();
   }
 
   if (!inicioMs) inicioMs = Date.now();
-  return inicioMs + 15 * 60 * 1000; // 15 minutos de vigencia
+  return inicioMs + 15 * 60 * 1000; // Exactamente 15 minutos (900.000 ms)
 }
 
-// ⏱️ TIMER EN TIEMPO REAL: Actualiza todas las insignias de vigencia cada segundo
+// ⏱️ TIMER EN TIEMPO REAL: Actualiza la vigencia regresiva segundo a segundo
 window.iniciarTimerCodigosTiempoReal = function () {
   if (window.timerIntervalCodigos) clearInterval(window.timerIntervalCodigos);
 
@@ -627,7 +633,10 @@ function renderizarCodigosBandeja(res, contenedor) {
         return parseInt(b.id, 10) - parseInt(a.id, 10);
       }
       if (a.fecha_registro && b.fecha_registro) {
-        return new Date(b.fecha_registro) - new Date(a.fecha_registro);
+        return (
+          new Date(String(b.fecha_registro).replace(" ", "T")) -
+          new Date(String(a.fecha_registro).replace(" ", "T"))
+        );
       }
 
       function getMins(t) {
@@ -675,7 +684,7 @@ function renderizarCodigosBandeja(res, contenedor) {
           ? item.codigoLink.substring(0, 22) + "..."
           : item.codigoLink;
 
-      // ⏱️ Cálculo de expiración
+      // ⏱️ Cálculo exacto de la expiración
       const expMs = calcularExpiracionCodigoMs(item);
 
       let botonHtml = "";
