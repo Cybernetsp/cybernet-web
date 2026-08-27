@@ -1084,7 +1084,9 @@
             </svg>
           </button>
         </div>
-        <div style="width: 100%; margin-bottom: 12px">
+
+        <!-- BUSCADOR PRINCIPAL -->
+        <div style="width: 100%; margin-bottom: 10px">
           <input
             type="text"
             id="inputCasilleroSearch"
@@ -1099,10 +1101,27 @@
             "
           />
         </div>
+
+        <!-- 🚀 CONTENEDOR DINÁMICO DE FILTROS POR PLATAFORMA ADQUIRIDA -->
+        <div
+          id="casilleroPlataformasFilterTabs"
+          style="
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+            width: 100%;
+          "
+        ></div>
+
+        <!-- RESULTADOS -->
         <div
           id="contenedorResultadosCasillero"
           style="
-            max-height: 60vh;
+            max-height: 55vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
