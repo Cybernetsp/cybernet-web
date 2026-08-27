@@ -1328,7 +1328,11 @@
     </div>
 
     <!-- CENTRO CÓDIGOS B2B -->
-    <div class="overlay-modal-code" id="codesCenterOverlay">
+    <div
+      class="overlay-modal-code"
+      id="codesCenterOverlay"
+      style="display: none"
+    >
       <div class="modal-ios" style="max-width: 420px; width: 92%">
         <div
           style="
@@ -1387,7 +1391,12 @@
         <div
           id="codeStep1"
           class="code-step"
-          style="display: flex; flex-direction: column; gap: 12px; width: 100%"
+          style="
+            display: flex !important;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+          "
         >
           <p
             style="
@@ -1395,16 +1404,17 @@
               font-size: 0.9rem;
               font-weight: 600;
               text-align: center;
-              margin-bottom: 4px;
+              margin: 0 0 4px 0;
             "
           >
             ¿Qué plataforma deseas gestionar hoy?
           </p>
           <button
+            type="button"
             class="btn-ios w-100"
             style="
-              background: #e50914;
-              color: white;
+              background: #e50914 !important;
+              color: #ffffff !important;
               padding: 14px;
               border-radius: 14px;
               font-weight: 800;
@@ -1436,10 +1446,11 @@
             Netflix Original
           </button>
           <button
+            type="button"
             class="btn-ios w-100"
             style="
-              background: #007aff;
-              color: white;
+              background: #007aff !important;
+              color: #ffffff !important;
               padding: 14px;
               border-radius: 14px;
               font-weight: 800;
@@ -1490,6 +1501,7 @@
             Selecciona el tipo de solicitud
           </p>
           <button
+            type="button"
             class="btn-ios btn-secondary w-100"
             style="
               padding: 12px;
@@ -1519,6 +1531,7 @@
             Código de Inicio Sesión
           </button>
           <button
+            type="button"
             class="btn-ios btn-secondary w-100"
             style="
               padding: 12px;
@@ -1549,6 +1562,7 @@
             Código 'Estoy de Viaje'
           </button>
           <button
+            type="button"
             class="btn-ios btn-secondary w-100"
             style="
               padding: 12px;
@@ -1630,6 +1644,7 @@
             />
           </div>
           <button
+            type="button"
             id="btnRastrearCodigo"
             class="btn-ios btn-success w-100"
             style="
@@ -1803,6 +1818,7 @@
               style="text-decoration: none; width: 100%"
             >
               <button
+                type="button"
                 class="btn-ios btn-success w-100"
                 style="
                   padding: 14px;
@@ -1817,6 +1833,7 @@
           </div>
 
           <button
+            type="button"
             class="btn-ios btn-secondary w-100"
             style="
               margin-top: 6px;
