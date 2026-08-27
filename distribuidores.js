@@ -190,10 +190,12 @@ function copiarTextoAlToque(elemento, texto) {
   if (!texto) return;
   navigator.clipboard.writeText(texto).then(() => {
     triggerToast(`Copiado al portapapeles`);
-    elemento.style.opacity = "0.4";
-    setTimeout(() => {
-      elemento.style.opacity = "1";
-    }, 150);
+    if (elemento && elemento.style) {
+      elemento.style.opacity = "0.4";
+      setTimeout(() => {
+        elemento.style.opacity = "1";
+      }, 150);
+    }
   });
 }
 
@@ -1474,9 +1476,13 @@ function renderizarResultadosCasillero(queryBusqueda = "") {
       item.perfil && item.perfil !== "" && item.perfil !== "N/A"
         ? `Perfil: <b>${item.perfil}</b>${pinText}`
         : "Cuenta Completa";
+
+    // 🎯 CLIENTE INTERACTIVO PARA COPIADO DIRECTO AL TOQUE
+    let clienteLimpioEscapado = String(item.cliente || "").replace(/'/g, "\\'");
     let subCliente = item.cliente
-      ? `<span style="font-size:0.75rem; color:var(--text-secondary);">Cliente: <b style="color:var(--ios-orange);">${item.cliente}</b></span>`
+      ? `<span style="font-size:0.75rem; color:var(--text-secondary);">Cliente: <b onclick="copiarTextoAlToque(this, '${clienteLimpioEscapado}')" style="color:var(--ios-orange); cursor:pointer; text-decoration: underline rgba(255,149,0,0.3);" title="Toca para copiar cliente">${item.cliente}</b></span>`
       : "";
+
     let dataFicha = encodeURIComponent(JSON.stringify(item));
 
     htmlCards += `
@@ -1996,6 +2002,8 @@ function renderizarVencimientosB2B() {
     const rawRecordatorio = generarMensajeRecordatorioAntispam(item);
     const encodedRecordatorio = encodeURIComponent(rawRecordatorio);
 
+    let clienteEscapadoVenc = String(clienteCardDisplay).replace(/'/g, "\\'");
+
     html += `
       <div class="venc-card-item">
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -2008,7 +2016,7 @@ function renderizarVencimientosB2B() {
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; color: var(--text-primary); margin-top: 2px;">
-          <div>👤 <strong>Cliente:</strong> ${clienteCardDisplay}</div>
+          <div>👤 <strong>Cliente:</strong> <span onclick="copiarTextoAlToque(this, '${clienteEscapadoVenc}')" style="color:var(--ios-orange); font-weight:bold; cursor:pointer; text-decoration:underline rgba(255,149,0,0.3);" title="Toca para copiar cliente">${clienteCardDisplay}</span></div>
           <div>📧 <strong>Correo:</strong> <span style="font-family: monospace; color: var(--ios-blue);">${item.correo || "-"}</span></div>
           <div>🔐 <strong>Acceso:</strong> Clave: <span style="font-family: monospace;">${item.clave || "-"}</span> | ${perfil} ${pin}</div>
           <div>📅 <strong>Vencimiento:</strong> ${item.vencimiento || "Activa"}</div>
