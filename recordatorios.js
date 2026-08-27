@@ -89,7 +89,7 @@ window.sincronizarW1 = function () {
   const listaContenedor = document.getElementById("listaIndividualW1");
   const bloquesContenedor = document.getElementById("bloquesW1");
 
-  // Destachar si se seleccionó otra fecha/periodo
+  // Destachar únicamente si el usuario cambia de fecha/periodo en el select
   if (window.periodoPrevioW1 && window.periodoPrevioW1 !== periodoVal) {
     window.limpiarCopiadosPorCanalYPeriodo("W1", window.periodoPrevioW1);
     window.limpiarCopiadosPorCanalYPeriodo("W1", periodoVal);
@@ -97,7 +97,7 @@ window.sincronizarW1 = function () {
   window.periodoPrevioW1 = periodoVal;
 
   if (contador) contador.innerText = "Consultando...";
-  if (listaContenedor) {
+  if (listaContenedor && window.memoriaRecordatoriosW1.length === 0) {
     listaContenedor.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #bf5af2;">
         <svg class="spin-anim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle; margin-right:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
@@ -141,7 +141,7 @@ window.sincronizarW2 = function () {
   const listaContenedor = document.getElementById("listaIndividualW2");
   const bloquesContenedor = document.getElementById("bloquesW2");
 
-  // Destachar si se seleccionó otra fecha/periodo
+  // Destachar únicamente si el usuario cambia de fecha/periodo en el select
   if (window.periodoPrevioW2 && window.periodoPrevioW2 !== periodoVal) {
     window.limpiarCopiadosPorCanalYPeriodo("W2", window.periodoPrevioW2);
     window.limpiarCopiadosPorCanalYPeriodo("W2", periodoVal);
@@ -149,7 +149,7 @@ window.sincronizarW2 = function () {
   window.periodoPrevioW2 = periodoVal;
 
   if (contador) contador.innerText = "Consultando...";
-  if (listaContenedor) {
+  if (listaContenedor && window.memoriaRecordatoriosW2.length === 0) {
     listaContenedor.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #30d158;">
         <svg class="spin-anim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle; margin-right:8px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
@@ -184,7 +184,7 @@ window.sincronizarW2 = function () {
 };
 
 // =========================================================================
-// 🎨 RENDERIZADO TIPO PÍLDORA NUMERADA Y BLOQUES ENUMERADOS DE MÁX 20
+// 🎨 RENDERIZADO TIPO PÍLDORA CON DETECCIÓN DE RENOVADOS Y COPIADOS
 // =========================================================================
 window.renderizarCanalRecordatorios = function (canal) {
   const esW1 = canal === "W1";
@@ -213,7 +213,7 @@ window.renderizarCanalRecordatorios = function (canal) {
     return;
   }
 
-  // 1. GENERACIÓN DE BOTONES POR BLOQUES ENUMERADOS (MÁXIMO 20 POR BOTÓN)
+  // 1. GENERACIÓN DE BOTONES POR BLOQUES ENUMERADOS
   if (bloquesContenedor) {
     let htmlBloques = "";
     const tamanoBloque = 20;
@@ -241,7 +241,7 @@ window.renderizarCanalRecordatorios = function (canal) {
     bloquesContenedor.innerHTML = htmlBloques;
   }
 
-  // 2. RENDERIZAR TARJETAS CON MEMORIA DE TACHADO PERSISTENTE
+  // 2. RENDERIZADO DE TARJETAS CON DIFERENCIACIÓN (VERDE SI RENOVÓ / GRIS SI SE COPIÓ)
   const copiadosSet = window.obtenerCopiadosSet();
   let htmlCards = "";
 
@@ -256,27 +256,48 @@ window.renderizarCanalRecordatorios = function (canal) {
     const itemKey = `${canal}_${periodoVal}_${item.tel}_${item.user || ""}_${idx}`;
     const estaCopiado = copiadosSet.includes(itemKey);
 
-    const styleTachado = estaCopiado
-      ? "opacity: 0.45; text-decoration: line-through; filter: grayscale(0.6);"
-      : "";
+    // Detección de renovación enviada por MySQL (item.renovado o estado)
+    const esRenovado =
+      item.renovado === true ||
+      item.renovado === 1 ||
+      item.estado === "renovado" ||
+      item.es_renovado === true;
+
+    let styleTarjeta =
+      "background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);";
+    let badgeEstado = "";
+
+    if (esRenovado) {
+      // 🟢 CLIENTE QUE RENOVÓ: Fondo verde, borde verde, texto tachado y badge
+      styleTarjeta =
+        "background: rgba(48, 209, 88, 0.12) !important; border: 1px solid rgba(48, 209, 88, 0.3) !important; text-decoration: line-through; opacity: 0.85;";
+      badgeEstado = `<span style="font-size: 0.68rem; font-weight: 800; background: rgba(48, 209, 88, 0.25); color: #30d158; padding: 2px 8px; border-radius: 6px; font-family: monospace; text-transform: uppercase;">RENOVADO ✅</span>`;
+    } else if (estaCopiado) {
+      // ⚪ CLIENTE CON MENSAJE ENVIADO/COPIADO: Opaco y tachado gris
+      styleTarjeta =
+        "background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); opacity: 0.45; text-decoration: line-through; filter: grayscale(0.6);";
+    }
 
     htmlCards += `
-      <div class="pill-recordatorio-item" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s ease; ${styleTachado}" onmouseover="this.style.background='rgba(255, 255, 255, 0.055)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)';">
+      <div class="pill-recordatorio-item" style="${styleTarjeta} border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.055)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)';">
         
         <!-- Índice Numerado -->
-        <div style="width: 28px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: #a1a1aa; font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <div style="width: 28px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: ${esRenovado ? "#30d158" : "#a1a1aa"}; font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
           ${idx + 1}
         </div>
 
-        <!-- Identificador / Teléfono -->
+        <!-- Identificador / Teléfono / Estado -->
         <div style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-          <span class="txt-identificador" style="font-weight: 800; font-size: 0.88rem; color: #ffffff; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${nombreOIdentificador}
-          </span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="txt-identificador" style="font-weight: 800; font-size: 0.88rem; color: ${esRenovado ? "#30d158" : "#ffffff"}; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${nombreOIdentificador}
+            </span>
+            ${badgeEstado}
+          </div>
           ${item.user && item.user !== "CLIENTE CYBERNET" ? `<span style="font-size: 0.72rem; color: #a1a1aa; font-family: monospace;">${item.tel}</span>` : ""}
         </div>
 
-        <!-- Botón SVG de Copiado Directo -->
+        <!-- Botón de Copiado Directo -->
         <button type="button" 
                 onclick="window.copiarMensajeRecordatorio(this, '${msjEscapado}', '${itemKey}')" 
                 title="Copiar mensaje de recordatorio"
@@ -315,7 +336,6 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado, itemKey) {
     btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
     btn.style.setProperty("background", "rgba(48, 209, 88, 0.2)", "important");
 
-    // 🎯 TACHADO Y PERSISTENCIA
     const pillParent = btn.closest(".pill-recordatorio-item");
     if (pillParent) {
       pillParent.style.opacity = "0.45";
@@ -349,7 +369,6 @@ window.copiarMensajeRecordatorio = function (btn, msjEscapado, itemKey) {
   }
 };
 
-// 🛠️ FUNCIÓN DE RESPALDO UNIVERSAL PARA NAVEGADORES QUE BLOQUEAN EL PORTAPAPELES
 function usarFallbackCopiadoRecordatorio(texto, callbackExito) {
   const textarea = document.createElement("textarea");
   textarea.value = texto;
@@ -368,7 +387,7 @@ function usarFallbackCopiadoRecordatorio(texto, callbackExito) {
 }
 
 // =========================================================================
-// 📋 COPIAR BLOQUE CON ENUMERACIÓN DE RANGO (EJ. 21 TO 40)
+// 📋 COPIAR BLOQUE CON ENUMERACIÓN DE RANGO (EJ. 1 TO 20)
 // =========================================================================
 window.copiarBloqueRecordatorio = function (
   canal,
@@ -386,7 +405,6 @@ window.copiarBloqueRecordatorio = function (
 
   const subLista = dataList.slice(inicioIdx, finIdx);
 
-  // 🎯 FORMATO ENUMERADO SEGÚN EL RANGO DEL BLOQUE: 21. wa.me/57XXXXXXXXXX
   const textoEnlaces = subLista
     .map((item, idx) => {
       let telRaw = String(item.tel || "").replace(/\D/g, "");
