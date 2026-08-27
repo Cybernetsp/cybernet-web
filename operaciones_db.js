@@ -239,11 +239,11 @@ window.renderizarListaDistribuidores = function (lista) {
       : `<span style="font-size:0.72rem; color:#ff9f0a; font-weight:700; display:block;">⚠️ Sin correo asignado</span>`;
 
     let botonAccion = tieneCorreo
-      ? `<button onclick="window.copiarAccesoPortalDistri('${(d.nombre || "").replace(/'/g, "\\'")}', '${(d.correo || "").replace(/'/g, "\\\'")}')" class="btn-ios" style="padding:6px 12px; font-size:0.75rem; border-radius:10px; background:rgba(10,132,255,0.15); color:#0a84ff; border:1px solid rgba(10,132,255,0.3); font-weight:700; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Copiar accesos al portal">
+      ? `<button onclick="window.copiarAccesoPortalDistri('${(d.nombre || "").replace(/'/g, "\\'")}', '${(d.correo || "").replace(/'/g, "\\'")}')" class="btn-ios" style="padding:6px 12px; font-size:0.75rem; border-radius:10px; background:rgba(10,132,255,0.15); color:#0a84ff; border:1px solid rgba(10,132,255,0.3); font-weight:700; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Copiar accesos al portal">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           Copiar Acceso
          </button>`
-      : `<button onclick="window.abrirModalRegistrarCorreo('${d.id}', '${d.telefono}', '${(d.nombre || "").replace(/'/g, "\\\'")}')" class="btn-ios" style="padding:6px 12px; font-size:0.75rem; border-radius:10px; background:rgba(255,159,10,0.15); color:#ff9f0a; border:1px solid rgba(255,159,10,0.3); font-weight:700; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Registrar correo para acceso B2B">
+      : `<button onclick="window.abrirModalRegistrarCorreo('${d.id}', '${d.telefono}', '${(d.nombre || "").replace(/'/g, "\\'")}')" class="btn-ios" style="padding:6px 12px; font-size:0.75rem; border-radius:10px; background:rgba(255,159,10,0.15); color:#ff9f0a; border:1px solid rgba(255,159,10,0.3); font-weight:700; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Registrar correo para acceso B2B">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
           + Registrar
          </button>`;
@@ -1000,22 +1000,33 @@ window.crearCuentaNetflixAliasExterna = function () {
 };
 
 /* ==========================================================================
-   📥 MÓDULO DE CARGA MASIVA DE CUENTAS EN LOTE
+   📥 MÓDULO DE CARGA MASIVA DE CUENTAS EN LOTE (AISLADO POR USUARIO Y DÍA)
    ========================================================================== */
 
-try {
-  window.cuentasCargadasEsteTurno = JSON.parse(
-    localStorage.getItem("cyber_cargadas_turno") || "[]",
-  );
-} catch (e) {
-  window.cuentasCargadasEsteTurno = [];
-}
+// 🔑 Helper para generar la clave dinámica en localStorage por usuario y fecha
+window.obtenerClaveCargadasTurno = function () {
+  const staffRaw =
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "DESCONOCIDO";
+  const usuario = staffRaw.trim().toUpperCase();
+  const hoy = new Date();
+  const fechaStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
+  return `cyber_cargadas_${usuario}_${fechaStr}`;
+};
 
-window.guardarCargadasTurnoCache = function () {
-  localStorage.setItem(
-    "cyber_cargadas_turno",
-    JSON.stringify(window.cuentasCargadasEsteTurno),
-  );
+window.obtenerCargadasTurnoCache = function () {
+  const key = window.obtenerClaveCargadasTurno();
+  try {
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  } catch (e) {
+    return [];
+  }
+};
+
+window.guardarCargadasTurnoCache = function (lista) {
+  const key = window.obtenerClaveCargadasTurno();
+  localStorage.setItem(key, JSON.stringify(lista));
 };
 
 const oldToggleCargarPanel = window.toggleCargarPanel;
@@ -1221,13 +1232,14 @@ window.ejecutarCargaLote = function (e) {
         }
 
         if (res.cargadas && res.cargadas.length > 0) {
+          let listaActual = window.obtenerCargadasTurnoCache();
           res.cargadas.forEach((c) => {
             c.plataforma = c.plataforma || nombrePlataformaLegible;
             c.proveedor = c.proveedor || proveedorFinal;
             c.tabla = plataforma;
-            window.cuentasCargadasEsteTurno.unshift(c);
+            listaActual.unshift(c);
           });
-          window.guardarCargadasTurnoCache();
+          window.guardarCargadasTurnoCache(listaActual);
         }
 
         if (res.repetidas && res.repetidas.length > 0) {
@@ -1261,11 +1273,13 @@ window.renderizarCargadasEsteTurno = function () {
   const badgeCant = document.getElementById("cantCargadasTurno");
   if (!container) return;
 
+  const cuentasCargadasEsteTurno = window.obtenerCargadasTurnoCache();
+
   if (badgeCant) {
-    badgeCant.innerText = `${window.cuentasCargadasEsteTurno.length} cuentas`;
+    badgeCant.innerText = `${cuentasCargadasEsteTurno.length} cuentas`;
   }
 
-  if (window.cuentasCargadasEsteTurno.length === 0) {
+  if (cuentasCargadasEsteTurno.length === 0) {
     container.innerHTML = `
       <div style="text-align: center; padding: 25px; color: #a1a1aa; font-size: 0.82rem; background: rgba(0, 0, 0, 0.2); border-radius: 14px; border: 1px dashed rgba(255, 255, 255, 0.08);">
         Las cuentas inyectadas se reflejarán aquí con accesos rápidos.
@@ -1275,7 +1289,7 @@ window.renderizarCargadasEsteTurno = function () {
   }
 
   let html = "";
-  window.cuentasCargadasEsteTurno.forEach((c) => {
+  cuentasCargadasEsteTurno.forEach((c) => {
     const correoEsc = encodeURIComponent(c.correo || "");
     const claveEsc = encodeURIComponent(c.clave || "");
     const provEsc = encodeURIComponent(c.proveedor || "");
