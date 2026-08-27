@@ -1,671 +1,9 @@
 /* ==========================================================================
-   🍎 CYBERNET OS - macOS EDITION (SONOMA / SEQUOIA DESIGN SYSTEM)
-   Hoja de estilos unificada, optimizada y organizada por componentes.
-   ========================================================================== */
-
-/* ==========================================================================
-   1. VARIABLES Y CONFIGURACIÓN BASE
-   ========================================================================== */
-:root {
-  /* Colores de sistema Apple (Dark Mode) */
-  --mac-blue: #0a84ff;
-  --mac-green: #30d158;
-  --mac-red: #ff453a;
-  --mac-orange: #ff9f0a;
-  --mac-yellow: #ffd60a;
-  --mac-purple: #bf5af2;
-
-  /* Superficies y fondos */
-  --page-bg: #0b0b0d;
-  --window-bg: #1c1c1e;
-  --card-bg: #2c2c2e;
-  --card-hover: #3a3a3c;
-  --glass-bg: #111112;
-
-  /* Textos */
-  --text-primary: #ffffff;
-  --text-secondary: rgba(235, 235, 245, 0.6);
-  --text-tertiary: #a1a1aa;
-
-  /* Bordes */
-  --border-subtle: 1px solid #2c2c2e;
-  --border-strong: 1px solid #3a3a3c;
-  --border-input: 1px solid rgba(255, 255, 255, 0.1);
-
-  /* Controles */
-  --input-bg: rgba(0, 0, 0, 0.4);
-  --input-focus-bg: rgba(0, 0, 0, 0.6);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
-
-  /* Transiciones fluidas Apple */
-  --transition-fluid:
-    transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease,
-    background-color 0.2s ease, border-color 0.2s ease;
-  --transition-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-
-  /* Sombras */
-  --shadow-window:
-    0 40px 80px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.1);
-  --shadow-dock:
-    0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-/* Reset y tipografía */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-html,
-body {
-  height: 100%;
-}
-
-body {
-  background:
-    linear-gradient(rgba(11, 11, 13, 0.6), rgba(11, 11, 13, 0.82)),
-    url("wallpaper.jpg") no-repeat center center fixed;
-  background-size: cover;
-  color: var(--text-primary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  overflow: hidden;
-  padding-bottom: 110px; /* Espacio para el dock */
-}
-
-/* Scrollbars estilo macOS */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 10px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-/* ==========================================================================
-   2. BARRA DE MENÚ SUPERIOR (macOS TOP BAR)
-   ========================================================================== */
-.macos-top-bar {
-  height: 28px;
-  background: #111112;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 16px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  color: #fff;
-  align-items: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 999999;
-  border-bottom: var(--border-subtle);
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
-}
-
-.mac-menu-left,
-.mac-menu-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.mac-menu-item {
-  cursor: pointer;
-  padding: 2px 8px;
-  border-radius: 4px;
-  transition: background 0.1s;
-}
-.mac-menu-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-.mac-menu-item.mac-title {
-  font-weight: 800;
-  color: #ffffff;
-}
-
-/* Botón de logout */
-.mac-logout-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--mac-red);
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-
-/* Contenedor de banners y control center */
-#macControlCenterRight {
-  position: fixed;
-  top: 0;
-  right: 16px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  z-index: 2000001;
-  color: #ffffff;
-  pointer-events: auto;
-}
-#macBannersWrapper {
-  position: fixed;
-  top: 40px;
-  right: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  z-index: 999999;
-  pointer-events: none;
-  width: 320px;
-}
-
-.ticker-wrapper {
-  max-width: 150px;
-  border: none;
-  background: transparent;
-  overflow: hidden;
-}
-
-#ledConexion {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--mac-green);
-  box-shadow: 0 0 8px var(--mac-green);
-  flex-shrink: 0;
-}
-#staffSessionName {
-  font-weight: 700;
-  color: #ffffff;
-  font-size: 0.82rem;
-}
-#shiftTimer {
-  font-family: monospace;
-  font-weight: 600;
-  color: var(--mac-green);
-  font-size: 0.82rem;
-}
-
-/* ==========================================================================
-   3. DOCK INFERIOR
-   ========================================================================== */
-#controlPanel,
-.macos-dock-wrapper,
-.mac-dock {
-  position: fixed !important;
-  top: auto !important;
-  bottom: 25px !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
-  width: max-content !important;
-  z-index: 999999 !important;
-}
-
-.macos-dock {
-  background: #1c1c1e;
-  border: var(--border-subtle);
-  border-radius: 24px;
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 10px;
-  pointer-events: auto;
-  box-shadow: var(--shadow-dock);
-}
-
-.mac-dock-icon {
-  position: relative;
-  cursor: pointer;
-  transition: var(--transition-fluid);
-}
-.mac-dock-icon:hover {
-  transform: scale(1.25);
-  z-index: 10;
-  margin: 0 10px;
-}
-
-.mac-icon-bg {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px; /* Squircle Apple */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.4),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
-}
-
-.mac-icon-wrapper {
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1);
-  cursor: pointer;
-}
-.mac-icon-wrapper:hover {
-  transform: scale(1.22) translateY(-8px);
-}
-
-.mac-tooltip {
-  position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(30, 30, 30, 0.85);
-  color: white;
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-  white-space: nowrap;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-.mac-dock-icon:hover .mac-tooltip {
-  opacity: 1;
-}
-
-/* Badge contador en dock */
-.dock-badge-counter {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #ff3b30;
-  color: #ffffff;
-  font-size: 0.72rem;
-  font-weight: 800;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.6);
-  border: 2px solid #1c1c1e;
-  z-index: 25;
-  pointer-events: none;
-}
-
-.divider-dock {
-  width: 1px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.15);
-  margin: 0 4px;
-  border-radius: 2px;
-}
-
-/* ==========================================================================
-   4. ESCRITORIO Y VENTANAS
-   ========================================================================== */
-.mac-desktop-workspace {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  padding: 40px 20px 80px 20px;
-  z-index: 10;
-  width: 100%;
-}
-
-.mac-split-container {
-  display: flex;
-  width: 100%;
-  max-width: 1000px;
-  height: 70vh;
-  min-height: 550px;
-  background: var(--window-bg);
-  border: var(--border-strong);
-  border-radius: 24px;
-  box-shadow: var(--shadow-window);
-  overflow: hidden;
-}
-
-.mac-left-panel {
-  flex: 0 0 320px;
-  background: rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-right: var(--border-strong);
-  padding: 40px 20px;
-}
-.mac-right-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 30px;
-  gap: 20px;
-  overflow: hidden; /* Scroll controlado en grid */
-}
-
-/* Buscador Spotlight */
-.mac-search-wrapper {
-  position: relative;
-  width: 100%;
-  flex-shrink: 0;
-  margin-bottom: 10px;
-  z-index: 10;
-}
-.mac-search-icon {
-  position: absolute;
-  top: 50%;
-  left: 16px;
-  transform: translateY(-50%);
-  color: var(--text-secondary);
-}
-.mac-search-input {
-  width: 100%;
-  padding: 14px 16px 14px 45px;
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: #fff;
-  background: var(--input-bg);
-  border: var(--border-input);
-  border-radius: 12px;
-  outline: none;
-  transition: var(--transition-fluid);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-.mac-search-input:focus {
-  border-color: var(--mac-blue);
-  background: var(--input-focus-bg);
-  box-shadow:
-    0 0 0 3px rgba(10, 132, 255, 0.25),
-    inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Overlays y modales */
-.overlay-ios {
-  background: transparent !important;
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2000;
-  display: none;
-  justify-content: center;
-  align-items: center;
-}
-.overlay-ios.open {
-  display: flex;
-  pointer-events: auto;
-}
-
-.sheet-ios,
-.modal-ios {
-  position: absolute !important;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--window-bg);
-  border: var(--border-strong);
-  box-shadow:
-    var(--shadow-window),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-  border-radius: 20px;
-  pointer-events: auto;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100vh - 60px);
-}
-.sheet-ios {
-  width: 95%;
-  max-width: 800px;
-  height: 85vh;
-  padding: 20px;
-}
-.modal-ios {
-  width: 90%;
-  max-width: 420px;
-  padding: 24px;
-  text-align: center;
-}
-
-.mac-window-header {
-  height: 38px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  border-bottom: var(--border-subtle);
-  cursor: grab;
-  flex-shrink: 0;
-  background: #111112;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
-.mac-window-header:active {
-  cursor: grabbing;
-}
-.mac-window-controls {
-  display: flex;
-  gap: 8px;
-  margin-right: 15px;
-}
-.mac-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-.mac-dot.red {
-  background: #ff5f56;
-  border: 1px solid #e0443e;
-}
-.mac-dot.yellow {
-  background: #ffbd2e;
-  border: 1px solid #dea123;
-}
-.mac-dot.green {
-  background: #27c93f;
-  border: 1px solid #1aab29;
-}
-.mac-window-title {
-  flex-grow: 1;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #d1d1d6;
-  margin-right: 50px;
-}
-
-/* Botón cerrar universal */
-.btn-close-circle {
-  display: flex;
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-secondary);
-  border: var(--border-subtle);
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  cursor: pointer;
-  z-index: 9999;
-  transition: var(--transition-fluid);
-}
-.btn-close-circle:hover {
-  background: var(--mac-red);
-  color: white;
-  border-color: var(--mac-red);
-  transform: scale(1.08);
-}
-
-/* ==========================================================================
-   5. COMPONENTES INTERNOS
-   ========================================================================== */
-.card-ios,
-.stat-card,
-.widget-ipad {
-  background: var(--card-bg);
-  border: var(--border-subtle);
-  border-radius: 16px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  transition: var(--transition-fluid);
-  box-shadow: var(--shadow-card);
-}
-.card-ios:hover,
-.stat-card:hover,
-.widget-ipad:hover {
-  background: var(--card-hover);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.input-ios {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: var(--border-input);
-  background: var(--input-bg);
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  outline: none;
-  transition: var(--transition-fluid);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-.input-ios:focus {
-  background: var(--input-focus-bg);
-  border-color: var(--mac-blue);
-  box-shadow:
-    0 0 0 2px rgba(10, 132, 255, 0.2),
-    inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-select.input-ios {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 14px;
-  cursor: pointer;
-  color-scheme: dark;
-}
-select.input-ios option {
-  background-color: #1c1c1e;
-  color: #ffffff;
-  font-weight: 600;
-  padding: 12px;
-}
-select.input-ios option:disabled {
-  color: #8e8e93;
-}
-
-.btn-ios {
-  padding: 10px 18px;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: auto;
-  min-height: 38px;
-  align-self: center;
-  transition: var(--transition-fluid);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-.btn-ios:active {
-  transform: scale(0.96);
-}
-.btn-primary {
-  background: var(--text-primary);
-  color: #000;
-}
-.btn-success {
-  background: var(--mac-green);
-  color: #ffffff;
-}
-.btn-danger {
-  background: var(--mac-red);
-  color: #ffffff;
-}
-.btn-secondary {
-  background: #2c2c2e;
-  border: var(--border-subtle);
-  color: var(--text-primary);
-}
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* Badges */
-.badge-ios {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border: var(--border-subtle);
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-.badge-blue {
-  color: var(--mac-blue);
-  background: rgba(10, 132, 255, 0.15);
-  border-color: rgba(10, 132, 255, 0.2);
-}
-.badge-green {
-  color: var(--mac-green);
-  background: rgba(48, 209, 88, 0.15);
-  border-color: rgba(48, 209, 88, 0.2);
-}
-.badge-danger {
-  color: var(--mac-red);
-  background: rgba(255, 69, 58, 0.15);
-  border-color: rgba(255, 69, 58, 0.2);
-}
-
-/* ==========================================================================
-   6. NOTIFICACIONES Y TOASTS
+   🔥 TOAST NOTIFICACIONES & ISLA DINÁMICA
    ========================================================================== */
 .cyber-notification-center {
   position: fixed;
-  top: 38px; /* Debajo de la top bar */
+  top: 15px;
   right: 15px;
   z-index: 2000000;
   display: flex;
@@ -673,43 +11,48 @@ select.input-ios option:disabled {
   gap: 10px;
   pointer-events: none;
   width: 100%;
-  max-width: 320px;
+  max-width: 340px;
 }
+
 .cyber-notification {
   pointer-events: auto;
-  background: var(--window-bg);
-  border: var(--border-strong);
+  background: #111115;
+  border: 1px solid #27272a;
   border-radius: 16px;
   padding: 14px 16px;
   color: white;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   opacity: 0;
   transform: translateX(50px) scale(0.95);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+
 .cyber-notification.show {
   opacity: 1;
   transform: translateX(0) scale(1);
 }
+
 .cyber-notif-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  border-bottom: var(--border-subtle);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   padding-bottom: 8px;
   margin-bottom: 8px;
-  font-weight: 600;
 }
+
 .cyber-notif-body {
   font-size: 0.82rem;
-  color: var(--text-secondary);
+  color: #a1a1aa;
   line-height: 1.4;
 }
+
 .cyber-notif-close {
   margin-left: auto;
   background: rgba(255, 255, 255, 0.05);
   border: none;
-  color: var(--text-tertiary);
+  color: #a1a1aa;
   cursor: pointer;
   width: 22px;
   height: 22px;
@@ -720,19 +63,29 @@ select.input-ios option:disabled {
   font-size: 0.9rem;
   line-height: 1;
 }
+
 .cyber-notif-close:hover {
-  background: var(--mac-red);
+  background: var(--ios-red);
   color: white;
 }
 
-/* Isla dinámica / toast central */
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-anim {
+  animation: spin 1s linear infinite;
+}
+
 .apple-notification-toast {
   position: fixed;
-  top: 38px;
+  top: 15px;
   left: 50%;
   transform: translateX(-50%) scale(0.6);
-  background: #000;
-  color: #fff;
+  background: #000000;
+  color: #ffffff;
   padding: 4px 10px;
   border-radius: 30px;
   width: 60px;
@@ -742,6 +95,7 @@ select.input-ios option:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
   z-index: 999999;
@@ -756,6 +110,7 @@ select.input-ios option:disabled {
     opacity 0.25s ease,
     padding 0.3s ease;
 }
+
 .apple-notification-toast.island-active {
   opacity: 1;
   visibility: visible;
@@ -768,14 +123,34 @@ select.input-ios option:disabled {
   white-space: normal;
 }
 
-/* Apple Pay overlay */
+@keyframes islandTextReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.island-content-fade {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  animation: islandTextReveal 0.25s ease-out forwards;
+}
+
 .apple-pay-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -783,12 +158,8 @@ select.input-ios option:disabled {
   z-index: 9999999;
   opacity: 0;
   transition: opacity 0.25s ease;
-  pointer-events: none;
 }
-.apple-pay-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
+
 .apple-pay-circle {
   width: 110px;
   height: 110px;
@@ -797,13 +168,19 @@ select.input-ios option:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--glass-bg);
+  background: rgba(48, 209, 88, 0.05);
   transform: scale(0.8);
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
+.apple-pay-overlay.active {
+  opacity: 1;
+}
+
 .apple-pay-overlay.active .apple-pay-circle {
   transform: scale(1);
 }
+
 .checkmark-svg {
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
@@ -812,14 +189,212 @@ select.input-ios option:disabled {
     scaleCheck 0.3s 0.15s ease-in-out;
 }
 
+@keyframes drawCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes scaleCheck {
+  50% {
+    transform: scale(1.1);
+  }
+}
+
 /* ==========================================================================
-   7. WIDGET BRE-B
+   📱 ESTILOS DE BANNERS Y TOP BAR
+   ========================================================================== */
+.mac-menu-item.mac-title {
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.menu-btn-inv {
+  display: none;
+  color: #ffffff;
+}
+
+.mac-logout-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #ff453a !important;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.mac-banner-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.mac-banner-icon.icon-red {
+  background: linear-gradient(135deg, #ff453a, #b32b22);
+}
+
+.mac-banner-icon.icon-orange {
+  background: linear-gradient(135deg, #ff9f0a, #b36b00);
+}
+
+.mac-banner-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+}
+
+.mac-banner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mac-banner-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.mac-banner-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mac-banner-controls span {
+  font-size: 0.7rem;
+  color: rgba(235, 235, 245, 0.6);
+}
+
+.mac-banner-controls .btn-x {
+  cursor: pointer;
+  color: rgba(235, 235, 245, 0.4);
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 2px 4px;
+  transition: color 0.2s;
+}
+
+.mac-banner-subtitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.mac-banner-subtitle.color-red {
+  color: #ff453a;
+}
+
+.mac-banner-subtitle.color-orange {
+  color: #ff9f0a;
+}
+
+.mac-banner-label {
+  font-size: 0.75rem;
+  color: rgba(235, 235, 245, 0.7);
+  font-weight: 500;
+}
+
+.mac-banner-bold-text {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.3;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.mac-banner-text {
+  font-size: 0.8rem;
+  color: rgba(235, 235, 245, 0.8);
+  line-height: 1.3;
+}
+
+/* ==========================================================================
+   ⚓ DOCK DE NAVEGACIÓN Y GRADIENTES
+   ========================================================================== */
+.bg-orange-grad {
+  background: linear-gradient(180deg, #f39c12, #d35400);
+  color: white;
+}
+
+.bg-green-grad {
+  background: linear-gradient(180deg, #30d158, #248a3d);
+  color: white;
+}
+
+.bg-blue-grad {
+  background: linear-gradient(180deg, #3ab4f2, #0084ff);
+  color: white;
+}
+
+.bg-cyan-grad {
+  background: linear-gradient(180deg, #00c6ff, #0072ff);
+  color: white;
+}
+
+.bg-amber-grad {
+  background: linear-gradient(180deg, #ffb340, #f57c00);
+  color: white;
+}
+
+.bg-red-grad {
+  background: linear-gradient(180deg, #e50914, #8b0000);
+  color: white;
+}
+
+.bg-purple-grad {
+  background: linear-gradient(180deg, #af52de, #5e5ce6);
+  color: white;
+}
+
+.bg-gray-grad {
+  background: linear-gradient(180deg, #8e8e93, #3a3a3c);
+  color: white;
+}
+
+.dock-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 4px;
+  border-radius: 2px;
+}
+
+#controlPanel,
+.macos-dock-wrapper,
+.mac-dock {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 25px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  width: max-content !important;
+  z-index: 999999 !important;
+}
+
+body,
+main,
+#main-container,
+.contenedor-principal {
+  padding-bottom: 110px !important;
+}
+
+/* ==========================================================================
+   📡 WIDGET FLOTANTE DE PAGOS BRE-B
    ========================================================================== */
 .breb-tooltip {
   position: absolute;
   left: 100%;
   margin-left: 14px;
-  background: var(--mac-blue);
+  background: #0a84ff;
   color: white;
   padding: 6px 12px;
   border-radius: 8px;
@@ -830,6 +405,7 @@ select.input-ios option:disabled {
   animation: floatTooltip 2s ease-in-out infinite;
   pointer-events: none;
 }
+
 .breb-tooltip::before {
   content: "";
   position: absolute;
@@ -838,7 +414,17 @@ select.input-ios option:disabled {
   transform: translateY(-50%);
   border-width: 6px;
   border-style: solid;
-  border-color: transparent var(--mac-blue) transparent transparent;
+  border-color: transparent #0a84ff transparent transparent;
+}
+
+@keyframes floatTooltip {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(5px);
+  }
 }
 
 #btn-expand-breb {
@@ -846,6 +432,7 @@ select.input-ios option:disabled {
   left: 0;
   top: 120px;
   background: rgba(28, 28, 30, 0.9);
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-left: none;
   border-radius: 0 12px 12px 0;
@@ -879,7 +466,6 @@ select.input-ios option:disabled {
   transform: translateX(-350px);
 }
 
-/* (Se mantienen todas las clases internas .breb-* sin cambios relevantes) */
 .breb-header {
   padding: 15px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -888,38 +474,44 @@ select.input-ios option:disabled {
   flex-direction: column;
   gap: 10px;
 }
+
 .breb-header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .breb-title-group {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .breb-title {
   color: #fff;
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.5px;
 }
+
 .breb-status-dot {
   width: 8px;
   height: 8px;
-  background: var(--mac-green);
+  background: #30d158;
   border-radius: 50%;
-  box-shadow: 0 0 8px var(--mac-green);
+  box-shadow: 0 0 8px #30d158;
   animation: pulseBreb 2s infinite;
 }
+
 .breb-actions {
   display: flex;
   gap: 6px;
 }
+
 .btn-refresh-breb {
   background: rgba(10, 132, 255, 0.15);
   border: 1px solid rgba(10, 132, 255, 0.3);
-  color: var(--mac-blue);
+  color: #0a84ff;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -929,6 +521,7 @@ select.input-ios option:disabled {
   transition: all 0.2s;
   outline: none;
 }
+
 .btn-close-breb {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -942,6 +535,7 @@ select.input-ios option:disabled {
   transition: all 0.2s;
   outline: none;
 }
+
 .breb-date-input {
   width: 100%;
   background: rgba(0, 0, 0, 0.3);
@@ -954,16 +548,19 @@ select.input-ios option:disabled {
   cursor: pointer;
   color-scheme: dark;
 }
+
 .breb-search-box {
   position: relative;
   width: 100%;
 }
+
 .breb-search-icon {
   position: absolute;
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
 }
+
 .breb-search-input {
   width: 100%;
   background: rgba(0, 0, 0, 0.2);
@@ -975,10 +572,12 @@ select.input-ios option:disabled {
   outline: none;
   transition: border 0.2s;
 }
+
 #breb-buscador:focus {
-  border-color: rgba(10, 132, 255, 0.6);
-  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(10, 132, 255, 0.6) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
 }
+
 .breb-vertical-scroll {
   padding: 12px;
   overflow-y: auto;
@@ -987,19 +586,24 @@ select.input-ios option:disabled {
   flex-direction: column;
   gap: 8px;
 }
+
 .breb-vertical-scroll::-webkit-scrollbar {
   width: 5px;
 }
+
 .breb-vertical-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .breb-vertical-scroll::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 10px;
 }
+
 .breb-vertical-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
 .breb-empty-state {
   color: rgba(255, 255, 255, 0.4);
   width: 100%;
@@ -1007,18 +611,21 @@ select.input-ios option:disabled {
   font-size: 12px;
   padding: 30px 0;
 }
+
 .breb-footer {
   background: rgba(0, 0, 0, 0.2);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   padding: 10px 12px;
   text-align: center;
 }
+
 .breb-footer-text {
   color: rgba(255, 255, 255, 0.45);
   font-size: 10.5px;
   line-height: 1.3;
   display: block;
 }
+
 .breb-card {
   background: linear-gradient(
     145deg,
@@ -1034,739 +641,9 @@ select.input-ios option:disabled {
   transition: background 0.2s;
   flex-shrink: 0;
 }
+
 .breb-card:hover {
   background: rgba(255, 255, 255, 0.08);
-}
-
-/* ==========================================================================
-   8. VISOR MYSQL
-   ========================================================================== */
-.sheet-mysql {
-  max-width: 95%;
-  width: 95%;
-  height: 85vh;
-  padding: 0;
-  border-radius: 24px;
-  overflow: hidden;
-  background: #0b0b0d;
-}
-.sheet-mysql-advanced {
-  max-width: 98% !important;
-  width: 98% !important;
-  height: 92vh !important;
-  max-height: 92vh !important;
-  padding: 0 !important;
-  border-radius: 20px !important;
-  background: #0b0b0e !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-.header-mysql {
-  padding: 16px 24px;
-  background: #111115;
-  border-bottom: 1px solid rgba(243, 156, 18, 0.15);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.title-mysql {
-  color: #f39c12;
-  font-weight: 800;
-  font-size: 1.15rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-}
-.icon-box-mysql {
-  background: rgba(243, 156, 18, 0.15);
-  padding: 8px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  border: 1px solid rgba(243, 156, 18, 0.1);
-}
-.modal-header-btns {
-  display: flex;
-  gap: 10px;
-}
-.btn-pill {
-  padding: 8px 16px;
-  font-size: 0.85rem;
-  border-radius: 50px;
-}
-.static-close {
-  position: static !important;
-  margin: 0;
-}
-
-.mysql-search-header {
-  padding: 16px 20px;
-  background: #16161c;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-sizing: border-box;
-}
-.mysql-search-box {
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  padding: 10px 16px;
-  box-sizing: border-box;
-}
-.mysql-search-box input {
-  background: transparent;
-  border: none;
-  color: #fff;
-  width: 100%;
-  margin-left: 10px;
-  font-size: 0.95rem;
-  outline: none;
-  font-weight: 500;
-}
-
-.mysql-tabs-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 14px 20px;
-  background: #0b0b0d;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  overflow-x: auto;
-  white-space: normal;
-  align-items: center;
-}
-.mysql-tabs-bar::-webkit-scrollbar {
-  height: 4px;
-}
-.mysql-tabs-bar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
-}
-
-.mysql-tab-btn {
-  background: #18181c;
-  border: 1px solid #27272a;
-  color: #d4d4d8;
-  padding: 7px 14px;
-  border-radius: 10px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  letter-spacing: 0.3px;
-}
-.mysql-tab-btn:hover {
-  background: #27272a;
-  color: #ffffff;
-  border-color: #3f3f46;
-}
-.mysql-tab-btn.active {
-  background: #0072ff;
-  color: #ffffff;
-  border-color: #0072ff;
-  box-shadow: 0 4px 15px rgba(0, 114, 255, 0.35);
-}
-.mysql-tab-btn.btn-netflix.active {
-  background: #e50914;
-  border-color: #e50914;
-  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
-}
-.mysql-tab-btn.btn-garantias {
-  color: #ff453a;
-  background: rgba(255, 69, 58, 0.12);
-  border: 1px solid rgba(255, 69, 58, 0.35);
-}
-.mysql-tab-btn.btn-garantias.active {
-  background: #ff453a;
-  color: #ffffff;
-  border-color: #ff453a;
-}
-.mysql-tab-btn.btn-ventas {
-  color: #30d158;
-  background: rgba(48, 209, 88, 0.12);
-  border: 1px solid rgba(48, 209, 88, 0.35);
-}
-.mysql-tab-btn.btn-ventas.active {
-  background: #30d158;
-  color: #000;
-  border-color: #30d158;
-}
-.mysql-tab-btn.btn-reload {
-  padding: 7px 11px;
-  background: #18181c;
-  color: #a1a1aa;
-}
-
-.mysql-body {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 20px;
-  background: #0b0b0d;
-}
-.mysql-table-wrapper {
-  overflow-x: auto;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding-bottom: 10px;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.mysql-table-wrapper::-webkit-scrollbar {
-  display: none;
-}
-
-.mysql-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-  color: #ffffff;
-  text-align: left;
-  min-width: 1000px;
-}
-.mysql-table th,
-.mysql-table td {
-  white-space: nowrap;
-  vertical-align: middle;
-  padding: 10px 14px;
-}
-.mysql-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: #16161c;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-.mysql-table tbody tr {
-  background: rgba(0, 0, 0, 0.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Filas de fecha */
-.row-fecha-header {
-  background: rgba(20, 24, 33, 0.9);
-  border-top: 1px solid rgba(10, 132, 255, 0.25);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-.row-fecha-header td {
-  padding: 8px 16px;
-}
-.fecha-header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-.fecha-header-title {
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: #38bdf8;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-.btn-borrar-fecha {
-  background: rgba(255, 69, 58, 0.15);
-  border: 1px solid rgba(255, 69, 58, 0.4);
-  color: #ff453a;
-  padding: 4px 12px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.btn-borrar-fecha:hover {
-  background: #ff453a;
-  color: #fff;
-  box-shadow: 0 0 10px rgba(255, 69, 58, 0.4);
-}
-
-/* Botón copiar inline */
-.btn-copy-inline {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.35);
-  cursor: pointer;
-  font-size: 0.75rem;
-  padding: 2px 5px;
-  margin-left: 6px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-}
-.btn-copy-inline:hover {
-  color: #30d158;
-  background: rgba(48, 209, 88, 0.15);
-}
-.btn-copy-acc {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border-radius: 8px;
-  padding: 5px 10px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-copy-acc:hover {
-  background: #30d158;
-  color: #000;
-  border-color: #30d158;
-}
-
-/* Página completa visor MySQL */
-body.mysql-visor-body {
-  background: #0b0b0e;
-  padding: 16px;
-  margin: 0;
-  box-sizing: border-box;
-  height: 100vh;
-  overflow: hidden;
-}
-.mysql-visor-container {
-  width: 100%;
-  height: calc(100vh - 32px);
-  background: #111115;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-}
-
-.btn-back-dashboard {
-  padding: 10px 18px;
-  font-weight: 800;
-  border-radius: 50px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* ==========================================================================
-   9. BANNERS Y ESTILOS DE ALERTA
-   ========================================================================== */
-.mac-banner-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-.mac-banner-icon.icon-red {
-  background: linear-gradient(135deg, #ff453a, #b32b22);
-}
-.mac-banner-icon.icon-orange {
-  background: linear-gradient(135deg, #ff9f0a, #b36b00);
-}
-.mac-banner-content {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  justify-content: center;
-}
-.mac-banner-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.mac-banner-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-}
-.mac-banner-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.mac-banner-controls span {
-  font-size: 0.7rem;
-  color: rgba(235, 235, 245, 0.6);
-}
-.mac-banner-controls .btn-x {
-  cursor: pointer;
-  color: rgba(235, 235, 245, 0.4);
-  font-size: 0.8rem;
-  font-weight: bold;
-  padding: 2px 4px;
-  transition: color 0.2s;
-}
-.mac-banner-subtitle {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-.mac-banner-subtitle.color-red {
-  color: #ff453a;
-}
-.mac-banner-subtitle.color-orange {
-  color: #ff9f0a;
-}
-.mac-banner-label {
-  font-size: 0.75rem;
-  color: rgba(235, 235, 245, 0.7);
-  font-weight: 500;
-}
-.mac-banner-bold-text {
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: #ffffff;
-  line-height: 1.3;
-}
-.mac-banner-text {
-  font-size: 0.8rem;
-  color: rgba(235, 235, 245, 0.8);
-  line-height: 1.3;
-}
-
-/* ==========================================================================
-   10. UTILIDADES Y CLASES AUXILIARES
-   ========================================================================== */
-.flex-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.flex-row-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  flex-wrap: wrap;
-}
-.flex-col {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.text-center {
-  text-align: center;
-}
-.text-center-muted {
-  text-align: center;
-  padding: 30px;
-  color: var(--text-secondary);
-}
-.mt-1 {
-  margin-top: 10px;
-}
-.mb-1 {
-  margin-bottom: 12px;
-}
-.w-100 {
-  width: 100%;
-}
-.color-blue {
-  color: #0a84ff;
-}
-.saldo-verde {
-  color: var(--mac-green);
-  font-weight: 600;
-  font-family: monospace;
-}
-.saldo-rojo {
-  color: var(--mac-red);
-  font-weight: 600;
-  font-family: monospace;
-}
-.empty-log-msg {
-  text-align: center;
-  padding: 36px;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  width: 100%;
-}
-
-/* Fondos degradados para iconos */
-.bg-orange-grad {
-  background: linear-gradient(180deg, #f39c12, #d35400);
-  color: white;
-}
-.bg-green-grad {
-  background: linear-gradient(180deg, #30d158, #248a3d);
-  color: white;
-}
-.bg-blue-grad {
-  background: linear-gradient(180deg, #3ab4f2, #0084ff);
-  color: white;
-}
-.bg-cyan-grad {
-  background: linear-gradient(180deg, #00c6ff, #0072ff);
-  color: white;
-}
-.bg-amber-grad {
-  background: linear-gradient(180deg, #ffb340, #f57c00);
-  color: white;
-}
-.bg-red-grad {
-  background: linear-gradient(180deg, #e50914, #8b0000);
-  color: white;
-}
-.bg-purple-grad {
-  background: linear-gradient(180deg, #af52de, #5e5ce6);
-  color: white;
-}
-.bg-gray-grad {
-  background: linear-gradient(180deg, #8e8e93, #3a3a3c);
-  color: white;
-}
-
-/* Gráficas y anillos */
-.chart-layout-box {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.apple-ring-svg {
-  transform: rotate(-90deg);
-  width: 100px;
-  height: 100px;
-  flex-shrink: 0;
-}
-.ring-bg {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.05);
-  stroke-width: 10;
-}
-.ring-fill-ingresos {
-  fill: none;
-  stroke: var(--mac-blue);
-  stroke-width: 10;
-  stroke-linecap: round;
-}
-.ring-fill-gastos {
-  fill: none;
-  stroke: var(--mac-red);
-  stroke-width: 10;
-  stroke-linecap: round;
-}
-
-.bar-chart-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.bar-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.bar-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-.bar-track {
-  width: 100%;
-  height: 6px;
-  background: #09090a;
-  border-radius: 6px;
-  overflow: hidden;
-}
-.main-price-lbl {
-  font-size: 2.8rem;
-  font-weight: 700;
-  letter-spacing: -1.5px;
-  line-height: 1;
-  margin: 10px 0;
-}
-.status-pill-container {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--mac-green);
-}
-
-/* Panel de finanzas */
-#finanzasOverlay .sheet-ios {
-  height: calc(100vh - 70px);
-  max-height: 840px;
-  top: calc(50% + 14px);
-}
-
-/* Filtros */
-.filter-wrapper-ios {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.filter-group-center {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: center;
-  flex: 1;
-}
-.pod-selector {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--input-bg);
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: var(--border-input);
-}
-
-/* Bento grids */
-.executive-panoramic-hub {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 20px;
-  width: 100%;
-}
-.bento-horizontal-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  width: 100%;
-}
-.dist-grid-layout {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-  width: 100%;
-}
-.workspace-action-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 20px;
-  width: 100%;
-}
-
-/* Widgets iPad */
-.ipad-bento-container {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-  width: 100%;
-}
-.bento-w-12 {
-  grid-column: span 12;
-}
-.bento-w-8 {
-  grid-column: span 8;
-}
-.bento-w-7 {
-  grid-column: span 7;
-}
-.bento-w-6 {
-  grid-column: span 6;
-}
-.bento-w-5 {
-  grid-column: span 5;
-}
-.bento-w-4 {
-  grid-column: span 4;
-}
-.bento-w-3 {
-  grid-column: span 3;
-}
-
-/* Buscador estático */
-.mac-filtered-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
-  width: 100%;
-  padding-top: 4px;
-  padding-bottom: 40px;
-  flex-grow: 1;
-  overflow-y: auto;
-  align-content: flex-start;
-  padding-right: 8px;
-}
-.mac-filtered-cards .card-ios {
-  min-height: 130px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  text-align: left;
-  padding: 16px;
-  margin-bottom: 0;
-}
-.mac-filtered-cards .card-ios button,
-.mac-filtered-cards .card-ios .btn-ios {
-  width: 100%;
-  max-width: 100%;
-  margin-top: auto;
-}
-.mac-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  flex-grow: 1;
-  color: var(--text-secondary);
-  gap: 15px;
-  min-height: 250px;
-}
-.mac-empty-state svg {
-  opacity: 0.4;
-  width: 48px;
-  height: 48px;
-}
-.mac-empty-state span {
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-/* ==========================================================================
-   11. ANIMACIONES
-   ========================================================================== */
-@keyframes spin {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-.spin-anim {
-  animation: spin 1s linear infinite;
-}
-.spin-breb-anim {
-  animation: spin 1s linear infinite;
-} /* Alias para BRE-B */
-
-@keyframes floatTooltip {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(5px);
-  }
 }
 
 @keyframes pulseBreb {
@@ -1784,352 +661,681 @@ body.mysql-visor-body {
   }
 }
 
-@keyframes drawCheck {
-  to {
-    stroke-dashoffset: 0;
+@keyframes spinBreb {
+  100% {
+    transform: rotate(360deg);
   }
-}
-@keyframes scaleCheck {
-  50% {
-    transform: scale(1.1);
-  }
-}
-@keyframes islandTextReveal {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-.island-content-fade {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  animation: islandTextReveal 0.25s ease-out forwards;
 }
 
-@keyframes applePopIn {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -46%) scale(0.96);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
+.spin-breb-anim {
+  animation: spinBreb 1s linear infinite;
 }
 
 /* ==========================================================================
-   12. MEDIA QUERIES Y RESPONSIVE
+   🗄️ VISOR MYSQL
    ========================================================================== */
-@media (max-width: 1024px) {
-  .ipad-bento-container {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .bento-w-12,
-  .bento-w-8,
-  .bento-w-7,
-  .bento-w-6,
-  .bento-w-5,
-  .bento-w-4,
-  .bento-w-3 {
-    grid-column: span 12;
-  }
+.sheet-mysql {
+  max-width: 95%;
+  width: 95%;
+  height: 85vh;
+  padding: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #0b0b0d;
 }
 
-@media (max-width: 768px) {
-  body {
-    overflow-y: auto;
-    padding-bottom: 120px;
-  }
-  .macos-top-bar {
-    display: none;
-  }
-  .mac-desktop-workspace {
-    padding: 20px 15px 100px 15px;
-    height: auto;
-  }
-  .mac-split-container {
-    flex-direction: column;
-    height: auto;
-    border-radius: 20px;
-    margin-bottom: 20px;
-  }
-  .mac-left-panel {
-    flex: none;
-    width: 100%;
-    border-right: none;
-    border-bottom: var(--border-subtle);
-    padding: 20px;
-  }
-  .mac-right-panel {
-    padding: 20px;
-  }
-
-  /* Modales y sheets en móvil */
-  .sheet-ios,
-  .modal-ios {
-    width: 100%;
-    max-width: 100%;
-    height: 90svh;
-    max-height: 90svh;
-    border-radius: 24px 24px 0 0;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  .overlay-ios.open .sheet-ios,
-  .overlay-ios.open .modal-ios {
-    transform: translateY(0);
-  }
-
-  /* Ajustes para overlays específicos */
-  #codesOverlay .sheet-ios,
-  #shiftsOverlay .sheet-ios,
-  #inventarioOverlay .sheet-ios,
-  #promoOverlay .sheet-ios,
-  #recordatoriosOverlay .sheet-ios,
-  #distrisOverlay .sheet-ios {
-    left: 0;
-    top: auto;
-    width: 100%;
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  /* Dock móvil */
-  .macos-dock-wrapper {
-    bottom: 20px;
-  }
-  .macos-dock {
-    width: auto;
-    min-width: 140px;
-    height: 50px;
-    padding: 0 20px;
-    border-radius: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer;
-  }
-  .macos-dock > *:not(.mobile-menu-trigger) {
-    display: none;
-  }
-  .mobile-menu-trigger {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #fff;
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .macos-dock.mobile-expanded {
-    width: calc(100% - 40px);
-    height: auto;
-    min-height: 200px;
-    border-radius: 20px;
-    padding: 20px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-  .macos-dock.mobile-expanded .mobile-menu-trigger {
-    display: none;
-  }
-  .macos-dock.mobile-expanded > *:not(.mobile-menu-trigger) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
-    border: var(--border-subtle);
-    border-radius: 12px;
-    padding: 10px;
-    height: 75px;
-    width: 100%;
-  }
-
-  /* Ajustes de flex */
-  .flex-row,
-  .flex-row-between {
-    flex-wrap: wrap;
-  }
-  div[style*="display: flex"]:not(.macos-dock):not(.mac-menu-left):not(
-      .mac-window-header
-    ) {
-    flex-wrap: wrap;
-  }
-  div[style*="flex: 1"],
-  div[style*="flex: 2"],
-  div[style*="flex: 1.2"],
-  .balance-hero-section,
-  .chart-layout-box {
-    flex: none;
-    width: 100%;
-    min-width: 100%;
-  }
-  .input-ios,
-  select.input-ios,
-  .btn-ios {
-    width: 100%;
-    max-width: 100%;
-  }
-  table {
-    min-width: 100%;
-  }
-  .card-ios,
-  .widget-ipad {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-/* Centrado de overlays en escritorio (unificado) */
-@media (min-width: 769px) {
-  #codesOverlay .sheet-ios,
-  #shiftsOverlay .sheet-ios,
-  #inventarioOverlay .sheet-ios,
-  #promoOverlay .sheet-ios,
-  #recordatoriosOverlay .sheet-ios,
-  #distrisOverlay .sheet-ios,
-  #editShiftModalOverlay .sheet-ios,
-  #resultadoCortesOverlay .sheet-ios,
-  #ventaGeneradaModalOverlay .sheet-ios,
-  #modalRenovacionFlotante .modal-ios,
-  #resolverGarantiaOverlay .modal-ios,
-  #chayoOverlay .sheet-ios {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-    animation: applePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-}
-
-/* Capas de superposición */
-#addHoursOverlay,
-#nominaOverlay,
-#adelantoShiftOverlay {
-  z-index: 16000;
-}
-#editShiftModalOverlay,
-#resultadoCortesOverlay,
-#modalRenovacionFlotante,
-#resolverGarantiaOverlay {
-  z-index: 18000;
-}
-#ventaGeneradaModalOverlay {
-  z-index: 18500;
-}
-#modalLectorCorreo,
-#modalLectorCorreoGlobal {
-  z-index: 19000;
-}
-
-/* Bloqueo del dock cuando hay modales abiertos */
-body:has(.overlay-ios.open) [class*="dock"],
-body:has(.overlay-ios.open) [id*="dock"],
-body:has(.overlay-ios[style*="display: flex"]) [class*="dock"],
-body:has(.overlay-ios[style*="display: flex"]) [id*="dock"],
-body:has(.overlay-ios[style*="display: block"]) [class*="dock"],
-body:has(.overlay-ios[style*="display: block"]) [id*="dock"] {
-  pointer-events: none;
-  visibility: hidden;
-  opacity: 0;
-}
-
-/* Scrollbar oculto en tablas */
-.sheet-ios div[style*="overflow-x: auto"]::-webkit-scrollbar,
-.mac-right-panel div[style*="overflow-x: auto"]::-webkit-scrollbar,
-table::-webkit-scrollbar,
-.table-responsive::-webkit-scrollbar {
-  height: 0;
-  display: none;
-}
-.sheet-ios div[style*="overflow-x: auto"],
-table {
-  scrollbar-width: none;
-}
-
-/* Ajustes para botones en paneles */
-#netflixPanelCortes div[style*="position: sticky"] {
+.header-mysql {
+  padding: 16px 24px;
+  background: #111115;
+  border-bottom: 1px solid rgba(243, 156, 18, 0.15);
   display: flex;
-  flex-direction: row;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-}
-#netflixPanelCortes div[style*="position: sticky"] button {
-  flex: 1;
-  height: 38px;
-  align-self: center;
-}
-#formFinanzas button,
-#formGenerarVenta button[type="submit"],
-#formReportar button,
-#formCargarCuentas button,
-#btnProcesarCambio {
-  width: 100%;
-  max-width: 100%;
-  display: inline-flex;
-}
-.sheet-ios button,
-.modal-ios button {
-  align-self: center;
-  height: fit-content;
+  align-items: center;
 }
 
-/* Modal buscador global gigante */
-#modal-buscador-global.modal-gigante-activo {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 98vw;
-  max-width: 1750px;
-  height: 95vh;
-  max-height: 95vh;
-  background: #0b0b0e;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95);
+.title-mysql {
+  color: #f39c12;
+  font-weight: 800;
+  font-size: 1.15rem;
   display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  z-index: 999999;
+  align-items: center;
+  gap: 10px;
   margin: 0;
 }
-#modal-buscador-global.modal-gigante-activo > div:first-child {
-  flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 10px 16px;
+
+.icon-box-mysql {
+  background: rgba(243, 156, 18, 0.15);
+  padding: 8px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(243, 156, 18, 0.1);
 }
 
-/* Scrollbar ultra-fino personalizado */
-.cyber-custom-scroll::-webkit-scrollbar {
-  width: 5px;
+.modal-header-btns {
+  display: flex;
+  gap: 10px;
 }
-.cyber-custom-scroll::-webkit-scrollbar-track {
+
+.btn-pill {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: 50px;
+}
+
+.static-close {
+  position: static !important;
+  margin: 0;
+}
+
+.mysql-body {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #0b0b0d;
+}
+
+.mysql-table-wrapper {
+  overflow-x: auto;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding-bottom: 10px;
+}
+
+.mysql-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  text-align: left;
+  min-width: 1000px;
+}
+
+.mysql-table th {
+  padding: 12px;
+}
+
+.mysql-table tr {
+  background: rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.text-center-muted {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-secondary);
+}
+
+.color-blue {
+  color: #0a84ff;
+}
+/* ==========================================================================
+   📌 CORRECCIÓN DE POSICIÓN: BANNERS Y ESQUINA SUPERIOR DERECHA
+   ========================================================================== */
+#macControlCenterRight {
+  position: fixed !important;
+  top: 0 !important;
+  right: 16px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  z-index: 2000001 !important;
+  color: #ffffff !important;
+  pointer-events: auto !important;
+}
+
+#macBannersWrapper {
+  position: fixed !important;
+  top: 40px !important;
+  right: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  z-index: 999999 !important;
+  pointer-events: none !important;
+  width: 320px !important;
+}
+
+.ticker-wrapper {
+  max-width: 150px;
+  border: none;
   background: transparent;
+  overflow: hidden;
 }
-.cyber-custom-scroll::-webkit-scrollbar-thumb {
+
+#ledConexion {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #30d158;
+  box-shadow: 0 0 8px #30d158;
+  flex-shrink: 0;
+}
+
+#staffSessionName {
+  font-weight: 700;
+  color: #ffffff !important;
+  font-size: 0.82rem;
+}
+
+#shiftTimer {
+  font-family: monospace;
+  font-weight: 600;
+  color: #30d158 !important;
+  font-size: 0.82rem;
+}
+/* ==========================================================================
+   🗄️ ESTILOS AVANZADOS VISOR MULTI-TABLA MYSQL (APPLE STYLE)
+   ========================================================================== */
+.sheet-mysql-advanced {
+  max-width: 98% !important;
+  width: 98% !important;
+  height: 92vh !important;
+  max-height: 92vh !important;
+  padding: 0 !important;
+  border-radius: 20px !important;
+  background: #0b0b0e !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.mysql-search-header {
+  padding: 16px 20px;
+  background: #111115;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.mysql-search-box {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 8px 14px;
+}
+
+.mysql-search-box input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  width: 100%;
+  margin-left: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  font-weight: 500;
+}
+
+.mysql-tabs-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #0b0b0d;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
+}
+
+.mysql-tabs-bar::-webkit-scrollbar {
+  height: 4px;
+}
+.mysql-tabs-bar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
+  border-radius: 4px;
 }
-.cyber-custom-scroll::-webkit-scrollbar-thumb:hover {
-  background: var(--mac-purple);
+
+.mysql-tab-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a1a1aa;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mysql-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.mysql-tab-btn.active {
+  background: #0a84ff !important;
+  color: #fff !important;
+  border-color: #0a84ff !important;
+  box-shadow: 0 0 12px rgba(10, 132, 255, 0.4);
+}
+
+.mysql-tab-btn.btn-netflix.active {
+  background: #e50914 !important;
+  border-color: #e50914 !important;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.4);
+}
+
+.mysql-tab-btn.btn-garantias {
+  color: #ff453a;
+  border-color: rgba(255, 69, 58, 0.2);
+}
+.mysql-tab-btn.btn-garantias.active {
+  background: #ff453a !important;
+  color: #fff !important;
+}
+
+.mysql-tab-btn.btn-ventas {
+  color: #30d158;
+  border-color: rgba(48, 209, 88, 0.2);
+}
+.mysql-tab-btn.btn-ventas.active {
+  background: #30d158 !important;
+  color: #000 !important;
+}
+
+.btn-copy-acc {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy-acc:hover {
+  background: #30d158;
+  color: #000;
+  border-color: #30d158;
+}
+/* ==========================================================================
+   🗄️ PAGINA COMPLETA VISOR MYSQL (CORREGIDO Y SIN RECORTES)
+   ========================================================================== */
+body.mysql-visor-body {
+  background: #0b0b0e !important;
+  padding: 16px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+.mysql-visor-container {
+  width: 100% !important;
+  height: calc(100vh - 32px) !important;
+  background: #111115 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+.mysql-search-header {
+  padding: 16px 20px !important;
+  background: #16161c !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  box-sizing: border-box !important;
+}
+
+.btn-back-dashboard {
+  padding: 10px 18px !important;
+  font-weight: 800 !important;
+  border-radius: 50px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.mysql-search-box {
+  flex-grow: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 14px !important;
+  padding: 10px 16px !important;
+  box-sizing: border-box !important;
+}
+
+.mysql-search-box input {
+  background: transparent !important;
+  border: none !important;
+  color: #fff !important;
+  width: 100% !important;
+  margin-left: 10px !important;
+  font-size: 0.95rem !important;
+  outline: none !important;
+  font-weight: 500 !important;
+}
+
+.mysql-tabs-bar {
+  display: flex !important;
+  gap: 8px !important;
+  padding: 12px 20px !important;
+  background: #0b0b0d !important;
+  overflow-x: auto !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  white-space: nowrap !important;
+  align-items: center !important;
+}
+
+.mysql-tabs-bar::-webkit-scrollbar {
+  height: 4px;
+}
+.mysql-tabs-bar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.mysql-tab-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a1a1aa;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mysql-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.mysql-tab-btn.active {
+  background: #0a84ff !important;
+  color: #fff !important;
+  border-color: #0a84ff !important;
+  box-shadow: 0 0 12px rgba(10, 132, 255, 0.4);
+}
+
+.mysql-tab-btn.btn-netflix.active {
+  background: #e50914 !important;
+  border-color: #e50914 !important;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.4);
+}
+
+.mysql-tab-btn.btn-garantias {
+  color: #ff453a;
+  border-color: rgba(255, 69, 58, 0.2);
+}
+.mysql-tab-btn.btn-garantias.active {
+  background: #ff453a !important;
+  color: #fff !important;
+}
+
+.mysql-tab-btn.btn-ventas {
+  color: #30d158;
+  border-color: rgba(48, 209, 88, 0.2);
+}
+.mysql-tab-btn.btn-ventas.active {
+  background: #30d158 !important;
+  color: #000 !important;
+}
+
+.mysql-body {
+  flex-grow: 1 !important;
+  overflow-y: auto !important;
+  padding: 20px !important;
+  background: #0b0b0d !important;
+}
+
+.mysql-table-wrapper {
+  overflow-x: auto !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 12px !important;
+  padding-bottom: 10px !important;
+}
+
+.mysql-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 0.85rem !important;
+  color: #ffffff !important;
+  text-align: left !important;
+  min-width: 1000px !important;
+}
+
+.mysql-table th {
+  padding: 12px !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.btn-copy-acc {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy-acc:hover {
+  background: #30d158;
+  color: #000;
+  border-color: #30d158;
+}
+/* ==========================================================================
+   🗄️ ESTILOS PESTAÑAS MYSQL MULTI-LÍNEA (ESTILO IDÉNTICO A IMAGEN 2)
+   ========================================================================== */
+.mysql-tabs-bar {
+  display: flex !important;
+  flex-wrap: wrap !important; /* Distribuye en varias filas automáticas */
+  gap: 8px !important;
+  padding: 14px 20px !important;
+  background: #0b0b0d !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow-x: visible !important; /* Elimina la barra de desplazamiento horizontal */
+  white-space: normal !important;
+  align-items: center !important;
+}
+
+.mysql-tab-btn {
+  background: #18181c !important;
+  border: 1px solid #27272a !important;
+  color: #d4d4d8 !important;
+  padding: 7px 14px !important;
+  border-radius: 10px !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  letter-spacing: 0.3px !important;
+  box-shadow: none !important;
+}
+
+.mysql-tab-btn:hover {
+  background: #27272a !important;
+  color: #ffffff !important;
+  border-color: #3f3f46 !important;
+}
+
+/* Botón Cuadrado Refrescar */
+.mysql-tab-btn.btn-reload {
+  padding: 7px 11px !important;
+  background: #18181c !important;
+  color: #a1a1aa !important;
+}
+
+/* Botón GARANTÍAS */
+.mysql-tab-btn.btn-garantias {
+  color: #ff453a !important;
+  background: rgba(255, 69, 58, 0.12) !important;
+  border: 1px solid rgba(255, 69, 58, 0.35) !important;
+}
+
+/* Botón REGISTRO VENTAS */
+.mysql-tab-btn.btn-ventas {
+  color: #30d158 !important;
+  background: rgba(48, 209, 88, 0.12) !important;
+  border: 1px solid rgba(48, 209, 88, 0.35) !important;
+}
+
+/* Estado Activo: Azul eléctrico sólido con texto blanco */
+.mysql-tab-btn.active {
+  background: #0072ff !important;
+  color: #ffffff !important;
+  border-color: #0072ff !important;
+  box-shadow: 0 4px 15px rgba(0, 114, 255, 0.35) !important;
+}
+/* ==========================================================================
+   📅 SEPARADOR DE FECHAS Y BOTÓN BORRAR FECHA (IMAGEN 2)
+   ========================================================================== */
+.row-fecha-header {
+  background: rgba(20, 24, 33, 0.9) !important;
+  border-top: 1px solid rgba(10, 132, 255, 0.25) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.row-fecha-header td {
+  padding: 8px 16px !important;
+}
+
+.fecha-header-content {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.fecha-header-title {
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  color: #38bdf8 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+}
+
+.btn-borrar-fecha {
+  background: rgba(255, 69, 58, 0.15) !important;
+  border: 1px solid rgba(255, 69, 58, 0.4) !important;
+  color: #ff453a !important;
+  padding: 4px 12px !important;
+  border-radius: 8px !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+.btn-borrar-fecha:hover {
+  background: #ff453a !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(255, 69, 58, 0.4) !important;
+}
+/* ==========================================================================
+   📌 CABECERA FIJA PARA LA TABLA MYSQL (STICKY HEADER)
+   ========================================================================== */
+.mysql-table th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 20 !important;
+  background: #16161c !important; /* Fondo oscuro sólido para que las filas pasen por debajo */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+}
+/* ==========================================================================
+   ✨ FIX TABLA MYSQL: EVITAR SALTO DE LÍNEA Y BOTONES INLINE (IMAGEN 3)
+   ========================================================================== */
+.mysql-table th,
+.mysql-table td {
+  white-space: nowrap !important; /* Prohíbe que el texto se rompa en 2 o 3 líneas */
+  vertical-align: middle !important;
+  padding: 10px 14px !important;
+}
+
+/* Botón pequeño de copia al lado del correo y clave */
+.btn-copy-inline {
+  background: transparent !important;
+  border: none !important;
+  color: rgba(255, 255, 255, 0.35) !important;
+  cursor: pointer !important;
+  font-size: 0.75rem !important;
+  padding: 2px 5px !important;
+  margin-left: 6px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.btn-copy-inline:hover {
+  color: #30d158 !important;
+  background: rgba(48, 209, 88, 0.15) !important;
+}
+/* ==========================================================================
+   🚫 OCULTAR BARRA DE SCROLL INFERIOR EN MYSQL VISOR
+   ========================================================================== */
+.mysql-table-wrapper {
+  overflow-x: auto !important;
+  -ms-overflow-style: none !important; /* Para Internet Explorer y Edge */
+  scrollbar-width: none !important; /* Para Firefox */
+}
+
+/* Ocultar scrollbar para Chrome, Safari y Opera */
+.mysql-table-wrapper::-webkit-scrollbar {
+  display: none !important;
+}
+/* ==========================================================================
+   ✨ FIX FINAL TABLA MYSQL: ALINEACIÓN PERFECTA (SIN SCROLL NI SALTOS)
+   ========================================================================== */
+
+/* Impedimos categóricamente los saltos de línea (Alineación Imagen 3) */
+.mysql-table th,
+.mysql-table td {
+  white-space: nowrap !important;
+  vertical-align: middle !important;
+  font-size: 0.85rem !important;
+}
+
+/* Ocultar barra de Scroll de Abajo permanentemente */
+.mysql-table-wrapper {
+  overflow-x: auto !important;
+  -ms-overflow-style: none !important; /* IE y Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+
+.mysql-table-wrapper::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
+}
+/* ==========================================================================
+   🎛️ ESTILOS INTERRUPTORES TIPO iOS (PANEL INVENTARIO)
+   ========================================================================== */
+.ios-switch-label input:checked + .ios-switch-slider:before {
+  transform: translateX(22px);
+}
+
+.ios-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
