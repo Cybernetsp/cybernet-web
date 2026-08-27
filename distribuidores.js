@@ -16,6 +16,10 @@ window.vencimientosDataCache = [];
 window.vencimientoFiltroActual = "TODOS";
 window.cuentasRenovacionCache = [];
 
+// Variables globales exclusivas para Casillero
+window.casilleroPlatFiltroActual = "TODOS";
+window.casilleroDataCache = [];
+
 // 💡 Plataformas que requieren activación manual por WhatsApp
 const PLATAFORMAS_MANUALES = [
   "YOUTUBE",
@@ -1309,9 +1313,10 @@ function copiarCuentasCheckout() {
 }
 
 // =========================================================================
-// 📡 BÓVEDA Y CASILLERO DE CUENTAS
+// 📡 BÓVEDA Y CASILLERO DE CUENTAS (CON FILTRADO ESTRICTO Y TABS DE PLATAFORMA)
 // =========================================================================
 let timeoutCasilleroLive = null;
+
 function buscarCasilleroDistri() {
   clearTimeout(timeoutCasilleroLive);
 
@@ -1336,53 +1341,25 @@ function buscarCasilleroDistri() {
     const formData = new FormData();
     formData.append("accion", "buscar_casillero_distribuidor");
     formData.append("telefono_distribuidor", telefonoDistribuidor);
-    formData.append("busqueda", valQuery);
+    formData.append("busqueda", "");
 
     fetch(API_MYSQL_URL, { method: "POST", body: formData })
       .then((res) => res.text())
       .then((text) => {
         const res = parseCleanJSON(text);
         if (res && res.status === "success") {
-          let htmlCards = "";
+          // 🔒 FILTRADO ESTRICTO: Solo cuentas con correo real (que incluyan '@')
+          let cuentasValidas = (res.data || []).filter(
+            (item) => item.correo && String(item.correo).includes("@"),
+          );
 
-          if (res.data && res.data.length > 0) {
-            res.data.forEach((item) => {
-              let pinText =
-                item.pin &&
-                item.pin !== "" &&
-                item.pin !== "N/A" &&
-                item.pin !== "-"
-                  ? ` | PIN: <b>${item.pin}</b>`
-                  : "";
-              let perfilText =
-                item.perfil && item.perfil !== "" && item.perfil !== "N/A"
-                  ? `Perfil: <b>${item.perfil}</b>${pinText}`
-                  : "Cuenta Completa";
-              let subCliente = item.cliente
-                ? `<span style="font-size:0.75rem; color:var(--text-secondary);">Cliente: <b style="color:var(--ios-orange);">${item.cliente}</b></span>`
-                : "";
-              let dataFicha = encodeURIComponent(JSON.stringify(item));
+          window.casilleroDataCache = cuentasValidas;
 
-              htmlCards += `
-                <div class="cuenta-resultado-card" style="background:var(--input-bg); border:var(--surface-border); padding:14px; border-radius:16px; margin-bottom:10px; display:flex; flex-direction:column; gap:8px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="color:var(--ios-blue); font-weight:800; text-transform: uppercase;">${item.plataforma.replace(/-/g, " ")}</div>
-                    <div style="color:var(--ios-green); font-family:monospace; font-weight:800; font-size:0.85rem;">${item.vencimiento}</div>
-                  </div>
-                  <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
-                       ${perfilText}<br>${subCliente}
-                  </div>
-                  <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
-                    <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.correo}')" style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:10px; font-family:monospace; font-size:0.8rem; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">E: <span style="color:white; font-weight:bold;">${item.correo}</span></div>
-                    <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.clave}')" style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:10px; font-family:monospace; font-size:0.8rem; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">P: <span style="color:white; font-weight:bold;">${item.clave}</span></div>
-                    <button class="btn-ios btn-secondary w-100" style="padding:8px; font-size:0.75rem; margin-top:4px; border-radius:10px;" onclick="copiarFichaCasillero(this, '${dataFicha}')">Copiar Ficha Completa</button>
-                  </div>
-                </div>`;
-            });
-            contenedor.innerHTML = htmlCards;
-          } else {
-            contenedor.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-secondary);">No tienes cuentas registradas que coincidan.</div>`;
-          }
+          // 🎨 RENDERIZAR BOTONES DE FILTRO DE PLATAFORMAS ADQUIRIDAS
+          renderizarTabsPlataformasCasillero(cuentasValidas);
+
+          // 🎴 RENDERIZAR TARJETAS FILTRADAS
+          renderizarResultadosCasillero(valQuery);
         } else {
           contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">Error buscando en MySQL.</div>`;
         }
@@ -1392,6 +1369,133 @@ function buscarCasilleroDistri() {
         contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">Error de conexión al servidor.</div>`;
       });
   }, 200);
+}
+
+function renderizarTabsPlataformasCasillero(cuentas) {
+  const tabsContainer = document.getElementById(
+    "casilleroPlataformasFilterTabs",
+  );
+  if (!tabsContainer) return;
+
+  // Extraer plataformas únicas en uso
+  const plataformasUnicas = [];
+  cuentas.forEach((item) => {
+    let p = (item.plataforma || "OTRO").toUpperCase().replace(/_/g, "-");
+    if (!plataformasUnicas.includes(p)) {
+      plataformasUnicas.push(p);
+    }
+  });
+
+  if (plataformasUnicas.length === 0) {
+    tabsContainer.innerHTML = "";
+    return;
+  }
+
+  let htmlTabs = `
+    <button class="venc-tab-btn ${window.casilleroPlatFiltroActual === "TODOS" ? "active" : ""}" onclick="filtrarPlataformaCasillero('TODOS', this)">
+      Todos (${cuentas.length})
+    </button>
+  `;
+
+  plataformasUnicas.forEach((plat) => {
+    let count = cuentas.filter(
+      (c) => (c.plataforma || "").toUpperCase().replace(/_/g, "-") === plat,
+    ).length;
+    let activeClass = window.casilleroPlatFiltroActual === plat ? "active" : "";
+    let nombreLimpio = plat.replace(/-/g, " ");
+
+    htmlTabs += `
+      <button class="venc-tab-btn ${activeClass}" onclick="filtrarPlataformaCasillero('${plat}', this)">
+        ${nombreLimpio} (${count})
+      </button>
+    `;
+  });
+
+  tabsContainer.innerHTML = htmlTabs;
+}
+
+function filtrarPlataformaCasillero(plat, btn) {
+  if (typeof haptic === "function") haptic();
+  window.casilleroPlatFiltroActual = plat;
+
+  const tabsContainer = document.getElementById(
+    "casilleroPlataformasFilterTabs",
+  );
+  if (tabsContainer) {
+    tabsContainer
+      .querySelectorAll(".venc-tab-btn")
+      .forEach((b) => b.classList.remove("active"));
+  }
+  if (btn) btn.classList.add("active");
+
+  const inputSearch = document.getElementById("inputCasilleroSearch");
+  const valQuery = inputSearch ? inputSearch.value.trim().toLowerCase() : "";
+  renderizarResultadosCasillero(valQuery);
+}
+
+function renderizarResultadosCasillero(queryBusqueda = "") {
+  const contenedor = document.getElementById("contenedorResultadosCasillero");
+  if (!contenedor) return;
+
+  let cuentas = window.casilleroDataCache || [];
+
+  // 1. Filtrar por la pestaña/plataforma seleccionada
+  if (
+    window.casilleroPlatFiltroActual &&
+    window.casilleroPlatFiltroActual !== "TODOS"
+  ) {
+    cuentas = cuentas.filter((item) => {
+      let p = (item.plataforma || "").toUpperCase().replace(/_/g, "-");
+      return p === window.casilleroPlatFiltroActual;
+    });
+  }
+
+  // 2. Filtrar por búsqueda de texto
+  if (queryBusqueda !== "") {
+    cuentas = cuentas.filter((item) => {
+      let searchStr =
+        `${item.cliente || ""} ${item.correo || ""} ${item.perfil || ""} ${item.plataforma || ""}`.toLowerCase();
+      return searchStr.includes(queryBusqueda);
+    });
+  }
+
+  if (cuentas.length === 0) {
+    contenedor.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-secondary);">No tienes cuentas registradas que coincidan.</div>`;
+    return;
+  }
+
+  let htmlCards = "";
+  cuentas.forEach((item) => {
+    let pinText =
+      item.pin && item.pin !== "" && item.pin !== "N/A" && item.pin !== "-"
+        ? ` | PIN: <b>${item.pin}</b>`
+        : "";
+    let perfilText =
+      item.perfil && item.perfil !== "" && item.perfil !== "N/A"
+        ? `Perfil: <b>${item.perfil}</b>${pinText}`
+        : "Cuenta Completa";
+    let subCliente = item.cliente
+      ? `<span style="font-size:0.75rem; color:var(--text-secondary);">Cliente: <b style="color:var(--ios-orange);">${item.cliente}</b></span>`
+      : "";
+    let dataFicha = encodeURIComponent(JSON.stringify(item));
+
+    htmlCards += `
+      <div class="cuenta-resultado-card" style="background:var(--input-bg); border:var(--surface-border); padding:14px; border-radius:16px; margin-bottom:10px; display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="color:var(--ios-blue); font-weight:800; text-transform: uppercase;">${item.plataforma.replace(/-/g, " ")}</div>
+          <div style="color:var(--ios-green); font-family:monospace; font-weight:800; font-size:0.85rem;">${item.vencimiento}</div>
+        </div>
+        <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+             ${perfilText}<br>${subCliente}
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+          <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.correo}')" style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:10px; font-family:monospace; font-size:0.8rem; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">E: <span style="color:white; font-weight:bold;">${item.correo}</span></div>
+          <div class="credential-pill" onclick="copiarTextoAlToque(this, '${item.clave}')" style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:10px; font-family:monospace; font-size:0.8rem; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">P: <span style="color:white; font-weight:bold;">${item.clave}</span></div>
+          <button class="btn-ios btn-secondary w-100" style="padding:8px; font-size:0.75rem; margin-top:4px; border-radius:10px;" onclick="copiarFichaCasillero(this, '${dataFicha}')">Copiar Ficha Completa</button>
+        </div>
+      </div>`;
+  });
+  contenedor.innerHTML = htmlCards;
 }
 
 function copiarFichaCasillero(btn, dataEncoded) {
