@@ -411,7 +411,7 @@ window.abrirCentroCodigos = function () {
 
   const overlay = document.getElementById("codesCenterOverlay");
   if (overlay) {
-    overlay.style.display = "flex";
+    overlay.style.setProperty("display", "flex", "important");
     overlay.classList.add("open");
   }
   changeCodeStep(1);
@@ -422,7 +422,7 @@ window.cerrarCentroCodigos = function () {
   desbloquearScroll();
   const overlay = document.getElementById("codesCenterOverlay");
   if (overlay) {
-    overlay.style.display = "none";
+    overlay.style.setProperty("display", "none", "important");
     overlay.classList.remove("open");
   }
 };
@@ -796,7 +796,7 @@ function cargarDatosFinancierosYAlertas(tel, mesFiltro = "todos") {
                 );
 
                 htmlRenov += `
-                   <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,149,0,0.3); border-radius:16px; padding:12px 16px; min-width:200px; display:flex; flex-direction:column; gap:6px;">
+                    <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,149,0,0.3); border-radius:16px; padding:12px 16px; min-width:200px; display:flex; flex-direction:column; gap:6px;">
                       <div style="font-weight:800; color:var(--text-primary); font-size:0.9rem;">${c.plataforma.replace(/-/g, " ")}</div>
                       <div style="font-size:0.8rem; color:var(--text-secondary);">Cliente: ${c.cliente || "Sin Nombre"}</div>
                       <div style="font-size:0.8rem; color:${colorDias}; font-weight:700;">${txtDias}</div>
@@ -1572,11 +1572,11 @@ function asegurarEstructuraCentroCodigos() {
 function changeCodeStep(n) {
   document
     .querySelectorAll("#codesCenterOverlay .code-step")
-    .forEach((s) => (s.style.display = "none"));
+    .forEach((s) => s.style.setProperty("display", "none", "important"));
 
   const currentStep = document.getElementById("codeStep" + n);
   if (currentStep) {
-    currentStep.style.display = "flex";
+    currentStep.style.setProperty("display", "flex", "important");
     currentStep.style.flexDirection = "column";
     currentStep.style.gap = "12px";
     currentStep.style.width = "100%";
