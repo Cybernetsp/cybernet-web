@@ -385,13 +385,21 @@ Aquí tienes las credenciales para ingresar a tu panel de revendedor B2B:
 const oldToggleNetflixManagerPanel = window.toggleNetflixManagerPanel;
 window.toggleNetflixManagerPanel = function () {
   if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("netflixManagerOverlay");
+  let overlay = document.getElementById("netflixManagerOverlay");
 
-  if (!overlay) {
-    window.crearModalNetflixManagerHTML();
-    return window.toggleNetflixManagerPanel();
+  // 🔥 EL TRUCO: Si la ventana existe pero es la VERSIÓN VIEJA (no tiene los cuadros), la destruimos
+  if (overlay && !document.getElementById("statPinesDisponibles")) {
+    overlay.remove();
+    overlay = null; // Forzamos a que sea nulo para que el IF de abajo la vuelva a crear
   }
 
+  // Si no existe, crea la versión nueva con los cuadros estadísticos
+  if (!overlay) {
+    window.crearModalNetflixManagerHTML();
+    return window.toggleNetflixManagerPanel(); // Se vuelve a llamar a sí misma para abrirla
+  }
+
+  // Lógica para abrir o cerrar
   if (overlay.classList.contains("open") || overlay.style.display === "flex") {
     overlay.classList.remove("open");
     overlay.style.display = "none";
@@ -400,10 +408,8 @@ window.toggleNetflixManagerPanel = function () {
     overlay.style.display = "flex";
     overlay.classList.add("open");
 
-    // Carga los cortes operativos de MySQL
+    // Ejecuta las funciones en vivo al abrir la ventana
     window.cargarCortesOperativosNetflix();
-
-    // 🔥 NUEVAS FUNCIONES AL ABRIR: Pide pines, cuentas y actualiza refácil
     window.cargarEstadisticasNetflix();
     window.dispararActualizarPinesRefacil();
   }
