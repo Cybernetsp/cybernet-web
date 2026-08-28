@@ -70,7 +70,6 @@ window.sincronizarTiempoTrabajadorMySQL = function (
 ) {
   if (!trabajador || segundosTotales <= 0) return;
 
-  // 🛑 Protección adicional frente a envíos manuales
   const usuarioActivoObj = JSON.parse(
     sessionStorage.getItem("usuario_activo") || "null",
   );
@@ -380,7 +379,7 @@ Aquí tienes las credenciales para ingresar a tu panel de revendedor B2B:
 };
 
 /* ==========================================================================
-   🍿 MÓDULO DE NETFLIX: CORTES OPERATIVOS
+   🍿 MÓDULO DE NETFLIX: CORTES OPERATIVOS Y ESTADÍSTICAS
    ========================================================================== */
 
 const oldToggleNetflixManagerPanel = window.toggleNetflixManagerPanel;
@@ -400,8 +399,59 @@ window.toggleNetflixManagerPanel = function () {
     if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
     overlay.style.display = "flex";
     overlay.classList.add("open");
+
+    // Carga los cortes operativos de MySQL
     window.cargarCortesOperativosNetflix();
+
+    // 🔥 NUEVAS FUNCIONES AL ABRIR: Pide pines, cuentas y actualiza refácil
+    window.cargarEstadisticasNetflix();
+    window.dispararActualizarPinesRefacil();
   }
+};
+
+window.cargarEstadisticasNetflix = function () {
+  const elPines = document.getElementById("statPinesDisponibles");
+  const elCuentas = document.getElementById("statCuentasTotales");
+
+  const loadingSvg = `<svg class="spin-anim" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>`;
+
+  if (elPines) elPines.innerHTML = loadingSvg;
+  if (elCuentas) elCuentas.innerHTML = loadingSvg;
+
+  const cbName = "cb_stats_net_" + Date.now();
+  window[cbName] = function (res) {
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      if (elPines) elPines.innerText = res.pinesDisponibles;
+      if (elCuentas) elCuentas.innerText = res.cuentasTotales;
+    } else {
+      if (elPines) elPines.innerText = "Error";
+      if (elCuentas) elCuentas.innerText = "Error";
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerEstadisticasNetflix&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+};
+
+window.dispararActualizarPinesRefacil = function () {
+  const cbName = "cb_upd_pines_" + Date.now();
+  window[cbName] = function (res) {
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+    console.log("Actualización de pines lanzada:", res);
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=actualizarPinesRefacil&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
 };
 
 window.cargarCortesOperativosNetflix = function () {
@@ -730,6 +780,18 @@ window.crearModalNetflixManagerHTML = function () {
             <h3 style="margin: 0; color: #e50914; font-size: 1.15rem; font-weight: 800;">Cortes Operativos</h3>
           </div>
           <button type="button" onclick="window.toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">✕</button>
+        </div>
+
+        <!-- 🔥 NUEVOS CUADROS ESTADÍSTICOS AÑADIDOS AQUÍ 🔥 -->
+        <div style="display: flex; gap: 12px; margin-bottom: 4px; flex-shrink: 0;">
+          <div style="flex: 1; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); border-radius: 14px; padding: 14px; text-align: center; box-shadow: inset 0 0 20px rgba(48,209,88,0.02);">
+            <div style="font-size: 0.68rem; color: #30d158; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Pines Disponibles</div>
+            <div id="statPinesDisponibles" style="font-size: 1.8rem; font-weight: 900; color: #ffffff; font-family: monospace;">-</div>
+          </div>
+          <div style="flex: 1; background: rgba(10, 132, 255, 0.08); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 14px; padding: 14px; text-align: center; box-shadow: inset 0 0 20px rgba(10,132,255,0.02);">
+            <div style="font-size: 0.68rem; color: #0a84ff; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Cuentas Totales</div>
+            <div id="statCuentasTotales" style="font-size: 1.8rem; font-weight: 900; color: #ffffff; font-family: monospace;">-</div>
+          </div>
         </div>
 
         <div style="display: flex; flex-direction: column; flex-shrink: 0;">
