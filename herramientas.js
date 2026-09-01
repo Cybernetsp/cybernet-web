@@ -1037,17 +1037,19 @@ window.cerrarLectorCorreoGlobal = function () {
 };
 function togglePedagoCodesPanel() {
   if (typeof haptic === "function") haptic();
-  const panel = document.getElementById("pedagoCodesOverlay");
-  if (!panel) return;
 
-  if (panel.style.display === "flex" || panel.classList.contains("open")) {
-    panel.style.display = "none";
-    panel.classList.remove("open");
-  } else {
-    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
-    panel.style.display = "flex";
-    panel.style.alignItems = "center";
-    panel.style.justifyContent = "center";
-    panel.classList.add("open");
-  }
+  // Definimos el tamaño de la ventana flotante
+  const width = 1000;
+  const height = 800;
+
+  // Calculamos para que aparezca justo en el centro de la pantalla
+  const left = (screen.width - width) / 2;
+  const top = (screen.height - height) / 2;
+
+  // Abrimos la ventana emergente oficial de Codexgogo
+  window.open(
+    "https://www.codexgogo.com/",
+    "CodexGogoPanel",
+    `width=${width},height=${height},top=${top},left=${left},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`,
+  );
 }
