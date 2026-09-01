@@ -778,36 +778,50 @@ window.filtrarCodigosInternos = function () {
 };
 
 /* ==========================================================================
-   👁️ BÓVEDAS (ANA Y CHAYO) E IFRAMES
+   👁️ BÓVEDAS (ANA Y CHAYO Y PEDAGO) POPUPS DIRECTOS E INDEPENDIENTES
    ========================================================================== */
-const oldToggleAnaCodesPanel = window.toggleAnaCodesPanel;
 window.toggleAnaCodesPanel = function () {
-  if (oldToggleAnaCodesPanel) oldToggleAnaCodesPanel();
-  const iframe = document.getElementById("iframeAnaCodes");
-  const overlay = document.getElementById("anaCodesOverlay");
-  if (
-    overlay &&
-    overlay.classList.contains("open") &&
-    iframe &&
-    (iframe.src === "about:blank" || iframe.src === "")
-  ) {
-    iframe.src = "https://correos.tkdjgz.com/";
-  }
+  if (typeof haptic === "function") haptic();
+  const width = 1000;
+  const height = 800;
+  const left = (screen.width - width) / 2;
+  const top = (screen.height - height) / 2;
+  window.open(
+    "https://correos.tkdjgz.com/",
+    "AnaCodesPanel",
+    `width=${width},height=${height},top=${top},left=${left},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`,
+  );
 };
 
+function togglePedagoCodesPanel() {
+  if (typeof haptic === "function") haptic();
+  const width = 1000;
+  const height = 800;
+  const left = (screen.width - width) / 2;
+  const top = (screen.height - height) / 2;
+  window.open(
+    "https://www.codexgogo.com/",
+    "CodexGogoPanel",
+    `width=${width},height=${height},top=${top},left=${left},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`,
+  );
+}
+
 let cronometroChayo = null;
-const oldToggleChayoPanel = window.toggleChayoPanel;
 
 window.toggleChayoPanel = function () {
-  if (oldToggleChayoPanel) oldToggleChayoPanel();
+  if (typeof haptic === "function") haptic();
   const overlay = document.getElementById("chayoOverlay");
-  const iframe = document.getElementById("iframeChayo");
   const barra = document.getElementById("barraCredencialesChayo");
   const botonVer = document.getElementById("btnVerDatosChayo");
 
   if (!overlay) return;
 
-  if (!overlay.classList.contains("open")) {
+  const isVisible =
+    overlay.classList.contains("open") || overlay.style.display === "flex";
+
+  if (isVisible) {
+    overlay.classList.remove("open");
+    overlay.style.display = "none";
     if (cronometroChayo) clearInterval(cronometroChayo);
     if (barra) barra.style.setProperty("display", "none", "important");
     if (botonVer) {
@@ -816,10 +830,23 @@ window.toggleChayoPanel = function () {
       botonVer.innerText = "Ver datos de ingresos";
     }
   } else {
-    if (iframe && (iframe.src === "about:blank" || iframe.src === "")) {
-      iframe.src = "https://chayonet.github.io/tienda/";
-    }
+    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
+    overlay.classList.add("open");
+    overlay.style.setProperty("display", "flex", "important");
   }
+};
+
+window.abrirVentanaChayo = function () {
+  if (typeof haptic === "function") haptic();
+  const width = 1000;
+  const height = 800;
+  const left = (screen.width - width) / 2;
+  const top = (screen.height - height) / 2;
+  window.open(
+    "https://chayonet.github.io/tienda/",
+    "ChayoPanel",
+    `width=${width},height=${height},top=${top},left=${left},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`,
+  );
 };
 
 window.revelarDatosChayoTemporizados = function () {
@@ -1035,21 +1062,3 @@ window.cerrarLectorCorreoGlobal = function () {
   if (visorModal) visorModal.style.display = "none";
   if (visorContent) visorContent.innerHTML = "";
 };
-function togglePedagoCodesPanel() {
-  if (typeof haptic === "function") haptic();
-
-  // Definimos el tamaño de la ventana flotante
-  const width = 1000;
-  const height = 800;
-
-  // Calculamos para que aparezca justo en el centro de la pantalla
-  const left = (screen.width - width) / 2;
-  const top = (screen.height - height) / 2;
-
-  // Abrimos la ventana emergente oficial de Codexgogo
-  window.open(
-    "https://www.codexgogo.com/",
-    "CodexGogoPanel",
-    `width=${width},height=${height},top=${top},left=${left},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`,
-  );
-}
