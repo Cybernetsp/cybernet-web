@@ -1,6 +1,7 @@
 /* ==========================================================================
    💸 CYBERNET OS - FINANZAS, INVENTARIO Y DISTRIBUIDORES (finanzas_staff.js)
    ========================================================================== */
+
 /* ==========================================================================
    📈 MÓDULO PRINCIPAL DE FINANZAS Y CAJA REAL
    ========================================================================== */
@@ -301,7 +302,9 @@ window.cargarDistribuidores = function () {
                   </div>
                   
                   <button type="button" 
-                          onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')" 
+                          class="btn-copiar-saldo-distri"
+                          data-nombre="${nombreLimpio.replace(/"/g, "&quot;")}"
+                          data-saldo="${saldoFormateado}"
                           title="Copiar reporte de saldo para WhatsApp"
                           style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.35); color: #30d158; width: 38px; height: 38px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
                           onmouseover="this.style.background='rgba(48, 209, 88, 0.3)'; this.style.transform='scale(1.05)';" 
@@ -325,6 +328,15 @@ window.cargarDistribuidores = function () {
             </div>`;
         });
         container.innerHTML = html;
+
+        // 🔥 Asignar evento click a todos los botones de copiar saldo recién creados
+        document.querySelectorAll(".btn-copiar-saldo-distri").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const nombre = this.getAttribute("data-nombre") || "Distribuidor";
+            const saldo = this.getAttribute("data-saldo") || "$0";
+            window.copiarSaldoDistri(this, nombre, saldo);
+          });
+        });
       } else {
         container.innerHTML = `<div style="text-align: center; padding: 25px; color: #ff453a; font-weight: 700;">Error: ${res.message}</div>`;
       }
