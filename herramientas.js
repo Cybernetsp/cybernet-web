@@ -1035,3 +1035,19 @@ window.cerrarLectorCorreoGlobal = function () {
   if (visorModal) visorModal.style.display = "none";
   if (visorContent) visorContent.innerHTML = "";
 };
+function togglePedagoCodesPanel() {
+  if (typeof haptic === "function") haptic();
+  const panel = document.getElementById("pedagoCodesOverlay");
+  if (!panel) return;
+
+  if (panel.style.display === "flex" || panel.classList.contains("open")) {
+    panel.style.display = "none";
+    panel.classList.remove("open");
+  } else {
+    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
+    panel.style.display = "flex";
+    panel.style.alignItems = "center";
+    panel.style.justifyContent = "center";
+    panel.classList.add("open");
+  }
+}
