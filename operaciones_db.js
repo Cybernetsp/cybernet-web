@@ -387,19 +387,16 @@ window.toggleNetflixManagerPanel = function () {
   if (typeof haptic === "function") haptic();
   let overlay = document.getElementById("netflixManagerOverlay");
 
-  // 🔥 EL TRUCO: Si la ventana existe pero es la VERSIÓN VIEJA (no tiene los cuadros), la destruimos
   if (overlay && !document.getElementById("statPinesDisponibles")) {
     overlay.remove();
-    overlay = null; // Forzamos a que sea nulo para que el IF de abajo la vuelva a crear
+    overlay = null;
   }
 
-  // Si no existe, crea la versión nueva con los cuadros estadísticos
   if (!overlay) {
     window.crearModalNetflixManagerHTML();
-    return window.toggleNetflixManagerPanel(); // Se vuelve a llamar a sí misma para abrirla
+    return window.toggleNetflixManagerPanel();
   }
 
-  // Lógica para abrir o cerrar
   if (overlay.classList.contains("open") || overlay.style.display === "flex") {
     overlay.classList.remove("open");
     overlay.style.display = "none";
@@ -408,7 +405,6 @@ window.toggleNetflixManagerPanel = function () {
     overlay.style.display = "flex";
     overlay.classList.add("open");
 
-    // Ejecuta las funciones en vivo al abrir la ventana
     window.cargarCortesOperativosNetflix();
     window.cargarEstadisticasNetflix();
     window.dispararActualizarPinesRefacil();
@@ -514,92 +510,127 @@ window.mostrarEstadoSinCortes = function () {
     </div>`;
 };
 
+// 🔧 FUNCIÓN INDESTRUCTIBLE PARA CONVERTIR FECHAS LITERALES Y ASIGNAR EL LOTE PRIORITARIO
 function parsearFechaCorteMs(fStr) {
   if (!fStr || fStr === "-" || fStr === "N/A" || fStr === "SIN FECHA")
     return 9999999999999;
+
   if (fStr instanceof Date) return fStr.getTime();
 
-  let str = String(fStr).trim().toUpperCase();
-  let hoy = new Date();
+  let str = String(fStr).toUpperCase().trim();
+
+  const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
-  // Palabras clave relativas
-  if (str.includes("ANTEAYER") || str.includes("ANTES DE AYER"))
+  if (str === "ANTEAYER" || str === "ANTES DE AYER") {
     return hoy.getTime() - 2 * 86400000;
-  if (str.includes("AYER")) return hoy.getTime() - 86400000;
-  if (str.includes("HOY")) return hoy.getTime();
+  }
+  if (str === "AYER") {
+    return hoy.getTime() - 86400000;
+  }
+  if (str === "HOY") {
+    return hoy.getTime();
+  }
 
-  // Limpieza: quitar "de", separadores y espacios múltiples
+  // 1. Limpieza extrema: Quitar "DE", guiones y espacios en blanco extra.
+  // Transforma "31DEAGOSTO" o "31-AGOSTO" a "31 AGOSTO"
   let limpia = str
-    .replace(/(\d+)\s*DE\s*/gi, "$1 ")
-    .replace(/(\d+)DE/gi, "$1 ")
-    .replace(/[\/\-\.]/g, " ")
+    .replace(/(\d+)\s*DE\s*([A-Z]+)/gi, "$1 $2")
+    .replace(/(\d+)DE([A-Z]+)/gi, "$1 $2")
+    .replace(/(\d+)([A-Z]{3,})/gi, "$1 $2")
+    .replace(/[\/\-\.,]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
-  const mesesAbrev = [
-    "ENE",
-    "FEB",
-    "MAR",
-    "ABR",
-    "MAY",
-    "JUN",
-    "JUL",
-    "AGO",
-    "SEP",
-    "OCT",
-    "NOV",
-    "DIC",
-  ];
-  const mesesCompletos = [
-    "ENERO",
-    "FEBRERO",
-    "MARZO",
-    "ABRIL",
-    "MAYO",
-    "JUNIO",
-    "JULIO",
-    "AGOSTO",
-    "SEPTIEMBRE",
-    "OCTUBRE",
-    "NOVIEMBRE",
-    "DICIEMBRE",
-  ];
+  // 2. Extraer los componentes: Día, Mes (letra o número), Año (opcional)
+  let matchDiaMes = limpia.match(
+    /^(\d{1,2})\s+([A-Z]+|\d{1,2})(?:\s+(\d{2,4}))?/,
+  );
 
-  // Patrón 1: "30 AGOSTO" o "30 AGOSTO 2024"
-  let matchTexto = limpia.match(/^(\d{1,2})\s+([A-Z]+)(?:\s+(\d{2,4}))?/);
-  if (matchTexto) {
-    let dia = parseInt(matchTexto[1], 10);
-    let mesStr = matchTexto[2];
-    let anio = matchTexto[3] ? parseInt(matchTexto[3], 10) : hoy.getFullYear();
+  if (matchDiaMes) {
+    let dia = parseInt(matchDiaMes[1], 10);
+    let mesStr = matchDiaMes[2];
+    let anio = matchDiaMes[3]
+      ? parseInt(matchDiaMes[3], 10)
+      : hoy.getFullYear();
+
+    // Normalizar año (ej. 24 a 2024)
     if (anio < 100) anio += 2000;
+
+    const mesesMap = {
+      ENE: 0,
+      ENERO: 0,
+      "01": 0,
+      1: 0,
+      FEB: 1,
+      FEBRERO: 1,
+      "02": 1,
+      2: 1,
+      MAR: 2,
+      MARZO: 2,
+      "03": 2,
+      3: 2,
+      ABR: 3,
+      ABRIL: 3,
+      "04": 3,
+      4: 3,
+      MAY: 4,
+      MAYO: 4,
+      "05": 4,
+      5: 4,
+      JUN: 5,
+      JUNIO: 5,
+      "06": 5,
+      6: 5,
+      JUL: 6,
+      JULIO: 6,
+      "07": 6,
+      7: 6,
+      AGO: 7,
+      AGOSTO: 7,
+      "08": 7,
+      8: 7,
+      SEP: 8,
+      SEPT: 8,
+      SEPTIEMBRE: 8,
+      "09": 8,
+      9: 8,
+      OCT: 9,
+      OCTUBRE: 9,
+      10: 9,
+      NOV: 10,
+      NOVIEMBRE: 10,
+      11: 10,
+      DIC: 11,
+      DICIEMBRE: 11,
+      12: 11,
+    };
 
     let mesIdx = -1;
-    if (/^\d{1,2}$/.test(mesStr)) {
-      mesIdx = parseInt(mesStr, 10) - 1;
-    } else {
-      mesIdx = mesesAbrev.findIndex((m) => mesStr.startsWith(m));
-      if (mesIdx === -1)
-        mesIdx = mesesCompletos.findIndex((m) => mesStr.startsWith(m));
+    for (let key in mesesMap) {
+      if (mesStr === key || mesStr.startsWith(key)) {
+        mesIdx = mesesMap[key];
+        break;
+      }
     }
+
     if (!isNaN(dia) && mesIdx >= 0 && mesIdx <= 11) {
-      return new Date(anio, mesIdx, dia).getTime();
+      let dObj = new Date(anio, mesIdx, dia);
+
+      // 3. Ajuste inteligente: si el sistema detecta que el mes leído es *mayor*
+      // al mes en el que estamos actualmente (por ejemplo, lee Agosto, pero estamos en Septiembre),
+      // significa que esa cuenta es del año anterior, asegurando así que su valor en milisegundos sea mucho menor.
+      if (!matchDiaMes[3]) {
+        if (mesIdx > hoy.getMonth()) {
+          dObj.setFullYear(anio - 1);
+        }
+      }
+
+      return dObj.getTime();
     }
   }
 
-  // Patrón 2: formato numérico "30 08" o "30 08 2024" (DD MM [AAAA])
-  let matchNum = limpia.match(/^(\d{1,2})\s+(\d{1,2})(?:\s+(\d{2,4}))?/);
-  if (matchNum) {
-    let dia = parseInt(matchNum[1], 10);
-    let mes = parseInt(matchNum[2], 10);
-    let anio = matchNum[3] ? parseInt(matchNum[3], 10) : hoy.getFullYear();
-    if (anio < 100) anio += 2000;
-    if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12) {
-      return new Date(anio, mes - 1, dia).getTime();
-    }
-  }
-
-  // Último recurso: intentar parsear como fecha nativa
+  // 4. Si fallan las reglas de texto, JS intenta interpretar la fecha de forma nativa.
   let d = new Date(fStr);
   return isNaN(d.getTime()) ? 9999999999999 : d.getTime();
 }
@@ -616,7 +647,7 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     return;
   }
 
-  // Asignar timestamp de vencimiento a cada cuenta
+  // 1. Asignar el valor numérico de tiempo a cada cuenta
   cuentas.forEach((c) => {
     let rawVenc =
       c.vencimiento ||
@@ -630,30 +661,42 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     c._vencTexto = rawVenc && rawVenc !== "-" ? rawVenc : "Sin Fecha";
   });
 
-  // Ordenar por fecha ascendente (más antiguas primero).
-  // Las cuentas sin fecha válida se van al final.
-  cuentas.sort((a, b) => {
-    if (a._tsVenc === 9999999999999 && b._tsVenc === 9999999999999) return 0;
-    if (a._tsVenc === 9999999999999) return 1;
-    if (b._tsVenc === 9999999999999) return -1;
-    return a._tsVenc - b._tsVenc;
-  });
+  // 2. Encontrar el lote más antiguo (El valor en ms más pequeño)
+  let minTs = Math.min(...cuentas.map((c) => c._tsVenc));
 
-  // Cabecera informativa: mostrar la fecha más antigua y el total de cuentas
-  let fechaCabeceraTexto = cuentas[0]._vencTexto || "Pendientes";
+  let cuentasLoteActual = [];
+  if (minTs === 9999999999999) {
+    cuentasLoteActual = cuentas;
+  } else {
+    // 3. Agrupar las cuentas que tengan la fecha exacta de minTs
+    let dMin = new Date(minTs);
+    cuentasLoteActual = cuentas.filter((c) => {
+      if (c._tsVenc === 9999999999999) return false;
+      let dC = new Date(c._tsVenc);
+      return (
+        dC.getFullYear() === dMin.getFullYear() &&
+        dC.getMonth() === dMin.getMonth() &&
+        dC.getDate() === dMin.getDate()
+      );
+    });
+  }
+
+  let fechaCabeceraTexto = cuentasLoteActual[0]
+    ? cuentasLoteActual[0]._vencTexto
+    : "Pendientes";
+
   let html = `
     <div style="background: rgba(255, 69, 58, 0.12); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
       <span style="font-size: 0.78rem; font-weight: 800; color: #ff453a; text-transform: uppercase;">
-        🚨 Cuentas vencidas (ordenadas por fecha): ${fechaCabeceraTexto}
+        🚨 Lote Prioritario: ${fechaCabeceraTexto}
       </span>
       <span style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700; font-family: monospace;">
-        Total: ${cuentas.length}
+        Mostrando ${cuentasLoteActual.length} de ${cuentas.length}
       </span>
     </div>
   `;
 
-  // Generar tarjetas para todas las cuentas
-  cuentas.forEach((cuenta) => {
+  cuentasLoteActual.forEach((cuenta) => {
     let correo = cuenta.correo || "Sin correo";
     let claveVieja = cuenta.clave_actual || cuenta.clave || "fuego41@@";
     let claveNueva = cuenta.clave_nueva || window.generarClaveTVAleatoria();
