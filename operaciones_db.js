@@ -532,14 +532,46 @@ function parsearFechaCorteMs(fStr) {
 
   // 1. Limpieza extrema de ruido (quita "DE", guiones y espacios pegados)
   let limpia = str
-    .replace(/ DE /g, " ")
-    .replace(/DE/g, " ")
-    .replace(/[\/-]/g, " ")
+    .replace(/(\d+)\s*DE\s*([A-Z]+)/gi, "$1 $2") // "31 DE AGOSTO" -> "31 AGOSTO"
+    .replace(/(\d+)DE([A-Z]+)/gi, "$1 $2") // "31DEAGOSTO" -> "31 AGOSTO"
+    .replace(/(\d+)([A-Z]{3,})/gi, "$1 $2") // "31AGOSTO" -> "31 AGOSTO"
+    .replace(/[\/\-\.,]/g, " ") // "31-08" -> "31 08"
     .replace(/\s+/g, " ")
     .trim();
 
-  // 2. Extraer el formato ej. "31 AGOSTO" o "27 AGO"
-  let matchDiaMes = limpia.match(/^(\d{1,2})\s*([A-Z0-9]+)(?:\s*(\d{2,4}))?/);
+  const mesesAbrev = [
+    "ENE",
+    "FEB",
+    "MAR",
+    "ABR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AGO",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DIC",
+  ];
+  const mesesCompletos = [
+    "ENERO",
+    "FEBRERO",
+    "MARZO",
+    "ABRIL",
+    "MAYO",
+    "JUNIO",
+    "JULIO",
+    "AGOSTO",
+    "SEPTIEMBRE",
+    "OCTUBRE",
+    "NOVIEMBRE",
+    "DICIEMBRE",
+  ];
+
+  // 2. Extraer el formato ej. "31 AGOSTO", "27 AGO" o "31 08 2026"
+  let matchDiaMes = limpia.match(
+    /(\d{1,2})\s+([A-Z]+|\d{1,2})(?:\s+(\d{2,4}))?/,
+  );
 
   if (matchDiaMes) {
     let dia = parseInt(matchDiaMes[1], 10);
@@ -612,7 +644,8 @@ function parsearFechaCorteMs(fStr) {
 
       // 3. Ajuste inteligente de cruce de año si no se especificó uno
       if (!matchDiaMes[3]) {
-        if (mesIdx > hoy.getMonth() + 1) {
+        // Si leemos un mes que es "mucho mayor" al actual, probablemente pertenece al año pasado.
+        if (mesIdx > hoy.getMonth() + 2) {
           dObj.setFullYear(anio - 1);
         }
       }
