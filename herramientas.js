@@ -793,7 +793,7 @@ window.toggleAnaCodesPanel = function () {
   );
 };
 
-function togglePedagoCodesPanel() {
+window.togglePedagoCodesPanel = function () {
   if (typeof haptic === "function") haptic();
   const width = 1000;
   const height = 800;
@@ -804,39 +804,9 @@ function togglePedagoCodesPanel() {
     "CodexGogoPanel",
     `width=${width},height=${height},top=${top},left=${left},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`,
   );
-}
-
-let cronometroChayo = null;
-
-window.toggleChayoPanel = function () {
-  if (typeof haptic === "function") haptic();
-  const overlay = document.getElementById("chayoOverlay");
-  const barra = document.getElementById("barraCredencialesChayo");
-  const botonVer = document.getElementById("btnVerDatosChayo");
-
-  if (!overlay) return;
-
-  const isVisible =
-    overlay.classList.contains("open") || overlay.style.display === "flex";
-
-  if (isVisible) {
-    overlay.classList.remove("open");
-    overlay.style.display = "none";
-    if (cronometroChayo) clearInterval(cronometroChayo);
-    if (barra) barra.style.setProperty("display", "none", "important");
-    if (botonVer) {
-      botonVer.disabled = false;
-      botonVer.style.opacity = "1";
-      botonVer.innerText = "Ver datos de ingresos";
-    }
-  } else {
-    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
-    overlay.classList.add("open");
-    overlay.style.setProperty("display", "flex", "important");
-  }
 };
 
-window.abrirVentanaChayo = function () {
+window.toggleChayoPanel = function () {
   if (typeof haptic === "function") haptic();
   const width = 1000;
   const height = 800;
@@ -847,68 +817,6 @@ window.abrirVentanaChayo = function () {
     "ChayoPanel",
     `width=${width},height=${height},top=${top},left=${left},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`,
   );
-};
-
-window.revelarDatosChayoTemporizados = function () {
-  if (typeof haptic === "function") haptic();
-  const barra = document.getElementById("barraCredencialesChayo");
-  const botonVer = document.getElementById("btnVerDatosChayo");
-
-  if (barra) {
-    barra.style.setProperty("display", "flex", "important");
-    barra.style.maxHeight = "80px";
-    barra.style.opacity = "1";
-  }
-
-  if (botonVer) {
-    botonVer.disabled = true;
-    let segundos = 10;
-    botonVer.innerText = `Ocultando en ${segundos}s...`;
-
-    if (cronometroChayo) clearInterval(cronometroChayo);
-    cronometroChayo = setInterval(() => {
-      segundos--;
-      if (segundos > 0) {
-        botonVer.innerText = `Ocultando en ${segundos}s...`;
-      } else {
-        clearInterval(cronometroChayo);
-        if (barra) barra.style.setProperty("display", "none", "important");
-        botonVer.disabled = false;
-        botonVer.innerText = "Ver datos de ingresos";
-      }
-    }, 1000);
-  }
-};
-
-window.copiarCredencialChayo = function (texto, btn, tipo) {
-  if (typeof haptic === "function") haptic();
-  navigator.clipboard.writeText(texto).then(() => {
-    let originalText = btn.innerText;
-    btn.innerText = "¡Copiado!";
-    btn.style.background = "rgba(50, 215, 75, 0.15)";
-    btn.style.color = "var(--ios-green)";
-    btn.style.borderColor = "rgba(50, 215, 75, 0.3)";
-
-    if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
-
-    setTimeout(() => {
-      btn.innerText = originalText;
-      btn.style.background = "rgba(255,55,95,0.1)";
-      btn.style.color = "#ff375f";
-      btn.style.borderColor = "rgba(255,55,95,0.3)";
-    }, 1500);
-
-    if (tipo === "clave") {
-      setTimeout(() => {
-        const barra = document.getElementById("barraCredencialesChayo");
-        if (barra && barra.style.display !== "none") {
-          barra.style.setProperty("display", "none", "important");
-          if (typeof triggerToast === "function")
-            triggerToast("🔓 Acceso completado. Maximizando visualización.");
-        }
-      }, 3000);
-    }
-  });
 };
 
 /* ==========================================================================
