@@ -387,19 +387,16 @@ window.toggleNetflixManagerPanel = function () {
   if (typeof haptic === "function") haptic();
   let overlay = document.getElementById("netflixManagerOverlay");
 
-  // 🔥 EL TRUCO: Si la ventana existe pero es la VERSIÓN VIEJA (no tiene los cuadros), la destruimos
   if (overlay && !document.getElementById("statPinesDisponibles")) {
     overlay.remove();
-    overlay = null; // Forzamos a que sea nulo para que el IF de abajo la vuelva a crear
+    overlay = null;
   }
 
-  // Si no existe, crea la versión nueva con los cuadros estadísticos
   if (!overlay) {
     window.crearModalNetflixManagerHTML();
-    return window.toggleNetflixManagerPanel(); // Se vuelve a llamar a sí misma para abrirla
+    return window.toggleNetflixManagerPanel();
   }
 
-  // Lógica para abrir o cerrar
   if (overlay.classList.contains("open") || overlay.style.display === "flex") {
     overlay.classList.remove("open");
     overlay.style.display = "none";
@@ -408,7 +405,6 @@ window.toggleNetflixManagerPanel = function () {
     overlay.style.display = "flex";
     overlay.classList.add("open");
 
-    // Ejecuta las funciones en vivo al abrir la ventana
     window.cargarCortesOperativosNetflix();
     window.cargarEstadisticasNetflix();
     window.dispararActualizarPinesRefacil();
@@ -514,62 +510,36 @@ window.mostrarEstadoSinCortes = function () {
     </div>`;
 };
 
+// 🔧 FUNCIÓN INDESTRUCTIBLE PARA CONVERTIR FECHAS LITERALES
 function parsearFechaCorteMs(fStr) {
   if (!fStr || fStr === "-" || fStr === "N/A" || fStr === "SIN FECHA")
     return 9999999999999;
   if (fStr instanceof Date) return fStr.getTime();
 
-  let str = String(fStr).trim().toUpperCase();
+  let str = String(fStr).toUpperCase().trim();
   let hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
-  if (str.includes("ANTEAYER") || str.includes("ANTES DE AYER")) {
+  if (str === "ANTEAYER" || str === "ANTES DE AYER") {
     return hoy.getTime() - 2 * 86400000;
   }
-  if (str.includes("AYER")) {
+  if (str === "AYER") {
     return hoy.getTime() - 86400000;
   }
-  if (str.includes("HOY")) {
+  if (str === "HOY") {
     return hoy.getTime();
   }
 
+  // 1. Limpieza extrema de ruido (quita "DE", guiones y espacios pegados)
   let limpia = str
-    .replace(/(\d+)\s*DE\s*/gi, "$1 ")
-    .replace(/(\d+)DE/gi, "$1 ")
+    .replace(/ DE /g, " ")
+    .replace(/DE/g, " ")
     .replace(/[\/-]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
-  const mesesAbrev = [
-    "ENE",
-    "FEB",
-    "MAR",
-    "ABR",
-    "MAY",
-    "JUN",
-    "JUL",
-    "AGO",
-    "SEP",
-    "OCT",
-    "NOV",
-    "DIC",
-  ];
-  const mesesCompletos = [
-    "ENERO",
-    "FEBRERO",
-    "MARZO",
-    "ABRIL",
-    "MAYO",
-    "JUNIO",
-    "JULIO",
-    "AGOSTO",
-    "SEPTIEMBRE",
-    "OCTUBRE",
-    "NOVIEMBRE",
-    "DICIEMBRE",
-  ];
-
-  let matchDiaMes = limpia.match(/^(\d{1,2})\s*([A-Z]+)(?:\s*(\d{2,4}))?/);
+  // 2. Extraer el formato ej. "31 AGOSTO" o "27 AGO"
+  let matchDiaMes = limpia.match(/^(\d{1,2})\s*([A-Z0-9]+)(?:\s*(\d{2,4}))?/);
 
   if (matchDiaMes) {
     let dia = parseInt(matchDiaMes[1], 10);
@@ -577,23 +547,81 @@ function parsearFechaCorteMs(fStr) {
     let anio = matchDiaMes[3]
       ? parseInt(matchDiaMes[3], 10)
       : hoy.getFullYear();
+
     if (anio < 100) anio += 2000;
 
+    const mesesMap = {
+      ENE: 0,
+      ENERO: 0,
+      "01": 0,
+      1: 0,
+      FEB: 1,
+      FEBRERO: 1,
+      "02": 1,
+      2: 1,
+      MAR: 2,
+      MARZO: 2,
+      "03": 2,
+      3: 2,
+      ABR: 3,
+      ABRIL: 3,
+      "04": 3,
+      4: 3,
+      MAY: 4,
+      MAYO: 4,
+      "05": 4,
+      5: 4,
+      JUN: 5,
+      JUNIO: 5,
+      "06": 5,
+      6: 5,
+      JUL: 6,
+      JULIO: 6,
+      "07": 6,
+      7: 6,
+      AGO: 7,
+      AGOSTO: 7,
+      "08": 7,
+      8: 7,
+      SEP: 8,
+      SEPT: 8,
+      SEPTIEMBRE: 8,
+      "09": 8,
+      9: 8,
+      OCT: 9,
+      OCTUBRE: 9,
+      10: 9,
+      NOV: 10,
+      NOVIEMBRE: 10,
+      11: 10,
+      DIC: 11,
+      DICIEMBRE: 11,
+      12: 11,
+    };
+
     let mesIdx = -1;
-    if (/^\d{1,2}$/.test(mesStr)) {
-      mesIdx = parseInt(mesStr, 10) - 1;
-    } else {
-      mesIdx = mesesAbrev.findIndex((m) => mesStr.startsWith(m));
-      if (mesIdx === -1) {
-        mesIdx = mesesCompletos.findIndex((m) => mesStr.startsWith(m));
+    for (let key in mesesMap) {
+      if (mesStr === key || mesStr.startsWith(key)) {
+        mesIdx = mesesMap[key];
+        break;
       }
     }
 
     if (!isNaN(dia) && mesIdx >= 0 && mesIdx <= 11) {
-      return new Date(anio, mesIdx, dia).getTime();
+      let dObj = new Date(anio, mesIdx, dia);
+
+      // 3. Ajuste inteligente de cruce de año si no se especificó uno
+      if (!matchDiaMes[3]) {
+        if (mesIdx > hoy.getMonth() + 1) {
+          dObj.setFullYear(anio - 1);
+        }
+      }
+
+      return dObj.getTime();
     }
   }
 
+  // Fallback a formato estándar de JS (YYYY-MM-DD)
   let d = new Date(fStr);
   return isNaN(d.getTime()) ? 9999999999999 : d.getTime();
 }
@@ -788,7 +816,6 @@ window.crearModalNetflixManagerHTML = function () {
           <button type="button" onclick="window.toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">✕</button>
         </div>
 
-        <!-- 🔥 NUEVOS CUADROS ESTADÍSTICOS AÑADIDOS AQUÍ 🔥 -->
         <div style="display: flex; gap: 12px; margin-bottom: 4px; flex-shrink: 0;">
           <div style="flex: 1; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); border-radius: 14px; padding: 14px; text-align: center; box-shadow: inset 0 0 20px rgba(48,209,88,0.02);">
             <div style="font-size: 0.68rem; color: #30d158; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Pines Disponibles</div>
