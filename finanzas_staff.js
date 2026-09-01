@@ -160,7 +160,7 @@ window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
 };
 
 /* ==========================================================================
-   💳 SALDO DE DISTRIBUIDORES
+   💳 SALDO DE DISTRIBUIDORES Y GESTIÓN DE ACCESOS
    ========================================================================== */
 window.toggleDistrisPanel = function () {
   if (typeof haptic === "function") haptic();
@@ -250,37 +250,76 @@ window.cargarDistribuidores = function () {
           let nombreLimpio = nombreReal !== "" ? nombreReal : telefonoReal;
           let inicial = nombreLimpio.charAt(0).toUpperCase();
 
+          let emailHtml = "";
+          let correoStr =
+            distri.correo && distri.correo.trim() !== ""
+              ? distri.correo.trim()
+              : null;
+
+          if (correoStr) {
+            emailHtml = `
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-family: monospace; color: #0a84ff; font-weight: 600;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d1d1d6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                ${correoStr}
+              </div>
+              <button class="btn-ios" style="padding: 6px 14px; font-size: 0.8rem; background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s;" onmouseover="this.style.background='rgba(10, 132, 255, 0.2)';" onmouseout="this.style.background='rgba(10, 132, 255, 0.1)';" onclick="window.copiarAccesoDistri(this, '${correoStr}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar Acceso
+              </button>
+            `;
+          } else {
+            emailHtml = `
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 800; color: #ff9f0a;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                Sin correo asignado
+              </div>
+              <button class="btn-ios" style="padding: 6px 14px; font-size: 0.8rem; background: rgba(255, 159, 10, 0.1); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255, 159, 10, 0.2)';" onmouseout="this.style.background='rgba(255, 159, 10, 0.1)';" onclick="window.abrirModalRegistrarCorreo(${distri.id}, '${telefonoReal}', '${nombreLimpio.replace(/'/g, "\\'")}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> + Registrar
+              </button>
+            `;
+          }
+
           html += `
-            <div class="distri-row-item" style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(10, 132, 255, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.025)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
+            <div class="distri-row-item" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; display: flex; flex-direction: column; transition: all 0.2s ease; overflow: hidden; margin-bottom: 4px;" onmouseover="this.style.borderColor='rgba(10, 132, 255, 0.3)';" onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.08)';">
               
-              <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); color: #0a84ff; font-weight: 900; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  ${inicial}
+              <!-- TOP ROW -->
+              <div style="padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1;">
+                  <div style="width: 42px; height: 42px; border-radius: 50%; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); color: #0a84ff; font-weight: 900; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    ${inicial}
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 3px; overflow: hidden;">
+                    <span style="font-weight: 800; font-size: 1.05rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1;">${nombreLimpio}</span>
+                    <span style="font-size: 0.8rem; color: #a1a1aa; font-family: monospace; display: flex; align-items: center; gap: 4px; line-height: 1;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${telefonoReal}
+                    </span>
+                  </div>
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden;">
-                  <span style="font-weight: 800; font-size: 0.92rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreLimpio}</span>
-                  <span style="font-size: 0.75rem; color: #a1a1aa; font-family: monospace; display: flex; align-items: center; gap: 4px;">
-                    📱 ${telefonoReal}
-                  </span>
+
+                <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                  <div style="background: ${bgBadgeSaldo}; border: 1px solid ${borderBadgeSaldo}; padding: 6px 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 0.95rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.5px;">${saldoFormateado}</span>
+                  </div>
+                  
+                  <button type="button" 
+                          onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')" 
+                          title="Copiar reporte de saldo"
+                          style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.25); color: #0a84ff; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
+                          onmouseover="this.style.background='rgba(10, 132, 255, 0.2)';" 
+                          onmouseout="this.style.background='rgba(10, 132, 255, 0.1)';">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
 
-              <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                <div style="background: ${bgBadgeSaldo}; border: 1px solid ${borderBadgeSaldo}; padding: 6px 12px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                  <span style="font-size: 1.05rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.3px;">${saldoFormateado}</span>
-                </div>
+              <!-- DIVIDER -->
+              <div style="height: 1px; width: 100%; background: rgba(255, 255, 255, 0.05);"></div>
 
-                <button type="button" 
-                        onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')" 
-                        title="Copiar reporte de saldo"
-                        style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
-                        onmouseover="this.style.background='rgba(10, 132, 255, 0.28)';" 
-                        onmouseout="this.style.background='rgba(10, 132, 255, 0.15)';">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
-                </button>
+              <!-- BOTTOM ROW -->
+              <div style="padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.15);">
+                 ${emailHtml}
               </div>
 
             </div>`;
@@ -293,6 +332,99 @@ window.cargarDistribuidores = function () {
     .catch((err) => {
       console.error(err);
       container.innerHTML = `<div style="text-align: center; padding: 25px; color: #ff453a; font-weight: 700;">❌ Error de conexión con el servidor.</div>`;
+    });
+};
+
+window.copiarAccesoDistri = function (btn, correo) {
+  if (typeof haptic === "function") haptic();
+  const texto = `🔗 *Acceso a tu Panel de Distribuidor*\n\n🌐 *Link:* https://cybernetsp.com/distribuidores\n📧 *Usuario:* ${correo}\n🔑 *Clave:* 123456\n\n_Puedes cambiar tu clave al ingresar._`;
+  navigator.clipboard.writeText(texto).then(() => {
+    let oldHtml = btn.innerHTML;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Copiado!`;
+    btn.style.background = "rgba(48, 209, 88, 0.15)";
+    btn.style.color = "#30d158";
+    btn.style.borderColor = "rgba(48, 209, 88, 0.3)";
+    setTimeout(() => {
+      btn.innerHTML = oldHtml;
+      btn.style.background = "rgba(10, 132, 255, 0.1)";
+      btn.style.color = "#0a84ff";
+      btn.style.borderColor = "rgba(10, 132, 255, 0.3)";
+    }, 2000);
+  });
+};
+
+window.abrirModalRegistrarCorreo = function (id, tel, nombre) {
+  if (typeof haptic === "function") haptic();
+  const idInput = document.getElementById("regCorreoDistriId");
+  const telInput = document.getElementById("regCorreoDistriTel");
+  const nomInput = document.getElementById("regCorreoDistriNombre");
+  const mailInput = document.getElementById("inputCorreoDistriNuevo");
+  const subtitle = document.getElementById("lblRegCorreoSubtitulo");
+
+  if (idInput) idInput.value = id;
+  if (telInput) telInput.value = tel;
+  if (nomInput) nomInput.value = nombre;
+  if (mailInput) mailInput.value = "";
+  if (subtitle) subtitle.innerText = `Asignar acceso a ${nombre}`;
+
+  const modal = document.getElementById("modalRegistrarCorreoDistri");
+  if (modal) {
+    modal.style.display = "flex";
+    setTimeout(() => {
+      if (mailInput) mailInput.focus();
+    }, 100);
+  }
+};
+
+window.cerrarModalRegistrarCorreo = function () {
+  const modal = document.getElementById("modalRegistrarCorreoDistri");
+  if (modal) modal.style.display = "none";
+};
+
+window.guardarCorreoDistribuidor = function (e) {
+  e.preventDefault();
+  const btn = document.getElementById("btnGuardarCorreoDistri");
+  const originalText = btn ? btn.innerText : "Guardar Correo";
+  if (btn) {
+    btn.innerText = "Guardando...";
+    btn.disabled = true;
+  }
+
+  const id = document.getElementById("regCorreoDistriId").value;
+  const tel = document.getElementById("regCorreoDistriTel").value;
+  const correo = document.getElementById("inputCorreoDistriNuevo").value;
+
+  const formData = new FormData();
+  formData.append("accion", "registrar_correo_distribuidor");
+  formData.append("id", id);
+  formData.append("telefono", tel);
+  formData.append("correo", correo);
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (btn) {
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+      if (res.status === "success") {
+        window.cerrarModalRegistrarCorreo();
+        window.cargarDistribuidores();
+        if (typeof triggerToast === "function")
+          triggerToast("✅ Correo y acceso registrado correctamente.");
+      } else {
+        alert("Error: " + res.message);
+      }
+    })
+    .catch((err) => {
+      if (btn) {
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+      alert("❌ Error de conexión al guardar el correo.");
     });
 };
 
