@@ -281,7 +281,6 @@ window.cargarDistribuidores = function () {
           html += `
             <div class="distri-row-item" style="background: #18181c; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; display: flex; flex-direction: column; transition: all 0.2s ease; overflow: hidden; margin-bottom: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='rgba(10, 132, 255, 0.4)';" onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.08)';">
               
-              <!-- FILA SUPERIOR: AVATAR, NOMBRE, TELÉFONO, SALDO Y BOTÓN COPIAR SALDO -->
               <div style="padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 14px; overflow: hidden; flex: 1;">
                   <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -295,20 +294,36 @@ window.cargarDistribuidores = function () {
                   </div>
                 </div>
 
-                <!-- CONTENEDOR DERECHA: INSIGNIA SALDO + BOTÓN COPIAR SALDO -->
                 <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                  <div style="background: ${bgBadgeSaldo}; border: 1px solid ${borderBadgeSaldo}; padding: 7px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                  <div onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')"
+                       title="Clic para copiar reporte de saldo"
+                       style="background: ${bgBadgeSaldo}; border: 1px solid ${borderBadgeSaldo}; padding: 7px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px ${bgBadgeSaldo};"
+                       onmouseover="this.style.transform='scale(1.05)';"
+                       onmouseout="this.style.transform='scale(1)';"
+                  >
                     <span style="font-size: 1rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.5px;">${saldoFormateado}</span>
                   </div>
+
+                  <button type="button" 
+                          onclick="window.abrirModalEditarDistri('${distri.id}', '${nombreLimpio.replace(/'/g, "\\'")}', '${telefonoReal}', '${correoStr ? correoStr.replace(/'/g, "\\'") : ""}', ${saldoClean})" 
+                          title="Editar datos y saldo de distribuidor"
+                          style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.35); color: #ff9f0a; width: 38px; height: 38px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
+                          onmouseover="this.style.background='rgba(255, 159, 10, 0.28)'; this.style.transform='scale(1.05)';" 
+                          onmouseout="this.style.background='rgba(255, 159, 10, 0.15)'; this.style.transform='scale(1)';"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                  </button>
                   
                   <button type="button" 
-                          class="btn-copiar-saldo-distri"
-                          data-nombre="${nombreLimpio.replace(/"/g, "&quot;")}"
-                          data-saldo="${saldoFormateado}"
+                          onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')" 
                           title="Copiar reporte de saldo para WhatsApp"
                           style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.35); color: #30d158; width: 38px; height: 38px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
                           onmouseover="this.style.background='rgba(48, 209, 88, 0.3)'; this.style.transform='scale(1.05)';" 
-                          onmouseout="this.style.background='rgba(48, 209, 88, 0.15)'; this.style.transform='scale(1)';">
+                          onmouseout="this.style.background='rgba(48, 209, 88, 0.15)'; this.style.transform='scale(1)';"
+                  >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -317,10 +332,8 @@ window.cargarDistribuidores = function () {
                 </div>
               </div>
 
-              <!-- DIVISOR DISCRETO -->
               <div style="height: 1px; width: 100%; background: rgba(255, 255, 255, 0.05);"></div>
 
-              <!-- FILA INFERIOR: EMAIL Y BOTÓN ACCESO -->
               <div style="padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.25);">
                  ${emailHtml}
               </div>
@@ -328,15 +341,6 @@ window.cargarDistribuidores = function () {
             </div>`;
         });
         container.innerHTML = html;
-
-        // 🔥 Asignar evento click a todos los botones de copiar saldo recién creados
-        document.querySelectorAll(".btn-copiar-saldo-distri").forEach((btn) => {
-          btn.addEventListener("click", function () {
-            const nombre = this.getAttribute("data-nombre") || "Distribuidor";
-            const saldo = this.getAttribute("data-saldo") || "$0";
-            window.copiarSaldoDistri(this, nombre, saldo);
-          });
-        });
       } else {
         container.innerHTML = `<div style="text-align: center; padding: 25px; color: #ff453a; font-weight: 700;">Error: ${res.message}</div>`;
       }
@@ -344,6 +348,151 @@ window.cargarDistribuidores = function () {
     .catch((err) => {
       console.error(err);
       container.innerHTML = `<div style="text-align: center; padding: 25px; color: #ff453a; font-weight: 700;">❌ Error de conexión con el servidor.</div>`;
+    });
+};
+
+/* ==========================================================================
+   ✏️ MODAL EDITAR DISTRIBUIDOR (AUTO-INYECTADO EN EL DOM)
+   ========================================================================== */
+window.crearModalEditarDistriSiNoExiste = function () {
+  if (document.getElementById("modalEditarDistri")) return;
+
+  const modalHtml = `
+  <div class="overlay-ios" id="modalEditarDistri" style="display: none; z-index: 25000; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; align-items: center !important; justify-content: center !important; background: rgba(0, 0, 0, 0.85) !important; backdrop-filter: blur(14px) !important;">
+    <div class="modal-ios" onclick="event.stopPropagation()" style="max-width: 450px !important; width: 92% !important; background: #141418 !important; border: 1px solid rgba(255, 159, 10, 0.35) !important; border-radius: 24px !important; padding: 22px 24px !important; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9) !important; display: flex !important; flex-direction: column !important; gap: 16px !important; margin: auto !important;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); display: flex; align-items: center; justify-content: center; color: #ff9f0a;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </div>
+          <div style="display: flex; flex-direction: column; text-align: left;">
+            <h3 style="margin: 0; color: #ffffff; font-weight: 800; font-size: 1.1rem;">Editar Distribuidor</h3>
+            <span style="font-size: 0.72rem; color: #a1a1aa; font-weight: 600;">Modificar datos de revendedor</span>
+          </div>
+        </div>
+        <button type="button" onclick="window.cerrarModalEditarDistri()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); color: #a1a1aa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+      </div>
+
+      <form onsubmit="window.guardarEditarDistribuidor(event)" style="display: flex; flex-direction: column; gap: 12px; margin: 0;">
+        <input type="hidden" id="editDistriId" />
+
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+          <label style="font-size: 0.7rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">Nombre de Revendedor</label>
+          <input type="text" id="editDistriNombre" class="input-ios" placeholder="Ej: Camilo" required style="background: rgba(0, 0, 0, 0.45) !important; padding: 11px 14px !important; border-radius: 12px !important; font-size: 0.9rem !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.1) !important;" />
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+          <label style="font-size: 0.7rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">Teléfono / Celular</label>
+          <input type="text" id="editDistriTel" class="input-ios" placeholder="Ej: 3215938767" required style="background: rgba(0, 0, 0, 0.45) !important; padding: 11px 14px !important; border-radius: 12px !important; font-size: 0.9rem !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; font-family: monospace;" />
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+          <label style="font-size: 0.7rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">Correo Electrónico</label>
+          <input type="email" id="editDistriCorreo" class="input-ios" placeholder="correo@ejemplo.com" style="background: rgba(0, 0, 0, 0.45) !important; padding: 11px 14px !important; border-radius: 12px !important; font-size: 0.9rem !important; color: #0a84ff !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; font-family: monospace;" />
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+          <label style="font-size: 0.7rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">Saldo Disponible ($)</label>
+          <input type="text" id="editDistriSaldo" class="input-ios" placeholder="$0" oninput="window.formatearMontoEnVivoCOP(this)" style="background: rgba(0, 0, 0, 0.45) !important; padding: 11px 14px !important; border-radius: 12px !important; font-size: 1.1rem !important; font-weight: 900 !important; color: #30d158 !important; border: 1px solid rgba(48, 209, 88, 0.3) !important; font-family: monospace;" />
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 8px;">
+          <button type="button" class="btn-ios btn-secondary" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; background: rgba(255, 255, 255, 0.08); color: #a1a1aa; border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer;" onclick="window.cerrarModalEditarDistri()">Cancelar</button>
+          <button type="submit" id="btnGuardarEditDistri" class="btn-ios btn-primary" style="flex: 1.3; padding: 12px; border-radius: 12px; font-weight: 900; background: #ff9f0a; color: #000; border: none; cursor: pointer; box-shadow: 0 4px 18px rgba(255, 159, 10, 0.35);">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+};
+
+window.abrirModalEditarDistri = function (id, nombre, tel, correo, saldoNum) {
+  if (typeof haptic === "function") haptic();
+  window.crearModalEditarDistriSiNoExiste();
+
+  document.getElementById("editDistriId").value = id;
+  document.getElementById("editDistriNombre").value = nombre;
+  document.getElementById("editDistriTel").value = tel;
+  document.getElementById("editDistriCorreo").value = correo || "";
+
+  const saldoInput = document.getElementById("editDistriSaldo");
+  saldoInput.value = saldoNum
+    ? Math.round(saldoNum).toLocaleString("es-CO")
+    : "0";
+  window.formatearMontoEnVivoCOP(saldoInput);
+
+  const modal = document.getElementById("modalEditarDistri");
+  if (modal) {
+    modal.style.display = "flex";
+  }
+};
+
+window.cerrarModalEditarDistri = function () {
+  const modal = document.getElementById("modalEditarDistri");
+  if (modal) modal.style.display = "none";
+};
+
+window.guardarEditarDistribuidor = function (e) {
+  if (e) e.preventDefault();
+  if (typeof haptic === "function") haptic();
+
+  const btn = document.getElementById("btnGuardarEditDistri");
+  const origText = btn ? btn.innerText : "Guardar Cambios";
+  if (btn) {
+    btn.innerText = "Guardando...";
+    btn.disabled = true;
+  }
+
+  const id = document.getElementById("editDistriId").value;
+  const nombre = document.getElementById("editDistriNombre").value;
+  const tel = document.getElementById("editDistriTel").value;
+  const correo = document.getElementById("editDistriCorreo").value;
+  const saldoRaw = document
+    .getElementById("editDistriSaldo")
+    .value.replace(/\D/g, "");
+  const saldo = parseFloat(saldoRaw) || 0;
+
+  const formData = new FormData();
+  formData.append("accion", "editar_distribuidor");
+  formData.append("id", id);
+  formData.append("nombre", nombre);
+  formData.append("telefono", tel);
+  formData.append("correo", correo);
+  formData.append("saldo", saldo);
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (btn) {
+        btn.innerText = origText;
+        btn.disabled = false;
+      }
+      if (res.status === "success") {
+        window.cerrarModalEditarDistri();
+        window.cargarDistribuidores();
+        if (typeof triggerToast === "function")
+          triggerToast("✅ Distribuidor actualizado correctamente.");
+      } else {
+        alert(
+          "Error: " + (res.message || "No se pudo actualizar el distribuidor."),
+        );
+      }
+    })
+    .catch((err) => {
+      if (btn) {
+        btn.innerText = origText;
+        btn.disabled = false;
+      }
+      console.error(err);
+      alert("❌ Error de conexión al guardar el distribuidor.");
     });
 };
 
