@@ -160,7 +160,7 @@ window.cambiarEstadoPlataformaMySQL = function (idPlataforma, inputElem) {
 };
 
 /* ==========================================================================
-   💳 SALDO DE DISTRIBUIDORES Y GESTIÓN DE ACCESOS (DISEÑO PREMIUM AUMENTADO)
+   💳 SALDO DE DISTRIBUIDORES Y GESTIÓN DE ACCESOS (NUEVO DISEÑO PULIDO)
    ========================================================================== */
 window.toggleDistrisPanel = function () {
   if (typeof haptic === "function") haptic();
@@ -279,62 +279,59 @@ window.cargarDistribuidores = function () {
           }
 
           html += `
-            <div class="distri-row-item" style="background: #18181c; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; display: flex; flex-direction: column; transition: all 0.2s ease; overflow: hidden; margin-bottom: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='rgba(10, 132, 255, 0.4)';" onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.08)';">
+            <div class="distri-row-item" style="background: rgba(255, 255, 255, 0.035); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; display: flex; flex-direction: column; transition: all 0.25s ease; overflow: hidden; margin-bottom: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.35);" onmouseover="this.style.borderColor='rgba(10, 132, 255, 0.45)';" onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.08)';">
               
-              <div style="padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <!-- FILA SUPERIOR: AVATAR, NOMBRE, TELÉFONO, BADGE SALDO Y BOTÓN EDITAR -->
+              <div style="padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px;">
                 <div style="display: flex; align-items: center; gap: 14px; overflow: hidden; flex: 1;">
-                  <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, rgba(10, 132, 255, 0.25), rgba(10, 132, 255, 0.05)); border: 1px solid rgba(10, 132, 255, 0.35); color: #0a84ff; font-weight: 900; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(10, 132, 255, 0.15);">
                     ${inicial}
                   </div>
                   <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden;">
-                    <span style="font-weight: 800; font-size: 1.05rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1;">${nombreLimpio}</span>
-                    <span style="font-size: 0.82rem; color: #a1a1aa; font-family: monospace; display: flex; align-items: center; gap: 5px; line-height: 1;">
+                    <span style="font-weight: 800; font-size: 1.05rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${nombreLimpio}</span>
+                    <span style="font-size: 0.82rem; color: #a1a1aa; font-family: monospace; display: flex; align-items: center; gap: 6px; line-height: 1;">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${telefonoReal}
                     </span>
                   </div>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                <!-- DERECHA: INSIGNIA SALDO (CLICK PARA COPIAR) + BOTÓN LÁPIZ EDITAR -->
+                <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                  <!-- BADGE SALDO CLICKEABLE CON ÍCONO DE COPIAR INTEGRADO -->
                   <div onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')"
-                       title="Clic para copiar reporte de saldo"
-                       style="background: ${bgBadgeSaldo}; border: 1px solid ${borderBadgeSaldo}; padding: 7px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px ${bgBadgeSaldo};"
-                       onmouseover="this.style.transform='scale(1.05)';"
-                       onmouseout="this.style.transform='scale(1)';"
+                       title="Haz clic para copiar reporte para WhatsApp"
+                       style="background: ${bgBadgeSaldo}; border: 1px solid ${borderBadgeSaldo}; padding: 8px 16px; border-radius: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; user-select: none;"
+                       onmouseover="this.style.transform='scale(1.04)'; this.style.filter='brightness(1.15)';"
+                       onmouseout="this.style.transform='scale(1)'; this.style.filter='none';"
                   >
-                    <span style="font-size: 1rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.5px;">${saldoFormateado}</span>
-                  </div>
-
-                  <button type="button" 
-                          onclick="window.abrirModalEditarDistri('${distri.id}', '${nombreLimpio.replace(/'/g, "\\'")}', '${telefonoReal}', '${correoStr ? correoStr.replace(/'/g, "\\'") : ""}', ${saldoClean})" 
-                          title="Editar datos y saldo de distribuidor"
-                          style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.35); color: #ff9f0a; width: 38px; height: 38px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
-                          onmouseover="this.style.background='rgba(255, 159, 10, 0.28)'; this.style.transform='scale(1.05)';" 
-                          onmouseout="this.style.background='rgba(255, 159, 10, 0.15)'; this.style.transform='scale(1)';"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                  </button>
-                  
-                  <button type="button" 
-                          onclick="window.copiarSaldoDistri(this, '${nombreLimpio.replace(/'/g, "\\'")}', '${saldoFormateado}')" 
-                          title="Copiar reporte de saldo para WhatsApp"
-                          style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.35); color: #30d158; width: 38px; height: 38px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
-                          onmouseover="this.style.background='rgba(48, 209, 88, 0.3)'; this.style.transform='scale(1.05)';" 
-                          onmouseout="this.style.background='rgba(48, 209, 88, 0.15)'; this.style.transform='scale(1)';"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <span style="font-size: 1.05rem; font-weight: 900; color: ${colorSaldo}; font-family: monospace; letter-spacing: 0.5px;">${saldoFormateado}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${colorSaldo}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8;">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                  </div>
+
+                  <!-- BOTÓN EDITAR LÁPIZ -->
+                  <button type="button" 
+                          onclick="window.abrirModalEditarDistri('${distri.id}', '${nombreLimpio.replace(/'/g, "\\'")}', '${telefonoReal}', '${correoStr ? correoStr.replace(/'/g, "\\'") : ""}', ${saldoClean})" 
+                          title="Editar distribuidor"
+                          style="background: rgba(255, 159, 10, 0.12); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; width: 40px; height: 40px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;" 
+                          onmouseover="this.style.background='rgba(255, 159, 10, 0.25)'; this.style.transform='scale(1.05)';" 
+                          onmouseout="this.style.background='rgba(255, 159, 10, 0.12)'; this.style.transform='scale(1)';"
+                  >
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
                   </button>
                 </div>
               </div>
 
+              <!-- DIVISOR DISCRETO -->
               <div style="height: 1px; width: 100%; background: rgba(255, 255, 255, 0.05);"></div>
 
-              <div style="padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.25);">
+              <!-- FILA INFERIOR: EMAIL Y BOTÓN ACCESO -->
+              <div style="padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.2);">
                  ${emailHtml}
               </div>
 
@@ -361,6 +358,7 @@ window.crearModalEditarDistriSiNoExiste = function () {
   <div class="overlay-ios" id="modalEditarDistri" style="display: none; z-index: 25000; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; align-items: center !important; justify-content: center !important; background: rgba(0, 0, 0, 0.85) !important; backdrop-filter: blur(14px) !important;">
     <div class="modal-ios" onclick="event.stopPropagation()" style="max-width: 450px !important; width: 92% !important; background: #141418 !important; border: 1px solid rgba(255, 159, 10, 0.35) !important; border-radius: 24px !important; padding: 22px 24px !important; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9) !important; display: flex !important; flex-direction: column !important; gap: 16px !important; margin: auto !important;">
       
+      <!-- ENCABEZADO -->
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px;">
         <div style="display: flex; align-items: center; gap: 10px;">
           <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); display: flex; align-items: center; justify-content: center; color: #ff9f0a;">
@@ -377,6 +375,7 @@ window.crearModalEditarDistriSiNoExiste = function () {
         <button type="button" onclick="window.cerrarModalEditarDistri()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); color: #a1a1aa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
       </div>
 
+      <!-- FORMULARIO DE EDICIÓN -->
       <form onsubmit="window.guardarEditarDistribuidor(event)" style="display: flex; flex-direction: column; gap: 12px; margin: 0;">
         <input type="hidden" id="editDistriId" />
 
@@ -506,12 +505,11 @@ window.copiarSaldoDistri = function (btn, nombre, saldoFormateado) {
   const textoWhatsApp = `🔔 *NOTIFICACIÓN DE SALDO CYBERNET* 🚀\n────────────────────\n👤 *Distribuidor:* ${nombreDisplay}\n💰 *Saldo Disponible:* ${saldoFormateado}\n────────────────────\n✨ _¡Gracias por tu confianza y preferencia!_`;
 
   navigator.clipboard.writeText(textoWhatsApp).then(() => {
-    let oldHtml = btn.innerHTML;
+    let oldContent = btn.innerHTML;
 
-    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-    btn.style.setProperty("background", "#30d158", "important");
-    btn.style.setProperty("color", "#ffffff", "important");
-    btn.style.setProperty("border-color", "#30d158", "important");
+    btn.innerHTML = `<span style="font-size: 0.9rem; font-weight: 900; color: #ffffff; font-family: monospace;">¡COPIADO!</span>`;
+    let oldBg = btn.style.background;
+    btn.style.background = "#30d158";
 
     if (typeof triggerToast === "function") {
       triggerToast(
@@ -520,10 +518,8 @@ window.copiarSaldoDistri = function (btn, nombre, saldoFormateado) {
     }
 
     setTimeout(() => {
-      btn.innerHTML = oldHtml;
-      btn.style.background = "rgba(48, 209, 88, 0.15)";
-      btn.style.color = "#30d158";
-      btn.style.borderColor = "rgba(48, 209, 88, 0.35)";
+      btn.innerHTML = oldContent;
+      btn.style.background = oldBg;
     }, 1500);
   });
 };
