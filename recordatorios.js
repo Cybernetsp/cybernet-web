@@ -207,7 +207,7 @@ window.renderizarCanalRecordatorios = function (canal) {
   if (!listaData || listaData.length === 0) {
     listaContenedor.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 35px 20px; color: #a1a1aa; font-weight: 600; background: rgba(255, 255, 255, 0.02); border-radius: 16px; border: 1px dashed rgba(255, 255, 255, 0.08);">
-        No hay clientes pendientes de recordatorio en esta fecha.
+        No hay clientes pendientes en esta fecha.
       </div>`;
     if (bloquesContenedor) bloquesContenedor.innerHTML = "";
     return;
