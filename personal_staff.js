@@ -145,9 +145,10 @@ window.enviarRendimientoAMySQL = function (asistente, esCierreRapido = false) {
   if (esCierreRapido && navigator.sendBeacon) {
     navigator.sendBeacon(window.URL_GUARDAR_RENDIMIENTO, fd);
   } else {
-    fetch(window.URL_GUARDAR_RENDIMIENTO, { method: "POST", body: fd }).catch(
-      () => console.log("Rendimiento sync silent fail."),
-    );
+    fetch(window.URL_GUARDAR_RENDIMIENTO, { method: "POST", body: fd })
+      .then((res) => res.json())
+      .then((data) => console.log("📊 Sync Rendimiento:", data))
+      .catch((err) => console.log("⚠️ Error en sync rendimiento:", err));
   }
 };
 
@@ -208,6 +209,7 @@ let unsavedSecTotal = 0;
 let lastTickTs = Date.now();
 let timerInterval = null;
 let turnoActivo = false;
+let cerrandoSesionFlag = false; // Bandera para evitar cruces en el cierre de sesión
 
 function limpiarCacheShift() {
   localStorage.removeItem("cyber_shift_vendedor");
@@ -243,6 +245,8 @@ window.toggleTrackerShift = function () {
 };
 
 function iniciarTurnoTracker(esAuto = false) {
+  if (cerrandoSesionFlag) return;
+
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
     localStorage.getItem("cyber_saved_staff") ||
@@ -309,8 +313,14 @@ function iniciarTurnoTracker(esAuto = false) {
   }
 
   resetearTemporizadorInactividad();
+  window.enviarRendimientoAMySQL(activeStaff, false); // Forzar sincronización en el segundo cero
 
   const tickRelojExacto = () => {
+    if (cerrandoSesionFlag) {
+      clearInterval(timerInterval);
+      return;
+    }
+
     let now = Date.now();
     let delta = Math.floor((now - lastTickTs) / 1000);
     lastTickTs = now;
@@ -338,7 +348,6 @@ function iniciarTurnoTracker(esAuto = false) {
         formatoSegundosTracker(secToSave),
         "Autoguardado 1m",
       );
-
       window.enviarRendimientoAMySQL(activeStaff, false);
     }
   };
@@ -356,11 +365,19 @@ function iniciarTurnoTracker(esAuto = false) {
   }
 }
 
-function detenerTurnoTracker() {
+function detenerTurnoTracker(esCierreDefinitivo = false) {
   if (!turnoActivo) return;
   turnoActivo = false;
-  clearInterval(timerInterval);
-  clearTimeout(inactividadTimer);
+
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  if (inactividadTimer) {
+    clearTimeout(inactividadTimer);
+    inactividadTimer = null;
+  }
 
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
@@ -371,7 +388,6 @@ function detenerTurnoTracker() {
     .trim();
 
   localStorage.setItem("cyber_shift_active", "false");
-
   localStorage.setItem(
     "cyber_perf_hora_salida",
     new Date().toLocaleTimeString("es-CO", { hour12: true }),
@@ -399,9 +415,9 @@ function detenerTurnoTracker() {
     );
   }
 
-  window.enviarRendimientoAMySQL(activeStaff, false);
+  window.enviarRendimientoAMySQL(activeStaff, esCierreDefinitivo);
 
-  if (typeof triggerToast === "function") {
+  if (typeof triggerToast === "function" && !esCierreDefinitivo) {
     triggerToast(
       `<div style="color:var(--ios-red);">⏹ Turno pausado y tiempo guardado.</div>`,
     );
@@ -418,7 +434,8 @@ function enviarTiempoTrackerAMySQL(asistente, tiempoHHMMSS, razon) {
     .then((res) => {
       if (
         res.status === "success" &&
-        typeof window.cargarHorasDirectasPHP === "function"
+        typeof window.cargarHorasDirectasPHP === "function" &&
+        !cerrandoSesionFlag
       ) {
         window.cargarHorasDirectasPHP();
       }
@@ -433,6 +450,7 @@ function formatoSegundosTracker(totalSeg) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+// 🚪 CERRAR SESIÓN STAFF - APAGADO DEFINITIVO
 window.cerrarSesionStaff = function () {
   try {
     if (typeof haptic === "function") haptic();
@@ -447,7 +465,8 @@ window.cerrarSesionStaff = function () {
     .trim();
 
   if (usuarioActivo === "CAMILO") {
-    if (turnoActivo) detenerTurnoTracker();
+    cerrandoSesionFlag = true;
+    if (turnoActivo) detenerTurnoTracker(true);
     limpiarCacheShift();
     sessionStorage.clear();
     localStorage.removeItem("cyber_saved_staff");
@@ -460,21 +479,26 @@ window.cerrarSesionStaff = function () {
       "⚠️ ¿Estás seguro de que deseas cerrar sesión y finalizar tu turno de forma permanente?",
     )
   ) {
+    cerrandoSesionFlag = true; // Activar bandera para matar procesos JS
+
     if (turnoActivo) {
+      detenerTurnoTracker(true);
+    } else {
+      // En caso de que ya estuviera pausado, forzamos un último envío con la hora de salida actual.
       localStorage.setItem(
         "cyber_perf_hora_salida",
         new Date().toLocaleTimeString("es-CO", { hour12: true }),
       );
-      window.enviarRendimientoAMySQL(usuarioActivo, false);
-      detenerTurnoTracker();
+      window.enviarRendimientoAMySQL(usuarioActivo, true);
     }
+
     limpiarCacheShift();
 
     setTimeout(() => {
       sessionStorage.clear();
       localStorage.removeItem("cyber_saved_staff");
-      location.reload();
-    }, 350);
+      location.replace(location.pathname); // Recarga forzada sin caché
+    }, 500); // 500ms de gracia para que el sendBeacon logre salir
   }
 };
 
@@ -1179,7 +1203,6 @@ window.renderizarTotalNomina = function () {
     .toUpperCase()
     .trim();
   const esSuperAdmin = verificarSiEsSuperAdmin();
-
   const dMes = window.filtroMesTurnos;
   const dAnio = window.filtroAnioTurnos;
   const esQ1 = window.filtroQuincenaTurnos === 1;
@@ -1232,7 +1255,6 @@ window.renderizarTotalNomina = function () {
     totalGlobalGanado += ganado;
     totalGlobalDescontado += descontado;
     totalGlobalNeto += neto;
-
     let telefonoNum = mapaTelefonos[asistente] || "Sin Nequi";
     let colorNeto = neto < 0 ? "#ff453a" : "#30d158";
 
