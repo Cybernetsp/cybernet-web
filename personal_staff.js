@@ -1,5 +1,5 @@
 /* ==========================================================================
-   👥 CYBERNET OS - MÓDULO DE PERSONAL, NÓMINA, CALENDARIO Y CRONÓMETRO MYSQL
+   👥 CYBERNET OS - MÓDULO DE PERSONAL, NÓMINA, RENDIMIENTO Y CRONÓMETRO MYSQL
    ========================================================================== */
 
 // 🌐 ENDPOINTS OFICIALES DE MYSQL
@@ -11,6 +11,12 @@ window.URL_GUARDAR_HORAS_MANUAL =
   "https://api.cybernetsp.com/guardar_horas_manual.php";
 window.URL_OBTENER_USUARIOS = "https://api.cybernetsp.com/obtener_usuarios.php";
 
+// 🚀 NUEVOS ENDPOINTS DE RENDIMIENTO
+window.URL_GUARDAR_RENDIMIENTO =
+  "https://api.cybernetsp.com/guardar_rendimiento.php";
+window.URL_OBTENER_RENDIMIENTO =
+  "https://api.cybernetsp.com/obtener_rendimiento.php";
+
 window.ASISTENTES_BASE = [
   "ANGELICA",
   "KATHERINE",
@@ -21,6 +27,7 @@ window.ASISTENTES_BASE = [
 ];
 window.currentHorasStock = [];
 window.usuariosCache = [];
+window.datosRendimientoGlobal = [];
 
 window.filtroMesTurnos = new Date().getMonth();
 window.filtroAnioTurnos = new Date().getFullYear();
@@ -28,23 +35,22 @@ window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
 
 // ==========================================
-// 🚨 MÓDULO FANTASMA: DETECTOR DE INACTIVIDAD (ALERTA VISUAL)
+// 🚨 MÓDULO FANTASMA: DETECTOR DE INACTIVIDAD E INTERACCIONES
 // ==========================================
 let inactividadTimer = null;
 const TIEMPO_LIMITE_INACTIVIDAD = 7 * 60 * 1000; // 7 Minutos reales
+let ultimaInteraccionTs = 0;
 
 function resetearTemporizadorInactividad() {
   const modalAlerta = document.getElementById("alertaInactividadFantasma");
 
-  // Si el modal está visible, lo ocultamos porque el usuario se movió
+  // Ocultar si el usuario se movió
   if (modalAlerta && modalAlerta.style.display === "flex") {
     modalAlerta.style.display = "none";
   }
 
-  // Reiniciamos el temporizador
   clearTimeout(inactividadTimer);
 
-  // Solo vigilar si el turno está activo y NO es el administrador
   if (turnoActivo && !verificarSiEsSuperAdmin()) {
     inactividadTimer = setTimeout(
       mostrarAlertaInactividad,
@@ -53,10 +59,21 @@ function resetearTemporizadorInactividad() {
   }
 }
 
+function registrarInteraccionRendimiento() {
+  if (!turnoActivo || verificarSiEsSuperAdmin()) return;
+  let now = Date.now();
+  // Contamos máximo 1 interacción cada 2 segundos para evitar saturación (ej. mover el mouse 100 veces en 1 seg)
+  if (now - ultimaInteraccionTs > 2000) {
+    let inter =
+      parseInt(localStorage.getItem("cyber_perf_interacciones") || "0") + 1;
+    localStorage.setItem("cyber_perf_interacciones", inter);
+    ultimaInteraccionTs = now;
+  }
+}
+
 function mostrarAlertaInactividad() {
   let modalAlerta = document.getElementById("alertaInactividadFantasma");
 
-  // Crear el modal la primera vez que se necesita si no existe en el HTML
   if (!modalAlerta) {
     const htmlModal = `
       <div id="alertaInactividadFantasma" style="display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); z-index: 99999; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: #ffffff;">
@@ -80,21 +97,28 @@ function mostrarAlertaInactividad() {
   }
 
   modalAlerta.style.display = "flex";
+
+  // Sumar 1 a las veces que quedó inactivo
+  let inact =
+    parseInt(localStorage.getItem("cyber_perf_inactividad") || "0") + 1;
+  localStorage.setItem("cyber_perf_inactividad", inact);
 }
 
-// Eventos que reinician el temporizador (cualquier interacción física con la PC)
-["mousemove", "keydown", "mousedown", "touchstart"].forEach((evt) =>
-  document.addEventListener(evt, resetearTemporizadorInactividad),
-);
+// Eventos que reinician temporizador y suman interacción
+["mousemove", "keydown", "mousedown", "touchstart"].forEach((evt) => {
+  document.addEventListener(evt, () => {
+    resetearTemporizadorInactividad();
+    registrarInteraccionRendimiento();
+  });
+});
 
 // ==========================================
-// HELPER PARA LECTURA SEGURA DE JSON
+// HELPER PARA LECTURA SEGURA DE JSON Y SINCRONIZACIÓN DE RENDIMIENTO
 // ==========================================
 async function parsearRespuestaJSONSegura(res) {
   const text = await res.text();
-  if (!text || text.trim() === "") {
+  if (!text || text.trim() === "")
     throw new Error("El servidor respondió con un texto vacío.");
-  }
   try {
     return JSON.parse(text);
   } catch (e) {
@@ -103,6 +127,32 @@ async function parsearRespuestaJSONSegura(res) {
     );
   }
 }
+
+window.enviarRendimientoAMySQL = function (asistente, esCierreRapido = false) {
+  if (!asistente || asistente === "STAFF" || asistente === "CAMILO") return;
+
+  let entrada = localStorage.getItem("cyber_perf_hora_entrada") || "";
+  let salida = localStorage.getItem("cyber_perf_hora_salida") || "";
+  let inactividades = localStorage.getItem("cyber_perf_inactividad") || "0";
+  let interacciones = localStorage.getItem("cyber_perf_interacciones") || "0";
+
+  if (!entrada) return; // Si no hay entrada registrada, no enviamos nada.
+
+  const fd = new FormData();
+  fd.append("vendedor", asistente);
+  fd.append("hora_entrada", entrada);
+  fd.append("hora_salida", salida);
+  fd.append("inactividades", inactividades);
+  fd.append("interacciones", interacciones);
+
+  if (esCierreRapido && navigator.sendBeacon) {
+    navigator.sendBeacon(window.URL_GUARDAR_RENDIMIENTO, fd);
+  } else {
+    fetch(window.URL_GUARDAR_RENDIMIENTO, { method: "POST", body: fd }).catch(
+      () => console.log("Rendimiento sync silent fail."),
+    );
+  }
+};
 
 // ==========================================
 // 1. UTILIDADES Y CARGA DE USUARIOS
@@ -138,12 +188,11 @@ window.cargarUsuariosBaseMySQL = async function () {
     let data = await parsearRespuestaJSONSegura(res);
     if (data && data.status === "success") {
       window.usuariosCache = data.data_completa || [];
-      if (Array.isArray(data.data) && data.data.length > 0) {
+      if (Array.isArray(data.data) && data.data.length > 0)
         window.ASISTENTES_BASE = data.data;
-      }
     }
   } catch (e) {
-    console.error("Error cargando usuarios desde MySQL:", e);
+    console.error("Error cargando usuarios:", e);
   }
 };
 
@@ -169,6 +218,12 @@ function limpiarCacheShift() {
   localStorage.removeItem("cyber_shift_active");
   localStorage.removeItem("cyber_shift_accumulated_sec");
   localStorage.removeItem("cyber_shift_unsaved_sec");
+
+  // Limpiar métricas de rendimiento
+  localStorage.removeItem("cyber_perf_hora_entrada");
+  localStorage.removeItem("cyber_perf_hora_salida");
+  localStorage.removeItem("cyber_perf_inactividad");
+  localStorage.removeItem("cyber_perf_interacciones");
 }
 
 window.verificarEIniciarTurnoAuto = function () {
@@ -179,12 +234,10 @@ window.verificarEIniciarTurnoAuto = function () {
   )
     .toUpperCase()
     .trim();
-
   if (!activeStaff || activeStaff === "STAFF" || activeStaff === "CAMILO") {
     limpiarCacheShift();
     return;
   }
-
   iniciarTurnoTracker(true);
 };
 
@@ -203,11 +256,10 @@ function iniciarTurnoTracker(esAuto = false) {
     .trim();
 
   if (!activeStaff || activeStaff === "STAFF" || activeStaff === "CAMILO") {
-    if (!esAuto) {
+    if (!esAuto)
       alert(
         "⚠️ Debes iniciar sesión con tu cuenta de trabajador para activar el turno.",
       );
-    }
     return;
   }
 
@@ -217,14 +269,22 @@ function iniciarTurnoTracker(esAuto = false) {
   let savedVendedor = localStorage.getItem("cyber_shift_vendedor");
   let savedDate = localStorage.getItem("cyber_shift_date");
 
-  // Reset si cambia de día o de trabajador
   if (savedVendedor !== activeStaff || savedDate !== todayStr) {
     secCronometroTotal = 0;
     unsavedSecTotal = 0;
+    limpiarCacheShift(); // Limpia todo
     localStorage.setItem("cyber_shift_vendedor", activeStaff);
     localStorage.setItem("cyber_shift_date", todayStr);
     localStorage.setItem("cyber_shift_accumulated_sec", "0");
     localStorage.setItem("cyber_shift_unsaved_sec", "0");
+
+    // Inicializar variables de rendimiento del día
+    localStorage.setItem(
+      "cyber_perf_hora_entrada",
+      new Date().toLocaleTimeString("es-CO", { hour12: true }),
+    );
+    localStorage.setItem("cyber_perf_inactividad", "0");
+    localStorage.setItem("cyber_perf_interacciones", "0");
   } else {
     secCronometroTotal = parseInt(
       localStorage.getItem("cyber_shift_accumulated_sec") || "0",
@@ -234,6 +294,14 @@ function iniciarTurnoTracker(esAuto = false) {
       localStorage.getItem("cyber_shift_unsaved_sec") || "0",
       10,
     );
+
+    // Si recargó y no había entrada, la forzamos
+    if (!localStorage.getItem("cyber_perf_hora_entrada")) {
+      localStorage.setItem(
+        "cyber_perf_hora_entrada",
+        new Date().toLocaleTimeString("es-CO", { hour12: true }),
+      );
+    }
   }
 
   turnoActivo = true;
@@ -246,21 +314,17 @@ function iniciarTurnoTracker(esAuto = false) {
     dot.style.boxShadow = "0 0 8px #30d158";
   }
 
-  resetearTemporizadorInactividad(); // Iniciar vigilancia de inactividad al arrancar turno
+  resetearTemporizadorInactividad();
 
-  // 🎯 MOTOR INCREMENTAL CON FILTRO DE BRECHAS/SUEÑO
   const tickRelojExacto = () => {
     let now = Date.now();
     let delta = Math.floor((now - lastTickTs) / 1000);
     lastTickTs = now;
 
-    // Si el tick es normal (entre 1 y 3 segundos), incrementa exacto
     if (delta > 0 && delta <= 3) {
       secCronometroTotal += delta;
       unsavedSecTotal += delta;
     } else if (delta > 3) {
-      // BRECHA DETECTADA (laptop cerrada, celular bloqueado o pestaña congelada).
-      // Se ignora el salto de tiempo en segundo plano y solo suma 1 segundo activo.
       secCronometroTotal += 1;
       unsavedSecTotal += 1;
     }
@@ -271,7 +335,6 @@ function iniciarTurnoTracker(esAuto = false) {
     const lbl = document.getElementById("shiftTimer");
     if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
 
-    // AUTOGUARDADO CADA 60 SEGUNDOS TRABAJADOS REALES
     if (unsavedSecTotal >= 60) {
       let secToSave = unsavedSecTotal;
       unsavedSecTotal = 0;
@@ -281,6 +344,9 @@ function iniciarTurnoTracker(esAuto = false) {
         formatoSegundosTracker(secToSave),
         "Autoguardado 1m",
       );
+
+      // Sincroniza Rendimiento cada minuto en background
+      window.enviarRendimientoAMySQL(activeStaff, false);
     }
   };
 
@@ -301,7 +367,7 @@ function detenerTurnoTracker() {
   if (!turnoActivo) return;
   turnoActivo = false;
   clearInterval(timerInterval);
-  clearTimeout(inactividadTimer); // Apagar vigilancia de inactividad
+  clearTimeout(inactividadTimer);
 
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
@@ -313,13 +379,18 @@ function detenerTurnoTracker() {
 
   localStorage.setItem("cyber_shift_active", "false");
 
+  // Guardar Hora de Salida al pausar/detener
+  localStorage.setItem(
+    "cyber_perf_hora_salida",
+    new Date().toLocaleTimeString("es-CO", { hour12: true }),
+  );
+
   const dot = document.getElementById("ledConexion");
   if (dot) {
     dot.style.background = "#ff453a";
     dot.style.boxShadow = "0 0 8px #ff453a";
   }
 
-  // Guardar los segundos pendientes de sincronizar
   if (
     unsavedSecTotal > 0 &&
     activeStaff &&
@@ -335,6 +406,8 @@ function detenerTurnoTracker() {
       "Pausa/Cierre",
     );
   }
+
+  window.enviarRendimientoAMySQL(activeStaff, false);
 
   if (typeof triggerToast === "function") {
     triggerToast(
@@ -368,7 +441,7 @@ function formatoSegundosTracker(totalSeg) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-// 🚪 CERRAR SESIÓN STAFF
+// 🚪 CERRAR SESIÓN STAFF Y GUARDAR DATOS DE CIERRE X
 window.cerrarSesionStaff = function () {
   try {
     if (typeof haptic === "function") haptic();
@@ -397,6 +470,11 @@ window.cerrarSesionStaff = function () {
     )
   ) {
     if (turnoActivo) {
+      localStorage.setItem(
+        "cyber_perf_hora_salida",
+        new Date().toLocaleTimeString("es-CO", { hour12: true }),
+      );
+      window.enviarRendimientoAMySQL(usuarioActivo, false);
       detenerTurnoTracker();
     }
     limpiarCacheShift();
@@ -410,15 +488,24 @@ window.cerrarSesionStaff = function () {
 };
 
 function guardarEmergenciaAlCerrarVentana() {
-  if (turnoActivo && unsavedSecTotal > 0) {
-    const activeStaff = (
-      sessionStorage.getItem("active_staff") ||
-      localStorage.getItem("cyber_saved_staff") ||
-      ""
-    )
-      .toUpperCase()
-      .trim();
+  const activeStaff = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    ""
+  )
+    .toUpperCase()
+    .trim();
 
+  if (activeStaff && activeStaff !== "STAFF" && activeStaff !== "CAMILO") {
+    // Guardar salida inminente
+    localStorage.setItem(
+      "cyber_perf_hora_salida",
+      new Date().toLocaleTimeString("es-CO", { hour12: true }),
+    );
+    window.enviarRendimientoAMySQL(activeStaff, true); // True activa sendBeacon
+  }
+
+  if (turnoActivo && unsavedSecTotal > 0) {
     if (activeStaff && activeStaff !== "STAFF" && activeStaff !== "CAMILO") {
       let secToSave = unsavedSecTotal;
       unsavedSecTotal = 0;
@@ -568,7 +655,7 @@ window.renderizarHorasEnPantalla = function () {
   const esQ1 = window.filtroQuincenaTurnos === 1;
 
   const inicioDia = esQ1 ? 1 : 16;
-  const finDia = esQ1 ? 1 : new Date(dAnio, dMes + 1, 0).getDate(); // Rango dinámico
+  const finDia = esQ1 ? 1 : new Date(dAnio, dMes + 1, 0).getDate();
   const mesesNombres = [
     "Enero",
     "Febrero",
@@ -704,16 +791,15 @@ window.renderizarHorasEnPantalla = function () {
           let tStr = reg.tiempo_trabajado || "00:00:00";
           if (tStr !== "00:00:00") {
             let p = tStr.split(":");
-            if (p.length === 3) {
+            if (p.length === 3)
               totalHorasSegundos +=
                 (parseInt(p[0], 10) || 0) * 3600 +
                 (parseInt(p[1], 10) || 0) * 60 +
                 (parseInt(p[2], 10) || 0);
-            } else if (p.length === 2) {
+            else if (p.length === 2)
               totalHorasSegundos +=
                 (parseInt(p[0], 10) || 0) * 3600 +
                 (parseInt(p[1], 10) || 0) * 60;
-            }
           }
         }
       });
@@ -826,28 +912,24 @@ window.renderizarHorasEnPantalla = function () {
 // ==========================================
 window.formatearMontoEnVivoCOP = function (input) {
   let val = input.value.replace(/\D/g, "");
-  if (val) {
+  if (val)
     input.value = new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
       maximumFractionDigits: 0,
     }).format(val);
-  } else {
-    input.value = "";
-  }
+  else input.value = "";
 };
 
 window.toggleFormularioHoras = function () {
   const overlay = document.getElementById("addHoursOverlay");
   if (!overlay) return;
-
   if (overlay.classList.contains("open") || overlay.style.display === "flex") {
     overlay.classList.remove("open");
     overlay.style.display = "none";
   } else {
     overlay.classList.add("open");
     overlay.style.setProperty("display", "flex", "important");
-
     const selectVendedor = document.getElementById("inputVendedorShift");
     if (selectVendedor) {
       let opts =
@@ -863,7 +945,6 @@ window.toggleFormularioHoras = function () {
 window.toggleModalAdelanto = function (abrir) {
   const overlay = document.getElementById("adelantoShiftOverlay");
   if (!overlay) return;
-
   if (abrir) {
     overlay.classList.add("open");
     overlay.style.setProperty("display", "flex", "important");
@@ -1074,11 +1155,9 @@ window.refrescarTotalNominaEnVivo = async function (btn) {
     btn.disabled = true;
     btn.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Calculando...`;
   }
-
   const container = document.getElementById("nominaContentArea");
-  if (container) {
+  if (container)
     container.innerHTML = `<div style="text-align:center; padding:45px; color:#30d158;">Calculando Nómina...</div>`;
-  }
 
   if (window.usuariosCache.length === 0) await window.cargarUsuariosBaseMySQL();
 
@@ -1095,7 +1174,6 @@ window.refrescarTotalNominaEnVivo = async function (btn) {
     btn.disabled = false;
     btn.innerHTML = "Refrescar";
   }
-
   window.renderizarTotalNomina();
 };
 
@@ -1123,13 +1201,10 @@ window.renderizarTotalNomina = function () {
     if (nom) mapaTelefonos[nom] = num;
   });
 
-  let todosLosRegistros = window.currentHorasStock || [];
   let mapaNomina = {};
-
-  todosLosRegistros.forEach((item) => {
+  window.currentHorasStock.forEach((item) => {
     let d = parsearFechaTurno(item.fecha);
     if (d.getMonth() !== dMes || d.getFullYear() !== dAnio) return;
-
     let dia = d.getDate();
     if (esQ1 && dia > 15) return;
     if (!esQ1 && dia <= 15) return;
@@ -1149,10 +1224,10 @@ window.renderizarTotalNomina = function () {
   let listaProcesar = obtenerTodosLosAsistentes();
   if (!esSuperAdmin) listaProcesar = [activeStaff];
 
-  let totalGlobalGanado = 0;
-  let totalGlobalDescontado = 0;
-  let totalGlobalNeto = 0;
-  let htmlFilas = "";
+  let totalGlobalGanado = 0,
+    totalGlobalDescontado = 0,
+    totalGlobalNeto = 0,
+    htmlFilas = "";
 
   listaProcesar.forEach((asistente) => {
     let datosUser = mapaNomina[asistente] || {
@@ -1160,8 +1235,8 @@ window.renderizarTotalNomina = function () {
       descontado: 0,
       neto: 0,
     };
-    let ganado = Math.round(datosUser.ganado);
-    let descontado = Math.round(datosUser.descontado);
+    let ganado = Math.round(datosUser.ganado),
+      descontado = Math.round(datosUser.descontado);
     let neto = ganado - descontado;
 
     totalGlobalGanado += ganado;
@@ -1171,26 +1246,17 @@ window.renderizarTotalNomina = function () {
     let telefonoNum = mapaTelefonos[asistente] || "Sin Nequi";
     let colorNeto = neto < 0 ? "#ff453a" : "#30d158";
 
-    let btnCopiarTel = "";
-    if (telefonoNum !== "Sin Nequi") {
-      btnCopiarTel = `
-        <button onclick="navigator.clipboard.writeText('${telefonoNum}'); this.style.color='#30d158'; setTimeout(()=>this.style.color='#0a84ff', 1000);" title="Copiar Nequi/Bre-B" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 4px 8px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 800; font-family: monospace; transition: 0.2s;">
-          <span>${telefonoNum}</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-        </button>`;
-    } else {
-      btnCopiarTel = `<span style="font-size:0.75rem; color:#71717a; padding-left:2px;">Sin Nequi</span>`;
-    }
+    let btnCopiarTel =
+      telefonoNum !== "Sin Nequi"
+        ? `<button onclick="navigator.clipboard.writeText('${telefonoNum}'); this.style.color='#30d158'; setTimeout(()=>this.style.color='#0a84ff', 1000);" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 4px 8px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 800; font-family: monospace; transition: 0.2s;"><span>${telefonoNum}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>`
+        : `<span style="font-size:0.75rem; color:#71717a; padding-left:2px;">Sin Nequi</span>`;
 
     htmlFilas += `
       <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; flex-wrap: wrap; gap: 10px;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
         <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 140px;">
-          <div style="width: 36px; height: 36px; border-radius: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-            ${asistente.charAt(0)}
-          </div>
+          <div style="width: 36px; height: 36px; border-radius: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${asistente.charAt(0)}</div>
           <div style="display: flex; flex-direction: column; gap: 3px; justify-content: center;">
-            <span style="font-weight: 800; color: #ffffff; font-size: 0.95rem; line-height: 1;">${asistente}</span>
-            ${btnCopiarTel}
+            <span style="font-weight: 800; color: #ffffff; font-size: 0.95rem; line-height: 1;">${asistente}</span>${btnCopiarTel}
           </div>
         </div>
         <div style="display: flex; flex-direction: row; justify-content: flex-end; align-items: center; gap: 20px; flex: 1; min-width: 160px;">
@@ -1210,9 +1276,8 @@ window.renderizarTotalNomina = function () {
       </div>`;
   });
 
-  let htmlResumenGlobal = "";
-  if (esSuperAdmin) {
-    htmlResumenGlobal = `
+  let htmlResumenGlobal = esSuperAdmin
+    ? `
       <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; width: 100%;">
         <div style="flex: 1; min-width: 130px; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); padding: 16px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px;">
           <span style="font-size: 0.72rem; font-weight: 800; color: #30d158; text-transform: uppercase;">Total Bruto (+)</span>
@@ -1226,24 +1291,210 @@ window.renderizarTotalNomina = function () {
           <span style="font-size: 0.72rem; font-weight: 800; color: #ffffff; text-transform: uppercase;">Nómina Total Neta</span>
           <span style="font-size: 1.4rem; font-weight: 900; color: #ffffff; font-family: monospace;">$${totalGlobalNeto.toLocaleString("es-CO")}</span>
         </div>
-      </div>`;
-  }
+      </div>`
+    : "";
 
-  let htmlFinal = `
-    <div style="display: flex; flex-direction: column; width: 100%;">
-      ${htmlResumenGlobal}
-      <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; overflow: hidden; width: 100%;">
-        <div style="display: flex; flex-direction: column; width: 100%;">
-          ${htmlFilas}
-        </div>
-      </div>
-    </div>`;
-
-  container.innerHTML = htmlFinal;
+  container.innerHTML = `<div style="display: flex; flex-direction: column; width: 100%;">${htmlResumenGlobal}<div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; overflow: hidden; width: 100%;"><div style="display: flex; flex-direction: column; width: 100%;">${htmlFilas}</div></div></div>`;
 };
-
-window.cargarNominaMySQL = window.renderizarTotalNomina;
 
 window.filtrarHorasInternas = function () {
   window.renderizarHorasEnPantalla();
 };
+
+// ==========================================
+// 🚀 NUEVO: MÓDULO DE RENDIMIENTO BENTO
+// ==========================================
+
+window.crearModalRendimientoSiNoExiste = function () {
+  if (document.getElementById("rendimientoOverlay")) return;
+
+  const modalHtml = `
+  <div class="overlay-ios" id="rendimientoOverlay" style="display: none; z-index: 15000; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; align-items: center !important; justify-content: center !important; background: rgba(0, 0, 0, 0.85) !important; backdrop-filter: blur(14px) !important;">
+    <div class="modal-ios" onclick="event.stopPropagation()" style="max-width: 750px !important; width: 92% !important; max-height: 85vh !important; background: #141418 !important; border: 1px solid rgba(191, 90, 242, 0.35) !important; border-radius: 26px !important; padding: 0 !important; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9) !important; display: flex !important; flex-direction: column !important; margin: auto !important; overflow: hidden !important;">
+      
+      <!-- ENCABEZADO FIJO -->
+      <div style="padding: 18px 22px; background: #18181c; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(191, 90, 242, 0.15); border: 1px solid rgba(191, 90, 242, 0.3); display: flex; align-items: center; justify-content: center; color: #bf5af2;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
+          <div style="display: flex; flex-direction: column; text-align: left;">
+            <h3 style="margin: 0; color: #ffffff; font-weight: 800; font-size: 1.12rem;">Rendimiento del Personal</h3>
+            <span style="font-size: 0.72rem; color: #a1a1aa; font-weight: 600;">Métricas de interacción, inactividad y conexión</span>
+          </div>
+        </div>
+        <button type="button" onclick="window.toggleRendimientoPanel()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); color: #a1a1aa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+      </div>
+
+      <!-- CUERPO CON SCROLL -->
+      <div id="rendimientoContentArea" class="cyber-custom-scroll" style="padding: 20px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 16px;">
+        <div style="text-align: center; padding: 40px; color: #bf5af2;">
+          <svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg>
+          <div style="margin-top: 10px; font-weight: 700; font-size: 0.9rem;">Calculando métricas...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+};
+
+window.toggleRendimientoPanel = function () {
+  if (typeof haptic === "function") haptic();
+  window.crearModalRendimientoSiNoExiste();
+  const overlay = document.getElementById("rendimientoOverlay");
+
+  if (overlay.style.display === "flex") {
+    overlay.style.display = "none";
+  } else {
+    if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
+    overlay.style.setProperty("display", "flex", "important");
+    window.cargarRendimientoMySQL();
+  }
+};
+
+window.cargarRendimientoMySQL = function () {
+  const container = document.getElementById("rendimientoContentArea");
+  if (!container) return;
+
+  container.innerHTML = `<div style="text-align: center; padding: 40px; color: #bf5af2;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg><div style="margin-top: 10px; font-weight: 700; font-size: 0.9rem;">Obteniendo datos de MySQL...</div></div>`;
+
+  fetch(`${window.URL_OBTENER_RENDIMIENTO}?nocache=${Date.now()}`)
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success") {
+        window.datosRendimientoGlobal = res.data || [];
+        window.renderizarRendimientoEnPantalla();
+      } else {
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Error al obtener rendimiento"}</div>`;
+      }
+    })
+    .catch((err) => {
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ Error de conexión: ${err.message}</div>`;
+    });
+};
+
+window.renderizarRendimientoEnPantalla = function () {
+  const container = document.getElementById("rendimientoContentArea");
+  if (!container) return;
+
+  const activeStaff = (
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "STAFF"
+  )
+    .toUpperCase()
+    .trim();
+  const esSuperAdmin = verificarSiEsSuperAdmin();
+
+  let dataAMostrar = window.datosRendimientoGlobal;
+
+  // Si no es admin, solo puede ver sus propias estadísticas
+  if (!esSuperAdmin) {
+    dataAMostrar = window.datosRendimientoGlobal.filter(
+      (item) => (item.vendedor || "").toUpperCase() === activeStaff,
+    );
+  }
+
+  if (dataAMostrar.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:30px; color:#a1a1aa; font-weight:600; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.05);">No hay métricas de rendimiento disponibles aún.</div>`;
+    return;
+  }
+
+  let htmlCards = "";
+
+  dataAMostrar.forEach((item) => {
+    let interacciones = parseInt(item.interacciones || "0");
+    let inactividades = parseInt(item.inactividades || "0");
+
+    // Convertir segundos promedio a texto legible
+    let avgDia = formatoMinutosRendimiento(parseInt(item.promedio_dia || "0"));
+    let avgSemana = formatoMinutosRendimiento(
+      parseInt(item.promedio_semana || "0"),
+    );
+    let avgQuincena = formatoMinutosRendimiento(
+      parseInt(item.promedio_quincena || "0"),
+    );
+
+    let colorInactividad = inactividades > 0 ? "#ff453a" : "#30d158";
+
+    htmlCards += `
+      <div style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden;">
+        
+        <!-- Header Tarjeta -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.1); padding-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(191, 90, 242, 0.15); border: 1px solid rgba(191, 90, 242, 0.3); color: #bf5af2; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center;">
+              ${item.vendedor.charAt(0).toUpperCase()}
+            </div>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-weight: 800; font-size: 1.05rem; color: #ffffff;">${item.vendedor.toUpperCase()}</span>
+              <span style="font-size: 0.72rem; color: #a1a1aa; font-family: monospace;">Actualizado HOY</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Métricas Principales (Grid) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <!-- Bloque Horario -->
+          <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Hora Entrada</span>
+              <span style="font-size: 0.85rem; font-weight: 800; color: #30d158; font-family: monospace;">${item.hora_entrada || "--:--"}</span>
+            </div>
+            <div style="height: 1px; width: 100%; background: rgba(255,255,255,0.05);"></div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Hora Salida</span>
+              <span style="font-size: 0.85rem; font-weight: 800; color: #ff9f0a; font-family: monospace;">${item.hora_salida || "--:--"}</span>
+            </div>
+          </div>
+
+          <!-- Bloque Interacciones / Inactividad -->
+          <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Interacciones</span>
+              <span style="font-size: 0.85rem; font-weight: 800; color: #0a84ff; font-family: monospace;">+${interacciones.toLocaleString()} clics</span>
+            </div>
+            <div style="height: 1px; width: 100%; background: rgba(255,255,255,0.05);"></div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Inactividades</span>
+              <span style="font-size: 0.85rem; font-weight: 800; color: ${colorInactividad}; font-family: monospace;">${inactividades} veces</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promedios de Conexión -->
+        <div style="background: rgba(191, 90, 242, 0.05); border: 1px solid rgba(191, 90, 242, 0.15); padding: 12px 14px; border-radius: 14px; display: flex; justify-content: space-between; text-align: center;">
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            <span style="font-size: 0.65rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Diario</span>
+            <span style="font-size: 0.95rem; font-weight: 800; color: #ffffff; font-family: monospace;">${avgDia}</span>
+          </div>
+          <div style="width: 1px; background: rgba(191, 90, 242, 0.2);"></div>
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            <span style="font-size: 0.65rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Semanal</span>
+            <span style="font-size: 0.95rem; font-weight: 800; color: #ffffff; font-family: monospace;">${avgSemana}</span>
+          </div>
+          <div style="width: 1px; background: rgba(191, 90, 242, 0.2);"></div>
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            <span style="font-size: 0.65rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Quincenal</span>
+            <span style="font-size: 0.95rem; font-weight: 800; color: #ffffff; font-family: monospace;">${avgQuincena}</span>
+          </div>
+        </div>
+
+      </div>
+    `;
+  });
+
+  container.innerHTML = htmlCards;
+};
+
+// Formatea los segundos en horas y minutos legibles (Ej: "6h 20m")
+function formatoMinutosRendimiento(totalSeg) {
+  if (totalSeg <= 0) return "0h 0m";
+  let h = Math.floor(totalSeg / 3600);
+  let m = Math.floor((totalSeg % 3600) / 60);
+  return `${h}h ${m}m`;
+}
