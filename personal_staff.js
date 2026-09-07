@@ -28,6 +28,66 @@ window.filtroQuincenaTurnos = new Date().getDate() <= 15 ? 1 : 2;
 window.asistenteSeleccionadoAdmin = "TODOS";
 
 // ==========================================
+// 🚨 MÓDULO FANTASMA: DETECTOR DE INACTIVIDAD (ALERTA VISUAL)
+// ==========================================
+let inactividadTimer = null;
+const TIEMPO_LIMITE_INACTIVIDAD = 7 * 60 * 1000; // 7 Minutos reales
+
+function resetearTemporizadorInactividad() {
+  const modalAlerta = document.getElementById("alertaInactividadFantasma");
+
+  // Si el modal está visible, lo ocultamos porque el usuario se movió
+  if (modalAlerta && modalAlerta.style.display === "flex") {
+    modalAlerta.style.display = "none";
+  }
+
+  // Reiniciamos el temporizador
+  clearTimeout(inactividadTimer);
+
+  // Solo vigilar si el turno está activo y NO es el administrador
+  if (turnoActivo && !verificarSiEsSuperAdmin()) {
+    inactividadTimer = setTimeout(
+      mostrarAlertaInactividad,
+      TIEMPO_LIMITE_INACTIVIDAD,
+    );
+  }
+}
+
+function mostrarAlertaInactividad() {
+  let modalAlerta = document.getElementById("alertaInactividadFantasma");
+
+  // Crear el modal la primera vez que se necesita si no existe en el HTML
+  if (!modalAlerta) {
+    const htmlModal = `
+      <div id="alertaInactividadFantasma" style="display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); z-index: 99999; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: #ffffff;">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px; filter: drop-shadow(0 0 15px rgba(255, 69, 58, 0.6));">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h1 style="font-weight: 900; font-size: 2.2rem; color: #ff453a; letter-spacing: -1px; margin: 0 0 10px 0;">INACTIVIDAD DETECTADA</h1>
+        <p style="font-size: 1.1rem; color: #a1a1aa; max-width: 500px; line-height: 1.5; font-weight: 500;">
+          No se ha detectado actividad en el sistema desde hace <b>5 minutos</b>. <br><br>
+          <span style="color: #ffffff; font-weight: 800; padding: 6px 12px; background: rgba(255,69,58,0.2); border-radius: 8px;">Se pausó el tiempo de tu turno.</span>
+        </p>
+        <div style="margin-top: 30px; font-family: monospace; font-size: 0.9rem; color: #30d158; animation: blinker 1.5s linear infinite;">
+          [ Mueve el mouse o presiona una tecla para reactivar el tiempo ]
+        </div>
+        <style>@keyframes blinker { 50% { opacity: 0.3; } }</style>
+      </div>`;
+    document.body.insertAdjacentHTML("beforeend", htmlModal);
+    modalAlerta = document.getElementById("alertaInactividadFantasma");
+  }
+
+  modalAlerta.style.display = "flex";
+}
+
+// Eventos que reinician el temporizador (cualquier interacción física con la PC)
+["mousemove", "keydown", "mousedown", "touchstart"].forEach((evt) =>
+  document.addEventListener(evt, resetearTemporizadorInactividad),
+);
+
+// ==========================================
 // HELPER PARA LECTURA SEGURA DE JSON
 // ==========================================
 async function parsearRespuestaJSONSegura(res) {
@@ -186,6 +246,8 @@ function iniciarTurnoTracker(esAuto = false) {
     dot.style.boxShadow = "0 0 8px #30d158";
   }
 
+  resetearTemporizadorInactividad(); // Iniciar vigilancia de inactividad al arrancar turno
+
   // 🎯 MOTOR INCREMENTAL CON FILTRO DE BRECHAS/SUEÑO
   const tickRelojExacto = () => {
     let now = Date.now();
@@ -239,6 +301,7 @@ function detenerTurnoTracker() {
   if (!turnoActivo) return;
   turnoActivo = false;
   clearInterval(timerInterval);
+  clearTimeout(inactividadTimer); // Apagar vigilancia de inactividad
 
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
