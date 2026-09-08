@@ -3,8 +3,9 @@ window.lastSelectedTab = "netflix";
 window.mesFiltroVentas = ""; // Variable para el filtro de mes en Registro de Ventas
 let searchTimeoutMySQL = null;
 
-// Lista de todas las tablas de MySQL para la búsqueda global inteligente
+// Lista de todas las tablas de MySQL para la búsqueda global inteligente (incluye Registro de Ventas)
 const LISTA_TABLAS_GLOBALES = [
+  "registro_ventas",
   "netflix",
   "amazon_prime_video",
   "disney_premium",
@@ -27,6 +28,95 @@ const LISTA_TABLAS_GLOBALES = [
   "deezer",
   "mubi",
 ];
+
+// 🗓️ PARSEADORES DE MES Y AÑO PARA AGRUPAMIENTO CHRONOLÓGICO
+function obtenerClaveMesAnio(fechaRaw) {
+  if (!fechaRaw || fechaRaw === "-") return "0000-00";
+  let str = String(fechaRaw).trim().toLowerCase();
+  if (str === "hoy") {
+    const h = new Date();
+    return `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  const mesesMap = {
+    ene: "01",
+    enero: "01",
+    feb: "02",
+    febrero: "02",
+    mar: "03",
+    marzo: "03",
+    abr: "04",
+    abril: "04",
+    may: "05",
+    mayo: "05",
+    jun: "06",
+    junio: "06",
+    jul: "07",
+    julio: "07",
+    ago: "08",
+    agosto: "08",
+    sep: "09",
+    septiembre: "09",
+    oct: "10",
+    octubre: "10",
+    nov: "11",
+    noviembre: "11",
+    dic: "12",
+    diciembre: "12",
+  };
+
+  if (/^\d{4}-\d{2}/.test(str)) {
+    return str.substring(0, 7);
+  }
+
+  let partes = str.includes("/") ? str.split("/") : str.split("-");
+  if (partes.length === 3) {
+    let anio =
+      partes[0].length === 4
+        ? partes[0]
+        : partes[2].length === 4
+          ? partes[2]
+          : new Date().getFullYear();
+    let mes = partes[0].length === 4 ? partes[1] : partes[1];
+    if (isNaN(mes)) {
+      mes = mesesMap[mes.substring(0, 3)] || "01";
+    } else {
+      mes = String(parseInt(mes, 10)).padStart(2, "0");
+    }
+    return `${anio}-${mes}`;
+  }
+
+  for (let m in mesesMap) {
+    if (str.includes(m)) {
+      let anio = new Date().getFullYear();
+      return `${anio}-${mesesMap[m]}`;
+    }
+  }
+
+  return "0000-00";
+}
+
+function obtenerNombreMesLegible(claveMes) {
+  if (claveMes === "0000-00") return "SIN FECHA DEFINIDA";
+  const [anio, mes] = claveMes.split("-");
+  const nombres = [
+    "",
+    "ENERO",
+    "FEBRERO",
+    "MARZO",
+    "ABRIL",
+    "MAYO",
+    "JUNIO",
+    "JULIO",
+    "AGOSTO",
+    "SEPTIEMBRE",
+    "OCTUBRE",
+    "NOVIEMBRE",
+    "DICIEMBRE",
+  ];
+  const mesNum = parseInt(mes, 10);
+  return `${nombres[mesNum] || "MES"} ${anio}`;
+}
 
 // 🎨 CONSTRUCTOR OFICIAL DE FICHAS Y MENSAJES DE ACCESO
 function construirMensajeFicha(
@@ -632,6 +722,9 @@ function cargarDatosMySQL() {
         let provSearchVal = String(
           fila.proveedor || fila.prov || "",
         ).toLowerCase();
+        let platVentas = String(
+          fila.plataformas || fila.descripcion || "",
+        ).toLowerCase();
 
         return (
           correoVal.includes(queryLower) ||
@@ -640,121 +733,226 @@ function cargarDatosMySQL() {
           perfilVal.includes(queryLower) ||
           pinVal.includes(queryLower) ||
           provSearchVal.includes(queryLower) ||
+          platVentas.includes(queryLower) ||
           numValRaw.toLowerCase().includes(queryLower)
         );
       });
 
       if (filtradosFinales.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--ios-red); font-weight: 600;">No se encontraron cuentas asociadas a "${busqueda}" en ninguna plataforma.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${totalColumnas}" style="text-align: center; padding: 40px; color: var(--ios-red); font-weight: 600;">No se encontraron cuentas ni registros asociados a "${busqueda}" en ninguna plataforma.</td></tr>`;
         return;
       }
 
-      // 🌟 AGRUPACIÓN POR PLATAFORMAS (BENTO STYLE)
-      const gruposPlataformas = {};
+      // 🌟 AGRUPACIÓN POR MES Y AÑO (DESCENTENTE)
+      const gruposPorMes = {};
       filtradosFinales.forEach((fila) => {
-        let origen = fila._tablaOrigen || "netflix";
-        if (!gruposPlataformas[origen]) gruposPlataformas[origen] = [];
-        gruposPlataformas[origen].push(fila);
+        let fechaRef = fila.dia || fila.fecha || fila.fecha_compra || "-";
+        let claveMes = obtenerClaveMesAnio(fechaRef);
+        if (!gruposPorMes[claveMes]) gruposPorMes[claveMes] = [];
+        gruposPorMes[claveMes].push(fila);
       });
 
-      let html = "";
-      for (const [tablaOrigen, filas] of Object.entries(gruposPlataformas)) {
-        let platNombreUI = tablaOrigen.toUpperCase().replace(/_/g, " ");
+      const mesesOrdenados = Object.keys(gruposPorMes).sort().reverse();
 
-        // TÍTULO AGRUPADOR DE PLATAFORMA
+      let html = "";
+      mesesOrdenados.forEach((claveMes) => {
+        let filasMes = gruposPorMes[claveMes];
+        let nombreMesUI = obtenerNombreMesLegible(claveMes);
+
+        // CABECERA PRINCIPAL DEL MES
         html += `
-              <tr style="background: rgba(191, 90, 242, 0.08);">
-                  <td colspan="${totalColumnas}" style="padding: 12px 16px; border-top: 1px solid rgba(191, 90, 242, 0.25); border-bottom: 1px solid rgba(191, 90, 242, 0.25); color: #bf5af2; font-size: 0.85rem; font-weight: 900; text-transform: uppercase;">
-                      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                          <span style="display: flex; align-items: center; gap: 8px;">📺 PLATAFORMA: ${platNombreUI}</span>
-                          <span style="background: #bf5af2; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">${filas.length} Cuentas</span>
-                      </div>
-                  </td>
-              </tr>
+          <tr style="background: rgba(10, 132, 255, 0.12);">
+            <td colspan="${totalColumnas}" style="padding: 12px 16px; border-top: 2px solid #0a84ff; border-bottom: 2px solid #0a84ff; color: #ffffff; font-size: 0.88rem; font-weight: 900; text-transform: uppercase;">
+              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <span style="display: flex; align-items: center; gap: 8px;">📅 PERÍODO / MES: ${nombreMesUI}</span>
+                <span style="background: #0a84ff; color: #ffffff; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 800;">${filasMes.length} Registros</span>
+              </div>
+            </td>
+          </tr>
+        `;
+
+        // SEPARAR REGISTROS DE VENTA DE LAS DEMÁS PLATAFORMAS
+        let ventasMes = filasMes.filter(
+          (f) => f._tablaOrigen === "registro_ventas",
+        );
+        let cuentasMes = filasMes.filter(
+          (f) => f._tablaOrigen !== "registro_ventas",
+        );
+
+        // 1. MUESTRA PRIMERO LOS REGISTROS DE VENTAS DEL MES
+        if (ventasMes.length > 0) {
+          html += `
+            <tr style="background: rgba(48, 209, 88, 0.08);">
+              <td colspan="${totalColumnas}" style="padding: 8px 16px; color: #30d158; font-size: 0.78rem; font-weight: 900; text-transform: uppercase; border-bottom: 1px solid rgba(48, 209, 88, 0.2);">
+                🟢 REGISTROS DE VENTA DE ${nombreMesUI} (${ventasMes.length})
+              </td>
+            </tr>
           `;
 
-        // RENDERIZAR LAS FILAS DENTRO DEL GRUPO
-        filas.forEach((fila, idx) => {
-          let diaVal = fila.dia || fila.fecha || "-";
-          let esTablaNetflix = tablaOrigen.toLowerCase() === "netflix";
-          let provVal = esTablaNetflix
-            ? "-"
-            : fila.proveedor || fila.prov || "-";
-          let correoVal = fila.correo || fila.usuario || "-";
-          let claveVal = fila.clave || fila.contrasena || "-";
-          let perfilVal = fila.perfil || "-";
-          let pinVal = fila.pin || "-";
-          let vencVal = fila.vencimiento || "-";
-          let clienteVal = fila.nombre || fila.cliente || "-";
-          let numeroVal = fila.numero || fila.telefono || "-";
+          ventasMes.forEach((fila, idx) => {
+            let diaVal = fila.fecha || fila.dia || "-";
+            let clienteVal = fila.cliente || fila.nombre || "-";
+            let numeroVal = fila.numero || fila.telefono || "-";
+            let platVta = fila.plataformas || fila.descripcion || "-";
+            let valorValRaw =
+              fila.pago_total ||
+              fila.valor ||
+              fila.monto_cobrado ||
+              fila.monto ||
+              "-";
+            let valorVal = formatearMontoMoneda(valorValRaw);
+            let pagoVal = fila.pago || fila.metodo || fila.banco || "-";
+            let tipoVta = fila.tipo || "Venta";
 
-          let isCaida = fila.estado === "caida" || fila.es_caida == 1;
-          const colorFondoFila = isCaida
-            ? "rgba(255, 69, 58, 0.15)"
-            : idx % 2 === 0
-              ? "rgba(255, 255, 255, 0.015)"
-              : "transparent";
+            let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
+            let celdaTel =
+              numeroVal !== "-" && numeroVal.trim() !== ""
+                ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; cursor: pointer;">${numeroVal}</span>`
+                : "-";
 
-          let celdaCorreo =
-            correoVal !== "-"
-              ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; cursor: pointer;" title="${correoVal}">${correoVal}</span>`
-              : "-";
-          let celdaClave =
-            claveVal !== "-"
-              ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; cursor: pointer;" title="${claveVal}">${claveVal}</span>`
-              : "-";
-          let celdaPin =
-            pinVal !== "-"
-              ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(pinVal)}')" style="color: #ffd60a; font-weight: 700; font-family: monospace; cursor: pointer;">${pinVal}</span>`
-              : "-";
-          let celdaTel =
-            numeroVal !== "-" && numeroVal.trim() !== ""
-              ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; cursor: pointer;">${numeroVal}</span>`
-              : "-";
+            let btnBorrarVenta = esSuperAdmin
+              ? `<button onclick="window.tablaMySQLActual='registro_ventas'; eliminarRegistroMySQL(${fila.id}, '${encodeURIComponent(clienteVal)}')" title="Eliminar Registro de Venta" style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); border-radius: 6px; padding: 5px; color: #ff453a; cursor: pointer; margin-left: 4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`
+              : "";
 
-          let textoCopiarFicha = construirMensajeFicha(
-            tablaOrigen,
-            correoVal,
-            claveVal,
-            perfilVal,
-            pinVal,
-            vencVal,
-            clienteVal,
-          );
-          let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
-          let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
-
-          let botonesAccion = `
-              <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
-                <button onclick="window.tablaMySQLActual='${tablaOrigen}'; abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
-                <button onclick="window.tablaMySQLActual='${tablaOrigen}'; window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">⏳ Temp</button>
-                <button onclick="window.tablaMySQLActual='${tablaOrigen}'; window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}', ${isCaida})" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>
+            let botonesAccionVentas = `
+              <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end;">
+                <button onclick="window.tablaMySQLActual='registro_ventas'; abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Registro" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                ${btnBorrarVenta}
               </div>
             `;
 
-          const tdBase =
-            "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
+            const tdBase =
+              "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
 
-          html += `
-              <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+            html += `
+              <tr style="background: rgba(48, 209, 88, 0.03);">
                 <td style="${tdBase}">
-                  <span style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.68rem; text-transform: uppercase;">${platNombreUI}</span>
+                  <span style="background: rgba(48, 209, 88, 0.18); border: 1px solid rgba(48, 209, 88, 0.35); color: #30d158; padding: 3px 8px; border-radius: 6px; font-weight: 900; font-size: 0.68rem; text-transform: uppercase;">REGISTRO VENTAS</span>
                 </td>
-                <td style="${tdBase} color: #ff9f0a; font-weight: 800; text-transform: uppercase;">${provVal}</td>
+                <td style="${tdBase} color: #ff9f0a; font-weight: 800; text-transform: uppercase;">${tipoVta}</td>
                 <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
-                <td style="${tdBase}">${celdaCorreo}</td>
-                <td style="${tdBase}">${celdaClave}</td>
-                <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
-                <td style="${tdBase} text-align: center;">${celdaPin}</td>
-                <td style="${tdBase} font-weight: 800; color: #ff9f0a;">${vencVal}</td>
-                <td style="${tdBase} color: #e4e4e7;" title="${clienteVal}">${clienteVal}</td>
+                <td style="${tdBase} font-weight: 700; color: #ffffff;" title="${clienteVal}">${clienteVal}</td>
+                <td style="${tdBase} color: #30d158; font-weight: 700;" title="${platVta}">${platVta}</td>
+                <td style="${tdBase} text-align: center; color: #a1a1aa;">-</td>
+                <td style="${tdBase} text-align: center;">-</td>
+                <td style="${tdBase} font-weight: 800; color: #30d158;">${valorVal}</td>
+                <td style="${tdBase} color: #bf5af2; font-weight: 700;">${pagoVal}</td>
                 <td style="${tdBase}">${celdaTel}</td>
-                <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccion}</td>
+                <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccionVentas}</td>
               </tr>
             `;
-        });
-      }
+          });
+        }
+
+        // 2. MUESTRA SEGUNDO LAS CUENTAS/SUSCRIPCIONES DEL MES AGRUPADAS POR PLATAFORMA
+        if (cuentasMes.length > 0) {
+          const gruposPlatMes = {};
+          cuentasMes.forEach((fila) => {
+            let origen = fila._tablaOrigen || "netflix";
+            if (!gruposPlatMes[origen]) gruposPlatMes[origen] = [];
+            gruposPlatMes[origen].push(fila);
+          });
+
+          for (const [tablaOrigen, filasPlat] of Object.entries(
+            gruposPlatMes,
+          )) {
+            let platNombreUI = tablaOrigen.toUpperCase().replace(/_/g, " ");
+
+            html += `
+              <tr style="background: rgba(191, 90, 242, 0.05);">
+                <td colspan="${totalColumnas}" style="padding: 6px 16px; border-bottom: 1px solid rgba(191, 90, 242, 0.15); color: #bf5af2; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span>🎬 PLATAFORMA: ${platNombreUI}</span>
+                    <span style="font-size:0.7rem; color: #a1a1aa;">${filasPlat.length} Perfiles/Cuentas</span>
+                  </div>
+                </td>
+              </tr>
+            `;
+
+            filasPlat.forEach((fila, idx) => {
+              let diaVal = fila.dia || fila.fecha || "-";
+              let esTablaNetflix = tablaOrigen.toLowerCase() === "netflix";
+              let provVal = esTablaNetflix
+                ? "-"
+                : fila.proveedor || fila.prov || "-";
+              let correoVal = fila.correo || fila.usuario || "-";
+              let claveVal = fila.clave || fila.contrasena || "-";
+              let perfilVal = fila.perfil || "-";
+              let pinVal = fila.pin || "-";
+              let vencVal = fila.vencimiento || "-";
+              let clienteVal = fila.nombre || fila.cliente || "-";
+              let numeroVal = fila.numero || fila.telefono || "-";
+
+              let isCaida = fila.estado === "caida" || fila.es_caida == 1;
+              const colorFondoFila = isCaida
+                ? "rgba(255, 69, 58, 0.15)"
+                : idx % 2 === 0
+                  ? "rgba(255, 255, 255, 0.015)"
+                  : "transparent";
+
+              let celdaCorreo =
+                correoVal !== "-"
+                  ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(correoVal)}')" style="color: #0a84ff; font-family: monospace; font-weight: 600; cursor: pointer;" title="${correoVal}">${correoVal}</span>`
+                  : "-";
+              let celdaClave =
+                claveVal !== "-"
+                  ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(claveVal)}')" style="color: #30d158; font-family: monospace; font-weight: 600; cursor: pointer;" title="${claveVal}">${claveVal}</span>`
+                  : "-";
+              let celdaPin =
+                pinVal !== "-"
+                  ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(pinVal)}')" style="color: #ffd60a; font-weight: 700; font-family: monospace; cursor: pointer;">${pinVal}</span>`
+                  : "-";
+              let celdaTel =
+                numeroVal !== "-" && numeroVal.trim() !== ""
+                  ? `<span onclick="copiarTextoUnico(this, '${encodeURIComponent(numeroVal)}')" style="font-family: monospace; color: #ffffff; font-weight: 600; cursor: pointer;">${numeroVal}</span>`
+                  : "-";
+
+              let textoCopiarFicha = construirMensajeFicha(
+                tablaOrigen,
+                correoVal,
+                claveVal,
+                perfilVal,
+                pinVal,
+                vencVal,
+                clienteVal,
+              );
+              let textoEscapadoFicha = encodeURIComponent(textoCopiarFicha);
+              let filaJsonEscapada = encodeURIComponent(JSON.stringify(fila));
+
+              let botonesAccion = `
+                <div style="display: flex; gap: 5px; align-items: center; justify-content: flex-end; white-space: nowrap;">
+                  <button onclick="window.tablaMySQLActual='${tablaOrigen}'; abrirModalEditarMySQL('${filaJsonEscapada}')" title="Editar Datos" style="background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 6px; padding: 5px; color: #0a84ff; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                  <button onclick="copiarAccesoMySQL(this, '${textoEscapadoFicha}')" title="Copiar Ficha Completa" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 5px; border-radius: 6px; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                  <button onclick="window.tablaMySQLActual='${tablaOrigen}'; window.generarTemp(this, ${fila.id})" style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">⏳ Temp</button>
+                  <button onclick="window.tablaMySQLActual='${tablaOrigen}'; window.marcarComoGarantia(${fila.id}, '${encodeURIComponent(correoVal)}', '${encodeURIComponent(claveVal)}', '${encodeURIComponent(provVal)}', '${encodeURIComponent(diaVal)}', ${isCaida})" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🚨 Reportar</button>
+                </div>
+              `;
+
+              const tdBase =
+                "padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
+
+              html += `
+                <tr style="background: ${colorFondoFila}; transition: background 0.2s ease;">
+                  <td style="${tdBase}">
+                    <span style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.68rem; text-transform: uppercase;">${platNombreUI}</span>
+                  </td>
+                  <td style="${tdBase} color: #ff9f0a; font-weight: 800; text-transform: uppercase;">${provVal}</td>
+                  <td style="${tdBase} color: #a1a1aa;">${formatearFechaCorta(diaVal)}</td>
+                  <td style="${tdBase}">${celdaCorreo}</td>
+                  <td style="${tdBase}">${celdaClave}</td>
+                  <td style="${tdBase} text-align: center; color: #ffffff; font-weight: 600;">${perfilVal}</td>
+                  <td style="${tdBase} text-align: center;">${celdaPin}</td>
+                  <td style="${tdBase} font-weight: 800; color: #ff9f0a;">${vencVal}</td>
+                  <td style="${tdBase} color: #e4e4e7;" title="${clienteVal}">${clienteVal}</td>
+                  <td style="${tdBase}">${celdaTel}</td>
+                  <td style="${tdBase} text-align: right; padding-right: 15px;">${botonesAccion}</td>
+                </tr>
+              `;
+            });
+          }
+        }
+      });
+
       tbody.innerHTML = html;
     });
 
