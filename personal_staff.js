@@ -36,13 +36,13 @@ window.asistenteSeleccionadoAdmin = "TODOS";
 window.filtroFechaRendimiento = new Date().toISOString().split("T")[0];
 
 // ==========================================
-// 🚨 MÓDULO FANTASMA: DETECTOR DE INACTIVIDAD (CON RELOJ DESDE 00m 00s)
+// 🚨 MÓDULO FANTASMA: DETECTOR DE INACTIVIDAD (DESDE 00m 00s AL DESPLEGAR)
 // ==========================================
 let inactividadTimer = null;
 let inactividadCronometroInterval = null;
 const TIEMPO_LIMITE_INACTIVIDAD = 7 * 60 * 1000; // 7 Minutos reales
 let ultimaActividadTs = Date.now();
-let inicioVentanaInactividadTs = 0; // Instante exacto en que se despliega la ventana
+let inicioVentanaInactividadTs = 0; // Se fija en el milisegundo exacto que salta el aviso
 let ultimaInteraccionTs = 0;
 let throttleActividadTimer = null;
 
@@ -52,10 +52,12 @@ function resetearTemporizadorInactividad() {
   if (modalAlerta && modalAlerta.style.display === "flex") {
     modalAlerta.style.display = "none";
 
-    // Calcular segundos inactivos transcurridos durante esta pausa
+    // Calcular segundos inactivos transcurridos mientras la ventana estuvo visible
     let segsInactivoSesion = Math.floor(
-      (Date.now() - ultimaActividadTs) / 1000,
+      (Date.now() - (inicioVentanaInactividadTs || ultimaActividadTs)) / 1000,
     );
+    if (segsInactivoSesion < 0) segsInactivoSesion = 0;
+
     let acumuladoPrevio = parseInt(
       localStorage.getItem("cyber_perf_inactividad_sec") || "0",
       10,
@@ -156,6 +158,7 @@ function mostrarAlertaInactividad() {
     let segsVentanaInactivo = Math.floor(
       (Date.now() - inicioVentanaInactividadTs) / 1000,
     );
+    if (segsVentanaInactivo < 0) segsVentanaInactivo = 0;
     let m = Math.floor(segsVentanaInactivo / 60);
     let s = segsVentanaInactivo % 60;
     if (lbl) {
@@ -1382,7 +1385,7 @@ window.filtrarHorasInternas = function () {
 };
 
 // ==========================================
-// 🚀 MÓDULO DE RENDIMIENTO BENTO - ULTRA OPTIMIZADO
+// 🚀 MÓDULO DE RENDIMIENTO BENTO - SIN VENTAS Y CON HORAS DÍA REALES
 // ==========================================
 
 window.crearModalRendimientoSiNoExiste = function () {
@@ -1474,7 +1477,7 @@ window.cargarRendimientoMySQL = function () {
 };
 
 // ==========================================
-// RENDERIZADO ULTRA OPTIMIZADO DE TARJETAS (DISEÑO BENTO GRID)
+// RENDERIZADO ULTRA OPTIMIZADO DE TARJETAS (SIN BANDERAS DE VENTAS)
 // ==========================================
 window.renderizarRendimientoEnPantalla = function () {
   const container = document.getElementById("rendimientoContentArea");
@@ -1502,18 +1505,18 @@ window.renderizarRendimientoEnPantalla = function () {
     return;
   }
 
-  // Renderizado optimizado con map().join("")
   const htmlBuffer = dataAMostrar
     .map((item) => {
       let interacciones = parseInt(item.interacciones || "0", 10);
       let inactividadesSegundos = parseInt(item.inactividades || "0", 10);
-      let ventas = parseInt(item.ventas || "0", 10);
 
       let tiempoInactivoFormateado = formatoMinutosRendimiento(
         inactividadesSegundos,
       );
-      let avgDia = formatoMinutosRendimiento(
-        parseInt(item.promedio_dia || "0", 10),
+
+      // Horas reales trabajadas en el día seleccionado
+      let tiempoDia = formatoMinutosRendimiento(
+        parseInt(item.segundos_trabajados || item.tiempo_dia || "0", 10),
       );
       let avgSemana = formatoMinutosRendimiento(
         parseInt(item.promedio_semana || "0", 10),
@@ -1537,7 +1540,7 @@ window.renderizarRendimientoEnPantalla = function () {
       return `
       <div style="background: linear-gradient(160deg, #15151a 0%, #111115 100%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); position: relative; transition: transform 0.2s, border-color 0.2s;">
         
-        <!-- HEADER DE TARJETA: PERFIL + BADGE VENTAS -->
+        <!-- HEADER DE TARJETA: PERFIL Y FECHA -->
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 14px;">
           <div style="display: flex; align-items: center; gap: 14px;">
             <div style="width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, rgba(191, 90, 242, 0.3), rgba(10, 132, 255, 0.2)); border: 1px solid rgba(191, 90, 242, 0.4); color: #ffffff; font-weight: 900; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
@@ -1552,13 +1555,8 @@ window.renderizarRendimientoEnPantalla = function () {
             </div>
           </div>
 
-          <!-- HIGHLIGHT BENTO: VENTAS -->
-          <div style="background: linear-gradient(135deg, rgba(48, 209, 88, 0.18), rgba(48, 209, 88, 0.05)); border: 1px solid rgba(48, 209, 88, 0.35); padding: 8px 16px; border-radius: 16px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(48, 209, 88, 0.1);">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-            <div style="display: flex; flex-direction: column; text-align: right;">
-              <span style="font-size: 0.6rem; font-weight: 800; color: #30d158; text-transform: uppercase; letter-spacing: 0.5px;">Ventas</span>
-              <span style="font-size: 1.2rem; font-weight: 900; color: #ffffff; font-family: monospace; line-height: 1;">${ventas}</span>
-            </div>
+          <div style="font-size: 0.75rem; color: #a1a1aa; font-family: monospace; background: rgba(255,255,255,0.04); padding: 6px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); font-weight: 700;">
+            📅 ${window.filtroFechaRendimiento}
           </div>
         </div>
 
@@ -1602,11 +1600,11 @@ window.renderizarRendimientoEnPantalla = function () {
 
         </div>
 
-        <!-- STRIP BENTO: PROMEDIOS DE CONEXIÓN HISTÓRICOS -->
+        <!-- STRIP BENTO: HORAS DÍA Y PROMEDIOS DIARIOS DE DIAS TRABAJADOS -->
         <div style="background: rgba(191, 90, 242, 0.04); border: 1px solid rgba(191, 90, 242, 0.12); padding: 12px 16px; border-radius: 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center;">
           <div style="display: flex; flex-direction: column; gap: 3px;">
-            <span style="font-size: 0.62rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Día</span>
-            <span style="font-size: 0.88rem; font-weight: 900; color: #ffffff; font-family: monospace;">${avgDia}</span>
+            <span style="font-size: 0.62rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Horas Día</span>
+            <span style="font-size: 0.88rem; font-weight: 900; color: #ffffff; font-family: monospace;">${tiempoDia}</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 3px; border-left: 1px solid rgba(191, 90, 242, 0.15); padding-left: 6px;">
             <span style="font-size: 0.62rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Semana</span>
