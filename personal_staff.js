@@ -36,22 +36,21 @@ window.asistenteSeleccionadoAdmin = "TODOS";
 window.filtroFechaRendimiento = new Date().toISOString().split("T")[0];
 
 // ==========================================
-// 🚨 MÓDULO FANTASMA: DETECTOR DE INACTIVIDAD CON CRONÓMETRO EN VIVO
+// 🚨 MÓDULO FANTASMA: DETECTOR DE INACTIVIDAD (OPTIMIZADO CON THROTTLE)
 // ==========================================
 let inactividadTimer = null;
 let inactividadCronometroInterval = null;
 const TIEMPO_LIMITE_INACTIVIDAD = 7 * 60 * 1000; // 7 Minutos reales
 let ultimaActividadTs = Date.now();
 let ultimaInteraccionTs = 0;
+let throttleActividadTimer = null;
 
 function resetearTemporizadorInactividad() {
   const modalAlerta = document.getElementById("alertaInactividadFantasma");
 
-  // Si el modal de inactividad estaba activo y el usuario regresó
   if (modalAlerta && modalAlerta.style.display === "flex") {
     modalAlerta.style.display = "none";
 
-    // Calcular segundos inactivos transcurridos durante esta pausa
     let segsInactivoSesion = Math.floor(
       (Date.now() - ultimaActividadTs) / 1000,
     );
@@ -62,7 +61,7 @@ function resetearTemporizadorInactividad() {
     let nuevoAcumulado = acumuladoPrevio + segsInactivoSesion;
 
     localStorage.setItem("cyber_perf_inactividad_sec", nuevoAcumulado);
-    localStorage.setItem("cyber_perf_inactividad", nuevoAcumulado); // Sincroniza con DB
+    localStorage.setItem("cyber_perf_inactividad", nuevoAcumulado);
 
     const activeStaff = (
       sessionStorage.getItem("active_staff") ||
@@ -95,10 +94,20 @@ function registrarInteraccionRendimiento() {
   let now = Date.now();
   if (now - ultimaInteraccionTs > 2000) {
     let inter =
-      parseInt(localStorage.getItem("cyber_perf_interacciones") || "0") + 1;
+      parseInt(localStorage.getItem("cyber_perf_interacciones") || "0", 10) + 1;
     localStorage.setItem("cyber_perf_interacciones", inter);
     ultimaInteraccionTs = now;
   }
+}
+
+// Handler optimizado: Throttle para evitar congelamientos de CPU por llamadas excesivas
+function capturarEventosUsuario() {
+  if (throttleActividadTimer) return;
+  throttleActividadTimer = setTimeout(() => {
+    throttleActividadTimer = null;
+    resetearTemporizadorInactividad();
+    registrarInteraccionRendimiento();
+  }, 250);
 }
 
 function mostrarAlertaInactividad() {
@@ -106,29 +115,28 @@ function mostrarAlertaInactividad() {
 
   if (!modalAlerta) {
     const htmlModal = `
-      <div id="alertaInactividadFantasma" style="display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.92); backdrop-filter: blur(18px); z-index: 99999; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: #ffffff;">
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px; filter: drop-shadow(0 0 15px rgba(255, 69, 58, 0.6));">
+      <div id="alertaInactividadFantasma" style="display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.94); backdrop-filter: blur(20px); z-index: 99999; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: #ffffff;">
+        <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px; filter: drop-shadow(0 0 15px rgba(255, 69, 58, 0.6));">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="8" x2="12" y2="12"></line>
           <line x1="12" y1="16" x2="12.01" y2="16"></line>
         </svg>
-        <h1 style="font-weight: 900; font-size: 2.2rem; color: #ff453a; letter-spacing: -1px; margin: 0 0 10px 0;">INACTIVIDAD DETECTADA</h1>
+        <h1 style="font-weight: 900; font-size: 2rem; color: #ff453a; letter-spacing: -1px; margin: 0 0 6px 0;">INACTIVIDAD DETECTADA</h1>
         
-        <p style="font-size: 1rem; color: #a1a1aa; max-width: 500px; line-height: 1.4; margin-bottom: 10px;">
-          Tiempo transcurrido sin detectar actividad en el sistema:
+        <p style="font-size: 0.95rem; color: #a1a1aa; max-width: 480px; margin-bottom: 10px;">
+          Tiempo transcurrido sin actividad en la plataforma:
         </p>
 
-        <!-- CRONÓMETRO EN VIVO DE INACTIVIDAD -->
-        <div id="lblCronometroInactivo" style="font-size: 3.2rem; font-weight: 900; font-family: monospace; color: #ff453a; text-shadow: 0 0 20px rgba(255,69,58,0.5); margin: 10px 0 20px 0; background: rgba(255,69,58,0.1); padding: 10px 28px; border-radius: 18px; border: 1px solid rgba(255,69,58,0.3);">
+        <div id="lblCronometroInactivo" style="font-size: 3rem; font-weight: 900; font-family: monospace; color: #ff453a; text-shadow: 0 0 20px rgba(255,69,58,0.5); margin: 8px 0 18px 0; background: rgba(255,69,58,0.1); padding: 8px 26px; border-radius: 16px; border: 1px solid rgba(255,69,58,0.3);">
           07m 00s
         </div>
 
-        <p style="font-size: 0.95rem; color: #a1a1aa; max-width: 500px; line-height: 1.5; font-weight: 500;">
-          <span style="color: #ffffff; font-weight: 800; padding: 6px 14px; background: rgba(255,69,58,0.25); border-radius: 8px;">Se pausó el tiempo de tu turno.</span>
+        <p style="font-size: 0.9rem; color: #a1a1aa; max-width: 480px;">
+          <span style="color: #ffffff; font-weight: 800; padding: 6px 14px; background: rgba(255,69,58,0.25); border-radius: 8px;">Se pausó la sincronización de tu turno.</span>
         </p>
 
-        <div style="margin-top: 25px; font-family: monospace; font-size: 0.9rem; color: #30d158; animation: blinker 1.5s linear infinite;">
-          [ Mueve el mouse o presiona una tecla para reactivar el tiempo ]
+        <div style="margin-top: 22px; font-family: monospace; font-size: 0.85rem; color: #30d158; animation: blinker 1.5s linear infinite;">
+          [ Mueve el mouse o presiona cualquier tecla para reactivar ]
         </div>
         <style>@keyframes blinker { 50% { opacity: 0.3; } }</style>
       </div>`;
@@ -138,12 +146,11 @@ function mostrarAlertaInactividad() {
 
   modalAlerta.style.display = "flex";
 
-  // Actualizar el cronómetro en tiempo real cada segundo
+  const lbl = document.getElementById("lblCronometroInactivo");
   const actualizarCronometroLive = () => {
     let segsInactivo = Math.floor((Date.now() - ultimaActividadTs) / 1000);
     let m = Math.floor(segsInactivo / 60);
     let s = segsInactivo % 60;
-    let lbl = document.getElementById("lblCronometroInactivo");
     if (lbl) {
       lbl.innerText = `${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
     }
@@ -156,14 +163,11 @@ function mostrarAlertaInactividad() {
 }
 
 ["mousemove", "keydown", "mousedown", "touchstart"].forEach((evt) => {
-  document.addEventListener(evt, () => {
-    resetearTemporizadorInactividad();
-    registrarInteraccionRendimiento();
-  });
+  document.addEventListener(evt, capturarEventosUsuario, { passive: true });
 });
 
 // ==========================================
-// HELPER PARA LECTURA SEGURA DE JSON Y SINCRONIZACIÓN DE RENDIMIENTO
+// HELPER DE LECTURA Y SINCRONIZACIÓN DE RENDIMIENTO
 // ==========================================
 async function parsearRespuestaJSONSegura(res) {
   const text = await res.text();
@@ -202,7 +206,7 @@ window.enviarRendimientoAMySQL = function (asistente, esCierreRapido = false) {
     navigator.sendBeacon(window.URL_GUARDAR_RENDIMIENTO, fd);
   } else {
     fetch(window.URL_GUARDAR_RENDIMIENTO, { method: "POST", body: fd }).catch(
-      () => console.log("Rendimiento sync silent fail."),
+      () => {},
     );
   }
 };
@@ -257,13 +261,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO EXACTO (SISTEMA DELTA-TICK ANTI-SUSPENSIÓN)
+// 2. CRONÓMETRO EXACTO
 // ==========================================
 let secCronometroTotal = 0;
 let unsavedSecTotal = 0;
 let lastTickTs = Date.now();
 let timerInterval = null;
 let turnoActivo = false;
+let cerrandoSesionFlag = false;
 
 function limpiarCacheShift() {
   localStorage.removeItem("cyber_shift_vendedor");
@@ -300,6 +305,8 @@ window.toggleTrackerShift = function () {
 };
 
 function iniciarTurnoTracker(esAuto = false) {
+  if (cerrandoSesionFlag) return;
+
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
     localStorage.getItem("cyber_saved_staff") ||
@@ -367,8 +374,14 @@ function iniciarTurnoTracker(esAuto = false) {
   }
 
   resetearTemporizadorInactividad();
+  window.enviarRendimientoAMySQL(activeStaff, false);
 
   const tickRelojExacto = () => {
+    if (cerrandoSesionFlag) {
+      clearInterval(timerInterval);
+      return;
+    }
+
     let now = Date.now();
     let delta = Math.floor((now - lastTickTs) / 1000);
     lastTickTs = now;
@@ -396,7 +409,6 @@ function iniciarTurnoTracker(esAuto = false) {
         formatoSegundosTracker(secToSave),
         "Autoguardado 1m",
       );
-
       window.enviarRendimientoAMySQL(activeStaff, false);
     }
   };
@@ -414,10 +426,14 @@ function iniciarTurnoTracker(esAuto = false) {
   }
 }
 
-function detenerTurnoTracker() {
+function detenerTurnoTracker(esCierreDefinitivo = false) {
   if (!turnoActivo) return;
   turnoActivo = false;
-  clearInterval(timerInterval);
+
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
 
   if (inactividadCronometroInterval) {
     clearInterval(inactividadCronometroInterval);
@@ -434,7 +450,6 @@ function detenerTurnoTracker() {
     .trim();
 
   localStorage.setItem("cyber_shift_active", "false");
-
   localStorage.setItem(
     "cyber_perf_hora_salida",
     new Date().toLocaleTimeString("es-CO", { hour12: true }),
@@ -462,9 +477,9 @@ function detenerTurnoTracker() {
     );
   }
 
-  window.enviarRendimientoAMySQL(activeStaff, false);
+  window.enviarRendimientoAMySQL(activeStaff, esCierreDefinitivo);
 
-  if (typeof triggerToast === "function") {
+  if (typeof triggerToast === "function" && !esCierreDefinitivo) {
     triggerToast(
       `<div style="color:var(--ios-red);">⏹ Turno pausado y tiempo guardado.</div>`,
     );
@@ -481,7 +496,8 @@ function enviarTiempoTrackerAMySQL(asistente, tiempoHHMMSS, razon) {
     .then((res) => {
       if (
         res.status === "success" &&
-        typeof window.cargarHorasDirectasPHP === "function"
+        typeof window.cargarHorasDirectasPHP === "function" &&
+        !cerrandoSesionFlag
       ) {
         window.cargarHorasDirectasPHP();
       }
@@ -496,6 +512,7 @@ function formatoSegundosTracker(totalSeg) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+// 🚪 CERRAR SESIÓN STAFF
 window.cerrarSesionStaff = function () {
   try {
     if (typeof haptic === "function") haptic();
@@ -510,7 +527,8 @@ window.cerrarSesionStaff = function () {
     .trim();
 
   if (usuarioActivo === "CAMILO") {
-    if (turnoActivo) detenerTurnoTracker();
+    cerrandoSesionFlag = true;
+    if (turnoActivo) detenerTurnoTracker(true);
     limpiarCacheShift();
     sessionStorage.clear();
     localStorage.removeItem("cyber_saved_staff");
@@ -523,21 +541,25 @@ window.cerrarSesionStaff = function () {
       "⚠️ ¿Estás seguro de que deseas cerrar sesión y finalizar tu turno de forma permanente?",
     )
   ) {
+    cerrandoSesionFlag = true;
+
     if (turnoActivo) {
+      detenerTurnoTracker(true);
+    } else {
       localStorage.setItem(
         "cyber_perf_hora_salida",
         new Date().toLocaleTimeString("es-CO", { hour12: true }),
       );
-      window.enviarRendimientoAMySQL(usuarioActivo, false);
-      detenerTurnoTracker();
+      window.enviarRendimientoAMySQL(usuarioActivo, true);
     }
+
     limpiarCacheShift();
 
     setTimeout(() => {
       sessionStorage.clear();
       localStorage.removeItem("cyber_saved_staff");
-      location.reload();
-    }, 350);
+      location.replace(location.pathname);
+    }, 400);
   }
 };
 
@@ -1242,7 +1264,6 @@ window.renderizarTotalNomina = function () {
     .toUpperCase()
     .trim();
   const esSuperAdmin = verificarSiEsSuperAdmin();
-
   const dMes = window.filtroMesTurnos;
   const dAnio = window.filtroAnioTurnos;
   const esQ1 = window.filtroQuincenaTurnos === 1;
@@ -1295,7 +1316,6 @@ window.renderizarTotalNomina = function () {
     totalGlobalGanado += ganado;
     totalGlobalDescontado += descontado;
     totalGlobalNeto += neto;
-
     let telefonoNum = mapaTelefonos[asistente] || "Sin Nequi";
     let colorNeto = neto < 0 ? "#ff453a" : "#30d158";
 
@@ -1355,41 +1375,45 @@ window.filtrarHorasInternas = function () {
 };
 
 // ==========================================
-// 🚀 MÓDULO DE RENDIMIENTO BENTO
+// 🚀 MÓDULO DE RENDIMIENTO BENTO - ULTRA OPTIMIZADO
 // ==========================================
 
 window.crearModalRendimientoSiNoExiste = function () {
   if (document.getElementById("rendimientoOverlay")) return;
 
   const modalHtml = `
-  <div class="overlay-ios" id="rendimientoOverlay" style="display: none; z-index: 15000; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; align-items: center !important; justify-content: center !important; background: rgba(0, 0, 0, 0.85) !important; backdrop-filter: blur(14px) !important;">
-    <div class="modal-ios" onclick="event.stopPropagation()" style="max-width: 780px !important; width: 92% !important; max-height: 85vh !important; background: #141418 !important; border: 1px solid rgba(191, 90, 242, 0.35) !important; border-radius: 26px !important; padding: 0 !important; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9) !important; display: flex !important; flex-direction: column !important; margin: auto !important; overflow: hidden !important;">
+  <div class="overlay-ios" id="rendimientoOverlay" style="display: none; z-index: 15000; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; align-items: center !important; justify-content: center !important; background: rgba(0, 0, 0, 0.88) !important; backdrop-filter: blur(16px) !important;">
+    <div class="modal-ios" onclick="event.stopPropagation()" style="max-width: 820px !important; width: 94% !important; max-height: 86vh !important; background: #0d0d11 !important; border: 1px solid rgba(191, 90, 242, 0.3) !important; border-radius: 28px !important; padding: 0 !important; box-shadow: 0 35px 80px rgba(0, 0, 0, 0.95) !important; display: flex !important; flex-direction: column !important; margin: auto !important; overflow: hidden !important;">
       
       <!-- ENCABEZADO FIJO -->
-      <div style="padding: 18px 22px; background: #18181c; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; z-index: 10; gap: 10px; flex-wrap: wrap;">
+      <div style="padding: 18px 24px; background: #131318; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; z-index: 10; gap: 12px; flex-wrap: wrap;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(191, 90, 242, 0.15); border: 1px solid rgba(191, 90, 242, 0.3); display: flex; align-items: center; justify-content: center; color: #bf5af2;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          <div style="width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(135deg, rgba(191, 90, 242, 0.25), rgba(191, 90, 242, 0.05)); border: 1px solid rgba(191, 90, 242, 0.4); display: flex; align-items: center; justify-content: center; color: #bf5af2; box-shadow: 0 0 15px rgba(191, 90, 242, 0.15);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 20V10"></path>
+              <path d="M12 20V4"></path>
+              <path d="M6 20v-6"></path>
             </svg>
           </div>
           <div style="display: flex; flex-direction: column; text-align: left;">
-            <h3 style="margin: 0; color: #ffffff; font-weight: 800; font-size: 1.12rem;">Rendimiento del Personal</h3>
-            <span style="font-size: 0.72rem; color: #a1a1aa; font-weight: 600;">Métricas de ventas, interacción, tiempo inactivo y conexión</span>
+            <h3 style="margin: 0; color: #ffffff; font-weight: 800; font-size: 1.15rem; letter-spacing: -0.3px;">Panel de Rendimiento</h3>
+            <span style="font-size: 0.72rem; color: #a1a1aa; font-weight: 600;">Métricas avanzadas, actividad y promedios en vivo</span>
           </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <input type="date" id="filtroFechaRendimientoInput" class="input-ios" value="${window.filtroFechaRendimiento}" onchange="window.cambiarFechaRendimiento(this.value)" style="padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; color: #ffffff; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); cursor: pointer;" />
-          <button type="button" onclick="window.toggleRendimientoPanel()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); color: #a1a1aa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="date" id="filtroFechaRendimientoInput" class="input-ios" value="${window.filtroFechaRendimiento}" onchange="window.cambiarFechaRendimiento(this.value)" style="padding: 7px 14px; border-radius: 12px; font-weight: 800; font-size: 0.82rem; color: #ffffff; background: #1c1c22; border: 1px solid rgba(191, 90, 242, 0.3); cursor: pointer; color-scheme: dark;" />
+          </div>
+          <button type="button" onclick="window.toggleRendimientoPanel()" style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">✕</button>
         </div>
       </div>
 
-      <!-- CUERPO CON SCROLL -->
-      <div id="rendimientoContentArea" class="cyber-custom-scroll" style="padding: 20px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 16px;">
-        <div style="text-align: center; padding: 40px; color: #bf5af2;">
-          <svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg>
-          <div style="margin-top: 10px; font-weight: 700; font-size: 0.9rem;">Calculando métricas...</div>
+      <!-- CUERPO DE TARJETAS (BENTO DASHBOARD) -->
+      <div id="rendimientoContentArea" class="cyber-custom-scroll" style="padding: 22px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 18px; background: #09090c;">
+        <div style="text-align: center; padding: 45px; color: #bf5af2;">
+          <svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg>
+          <div style="margin-top: 12px; font-weight: 700; font-size: 0.9rem;">Procesando analíticas...</div>
         </div>
       </div>
 
@@ -1423,7 +1447,7 @@ window.cargarRendimientoMySQL = function () {
   const container = document.getElementById("rendimientoContentArea");
   if (!container) return;
 
-  container.innerHTML = `<div style="text-align: center; padding: 40px; color: #bf5af2;"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg><div style="margin-top: 10px; font-weight: 700; font-size: 0.9rem;">Obteniendo datos de MySQL...</div></div>`;
+  container.innerHTML = `<div style="text-align: center; padding: 45px; color: #bf5af2;"><svg class="spin-anim" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg><div style="margin-top: 12px; font-weight: 700; font-size: 0.9rem;">Obteniendo registros...</div></div>`;
 
   fetch(
     `${window.URL_OBTENER_RENDIMIENTO}?fecha=${encodeURIComponent(window.filtroFechaRendimiento)}&nocache=${Date.now()}`,
@@ -1434,7 +1458,7 @@ window.cargarRendimientoMySQL = function () {
         window.datosRendimientoGlobal = res.data || [];
         window.renderizarRendimientoEnPantalla();
       } else {
-        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Error al obtener rendimiento"}</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ff453a; font-weight:700;">❌ ${res ? res.message : "Error obteniendo datos"}</div>`;
       }
     })
     .catch((err) => {
@@ -1442,6 +1466,9 @@ window.cargarRendimientoMySQL = function () {
     });
 };
 
+// ==========================================
+// RENDERIZADO ULTRA OPTIMIZADO DE TARJETAS (DISEÑO BENTO GRID)
+// ==========================================
 window.renderizarRendimientoEnPantalla = function () {
   const container = document.getElementById("rendimientoContentArea");
   if (!container) return;
@@ -1464,115 +1491,136 @@ window.renderizarRendimientoEnPantalla = function () {
   }
 
   if (dataAMostrar.length === 0) {
-    container.innerHTML = `<div style="text-align:center; padding:30px; color:#a1a1aa; font-weight:600; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px dashed rgba(255,255,255,0.05);">No hay métricas de rendimiento para la fecha seleccionada (${window.filtroFechaRendimiento}).</div>`;
+    container.innerHTML = `<div style="text-align:center; padding:35px; color:#a1a1aa; font-weight:600; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.08);">Sin métricas registradas para el ${window.filtroFechaRendimiento}.</div>`;
     return;
   }
 
-  let htmlCards = "";
+  // Renderizado optimizado con map().join("")
+  const htmlBuffer = dataAMostrar
+    .map((item) => {
+      let interacciones = parseInt(item.interacciones || "0", 10);
+      let inactividadesSegundos = parseInt(item.inactividades || "0", 10);
+      let ventas = parseInt(item.ventas || "0", 10);
 
-  dataAMostrar.forEach((item) => {
-    let interacciones = parseInt(item.interacciones || "0", 10);
-    let inactividadesSegundos = parseInt(item.inactividades || "0", 10);
-    let ventas = parseInt(item.ventas || "0", 10);
+      let tiempoInactivoFormateado = formatoMinutosRendimiento(
+        inactividadesSegundos,
+      );
+      let avgDia = formatoMinutosRendimiento(
+        parseInt(item.promedio_dia || "0", 10),
+      );
+      let avgSemana = formatoMinutosRendimiento(
+        parseInt(item.promedio_semana || "0", 10),
+      );
+      let avgQuincena = formatoMinutosRendimiento(
+        parseInt(item.promedio_quincena || "0", 10),
+      );
+      let avgMes = formatoMinutosRendimiento(
+        parseInt(item.promedio_mes || "0", 10),
+      );
 
-    let tiempoInactivoFormateado = formatoMinutosRendimiento(
-      inactividadesSegundos,
-    );
+      let esInactivoGrafico = inactividadesSegundos > 0;
+      let badgeInactivoBg = esInactivoGrafico
+        ? "rgba(255, 69, 58, 0.12)"
+        : "rgba(48, 209, 88, 0.1)";
+      let badgeInactivoBorder = esInactivoGrafico
+        ? "rgba(255, 69, 58, 0.3)"
+        : "rgba(48, 209, 88, 0.25)";
+      let colorInactividad = esInactivoGrafico ? "#ff453a" : "#30d158";
 
-    let avgDia = formatoMinutosRendimiento(
-      parseInt(item.promedio_dia || "0", 10),
-    );
-    let avgSemana = formatoMinutosRendimiento(
-      parseInt(item.promedio_semana || "0", 10),
-    );
-    let avgQuincena = formatoMinutosRendimiento(
-      parseInt(item.promedio_quincena || "0", 10),
-    );
-    let avgMes = formatoMinutosRendimiento(
-      parseInt(item.promedio_mes || "0", 10),
-    );
-
-    let colorInactividad = inactividadesSegundos > 0 ? "#ff453a" : "#30d158";
-
-    htmlCards += `
-      <div style="background: rgba(255, 255, 255, 0.025); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden;">
+      return `
+      <div style="background: linear-gradient(160deg, #15151a 0%, #111115 100%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); position: relative; transition: transform 0.2s, border-color 0.2s;">
         
-        <!-- Header Tarjeta -->
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.1); padding-bottom: 12px;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(191, 90, 242, 0.15); border: 1px solid rgba(191, 90, 242, 0.3); color: #bf5af2; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center;">
+        <!-- HEADER DE TARJETA: PERFIL + BADGE VENTAS -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, rgba(191, 90, 242, 0.3), rgba(10, 132, 255, 0.2)); border: 1px solid rgba(191, 90, 242, 0.4); color: #ffffff; font-weight: 900; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
               ${item.vendedor.charAt(0).toUpperCase()}
             </div>
-            <div style="display: flex; flex-direction: column;">
-              <span style="font-weight: 800; font-size: 1.05rem; color: #ffffff;">${item.vendedor.toUpperCase()}</span>
-              <span style="font-size: 0.72rem; color: #a1a1aa; font-family: monospace;">Fecha: ${window.filtroFechaRendimiento}</span>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-weight: 900; font-size: 1.1rem; color: #ffffff; letter-spacing: -0.2px;">${item.vendedor.toUpperCase()}</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #30d158; box-shadow: 0 0 6px #30d158;"></span>
+                <span style="font-size: 0.7rem; color: #8e8e93; font-weight: 700; font-family: monospace;">AUDITORÍA ACTIVA</span>
+              </div>
             </div>
           </div>
 
-          <!-- Métrica Destacada: Ventas Realizadas -->
-          <div style="background: rgba(48, 209, 88, 0.12); border: 1px solid rgba(48, 209, 88, 0.3); padding: 6px 14px; border-radius: 12px; display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.72rem; font-weight: 800; color: #30d158; text-transform: uppercase;">Ventas:</span>
-            <span style="font-size: 1.1rem; font-weight: 900; color: #30d158; font-family: monospace;">${ventas}</span>
-          </div>
-        </div>
-
-        <!-- Métricas Principales (Grid) -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <!-- Bloque Horario -->
-          <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; justify-content: space-between;">
-              <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Hora Entrada</span>
-              <span style="font-size: 0.85rem; font-weight: 800; color: #30d158; font-family: monospace;">${item.hora_entrada || "--:--"}</span>
-            </div>
-            <div style="height: 1px; width: 100%; background: rgba(255,255,255,0.05);"></div>
-            <div style="display: flex; justify-content: space-between;">
-              <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Hora Salida</span>
-              <span style="font-size: 0.85rem; font-weight: 800; color: #ff9f0a; font-family: monospace;">${item.hora_salida || "--:--"}</span>
-            </div>
-          </div>
-
-          <!-- Bloque Interacciones / Tiempo Inactivo -->
-          <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; justify-content: space-between;">
-              <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Interacciones</span>
-              <span style="font-size: 0.85rem; font-weight: 800; color: #0a84ff; font-family: monospace;">+${interacciones.toLocaleString()} clics</span>
-            </div>
-            <div style="height: 1px; width: 100%; background: rgba(255,255,255,0.05);"></div>
-            <div style="display: flex; justify-content: space-between;">
-              <span style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Tiempo Inactivo</span>
-              <span style="font-size: 0.85rem; font-weight: 800; color: ${colorInactividad}; font-family: monospace;">${tiempoInactivoFormateado}</span>
+          <!-- HIGHLIGHT BENTO: VENTAS -->
+          <div style="background: linear-gradient(135deg, rgba(48, 209, 88, 0.18), rgba(48, 209, 88, 0.05)); border: 1px solid rgba(48, 209, 88, 0.35); padding: 8px 16px; border-radius: 16px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(48, 209, 88, 0.1);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            <div style="display: flex; flex-direction: column; text-align: right;">
+              <span style="font-size: 0.6rem; font-weight: 800; color: #30d158; text-transform: uppercase; letter-spacing: 0.5px;">Ventas</span>
+              <span style="font-size: 1.2rem; font-weight: 900; color: #ffffff; font-family: monospace; line-height: 1;">${ventas}</span>
             </div>
           </div>
         </div>
 
-        <!-- Promedios de Conexión (Diario, Semanal, Quincenal, Mensual) -->
-        <div style="background: rgba(191, 90, 242, 0.05); border: 1px solid rgba(191, 90, 242, 0.15); padding: 12px 14px; border-radius: 14px; display: flex; justify-content: space-between; text-align: center;">
-          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-            <span style="font-size: 0.65rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Día</span>
-            <span style="font-size: 0.85rem; font-weight: 800; color: #ffffff; font-family: monospace;">${avgDia}</span>
+        <!-- BENTO STATS GRID (METRICAS DE SESION) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+          
+          <!-- ITEM 1: HORARIOS DE TURNO -->
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.68rem; font-weight: 800; color: #8e8e93; text-transform: uppercase;">Hora Entrada</span>
+              <span style="font-size: 0.88rem; font-weight: 900; color: #30d158; font-family: monospace; background: rgba(48,209,88,0.1); padding: 2px 8px; border-radius: 6px;">${item.hora_entrada || "--:--"}</span>
+            </div>
+            <div style="height: 1px; width: 100%; background: rgba(255,255,255,0.04);"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.68rem; font-weight: 800; color: #8e8e93; text-transform: uppercase;">Hora Salida</span>
+              <span style="font-size: 0.88rem; font-weight: 900; color: #ff9f0a; font-family: monospace; background: rgba(255,159,10,0.1); padding: 2px 8px; border-radius: 6px;">${item.hora_salida || "--:--"}</span>
+            </div>
           </div>
-          <div style="width: 1px; background: rgba(191, 90, 242, 0.2);"></div>
-          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-            <span style="font-size: 0.65rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Semana</span>
-            <span style="font-size: 0.85rem; font-weight: 800; color: #ffffff; font-family: monospace;">${avgSemana}</span>
+
+          <!-- ITEM 2: INTERACCIONES (CLICS) -->
+          <div style="background: rgba(10, 132, 255, 0.03); border: 1px solid rgba(10, 132, 255, 0.12); padding: 12px 14px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 0.68rem; font-weight: 800; color: #0a84ff; text-transform: uppercase;">Interacciones</span>
+              <span style="font-size: 1.25rem; font-weight: 900; color: #ffffff; font-family: monospace;">+${interacciones.toLocaleString()}</span>
+            </div>
+            <div style="width: 34px; height: 38px; border-radius: 10px; background: rgba(10, 132, 255, 0.15); display: flex; align-items: center; justify-content: center; color: #0a84ff;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 15l-2 5l-2.2-4.2L6 13.6l5-2l4 3.4z"></path></svg>
+            </div>
           </div>
-          <div style="width: 1px; background: rgba(191, 90, 242, 0.2);"></div>
-          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-            <span style="font-size: 0.65rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Quincena</span>
-            <span style="font-size: 0.85rem; font-weight: 800; color: #ffffff; font-family: monospace;">${avgQuincena}</span>
+
+          <!-- ITEM 3: TIEMPO INACTIVO ACUMULADO -->
+          <div style="background: ${badgeInactividaBg}; border: 1px solid ${badgeInactividaBorder}; padding: 12px 14px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 0.68rem; font-weight: 800; color: ${colorInactividad}; text-transform: uppercase;">Tiempo Inactivo</span>
+              <span style="font-size: 1.25rem; font-weight: 900; color: #ffffff; font-family: monospace;">${tiempoInactivoFormateado}</span>
+            </div>
+            <div style="width: 34px; height: 38px; border-radius: 10px; background: rgba(255, 69, 58, 0.15); display: flex; align-items: center; justify-content: center; color: ${colorInactividad};">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
           </div>
-          <div style="width: 1px; background: rgba(191, 90, 242, 0.2);"></div>
-          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-            <span style="font-size: 0.65rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Mes</span>
-            <span style="font-size: 0.85rem; font-weight: 800; color: #ffffff; font-family: monospace;">${avgMes}</span>
+
+        </div>
+
+        <!-- STRIP BENTO: PROMEDIOS DE CONEXIÓN HISTÓRICOS -->
+        <div style="background: rgba(191, 90, 242, 0.04); border: 1px solid rgba(191, 90, 242, 0.12); padding: 12px 16px; border-radius: 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <span style="font-size: 0.62rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Día</span>
+            <span style="font-size: 0.88rem; font-weight: 900; color: #ffffff; font-family: monospace;">${avgDia}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px; border-left: 1px solid rgba(191, 90, 242, 0.15); padding-left: 6px;">
+            <span style="font-size: 0.62rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Semana</span>
+            <span style="font-size: 0.88rem; font-weight: 900; color: #ffffff; font-family: monospace;">${avgSemana}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px; border-left: 1px solid rgba(191, 90, 242, 0.15); padding-left: 6px;">
+            <span style="font-size: 0.62rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Quincena</span>
+            <span style="font-size: 0.88rem; font-weight: 900; color: #ffffff; font-family: monospace;">${avgQuincena}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px; border-left: 1px solid rgba(191, 90, 242, 0.15); padding-left: 6px;">
+            <span style="font-size: 0.62rem; font-weight: 800; color: #bf5af2; text-transform: uppercase;">Prom. Mes</span>
+            <span style="font-size: 0.88rem; font-weight: 900; color: #ffffff; font-family: monospace;">${avgMes}</span>
           </div>
         </div>
 
       </div>
     `;
-  });
+    })
+    .join("");
 
-  container.innerHTML = htmlCards;
+  container.innerHTML = htmlBuffer;
 };
 
 function formatoMinutosRendimiento(totalSeg) {
