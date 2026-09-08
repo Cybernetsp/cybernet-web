@@ -100,7 +100,6 @@ function registrarInteraccionRendimiento() {
   }
 }
 
-// Handler optimizado: Throttle para evitar congelamientos de CPU por llamadas excesivas
 function capturarEventosUsuario() {
   if (throttleActividadTimer) return;
   throttleActividadTimer = setTimeout(() => {
@@ -1583,7 +1582,7 @@ window.renderizarRendimientoEnPantalla = function () {
           </div>
 
           <!-- ITEM 3: TIEMPO INACTIVO ACUMULADO -->
-          <div style="background: ${badgeInactividaBg}; border: 1px solid ${badgeInactividaBorder}; padding: 12px 14px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="background: ${badgeInactivoBg}; border: 1px solid ${badgeInactivoBorder}; padding: 12px 14px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; flex-direction: column; gap: 4px;">
               <span style="font-size: 0.68rem; font-weight: 800; color: ${colorInactividad}; text-transform: uppercase;">Tiempo Inactivo</span>
               <span style="font-size: 1.25rem; font-weight: 900; color: #ffffff; font-family: monospace;">${tiempoInactivoFormateado}</span>
