@@ -36,12 +36,13 @@ window.asistenteSeleccionadoAdmin = "TODOS";
 window.filtroFechaRendimiento = new Date().toISOString().split("T")[0];
 
 // ==========================================
-// 🚨 MÓDULO FANTASMA: DETECTOR DE INACTIVIDAD (OPTIMIZADO CON THROTTLE)
+// 🚨 MÓDULO FANTASMA: DETECTOR DE INACTIVIDAD (CON RELOJ DESDE 00m 00s)
 // ==========================================
 let inactividadTimer = null;
 let inactividadCronometroInterval = null;
 const TIEMPO_LIMITE_INACTIVIDAD = 7 * 60 * 1000; // 7 Minutos reales
 let ultimaActividadTs = Date.now();
+let inicioVentanaInactividadTs = 0; // Instante exacto en que se despliega la ventana
 let ultimaInteraccionTs = 0;
 let throttleActividadTimer = null;
 
@@ -51,6 +52,7 @@ function resetearTemporizadorInactividad() {
   if (modalAlerta && modalAlerta.style.display === "flex") {
     modalAlerta.style.display = "none";
 
+    // Calcular segundos inactivos transcurridos durante esta pausa
     let segsInactivoSesion = Math.floor(
       (Date.now() - ultimaActividadTs) / 1000,
     );
@@ -110,6 +112,9 @@ function capturarEventosUsuario() {
 }
 
 function mostrarAlertaInactividad() {
+  // Marca el segundo cero justo en el instante en que sale la pantalla
+  inicioVentanaInactividadTs = Date.now();
+
   let modalAlerta = document.getElementById("alertaInactividadFantasma");
 
   if (!modalAlerta) {
@@ -123,11 +128,12 @@ function mostrarAlertaInactividad() {
         <h1 style="font-weight: 900; font-size: 2rem; color: #ff453a; letter-spacing: -1px; margin: 0 0 6px 0;">INACTIVIDAD DETECTADA</h1>
         
         <p style="font-size: 0.95rem; color: #a1a1aa; max-width: 480px; margin-bottom: 10px;">
-          Tiempo transcurrido sin actividad en la plataforma:
+          Tiempo transcurrido en esta pantalla de inactividad:
         </p>
 
+        <!-- CRONÓMETRO EN VIVO: COMIENZA EN 00m 00s AL SALIR LA VENTANA -->
         <div id="lblCronometroInactivo" style="font-size: 3rem; font-weight: 900; font-family: monospace; color: #ff453a; text-shadow: 0 0 20px rgba(255,69,58,0.5); margin: 8px 0 18px 0; background: rgba(255,69,58,0.1); padding: 8px 26px; border-radius: 16px; border: 1px solid rgba(255,69,58,0.3);">
-          07m 00s
+          00m 00s
         </div>
 
         <p style="font-size: 0.9rem; color: #a1a1aa; max-width: 480px;">
@@ -147,9 +153,11 @@ function mostrarAlertaInactividad() {
 
   const lbl = document.getElementById("lblCronometroInactivo");
   const actualizarCronometroLive = () => {
-    let segsInactivo = Math.floor((Date.now() - ultimaActividadTs) / 1000);
-    let m = Math.floor(segsInactivo / 60);
-    let s = segsInactivo % 60;
+    let segsVentanaInactivo = Math.floor(
+      (Date.now() - inicioVentanaInactividadTs) / 1000,
+    );
+    let m = Math.floor(segsVentanaInactivo / 60);
+    let s = segsVentanaInactivo % 60;
     if (lbl) {
       lbl.innerText = `${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
     }
