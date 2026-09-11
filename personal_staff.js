@@ -271,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. CRONÓMETRO EXACTO
+// 2. CRONÓMETRO EXACTO Y MODO ESPERA
 // ==========================================
 let secCronometroTotal = 0;
 let unsavedSecTotal = 0;
@@ -294,6 +294,7 @@ function limpiarCacheShift() {
   localStorage.removeItem("cyber_perf_interacciones");
 }
 
+// 🟢 VERIFICADOR DE ARRANQUE CON PREGUNTA
 window.verificarEIniciarTurnoAuto = function () {
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
@@ -306,6 +307,73 @@ window.verificarEIniciarTurnoAuto = function () {
     limpiarCacheShift();
     return;
   }
+
+  // Comprobar si ya había un turno activo previamente sin cerrar
+  let isShiftActive = localStorage.getItem("cyber_shift_active") === "true";
+
+  if (isShiftActive) {
+    // Si ya estaba activo (ej. recargó la página accidentalmente), arrancar normal.
+    iniciarTurnoTracker(true);
+  } else {
+    // Si es nuevo acceso o lo había pausado, le preguntamos.
+    mostrarModalEsperaTurno(activeStaff);
+  }
+};
+
+function mostrarModalEsperaTurno(nombreStaff) {
+  let modalPrevia = document.getElementById("alertaEsperaTurnoInicial");
+  if (!modalPrevia) {
+    const htmlEspera = `
+      <div id="alertaEsperaTurnoInicial" style="display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.94); backdrop-filter: blur(15px); z-index: 999999; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: #ffffff;">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px;">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+        <h1 style="font-weight: 900; font-size: 1.8rem; color: #ffffff; letter-spacing: -1px; margin: 0 0 10px 0;">¡HOLA, ${nombreStaff}!</h1>
+        
+        <p style="font-size: 0.95rem; color: #a1a1aa; max-width: 480px; margin-bottom: 24px; line-height: 1.5;">
+          Hemos detectado tu inicio de sesión.<br>
+          <b>¿Deseas iniciar tu turno y el cronómetro de inmediato?</b>
+        </p>
+
+        <div id="cajaOpcionesEspera" style="display: flex; gap: 14px; width: 100%; max-width: 380px;">
+          <button type="button" onclick="rechazarInicioTurno()" style="flex: 1; padding: 14px; border-radius: 14px; background: rgba(255, 69, 58, 0.15); color: #ff453a; font-weight: 800; border: 1px solid rgba(255, 69, 58, 0.3); cursor: pointer; font-size: 0.95rem; transition: background 0.2s;">
+            Aún no
+          </button>
+          
+          <button type="button" onclick="confirmarInicioTurno()" style="flex: 1; padding: 14px; border-radius: 14px; background: #30d158; color: #000000; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(48,209,88,0.3); font-size: 0.95rem; transition: transform 0.2s;">
+            Sí, Empezar Turno
+          </button>
+        </div>
+
+        <div id="cajaBotonListoEspera" style="display: none; width: 100%; max-width: 380px;">
+          <p style="font-size: 0.85rem; color: #ff453a; margin-bottom: 14px;">El cronómetro está pausado. Tu tiempo no está contando.</p>
+          <button type="button" onclick="confirmarInicioTurno()" style="width: 100%; padding: 16px; border-radius: 16px; background: #30d158; color: #000000; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(48,209,88,0.4); font-size: 1.1rem; transition: transform 0.2s; animation: pulseBreb 2s infinite;">
+            ▶ ESTOY LISTO PARA INICIAR
+          </button>
+        </div>
+
+      </div>`;
+    document.body.insertAdjacentHTML("beforeend", htmlEspera);
+    modalPrevia = document.getElementById("alertaEsperaTurnoInicial");
+  }
+
+  modalPrevia.style.display = "flex";
+  document.getElementById("cajaOpcionesEspera").style.display = "flex";
+  document.getElementById("cajaBotonListoEspera").style.display = "none";
+}
+
+window.rechazarInicioTurno = function () {
+  if (typeof haptic === "function") haptic();
+  document.getElementById("cajaOpcionesEspera").style.display = "none";
+  document.getElementById("cajaBotonListoEspera").style.display = "block";
+};
+
+window.confirmarInicioTurno = function () {
+  if (typeof haptic === "function") haptic();
+  const modal = document.getElementById("alertaEsperaTurnoInicial");
+  if (modal) modal.style.display = "none";
   iniciarTurnoTracker(true);
 };
 
@@ -740,7 +808,7 @@ window.renderizarHorasEnPantalla = function () {
   const esQ1 = window.filtroQuincenaTurnos === 1;
 
   const inicioDia = esQ1 ? 1 : 16;
-  const finDia = esQ1 ? 1 : new Date(dAnio, dMes + 1, 0).getDate();
+  const finDia = esQ1 ? 15 : new Date(dAnio, dMes + 1, 0).getDate();
   const mesesNombres = [
     "Enero",
     "Febrero",
