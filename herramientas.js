@@ -101,28 +101,24 @@ window.cargarPagosBreBModal = function () {
           const bancoOrigen = pago.banco ? pago.banco.toUpperCase() : "BRE-B";
           const refText = pago.referencia || "";
 
-          // 🕒 SEPARAR FECHA Y HORA PARA EL ESQUEMA SUPERIOR DERECHO
+          // 🕒 SEPARAR FECHA Y HORA
           const partesFecha = fechaHora.trim().split(" ");
           const fechaOnly = partesFecha[0] || "";
           const horaOnly = partesFecha.slice(1).join(" ") || "";
 
-          // Badge exclusivo para pagos 'usados'
           const esUsado = pago.estado === "usado";
           const estadoBadge = esUsado
             ? `<div style="margin-top:6px;"><span style="color:#ff453a; font-size:0.72rem; font-weight:800; background:rgba(255,69,58,0.15); padding:3px 10px; border-radius:6px;">USADO</span></div>`
             : "";
 
-          // 🟢 TARJETA RE-DISEÑADA (HORA GRANDE ARRIBA DERECHA + SIN 'DISPONIBLE')
           html += `
             <div class="breb-card" style="position: relative; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px 16px; font-size: 0.83rem; line-height: 1.5; color: rgba(255, 255, 255, 0.8); transition: all 0.2s ease; margin-bottom: 8px;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(48, 209, 88, 0.4)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
               
-              <!-- ESQUINA SUPERIOR DERECHA: HORA GRANDE Y FECHA ABAJO -->
               <div style="position: absolute; top: 12px; right: 16px; text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
                 <span style="color: #ffffff; font-weight: 900; font-size: 1.05rem; font-family: monospace; letter-spacing: -0.3px;">${horaOnly}</span>
                 <span style="color: rgba(255, 255, 255, 0.45); font-size: 0.72rem; font-weight: 600; font-family: monospace; margin-top: -2px;">${fechaOnly}</span>
               </div>
 
-              <!-- CONTENIDO PRINCIPAL DE LA TARJETA -->
               <div style="padding-right: 110px;">
                 <div style="font-weight: 800; color: #ffffff; font-size: 0.95rem; letter-spacing: 0.3px; text-transform: uppercase;">${cliente}</div>
                 <div style="margin-top: 3px; display: flex; align-items: center; gap: 5px;">
@@ -140,7 +136,6 @@ window.cargarPagosBreBModal = function () {
 
         contenedor.innerHTML = html;
 
-        // 🛡️ VERIFICACIÓN DE ROL/USUARIO EXCLUSIVO PARA SUPERADMIN
         const usuarioActivo = (
           localStorage.getItem("usuario") ||
           localStorage.getItem("user") ||
@@ -207,9 +202,25 @@ window.forzarActualizacionBreBModal = function () {
 };
 
 /* ==========================================================================
-   📋 PLANTILLAS DESDE MYSQL Y MOTORES DE COPIADO
+   📋 PLANTILLAS DESDE MYSQL Y MOTORES DE COPIADO + EDICIÓN SUPERADMIN
    ========================================================================== */
 window.currentGridStock = [];
+
+// Helper para validar si el usuario es SuperAdmin (CAMILO)
+window.verificarSuperAdminPlantillas = function () {
+  const usuarioActivoObj = JSON.parse(
+    sessionStorage.getItem("usuario_activo") || "{}",
+  );
+  const usuarioNombre = (
+    usuarioActivoObj.nombre ||
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    ""
+  )
+    .toUpperCase()
+    .trim();
+  return usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
+};
 
 window.cargarPlantillasDesdeSheets = function () {
   const container = document.getElementById("grid-container");
@@ -285,6 +296,14 @@ window.cargarPlantillasDesdeSheets = function () {
 window.renderGrid = function (filtro = "") {
   const gridContainer = document.getElementById("grid-container");
   const emptyState = document.getElementById("macEmptyState");
+  const btnAgregar = document.getElementById("btnAgregarPlantillaSuperAdmin");
+
+  const esAdmin = window.verificarSuperAdminPlantillas();
+
+  // Muestra u oculta el botón "+ Agregar" superior solo si es SuperAdmin
+  if (btnAgregar) {
+    btnAgregar.style.display = esAdmin ? "flex" : "none";
+  }
 
   if (!gridContainer || !window.currentGridStock) return;
   gridContainer.innerHTML = "";
@@ -324,10 +343,15 @@ window.renderGrid = function (filtro = "") {
       "margin-bottom: 14px; flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start;";
     divHeader.innerHTML = `<h2 class="card-title" style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4;">${tituloSeguro}</h2>`;
 
+    // Fila inferior de botones (Copiar + Editar si es SuperAdmin)
+    const divBtns = document.createElement("div");
+    divBtns.style.cssText =
+      "display: flex; gap: 8px; align-items: center; width: 100%; margin-top: auto;";
+
     const btnCopiar = document.createElement("button");
-    btnCopiar.className = "btn-ios w-100";
+    btnCopiar.className = "btn-ios";
     btnCopiar.style.cssText =
-      "margin-top: auto !important; padding: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 0.85rem !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer;";
+      "flex: 1; padding: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 0.85rem !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer;";
     btnCopiar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> COPIAR TEXTO`;
 
     btnCopiar.onclick = function () {
@@ -335,10 +359,158 @@ window.renderGrid = function (filtro = "") {
       window.copiarPlantillaDirecta(this, textoReal);
     };
 
+    divBtns.appendChild(btnCopiar);
+
+    // Botón SVG Editar al lado del botón Copiar (Exclusivo SuperAdmin)
+    if (esAdmin) {
+      const btnEditar = document.createElement("button");
+      btnEditar.className = "btn-ios";
+      btnEditar.title = "Editar plantilla";
+      btnEditar.style.cssText =
+        "width: 42px; height: 42px; flex-shrink: 0; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer; transition: all 0.2s ease;";
+      btnEditar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+
+      btnEditar.onclick = function (e) {
+        e.stopPropagation();
+        window.abrirModalEditarPlantilla(currentItem);
+      };
+
+      divBtns.appendChild(btnEditar);
+    }
+
     card.appendChild(divHeader);
-    card.appendChild(btnCopiar);
+    card.appendChild(divBtns);
     gridContainer.appendChild(card);
   });
+};
+
+/* ==========================================================================
+   ✏️ MODAL Y LÓGICA DE AGREGAR / EDITAR PLANTILLAS (SUPERADMIN)
+   ========================================================================== */
+window.crearModalPlantillaSiNoExiste = function () {
+  if (document.getElementById("modalPlantillaOverlay")) return;
+
+  const modalHtml = `
+  <div class="overlay-ios" id="modalPlantillaOverlay" style="display: none; z-index: 18000; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; align-items: center !important; justify-content: center !important; background: rgba(0, 0, 0, 0.85) !important; backdrop-filter: blur(14px) !important;">
+    <div class="modal-ios" onclick="event.stopPropagation()" style="max-width: 520px !important; width: 92% !important; background: #141418 !important; border: 1px solid rgba(48, 209, 88, 0.35) !important; border-radius: 26px !important; padding: 22px 24px !important; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9) !important; display: flex !important; flex-direction: column !important; gap: 16px !important; margin: auto !important;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px;">
+        <h3 id="modalPlantillaTituloText" style="margin: 0; color: #ffffff; font-weight: 800; font-size: 1.1rem;">Gestión de Plantilla</h3>
+        <button type="button" onclick="window.cerrarModalPlantilla()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); color: #a1a1aa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+      </div>
+
+      <form onsubmit="window.guardarPlantillaPHP(event)" style="display: flex; flex-direction: column; gap: 14px; margin: 0;">
+        <input type="hidden" id="inputPlantillaId" value="" />
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <label style="font-size: 0.7rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">Título de la Plantilla</label>
+          <input type="text" id="inputPlantillaTitulo" required placeholder="Ej: SALUDO, PROMO..." class="input-ios" style="background: rgba(0,0,0,0.45) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: #ffffff !important; padding: 10px 14px !important; border-radius: 12px !important; font-size: 0.9rem !important; outline: none; margin: 0 !important; width: 100%; box-sizing: border-box;" />
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <label style="font-size: 0.7rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">Contenido / Texto</label>
+          <textarea id="inputPlantillaTexto" required rows="6" placeholder="Escribe el mensaje aquí..." class="input-ios" style="background: rgba(0,0,0,0.45) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: #ffffff !important; padding: 12px 14px !important; border-radius: 12px !important; font-size: 0.85rem !important; font-family: monospace; line-height: 1.4; outline: none; resize: vertical; margin: 0 !important; width: 100%; box-sizing: border-box;"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 6px;">
+          <button type="button" onclick="window.cerrarModalPlantilla()" style="flex: 1; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.08); color: #a1a1aa; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">Cancelar</button>
+          <button type="submit" id="btnSubmitPlantilla" style="flex: 1.4; padding: 12px; border-radius: 12px; background: #30d158; color: #000000; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(48,209,88,0.3);">Guardar Plantilla</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+};
+
+window.abrirModalAgregarPlantilla = function () {
+  if (typeof haptic === "function") haptic();
+  window.crearModalPlantillaSiNoExiste();
+
+  document.getElementById("inputPlantillaId").value = "";
+  document.getElementById("inputPlantillaTitulo").value = "";
+  document.getElementById("inputPlantillaTexto").value = "";
+  document.getElementById("modalPlantillaTituloText").innerText =
+    "➕ Agregar Nueva Plantilla";
+
+  const overlay = document.getElementById("modalPlantillaOverlay");
+  if (overlay) overlay.style.display = "flex";
+};
+
+window.abrirModalEditarPlantilla = function (item) {
+  if (typeof haptic === "function") haptic();
+  window.crearModalPlantillaSiNoExiste();
+
+  document.getElementById("inputPlantillaId").value = item.id || "";
+  document.getElementById("inputPlantillaTitulo").value = item.titulo || "";
+  document.getElementById("inputPlantillaTexto").value = item.texto || "";
+  document.getElementById("modalPlantillaTituloText").innerText =
+    "✏️ Editar Plantilla";
+
+  const overlay = document.getElementById("modalPlantillaOverlay");
+  if (overlay) overlay.style.display = "flex";
+};
+
+window.cerrarModalPlantilla = function () {
+  const overlay = document.getElementById("modalPlantillaOverlay");
+  if (overlay) overlay.style.display = "none";
+};
+
+window.guardarPlantillaPHP = function (e) {
+  if (e) e.preventDefault();
+
+  const id = document.getElementById("inputPlantillaId").value;
+  const titulo = document.getElementById("inputPlantillaTitulo").value.trim();
+  const texto = document.getElementById("inputPlantillaTexto").value.trim();
+
+  if (!titulo || !texto) {
+    alert("⚠️ Por favor completa el título y texto.");
+    return;
+  }
+
+  const btn = document.getElementById("btnSubmitPlantilla");
+  const originalTxt = btn ? btn.innerText : "Guardar";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "Guardando...";
+  }
+
+  const formData = new FormData();
+  formData.append("accion", id ? "editar" : "agregar");
+  formData.append("id", id);
+  formData.append("titulo", titulo);
+  formData.append("texto", texto);
+
+  fetch("https://api.cybernetsp.com/acciones_plantillas.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = originalTxt;
+      }
+      if (res && res.status === "success") {
+        window.cerrarModalPlantilla();
+        window.cargarPlantillasDesdeSheets();
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="color:var(--ios-green);">✅ Plantilla guardada correctamente</div>`,
+          );
+        }
+      } else {
+        alert("❌ Error: " + (res ? res.message : "No se pudo guardar"));
+      }
+    })
+    .catch((err) => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = originalTxt;
+      }
+      alert("❌ Error de comunicación: " + err.message);
+    });
 };
 
 window.filtrarTarjetasMac = function () {
@@ -519,18 +691,15 @@ window.toggleCodesPanel = function () {
   }
 };
 
-// ⏱️ HELPER PREACABADO: Obtener el timestamp de expiración (Llegada exacta ISO + 15 min)
 function calcularExpiracionCodigoMs(item) {
   let inicioMs = 0;
 
-  // 1. Normalización estricta ISO para iOS, Safari y Chrome (Reemplazar espacios por 'T')
   if (item.fecha_registro) {
     let isoStr = String(item.fecha_registro).trim().replace(" ", "T");
     let parsed = new Date(isoStr).getTime();
     if (!isNaN(parsed) && parsed > 0) inicioMs = parsed;
   }
 
-  // 2. Respaldo para hora formateada corta con segundos opcionales (Ej: 13:19 o 13:19:25)
   if (!inicioMs && item.hora) {
     const hoy = new Date();
     let p = item.hora.trim().split(" ");
@@ -548,10 +717,9 @@ function calcularExpiracionCodigoMs(item) {
   }
 
   if (!inicioMs) inicioMs = Date.now();
-  return inicioMs + 15 * 60 * 1000; // Exactamente 15 minutos (900.000 ms)
+  return inicioMs + 15 * 60 * 1000;
 }
 
-// ⏱️ TIMER EN TIEMPO REAL: Actualiza la vigencia regresiva segundo a segundo
 window.iniciarTimerCodigosTiempoReal = function () {
   if (window.timerIntervalCodigos) clearInterval(window.timerIntervalCodigos);
 
@@ -588,7 +756,6 @@ window.iniciarTimerCodigosTiempoReal = function () {
   }, 1000);
 };
 
-// 📥 CONSULTA Y SINCRONIZACIÓN DE CÓDIGOS SILENCIOSA EN SEGUNDO PLANO
 window.cargarBandejaCodigosMySQL = function () {
   const contenedor = document.getElementById("codesScrollArea");
   if (!contenedor) return;
@@ -619,7 +786,6 @@ window.cargarBandejaCodigosMySQL = function () {
     );
 };
 
-// 🎨 DIBUJAR TARJETAS DE CÓDIGOS CON VIGENCIA EN VIVO
 function renderizarCodigosBandeja(res, contenedor) {
   if (res && res.status === "success" && res.data) {
     if (res.data.length === 0) {
@@ -684,7 +850,6 @@ function renderizarCodigosBandeja(res, contenedor) {
           ? item.codigoLink.substring(0, 22) + "..."
           : item.codigoLink;
 
-      // ⏱️ Cálculo exacto de la expiración
       const expMs = calcularExpiracionCodigoMs(item);
 
       let botonHtml = "";
@@ -739,7 +904,6 @@ function renderizarCodigosBandeja(res, contenedor) {
   }
 }
 
-// 📋 COPIAR MENSAJE ADICIONANDO LA VIGENCIA RESTANTE EN TIEMPO REAL
 window.copiarCodigoConVigencia = function (btn, textoOriginalEncoded, expMs) {
   const textoOriginal = decodeURIComponent(textoOriginalEncoded);
   const diffMs = expMs - Date.now();
@@ -758,13 +922,11 @@ window.copiarCodigoConVigencia = function (btn, textoOriginalEncoded, expMs) {
   window.copiarPlantillaDirecta(btn, textoFinal);
 };
 
-// 🔄 BOTÓN REFRESCAR: Dispara la actualización silenciosa
 window.refrescarCodigosModal = function () {
   if (typeof haptic === "function") haptic();
   window.cargarBandejaCodigosMySQL();
 };
 
-// 🔍 BUSCADOR EN VIVO
 window.filtrarCodigosInternos = function () {
   const buscador = document.getElementById("searchCodesInput");
   const query = buscador ? buscador.value.toLowerCase().trim() : "";
@@ -778,7 +940,7 @@ window.filtrarCodigosInternos = function () {
 };
 
 /* ==========================================================================
-   👁️ BÓVEDAS (ANA Y CHAYO Y PEDAGO) POPUPS DIRECTOS E INDEPENDIENTES
+   👁️ BÓVEDAS (ANA, CHAYO Y PEDAGO) POPUPS DIRECTOS
    ========================================================================== */
 window.toggleAnaCodesPanel = function () {
   if (typeof haptic === "function") haptic();
