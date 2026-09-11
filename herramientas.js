@@ -261,7 +261,6 @@ window.cargarPlantillasDesdeSheets = function () {
         const esAdmin = window.verificarSuperAdminPlantillas();
         const headerContainer = document.getElementById("header-container");
 
-        // Generador de botón SVG Editar para la columna izquierda
         const crearBtnEditarLeft = (item) => {
           if (!esAdmin || !item) return "";
           let itemEscapado = encodeURIComponent(JSON.stringify(item));
@@ -417,7 +416,7 @@ window.renderGrid = function (filtro = "") {
 };
 
 /* ==========================================================================
-   ✏️ MODAL Y LÓGICA DE AGREGAR / EDITAR PLANTILLAS (SUPERADMIN)
+   ✏️ MODAL Y LÓGICA DE AGREGAR / EDITAR / ELIMINAR PLANTILLAS (SUPERADMIN)
    ========================================================================== */
 window.crearModalPlantillaSiNoExiste = function () {
   if (document.getElementById("modalPlantillaOverlay")) return;
@@ -469,8 +468,8 @@ window.abrirModalAgregarPlantilla = function () {
   document.getElementById("modalPlantillaTituloText").innerText =
     "➕ Agregar Nueva Plantilla";
 
-  // Ocultar botón borrar cuando se agrega una nueva
-  document.getElementById("btnEliminarPlantilla").style.display = "none";
+  const btnEliminar = document.getElementById("btnEliminarPlantilla");
+  if (btnEliminar) btnEliminar.style.display = "none";
 
   const overlay = document.getElementById("modalPlantillaOverlay");
   if (overlay) overlay.style.display = "flex";
@@ -486,8 +485,8 @@ window.abrirModalEditarPlantilla = function (item) {
   document.getElementById("modalPlantillaTituloText").innerText =
     "✏️ Editar Plantilla";
 
-  // Mostrar el botón borrar solo cuando se edita
-  document.getElementById("btnEliminarPlantilla").style.display = "block";
+  const btnEliminar = document.getElementById("btnEliminarPlantilla");
+  if (btnEliminar) btnEliminar.style.display = "block";
 
   const overlay = document.getElementById("modalPlantillaOverlay");
   if (overlay) overlay.style.display = "flex";
@@ -555,22 +554,27 @@ window.guardarPlantillaPHP = function (e) {
 };
 
 window.eliminarPlantillaPHP = function () {
-  const id = document.getElementById("inputPlantillaId").value;
-  if (!id) return;
+  const idInput = document.getElementById("inputPlantillaId");
+  const id = idInput ? idInput.value : "";
 
-  if (
-    !confirm(
-      "⚠️ ¿Estás seguro de que deseas eliminar esta plantilla permanentemente?",
-    )
-  )
+  if (!id) {
+    alert("⚠️ Error: No se encontró el ID de la plantilla a eliminar.");
     return;
+  }
+
+  const confirmacion = confirm(
+    "⚠️ ¿Estás seguro de que deseas eliminar esta plantilla permanentemente de la base de datos?",
+  );
+  if (!confirmacion) return;
 
   if (typeof haptic === "function") haptic();
 
   const btn = document.getElementById("btnEliminarPlantilla");
-  const originalTxt = btn.innerText;
-  btn.disabled = true;
-  btn.innerText = "Borrando...";
+  const originalTxt = btn ? btn.innerText : "Borrar";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "Borrando...";
+  }
 
   const formData = new FormData();
   formData.append("accion", "eliminar");
@@ -582,8 +586,10 @@ window.eliminarPlantillaPHP = function () {
   })
     .then((res) => res.json())
     .then((res) => {
-      btn.disabled = false;
-      btn.innerText = originalTxt;
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = originalTxt;
+      }
       if (res && res.status === "success") {
         window.cerrarModalPlantilla();
         window.cargarPlantillasDesdeSheets();
@@ -597,8 +603,10 @@ window.eliminarPlantillaPHP = function () {
       }
     })
     .catch((err) => {
-      btn.disabled = false;
-      btn.innerText = originalTxt;
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = originalTxt;
+      }
       alert("❌ Error de comunicación: " + err.message);
     });
 };
