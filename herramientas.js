@@ -611,12 +611,30 @@ window.eliminarPlantillaPHP = function () {
     });
 };
 
-// 🗑️ BOTÓN DE PAPELERA PARA EL BUSCADOR DE PLANTILLAS (#macSearchCards)
+// 🗑️ BOTÓN DE PAPELERA DINÁMICO PEGADO AL TEXTO EN EL BUSCADOR (#macSearchCards)
 window.actualizarBotonBorrarSearchCards = function () {
   const input = document.getElementById("macSearchCards");
   if (!input) return;
 
   let btnTrash = document.getElementById("btnBorrarTrashSearchCards");
+  let measurer = document.getElementById("measurerSearchCards");
+
+  if (!measurer) {
+    measurer = document.createElement("span");
+    measurer.id = "measurerSearchCards";
+    measurer.style.cssText = `
+      position: absolute;
+      visibility: hidden;
+      height: 0;
+      white-space: pre;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+    `;
+    document.body.appendChild(measurer);
+  }
+
   if (!btnTrash && input.parentElement) {
     const container = input.parentElement;
     if (window.getComputedStyle(container).position === "static") {
@@ -630,7 +648,6 @@ window.actualizarBotonBorrarSearchCards = function () {
     btnTrash.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
     btnTrash.style.cssText = `
       position: absolute;
-      right: 10px;
       top: 50%;
       transform: translateY(-50%);
       background: rgba(255, 69, 58, 0.15);
@@ -643,19 +660,30 @@ window.actualizarBotonBorrarSearchCards = function () {
       justify-content: center;
       cursor: pointer;
       z-index: 10;
-      transition: all 0.2s ease;
+      transition: background 0.2s ease, border-color 0.2s ease;
     `;
     btnTrash.onclick = window.borrarTextoBuscadorTarjetas;
     container.appendChild(btnTrash);
   }
 
-  const val = input.value.trim();
+  const val = input.value;
   if (val.length > 0 && btnTrash) {
+    const style = window.getComputedStyle(input);
+    measurer.style.fontFamily = style.fontFamily;
+    measurer.style.fontSize = style.fontSize;
+    measurer.style.fontWeight = style.fontWeight;
+    measurer.style.letterSpacing = style.letterSpacing;
+    measurer.textContent = val;
+
+    const paddingLeft = parseFloat(style.paddingLeft) || 40;
+    const textWidth = measurer.offsetWidth;
+    const maxLeft = input.offsetWidth - 38;
+    const calculatedLeft = Math.min(paddingLeft + textWidth + 10, maxLeft);
+
+    btnTrash.style.left = `${calculatedLeft}px`;
     btnTrash.style.display = "flex";
-    input.style.paddingRight = "44px";
   } else if (btnTrash) {
     btnTrash.style.display = "none";
-    input.style.paddingRight = "";
   }
 };
 
