@@ -231,14 +231,18 @@ window.abrirModalEditarPlantillaFromEscaped = function (escapedObj) {
   }
 };
 
-window.cargarPlantillasDesdeSheets = function () {
+// 🔄 CARGA Y AUTO-SINCRONIZACIÓN DE PLANTILLAS
+window.cargarPlantillasDesdeSheets = function (silencioso = false) {
   const container = document.getElementById("grid-container");
-  if (container) {
+
+  // Mostrar texto de carga únicamente en la carga inicial o manual
+  if (container && !silencioso) {
     container.innerHTML =
       '<div class="empty-log-msg" style="grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">Sincronizando mensajes desde MySQL...</div>';
   }
 
-  fetch("https://api.cybernetsp.com/obtener_plantillas.php")
+  // Parámetro v=Date.now() evita cache en navegadores de los empleados
+  fetch("https://api.cybernetsp.com/obtener_plantillas.php?v=" + Date.now())
     .then((res) => res.json())
     .then((res) => {
       if (res && res.status === "success") {
@@ -311,20 +315,41 @@ window.cargarPlantillasDesdeSheets = function () {
               </div>
             </div>`;
         }
-        window.renderGrid("");
+
+        // Mantener el filtro activo del buscador en caso de que estén buscando una plantilla
+        const buscadorInput = document.getElementById("macSearchCards");
+        const filtroTexto = buscadorInput ? buscadorInput.value.trim() : "";
+        window.renderGrid(filtroTexto);
       } else {
-        if (container)
+        if (container && !silencioso)
           container.innerHTML =
             '<div class="empty-log-msg" style="color:var(--ios-red); grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">❌ Error al descargar plantillas desde MySQL.</div>';
       }
     })
     .catch((err) => {
-      if (container)
+      if (container && !silencioso)
         container.innerHTML =
           '<div class="empty-log-msg" style="color:var(--ios-red); grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">❌ Error al conectar con el servidor PHP.</div>';
       console.error(err);
     });
 };
+
+// ⏱️ TEMPORIZADOR DE AUTO-REFRESCO CADA 1 MINUTO (60,000 MS)
+if (window.intervaloPlantillasAuto) {
+  clearInterval(window.intervaloPlantillasAuto);
+}
+window.intervaloPlantillasAuto = setInterval(() => {
+  // Evitar refrescar si el superadmin está editando una plantilla
+  const modalOverlay = document.getElementById("modalPlantillaOverlay");
+  const modalAbierto =
+    modalOverlay &&
+    modalOverlay.style.display !== "none" &&
+    modalOverlay.style.display !== "";
+
+  if (!modalAbierto) {
+    window.cargarPlantillasDesdeSheets(true); // Refresco silencioso
+  }
+}, 60000);
 
 window.renderGrid = function (filtro = "") {
   const gridContainer = document.getElementById("grid-container");
@@ -534,7 +559,7 @@ window.guardarPlantillaPHP = function (e) {
       }
       if (res && res.status === "success") {
         window.cerrarModalPlantilla();
-        window.cargarPlantillasDesdeSheets();
+        window.cargarPlantillasDesdeSheets(false);
         if (typeof triggerToast === "function") {
           triggerToast(
             `<div style="color:var(--ios-green);">✅ Plantilla guardada correctamente</div>`,
@@ -592,7 +617,7 @@ window.eliminarPlantillaPHP = function () {
       }
       if (res && res.status === "success") {
         window.cerrarModalPlantilla();
-        window.cargarPlantillasDesdeSheets();
+        window.cargarPlantillasDesdeSheets(false);
         if (typeof triggerToast === "function") {
           triggerToast(
             `<div style="color:var(--ios-red);">🗑️ Plantilla eliminada correctamente</div>`,
