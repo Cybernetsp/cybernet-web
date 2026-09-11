@@ -515,26 +515,30 @@ window.renderGrid = function (filtro = "") {
 function crearTarjetaPlantilla(currentItem, esFavorita, esAdmin) {
   const card = document.createElement("div");
   card.className = "card-ios";
-  card.style.cssText = `display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; padding: 18px !important; background: ${esFavorita ? "rgba(255, 204, 0, 0.04)" : "rgba(255, 255, 255, 0.02)"} !important; border: 1px solid ${esFavorita ? "rgba(255, 204, 0, 0.3)" : "rgba(255, 255, 255, 0.06)"} !important; border-radius: 16px !important; margin: 0 !important; box-sizing: border-box !important; min-height: 120px !important; position: relative !important;`;
+  // Tarjeta con position: relative para anclar la estrella
+  card.style.cssText = `display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; padding: 16px !important; background: ${esFavorita ? "rgba(255, 204, 0, 0.04)" : "rgba(255, 255, 255, 0.02)"} !important; border: 1px solid ${esFavorita ? "rgba(255, 204, 0, 0.3)" : "rgba(255, 255, 255, 0.06)"} !important; border-radius: 16px !important; margin: 0 !important; box-sizing: border-box !important; min-height: 120px !important; position: relative !important; overflow: hidden !important;`;
 
   let tituloLimpio = currentItem.titulo
     ? currentItem.titulo.trim()
     : "Plantilla Sin Nombre";
 
   const divHeader = document.createElement("div");
+  // padding-right: 40px para que el texto NUNCA toque el botón de la estrella
   divHeader.style.cssText =
-    "margin-bottom: 14px !important; flex-grow: 1 !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important; padding-right: 32px !important;";
+    "margin-bottom: 14px !important; flex-grow: 1 !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important; padding-right: 40px !important;";
 
+  // word-break: break-word permite que los textos largos bajen de línea correctamente
   divHeader.innerHTML = `
-    <h2 class="card-title" style="margin: 0 !important; font-size: 0.92rem !important; font-weight: 800 !important; color: var(--text-primary) !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; line-height: 1.3 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; word-break: normal !important;" title="${tituloLimpio}">${tituloLimpio}</h2>
+    <h2 class="card-title" style="margin: 0 !important; font-size: 0.92rem !important; font-weight: 800 !important; color: var(--text-primary) !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; line-height: 1.3 !important; word-break: break-word !important;" title="${tituloLimpio}">${tituloLimpio}</h2>
   `;
 
+  // Botón de estrella estilizado fijamente en la esquina
   const btnEstrella = document.createElement("button");
   btnEstrella.type = "button";
   btnEstrella.title = esFavorita
     ? "Quitar de favoritas"
     : "Fijar como favorita";
-  btnEstrella.style.cssText = `position: absolute !important; top: 14px !important; right: 14px !important; background: transparent !important; border: none !important; font-size: 1.15rem !important; cursor: pointer !important; padding: 0 !important; line-height: 1 !important; filter: ${esFavorita ? "drop-shadow(0 0 6px rgba(255, 204, 0, 0.6))" : "grayscale(100%) opacity(0.35)"} !important; transition: transform 0.2s ease, filter 0.2s ease !important; z-index: 5 !important;`;
+  btnEstrella.style.cssText = `position: absolute !important; top: 12px !important; right: 12px !important; width: 32px !important; height: 32px !important; background: ${esFavorita ? "rgba(255, 204, 0, 0.15)" : "rgba(255, 255, 255, 0.05)"} !important; border: 1px solid ${esFavorita ? "rgba(255, 204, 0, 0.3)" : "rgba(255, 255, 255, 0.1)"} !important; border-radius: 10px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 1.1rem !important; cursor: pointer !important; padding: 0 !important; filter: ${esFavorita ? "drop-shadow(0 0 6px rgba(255, 204, 0, 0.4))" : "grayscale(100%) opacity(0.5)"} !important; transition: all 0.2s ease !important; z-index: 5 !important;`;
   btnEstrella.innerHTML = "⭐";
   btnEstrella.onclick = function (e) {
     e.stopPropagation();
