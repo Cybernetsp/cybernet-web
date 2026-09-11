@@ -908,29 +908,81 @@
         </div>
 
         <div class="mac-right-panel">
-          <div class="mac-search-wrapper">
-            <svg
-              class="mac-search-icon"
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+          <div
+            class="mac-search-wrapper"
+            style="display: flex; gap: 10px; align-items: center; width: 100%"
+          >
+            <div
+              style="
+                position: relative;
+                flex: 1;
+                display: flex;
+                align-items: center;
+              "
             >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input
-              type="text"
-              id="macSearchCards"
-              class="mac-search-input"
-              placeholder="Buscar plantilla (Ej: Ads, Partidos, Saludo)..."
-              oninput="filtrarTarjetasMac()"
-              autocomplete="off"
-            />
+              <svg
+                class="mac-search-icon"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="text"
+                id="macSearchCards"
+                class="mac-search-input"
+                placeholder="Buscar plantilla (Ej: Ads, Partidos, Saludo)..."
+                oninput="filtrarTarjetasMac()"
+                autocomplete="off"
+                style="width: 100%"
+              />
+            </div>
+
+            <!-- BOTÓN AGREGAR PLANTILLA SOLO SVG (EXCLUSIVO SUPERADMIN) -->
+            <button
+              id="btnAgregarPlantillaSuperAdmin"
+              type="button"
+              onclick="abrirModalAgregarPlantilla()"
+              title="Agregar nueva plantilla"
+              style="
+                display: none;
+                width: 42px;
+                height: 42px;
+                background: #30d158;
+                color: #000000;
+                border: none;
+                border-radius: 12px;
+                cursor: pointer;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3);
+                transition:
+                  transform 0.2s ease,
+                  background 0.2s ease;
+              "
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
           </div>
 
           <div id="grid-container" class="mac-filtered-cards"></div>
