@@ -310,15 +310,12 @@ window.abrirModalEditarPlantillaFromEscaped = function (escapedObj) {
 window.cargarPlantillasDesdeSheets = function (silencioso = false) {
   const container = document.getElementById("grid-container");
 
-  // Mostrar texto de carga únicamente en la carga inicial o manual
   if (container && !silencioso) {
     container.innerHTML =
       '<div class="empty-log-msg" style="grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">Sincronizando mensajes desde MySQL...</div>';
   }
 
-  // Asegurarnos de que los favoritos estén cargados antes de renderizar
   window.cargarFavoritosServidor(() => {
-    // Parámetro v=Date.now() evita cache en navegadores de los empleados
     fetch("https://api.cybernetsp.com/obtener_plantillas.php?v=" + Date.now())
       .then((res) => res.json())
       .then((res) => {
@@ -393,7 +390,6 @@ window.cargarPlantillasDesdeSheets = function (silencioso = false) {
               </div>`;
           }
 
-          // Mantener el filtro activo del buscador en caso de que estén buscando una plantilla
           const buscadorInput = document.getElementById("macSearchCards");
           const filtroTexto = buscadorInput ? buscadorInput.value.trim() : "";
           window.renderGrid(filtroTexto);
@@ -417,7 +413,6 @@ if (window.intervaloPlantillasAuto) {
   clearInterval(window.intervaloPlantillasAuto);
 }
 window.intervaloPlantillasAuto = setInterval(() => {
-  // Evitar refrescar si el superadmin está editando una plantilla
   const modalOverlay = document.getElementById("modalPlantillaOverlay");
   const modalAbierto =
     modalOverlay &&
@@ -425,7 +420,7 @@ window.intervaloPlantillasAuto = setInterval(() => {
     modalOverlay.style.display !== "";
 
   if (!modalAbierto) {
-    window.cargarPlantillasDesdeSheets(true); // Refresco silencioso
+    window.cargarPlantillasDesdeSheets(true);
   }
 }, 60000);
 
@@ -442,7 +437,6 @@ window.renderGrid = function (filtro = "") {
   if (!gridContainer || !window.currentGridStock) return;
   gridContainer.innerHTML = "";
 
-  // Separar plantillas favoritas de las normales
   let favsList = [];
   let normalesList = [];
 
@@ -455,7 +449,6 @@ window.renderGrid = function (filtro = "") {
     }
   });
 
-  // Filtrar según el buscador
   let favsFiltrados = favsList.filter(
     (item) =>
       item.titulo && item.titulo.toLowerCase().includes(filtro.toLowerCase()),
@@ -484,7 +477,6 @@ window.renderGrid = function (filtro = "") {
 
   if (favsFiltrados.length === 0 && normalesFiltrados.length === 0) return;
 
-  // Renderizar Favoritas
   if (favsFiltrados.length > 0 && filtro === "") {
     const favHeader = document.createElement("div");
     favHeader.style.cssText =
@@ -505,7 +497,6 @@ window.renderGrid = function (filtro = "") {
     gridContainer.appendChild(divSeparador);
   }
 
-  // Renderizar Resto de Plantillas
   const listaMostrar =
     filtro !== ""
       ? [...favsFiltrados, ...normalesFiltrados]
@@ -532,14 +523,23 @@ function crearTarjetaPlantilla(currentItem, esFavorita, esAdmin) {
 
   const divHeader = document.createElement("div");
   divHeader.style.cssText =
-    "margin-bottom: 14px !important; flex-grow: 1 !important; display: flex !important; align-items: flex-start !important; justify-content: space-between !important; gap: 8px !important;";
+    "margin-bottom: 14px !important; flex-grow: 1 !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important; padding-right: 32px !important;";
 
   divHeader.innerHTML = `
-    <h2 class="card-title" style="margin: 0 !important; font-size: 0.95rem !important; font-weight: 800 !important; color: var(--text-primary) !important; text-transform: uppercase !important;">${tituloLimpio}</h2>
-    <button type="button" title="${esFavorita ? "Quitar de favoritas" : "Fijar como favorita"}" onclick="event.stopPropagation(); window.toggleFavoritoPlantilla('${currentItem.id}')" style="background: transparent; border: none; font-size: 1.1rem; cursor: pointer; padding: 0; line-height: 1; filter: ${esFavorita ? "drop-shadow(0 0 6px rgba(255, 204, 0, 0.6))" : "grayscale(100%) opacity(0.4)"}; transition: transform 0.2s ease;">
-      ⭐
-    </button>
+    <h2 class="card-title" style="margin: 0 !important; font-size: 0.92rem !important; font-weight: 800 !important; color: var(--text-primary) !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; line-height: 1.3 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; word-break: normal !important;" title="${tituloLimpio}">${tituloLimpio}</h2>
   `;
+
+  const btnEstrella = document.createElement("button");
+  btnEstrella.type = "button";
+  btnEstrella.title = esFavorita
+    ? "Quitar de favoritas"
+    : "Fijar como favorita";
+  btnEstrella.style.cssText = `position: absolute !important; top: 14px !important; right: 14px !important; background: transparent !important; border: none !important; font-size: 1.15rem !important; cursor: pointer !important; padding: 0 !important; line-height: 1 !important; filter: ${esFavorita ? "drop-shadow(0 0 6px rgba(255, 204, 0, 0.6))" : "grayscale(100%) opacity(0.35)"} !important; transition: transform 0.2s ease, filter 0.2s ease !important; z-index: 5 !important;`;
+  btnEstrella.innerHTML = "⭐";
+  btnEstrella.onclick = function (e) {
+    e.stopPropagation();
+    window.toggleFavoritoPlantilla(currentItem.id);
+  };
 
   const divBtns = document.createElement("div");
   divBtns.style.cssText =
@@ -549,8 +549,8 @@ function crearTarjetaPlantilla(currentItem, esFavorita, esAdmin) {
   btnCopiar.type = "button";
   btnCopiar.className = "btn-ios";
   btnCopiar.style.cssText =
-    "flex: 1 1 auto !important; width: 100% !important; padding: 12px 10px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 0.8rem !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;";
-  btnCopiar.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span>COPIAR TEXTO</span>`;
+    "flex: 1 1 auto !important; width: 100% !important; min-width: 0 !important; padding: 12px 10px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 0.8rem !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;";
+  btnCopiar.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR TEXTO</span>`;
   btnCopiar.onclick = function () {
     window.copiarPlantillaDirecta(this, currentItem.texto || "");
   };
@@ -560,9 +560,10 @@ function crearTarjetaPlantilla(currentItem, esFavorita, esAdmin) {
   if (esAdmin) {
     const btnEditar = document.createElement("button");
     btnEditar.type = "button";
+    btnEditar.title = "Editar plantilla";
     btnEditar.style.cssText =
-      "width: 40px !important; min-width: 40px !important; height: 40px !important; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important;";
-    btnEditar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+      "width: 40px !important; min-width: 40px !important; max-width: 40px !important; height: 40px !important; flex: 0 0 40px !important; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; transition: all 0.2s ease !important; flex-shrink: 0 !important;";
+    btnEditar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
     btnEditar.onclick = function (e) {
       e.stopPropagation();
       window.abrirModalEditarPlantilla(currentItem);
@@ -570,6 +571,7 @@ function crearTarjetaPlantilla(currentItem, esFavorita, esAdmin) {
     divBtns.appendChild(btnEditar);
   }
 
+  card.appendChild(btnEstrella);
   card.appendChild(divHeader);
   card.appendChild(divBtns);
   return card;
@@ -867,7 +869,6 @@ window.filtrarTarjetasMac = function () {
 window.copiarPlantillaGlobal = function (btn, textoCodificado) {
   if (typeof haptic === "function") haptic();
 
-  // Borrar automáticamente lo que se escribió en el buscador al copiar
   const inputSearch = document.getElementById("macSearchCards");
   if (inputSearch && inputSearch.value.trim() !== "") {
     inputSearch.value = "";
@@ -882,7 +883,6 @@ window.copiarPlantillaGlobal = function (btn, textoCodificado) {
 window.copiarPlantillaDirecta = function (btn, textoReal) {
   if (typeof haptic === "function") haptic();
 
-  // Borrar automáticamente lo que se escribió en el buscador al copiar
   const inputSearch = document.getElementById("macSearchCards");
   if (inputSearch && inputSearch.value.trim() !== "") {
     inputSearch.value = "";
