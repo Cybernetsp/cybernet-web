@@ -222,6 +222,15 @@ window.verificarSuperAdminPlantillas = function () {
   return usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
 };
 
+window.abrirModalEditarPlantillaFromEscaped = function (escapedObj) {
+  try {
+    const item = JSON.parse(decodeURIComponent(escapedObj));
+    window.abrirModalEditarPlantilla(item);
+  } catch (err) {
+    console.error("Error abriendo plantilla codificada:", err);
+  }
+};
+
 window.cargarPlantillasDesdeSheets = function () {
   const container = document.getElementById("grid-container");
   if (container) {
@@ -249,21 +258,43 @@ window.cargarPlantillasDesdeSheets = function () {
           }
         });
 
+        const esAdmin = window.verificarSuperAdminPlantillas();
         const headerContainer = document.getElementById("header-container");
+
+        // Generador de botón SVG Editar para la columna izquierda
+        const crearBtnEditarLeft = (item) => {
+          if (!esAdmin || !item) return "";
+          let itemEscapado = encodeURIComponent(JSON.stringify(item));
+          return `
+            <button type="button" title="Editar plantilla" onclick="event.stopPropagation(); window.abrirModalEditarPlantillaFromEscaped('${itemEscapado}')" style="width: 40px !important; min-width: 40px !important; max-width: 40px !important; height: 40px !important; flex: 0 0 40px !important; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; transition: all 0.2s ease !important; flex-shrink: 0 !important;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>`;
+        };
+
         if (headerContainer && plantillaPagos) {
           let textoPagosSeguro = encodeURIComponent(
             plantillaPagos.texto || "",
           ).replace(/'/g, "%27");
+          let editPagosHtml = crearBtnEditarLeft(plantillaPagos);
+
           let btnNequiHtml = "";
 
           if (plantillaNequi) {
             let textoNequiSeguro = encodeURIComponent(
               plantillaNequi.texto || "",
             ).replace(/'/g, "%27");
+            let editNequiHtml = crearBtnEditarLeft(plantillaNequi);
+
             btnNequiHtml = `
-              <button class="btn-ios w-100" style="padding: 14px !important; font-size: 0.85rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer;" onclick="window.copiarPlantillaGlobal(this, '${textoNequiSeguro}')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> COPIAR NEQUI
-              </button>`;
+              <div style="display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important;">
+                <button class="btn-ios" style="flex: 1 !important; width: 100% !important; min-width: 0 !important; padding: 12px 10px !important; font-size: 0.8rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;" onclick="window.copiarPlantillaGlobal(this, '${textoNequiSeguro}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR NEQUI</span>
+                </button>
+                ${editNequiHtml}
+              </div>`;
           }
 
           headerContainer.innerHTML = `
@@ -271,9 +302,12 @@ window.cargarPlantillasDesdeSheets = function () {
               <img src="${plantillaPagos.imagenUrl}" alt="QR" onclick="window.copiarImagenQRPagos(this, '${plantillaPagos.imagenUrl}')" style="max-width:210px; width:100%; border-radius:16px; border: 2px solid transparent; box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Haz clic para copiar la imagen del QR">
               <span class="text-secondary text-center" style="font-size:0.75rem; font-weight:500; margin-top: -4px;">(Haz clic sobre el QR para copiar la imagen)</span>
               <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 4px;">
-                <button class="btn-ios w-100" style="padding: 14px !important; font-size: 0.85rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer;" onclick="window.copiarPlantillaGlobal(this, '${textoPagosSeguro}')">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> COPIAR PAGOS (BRE-B)
-                </button>
+                <div style="display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important;">
+                  <button class="btn-ios" style="flex: 1 !important; width: 100% !important; min-width: 0 !important; padding: 12px 10px !important; font-size: 0.8rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;" onclick="window.copiarPlantillaGlobal(this, '${textoPagosSeguro}')">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR PAGOS (BRE-B)</span>
+                  </button>
+                  ${editPagosHtml}
+                </div>
                 ${btnNequiHtml}
               </div>
             </div>`;
@@ -342,7 +376,6 @@ window.renderGrid = function (filtro = "") {
       "margin-bottom: 14px !important; flex-grow: 1 !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;";
     divHeader.innerHTML = `<h2 class="card-title" style="margin: 0 !important; font-size: 0.95rem !important; font-weight: 800 !important; color: var(--text-primary) !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; line-height: 1.4 !important;">${tituloSeguro}</h2>`;
 
-    // Fila inferior de botones con flex estricto
     const divBtns = document.createElement("div");
     divBtns.style.cssText =
       "display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important; margin-top: auto !important;";
@@ -361,7 +394,6 @@ window.renderGrid = function (filtro = "") {
 
     divBtns.appendChild(btnCopiar);
 
-    // Botón SVG Editar (ANCHO FIJO ESTRICTO, sin heredar clase btn-ios)
     if (esAdmin) {
       const btnEditar = document.createElement("button");
       btnEditar.type = "button";
