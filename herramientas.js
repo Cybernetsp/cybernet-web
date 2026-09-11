@@ -445,8 +445,11 @@ window.crearModalPlantillaSiNoExiste = function () {
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 6px;">
-          <button type="button" onclick="window.cerrarModalPlantilla()" style="flex: 1; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.08); color: #a1a1aa; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">Cancelar</button>
-          <button type="submit" id="btnSubmitPlantilla" style="flex: 1.4; padding: 12px; border-radius: 12px; background: #30d158; color: #000000; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(48,209,88,0.3);">Guardar Plantilla</button>
+          <button type="button" onclick="window.cerrarModalPlantilla()" style="flex: 1; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.08); color: #a1a1aa; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s ease;">Cancelar</button>
+          
+          <button type="button" id="btnEliminarPlantilla" onclick="window.eliminarPlantillaPHP()" style="display: none; flex: 1; padding: 12px; border-radius: 12px; background: rgba(255,69,58,0.15); color: #ff453a; font-weight: 800; border: 1px solid rgba(255,69,58,0.3); cursor: pointer; transition: all 0.2s ease;">Borrar</button>
+          
+          <button type="submit" id="btnSubmitPlantilla" style="flex: 1.5; padding: 12px; border-radius: 12px; background: #30d158; color: #000000; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(48,209,88,0.3); transition: all 0.2s ease;">Guardar</button>
         </div>
       </form>
 
@@ -466,6 +469,9 @@ window.abrirModalAgregarPlantilla = function () {
   document.getElementById("modalPlantillaTituloText").innerText =
     "➕ Agregar Nueva Plantilla";
 
+  // Ocultar botón borrar cuando se agrega una nueva
+  document.getElementById("btnEliminarPlantilla").style.display = "none";
+
   const overlay = document.getElementById("modalPlantillaOverlay");
   if (overlay) overlay.style.display = "flex";
 };
@@ -479,6 +485,9 @@ window.abrirModalEditarPlantilla = function (item) {
   document.getElementById("inputPlantillaTexto").value = item.texto || "";
   document.getElementById("modalPlantillaTituloText").innerText =
     "✏️ Editar Plantilla";
+
+  // Mostrar el botón borrar solo cuando se edita
+  document.getElementById("btnEliminarPlantilla").style.display = "block";
 
   const overlay = document.getElementById("modalPlantillaOverlay");
   if (overlay) overlay.style.display = "flex";
@@ -541,6 +550,55 @@ window.guardarPlantillaPHP = function (e) {
         btn.disabled = false;
         btn.innerText = originalTxt;
       }
+      alert("❌ Error de comunicación: " + err.message);
+    });
+};
+
+window.eliminarPlantillaPHP = function () {
+  const id = document.getElementById("inputPlantillaId").value;
+  if (!id) return;
+
+  if (
+    !confirm(
+      "⚠️ ¿Estás seguro de que deseas eliminar esta plantilla permanentemente?",
+    )
+  )
+    return;
+
+  if (typeof haptic === "function") haptic();
+
+  const btn = document.getElementById("btnEliminarPlantilla");
+  const originalTxt = btn.innerText;
+  btn.disabled = true;
+  btn.innerText = "Borrando...";
+
+  const formData = new FormData();
+  formData.append("accion", "eliminar");
+  formData.append("id", id);
+
+  fetch("https://api.cybernetsp.com/acciones_plantillas.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      btn.disabled = false;
+      btn.innerText = originalTxt;
+      if (res && res.status === "success") {
+        window.cerrarModalPlantilla();
+        window.cargarPlantillasDesdeSheets();
+        if (typeof triggerToast === "function") {
+          triggerToast(
+            `<div style="color:var(--ios-red);">🗑️ Plantilla eliminada correctamente</div>`,
+          );
+        }
+      } else {
+        alert("❌ Error: " + (res ? res.message : "No se pudo eliminar"));
+      }
+    })
+    .catch((err) => {
+      btn.disabled = false;
+      btn.innerText = originalTxt;
       alert("❌ Error de comunicación: " + err.message);
     });
 };
