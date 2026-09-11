@@ -300,7 +300,6 @@ window.renderGrid = function (filtro = "") {
 
   const esAdmin = window.verificarSuperAdminPlantillas();
 
-  // Muestra u oculta el botón "+ Agregar" superior solo si es SuperAdmin
   if (btnAgregar) {
     btnAgregar.style.display = esAdmin ? "flex" : "none";
   }
@@ -324,7 +323,7 @@ window.renderGrid = function (filtro = "") {
   }
 
   gridContainer.style.cssText =
-    "display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; width: 100%; align-content: start;";
+    "display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 16px !important; width: 100% !important; align-content: start !important;";
 
   if (filtrados.length === 0) return;
 
@@ -332,7 +331,7 @@ window.renderGrid = function (filtro = "") {
     const card = document.createElement("div");
     card.className = "card-ios";
     card.style.cssText =
-      "display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; padding: 18px !important; background: rgba(255, 255, 255, 0.02) !important; border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 16px !important; margin: 0 !important; box-sizing: border-box !important; min-height: 120px;";
+      "display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; padding: 18px !important; background: rgba(255, 255, 255, 0.02) !important; border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 16px !important; margin: 0 !important; box-sizing: border-box !important; min-height: 120px !important; overflow: hidden !important;";
 
     let tituloLimpio = currentItem.titulo ? currentItem.titulo.trim() : "";
     let tituloSeguro =
@@ -340,19 +339,20 @@ window.renderGrid = function (filtro = "") {
 
     const divHeader = document.createElement("div");
     divHeader.style.cssText =
-      "margin-bottom: 14px; flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start;";
-    divHeader.innerHTML = `<h2 class="card-title" style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4;">${tituloSeguro}</h2>`;
+      "margin-bottom: 14px !important; flex-grow: 1 !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;";
+    divHeader.innerHTML = `<h2 class="card-title" style="margin: 0 !important; font-size: 0.95rem !important; font-weight: 800 !important; color: var(--text-primary) !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; line-height: 1.4 !important;">${tituloSeguro}</h2>`;
 
-    // Fila inferior de botones (Copiar + Editar si es SuperAdmin)
+    // Fila inferior de botones con flex estricto
     const divBtns = document.createElement("div");
     divBtns.style.cssText =
-      "display: flex; gap: 8px; align-items: center; width: 100%; margin-top: auto;";
+      "display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important; margin-top: auto !important;";
 
     const btnCopiar = document.createElement("button");
+    btnCopiar.type = "button";
     btnCopiar.className = "btn-ios";
     btnCopiar.style.cssText =
-      "flex: 1; padding: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 0.85rem !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer;";
-    btnCopiar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> COPIAR TEXTO`;
+      "flex: 1 1 auto !important; width: 100% !important; min-width: 0 !important; padding: 12px 10px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 0.8rem !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;";
+    btnCopiar.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR TEXTO</span>`;
 
     btnCopiar.onclick = function () {
       let textoReal = currentItem.texto || "";
@@ -361,14 +361,14 @@ window.renderGrid = function (filtro = "") {
 
     divBtns.appendChild(btnCopiar);
 
-    // Botón SVG Editar al lado del botón Copiar (Exclusivo SuperAdmin)
+    // Botón SVG Editar (ANCHO FIJO ESTRICTO, sin heredar clase btn-ios)
     if (esAdmin) {
       const btnEditar = document.createElement("button");
-      btnEditar.className = "btn-ios";
+      btnEditar.type = "button";
       btnEditar.title = "Editar plantilla";
       btnEditar.style.cssText =
-        "width: 42px; height: 42px; flex-shrink: 0; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer; transition: all 0.2s ease;";
-      btnEditar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+        "width: 40px !important; min-width: 40px !important; max-width: 40px !important; height: 40px !important; flex: 0 0 40px !important; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; transition: all 0.2s ease !important; flex-shrink: 0 !important;";
+      btnEditar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
 
       btnEditar.onclick = function (e) {
         e.stopPropagation();
