@@ -611,20 +611,96 @@ window.eliminarPlantillaPHP = function () {
     });
 };
 
+// 🗑️ BOTÓN DE PAPELERA PARA EL BUSCADOR DE PLANTILLAS (#macSearchCards)
+window.actualizarBotonBorrarSearchCards = function () {
+  const input = document.getElementById("macSearchCards");
+  if (!input) return;
+
+  let btnTrash = document.getElementById("btnBorrarTrashSearchCards");
+  if (!btnTrash && input.parentElement) {
+    const container = input.parentElement;
+    if (window.getComputedStyle(container).position === "static") {
+      container.style.position = "relative";
+    }
+
+    btnTrash = document.createElement("button");
+    btnTrash.id = "btnBorrarTrashSearchCards";
+    btnTrash.type = "button";
+    btnTrash.title = "Borrar búsqueda";
+    btnTrash.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+    btnTrash.style.cssText = `
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 69, 58, 0.15);
+      border: 1px solid rgba(255, 69, 58, 0.3);
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s ease;
+    `;
+    btnTrash.onclick = window.borrarTextoBuscadorTarjetas;
+    container.appendChild(btnTrash);
+  }
+
+  const val = input.value.trim();
+  if (val.length > 0 && btnTrash) {
+    btnTrash.style.display = "flex";
+    input.style.paddingRight = "44px";
+  } else if (btnTrash) {
+    btnTrash.style.display = "none";
+    input.style.paddingRight = "";
+  }
+};
+
+window.borrarTextoBuscadorTarjetas = function () {
+  if (typeof haptic === "function") haptic();
+  const input = document.getElementById("macSearchCards");
+  if (input) {
+    input.value = "";
+    window.actualizarBotonBorrarSearchCards();
+    window.renderGrid("");
+  }
+};
+
 window.filtrarTarjetasMac = function () {
   const input = document.getElementById("macSearchCards");
   const filtro = input ? input.value.trim() : "";
+  window.actualizarBotonBorrarSearchCards();
   window.renderGrid(filtro);
 };
 
 window.copiarPlantillaGlobal = function (btn, textoCodificado) {
   if (typeof haptic === "function") haptic();
+
+  // Borrar automáticamente lo que se escribió en el buscador al copiar
+  const inputSearch = document.getElementById("macSearchCards");
+  if (inputSearch && inputSearch.value.trim() !== "") {
+    inputSearch.value = "";
+    window.actualizarBotonBorrarSearchCards();
+    window.renderGrid("");
+  }
+
   const textoReal = decodeURIComponent(textoCodificado);
   window.copiarPlantillaDirecta(btn, textoReal);
 };
 
 window.copiarPlantillaDirecta = function (btn, textoReal) {
   if (typeof haptic === "function") haptic();
+
+  // Borrar automáticamente lo que se escribió en el buscador al copiar
+  const inputSearch = document.getElementById("macSearchCards");
+  if (inputSearch && inputSearch.value.trim() !== "") {
+    inputSearch.value = "";
+    window.actualizarBotonBorrarSearchCards();
+    window.renderGrid("");
+  }
 
   const animarExito = () => {
     const originalHTML = btn.innerHTML;
