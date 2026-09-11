@@ -205,6 +205,7 @@ window.forzarActualizacionBreBModal = function () {
    📋 PLANTILLAS DESDE MYSQL Y MOTORES DE COPIADO + EDICIÓN SUPERADMIN
    ========================================================================== */
 window.currentGridStock = [];
+window.misFavoritosPlantillas = [];
 
 // Helper para validar si el usuario es SuperAdmin (CAMILO)
 window.verificarSuperAdminPlantillas = function () {
@@ -220,6 +221,80 @@ window.verificarSuperAdminPlantillas = function () {
     .toUpperCase()
     .trim();
   return usuarioActivoObj.rol === "superadmin" || usuarioNombre === "CAMILO";
+};
+
+// Helper para obtener nombre del trabajador activo (Para favoritos)
+window.obtenerNombreTrabajadorActivo = function () {
+  const usuarioActivoObj = JSON.parse(
+    sessionStorage.getItem("usuario_activo") || "{}",
+  );
+  return (
+    usuarioActivoObj.nombre ||
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "GENERAL"
+  )
+    .toUpperCase()
+    .trim();
+};
+
+// Cargar favoritos al inicio
+window.cargarFavoritosServidor = function (callback) {
+  const usuario = window.obtenerNombreTrabajadorActivo();
+  fetch(
+    `https://api.cybernetsp.com/favoritos_plantillas.php?usuario=${encodeURIComponent(usuario)}&v=${Date.now()}`,
+  )
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success" && Array.isArray(res.favoritos)) {
+        window.misFavoritosPlantillas = res.favoritos;
+      }
+      if (typeof callback === "function") callback();
+    })
+    .catch(() => {
+      if (typeof callback === "function") callback();
+    });
+};
+
+window.toggleFavoritoPlantilla = function (idPlantilla) {
+  if (typeof haptic === "function") haptic();
+  const idStr = String(idPlantilla);
+  const index = window.misFavoritosPlantillas.indexOf(idStr);
+
+  if (index > -1) {
+    window.misFavoritosPlantillas.splice(index, 1);
+  } else {
+    if (window.misFavoritosPlantillas.length >= 4) {
+      if (typeof triggerToast === "function") {
+        triggerToast(
+          "⚠️ Solo puedes fijar un máximo de 4 plantillas favoritas.",
+        );
+      } else {
+        alert("⚠️ Solo puedes fijar un máximo de 4 plantillas favoritas.");
+      }
+      return;
+    }
+    window.misFavoritosPlantillas.push(idStr);
+  }
+
+  const usuario = window.obtenerNombreTrabajadorActivo();
+  fetch(
+    "https://api.cybernetsp.com/favoritos_plantillas.php?usuario=" +
+      encodeURIComponent(usuario),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ favoritos: window.misFavoritosPlantillas }),
+    },
+  )
+    .then((res) => res.json())
+    .then((res) => {
+      if (res && res.status === "success") {
+        const buscadorInput = document.getElementById("macSearchCards");
+        const filtroTexto = buscadorInput ? buscadorInput.value.trim() : "";
+        window.renderGrid(filtroTexto);
+      }
+    });
 };
 
 window.abrirModalEditarPlantillaFromEscaped = function (escapedObj) {
@@ -241,97 +316,100 @@ window.cargarPlantillasDesdeSheets = function (silencioso = false) {
       '<div class="empty-log-msg" style="grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">Sincronizando mensajes desde MySQL...</div>';
   }
 
-  // Parámetro v=Date.now() evita cache en navegadores de los empleados
-  fetch("https://api.cybernetsp.com/obtener_plantillas.php?v=" + Date.now())
-    .then((res) => res.json())
-    .then((res) => {
-      if (res && res.status === "success") {
-        const data = res.data;
-        let plantillaPagos = null;
-        let plantillaNequi = null;
-        window.currentGridStock = [];
+  // Asegurarnos de que los favoritos estén cargados antes de renderizar
+  window.cargarFavoritosServidor(() => {
+    // Parámetro v=Date.now() evita cache en navegadores de los empleados
+    fetch("https://api.cybernetsp.com/obtener_plantillas.php?v=" + Date.now())
+      .then((res) => res.json())
+      .then((res) => {
+        if (res && res.status === "success") {
+          const data = res.data;
+          let plantillaPagos = null;
+          let plantillaNequi = null;
+          window.currentGridStock = [];
 
-        data.forEach((item) => {
-          const tituloUP = item.titulo.toUpperCase();
-          if (tituloUP === "PAGOS") {
-            plantillaPagos = item;
-          } else if (tituloUP === "NEQUI") {
-            plantillaNequi = item;
-          } else {
-            window.currentGridStock.push(item);
-          }
-        });
+          data.forEach((item) => {
+            const tituloUP = item.titulo.toUpperCase();
+            if (tituloUP === "PAGOS") {
+              plantillaPagos = item;
+            } else if (tituloUP === "NEQUI") {
+              plantillaNequi = item;
+            } else {
+              window.currentGridStock.push(item);
+            }
+          });
 
-        const esAdmin = window.verificarSuperAdminPlantillas();
-        const headerContainer = document.getElementById("header-container");
+          const esAdmin = window.verificarSuperAdminPlantillas();
+          const headerContainer = document.getElementById("header-container");
 
-        const crearBtnEditarLeft = (item) => {
-          if (!esAdmin || !item) return "";
-          let itemEscapado = encodeURIComponent(JSON.stringify(item));
-          return `
-            <button type="button" title="Editar plantilla" onclick="event.stopPropagation(); window.abrirModalEditarPlantillaFromEscaped('${itemEscapado}')" style="width: 40px !important; min-width: 40px !important; max-width: 40px !important; height: 40px !important; flex: 0 0 40px !important; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; transition: all 0.2s ease !important; flex-shrink: 0 !important;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-            </button>`;
-        };
+          const crearBtnEditarLeft = (item) => {
+            if (!esAdmin || !item) return "";
+            let itemEscapado = encodeURIComponent(JSON.stringify(item));
+            return `
+              <button type="button" title="Editar plantilla" onclick="event.stopPropagation(); window.abrirModalEditarPlantillaFromEscaped('${itemEscapado}')" style="width: 40px !important; min-width: 40px !important; max-width: 40px !important; height: 40px !important; flex: 0 0 40px !important; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; transition: all 0.2s ease !important; flex-shrink: 0 !important;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>`;
+          };
 
-        if (headerContainer && plantillaPagos) {
-          let textoPagosSeguro = encodeURIComponent(
-            plantillaPagos.texto || "",
-          ).replace(/'/g, "%27");
-          let editPagosHtml = crearBtnEditarLeft(plantillaPagos);
-
-          let btnNequiHtml = "";
-
-          if (plantillaNequi) {
-            let textoNequiSeguro = encodeURIComponent(
-              plantillaNequi.texto || "",
+          if (headerContainer && plantillaPagos) {
+            let textoPagosSeguro = encodeURIComponent(
+              plantillaPagos.texto || "",
             ).replace(/'/g, "%27");
-            let editNequiHtml = crearBtnEditarLeft(plantillaNequi);
+            let editPagosHtml = crearBtnEditarLeft(plantillaPagos);
 
-            btnNequiHtml = `
-              <div style="display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important;">
-                <button class="btn-ios" style="flex: 1 !important; width: 100% !important; min-width: 0 !important; padding: 12px 10px !important; font-size: 0.8rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;" onclick="window.copiarPlantillaGlobal(this, '${textoNequiSeguro}')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR NEQUI</span>
-                </button>
-                ${editNequiHtml}
+            let btnNequiHtml = "";
+
+            if (plantillaNequi) {
+              let textoNequiSeguro = encodeURIComponent(
+                plantillaNequi.texto || "",
+              ).replace(/'/g, "%27");
+              let editNequiHtml = crearBtnEditarLeft(plantillaNequi);
+
+              btnNequiHtml = `
+                <div style="display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important;">
+                  <button class="btn-ios" style="flex: 1 !important; width: 100% !important; min-width: 0 !important; padding: 12px 10px !important; font-size: 0.8rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;" onclick="window.copiarPlantillaGlobal(this, '${textoNequiSeguro}')">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR NEQUI</span>
+                  </button>
+                  ${editNequiHtml}
+                </div>`;
+            }
+
+            headerContainer.innerHTML = `
+              <div class="card-ios w-100" style="max-width: 440px; align-items: center; gap: 12px; padding: 20px;">
+                <img src="${plantillaPagos.imagenUrl}" alt="QR" onclick="window.copiarImagenQRPagos(this, '${plantillaPagos.imagenUrl}')" style="max-width:210px; width:100%; border-radius:16px; border: 2px solid transparent; box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Haz clic para copiar la imagen del QR">
+                <span class="text-secondary text-center" style="font-size:0.75rem; font-weight:500; margin-top: -4px;">(Haz clic sobre el QR para copiar la imagen)</span>
+                <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 4px;">
+                  <div style="display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important;">
+                    <button class="btn-ios" style="flex: 1 !important; width: 100% !important; min-width: 0 !important; padding: 12px 10px !important; font-size: 0.8rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;" onclick="window.copiarPlantillaGlobal(this, '${textoPagosSeguro}')">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR PAGOS (BRE-B)</span>
+                    </button>
+                    ${editPagosHtml}
+                  </div>
+                  ${btnNequiHtml}
+                </div>
               </div>`;
           }
 
-          headerContainer.innerHTML = `
-            <div class="card-ios w-100" style="max-width: 440px; align-items: center; gap: 12px; padding: 20px;">
-              <img src="${plantillaPagos.imagenUrl}" alt="QR" onclick="window.copiarImagenQRPagos(this, '${plantillaPagos.imagenUrl}')" style="max-width:210px; width:100%; border-radius:16px; border: 2px solid transparent; box-shadow:var(--glass-shadow); padding:5px; background:white; margin:0 auto; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" title="Haz clic para copiar la imagen del QR">
-              <span class="text-secondary text-center" style="font-size:0.75rem; font-weight:500; margin-top: -4px;">(Haz clic sobre el QR para copiar la imagen)</span>
-              <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 4px;">
-                <div style="display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important;">
-                  <button class="btn-ios" style="flex: 1 !important; width: 100% !important; min-width: 0 !important; padding: 12px 10px !important; font-size: 0.8rem !important; font-weight: 800 !important; border-radius: 12px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;" onclick="window.copiarPlantillaGlobal(this, '${textoPagosSeguro}')">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR PAGOS (BRE-B)</span>
-                  </button>
-                  ${editPagosHtml}
-                </div>
-                ${btnNequiHtml}
-              </div>
-            </div>`;
+          // Mantener el filtro activo del buscador en caso de que estén buscando una plantilla
+          const buscadorInput = document.getElementById("macSearchCards");
+          const filtroTexto = buscadorInput ? buscadorInput.value.trim() : "";
+          window.renderGrid(filtroTexto);
+        } else {
+          if (container && !silencioso)
+            container.innerHTML =
+              '<div class="empty-log-msg" style="color:var(--ios-red); grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">❌ Error al descargar plantillas desde MySQL.</div>';
         }
-
-        // Mantener el filtro activo del buscador en caso de que estén buscando una plantilla
-        const buscadorInput = document.getElementById("macSearchCards");
-        const filtroTexto = buscadorInput ? buscadorInput.value.trim() : "";
-        window.renderGrid(filtroTexto);
-      } else {
+      })
+      .catch((err) => {
         if (container && !silencioso)
           container.innerHTML =
-            '<div class="empty-log-msg" style="color:var(--ios-red); grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">❌ Error al descargar plantillas desde MySQL.</div>';
-      }
-    })
-    .catch((err) => {
-      if (container && !silencioso)
-        container.innerHTML =
-          '<div class="empty-log-msg" style="color:var(--ios-red); grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">❌ Error al conectar con el servidor PHP.</div>';
-      console.error(err);
-    });
+            '<div class="empty-log-msg" style="color:var(--ios-red); grid-column: 1 / -1; width: 100%; text-align: center; margin-top: 40px;">❌ Error al conectar con el servidor PHP.</div>';
+        console.error(err);
+      });
+  });
 };
 
 // ⏱️ TEMPORIZADOR DE AUTO-REFRESCO CADA 1 MINUTO (60,000 MS)
@@ -355,7 +433,6 @@ window.renderGrid = function (filtro = "") {
   const gridContainer = document.getElementById("grid-container");
   const emptyState = document.getElementById("macEmptyState");
   const btnAgregar = document.getElementById("btnAgregarPlantillaSuperAdmin");
-
   const esAdmin = window.verificarSuperAdminPlantillas();
 
   if (btnAgregar) {
@@ -365,13 +442,35 @@ window.renderGrid = function (filtro = "") {
   if (!gridContainer || !window.currentGridStock) return;
   gridContainer.innerHTML = "";
 
-  let filtrados = window.currentGridStock.filter(
+  // Separar plantillas favoritas de las normales
+  let favsList = [];
+  let normalesList = [];
+
+  window.currentGridStock.forEach((item) => {
+    const esFav = window.misFavoritosPlantillas.includes(String(item.id));
+    if (esFav) {
+      favsList.push(item);
+    } else {
+      normalesList.push(item);
+    }
+  });
+
+  // Filtrar según el buscador
+  let favsFiltrados = favsList.filter(
+    (item) =>
+      item.titulo && item.titulo.toLowerCase().includes(filtro.toLowerCase()),
+  );
+  let normalesFiltrados = normalesList.filter(
     (item) =>
       item.titulo && item.titulo.toLowerCase().includes(filtro.toLowerCase()),
   );
 
   if (emptyState) {
-    if (filtrados.length === 0 && filtro !== "") {
+    if (
+      favsFiltrados.length === 0 &&
+      normalesFiltrados.length === 0 &&
+      filtro !== ""
+    ) {
       emptyState.style.display = "flex";
       emptyState.querySelector("span").innerText =
         `No se encontraron plantillas con "${filtro}".`;
@@ -383,62 +482,98 @@ window.renderGrid = function (filtro = "") {
   gridContainer.style.cssText =
     "display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 16px !important; width: 100% !important; align-content: start !important;";
 
-  if (filtrados.length === 0) return;
+  if (favsFiltrados.length === 0 && normalesFiltrados.length === 0) return;
 
-  filtrados.forEach((currentItem) => {
-    const card = document.createElement("div");
-    card.className = "card-ios";
-    card.style.cssText =
-      "display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; padding: 18px !important; background: rgba(255, 255, 255, 0.02) !important; border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 16px !important; margin: 0 !important; box-sizing: border-box !important; min-height: 120px !important; overflow: hidden !important;";
+  // Renderizar Favoritas
+  if (favsFiltrados.length > 0 && filtro === "") {
+    const favHeader = document.createElement("div");
+    favHeader.style.cssText =
+      "grid-column: 1 / -1; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;";
+    favHeader.innerHTML = `
+      <div style="font-size: 0.85rem; font-weight: 800; color: #ffcc00; display: flex; align-items: center; gap: 6px; text-transform: uppercase;">
+        ⭐ MIS FAVORITAS (${favsFiltrados.length}/4)
+      </div>`;
+    gridContainer.appendChild(favHeader);
 
-    let tituloLimpio = currentItem.titulo ? currentItem.titulo.trim() : "";
-    let tituloSeguro =
-      tituloLimpio !== "" ? tituloLimpio : "Plantilla Sin Nombre";
+    favsFiltrados.forEach((item) =>
+      gridContainer.appendChild(crearTarjetaPlantilla(item, true, esAdmin)),
+    );
 
-    const divHeader = document.createElement("div");
-    divHeader.style.cssText =
-      "margin-bottom: 14px !important; flex-grow: 1 !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;";
-    divHeader.innerHTML = `<h2 class="card-title" style="margin: 0 !important; font-size: 0.95rem !important; font-weight: 800 !important; color: var(--text-primary) !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; line-height: 1.4 !important;">${tituloSeguro}</h2>`;
+    const divSeparador = document.createElement("div");
+    divSeparador.style.cssText =
+      "grid-column: 1 / -1; border-bottom: 1px solid rgba(255,255,255,0.08); margin: 10px 0 16px 0;";
+    gridContainer.appendChild(divSeparador);
+  }
 
-    const divBtns = document.createElement("div");
-    divBtns.style.cssText =
-      "display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important; margin-top: auto !important;";
-
-    const btnCopiar = document.createElement("button");
-    btnCopiar.type = "button";
-    btnCopiar.className = "btn-ios";
-    btnCopiar.style.cssText =
-      "flex: 1 1 auto !important; width: 100% !important; min-width: 0 !important; padding: 12px 10px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 0.8rem !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;";
-    btnCopiar.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR TEXTO</span>`;
-
-    btnCopiar.onclick = function () {
-      let textoReal = currentItem.texto || "";
-      window.copiarPlantillaDirecta(this, textoReal);
-    };
-
-    divBtns.appendChild(btnCopiar);
-
-    if (esAdmin) {
-      const btnEditar = document.createElement("button");
-      btnEditar.type = "button";
-      btnEditar.title = "Editar plantilla";
-      btnEditar.style.cssText =
-        "width: 40px !important; min-width: 40px !important; max-width: 40px !important; height: 40px !important; flex: 0 0 40px !important; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; transition: all 0.2s ease !important; flex-shrink: 0 !important;";
-      btnEditar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
-
-      btnEditar.onclick = function (e) {
-        e.stopPropagation();
-        window.abrirModalEditarPlantilla(currentItem);
-      };
-
-      divBtns.appendChild(btnEditar);
-    }
-
-    card.appendChild(divHeader);
-    card.appendChild(divBtns);
-    gridContainer.appendChild(card);
-  });
+  // Renderizar Resto de Plantillas
+  const listaMostrar =
+    filtro !== ""
+      ? [...favsFiltrados, ...normalesFiltrados]
+      : normalesFiltrados;
+  listaMostrar.forEach((item) =>
+    gridContainer.appendChild(
+      crearTarjetaPlantilla(
+        item,
+        window.misFavoritosPlantillas.includes(String(item.id)),
+        esAdmin,
+      ),
+    ),
+  );
 };
+
+function crearTarjetaPlantilla(currentItem, esFavorita, esAdmin) {
+  const card = document.createElement("div");
+  card.className = "card-ios";
+  card.style.cssText = `display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; padding: 18px !important; background: ${esFavorita ? "rgba(255, 204, 0, 0.04)" : "rgba(255, 255, 255, 0.02)"} !important; border: 1px solid ${esFavorita ? "rgba(255, 204, 0, 0.3)" : "rgba(255, 255, 255, 0.06)"} !important; border-radius: 16px !important; margin: 0 !important; box-sizing: border-box !important; min-height: 120px !important; position: relative !important;`;
+
+  let tituloLimpio = currentItem.titulo
+    ? currentItem.titulo.trim()
+    : "Plantilla Sin Nombre";
+
+  const divHeader = document.createElement("div");
+  divHeader.style.cssText =
+    "margin-bottom: 14px !important; flex-grow: 1 !important; display: flex !important; align-items: flex-start !important; justify-content: space-between !important; gap: 8px !important;";
+
+  divHeader.innerHTML = `
+    <h2 class="card-title" style="margin: 0 !important; font-size: 0.95rem !important; font-weight: 800 !important; color: var(--text-primary) !important; text-transform: uppercase !important;">${tituloLimpio}</h2>
+    <button type="button" title="${esFavorita ? "Quitar de favoritas" : "Fijar como favorita"}" onclick="event.stopPropagation(); window.toggleFavoritoPlantilla('${currentItem.id}')" style="background: transparent; border: none; font-size: 1.1rem; cursor: pointer; padding: 0; line-height: 1; filter: ${esFavorita ? "drop-shadow(0 0 6px rgba(255, 204, 0, 0.6))" : "grayscale(100%) opacity(0.4)"}; transition: transform 0.2s ease;">
+      ⭐
+    </button>
+  `;
+
+  const divBtns = document.createElement("div");
+  divBtns.style.cssText =
+    "display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important; margin-top: auto !important;";
+
+  const btnCopiar = document.createElement("button");
+  btnCopiar.type = "button";
+  btnCopiar.className = "btn-ios";
+  btnCopiar.style.cssText =
+    "flex: 1 1 auto !important; width: 100% !important; padding: 12px 10px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 0.8rem !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important;";
+  btnCopiar.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span>COPIAR TEXTO</span>`;
+  btnCopiar.onclick = function () {
+    window.copiarPlantillaDirecta(this, currentItem.texto || "");
+  };
+
+  divBtns.appendChild(btnCopiar);
+
+  if (esAdmin) {
+    const btnEditar = document.createElement("button");
+    btnEditar.type = "button";
+    btnEditar.style.cssText =
+      "width: 40px !important; min-width: 40px !important; height: 40px !important; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important;";
+    btnEditar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+    btnEditar.onclick = function (e) {
+      e.stopPropagation();
+      window.abrirModalEditarPlantilla(currentItem);
+    };
+    divBtns.appendChild(btnEditar);
+  }
+
+  card.appendChild(divHeader);
+  card.appendChild(divBtns);
+  return card;
+}
 
 /* ==========================================================================
    ✏️ MODAL Y LÓGICA DE AGREGAR / EDITAR / ELIMINAR PLANTILLAS (SUPERADMIN)
