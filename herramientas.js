@@ -515,46 +515,48 @@ window.renderGrid = function (filtro = "") {
 function crearTarjetaPlantilla(currentItem, esFavorita, esAdmin) {
   const card = document.createElement("div");
   card.className = "card-ios";
-  // Tarjeta con position: relative para anclar la estrella
-  card.style.cssText = `display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; padding: 16px !important; background: ${esFavorita ? "rgba(255, 204, 0, 0.04)" : "rgba(255, 255, 255, 0.02)"} !important; border: 1px solid ${esFavorita ? "rgba(255, 204, 0, 0.3)" : "rgba(255, 255, 255, 0.06)"} !important; border-radius: 16px !important; margin: 0 !important; box-sizing: border-box !important; min-height: 120px !important; position: relative !important; overflow: hidden !important;`;
+
+  // Tarjeta flexible con altura mínima de 135px e internal padding optimizado
+  card.style.cssText = `display: flex !important; flex-direction: column !important; justify-content: space-between !important; height: 100% !important; padding: 14px 16px !important; background: ${esFavorita ? "rgba(255, 204, 0, 0.04)" : "rgba(255, 255, 255, 0.02)"} !important; border: 1px solid ${esFavorita ? "rgba(255, 204, 0, 0.3)" : "rgba(255, 255, 255, 0.06)"} !important; border-radius: 16px !important; margin: 0 !important; box-sizing: border-box !important; min-height: 135px !important; position: relative !important;`;
 
   let tituloLimpio = currentItem.titulo
     ? currentItem.titulo.trim()
     : "Plantilla Sin Nombre";
 
   const divHeader = document.createElement("div");
-  // padding-right: 40px para que el texto NUNCA toque el botón de la estrella
+  // Espaciado de 32px a la derecha para no tocar el botón de estrella
   divHeader.style.cssText =
-    "margin-bottom: 14px !important; flex-grow: 1 !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important; padding-right: 40px !important;";
+    "margin-bottom: 12px !important; flex: 1 1 auto !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important; padding-right: 32px !important;";
 
-  // word-break: break-word permite que los textos largos bajen de línea correctamente
+  // -webkit-line-clamp: 2 permite adaptar textos de hasta 2 líneas sin sobrecargar verticalmente
   divHeader.innerHTML = `
-    <h2 class="card-title" style="margin: 0 !important; font-size: 0.92rem !important; font-weight: 800 !important; color: var(--text-primary) !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; line-height: 1.3 !important; word-break: break-word !important;" title="${tituloLimpio}">${tituloLimpio}</h2>
+    <h2 class="card-title" style="margin: 0 !important; font-size: 0.88rem !important; font-weight: 800 !important; color: var(--text-primary) !important; text-transform: uppercase !important; letter-spacing: 0.4px !important; line-height: 1.25 !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; word-break: break-word !important;" title="${tituloLimpio}">${tituloLimpio}</h2>
   `;
 
-  // Botón de estrella estilizado fijamente en la esquina
+  // Botón compacto de estrella fijado exactamente en (10px, 10px)
   const btnEstrella = document.createElement("button");
   btnEstrella.type = "button";
   btnEstrella.title = esFavorita
     ? "Quitar de favoritas"
     : "Fijar como favorita";
-  btnEstrella.style.cssText = `position: absolute !important; top: 12px !important; right: 12px !important; width: 32px !important; height: 32px !important; background: ${esFavorita ? "rgba(255, 204, 0, 0.15)" : "rgba(255, 255, 255, 0.05)"} !important; border: 1px solid ${esFavorita ? "rgba(255, 204, 0, 0.3)" : "rgba(255, 255, 255, 0.1)"} !important; border-radius: 10px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 1.1rem !important; cursor: pointer !important; padding: 0 !important; filter: ${esFavorita ? "drop-shadow(0 0 6px rgba(255, 204, 0, 0.4))" : "grayscale(100%) opacity(0.5)"} !important; transition: all 0.2s ease !important; z-index: 5 !important;`;
+  btnEstrella.style.cssText = `position: absolute !important; top: 10px !important; right: 10px !important; width: 28px !important; height: 28px !important; background: ${esFavorita ? "rgba(255, 204, 0, 0.15)" : "rgba(255, 255, 255, 0.05)"} !important; border: 1px solid ${esFavorita ? "rgba(255, 204, 0, 0.3)" : "rgba(255, 255, 255, 0.1)"} !important; border-radius: 8px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 0.95rem !important; cursor: pointer !important; padding: 0 !important; filter: ${esFavorita ? "drop-shadow(0 0 5px rgba(255, 204, 0, 0.4))" : "grayscale(100%) opacity(0.4)"} !important; transition: all 0.2s ease !important; z-index: 5 !important;`;
   btnEstrella.innerHTML = "⭐";
   btnEstrella.onclick = function (e) {
     e.stopPropagation();
     window.toggleFavoritoPlantilla(currentItem.id);
   };
 
+  // flex-shrink: 0 evita que los botones se compriman o corten abajo
   const divBtns = document.createElement("div");
   divBtns.style.cssText =
-    "display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important; margin-top: auto !important;";
+    "display: flex !important; flex-direction: row !important; gap: 8px !important; align-items: center !important; width: 100% !important; margin-top: auto !important; flex-shrink: 0 !important;";
 
   const btnCopiar = document.createElement("button");
   btnCopiar.type = "button";
   btnCopiar.className = "btn-ios";
   btnCopiar.style.cssText =
-    "flex: 1 1 auto !important; width: 100% !important; min-width: 0 !important; padding: 12px 10px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 0.8rem !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;";
-  btnCopiar.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR TEXTO</span>`;
+    "flex: 1 1 auto !important; width: 100% !important; min-width: 0 !important; padding: 10px 8px !important; background: rgba(255, 255, 255, 0.08) !important; color: var(--text-primary) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 10px !important; font-weight: 800 !important; font-size: 0.78rem !important; transition: all 0.2s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px !important; cursor: pointer !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;";
+  btnCopiar.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span style="white-space: nowrap !important;">COPIAR TEXTO</span>`;
   btnCopiar.onclick = function () {
     window.copiarPlantillaDirecta(this, currentItem.texto || "");
   };
@@ -566,8 +568,8 @@ function crearTarjetaPlantilla(currentItem, esFavorita, esAdmin) {
     btnEditar.type = "button";
     btnEditar.title = "Editar plantilla";
     btnEditar.style.cssText =
-      "width: 40px !important; min-width: 40px !important; max-width: 40px !important; height: 40px !important; flex: 0 0 40px !important; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; transition: all 0.2s ease !important; flex-shrink: 0 !important;";
-    btnEditar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+      "width: 36px !important; min-width: 36px !important; max-width: 36px !important; height: 36px !important; flex: 0 0 36px !important; padding: 0 !important; background: rgba(10, 132, 255, 0.15) !important; color: #0a84ff !important; border: 1px solid rgba(10, 132, 255, 0.3) !important; border-radius: 10px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; transition: all 0.2s ease !important; flex-shrink: 0 !important;";
+    btnEditar.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block !important;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
     btnEditar.onclick = function (e) {
       e.stopPropagation();
       window.abrirModalEditarPlantilla(currentItem);
