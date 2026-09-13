@@ -52,7 +52,6 @@ function resetearTemporizadorInactividad() {
   if (modalAlerta && modalAlerta.style.display === "flex") {
     modalAlerta.style.display = "none";
 
-    // Calcular segundos inactivos transcurridos mientras la ventana estuvo visible
     let segsInactivoSesion = Math.floor(
       (Date.now() - (inicioVentanaInactividadTs || ultimaActividadTs)) / 1000,
     );
@@ -114,7 +113,6 @@ function capturarEventosUsuario() {
 }
 
 function mostrarAlertaInactividad() {
-  // Marca el segundo cero justo en el instante en que sale la pantalla
   inicioVentanaInactividadTs = Date.now();
 
   let modalAlerta = document.getElementById("alertaInactividadFantasma");
@@ -133,7 +131,6 @@ function mostrarAlertaInactividad() {
           Tiempo transcurrido en esta pantalla de inactividad:
         </p>
 
-        <!-- CRONÓMETRO EN VIVO: COMIENZA EN 00m 00s AL SALIR LA VENTANA -->
         <div id="lblCronometroInactivo" style="font-size: 3rem; font-weight: 900; font-family: monospace; color: #ff453a; text-shadow: 0 0 20px rgba(255,69,58,0.5); margin: 8px 0 18px 0; background: rgba(255,69,58,0.1); padding: 8px 26px; border-radius: 16px; border: 1px solid rgba(255,69,58,0.3);">
           00m 00s
         </div>
@@ -294,7 +291,6 @@ function limpiarCacheShift() {
   localStorage.removeItem("cyber_perf_interacciones");
 }
 
-// 🟢 VERIFICADOR DE ARRANQUE CON PREGUNTA
 window.verificarEIniciarTurnoAuto = function () {
   const activeStaff = (
     sessionStorage.getItem("active_staff") ||
@@ -308,14 +304,11 @@ window.verificarEIniciarTurnoAuto = function () {
     return;
   }
 
-  // Comprobar si ya había un turno activo previamente sin cerrar
   let isShiftActive = localStorage.getItem("cyber_shift_active") === "true";
 
   if (isShiftActive) {
-    // Si ya estaba activo (ej. recargó la página accidentalmente), arrancar normal.
     iniciarTurnoTracker(true);
   } else {
-    // Si es nuevo acceso o lo había pausado, le preguntamos.
     mostrarModalEsperaTurno(activeStaff);
   }
 };
@@ -790,6 +783,9 @@ window.cambiarAsistenteAdmin = function (vendedor) {
   window.renderizarHorasEnPantalla();
 };
 
+// ==========================================
+// RENDERIZADO DEL CALENDARIO (AQUÍ SE CALCULA EL PRECIO DE DOMINGO)
+// ==========================================
 window.renderizarHorasEnPantalla = function () {
   const container = document.getElementById("shiftsScrollArea");
   if (!container) return;
@@ -929,9 +925,12 @@ window.renderizarHorasEnPantalla = function () {
       let idsAdelantosArray = [];
       let turnosPuros = [];
 
+      // Variable para calcular si el día actual del calendario es DOMINGO (0)
+      let fechaBucle = new Date(dAnio, dMes, dia);
+      let esDomingo = fechaBucle.getDay() === 0;
+
       registrosDia.forEach((reg) => {
         let totalMonto = parseFloat(reg.total) || 0;
-        totalPagoAsistente += totalMonto;
         let tipoBadge = reg.estado || "Completado";
         let esDescuento =
           totalMonto < 0 || tipoBadge.toUpperCase().includes("ADELANTO");
@@ -942,26 +941,49 @@ window.renderizarHorasEnPantalla = function () {
         } else {
           turnosPuros.push(reg);
           let tStr = reg.tiempo_trabajado || "00:00:00";
+          let segsDeEsteTurno = 0;
           if (tStr !== "00:00:00") {
             let p = tStr.split(":");
             if (p.length === 3)
-              totalHorasSegundos +=
+              segsDeEsteTurno =
                 (parseInt(p[0], 10) || 0) * 3600 +
                 (parseInt(p[1], 10) || 0) * 60 +
                 (parseInt(p[2], 10) || 0);
             else if (p.length === 2)
-              totalHorasSegundos +=
+              segsDeEsteTurno =
                 (parseInt(p[0], 10) || 0) * 3600 +
                 (parseInt(p[1], 10) || 0) * 60;
+
+            totalHorasSegundos += segsDeEsteTurno;
+          }
+
+          // RECALCULAR PAGO DEL DÍA: Si es domingo, la tarifa es $11,500 la hora
+          if (esDomingo) {
+            let horasDec = segsDeEsteTurno / 3600;
+            let valorDomingo = horasDec * 11500;
+            reg.total_calculado = valorDomingo;
+            totalPagoAsistente += valorDomingo;
+          } else {
+            reg.total_calculado = totalMonto; // Si es lunes a sábado, usa el que viene de la BD
+            totalPagoAsistente += totalMonto;
           }
         }
       });
 
+      // ADELANTOS (LOS DESCUENTOS RESTAN DEL TOTAL)
+      totalPagoAsistente += sumaAdelantos;
+
       turnosPuros.forEach((reg) => {
         let valorAbsolutoFormateado = Math.abs(
-          Math.round(reg.total),
+          Math.round(reg.total_calculado),
         ).toLocaleString("es-CO");
         let btnSuperAdmin = "";
+
+        // Etiqueta visual sutil si el pago se calculó como dominical
+        let indicadorDomingo = esDomingo
+          ? `<span style="font-size:0.6rem; color:#bf5af2; background:rgba(191, 90, 242, 0.15); padding:1px 4px; border-radius:4px; margin-top:1px;">Dom $11.5k</span>`
+          : "";
+
         if (esSuperAdmin) {
           btnSuperAdmin = `
             <div style="display: flex !important; justify-content: center !important; align-items: center !important; gap: 6px !important; margin-top: 6px !important; width: 100% !important;">
@@ -978,6 +1000,7 @@ window.renderizarHorasEnPantalla = function () {
           <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; margin-top: 4px;">
             <span style="font-size: 0.75rem; font-weight: 800; color: #0a84ff; font-family: monospace;">${reg.tiempo_trabajado !== "00:00:00" ? reg.tiempo_trabajado : "Turno"}</span>
             <span style="font-size: 0.8rem; font-weight: 900; color: #30d158; font-family: monospace;">$${valorAbsolutoFormateado}</span>
+            ${indicadorDomingo}
             ${btnSuperAdmin}
           </div>`;
       });
@@ -1011,9 +1034,13 @@ window.renderizarHorasEnPantalla = function () {
         ? "1px solid rgba(10, 132, 255, 0.3)"
         : "1px solid rgba(255, 255, 255, 0.05)";
 
+      // Colorear diferente si el calendario cae en domingo
+      let colorDiaNum = tieneTurno ? "#ffffff" : "#71717a";
+      if (esDomingo && !tieneTurno) colorDiaNum = "#bf5af2";
+
       celdasCalendario += `
         <div style="background: ${bgCelda} !important; border: ${borderCelda} !important; border-radius: 12px !important; padding: 6px !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; min-height: 115px !important; box-sizing: border-box !important; position: relative !important;">
-          <span style="font-size: 0.75rem !important; font-weight: 800 !important; color: ${tieneTurno ? "#ffffff" : "#71717a"} !important; align-self: flex-start !important; margin-bottom: 4px !important;">${dia}</span>
+          <span style="font-size: 0.75rem !important; font-weight: 800 !important; color: ${colorDiaNum} !important; align-self: flex-start !important; margin-bottom: 4px !important;">${dia}</span>
           ${htmlRegistros}
         </div>`;
     }
@@ -1283,7 +1310,7 @@ window.eliminarMultiplesTurnosSuperAdmin = function (idsStr) {
 };
 
 // ==========================================
-// 5. MÓDULO NÓMINA BENTO
+// 5. MÓDULO NÓMINA BENTO (CON CÁLCULO DOMINICAL EN VIVO)
 // ==========================================
 window.abrirTotalNomina = function () {
   const overlay = document.getElementById("nominaOverlay");
@@ -1369,8 +1396,32 @@ window.renderizarTotalNomina = function () {
     let esAdelanto =
       monto < 0 || (item.estado || "").toUpperCase().includes("ADELANTO");
 
-    if (esAdelanto) mapaNomina[asist].descontado += Math.abs(monto);
-    else mapaNomina[asist].ganado += monto;
+    let esDomingo = d.getDay() === 0;
+
+    if (esAdelanto) {
+      mapaNomina[asist].descontado += Math.abs(monto);
+    } else {
+      if (esDomingo) {
+        let tStr = item.tiempo_trabajado || "00:00:00";
+        let segsDeEsteTurno = 0;
+        if (tStr !== "00:00:00") {
+          let p = tStr.split(":");
+          if (p.length === 3)
+            segsDeEsteTurno =
+              (parseInt(p[0], 10) || 0) * 3600 +
+              (parseInt(p[1], 10) || 0) * 60 +
+              (parseInt(p[2], 10) || 0);
+          else if (p.length === 2)
+            segsDeEsteTurno =
+              (parseInt(p[0], 10) || 0) * 3600 + (parseInt(p[1], 10) || 0) * 60;
+        }
+        let horasDec = segsDeEsteTurno / 3600;
+        let valorDomingo = horasDec * 11500;
+        mapaNomina[asist].ganado += valorDomingo;
+      } else {
+        mapaNomina[asist].ganado += monto;
+      }
+    }
   });
 
   let listaProcesar = obtenerTodosLosAsistentes();
