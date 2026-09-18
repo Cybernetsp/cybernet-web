@@ -1491,45 +1491,50 @@ window.calcularPreciosSistemaCotizador = function () {
   });
 
   if (tieneNetflix) {
-    precioBaseUnMes = costoNetflixCalculado;
+    // Calculamos la diferencia si el usuario seleccionó más de 1 pantalla de Netflix
+    const extraPantallasNet = Math.max(0, costoNetflixCalculado - pNet);
+
     if (countDisneyPremium > 0) {
-      if (countTierEligible === 0) precioBaseUnMes += Math.round(pNet * 0.7);
-      else if (countTierEligible === 1)
-        precioBaseUnMes += Math.round(pNet * 0.96);
-      else if (countTierEligible === 2)
-        precioBaseUnMes += Math.round(pNet * 1.16);
-      else if (countTierEligible >= 3)
+      // 👑 LÍNEA VIP (Netflix + Disney Premium)
+      if (countTierEligible === 0) {
+        precioBaseUnMes = 25000; // Netflix + Disney Premium
+      } else if (countTierEligible === 1) {
+        precioBaseUnMes = 29000; // Netflix + Disney P. + 1 Extra ⭐
+      } else if (countTierEligible === 2) {
+        precioBaseUnMes = 32000; // Netflix + Disney P. + 2 Extras
+      } else if (countTierEligible === 3) {
+        precioBaseUnMes = 35000; // Netflix + Disney P. + 3 Extras
+      } else {
+        precioBaseUnMes = 35000 + (countTierEligible - 3) * 3000; // Extras adicionales
+      }
+
+      // Si seleccionan más de 1 cuenta/pantalla de Disney Premium
+      if (countDisneyPremium > 1) {
         precioBaseUnMes +=
-          Math.round(pNet * 1.36) + (countTierEligible - 3) * 3000;
-      precioBaseUnMes +=
-        (countDisneyPremium - 1) * mapValores["DISNEY-PREMIUM"].combo;
+          (countDisneyPremium - 1) * mapValores["DISNEY-PREMIUM"].combo;
+      }
     } else {
-      if (countTierEligible === 0) precioBaseUnMes += 0;
-      else if (countTierEligible === 1)
-        precioBaseUnMes += Math.round(pNet * 0.36);
-      else if (countTierEligible === 2)
-        precioBaseUnMes += Math.round(pNet * 0.63);
-      else if (countTierEligible >= 3)
-        precioBaseUnMes +=
-          Math.round(pNet * 0.83) + (countTierEligible - 3) * 3000;
+      // 🎬 LÍNEA CLÁSICA (Solo Netflix)
+      if (countTierEligible === 0) {
+        precioBaseUnMes = costoNetflixCalculado; // $15.000
+      } else if (countTierEligible === 1) {
+        precioBaseUnMes = 20000; // Netflix + 1 Extra 🔥
+      } else if (countTierEligible === 2) {
+        precioBaseUnMes = 24000; // Netflix + 2 Extras
+      } else if (countTierEligible === 3) {
+        precioBaseUnMes = 27000; // Netflix + 3 Extras
+      } else {
+        precioBaseUnMes = 27000 + (countTierEligible - 3) * 3000; // Extras adicionales
+      }
     }
 
+    // Sumar excedente si seleccionó más de 1 pantalla de Netflix
+    precioBaseUnMes += extraPantallasNet;
+
+    // Sumar servicios independientes o extras fuera del tier (Spotify, Canva, IPTV, etc.)
     arrayAddonsDirectosYExtras.forEach((plat) => {
       precioBaseUnMes += mapValores[plat].combo;
     });
-  } else {
-    if (allOtherScreens.length === 0) {
-      precioBaseUnMes = 0;
-    } else if (allOtherScreens.length === 1) {
-      precioBaseUnMes = mapValores[allOtherScreens[0]].indiv;
-    } else {
-      allOtherScreens.sort((a, b) => mapValores[b].indiv - mapValores[a].indiv);
-      let masCaro = allOtherScreens.shift();
-      precioBaseUnMes += mapValores[masCaro].indiv;
-      allOtherScreens.forEach((plat) => {
-        precioBaseUnMes += mapValores[plat].combo;
-      });
-    }
   }
 
   // Redondear a centenas hacia abajo para evitar fracciones en precios base
