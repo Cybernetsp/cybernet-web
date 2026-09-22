@@ -442,3 +442,126 @@ window.guardarPreciosTienda = function () {
       alert("❌ Ocurrió un error al guardar los precios.");
     });
 };
+
+/* ==========================================================================
+   🌐 BLOQUEADOR DE PANTALLA COMPLETA SIN INTERNET (CYBERNET OS)
+   ========================================================================== */
+(function () {
+  // 1. Crear dinámicamente el overlay oscuro de pantalla completa
+  function asegurarOverlayOffline() {
+    let overlay = document.getElementById("cyberOfflineOverlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "cyberOfflineOverlay";
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999999;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        pointer-events: auto;
+      `;
+
+      overlay.innerHTML = `
+        <div style="
+          max-width: 380px;
+          width: 88%;
+          background: #141418;
+          border: 1px solid rgba(255, 69, 58, 0.35);
+          border-radius: 28px;
+          padding: 30px 24px;
+          text-align: center;
+          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 40px rgba(255, 69, 58, 0.15);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 14px;
+        ">
+          <div style="
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: rgba(255, 69, 58, 0.15);
+            border: 1px solid rgba(255, 69, 58, 0.35);
+            color: #ff453a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(255, 69, 58, 0.2);
+          ">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+              <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+              <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+              <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+              <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+              <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+              <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+          </div>
+
+          <h3 style="margin: 0; color: #ffffff; font-weight: 800; font-size: 1.2rem;">Sin conexión a Internet</h3>
+          
+          <p style="margin: 0; color: #a1a1aa; font-size: 0.85rem; line-height: 1.45;">
+            Se ha interrumpido la conexión. El sistema se ha pausado para evitar pérdida de datos o errores en los envíos.
+          </p>
+
+          <div style="
+            margin-top: 4px;
+            font-size: 0.75rem;
+            color: #ff453a;
+            font-weight: 700;
+            background: rgba(255, 69, 58, 0.1);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 69, 58, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          ">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#ff453a;"></span>
+            Esperando señal de red...
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+    return overlay;
+  }
+
+  // 2. Mostrar overlay completo cuando se cae la red
+  function activarModoOffline() {
+    const overlay = asegurarOverlayOffline();
+    overlay.style.display = "flex";
+  }
+
+  // 3. Ocultar el bloqueo en cuanto vuelve la conexión
+  function desactivarModoOffline() {
+    const overlay = document.getElementById("cyberOfflineOverlay");
+    if (overlay) {
+      overlay.style.display = "none";
+    }
+    if (typeof window.mostrarToastIOS === "function") {
+      window.mostrarToastIOS("✅ Conexión a Internet restablecida");
+    }
+  }
+
+  // 4. Listeners nativos de red
+  window.addEventListener("offline", activarModoOffline);
+  window.addEventListener("online", desactivarModoOffline);
+
+  // 5. Comprobación inicial
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!navigator.onLine) {
+      activarModoOffline();
+    }
+  });
+})();
