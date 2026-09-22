@@ -1,6 +1,27 @@
 <!doctype html>
 <html lang="es" data-theme="dark">
   <head>
+    <!-- 🔒 PROTECCIÓN DE SEGURIDAD Y BLOQUEO DE RENDERIZADO -->
+    <style id="cyberAuthGuard">
+        body {
+            display: none !important;
+        }
+    </style>
+    <script>
+        (function () {
+            const usuarioObj = JSON.parse(sessionStorage.getItem("usuario_activo") || "null");
+            const sessionStaff = sessionStorage.getItem("active_staff");
+
+            if (!usuarioObj && !sessionStaff) {
+                window.location.replace("login.html");
+            } else {
+                document.addEventListener("DOMContentLoaded", function () {
+                    const styleGuard = document.getElementById("cyberAuthGuard");
+                    if (styleGuard) styleGuard.remove();
+                });
+            }
+        })();
+    </script>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
