@@ -376,6 +376,8 @@ window.toggleTrackerShift = function () {
 };
 
 function iniciarTurnoTracker(esAuto = false) {
+  // REGISTRO DE TIEMPO DESHABILITADO EN personal_staff.js
+  // El registro de tiempo solo se realiza en personal_staff_wa.js
   if (cerrandoSesionFlag) return;
 
   const activeStaff = (
@@ -396,46 +398,8 @@ function iniciarTurnoTracker(esAuto = false) {
 
   if (turnoActivo) return;
 
-  let todayStr = new Date().toLocaleDateString("es-CO");
-  let savedVendedor = localStorage.getItem("cyber_shift_vendedor");
-  let savedDate = localStorage.getItem("cyber_shift_date");
-
-  if (savedVendedor !== activeStaff || savedDate !== todayStr) {
-    secCronometroTotal = 0;
-    unsavedSecTotal = 0;
-    limpiarCacheShift();
-    localStorage.setItem("cyber_shift_vendedor", activeStaff);
-    localStorage.setItem("cyber_shift_date", todayStr);
-    localStorage.setItem("cyber_shift_accumulated_sec", "0");
-    localStorage.setItem("cyber_shift_unsaved_sec", "0");
-
-    localStorage.setItem(
-      "cyber_perf_hora_entrada",
-      new Date().toLocaleTimeString("es-CO", { hour12: true }),
-    );
-    localStorage.setItem("cyber_perf_inactividad", "0");
-    localStorage.setItem("cyber_perf_inactividad_sec", "0");
-    localStorage.setItem("cyber_perf_interacciones", "0");
-  } else {
-    secCronometroTotal = parseInt(
-      localStorage.getItem("cyber_shift_accumulated_sec") || "0",
-      10,
-    );
-    unsavedSecTotal = parseInt(
-      localStorage.getItem("cyber_shift_unsaved_sec") || "0",
-      10,
-    );
-
-    if (!localStorage.getItem("cyber_perf_hora_entrada")) {
-      localStorage.setItem(
-        "cyber_perf_hora_entrada",
-        new Date().toLocaleTimeString("es-CO", { hour12: true }),
-      );
-    }
-  }
-
+  // Solo iniciar estado visual, sin registro de tiempo
   turnoActivo = true;
-  lastTickTs = Date.now();
   localStorage.setItem("cyber_shift_active", "true");
 
   const dot = document.getElementById("ledConexion");
@@ -445,54 +409,11 @@ function iniciarTurnoTracker(esAuto = false) {
   }
 
   resetearTemporizadorInactividad();
-  window.enviarRendimientoAMySQL(activeStaff, false);
 
-  const tickRelojExacto = () => {
-    if (cerrandoSesionFlag) {
-      clearInterval(timerInterval);
-      return;
-    }
-
-    let now = Date.now();
-    let delta = Math.floor((now - lastTickTs) / 1000);
-    lastTickTs = now;
-
-    if (delta > 0 && delta <= 3) {
-      secCronometroTotal += delta;
-      unsavedSecTotal += delta;
-    } else if (delta > 3) {
-      secCronometroTotal += 1;
-      unsavedSecTotal += 1;
-    }
-
-    localStorage.setItem("cyber_shift_accumulated_sec", secCronometroTotal);
-    localStorage.setItem("cyber_shift_unsaved_sec", unsavedSecTotal);
-
-    const lbl = document.getElementById("shiftTimer");
-    if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
-
-    if (unsavedSecTotal >= 60) {
-      let secToSave = unsavedSecTotal;
-      unsavedSecTotal = 0;
-      localStorage.setItem("cyber_shift_unsaved_sec", "0");
-      enviarTiempoTrackerAMySQL(
-        activeStaff,
-        formatoSegundosTracker(secToSave),
-        "Autoguardado 1m",
-      );
-      window.enviarRendimientoAMySQL(activeStaff, false);
-    }
-  };
-
-  const lbl = document.getElementById("shiftTimer");
-  if (lbl) lbl.innerText = formatoSegundosTracker(secCronometroTotal);
-
-  if (timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(tickRelojExacto, 1000);
-
+  // NO iniciar el intervalo de cronómetro - el tiempo no se registra aquí
   if (typeof triggerToast === "function" && !esAuto) {
     triggerToast(
-      `<div style="color:var(--ios-green);">▶ Turno activo para ${activeStaff}. Sincronización en vivo.</div>`,
+      `<div style="color:var(--ios-green);">▶ Sesión activa para ${activeStaff}. El tiempo se registra en personal_staff_wa.js</div>`,
     );
   }
 }
@@ -558,22 +479,10 @@ function detenerTurnoTracker(esCierreDefinitivo = false) {
 }
 
 function enviarTiempoTrackerAMySQL(asistente, tiempoHHMMSS, razon) {
-  fetch(window.URL_GUARDAR_HORAS_MANUAL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `vendedor=${encodeURIComponent(asistente)}&tiempo=${encodeURIComponent(tiempoHHMMSS)}&fecha=hoy`,
-  })
-    .then((res) => parsearRespuestaJSONSegura(res))
-    .then((res) => {
-      if (
-        res.status === "success" &&
-        typeof window.cargarHorasDirectasPHP === "function" &&
-        !cerrandoSesionFlag
-      ) {
-        window.cargarHorasDirectasPHP();
-      }
-    })
-    .catch((e) => console.error("Error al sincronizar tiempo:", e));
+  // REGISTRO DE TIEMPO DESHABILITADO EN personal_staff.js
+  // El registro de tiempo solo se realiza en personal_staff_wa.js
+  console.log(`[personal_staff.js] Registro de tiempo deshabilitado. Use personal_staff_wa.js para: ${asistente}, ${tiempoHHMMSS}, ${razon}`);
+  return;
 }
 
 function formatoSegundosTracker(totalSeg) {
@@ -635,36 +544,9 @@ window.cerrarSesionStaff = function () {
 };
 
 function guardarEmergenciaAlCerrarVentana() {
-  const activeStaff = (
-    sessionStorage.getItem("active_staff") ||
-    localStorage.getItem("cyber_saved_staff") ||
-    ""
-  )
-    .toUpperCase()
-    .trim();
-
-  if (activeStaff && activeStaff !== "STAFF" && activeStaff !== "CAMILO") {
-    localStorage.setItem(
-      "cyber_perf_hora_salida",
-      new Date().toLocaleTimeString("es-CO", { hour12: true }),
-    );
-    window.enviarRendimientoAMySQL(activeStaff, true);
-  }
-
-  if (turnoActivo && unsavedSecTotal > 0) {
-    if (activeStaff && activeStaff !== "STAFF" && activeStaff !== "CAMILO") {
-      let secToSave = unsavedSecTotal;
-      unsavedSecTotal = 0;
-      localStorage.setItem("cyber_shift_unsaved_sec", "0");
-
-      const fd = new FormData();
-      fd.append("vendedor", activeStaff);
-      fd.append("tiempo", formatoSegundosTracker(secToSave));
-      fd.append("fecha", "hoy");
-
-      navigator.sendBeacon(window.URL_GUARDAR_HORAS_MANUAL, fd);
-    }
-  }
+  // REGISTRO DE TIEMPO DESHABILITADO EN personal_staff.js
+  // El registro de tiempo solo se realiza en personal_staff_wa.js
+  return;
 }
 
 window.addEventListener("pagehide", guardarEmergenciaAlCerrarVentana);
