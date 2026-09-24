@@ -36,142 +36,9 @@ window.asistenteSeleccionadoAdmin = "TODOS";
 window.filtroFechaRendimiento = new Date().toISOString().split("T")[0];
 
 // ==========================================
-// 🚨 MÓDULO FANTASMA: DETECTOR DE INACTIVIDAD (DESDE 00m 00s AL DESPLEGAR)
+// SISTEMA DE INACTIVIDAD ELIMINADO EN personal_staff.js
+// El control de inactividad ahora se maneja en personal_staff_wa.js
 // ==========================================
-let inactividadTimer = null;
-let inactividadCronometroInterval = null;
-const TIEMPO_LIMITE_INACTIVIDAD = 7 * 60 * 1000; // 7 Minutos reales
-let ultimaActividadTs = Date.now();
-let inicioVentanaInactividadTs = 0; // Se fija en el milisegundo exacto que salta el aviso
-let ultimaInteraccionTs = 0;
-let throttleActividadTimer = null;
-
-function resetearTemporizadorInactividad() {
-  const modalAlerta = document.getElementById("alertaInactividadFantasma");
-
-  if (modalAlerta && modalAlerta.style.display === "flex") {
-    modalAlerta.style.display = "none";
-
-    let segsInactivoSesion = Math.floor(
-      (Date.now() - (inicioVentanaInactividadTs || ultimaActividadTs)) / 1000,
-    );
-    if (segsInactivoSesion < 0) segsInactivoSesion = 0;
-
-    let acumuladoPrevio = parseInt(
-      localStorage.getItem("cyber_perf_inactividad_sec") || "0",
-      10,
-    );
-    let nuevoAcumulado = acumuladoPrevio + segsInactivoSesion;
-
-    localStorage.setItem("cyber_perf_inactividad_sec", nuevoAcumulado);
-    localStorage.setItem("cyber_perf_inactividad", nuevoAcumulado);
-
-    const activeStaff = (
-      sessionStorage.getItem("active_staff") ||
-      localStorage.getItem("cyber_saved_staff") ||
-      ""
-    )
-      .toUpperCase()
-      .trim();
-    if (activeStaff) window.enviarRendimientoAMySQL(activeStaff, false);
-  }
-
-  if (inactividadCronometroInterval) {
-    clearInterval(inactividadCronometroInterval);
-    inactividadCronometroInterval = null;
-  }
-
-  clearTimeout(inactividadTimer);
-  ultimaActividadTs = Date.now();
-
-  if (turnoActivo && !verificarSiEsSuperAdmin()) {
-    inactividadTimer = setTimeout(
-      mostrarAlertaInactividad,
-      TIEMPO_LIMITE_INACTIVIDAD,
-    );
-  }
-}
-
-function registrarInteraccionRendimiento() {
-  if (!turnoActivo || verificarSiEsSuperAdmin()) return;
-  let now = Date.now();
-  if (now - ultimaInteraccionTs > 2000) {
-    let inter =
-      parseInt(localStorage.getItem("cyber_perf_interacciones") || "0", 10) + 1;
-    localStorage.setItem("cyber_perf_interacciones", inter);
-    ultimaInteraccionTs = now;
-  }
-}
-
-function capturarEventosUsuario() {
-  if (throttleActividadTimer) return;
-  throttleActividadTimer = setTimeout(() => {
-    throttleActividadTimer = null;
-    resetearTemporizadorInactividad();
-    registrarInteraccionRendimiento();
-  }, 250);
-}
-
-function mostrarAlertaInactividad() {
-  inicioVentanaInactividadTs = Date.now();
-
-  let modalAlerta = document.getElementById("alertaInactividadFantasma");
-
-  if (!modalAlerta) {
-    const htmlModal = `
-      <div id="alertaInactividadFantasma" style="display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.94); backdrop-filter: blur(20px); z-index: 99999; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: #ffffff;">
-        <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px; filter: drop-shadow(0 0 15px rgba(255, 69, 58, 0.6));">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <h1 style="font-weight: 900; font-size: 2rem; color: #ff453a; letter-spacing: -1px; margin: 0 0 6px 0;">INACTIVIDAD DETECTADA</h1>
-        
-        <p style="font-size: 0.95rem; color: #a1a1aa; max-width: 480px; margin-bottom: 10px;">
-          Tiempo transcurrido en esta pantalla de inactividad:
-        </p>
-
-        <div id="lblCronometroInactivo" style="font-size: 3rem; font-weight: 900; font-family: monospace; color: #ff453a; text-shadow: 0 0 20px rgba(255,69,58,0.5); margin: 8px 0 18px 0; background: rgba(255,69,58,0.1); padding: 8px 26px; border-radius: 16px; border: 1px solid rgba(255,69,58,0.3);">
-          00m 00s
-        </div>
-
-        <p style="font-size: 0.9rem; color: #a1a1aa; max-width: 480px;">
-          <span style="color: #ffffff; font-weight: 800; padding: 6px 14px; background: rgba(255,69,58,0.25); border-radius: 8px;">Se pausó la sincronización de tu turno.</span>
-        </p>
-
-        <div style="margin-top: 22px; font-family: monospace; font-size: 0.85rem; color: #30d158; animation: blinker 1.5s linear infinite;">
-          [ Mueve el mouse o presiona cualquier tecla para reactivar ]
-        </div>
-        <style>@keyframes blinker { 50% { opacity: 0.3; } }</style>
-      </div>`;
-    document.body.insertAdjacentHTML("beforeend", htmlModal);
-    modalAlerta = document.getElementById("alertaInactividadFantasma");
-  }
-
-  modalAlerta.style.display = "flex";
-
-  const lbl = document.getElementById("lblCronometroInactivo");
-  const actualizarCronometroLive = () => {
-    let segsVentanaInactivo = Math.floor(
-      (Date.now() - inicioVentanaInactividadTs) / 1000,
-    );
-    if (segsVentanaInactivo < 0) segsVentanaInactivo = 0;
-    let m = Math.floor(segsVentanaInactivo / 60);
-    let s = segsVentanaInactivo % 60;
-    if (lbl) {
-      lbl.innerText = `${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
-    }
-  };
-
-  actualizarCronometroLive();
-  if (inactividadCronometroInterval)
-    clearInterval(inactividadCronometroInterval);
-  inactividadCronometroInterval = setInterval(actualizarCronometroLive, 1000);
-}
-
-["mousemove", "keydown", "mousedown", "touchstart"].forEach((evt) => {
-  document.addEventListener(evt, capturarEventosUsuario, { passive: true });
-});
 
 // ==========================================
 // HELPER DE LECTURA Y SINCRONIZACIÓN DE RENDIMIENTO
@@ -408,8 +275,7 @@ function iniciarTurnoTracker(esAuto = false) {
     dot.style.boxShadow = "0 0 8px #30d158";
   }
 
-  resetearTemporizadorInactividad();
-
+  // Sistema de inactividad eliminado - ahora se maneja en personal_staff_wa.js
   // NO iniciar el intervalo de cronómetro - el tiempo no se registra aquí
   if (typeof triggerToast === "function" && !esAuto) {
     triggerToast(
