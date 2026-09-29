@@ -592,3 +592,71 @@ html {
     padding: 12px 10px !important;
   }
 }
+
+/* 🔍 OPTIMIZACIONES ESPECÍFICAS PARA MODAL DE BÚSQUEDA DE CUENTAS EN MÓVIL */
+@media (max-width: 520px) {
+  #modalBusquedaCuentas .modal-ios {
+    max-width: 95% !important;
+    width: 95% !important;
+    max-height: 90vh !important;
+    max-height: 90dvh !important;
+  }
+
+  #modalBusquedaCuentas #contenedorResultadosCasillero {
+    max-height: 60vh !important;
+    max-height: 60dvh !important;
+  }
+
+  #modalBusquedaCuentas #casilleroPlataformasFilterTabs {
+    padding-bottom: 12px !important;
+    margin-bottom: 10px !important;
+    gap: 8px !important;
+  }
+
+  #modalBusquedaCuentas .venc-tab-btn {
+    padding: 8px 14px !important;
+    font-size: 0.8rem !important;
+    border-radius: 12px !important;
+  }
+
+  #modalBusquedaCuentas #inputCasilleroSearch {
+    padding: 14px !important;
+    font-size: 16px !important;
+  }
+
+  #modalBusquedaCuentas .cuenta-resultado-card {
+    padding: 12px !important;
+    border-radius: 14px !important;
+    margin-bottom: 8px !important;
+  }
+
+  #modalBusquedaCuentas .credential-pill {
+    padding: 10px 14px !important;
+    font-size: 0.85rem !important;
+    border-radius: 12px !important;
+  }
+
+  /* 🔄 OPTIMIZACIONES PARA MODAL DE RENOVACIÓN EN MÓVIL */
+  #modalRenovacionDistri .modal-ios {
+    max-width: 95% !important;
+    width: 95% !important;
+    max-height: 90vh !important;
+    max-height: 90dvh !important;
+  }
+
+  #modalRenovacionDistri #listaCuentasModalRenoDistri {
+    max-height: 65vh !important;
+    max-height: 65dvh !important;
+  }
+
+  #modalRenovacionDistri #buscadorModalRenoDistri {
+    padding: 14px !important;
+    font-size: 16px !important;
+  }
+
+  #modalRenovacionDistri .item-reno-b2b {
+    padding: 14px !important;
+    border-radius: 14px !important;
+    margin-bottom: 10px !important;
+  }
+}
