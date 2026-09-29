@@ -1,4 +1,4 @@
-const CACHE_NAME = "cybernet-cache-v114"; // 🚀 Subimos a v95 para eliminar cachés viejas
+const CACHE_NAME = "cybernet-cache-v120"; // 🚀 Subimos a v95 para eliminar cachés viejas
 
 // ⚡ LISTA DE ARCHIVOS PRINCIPALES DE LA APP
 const assets = [
