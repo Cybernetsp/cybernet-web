@@ -2283,6 +2283,13 @@ function eliminarDelCarrito(id) {
 function cerrarSesionDistribuidor() {
   if (window.cyberIntervaloSaldoFondo)
     clearInterval(window.cyberIntervaloSaldoFondo);
+  if (autoUpdateInterval)
+    clearInterval(autoUpdateInterval);
+  if (inactivityTimeout)
+    clearTimeout(inactivityTimeout);
+  if (inactivityIndicatorInterval)
+    clearInterval(inactivityIndicatorInterval);
+
   localStorage.removeItem("active_distri_id");
   localStorage.removeItem("active_distri_tel");
   localStorage.removeItem("active_distri_name");
@@ -2290,6 +2297,112 @@ function cerrarSesionDistribuidor() {
   localStorage.removeItem("last_activity");
   sessionStorage.clear();
   window.location.href = "login_distris.html";
+}
+
+// =========================================================================
+// 🔄 SISTEMA DE ACTUALIZACIÓN AUTOMÁTICA DE DATOS
+// =========================================================================
+let autoUpdateInterval;
+const AUTO_UPDATE_INTERVAL = 3 * 60 * 1000; // Actualizar cada 3 minutos
+
+function startAutoUpdateSystem() {
+  if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+
+  autoUpdateInterval = setInterval(() => {
+    actualizarDatosDistribuidor();
+  }, AUTO_UPDATE_INTERVAL);
+}
+
+function actualizarDatosDistribuidor() {
+  const telDistri =
+    localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+
+  if (!telDistri) return;
+
+  // Actualizar saldo
+  actualizarSaldoDesdeServidor(telDistri);
+
+  // Actualizar datos financieros si el modal de historial está abierto
+  const modalHistorial = document.getElementById("modalEstadoCuenta");
+  if (modalHistorial && modalHistorial.style.display === "flex") {
+    const select = document.getElementById("selectMesMovimientos");
+    const mesActual = select ? select.value : "todos";
+    cargarDatosFinancierosYAlertas(telDistri, mesActual);
+  }
+
+  // Actualizar casillero si el modal de búsqueda está abierto
+  const modalBusqueda = document.getElementById("modalBusquedaCuentas");
+  if (modalBusqueda && modalBusqueda.style.display === "flex") {
+    buscarCasilleroDistri();
+  }
+
+  // Actualizar renovaciones si el modal está abierto
+  const modalRenovacion = document.getElementById("modalRenovacionDistri");
+  if (modalRenovacion && modalRenovacion.style.display === "flex" && window.currentRenoItemId) {
+    cargarCuentasRenovacion(window.currentRenoItemId, telDistri);
+  }
+
+  // Actualizar alertas de vencimiento
+  cargarDatosFinancierosYAlertas(telDistri, "todos");
+}
+
+function actualizarSaldoDesdeServidor(telDistri) {
+  const formData = new FormData();
+  formData.append("accion", "obtener_saldo_distribuidor");
+  formData.append("telefono", telDistri);
+
+  fetch(API_MYSQL_URL, { method: "POST", body: formData })
+    .then((res) => res.text())
+    .then((text) => {
+      const res = parseCleanJSON(text);
+      if (res && res.status === "success" && res.saldo !== undefined) {
+        const saldoAnterior = parseFloat(localStorage.getItem("active_distri_saldo") || 0);
+        const saldoNuevo = parseFloat(res.saldo);
+
+        localStorage.setItem("active_distri_saldo", saldoNuevo);
+        window.saldoNumericoActual = saldoNuevo;
+
+        // Actualizar UI del saldo
+        const balanceEl = document.getElementById("distriBarBalance");
+        if (balanceEl) {
+          balanceEl.innerText = "$" + saldoNuevo.toLocaleString();
+        }
+
+        // Notificar si hubo cambio en el saldo
+        if (saldoNuevo !== saldoAnterior) {
+          if (saldoNuevo > saldoAnterior) {
+            mostrarNotificacionCambioSaldo(saldoNuevo - saldoAnterior, "positivo");
+          } else if (saldoNuevo < saldoAnterior) {
+            mostrarNotificacionCambioSaldo(saldoAnterior - saldoNuevo, "negativo");
+          }
+        }
+      }
+    })
+    .catch((err) => {
+      console.error("Error actualizando saldo:", err);
+    });
+}
+
+function mostrarNotificacionCambioSaldo(cambio, tipo) {
+  const icono = tipo === "positivo"
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ios-red)" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>`;
+
+  const mensaje = tipo === "positivo"
+    ? `Saldo actualizado: +$${cambio.toLocaleString()}`
+    : `Saldo actualizado: -$${cambio.toLocaleString()}`;
+
+  if (typeof triggerToast === "function") {
+    triggerToast(`<div style="display:flex;align-items:center;gap:8px;">
+      ${icono}
+      <span>${mensaje}</span>
+    </div>`);
+  }
+}
+
+// Iniciar sistema de actualización automática
+if (localStorage.getItem("active_distri_id") || localStorage.getItem("active_distri_tel")) {
+  startAutoUpdateSystem();
 }
 
 // =========================================================================
