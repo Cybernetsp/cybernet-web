@@ -162,6 +162,27 @@
             $--
           </div>
 
+          <div
+            id="inactivityIndicator"
+            style="
+              display: none;
+              background: rgba(255, 149, 0, 0.12);
+              border: 1px solid rgba(255, 149, 0, 0.25);
+              padding: 4px 8px;
+              border-radius: 50px;
+              font-weight: 700;
+              color: var(--ios-orange);
+              font-size: 0.7rem;
+              white-space: nowrap;
+            "
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span id="inactivityTimer">20m</span>
+          </div>
+
           <button
             id="btnRefrescarSaldoManual"
             onclick="manualRefrescarSaldo()"
