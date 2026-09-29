@@ -2287,9 +2287,137 @@ function cerrarSesionDistribuidor() {
   localStorage.removeItem("active_distri_tel");
   localStorage.removeItem("active_distri_name");
   localStorage.removeItem("active_distri_saldo");
+  localStorage.removeItem("last_activity");
   sessionStorage.clear();
   window.location.href = "login_distris.html";
 }
+
+// =========================================================================
+// ⏱️ SISTEMA DE CIERRE DE SESIÓN POR INACTIVIDAD (20 minutos)
+// =========================================================================
+let inactivityTimeout;
+let inactivityIndicatorInterval;
+const INACTIVITY_LIMIT = 20 * 60 * 1000; // 20 minutos en milisegundos
+const WARNING_TIME = 5 * 60 * 1000; // Mostrar advertencia a los 5 minutos
+
+function startInactivityTimer() {
+  clearTimeout(inactivityTimeout);
+  inactivityTimeout = setTimeout(() => {
+    cerrarSesionPorInactividad();
+  }, INACTIVITY_LIMIT);
+}
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimeout);
+  localStorage.setItem("last_activity", Date.now().toString());
+  startInactivityTimer();
+  hideInactivityIndicator();
+}
+
+function cerrarSesionPorInactividad() {
+  // Mostrar notificación antes de cerrar sesión
+  if (typeof triggerToast === "function") {
+    triggerToast(`<div style="display:flex;align-items:center;gap:8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-orange)" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>Sesión cerrada por inactividad</span>
+    </div>`);
+  }
+
+  // Limpiar datos de sesión
+  localStorage.removeItem("active_distri_id");
+  localStorage.removeItem("active_distri_tel");
+  localStorage.removeItem("active_distri_name");
+  localStorage.removeItem("active_distri_saldo");
+  localStorage.removeItem("last_activity");
+  sessionStorage.clear();
+
+  // Redirigir al login
+  setTimeout(() => {
+    window.location.href = "login_distris.html";
+  }, 1500);
+}
+
+function updateInactivityIndicator() {
+  const lastActivity = localStorage.getItem("last_activity");
+  if (!lastActivity) return;
+
+  const timeSinceLastActivity = Date.now() - parseInt(lastActivity);
+  const timeRemaining = INACTIVITY_LIMIT - timeSinceLastActivity;
+
+  const indicator = document.getElementById("inactivityIndicator");
+  const timerText = document.getElementById("inactivityTimer");
+
+  if (!indicator || !timerText) return;
+
+  if (timeRemaining <= WARNING_TIME && timeRemaining > 0) {
+    // Mostrar indicador cuando falten 5 minutos o menos
+    indicator.style.display = "flex";
+    const minutesRemaining = Math.ceil(timeRemaining / 60000);
+    timerText.textContent = `${minutesRemaining}m`;
+
+    // Cambiar color cuando falten 2 minutos o menos
+    if (timeRemaining <= 2 * 60 * 1000) {
+      indicator.style.background = "rgba(255, 69, 58, 0.12)";
+      indicator.style.borderColor = "rgba(255, 69, 58, 0.25)";
+      indicator.style.color = "var(--ios-red)";
+    } else {
+      indicator.style.background = "rgba(255, 149, 0, 0.12)";
+      indicator.style.borderColor = "rgba(255, 149, 0, 0.25)";
+      indicator.style.color = "var(--ios-orange)";
+    }
+  } else {
+    hideInactivityIndicator();
+  }
+}
+
+function hideInactivityIndicator() {
+  const indicator = document.getElementById("inactivityIndicator");
+  if (indicator) {
+    indicator.style.display = "none";
+  }
+}
+
+// Eventos que reinician el temporizador de inactividad
+const activityEvents = [
+  'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'
+];
+
+activityEvents.forEach(event => {
+  document.addEventListener(event, resetInactivityTimer);
+});
+
+// Verificar última actividad al cargar la página
+function checkInactivityOnLoad() {
+  const lastActivity = localStorage.getItem("last_activity");
+  if (lastActivity) {
+    const timeSinceLastActivity = Date.now() - parseInt(lastActivity);
+    if (timeSinceLastActivity > INACTIVITY_LIMIT) {
+      cerrarSesionPorInactividad();
+      return;
+    }
+  }
+  localStorage.setItem("last_activity", Date.now().toString());
+  startInactivityTimer();
+  updateInactivityIndicator();
+}
+
+// Iniciar el sistema de inactividad
+if (localStorage.getItem("active_distri_id") || localStorage.getItem("active_distri_tel")) {
+  checkInactivityOnLoad();
+  // Actualizar indicador cada 30 segundos
+  inactivityIndicatorInterval = setInterval(updateInactivityIndicator, 30000);
+}
+
+// Actualizar timestamp de actividad periódicamente
+setInterval(() => {
+  if (localStorage.getItem("active_distri_id") || localStorage.getItem("active_distri_tel")) {
+    localStorage.setItem("last_activity", Date.now().toString());
+  }
+}, 60000); // Cada minuto
 
 // =========================================================================
 // 🌙 UNIFICACIÓN DE MODO CLARO / OSCURO
