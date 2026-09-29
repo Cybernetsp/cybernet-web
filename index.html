@@ -2128,6 +2128,7 @@
         const startTime = Date.now();
         const maxDuration = 120000; // 2 minutos en milisegundos
         let attemptCount = 0;
+        let shouldContinue = true;
 
         // Función para actualizar el texto del loader
         function updateLoaderText() {
@@ -2137,7 +2138,7 @@
           const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
           
           if (loaderText) {
-            loaderText.innerText = `Rastreando código en Cybernet...\nTiempo transcurrido: ${timeStr}`;
+            loaderText.innerText = `Rastreando código en Cybernet...\nTiempo transcurrido: ${timeStr}\nIntento: ${attemptCount}`;
           }
         }
 
@@ -2145,22 +2146,31 @@
         const textInterval = setInterval(updateLoaderText, 1000);
         updateLoaderText();
 
-        // Función de búsqueda individual
+        // Función de búsqueda individual con manejo de errores
         async function trySearch() {
-          attemptCount++;
-          const query = new URLSearchParams(globalData);
-          const resp = await fetch(`${MYSQL_BOT_URL}?${query.toString()}`);
-          const res = await resp.json();
-          return res;
+          try {
+            attemptCount++;
+            const query = new URLSearchParams(globalData);
+            const resp = await fetch(`${MYSQL_BOT_URL}?${query.toString()}`);
+            const res = await resp.json();
+            return res;
+          } catch (error) {
+            console.error("Error en búsqueda:", error);
+            return { exito: false, error: true };
+          }
         }
 
         try {
           // Sistema de polling: buscar cada 5 segundos hasta encontrar o timeout
-          while (Date.now() - startTime < maxDuration) {
+          while (shouldContinue && Date.now() - startTime < maxDuration) {
+            console.log(`Intento ${attemptCount + 1} - Tiempo: ${Math.floor((Date.now() - startTime) / 1000)}s`);
+            
             const result = await trySearch();
             
             if (result.exito) {
+              console.log("Código encontrado:", result);
               clearInterval(textInterval);
+              shouldContinue = false;
               changeStep(6);
               document.getElementById("res-box-code").style.display = "none";
               document.getElementById("res-box-link").style.display = "none";
@@ -2185,12 +2195,15 @@
               return; // Salir de la función si encontró el código
             }
 
+            console.log("Código no encontrado, esperando 5 segundos...");
             // Esperar 5 segundos antes del siguiente intento
             await new Promise(resolve => setTimeout(resolve, 5000));
           }
 
           // Si después de 2 minutos no encontró nada
+          console.log("Timeout alcanzado después de 2 minutos");
           clearInterval(textInterval);
+          shouldContinue = false;
           changeStep(6);
           document.getElementById("res-title").innerHTML =
             `<span style="color:var(--ios-red); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> TIEMPO DE ESPERA AGOTADO</span>`;
@@ -2208,7 +2221,9 @@
           }
 
         } catch (err) {
+          console.error("Error en executeSearch:", err);
           clearInterval(textInterval);
+          shouldContinue = false;
           changeStep(6);
           document.getElementById("res-title").innerHTML =
             `<span style="color:var(--ios-red);">ERROR DE CONEXIÓN</span>`;
@@ -2239,7 +2254,7 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("sw.js?v=21.1")
+            .register("sw.js?v=120")
             .then((reg) => {
               console.log("Cybernet App actualizada a v21.1");
               reg.update();
