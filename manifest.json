@@ -1,11 +1,12 @@
 {
   "name": "Cybernet Centro de Códigos",
   "short_name": "Cybernet",
-  "description": "Centro de gestión de códigos Cybernet",
-  "start_url": "index.html",
+  "description": "Centro de códigos para Netflix y Disney Premium",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#e50914",
+  "theme_color": "#000000",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "logo.jpeg",
@@ -17,5 +18,6 @@
       "sizes": "512x512",
       "type": "image/jpeg"
     }
-  ]
+  ],
+  "version": "21.1"
 }
