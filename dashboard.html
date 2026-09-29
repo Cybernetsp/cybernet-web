@@ -3,24 +3,26 @@
   <head>
     <!-- 🔒 PROTECCIÓN DE SEGURIDAD Y BLOQUEO DE RENDERIZADO -->
     <style id="cyberAuthGuard">
-        body {
-            display: none !important;
-        }
+      body {
+        display: none !important;
+      }
     </style>
     <script>
-        (function () {
-            const usuarioObj = JSON.parse(sessionStorage.getItem("usuario_activo") || "null");
-            const sessionStaff = sessionStorage.getItem("active_staff");
+      (function () {
+        const usuarioObj = JSON.parse(
+          sessionStorage.getItem("usuario_activo") || "null",
+        );
+        const sessionStaff = sessionStorage.getItem("active_staff");
 
-            if (!usuarioObj && !sessionStaff) {
-                window.location.replace("login.html");
-            } else {
-                document.addEventListener("DOMContentLoaded", function () {
-                    const styleGuard = document.getElementById("cyberAuthGuard");
-                    if (styleGuard) styleGuard.remove();
-                });
-            }
-        })();
+        if (!usuarioObj && !sessionStaff) {
+          window.location.replace("login.html");
+        } else {
+          document.addEventListener("DOMContentLoaded", function () {
+            const styleGuard = document.getElementById("cyberAuthGuard");
+            if (styleGuard) styleGuard.remove();
+          });
+        }
+      })();
     </script>
     <meta charset="UTF-8" />
     <meta
@@ -321,36 +323,6 @@
         >
         <span
           class="mac-menu-item"
-          style="color: #ffffff"
-          onclick="toggleCodesPanel()"
-          >Códigos</span
-        >
-        <span
-          class="mac-menu-item"
-          style="color: #ffffff"
-          onclick="toggleAnaCodesPanel()"
-          >Cód Ana</span
-        >
-        <span
-          class="mac-menu-item"
-          style="color: #ffffff"
-          onclick="togglePedagoCodesPanel()"
-          >Cód Pedago</span
-        >
-        <span
-          class="mac-menu-item"
-          style="color: #ffffff"
-          onclick="toggleChayoPanel()"
-          >Chayo</span
-        >
-        <span
-          class="mac-menu-item"
-          style="color: #ffffff"
-          onclick="toggleYopmailPanel()"
-          >Yopmail</span
-        >
-        <span
-          class="mac-menu-item"
           id="menuBtnInventario"
           style="display: none; color: #ffffff"
           onclick="toggleInventarioPanel()"
@@ -381,12 +353,6 @@
           style="color: #ffffff"
           onclick="toggleDistrisPanel()"
           >Distris</span
-        >
-        <span
-          class="mac-menu-item"
-          onclick="toggleBreBPanel()"
-          style="color: #ffffff"
-          >Bre-B</span
         >
       </div>
     </header>
@@ -740,7 +706,6 @@
     <!-- 🚀 2. DOCK INFERIOR MAGNÉTICO -->
     <div class="macos-dock-wrapper">
       <nav class="macos-dock" id="controlPanel" style="display: none">
-
         <div
           class="mac-dock-icon"
           id="btnCajaFinanzas"
