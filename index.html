@@ -2043,7 +2043,7 @@
         haptic();
         globalData.plataforma = p;
         dispararSincronizacionGAS(); // 🔥 Escanea Gmail y sincroniza a MySQL de inmediato
-        changeStep(p === "NETFLIX" ? 3 : 4);
+        changeStep(3); // Ambos servicios van al step 3 para seleccionar tipo de código
       }
 
       function setOp(o) {
