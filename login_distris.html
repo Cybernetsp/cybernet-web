@@ -1004,6 +1004,7 @@
         localStorage.setItem("active_distri_tel", data.telefono);
         localStorage.setItem("active_distri_name", data.nombre.toUpperCase());
         localStorage.setItem("active_distri_saldo", data.saldo);
+        localStorage.setItem("last_activity", Date.now().toString());
 
         setTimeout(() => {
           window.location.href = "distribuidores.html";
