@@ -467,6 +467,27 @@ window.cerrarModalExitoCheckout = function () {
 
 window.abrirModalRenovacionB2B = window.abrirModalRenoB2B = function (idItem) {
   haptic();
+
+  // Verificar que el item sea Netflix antes de abrir el modal
+  const item = window.carrito.find((i) => i.id === idItem);
+  if (!item) return;
+
+  const esNetflix = item.id.toUpperCase().includes("NETFLIX") || item.nombre.toUpperCase().includes("NETFLIX");
+
+  if (!esNetflix) {
+    if (typeof triggerToast === "function") {
+      triggerToast(`<div style="display:flex;align-items:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-orange)" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>La renovación solo está disponible para Netflix</span>
+      </div>`);
+    }
+    return;
+  }
+
   const telDistri =
     localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
   const modal = document.getElementById("modalRenovacionDistri");
@@ -1055,6 +1076,25 @@ window.cuentasActivasB2B = [];
 window.cambiarTipoVentaCarrito = function (id, tipo) {
   let item = window.carrito.find((i) => i.id === id);
   if (item) {
+    // Solo permitir renovación para Netflix
+    const esNetflix = item.id.toUpperCase().includes("NETFLIX") || item.nombre.toUpperCase().includes("NETFLIX");
+
+    if (tipo === "Reno" && !esNetflix) {
+      // No permitir renovación para plataformas que no son Netflix
+      if (typeof triggerToast === "function") {
+        triggerToast(`<div style="display:flex;align-items:center;gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ios-orange)" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>La renovación solo está disponible para Netflix</span>
+        </div>`);
+      }
+      actualizarCarritoUI(); // Volver a renderizar para resetear el select
+      return;
+    }
+
     item.tipo = tipo;
     if (tipo === "Nueva") {
       item.correoReno = "";
@@ -1128,12 +1168,16 @@ function actualizarCarritoUI() {
     totalCost += subtotal;
     totalItems += item.amount;
 
+    // Solo permitir renovación para Netflix
+    const esNetflix = item.id.toUpperCase().includes("NETFLIX") || item.nombre.toUpperCase().includes("NETFLIX");
     let isReno = item.tipo === "Reno";
     let displayBtn = isReno ? "block" : "none";
     let btnText = item.correoReno ? item.correoReno : "Seleccionar Cuenta";
     let btnColor = item.correoReno ? "var(--ios-green)" : "var(--ios-orange)";
 
-    let opcionesReno = `
+    let opcionesReno = "";
+    if (esNetflix) {
+      opcionesReno = `
         <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px; width: 100%; border-top: 1px dashed var(--surface-border); padding-top: 10px;">
             <select class="input-ios" style="margin: 0; padding: 8px; font-size: 0.8rem; border-radius: 10px; font-weight: 600;" onchange="window.cambiarTipoVentaCarrito('${item.id}', this.value)">
                 <option value="Nueva" ${!isReno ? "selected" : ""}>Crear Pantalla Nueva</option>
@@ -1143,6 +1187,7 @@ function actualizarCarritoUI() {
                 ${btnText}
             </button>
         </div>`;
+    }
 
     html += `
       <div class="cart-item-row" style="display:flex; flex-direction:column; gap:12px; background: var(--input-bg); padding:14px; border-radius:16px; border: 1px solid var(--surface-border);">
