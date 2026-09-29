@@ -493,20 +493,36 @@
       }
 
       .loader {
-        border: 3px solid var(--btn-icon-bg);
-        border-top: 3px solid var(--ios-red);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spinLoader 0.8s linear infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
         margin: 10px auto 18px auto;
       }
-      @keyframes spinLoader {
-        0% {
-          transform: rotate(0deg);
+      .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--ios-red);
+        border-radius: 50%;
+        animation: typing 1.4s infinite ease-in-out;
+      }
+      .typing-dot:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes typing {
+        0%, 60%, 100% {
+          transform: translateY(0);
+          opacity: 0.4;
         }
-        100% {
-          transform: rotate(360deg);
+        30% {
+          transform: translateY(-8px);
+          opacity: 1;
         }
       }
 
@@ -1364,8 +1380,13 @@
       </div>
 
       <div id="step-5" class="step">
-        <div class="loader"></div>
+        <div class="loader">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
         <p
+          id="loader-text"
           style="
             color: var(--text-secondary);
             font-weight: 600;
@@ -1495,9 +1516,9 @@
             <polyline points="23 4 23 10 17 10"></polyline>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
           </svg>
-          Reintentar Búsqueda
+          Nueva Búsqueda
         </button>
-        <span class="back-link" onclick="reloadAll()">Nueva Consulta</span>
+        <span class="back-link" onclick="reloadAll()">Volver al inicio</span>
       </div>
     </div>
 
@@ -2051,10 +2072,9 @@
         changeStep(4);
       }
 
-      let searchAttempts = 0;
+
 
       function reloadAll() {
-        searchAttempts = 0;
         document.getElementById("telefono").value = "";
         document.getElementById("correo").value = "";
         changeStep(1);
@@ -2089,34 +2109,36 @@
         });
       }
 
-      /* RASTREO CON TEMPORIZADOR MÍNIMO DE 5 SEGUNDOS Y LÓGICA DE 4 INTENTOS */
+      /* RASTREO CON TIMEOUT DE 2 MINUTOS */
       async function executeSearch() {
         haptic();
         let m = document.getElementById("correo").value.toLowerCase().trim();
         if (!m.includes("@")) return fireError("Correo inválido.");
 
-        // 🔥 Disparador extra de respaldo al pulsar Rastrear / Reintentar
+        // 🔥 Disparador extra de respaldo al pulsar Rastrear
         dispararSincronizacionGAS();
 
         const btnTrack = document.getElementById("btn-rastrear");
         globalData.correo = m;
-        searchAttempts++;
 
         changeStep(5);
         btnTrack.disabled = true;
 
-        const loaderText = document.querySelector("#step-5 p");
+        const loaderText = document.getElementById("loader-text");
         if (loaderText) {
-          loaderText.innerText = `Rastreando código en Cybernet... (Intento ${searchAttempts}/4)\nEspera unos segundos...`;
+          loaderText.innerText = "Rastreando código en Cybernet...\nEspera unos segundos...";
         }
 
-        const minWait = new Promise((resolve) => setTimeout(resolve, 5000));
+        // Timeout de 2 minutos (120 segundos)
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("timeout")), 120000)
+        );
 
         try {
           const query = new URLSearchParams(globalData);
-          const [resp] = await Promise.all([
+          const resp = await Promise.race([
             fetch(`${MYSQL_BOT_URL}?${query.toString()}`),
-            minWait,
+            timeout,
           ]);
           const res = await resp.json();
 
@@ -2125,7 +2147,6 @@
           document.getElementById("res-box-link").style.display = "none";
 
           if (res.exito) {
-            searchAttempts = 0;
             document.getElementById("res-title").innerHTML =
               `<span style="color:var(--ios-green); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> ¡LOCALIZADO!</span>`;
             let finalMsg =
@@ -2144,38 +2165,43 @@
               document.getElementById("val-link").href = res.valor;
             }
           } else {
-            if (searchAttempts >= 4) {
-              document.getElementById("res-title").innerHTML =
-                `<span style="color:var(--ios-red); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> ATENCIÓN REQUERIDA</span>`;
-              document.getElementById("res-desc").innerHTML =
-                `Se han realizado <b>4 intentos de búsqueda</b> y el código aún no se registra.<br><br>Por favor, <b>comunícate con nuestros asesores vía WhatsApp</b> para brindarte soporte inmediato.`;
+            document.getElementById("res-title").innerHTML =
+              `<span style="color:var(--ios-orange); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> CÓDIGO NO DISPONIBLE</span>`;
+            document.getElementById("res-desc").innerHTML =
+              `El código aún no ha llegado al sistema.<br><br>Por favor, <b>espera unos minutos y vuelve a intentar</b>. Si el problema persiste, comunícate con nuestros asesores vía WhatsApp.`;
 
-              document.getElementById("res-box-link").style.display = "block";
-              document.getElementById("val-link").href =
-                "https://api.whatsapp.com/send?text=Hola%20Cybernet,%20realice%204%20intentos%20de%20busqueda%20de%20codigo%20y%20no%20aparece.";
-              const linkBtn = document.querySelector("#val-link button");
-              if (linkBtn) {
-                linkBtn.style.background = "#25D366";
-                linkBtn.style.boxShadow = "0 4px 15px rgba(37, 211, 102, 0.4)";
-                linkBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Contactar Asesor por WhatsApp`;
-              }
-            } else {
-              document.getElementById("res-title").innerHTML =
-                `<span style="color:var(--ios-orange); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> CÓDIGO AÚN NO DISPONIBLE</span>`;
-              document.getElementById("res-desc").innerHTML =
-                `El código aún no ha cargado en el sistema (Intento ${searchAttempts} de 4).<br><br>Por favor, presiona el botón <b>'Reintentar Búsqueda'</b> para consultar de nuevo.`;
+            document.getElementById("res-box-link").style.display = "block";
+            document.getElementById("val-link").href =
+              "https://api.whatsapp.com/send?text=Hola%20Cybernet,%20estoy%20buscando%20un%20codigo%20y%20no%20aparece.";
+            const linkBtn = document.querySelector("#val-link button");
+            if (linkBtn) {
+              linkBtn.style.background = "#25D366";
+              linkBtn.style.boxShadow = "0 4px 15px rgba(37, 211, 102, 0.4)";
+              linkBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Contactar Asesor por WhatsApp`;
             }
           }
         } catch (err) {
           changeStep(6);
-          if (searchAttempts >= 4) {
+          if (err.message === "timeout") {
+            document.getElementById("res-title").innerHTML =
+              `<span style="color:var(--ios-red); display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> TIEMPO DE ESPERA AGOTADO</span>`;
+            document.getElementById("res-desc").innerHTML =
+              `La búsqueda tomó más de 2 minutos y el código aún no ha llegado.<br><br>Por favor, <b>espera unos minutos y vuelve a intentar</b>. Si el problema persiste, comunícate con nuestros asesores vía WhatsApp.`;
+
+            document.getElementById("res-box-link").style.display = "block";
+            document.getElementById("val-link").href =
+              "https://api.whatsapp.com/send?text=Hola%20Cybernet,%20la%20busqueda%20de%20codigo%20tomo%20mas%20de%202%20minutos.";
+            const linkBtn = document.querySelector("#val-link button");
+            if (linkBtn) {
+              linkBtn.style.background = "#25D366";
+              linkBtn.style.boxShadow = "0 4px 15px rgba(37, 211, 102, 0.4)";
+              linkBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Contactar Asesor por WhatsApp`;
+            }
+          } else {
             document.getElementById("res-title").innerHTML =
               `<span style="color:var(--ios-red);">ERROR DE CONEXIÓN</span>`;
             document.getElementById("res-desc").innerHTML =
-              `Se alcanzaron 4 intentos. Por favor comunícate con nuestros asesores vía WhatsApp.`;
-          } else {
-            document.getElementById("res-desc").innerText =
-              `Error de conexión. Presiona 'Reintentar Búsqueda' (Intento ${searchAttempts} de 4).`;
+              `Error de conexión. Por favor comunícate con nuestros asesores vía WhatsApp.`;
           }
         } finally {
           btnTrack.disabled = false;
@@ -2202,9 +2228,9 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("sw.js?v=21.0")
+            .register("sw.js?v=21.1")
             .then((reg) => {
-              console.log("Cybernet App lista para instalar");
+              console.log("Cybernet App actualizada a v21.1");
               reg.update();
             })
             .catch((err) => console.log("Error al registrar la App", err));
