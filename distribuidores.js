@@ -322,15 +322,37 @@ window.abrirModalBusquedaCuentas = function () {
   haptic();
   bloquearScroll();
   const inputSearch = document.getElementById("inputCasilleroSearch");
-  if (inputSearch) inputSearch.value = "";
+  if (inputSearch) {
+    inputSearch.value = "";
+    // Asegurar que el input sea visible y no tenga problemas de enfoque en móviles
+    inputSearch.blur(); // Evitar que el teclado se abra automáticamente
+  }
 
   const modal = document.getElementById("modalBusquedaCuentas");
   if (modal) {
     modal.style.display = "flex";
     modal.classList.add("open");
+    // Scroll al inicio del modal en móviles
+    if (window.innerWidth <= 520) {
+      const modalContent = modal.querySelector('.modal-ios');
+      if (modalContent) {
+        modalContent.scrollTop = 0;
+      }
+    }
   }
   buscarCasilleroDistri();
 };
+
+// Manejar cambios de tamaño de ventana para ajustar el modal en móviles
+window.addEventListener('resize', function() {
+  const modal = document.getElementById("modalBusquedaCuentas");
+  if (modal && modal.classList.contains('open')) {
+    const modalContent = modal.querySelector('.modal-ios');
+    if (modalContent && window.innerWidth <= 520) {
+      modalContent.scrollTop = 0;
+    }
+  }
+});
 
 window.cerrarModalBusquedaCuentas = function () {
   haptic();
@@ -449,12 +471,43 @@ window.abrirModalRenovacionB2B = window.abrirModalRenoB2B = function (idItem) {
     localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
   const modal = document.getElementById("modalRenovacionDistri");
   const container = document.getElementById("listaCuentasModalRenoDistri");
+  const buscador = document.getElementById("buscadorModalRenoDistri");
+  const btnRecargaContainer = document.getElementById("botonRecargaRenovacionContainer");
 
   if (!modal || !container) return;
+
+  // Limpiar buscador y evitar que el teclado se abra automáticamente en móviles
+  if (buscador) {
+    buscador.value = "";
+    buscador.blur();
+  }
+
+  // Mostrar botón de recarga en móviles
+  if (btnRecargaContainer && window.innerWidth <= 520) {
+    btnRecargaContainer.style.display = "block";
+  }
+
+  // Guardar el ID del item actual para recarga
+  window.currentRenoItemId = idItem;
 
   container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><svg class="spin-anim" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line></svg><br>Buscando tus pantallas en MySQL...</div>`;
   modal.style.display = "flex";
   modal.classList.add("open");
+
+  // Scroll al inicio del modal en móviles
+  if (window.innerWidth <= 520) {
+    const modalContent = modal.querySelector('.modal-ios');
+    if (modalContent) {
+      modalContent.scrollTop = 0;
+    }
+  }
+
+  cargarCuentasRenovacion(idItem, telDistri);
+};
+
+function cargarCuentasRenovacion(idItem, telDistri) {
+  const container = document.getElementById("listaCuentasModalRenoDistri");
+  if (!container) return;
 
   const formData = new FormData();
   formData.append("accion", "obtener_cuentas_renovacion_distribuidor");
@@ -537,9 +590,23 @@ window.cerrarModalRenovacionB2B = function () {
   haptic();
   desbloquearScroll();
   const modal = document.getElementById("modalRenovacionDistri");
+  const btnRecargaContainer = document.getElementById("botonRecargaRenovacionContainer");
   if (modal) {
     modal.style.display = "none";
     modal.classList.remove("open");
+  }
+  // Ocultar botón de recarga al cerrar
+  if (btnRecargaContainer) {
+    btnRecargaContainer.style.display = "none";
+  }
+};
+
+window.recargarCuentasRenovacion = function () {
+  haptic();
+  if (window.currentRenoItemId) {
+    const telDistri =
+      localStorage.getItem("active_distri_tel") || window.distriTelefonoCache;
+    cargarCuentasRenovacion(window.currentRenoItemId, telDistri);
   }
 };
 
@@ -1011,6 +1078,30 @@ window.filtrarModalRenovacionB2B = function () {
   });
 };
 
+// Agregar un botón de recarga para el modal de renovación en móviles
+function agregarBotonRecargaRenovacion() {
+  const container = document.getElementById("listaCuentasModalRenoDistri");
+  if (!container) return;
+
+  // Verificar si ya existe el botón
+  if (document.getElementById("btnRecargarRenovacion")) return;
+
+  const btnRecarga = document.createElement("button");
+  btnRecarga.id = "btnRecargarRenovacion";
+  btnRecarga.className = "btn-ios btn-secondary";
+  btnRecarga.style.cssText = "width: 100%; padding: 10px; font-size: 0.8rem; margin-bottom: 10px; display: none;";
+  btnRecarga.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+      <polyline points="23 4 23 10 17 10"></polyline>
+      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+    </svg>
+    Recargar Cuentas
+  `;
+
+  // Insertar antes del contenedor de lista
+  container.parentNode.insertBefore(btnRecarga, container);
+}
+
 function actualizarCarritoUI() {
   const container = document.getElementById("cartItemsContainer");
   const countBadge = document.getElementById("cartCountBadge");
@@ -1370,7 +1461,7 @@ function buscarCasilleroDistri() {
         console.error(err);
         contenedor.innerHTML = `<div style="text-align:center; padding:30px; color:var(--ios-red);">Error de conexión al servidor.</div>`;
       });
-  }, 200);
+  }, 300); // Aumentado a 300ms para mejor rendimiento en móviles
 }
 
 function renderizarTabsPlataformasCasillero(cuentas) {
@@ -1462,7 +1553,14 @@ function renderizarResultadosCasillero(queryBusqueda = "") {
   }
 
   if (cuentas.length === 0) {
-    contenedor.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-secondary);">No tienes cuentas registradas que coincidan.</div>`;
+    contenedor.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-secondary);">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px; opacity:0.5;">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <div style="font-size:0.9rem; font-weight:600;">No se encontraron cuentas</div>
+      <div style="font-size:0.75rem; margin-top:4px;">Intenta con otra búsqueda o recarga las cuentas</div>
+    </div>`;
     return;
   }
 
