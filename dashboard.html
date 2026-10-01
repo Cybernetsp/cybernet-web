@@ -9155,17 +9155,17 @@
           padding: 0;
           border-radius: 24px;
           overflow: hidden;
-          background: #111115;
-          border: 1px solid rgba(229, 9, 20, 0.3);
-          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9);
+          background: #000000;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
         "
       >
         <div
           class="sheet-header"
           style="
-            padding: 20px 24px;
-            background: #16161a;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 24px 28px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -9176,30 +9176,31 @@
           <h3
             class="card-title"
             style="
-              color: #e50914;
+              color: #ffffff;
               margin: 0;
-              font-size: 1.15rem;
+              font-size: 1.3rem;
               display: flex;
               align-items: center;
-              gap: 10px;
-              font-weight: 800;
+              gap: 12px;
+              font-weight: 600;
+              letter-spacing: -0.5px;
             "
           >
             <div
               style="
-                color: #e50914;
+                color: #ffffff;
                 display: flex;
                 align-items: center;
                 justify-content: center;
               "
             >
               <svg
-                width="22"
-                height="22"
+                width="24"
+                height="24"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2.5"
+                stroke-width="2"
               >
                 <polygon points="23 7 16 12 23 17 23 7"></polygon>
                 <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
@@ -9212,13 +9213,15 @@
             style="
               position: static !important;
               margin: 0;
-              background: rgba(255, 255, 255, 0.08);
+              background: rgba(255, 255, 255, 0.1);
               border: none;
-              color: #a1a1aa;
+              color: #ffffff;
               width: 32px;
               height: 32px;
               border-radius: 50%;
               cursor: pointer;
+              font-size: 18px;
+              font-weight: 300;
             "
             onclick="toggleNetflixManagerPanel()"
           >
@@ -9230,31 +9233,30 @@
         <div
           style="
             display: flex;
-            gap: 12px;
+            gap: 16px;
             margin-bottom: 4px;
             flex-shrink: 0;
-            padding: 14px 24px 0 24px;
+            padding: 20px 28px 0 28px;
           "
         >
           <div
             style="
               flex: 1;
-              background: rgba(48, 209, 88, 0.08);
-              border: 1px solid rgba(48, 209, 88, 0.2);
-              border-radius: 14px;
-              padding: 14px;
+              background: rgba(255, 255, 255, 0.05);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              border-radius: 16px;
+              padding: 20px;
               text-align: center;
-              box-shadow: inset 0 0 20px rgba(48, 209, 88, 0.02);
             "
           >
             <div
               style="
-                font-size: 0.68rem;
-                color: #30d158;
-                font-weight: 800;
+                font-size: 0.7rem;
+                color: rgba(255, 255, 255, 0.5);
+                font-weight: 500;
                 text-transform: uppercase;
-                margin-bottom: 6px;
-                letter-spacing: 0.5px;
+                margin-bottom: 8px;
+                letter-spacing: 1px;
               "
             >
               Pines Disponibles
@@ -9262,10 +9264,11 @@
             <div
               id="statPinesDisponibles"
               style="
-                font-size: 1.8rem;
-                font-weight: 900;
+                font-size: 2rem;
+                font-weight: 300;
                 color: #ffffff;
-                font-family: monospace;
+                font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+                letter-spacing: -1px;
               "
             >
               -
@@ -9274,22 +9277,21 @@
           <div
             style="
               flex: 1;
-              background: rgba(10, 132, 255, 0.08);
-              border: 1px solid rgba(10, 132, 255, 0.2);
-              border-radius: 14px;
-              padding: 14px;
+              background: rgba(255, 255, 255, 0.05);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              border-radius: 16px;
+              padding: 20px;
               text-align: center;
-              box-shadow: inset 0 0 20px rgba(10, 132, 255, 0.02);
             "
           >
             <div
               style="
-                font-size: 0.68rem;
-                color: #0a84ff;
-                font-weight: 800;
+                font-size: 0.7rem;
+                color: rgba(255, 255, 255, 0.5);
+                font-weight: 500;
                 text-transform: uppercase;
-                margin-bottom: 6px;
-                letter-spacing: 0.5px;
+                margin-bottom: 8px;
+                letter-spacing: 1px;
               "
             >
               Cuentas Totales
@@ -9297,10 +9299,11 @@
             <div
               id="statCuentasTotales"
               style="
-                font-size: 1.8rem;
-                font-weight: 900;
+                font-size: 2rem;
+                font-weight: 300;
                 color: #ffffff;
-                font-family: monospace;
+                font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+                letter-spacing: -1px;
               "
             >
               -
@@ -9313,7 +9316,7 @@
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            padding: 14px 24px 0 24px;
+            padding: 20px 28px 0 28px;
           "
         >
           <!-- 🎯 Botón de crear alias siempre visible -->
@@ -9323,18 +9326,21 @@
             style="
               display: flex;
               width: 100%;
-              background: #e50914;
+              background: rgba(255, 255, 255, 0.1);
               color: #ffffff;
-              border: none;
-              padding: 14px;
-              border-radius: 12px;
-              font-weight: 800;
-              font-size: 0.9rem;
+              border: 1px solid rgba(255, 255, 255, 0.15);
+              padding: 16px;
+              border-radius: 14px;
+              font-weight: 500;
+              font-size: 0.95rem;
               cursor: pointer;
               align-items: center;
               justify-content: center;
-              gap: 8px;
+              gap: 10px;
+              transition: all 0.2s ease;
             "
+            onmouseover="this.style.background='rgba(255, 255, 255, 0.15)'"
+            onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'"
           >
             <svg
               width="18"
@@ -9342,11 +9348,11 @@
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2.5"
+              stroke-width="2"
             >
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-            Crear cuenta de Netflix (Usar Alias)
+            Crear cuenta de Netflix
           </button>
         </div>
 
