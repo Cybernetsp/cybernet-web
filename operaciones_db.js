@@ -1371,35 +1371,35 @@ window.renderizarCargadasEsteTurno = function () {
     const provNombre = (c.proveedor || "PROVEEDOR").toUpperCase();
 
     html += `
-      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-        <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex-grow: 1;">
-          
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 2px 7px; border-radius: 6px; font-weight: 800; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.3px;">
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+        <div style="display: flex; flex-direction: column; gap: 6px; overflow: hidden; flex-grow: 1;">
+
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; padding: 4px 10px; border-radius: 8px; font-weight: 500; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px;">
               ${platNombre}
             </span>
-            <span style="background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 2px 7px; border-radius: 6px; font-weight: 800; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.3px;">
+            <span style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.7); padding: 4px 10px; border-radius: 8px; font-weight: 500; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px;">
               PROV: ${provNombre}
             </span>
           </div>
 
-          <span style="color: #ffffff; font-weight: 800; font-family: monospace; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+          <span style="color: #ffffff; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
             ${c.correo || "-"}
           </span>
-          <span style="color: #30d158; font-weight: 700; font-family: monospace; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          <span style="color: rgba(255, 255, 255, 0.6); font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
             ${c.clave || "-"}
           </span>
         </div>
 
         <div style="display: flex; gap: 6px; flex-shrink: 0; align-items: center;">
-          <button onclick="window.copiarTextoUnico(this, '${correoEsc}')" style="background: rgba(10, 132, 255, 0.15); border: 1px solid rgba(10, 132, 255, 0.3); color: #0a84ff; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">
+          <button onclick="window.copiarTextoUnico(this, '${correoEsc}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">
             Correo
           </button>
-          <button onclick="window.copiarTextoUnico(this, '${claveEsc}')" style="background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">
+          <button onclick="window.copiarTextoUnico(this, '${claveEsc}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">
             Clave
           </button>
-          <button onclick="window.reportarCuentaCargadaDirecto('${idVal}', '${tablaEsc}', '${correoEsc}', '${claveEsc}', '${provEsc}')" style="background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer; white-space: nowrap;">
-            🚨 Reportar
+          <button onclick="window.reportarCuentaCargadaDirecto('${idVal}', '${tablaEsc}', '${correoEsc}', '${claveEsc}', '${provEsc}')" style="background: rgba(127, 29, 29, 0.8); border: 1px solid rgba(127, 29, 29, 0.9); color: #ffffff; padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 500; cursor: pointer; white-space: nowrap;">
+            Reportar
           </button>
         </div>
       </div>
