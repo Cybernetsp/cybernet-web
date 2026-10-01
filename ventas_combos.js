@@ -1092,12 +1092,12 @@ window.copiarTextoFichaVentaDefinitiva = function () {
     if (btn) {
       const oldHtml = btn.innerHTML;
       btn.innerHTML = `✅ ¡Ficha Copiada!`;
-      btn.style.background = "rgba(255, 255, 255, 0.15)";
+      btn.style.background = "#30d158";
       btn.style.color = "#ffffff";
       setTimeout(() => {
         btn.innerHTML = oldHtml;
-        btn.style.background = "rgba(255, 255, 255, 0.1)";
-        btn.style.color = "#ffffff";
+        btn.style.background = "#ffffff";
+        btn.style.color = "#000000";
       }, 1500);
     }
     if (typeof triggerToast === "function")
@@ -1695,16 +1695,16 @@ window.copiarCotizacionCombo = function (btn) {
   navigator.clipboard.writeText(mensajeVIP).then(() => {
     const originalHTML = btn.innerHTML;
     btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Ficha Copiada!`;
-    btn.style.setProperty("background", "#30d158", "important");
-    btn.style.setProperty("color", "#000000", "important");
+    btn.style.setProperty("background", "rgba(255, 255, 255, 0.15)", "important");
+    btn.style.setProperty("color", "#ffffff", "important");
 
     if (typeof triggerToast === "function")
       triggerToast(`📋 Cotización copiada al portapapeles.`);
 
     setTimeout(() => {
       btn.innerHTML = originalHTML;
-      btn.style.setProperty("background", "#30d158", "important");
-      btn.style.setProperty("color", "#000000", "important");
+      btn.style.setProperty("background", "rgba(255, 255, 255, 0.1)", "important");
+      btn.style.setProperty("color", "#ffffff", "important");
       window.cerrarCalculadoraCombos();
     }, 1500);
   });
