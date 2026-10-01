@@ -2785,26 +2785,26 @@
         class="sheet-ios"
         onclick="event.stopPropagation()"
         style="
-          max-width: 520px !important;
+          max-width: 500px !important;
           width: 92%;
           max-height: 90vh !important;
           display: flex;
           flex-direction: column;
           padding: 0;
-          border-radius: 26px;
+          border-radius: 24px;
           overflow: hidden;
-          background: #141417;
-          border: 1px solid rgba(48, 209, 88, 0.3);
+          background: #000000;
+          border: 1px solid rgba(255, 255, 255, 0.1);
           margin: auto;
-          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95);
+          box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
         "
       >
         <!-- ENCABEZADO -->
         <div
           class="sheet-header"
           style="
-            padding: 18px 22px;
-            background: #18181c;
+            padding: 28px 32px;
+            background: rgba(255, 255, 255, 0.03);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
@@ -2819,33 +2819,34 @@
             style="
               color: #ffffff;
               margin: 0;
-              font-size: 1.1rem;
-              font-weight: 800;
+              font-size: 1.4rem;
+              font-weight: 600;
+              letter-spacing: -0.5px;
               display: flex;
               align-items: center;
-              gap: 10px;
+              gap: 12px;
             "
           >
             <div
               style="
-                background: rgba(48, 209, 88, 0.15);
-                color: #30d158;
-                width: 36px;
-                height: 36px;
+                background: rgba(255, 255, 255, 0.1);
+                color: #ffffff;
+                width: 42px;
+                height: 42px;
                 border-radius: 12px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border: 1px solid rgba(48, 209, 88, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.15);
               "
             >
               <svg
-                width="20"
-                height="20"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="3"
+                stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
@@ -2860,17 +2861,18 @@
             type="button"
             class="btn-close-circle"
             style="
-              background: rgba(255, 255, 255, 0.08);
+              background: rgba(255, 255, 255, 0.1);
               border: none;
-              color: #a1a1aa;
-              width: 32px;
-              height: 32px;
+              color: #ffffff;
+              width: 36px;
+              height: 36px;
               border-radius: 50%;
               cursor: pointer;
               display: flex;
               align-items: center;
               justify-content: center;
               margin: 0;
+              font-size: 20px;
             "
             onclick="toggleCargarPanel()"
           >
@@ -2883,10 +2885,10 @@
           style="
             overflow-y: auto;
             flex-grow: 1;
-            padding: 20px;
+            padding: 28px 32px 32px 32px;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 20px;
             background: transparent;
           "
           class="cyber-custom-scroll"
@@ -2896,20 +2898,20 @@
             id="formCargarCuentas"
             onsubmit="ejecutarCargaLote(event)"
             style="
-              background: rgba(255, 255, 255, 0.025);
+              background: rgba(255, 255, 255, 0.03);
               border: 1px solid rgba(255, 255, 255, 0.08);
-              border-radius: 20px;
-              padding: 18px;
+              border-radius: 16px;
+              padding: 20px;
               display: flex;
               flex-direction: column;
-              gap: 14px;
+              gap: 16px;
             "
           >
             <span
               style="
-                font-size: 0.75rem;
-                color: #a1a1aa;
-                font-weight: 800;
+                font-size: 0.8rem;
+                color: rgba(255, 255, 255, 0.5);
+                font-weight: 500;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
               "
@@ -2918,7 +2920,7 @@
 
             <!-- SELECTORES -->
             <div
-              style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px"
             >
               <!-- PLATAFORMAS (SE LLENA DINÁMICAMENTE CON STOCK EN VIVO) -->
               <select
@@ -2927,13 +2929,13 @@
                 required
                 style="
                   margin: 0;
-                  background: rgba(0, 0, 0, 0.4) !important;
-                  padding: 12px 14px;
+                  background: rgba(0, 0, 0, 0.3) !important;
+                  padding: 14px 16px;
                   border-radius: 12px;
                   border: 1px solid rgba(255, 255, 255, 0.1);
                   color: #ffffff;
-                  font-size: 0.85rem;
-                  font-weight: 700;
+                  font-size: 0.9rem;
+                  font-weight: 500;
                   outline: none;
                 "
               >
@@ -2950,13 +2952,13 @@
                 onchange="comprobarProveedorDinamico()"
                 style="
                   margin: 0;
-                  background: rgba(0, 0, 0, 0.4) !important;
-                  padding: 12px 14px;
+                  background: rgba(0, 0, 0, 0.3) !important;
+                  padding: 14px 16px;
                   border-radius: 12px;
                   border: 1px solid rgba(255, 255, 255, 0.1);
                   color: #ffffff;
-                  font-size: 0.85rem;
-                  font-weight: 700;
+                  font-size: 0.9rem;
+                  font-weight: 500;
                   outline: none;
                 "
               >
@@ -2975,7 +2977,7 @@
             <!-- INPUT OTRO PROVEEDOR (OCULTO POR DEFECTO) -->
             <div
               id="wrapperProveedorManual"
-              style="display: none !important; flex-direction: column; gap: 6px"
+              style="display: none !important; flex-direction: column; gap: 8px"
             >
               <input
                 type="text"
@@ -2984,13 +2986,13 @@
                 placeholder="Escribe el nombre del proveedor..."
                 style="
                   margin: 0;
-                  background: rgba(0, 0, 0, 0.4) !important;
-                  padding: 12px 14px;
+                  background: rgba(0, 0, 0, 0.3) !important;
+                  padding: 14px 16px;
                   border-radius: 12px;
-                  border: 1px solid rgba(255, 159, 10, 0.3);
-                  color: var(--ios-orange, #ff9f0a);
-                  font-size: 0.88rem;
-                  font-weight: 700;
+                  border: 1px solid rgba(255, 255, 255, 0.1);
+                  color: #ffffff;
+                  font-size: 0.9rem;
+                  font-weight: 500;
                   outline: none;
                 "
               />
@@ -3005,14 +3007,14 @@
               placeholder="Pega aquí las cuentas. Formatos aceptados:&#10;correo@gmail.com clave123&#10;correo@gmail.com:clave123"
               style="
                 margin: 0;
-                background: rgba(0, 0, 0, 0.4) !important;
-                padding: 14px;
+                background: rgba(0, 0, 0, 0.3) !important;
+                padding: 16px;
                 border-radius: 14px;
                 border: 1px solid rgba(255, 255, 255, 0.1);
                 color: #ffffff;
-                font-family: monospace;
-                font-size: 0.85rem;
-                line-height: 1.4;
+                font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+                font-size: 0.9rem;
+                line-height: 1.5;
                 resize: vertical;
                 outline: none;
                 width: 100%;
@@ -3027,19 +3029,18 @@
               class="btn-ios btn-success"
               style="
                 width: 100%;
-                padding: 14px;
-                font-size: 0.95rem;
-                font-weight: 900;
+                padding: 16px;
+                font-size: 1rem;
+                font-weight: 500;
                 border-radius: 14px;
-                background: #30d158;
-                color: #000000;
-                border: none;
+                background: rgba(255, 255, 255, 0.1);
+                color: #ffffff;
+                border: 1px solid rgba(255, 255, 255, 0.15);
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
-                box-shadow: 0 10px 25px rgba(48, 209, 88, 0.25);
+                gap: 10px;
               "
             >
               CARGAR CUENTAS EN LOTE
@@ -3049,13 +3050,13 @@
           <!-- 2. CARGADAS EN ESTE TURNO -->
           <div
             style="
-              background: rgba(255, 255, 255, 0.025);
+              background: rgba(255, 255, 255, 0.03);
               border: 1px solid rgba(255, 255, 255, 0.08);
-              border-radius: 20px;
-              padding: 18px;
+              border-radius: 16px;
+              padding: 20px;
               display: flex;
               flex-direction: column;
-              gap: 12px;
+              gap: 14px;
             "
           >
             <div
@@ -3067,9 +3068,9 @@
             >
               <span
                 style="
-                  font-size: 0.75rem;
-                  color: #a1a1aa;
-                  font-weight: 800;
+                  font-size: 0.8rem;
+                  color: rgba(255, 255, 255, 0.5);
+                  font-weight: 500;
                   text-transform: uppercase;
                   letter-spacing: 0.5px;
                 "
@@ -3078,10 +3079,10 @@
               <span
                 id="cantCargadasTurno"
                 style="
-                  font-size: 0.75rem;
-                  color: #30d158;
-                  font-weight: 800;
-                  font-family: monospace;
+                  font-size: 0.8rem;
+                  color: rgba(255, 255, 255, 0.7);
+                  font-weight: 500;
+                  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
                 "
                 >0 cuentas</span
               >
@@ -3092,7 +3093,7 @@
               style="
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: 10px;
                 max-height: 200px;
                 overflow-y: auto;
                 padding-right: 2px;
@@ -3103,8 +3104,8 @@
                 style="
                   text-align: center;
                   padding: 25px;
-                  color: #a1a1aa;
-                  font-size: 0.82rem;
+                  color: rgba(255, 255, 255, 0.4);
+                  font-size: 0.85rem;
                   background: rgba(0, 0, 0, 0.2);
                   border-radius: 14px;
                   border: 1px dashed rgba(255, 255, 255, 0.08);
