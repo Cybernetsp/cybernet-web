@@ -26,12 +26,70 @@ window.crearCuentaNetflixAlias = function () {
     return;
   }
 
-  // Si no hay nada pendiente, genera una nueva cuenta
-  window.ejecutarGeneracionNuevaCuentaAlias();
+  // Si no hay nada pendiente, primero verificar PINs disponibles
+  window.verificarPinesDisponiblesYCrear();
 };
 
 // Alias para compatibilidad
 window.crearCuentaNetflixAliasExterna = window.crearCuentaNetflixAlias;
+
+// ==========================================================================
+// 2. VERIFICAR PINES DISPONIBLES ANTES DE CREAR CUENTA
+// ==========================================================================
+window.verificarPinesDisponiblesYCrear = function () {
+  if (typeof haptic === "function") haptic();
+
+  // Mostrar modal con estado de carga
+  window.abrirModalSuscripcionEstructura();
+
+  const spinner = document.getElementById("radarVerificacionSpinner");
+  if (spinner) {
+    spinner.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Buscando PINs disponibles...`;
+  }
+
+  // Actualizar estadísticas de PINs
+  window.actualizarEstadisticasPinesNetflix(function(pinesDisponibles) {
+    if (pinesDisponibles > 0) {
+      // Hay PINs disponibles, proceder a crear cuenta
+      window.ejecutarGeneracionNuevaCuentaAlias();
+    } else {
+      // No hay PINs disponibles
+      const modal = document.getElementById("cuentaGeneradaModalOverlay");
+      if (modal) modal.remove();
+      alert("⚠️ No hay PINs disponibles para crear cuenta.\n\nPor favor verifica el inventario en REFÁCIL y recarga la página.");
+    }
+  });
+};
+
+window.actualizarEstadisticasPinesNetflix = function (callback) {
+  const cbName = "cb_pines_check_" + Date.now();
+  window[cbName] = function (res) {
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      callback(res.pinesDisponibles || 0);
+    } else {
+      callback(0);
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=obtenerEstadisticasNetflix&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+
+  // Timeout de 15 segundos
+  setTimeout(() => {
+    if (window[cbName]) {
+      const node = document.getElementById("node_" + cbName);
+      if (node) node.remove();
+      delete window[cbName];
+      callback(0); // Si no responde, asumir 0 PINs
+    }
+  }, 15000);
+};
 
 // ==========================================================================
 // 2. GENERAR NUEVA CUENTA EN SHEETS (RESERVA ALIAS + PIN EN PINESMES)
