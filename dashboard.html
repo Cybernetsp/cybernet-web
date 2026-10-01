@@ -705,12 +705,79 @@
 
     <!-- 🚀 2. DOCK INFERIOR MAGNÉTICO -->
     <div class="macos-dock-wrapper">
-      <nav class="macos-dock" id="controlPanel" style="display: none">
+      <!-- Botón Hamburguesa para Móvil -->
+      <button
+        id="mobileMenuBtn"
+        class="mobile-hamburger"
+        onclick="toggleMobileMenu()"
+        style="display: none;"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Menú Flotante Móvil -->
+      <div id="mobileMenu" class="mobile-menu-overlay" style="display: none;">
+        <div class="mobile-menu-content">
+          <button class="mobile-menu-item" onclick="toggleFinanzasPanel(); toggleMobileMenu();">
+            <div class="mobile-menu-icon" style="background: linear-gradient(180deg, #30d158, #248a3d);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <span>Finanzas</span>
+          </button>
+          <button class="mobile-menu-item" onclick="toggleVentasPanel(); toggleMobileMenu();">
+            <div class="mobile-menu-icon" style="background: linear-gradient(180deg, #3ab4f2, #0084ff);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1.5"></circle>
+                <circle cx="20" cy="21" r="1.5"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+            </div>
+            <span>Vender</span>
+          </button>
+          <button class="mobile-menu-item" onclick="abrirCalculadoraCombos(); toggleMobileMenu();">
+            <div class="mobile-menu-icon" style="background: linear-gradient(180deg, #ffb340, #f57c00);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+              </svg>
+            </div>
+            <span>Cotizador</span>
+          </button>
+          <button class="mobile-menu-item" onclick="toggleNetflixManagerPanel(); toggleMobileMenu();">
+            <div class="mobile-menu-icon" style="background: linear-gradient(180deg, #e50914, #b71c1c);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M8 21h12"></path>
+              </svg>
+            </div>
+            <span>Netflix</span>
+          </button>
+          <button class="mobile-menu-item" onclick="toggleCargarPanel(); toggleMobileMenu();">
+            <div class="mobile-menu-icon" style="background: linear-gradient(180deg, #bf5af2, #8b5cf6);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 12 3 12 3"></polyline>
+                <polyline points="12 3 12 8 7 8"></polyline>
+              </svg>
+            </div>
+            <span>Cargar</span>
+          </button>
+        </div>
+      </div>
+
+      <nav class="macos-dock" id="controlPanel">
         <div
           class="mac-dock-icon"
           id="btnCajaFinanzas"
           onclick="toggleFinanzasPanel()"
-          style="display: none !important"
         >
           <div
             class="mac-icon-bg"
@@ -10557,5 +10624,26 @@
     <script src="personal_staff.js?v=2"></script>
     <script src="widgets_alertas.js"></script>
     <script src="finanzas_staff.js?v=999"></script>
+    
+    <!-- Función Menú Hamburguesa Móvil -->
+    <script>
+      function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        if (menu.style.display === 'none' || menu.style.display === '') {
+          menu.style.display = 'block';
+        } else {
+          menu.style.display = 'none';
+        }
+      }
+      
+      // Cerrar menú al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        const menu = document.getElementById('mobileMenu');
+        const menuBtn = document.getElementById('mobileMenuBtn');
+        if (menu && menuBtn && !menu.contains(e.target) && !menuBtn.contains(e.target)) {
+          menu.style.display = 'none';
+        }
+      });
+    </script>
   </body>
 </html>
