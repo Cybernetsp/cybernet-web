@@ -13,7 +13,7 @@ window.verificationLinkInterval = null;
 // ==========================================================================
 // 1. PUNTO DE ENTRADA PRINCIPAL
 // ==========================================================================
-window.crearCuentaNetflixAliasExterna = function () {
+window.crearCuentaNetflixAlias = function () {
   if (typeof haptic === "function") haptic();
 
   // Revisar si hay una cuenta pendiente de guardado en la memoria local
@@ -29,6 +29,9 @@ window.crearCuentaNetflixAliasExterna = function () {
   // Si no hay nada pendiente, genera una nueva cuenta
   window.ejecutarGeneracionNuevaCuentaAlias();
 };
+
+// Alias para compatibilidad
+window.crearCuentaNetflixAliasExterna = window.crearCuentaNetflixAlias;
 
 // ==========================================================================
 // 2. GENERAR NUEVA CUENTA EN SHEETS (RESERVA ALIAS + PIN EN PINESMES)
@@ -51,12 +54,17 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
     sessionStorage.getItem("active_staff") ||
     localStorage.getItem("cyber_saved_staff") ||
     "Admin";
-  const cbName = "cb_alias_cta_" + Date.now();
 
-  window[cbName] = function (res) {
-    const scriptNode = document.getElementById("node_" + cbName);
+  // Intentar primero con JSONP, si falla usar fetch con proxy
+  const url = `${SCRIPT_URL_NETFLIX_GEN}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&_ts=${Date.now()}`;
+  console.log("Intentando JSONP:", url);
+
+  // El Google Script usa callbackCiber como nombre fijo
+  window.callbackCiber = function (res) {
+    console.log("✅ Callback ejecutado. Respuesta del Google Script:", res);
+    const scriptNode = document.getElementById("node_script_netflix");
     if (scriptNode) scriptNode.remove();
-    delete window[cbName];
+    delete window.callbackCiber;
 
     if (res && res.status === "success" && res.data) {
       const d = res.data;
@@ -78,10 +86,108 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
     }
   };
 
+  // Usar JSONP como el método original
   const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=${cbName}&_ts=${Date.now()}`;
+  script.id = "node_script_netflix";
+  script.src = url;
+  script.onload = function() {
+    console.log("Script cargado, esperando callback...");
+  };
+  script.onerror = function(e) {
+    console.error("Error al cargar el script con JSONP, intentando con proxy:", e);
+
+    // Si JSONP falla, intentar con proxy CORS
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    console.log("Intentando con proxy CORS:", proxyUrl);
+
+    fetch(proxyUrl)
+      .then(response => response.text())
+      .then(text => {
+        console.log("Respuesta del proxy:", text);
+
+        // Extraer el JSON de la respuesta JSONP
+        const match = text.match(/callbackCiber\((.*)\)/);
+        if (match) {
+          const jsonStr = match[1];
+          const res = JSON.parse(jsonStr);
+          console.log("Respuesta parseada del proxy:", res);
+
+          if (res && res.status === "success" && res.data) {
+            const d = res.data;
+            window.pinOcultoActual = d.pinRefacil;
+            localStorage.setItem("cyber_netflix_alias_pendiente", JSON.stringify(d));
+            window.restaurarInterfazAliasGenerada(d);
+          } else {
+            alert("❌ Error: " + (res ? res.message : "Error desconocido del proxy"));
+            const modal = document.getElementById("cuentaGeneradaModalOverlay");
+            if (modal) modal.remove();
+          }
+        } else {
+          console.error("No se pudo parsear la respuesta del proxy");
+          alert("❌ Error: La respuesta del proxy no tiene el formato esperado.");
+          const modal = document.getElementById("cuentaGeneradaModalOverlay");
+          if (modal) modal.remove();
+        }
+      })
+      .catch(error => {
+        console.error("Error con el proxy:", error);
+        alert("❌ Error: JSONP y proxy fallaron. Verifica tu conexión o contacta al administrador.");
+        const modal = document.getElementById("cuentaGeneradaModalOverlay");
+        if (modal) modal.remove();
+      });
+  };
   document.body.appendChild(script);
+  console.log("Llamando al Google Script con JSONP:", script.src);
+
+  // Timeout para detectar si el script no responde
+  setTimeout(() => {
+    if (window.callbackCiber) {
+      console.error("El Google Script no respondió en 10 segundos");
+      const scriptNode = document.getElementById("node_script_netflix");
+      if (scriptNode) {
+        console.log("Script node existe, eliminándolo");
+        scriptNode.remove();
+      }
+      delete window.callbackCiber;
+      alert("⏱️ El Google Script no respondió. Intentando con proxy CORS...");
+      // Intentar con proxy CORS
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      console.log("Intentando con proxy CORS:", proxyUrl);
+
+      fetch(proxyUrl)
+        .then(response => response.text())
+        .then(text => {
+          console.log("Respuesta del proxy:", text);
+          const match = text.match(/callbackCiber\((.*)\)/);
+          if (match) {
+            const jsonStr = match[1];
+            const res = JSON.parse(jsonStr);
+            console.log("Respuesta parseada del proxy:", res);
+
+            if (res && res.status === "success" && res.data) {
+              const d = res.data;
+              window.pinOcultoActual = d.pinRefacil;
+              localStorage.setItem("cyber_netflix_alias_pendiente", JSON.stringify(d));
+              window.restaurarInterfazAliasGenerada(d);
+            } else {
+              alert("❌ Error: " + (res ? res.message : "Error desconocido del proxy"));
+              const modal = document.getElementById("cuentaGeneradaModalOverlay");
+              if (modal) modal.remove();
+            }
+          } else {
+            alert("❌ Error: La respuesta del proxy no tiene el formato esperado.");
+            const modal = document.getElementById("cuentaGeneradaModalOverlay");
+            if (modal) modal.remove();
+          }
+        })
+        .catch(error => {
+          console.error("Error con el proxy:", error);
+          alert("❌ Error: JSONP y proxy fallaron. Verifica tu conexión o contacta al administrador.");
+          const modal = document.getElementById("cuentaGeneradaModalOverlay");
+          if (modal) modal.remove();
+        });
+    }
+  }, 10000);
 };
 
 // ==========================================================================
@@ -93,70 +199,69 @@ window.abrirModalSuscripcionEstructura = function () {
 
   const modalHtml = `
     <div class="overlay-ios open" id="cuentaGeneradaModalOverlay" style="display: flex !important; z-index: 999999 !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
-      <div class="modal-ios" style="max-width: 440px; width: 92%; max-height: 90vh; background: #16161a; border: 1px solid rgba(229, 9, 20, 0.3); border-radius: 26px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative; overflow-y: auto;">
-        
-        <!-- Encabezado con Check Verde -->
-        <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
-          <div style="background: rgba(48, 209, 88, 0.15); color: #30d158; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(48, 209, 88, 0.3); flex-shrink: 0;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <div class="modal-ios" style="max-width: 500px; width: 92%; max-height: 90vh; background: #000000; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 0; display: flex; flex-direction: column; gap: 0; box-shadow: 0 40px 100px rgba(0,0,0,0.8); position: relative; overflow: hidden;">
+
+        <!-- Encabezado -->
+        <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 28px 32px; background: rgba(255, 255, 255, 0.03);">
+          <div style="background: rgba(255,255,255,0.1); color: #ffffff; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
-          <h3 style="margin: 0; color: #ffffff; font-size: 1.2rem; font-weight: 800;">Suscripción Creada</h3>
+          <h3 style="margin: 0; color: #ffffff; font-size: 1.4rem; font-weight: 600; letter-spacing: -0.5px;">Suscripción Creada</h3>
         </div>
 
-        <!-- Alerta Obligatoria -->
-        <div style="color: #ff9f0a; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; background: rgba(255, 159, 10, 0.08); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255, 159, 10, 0.2);">
-          ⚠️ OBLIGATORIO: DEBES INYECTAR AL MAESTRO ANTES DE SALIR
-        </div>
-
-        <!-- Caja Spinner / Radar de Gmail -->
-        <div id="radarVerificacionContenedor" style="background: rgba(255, 159, 10, 0.04); border: 1px dashed rgba(255, 159, 10, 0.3); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
-          <div id="radarVerificacionSpinner" style="color: #ff9f0a; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
-            Esperando correo '¡Ya casi terminas!' en Gmail...
+        <div style="padding: 28px 32px 32px 32px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; max-height: calc(90vh - 90px);">
+          <!-- Alerta Obligatoria -->
+          <div style="color: rgba(255,255,255,0.6); font-size: 0.8rem; font-weight: 500; text-align: center; background: rgba(255,255,255,0.03); padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+            Debes inyectar al maestro antes de salir
           </div>
 
-          <!-- Botón Enlace de Verificación (Oculto Inicialmente) -->
-          <a id="btnLinkVerificarGmail" href="#" target="_blank" style="display: none; width: 100%; background: #0a84ff; color: #ffffff; text-decoration: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 0.88rem; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3);">
-            ✉️ Verificar Correo en Netflix
-          </a>
-        </div>
+          <!-- Caja Spinner / Radar de Gmail -->
+          <div id="radarVerificacionContenedor" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+            <div id="radarVerificacionSpinner" style="color: rgba(255,255,255,0.7); font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg>
+              Esperando correo de verificación...
+            </div>
 
-        <!-- Bloque Correo -->
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden; padding-right: 8px;">
-            <span style="font-size: 0.65rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CORREO ELECTRÓNICO</span>
-            <span id="displayCtaCorreo" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #ffffff; word-break: break-all;">Cargando...</span>
+            <!-- Botón Enlace de Verificación (Oculto Inicialmente) -->
+            <a id="btnLinkVerificarGmail" href="#" target="_blank" style="display: none; width: 100%; background: rgba(255,255,255,0.1); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 14px; font-weight: 500; font-size: 0.95rem; align-items: center; justify-content: center; gap: 10px; border: 1px solid rgba(255,255,255,0.15);">
+              Verificar Correo en Netflix
+            </a>
           </div>
-          <button style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #ffffff; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; flex-shrink: 0;" onclick="window.copiarDatoCuentaNueva('displayCtaCorreo', this)">Copiar</button>
-        </div>
 
-        <!-- Bloque Contraseña -->
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; flex-direction: column; gap: 2px;">
-            <span style="font-size: 0.65rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">CONTRASEÑA</span>
-            <span id="displayCtaClave" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #ffffff;">Cargando...</span>
+          <!-- Bloque Correo -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 18px; cursor: pointer; transition: background 0.2s;" onclick="window.copiarDatoCuentaNueva('displayCtaCorreo', this)">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 0.7rem; color: rgba(255,255,255,0.5); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Correo Electrónico</span>
+              <span id="displayCtaCorreo" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; font-size: 1rem; font-weight: 500; color: #ffffff; word-break: break-all;">Cargando...</span>
+            </div>
           </div>
-          <button style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #ffffff; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; flex-shrink: 0;" onclick="window.copiarDatoCuentaNueva('displayCtaClave', this)">Copiar</button>
-        </div>
 
-        <!-- Bloque PIN de Activación -->
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; flex-direction: column; gap: 2px;">
-            <span style="font-size: 0.65rem; color: #a1a1aa; font-weight: 800; text-transform: uppercase;">PIN DE ACTIVACIÓN (REFÁCIL)</span>
-            <span id="displayCtaPinRecarga" style="font-family: monospace; font-size: 0.9rem; font-weight: 800; color: #ff9f0a;">Oculto (Esperando a Netflix...)</span>
+          <!-- Bloque Contraseña -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 18px; cursor: pointer; transition: background 0.2s;" onclick="window.copiarDatoCuentaNueva('displayCtaClave', this)">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 0.7rem; color: rgba(255,255,255,0.5); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Contraseña</span>
+              <span id="displayCtaClave" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; font-size: 1rem; font-weight: 500; color: #ffffff;">Cargando...</span>
+            </div>
           </div>
-          <button style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #ffffff; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; flex-shrink: 0;" onclick="window.copiarDatoCuentaNueva('displayCtaPinRecarga', this)">Copiar</button>
+
+          <!-- Bloque PIN de Activación -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 18px; cursor: pointer; transition: background 0.2s;" onclick="window.copiarDatoCuentaNueva('displayCtaPinRecarga', this)">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 0.7rem; color: rgba(255,255,255,0.5); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">PIN de Activación</span>
+              <span id="displayCtaPinRecarga" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; font-size: 0.95rem; font-weight: 500; color: rgba(255,255,255,0.6);">Oculto (Esperando a Netflix...)</span>
+            </div>
+          </div>
+
+          <!-- Botón Inyectar al Maestro (Inicialmente Oculto) -->
+          <button id="btnGuardarMaestroNetflix" style="display: none; width: 100%; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.15); padding: 16px; border-radius: 14px; font-weight: 500; font-size: 1rem; cursor: pointer; transition: all 0.2s;">
+            Guardar en Inventario Maestro
+          </button>
+
+          <!-- Botón Descartar Cuenta Mala -->
+          <button id="btnCuentaMalaAlias" onclick="window.cambiarCuentaMalaAlias()" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); padding: 14px; border-radius: 14px; font-weight: 500; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
+            No llego correo de verificacion
+          </button>
         </div>
-
-        <!-- Botón Verde Inyectar al Maestro (Inicialmente Oculto) -->
-        <button id="btnGuardarMaestroNetflix" style="display: none; width: 100%; background: #30d158; color: #000000; border: none; padding: 15px; border-radius: 14px; font-weight: 900; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3);">
-          ✓ Guardar en Inventario Maestro (Sheets + MySQL)
-        </button>
-
-        <!-- Botón Descartar Cuenta Mala -->
-        <button id="btnCuentaMalaAlias" onclick="window.cambiarCuentaMalaAlias()" style="width: 100%; background: rgba(255, 69, 58, 0.12); border: 1px solid rgba(255, 69, 58, 0.3); color: #ff453a; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          ✕ Esta cuenta no sirve (Descartar y buscar otra)
-        </button>
 
       </div>
     </div>
@@ -175,7 +280,7 @@ window.restaurarInterfazAliasGenerada = function (d) {
   document.getElementById("displayCtaClave").innerText = d.clave;
   document.getElementById("displayCtaPinRecarga").innerText =
     "Oculto (Esperando a Netflix...)";
-  document.getElementById("displayCtaPinRecarga").style.color = "#ff9f0a";
+  document.getElementById("displayCtaPinRecarga").style.color = "#888";
 
   const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
   btnGuardar.onclick = function () {
@@ -197,12 +302,11 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
     clearInterval(window.verificationLinkInterval);
 
   window.verificationLinkInterval = setInterval(function () {
-    const cbRadarName = "cb_radar_alias_" + Date.now();
-
-    window[cbRadarName] = function (res) {
-      const node = document.getElementById("node_" + cbRadarName);
+    // El Google Script usa callbackCiber como nombre fijo
+    window.callbackCiber = function (res) {
+      const node = document.getElementById("node_radar_netflix");
       if (node) node.remove();
-      delete window[cbRadarName];
+      delete window.callbackCiber;
 
       if (res && res.status === "success") {
         // 1. Si llegó el correo del PIN o el enlace
@@ -211,11 +315,11 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
           if (pinEl && pinEl.innerText !== window.pinOcultoActual) {
             if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
             pinEl.innerText = window.pinOcultoActual;
-            pinEl.style.color = "#30d158";
+            pinEl.style.color = "#ffffff";
 
             const spinner = document.getElementById("radarVerificacionSpinner");
             if (spinner) {
-              spinner.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> PIN Revelado. Esperando link de verificación...`;
+              spinner.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> PIN revelado. Esperando link de verificación...`;
             }
           }
         }
@@ -232,7 +336,7 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
           const btnLink = document.getElementById("btnLinkVerificarGmail");
           if (btnLink) {
             btnLink.href = res.linkVerificacion;
-            btnLink.innerHTML = "✉️ Verificar Correo en Netflix";
+            btnLink.innerHTML = "Verificar Correo en Netflix";
             btnLink.style.setProperty("display", "inline-flex", "important");
 
             // Al darle clic al link, se habilita el botón de Guardar en Maestro
@@ -250,16 +354,15 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
             "radarVerificacionContenedor",
           );
           if (contenedor) {
-            contenedor.style.background = "rgba(48, 209, 88, 0.06)";
-            contenedor.style.borderColor = "rgba(48, 209, 88, 0.35)";
+            contenedor.style.background = "rgba(255,255,255,0.08)";
           }
         }
       }
     };
 
     const script = document.createElement("script");
-    script.id = "node_" + cbRadarName;
-    script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoTarget)}&callback=${cbRadarName}&_ts=${Date.now()}`;
+    script.id = "node_radar_netflix";
+    script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoTarget)}&_ts=${Date.now()}`;
     document.body.appendChild(script);
   }, 4000);
 };
@@ -274,12 +377,11 @@ window.guardarCuentaConfirmadaNetflixDual = function (btn, datosCuenta) {
   btn.style.pointerEvents = "none";
   btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> 1/2: Inyectando en Sheets...`;
 
-  const cbName = "cb_save_cta_" + Date.now();
-
-  window[cbName] = function (res) {
-    const scriptNode = document.getElementById("node_" + cbName);
+  // El Google Script usa callbackCiber como nombre fijo
+  window.callbackCiber = function (res) {
+    const scriptNode = document.getElementById("node_save_netflix");
     if (scriptNode) scriptNode.remove();
-    delete window[cbName];
+    delete window.callbackCiber;
 
     if (res && res.status === "success") {
       btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> 2/2: Inyectando en MySQL...`;
@@ -343,8 +445,8 @@ window.guardarCuentaConfirmadaNetflixDual = function (btn, datosCuenta) {
   };
 
   const script = document.createElement("script");
-  script.id = "node_" + cbName;
-  const urlParams = `?action=confirmarGuardadoNetflix&correo=${encodeURIComponent(datosCuenta.correo)}&clave=${encodeURIComponent(datosCuenta.clave)}&callback=${cbName}&_ts=${Date.now()}`;
+  script.id = "node_save_netflix";
+  const urlParams = `?action=confirmarGuardadoNetflix&correo=${encodeURIComponent(datosCuenta.correo)}&clave=${encodeURIComponent(datosCuenta.clave)}&_ts=${Date.now()}`;
   script.src = SCRIPT_URL_NETFLIX_GEN + urlParams;
   document.body.appendChild(script);
 };
@@ -367,13 +469,13 @@ window.cambiarCuentaMalaAlias = function () {
   btnMala.disabled = true;
   btnMala.innerHTML = "Descartando y buscando nueva...";
 
-  const cbName = "cb_mala_" + Date.now();
-  window[cbName] = function (res) {
+  // El Google Script usa callbackCiber como nombre fijo
+  window.callbackCiber = function (res) {
     btnMala.disabled = false;
     btnMala.innerHTML = "✕ Esta cuenta no sirve (Descartar y buscar otra)";
-    const scriptNode = document.getElementById("node_" + cbName);
+    const scriptNode = document.getElementById("node_mala_netflix");
     if (scriptNode) scriptNode.remove();
-    delete window[cbName];
+    delete window.callbackCiber;
 
     if (res && res.status === "success") {
       let d =
@@ -389,12 +491,12 @@ window.cambiarCuentaMalaAlias = function () {
         clearInterval(window.verificationLinkInterval);
       document.getElementById("displayCtaPinRecarga").innerText =
         "Oculto (Esperando a Netflix...)";
-      document.getElementById("displayCtaPinRecarga").style.color = "#ff9f0a";
+      document.getElementById("displayCtaPinRecarga").style.color = "#888";
 
       const spinner = document.getElementById("radarVerificacionSpinner");
       if (spinner) {
         spinner.style.setProperty("display", "flex", "important");
-        spinner.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Esperando correo '¡Ya casi terminas!' en Gmail...`;
+        spinner.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Esperando correo de verificación...`;
       }
 
       window.lanzarRadarEspiaAlias(res.correoNuevo);
@@ -406,32 +508,65 @@ window.cambiarCuentaMalaAlias = function () {
   };
 
   const script = document.createElement("script");
-  script.id = "node_" + cbName;
+  script.id = "node_mala_netflix";
   const user = sessionStorage.getItem("active_staff") || "Sistema";
-  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=cambiarCuentaMalaAlias&correoMalo=${encodeURIComponent(correoMalo)}&user=${encodeURIComponent(user)}&callback=${cbName}&_ts=${Date.now()}`;
+  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=cambiarCuentaMalaAlias&correoMalo=${encodeURIComponent(correoMalo)}&user=${encodeURIComponent(user)}&_ts=${Date.now()}`;
   document.body.appendChild(script);
 };
 
 // ==========================================================================
 // 8. HELPER DE COPIADO DE DATOS
 // ==========================================================================
-window.copiarDatoCuentaNueva = function (idElemento, btn) {
+window.copiarDatoCuentaNueva = function (idElemento, contenedor) {
   if (typeof haptic === "function") haptic();
   let texto = document.getElementById(idElemento).innerText;
 
   if (!texto || texto.includes("Cargando") || texto.includes("Oculto")) return;
 
   navigator.clipboard.writeText(texto).then(function () {
-    let originalText = btn.innerText;
-    btn.innerText = "¡Copiado!";
-    btn.style.background = "#30d158";
-    btn.style.color = "#000000";
+    // Cambiar el fondo temporalmente para indicar que se copió
+    let originalBackground = contenedor.style.background;
+    contenedor.style.background = "rgba(255,255,255,0.15)";
 
     setTimeout(function () {
-      btn.innerText = originalText;
-      btn.style.background = "rgba(255,255,255,0.08)";
-      btn.style.color = "#ffffff";
-    }, 1200);
+      contenedor.style.background = originalBackground;
+    }, 300);
+
+    // Verificar si existe el appleToast y usar el sistema existente
+    const appleToast = document.getElementById("appleToast");
+    if (appleToast && typeof window.mostrarToastIOS === "function") {
+      window.mostrarToastIOS("📋 Copiado");
+    } else {
+      // Fallback si no existe el appleToast
+      console.warn("appleToast no encontrado, usando fallback");
+      const existingFallback = document.getElementById("copiadoFallback");
+      if (existingFallback) existingFallback.remove();
+
+      const fallback = document.createElement("div");
+      fallback.id = "copiadoFallback";
+      fallback.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #000000;
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        z-index: 99999999;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      `;
+      fallback.innerText = "📋 Copiado";
+      document.body.appendChild(fallback);
+
+      setTimeout(() => {
+        fallback.remove();
+      }, 2000);
+    }
 
     if (idElemento === "displayCtaCorreo") {
       window.open("https://netflix.com/clearcookies", "_blank");
