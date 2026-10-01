@@ -407,6 +407,10 @@ window.toggleNetflixManagerPanel = function () {
     if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
     overlay.style.display = "flex";
     overlay.classList.add("open");
+
+    // Ejecuta las funciones en vivo al abrir la ventana
+    window.cargarEstadisticasNetflix();
+    window.dispararActualizarPinesRefacil();
   }
 };
 
@@ -787,6 +791,18 @@ window.crearModalNetflixManagerHTML = function () {
             <h3 style="margin: 0; color: #e50914; font-size: 1.15rem; font-weight: 800;">Netflix</h3>
           </div>
           <button type="button" onclick="window.toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">✕</button>
+        </div>
+
+        <!-- 🔥 CUADROS ESTADÍSTICOS 🔥 -->
+        <div style="display: flex; gap: 12px; margin-bottom: 4px; flex-shrink: 0;">
+          <div style="flex: 1; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); border-radius: 14px; padding: 14px; text-align: center; box-shadow: inset 0 0 20px rgba(48,209,88,0.02);">
+            <div style="font-size: 0.68rem; color: #30d158; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Pines Disponibles</div>
+            <div id="statPinesDisponibles" style="font-size: 1.8rem; font-weight: 900; color: #ffffff; font-family: monospace;">-</div>
+          </div>
+          <div style="flex: 1; background: rgba(10, 132, 255, 0.08); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 14px; padding: 14px; text-align: center; box-shadow: inset 0 0 20px rgba(10,132,255,0.02);">
+            <div style="font-size: 0.68rem; color: #0a84ff; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Cuentas Totales</div>
+            <div id="statCuentasTotales" style="font-size: 1.8rem; font-weight: 900; color: #ffffff; font-family: monospace;">-</div>
+          </div>
         </div>
 
         <div style="display: flex; flex-direction: column; flex-shrink: 0;">
