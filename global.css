@@ -1669,6 +1669,48 @@ textarea.input-ios {
     bottom: 80px !important;
   }
 
+  /* Ocultar alertas por defecto en móvil */
+  .cyber-notification-center {
+    display: none !important;
+  }
+
+  .cyber-notification-center.mobile-alerts-visible {
+    display: flex !important;
+  }
+
+  /* Botón toggle alertas móvil */
+  .mobile-alert-toggle {
+    display: flex !important;
+    position: fixed;
+    top: 38px;
+    right: 12px;
+    z-index: 2000001;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-alert-toggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .mobile-alert-toggle svg {
+    transition: transform 0.3s ease;
+  }
+
+  .mobile-alert-toggle.expanded svg {
+    transform: rotate(180deg);
+  }
+
   .mobile-menu-content {
     display: flex;
     flex-direction: column;
