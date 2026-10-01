@@ -99,21 +99,21 @@
     // 🟠 WIDGET 1: STOCK CRÍTICO
     if (alertasStock && alertasStock.length > 0) {
       html += `
-        <div style="background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 159, 10, 0.25); border-radius: 18px; padding: 16px 18px; box-shadow: 0 12px 32px rgba(0,0,0,0.5); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:10px;">
-            <span style="font-size:0.8rem; font-weight:600; color:#ff9f0a; display:flex; align-items:center; gap:8px; letter-spacing:0.3px;">
-              <span style="width:6px; height:6px; border-radius:50%; background:#ff9f0a; display:inline-block; box-shadow:0 0 10px rgba(255, 159, 10, 0.5);"></span>
+        <div style="background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 18px 20px; box-shadow: 0 12px 32px rgba(0,0,0,0.5); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:12px;">
+            <span style="font-size:0.85rem; font-weight:500; color:#ffffff; display:flex; align-items:center; gap:10px; letter-spacing:0.2px;">
+              <span style="width:4px; height:4px; border-radius:50%; background:rgba(255, 255, 255, 0.3); display:inline-block;"></span>
               Stock Crítico
             </span>
-            <span style="font-size:0.7rem; color:rgba(255,255,255,0.4); font-weight:500;">${alertasStock.length}</span>
+            <span style="font-size:0.75rem; color:rgba(255,255,255,0.35); font-weight:400;">${alertasStock.length}</span>
           </div>
-          <div style="display:flex; flex-direction:column; gap:8px; max-height:180px; overflow-y:auto;">`;
+          <div style="display:flex; flex-direction:column; gap:10px; max-height:180px; overflow-y:auto;">`;
 
       alertasStock.forEach((item) => {
         html += `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,159,10,0.06); border:1px solid rgba(255,159,10,0.12); border-radius:12px; padding:10px 14px; transition: all 0.2s ease;">
-            <span style="font-size:0.85rem; font-weight:500; color:#ffffff;">${item.plataforma}</span>
-            <span style="font-size:0.8rem; font-weight:600; color:#ff9f0a; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:12px 16px; transition: all 0.2s ease;">
+            <span style="font-size:0.9rem; font-weight:400; color:#ffffff;">${item.plataforma}</span>
+            <span style="font-size:0.85rem; font-weight:500; color:rgba(255,255,255,0.5); font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
               ${item.libres} libre${item.libres === 1 ? "" : "s"}
             </span>
           </div>`;
@@ -125,21 +125,21 @@
     // 🔴 WIDGET 2: GARANTÍAS ACTIVAS
     if (garantias && garantias.length > 0) {
       html += `
-        <div style="background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 69, 58, 0.25); border-radius: 18px; padding: 16px 18px; box-shadow: 0 12px 32px rgba(0,0,0,0.5); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:10px;">
-            <span style="font-size:0.8rem; font-weight:600; color:#ff453a; display:flex; align-items:center; gap:8px; letter-spacing:0.3px;">
-              <span style="width:6px; height:6px; border-radius:50%; background:#ff453a; display:inline-block; box-shadow:0 0 10px rgba(255, 69, 58, 0.5);"></span>
+        <div style="background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 18px 20px; box-shadow: 0 12px 32px rgba(0,0,0,0.5); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:12px;">
+            <span style="font-size:0.85rem; font-weight:500; color:#ffffff; display:flex; align-items:center; gap:10px; letter-spacing:0.2px;">
+              <span style="width:4px; height:4px; border-radius:50%; background:rgba(255, 255, 255, 0.3); display:inline-block;"></span>
               Garantías Activas
             </span>
-            <span style="font-size:0.7rem; color:rgba(255,255,255,0.4); font-weight:500;">${garantias.length}</span>
+            <span style="font-size:0.75rem; color:rgba(255,255,255,0.35); font-weight:400;">${garantias.length}</span>
           </div>
-          <div style="display:flex; flex-direction:column; gap:8px; max-height:180px; overflow-y:auto;">`;
+          <div style="display:flex; flex-direction:column; gap:10px; max-height:180px; overflow-y:auto;">`;
 
       garantias.forEach((g) => {
         html += `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,69,58,0.06); border:1px solid rgba(255,69,58,0.12); border-radius:12px; padding:10px 14px; transition: all 0.2s ease;">
-            <span style="font-size:0.85rem; font-weight:500; color:#ffffff;">${g.plataforma}</span>
-            <span style="font-size:0.8rem; font-weight:600; color:#ff453a; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:12px 16px; transition: all 0.2s ease;">
+            <span style="font-size:0.9rem; font-weight:400; color:#ffffff;">${g.plataforma}</span>
+            <span style="font-size:0.85rem; font-weight:500; color:rgba(255,255,255,0.5); font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
               ${g.total} en garantía
             </span>
           </div>`;
