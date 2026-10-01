@@ -689,6 +689,102 @@ select.input-ios {
   animation: spin 1s linear infinite;
 }
 
+/* =========================================================================
+   🔄 CYBERNET LOADER - "C" CON TRES PUNTOS ANIMADOS (ESTILO TYPING)
+   ========================================================================= */
+@keyframes typingDot {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+.cyber-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px 20px;
+}
+
+.cyber-loader-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #30d158;
+  text-shadow: 0 0 20px rgba(48, 209, 88, 0.5);
+}
+
+.cyber-loader-c {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -1px;
+}
+
+.cyber-loader-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.cyber-loader-dot {
+  width: 8px;
+  height: 8px;
+  background: #30d158;
+  border-radius: 50%;
+  animation: typingDot 1.4s infinite ease-in-out;
+  box-shadow: 0 0 10px rgba(48, 209, 88, 0.6);
+}
+
+.cyber-loader-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.cyber-loader-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.cyber-loader-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.cyber-loader-text {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #a1a1aa;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Versión compacta para espacios pequeños */
+.cyber-loader-compact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+}
+
+.cyber-loader-compact .cyber-loader-icon {
+  font-size: 1.5rem;
+  gap: 6px;
+}
+
+.cyber-loader-compact .cyber-loader-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.cyber-loader-compact .cyber-loader-text {
+  font-size: 0.85rem;
+}
+
 /* --- 9. TABLAS (FINANZAS Y REGISTROS) --- */
 .distris-table {
   width: 100%;
@@ -1301,6 +1397,167 @@ textarea.input-ios {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
   }
+}
+
+/* 📱 Optimización para Celular */
+@media (max-width: 768px) {
+  /* Contenedores principales */
+  .sheet-ios,
+  .modal-ios {
+    max-width: 95% !important;
+    width: 95% !important;
+    max-height: 95vh !important;
+    border-radius: 20px !important;
+  }
+
+  /* Grids a una columna */
+  .ipad-bento-container,
+  .cyber-custom-scroll {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Clases de grid span - todas a ancho completo */
+  .bento-w-12,
+  .bento-w-8,
+  .bento-w-7,
+  .bento-w-6,
+  .bento-w-5,
+  .bento-w-4,
+  .bento-w-3 {
+    grid-column: span 1 !important;
+  }
+
+  /* Modales y overlays */
+  .overlay-ios {
+    padding: 16px !important;
+  }
+
+  /* Headers de modales */
+  .sheet-header {
+    padding: 20px 24px !important;
+  }
+
+  .sheet-header h3 {
+    font-size: 1.1rem !important;
+  }
+
+  .sheet-header h3 svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* Botones de cierre */
+  .btn-close-circle {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 18px !important;
+  }
+
+  /* Inputs y selects */
+  .input-ios,
+  input,
+  select,
+  textarea {
+    font-size: 16px !important; /* Evita zoom en iOS */
+    padding: 14px 16px !important;
+    min-height: 48px !important;
+  }
+
+  /* Botones */
+  .btn-ios {
+    padding: 14px 20px !important;
+    font-size: 0.9rem !important;
+    min-height: 48px !important;
+  }
+
+  /* Widgets */
+  .widget-ipad {
+    padding: 18px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Grid del dashboard */
+  .ipad-bento-container {
+    padding: 12px !important;
+  }
+
+  /* Textos responsivos */
+  h1, h2, h3 {
+    font-size: 1.2rem !important;
+  }
+
+  /* Modales específicos */
+  #finanzasOverlay .sheet-ios,
+  #comboCalcOverlay .sheet-ios,
+  #cargarOverlay .sheet-ios {
+    max-height: 95vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Scroll mejorado en celular */
+  ::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+  }
+
+  /* Espaciado en formularios */
+  form {
+    gap: 14px !important;
+  }
+
+  /* Grid de módulo financiero */
+  #finanzasOverlay .ipad-bento-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  #finanzasOverlay section {
+    width: 100% !important;
+    grid-column: span 1 !important;
+  }
+}
+
+/* 📱 Ultra optimización para Celular Pequeño */
+@media (max-width: 480px) {
+  .sheet-ios,
+  .modal-ios {
+    max-width: 98% !important;
+    width: 98% !important;
+    border-radius: 16px !important;
+  }
+
+  .sheet-header {
+    padding: 16px 20px !important;
+  }
+
+  .sheet-header h3 {
+    font-size: 1rem !important;
+  }
+
+  /* Botones más compactos */
+  .btn-ios {
+    padding: 12px 16px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Padding más reducido en contenedores */
+  .widget-ipad {
+    padding: 16px !important;
+  }
+
+  /* Ajustes para dock en celular */
+  .macos-dock {
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  .macos-dock button {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
   .bento-w-12,
   .bento-w-8,
   .bento-w-7,
