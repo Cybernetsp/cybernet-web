@@ -59,12 +59,12 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
   const url = `${SCRIPT_URL_NETFLIX_GEN}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&_ts=${Date.now()}`;
   console.log("Intentando JSONP:", url);
 
-  // El Google Script usa callbackCiber como nombre fijo
-  window.callbackCiber = function (res) {
+  // El Google Script usa callbackliber como nombre fijo
+  window.callbackliber = function (res) {
     console.log("✅ Callback ejecutado. Respuesta del Google Script:", res);
     const scriptNode = document.getElementById("node_script_netflix");
     if (scriptNode) scriptNode.remove();
-    delete window.callbackCiber;
+    delete window.callbackliber;
 
     if (res && res.status === "success" && res.data) {
       const d = res.data;
@@ -106,7 +106,7 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
         console.log("Respuesta del proxy:", text);
 
         // Extraer el JSON de la respuesta JSONP
-        const match = text.match(/callbackCiber\((.*)\)/);
+        const match = text.match(/callbackliber\((.*)\)/);
         if (match) {
           const jsonStr = match[1];
           const res = JSON.parse(jsonStr);
@@ -141,14 +141,14 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
 
   // Timeout para detectar si el script no responde
   setTimeout(() => {
-    if (window.callbackCiber) {
+    if (window.callbackliber) {
       console.error("El Google Script no respondió en 10 segundos");
       const scriptNode = document.getElementById("node_script_netflix");
       if (scriptNode) {
         console.log("Script node existe, eliminándolo");
         scriptNode.remove();
       }
-      delete window.callbackCiber;
+      delete window.callbackliber;
       alert("⏱️ El Google Script no respondió. Intentando con proxy CORS...");
       // Intentar con proxy CORS
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
@@ -158,7 +158,7 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
         .then(response => response.text())
         .then(text => {
           console.log("Respuesta del proxy:", text);
-          const match = text.match(/callbackCiber\((.*)\)/);
+          const match = text.match(/callbackliber\((.*)\)/);
           if (match) {
             const jsonStr = match[1];
             const res = JSON.parse(jsonStr);
@@ -302,11 +302,11 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
     clearInterval(window.verificationLinkInterval);
 
   window.verificationLinkInterval = setInterval(function () {
-    // El Google Script usa callbackCiber como nombre fijo
-    window.callbackCiber = function (res) {
+    // El Google Script usa callbackliber como nombre fijo
+    window.callbackliber = function (res) {
       const node = document.getElementById("node_radar_netflix");
       if (node) node.remove();
-      delete window.callbackCiber;
+      delete window.callbackliber;
 
       if (res && res.status === "success") {
         // 1. Si llegó el correo del PIN o el enlace
@@ -377,11 +377,11 @@ window.guardarCuentaConfirmadaNetflixDual = function (btn, datosCuenta) {
   btn.style.pointerEvents = "none";
   btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> 1/2: Inyectando en Sheets...`;
 
-  // El Google Script usa callbackCiber como nombre fijo
-  window.callbackCiber = function (res) {
+  // El Google Script usa callbackliber como nombre fijo
+  window.callbackliber = function (res) {
     const scriptNode = document.getElementById("node_save_netflix");
     if (scriptNode) scriptNode.remove();
-    delete window.callbackCiber;
+    delete window.callbackliber;
 
     if (res && res.status === "success") {
       btn.innerHTML = `<svg class="spin-anim" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> 2/2: Inyectando en MySQL...`;
@@ -469,13 +469,13 @@ window.cambiarCuentaMalaAlias = function () {
   btnMala.disabled = true;
   btnMala.innerHTML = "Descartando y buscando nueva...";
 
-  // El Google Script usa callbackCiber como nombre fijo
-  window.callbackCiber = function (res) {
+  // El Google Script usa callbackliber como nombre fijo
+  window.callbackliber = function (res) {
     btnMala.disabled = false;
     btnMala.innerHTML = "✕ Esta cuenta no sirve (Descartar y buscar otra)";
     const scriptNode = document.getElementById("node_mala_netflix");
     if (scriptNode) scriptNode.remove();
-    delete window.callbackCiber;
+    delete window.callbackliber;
 
     if (res && res.status === "success") {
       let d =
