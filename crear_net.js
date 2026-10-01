@@ -94,47 +94,10 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
     console.log("Script cargado, esperando callback...");
   };
   script.onerror = function(e) {
-    console.error("Error al cargar el script con JSONP, intentando con proxy:", e);
-
-    // Si JSONP falla, intentar con proxy CORS
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-    console.log("Intentando con proxy CORS:", proxyUrl);
-
-    fetch(proxyUrl)
-      .then(response => response.text())
-      .then(text => {
-        console.log("Respuesta del proxy:", text);
-
-        // Extraer el JSON de la respuesta JSONP
-        const match = text.match(/callbackCiber\((.*)\)/);
-        if (match) {
-          const jsonStr = match[1];
-          const res = JSON.parse(jsonStr);
-          console.log("Respuesta parseada del proxy:", res);
-
-          if (res && res.status === "success" && res.data) {
-            const d = res.data;
-            window.pinOcultoActual = d.pinRefacil;
-            localStorage.setItem("cyber_netflix_alias_pendiente", JSON.stringify(d));
-            window.restaurarInterfazAliasGenerada(d);
-          } else {
-            alert("❌ Error: " + (res ? res.message : "Error desconocido del proxy"));
-            const modal = document.getElementById("cuentaGeneradaModalOverlay");
-            if (modal) modal.remove();
-          }
-        } else {
-          console.error("No se pudo parsear la respuesta del proxy");
-          alert("❌ Error: La respuesta del proxy no tiene el formato esperado.");
-          const modal = document.getElementById("cuentaGeneradaModalOverlay");
-          if (modal) modal.remove();
-        }
-      })
-      .catch(error => {
-        console.error("Error con el proxy:", error);
-        alert("❌ Error: JSONP y proxy fallaron. Verifica tu conexión o contacta al administrador.");
-        const modal = document.getElementById("cuentaGeneradaModalOverlay");
-        if (modal) modal.remove();
-      });
+    console.error("Error al cargar el script con JSONP:", e);
+    alert("❌ Error: No se pudo conectar con Google Script. Verifica tu conexión.");
+    const modal = document.getElementById("cuentaGeneradaModalOverlay");
+    if (modal) modal.remove();
   };
   document.body.appendChild(script);
   console.log("Llamando al Google Script con JSONP:", script.src);
@@ -142,52 +105,18 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
   // Timeout para detectar si el script no responde
   setTimeout(() => {
     if (window.callbackCiber) {
-      console.error("El Google Script no respondió en 10 segundos");
+      console.error("El Google Script no respondió en 15 segundos");
       const scriptNode = document.getElementById("node_script_netflix");
       if (scriptNode) {
         console.log("Script node existe, eliminándolo");
         scriptNode.remove();
       }
       delete window.callbackCiber;
-      alert("⏱️ El Google Script no respondió. Intentando con proxy CORS...");
-      // Intentar con proxy CORS
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      console.log("Intentando con proxy CORS:", proxyUrl);
-
-      fetch(proxyUrl)
-        .then(response => response.text())
-        .then(text => {
-          console.log("Respuesta del proxy:", text);
-          const match = text.match(/callbackCiber\((.*)\)/);
-          if (match) {
-            const jsonStr = match[1];
-            const res = JSON.parse(jsonStr);
-            console.log("Respuesta parseada del proxy:", res);
-
-            if (res && res.status === "success" && res.data) {
-              const d = res.data;
-              window.pinOcultoActual = d.pinRefacil;
-              localStorage.setItem("cyber_netflix_alias_pendiente", JSON.stringify(d));
-              window.restaurarInterfazAliasGenerada(d);
-            } else {
-              alert("❌ Error: " + (res ? res.message : "Error desconocido del proxy"));
-              const modal = document.getElementById("cuentaGeneradaModalOverlay");
-              if (modal) modal.remove();
-            }
-          } else {
-            alert("❌ Error: La respuesta del proxy no tiene el formato esperado.");
-            const modal = document.getElementById("cuentaGeneradaModalOverlay");
-            if (modal) modal.remove();
-          }
-        })
-        .catch(error => {
-          console.error("Error con el proxy:", error);
-          alert("❌ Error: JSONP y proxy fallaron. Verifica tu conexión o contacta al administrador.");
-          const modal = document.getElementById("cuentaGeneradaModalOverlay");
-          if (modal) modal.remove();
-        });
+      alert("⏱️ El Google Script no respondió. Intenta nuevamente.");
+      const modal = document.getElementById("cuentaGeneradaModalOverlay");
+      if (modal) modal.remove();
     }
-  }, 10000);
+  }, 15000);
 };
 
 // ==========================================================================
