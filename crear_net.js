@@ -56,7 +56,7 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
     "Admin";
 
   // Intentar primero con JSONP, si falla usar fetch con proxy
-  const url = `${SCRIPT_URL_NETFLIX_GEN}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&_ts=${Date.now()}`;
+  const url = `${SCRIPT_URL_NETFLIX_GEN}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=callbackCiber&_ts=${Date.now()}`;
   console.log("Intentando JSONP:", url);
 
   // El Google Script usa callbackCiber como nombre fijo
@@ -105,7 +105,7 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
   // Timeout para detectar si el script no responde
   setTimeout(() => {
     if (window.callbackCiber) {
-      console.error("El Google Script no respondió en 15 segundos");
+      console.error("El Google Script no respondió en 30 segundos");
       const scriptNode = document.getElementById("node_script_netflix");
       if (scriptNode) {
         console.log("Script node existe, eliminándolo");
@@ -116,7 +116,7 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
       const modal = document.getElementById("cuentaGeneradaModalOverlay");
       if (modal) modal.remove();
     }
-  }, 15000);
+  }, 30000);
 };
 
 // ==========================================================================
