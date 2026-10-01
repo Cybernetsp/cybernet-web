@@ -1092,12 +1092,12 @@ window.copiarTextoFichaVentaDefinitiva = function () {
     if (btn) {
       const oldHtml = btn.innerHTML;
       btn.innerHTML = `✅ ¡Ficha Copiada!`;
-      btn.style.background = "#30d158";
+      btn.style.background = "rgba(255, 255, 255, 0.15)";
       btn.style.color = "#ffffff";
       setTimeout(() => {
         btn.innerHTML = oldHtml;
-        btn.style.background = "#ffffff";
-        btn.style.color = "#000000";
+        btn.style.background = "rgba(255, 255, 255, 0.1)";
+        btn.style.color = "#ffffff";
       }, 1500);
     }
     if (typeof triggerToast === "function")
