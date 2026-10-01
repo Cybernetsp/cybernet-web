@@ -1547,27 +1547,104 @@ textarea.input-ios {
     padding: 16px !important;
   }
 
-  /* Ajustes para dock en celular */
+  /* Ocultar dock normal en móvil */
   .macos-dock {
-    justify-content: center !important;
-    gap: 8px !important;
+    display: none !important;
   }
 
-  .macos-dock button {
-    width: 44px !important;
-    height: 44px !important;
+  /* Mostrar botón hamburguesa en móvil */
+  .mobile-hamburger {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .mobile-hamburger:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  /* Menú flotante móvil */
+  .mobile-menu-overlay {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999999;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 8px;
+    animation: fadeInUp 0.3s ease;
+  }
+
+  .mobile-menu-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mobile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 200px;
+  }
+
+  .mobile-menu-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .mobile-menu-item span {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .mobile-menu-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+  }
+
+  .mobile-menu-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   }
 }
-  .bento-w-12,
-  .bento-w-8,
-  .bento-w-7,
-  .bento-w-6,
-  .bento-w-5,
-  .bento-w-4,
-  .bento-w-3 {
-    grid-column: span 12 !important;
-  }
-}
+
 /* ==========================================================================
     🛠️ PARCHE: ESTILO OSCURO PARA MENÚS DESPLEGABLES (SELECT OPTIONS)
     ========================================================================== */
