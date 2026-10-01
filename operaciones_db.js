@@ -783,31 +783,31 @@ window.crearModalNetflixManagerHTML = function () {
     <div class="overlay-ios" id="netflixManagerOverlay" style="display: none; z-index: 16000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
       <div class="sheet-ios" onclick="event.stopPropagation()" style="max-width: 480px; width: 92%; max-height: 88vh; background: #000000; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 0; box-shadow: 0 40px 100px rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden; margin: auto;">
 
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 24px 28px; flex-shrink: 0; background: rgba(255, 255, 255, 0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 28px 32px; flex-shrink: 0; background: rgba(255, 255, 255, 0.03);">
           <div style="display: flex; align-items: center; gap: 12px;">
             <div style="color: #ffffff; display: flex; align-items: center; justify-content: center;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
             </div>
-            <h3 style="margin: 0; color: #ffffff; font-size: 1.3rem; font-weight: 600; letter-spacing: -0.5px;">Netflix</h3>
+            <h3 style="margin: 0; color: #ffffff; font-size: 1.4rem; font-weight: 600; letter-spacing: -0.5px;">Netflix</h3>
           </div>
-          <button type="button" onclick="window.toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.1); border: none; color: #ffffff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: 300;">✕</button>
+          <button type="button" onclick="window.toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.1); border: none; color: #ffffff; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px; font-weight: 300;">✕</button>
         </div>
 
         <!-- 🔥 CUADROS ESTADÍSTICOS 🔥 -->
-        <div style="display: flex; gap: 16px; margin-bottom: 4px; flex-shrink: 0; padding: 20px 28px 0 28px;">
-          <div style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 20px; text-align: center;">
-            <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.5); font-weight: 500; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;">Pines Disponibles</div>
-            <div id="statPinesDisponibles" style="font-size: 2rem; font-weight: 300; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; letter-spacing: -1px;">-</div>
+        <div style="display: flex; gap: 16px; margin-bottom: 4px; flex-shrink: 0; padding: 24px 32px 0 32px;">
+          <div style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 24px 20px; text-align: center;">
+            <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.5); font-weight: 500; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px;">Pines Disponibles</div>
+            <div id="statPinesDisponibles" style="font-size: 2.2rem; font-weight: 300; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; letter-spacing: -1px;">-</div>
           </div>
-          <div style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 20px; text-align: center;">
-            <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.5); font-weight: 500; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;">Cuentas Totales</div>
-            <div id="statCuentasTotales" style="font-size: 2rem; font-weight: 300; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; letter-spacing: -1px;">-</div>
+          <div style="flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 24px 20px; text-align: center;">
+            <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.5); font-weight: 500; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px;">Cuentas Totales</div>
+            <div id="statCuentasTotales" style="font-size: 2.2rem; font-weight: 300; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; letter-spacing: -1px;">-</div>
           </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; flex-shrink: 0; padding: 20px 28px 0 28px;">
-          <button id="btnCrearAliasHeader" onclick="window.crearCuentaNetflixAliasExterna()" style="display: flex; width: 100%; background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.15); padding: 16px; border-radius: 14px; font-weight: 500; font-size: 0.95rem; cursor: pointer; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.15)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <div style="display: flex; flex-direction: column; flex-shrink: 0; padding: 28px 32px 32px 32px;">
+          <button id="btnCrearAliasHeader" onclick="window.crearCuentaNetflixAliasExterna()" style="display: flex; width: 100%; background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.15); padding: 18px; border-radius: 14px; font-weight: 500; font-size: 1rem; cursor: pointer; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.15)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
             Crear cuenta de Netflix
           </button>
         </div>
