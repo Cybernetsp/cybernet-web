@@ -39,23 +39,31 @@ window.crearCuentaNetflixAliasExterna = window.crearCuentaNetflixAlias;
 window.verificarPinesDisponiblesYCrear = function () {
   if (typeof haptic === "function") haptic();
 
-  // Mostrar modal con estado de carga
-  window.abrirModalSuscripcionEstructura();
-
-  const spinner = document.getElementById("radarVerificacionSpinner");
-  if (spinner) {
-    spinner.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Buscando PINs disponibles...`;
+  // Obtener el botón del modal de Netflix
+  const btnCrear = document.getElementById("btnCrearAliasHeader");
+  if (!btnCrear) {
+    alert("❌ Error: No se encontró el botón de crear cuenta.");
+    return;
   }
+
+  // Guardar el contenido original del botón
+  const contenidoOriginal = btnCrear.innerHTML;
+  btnCrear.disabled = true;
+
+  // Mostrar animación de carga en el botón
+  btnCrear.innerHTML = `<svg class="spin-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line></svg> Buscando PINs...`;
 
   // Actualizar estadísticas de PINs
   window.actualizarEstadisticasPinesNetflix(function(pinesDisponibles) {
+    // Restaurar el botón
+    btnCrear.disabled = false;
+    btnCrear.innerHTML = contenidoOriginal;
+
     if (pinesDisponibles > 0) {
       // Hay PINs disponibles, proceder a crear cuenta
       window.ejecutarGeneracionNuevaCuentaAlias();
     } else {
       // No hay PINs disponibles
-      const modal = document.getElementById("cuentaGeneradaModalOverlay");
-      if (modal) modal.remove();
       alert("⚠️ No hay PINs disponibles para crear cuenta.\n\nPor favor verifica el inventario en REFÁCIL y recarga la página.");
     }
   });
