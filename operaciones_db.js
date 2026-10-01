@@ -1371,34 +1371,27 @@ window.renderizarCargadasEsteTurno = function () {
     const provNombre = (c.proveedor || "PROVEEDOR").toUpperCase();
 
     html += `
-      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-        <div style="display: flex; flex-direction: column; gap: 6px; overflow: hidden; flex-grow: 1;">
-
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; padding: 4px 10px; border-radius: 8px; font-weight: 500; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px;">
-              ${platNombre}
-            </span>
-            <span style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.7); padding: 4px 10px; border-radius: 8px; font-weight: 500; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px;">
-              PROV: ${provNombre}
-            </span>
-          </div>
-
-          <span style="color: #ffffff; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
-            ${c.correo || "-"}
+      <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; padding: 4px 10px; border-radius: 8px; font-weight: 500; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px;">
+            ${platNombre}
           </span>
-          <span style="color: rgba(255, 255, 255, 0.6); font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${c.clave || "-"}
+          <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); padding: 4px 10px; border-radius: 8px; font-weight: 500; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px;">
+            PROV: ${provNombre}
           </span>
         </div>
 
-        <div style="display: flex; gap: 6px; flex-shrink: 0; align-items: center;">
-          <button onclick="window.copiarTextoUnico(this, '${correoEsc}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">
-            Correo
-          </button>
-          <button onclick="window.copiarTextoUnico(this, '${claveEsc}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">
-            Clave
-          </button>
-          <button onclick="window.reportarCuentaCargadaDirecto('${idVal}', '${tablaEsc}', '${correoEsc}', '${claveEsc}', '${provEsc}')" style="background: rgba(127, 29, 29, 0.8); border: 1px solid rgba(127, 29, 29, 0.9); color: #ffffff; padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 500; cursor: pointer; white-space: nowrap;">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div onclick="window.copiarTextoUnico(this, '${correoEsc}')" style="color: #ffffff; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; font-size: 0.9rem; cursor: pointer; padding: 8px 10px; border-radius: 8px; transition: background 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+            ${c.correo || "-"}
+          </div>
+          <div onclick="window.copiarTextoUnico(this, '${claveEsc}')" style="color: rgba(255, 255, 255, 0.6); font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; font-size: 0.85rem; cursor: pointer; padding: 8px 10px; border-radius: 8px; transition: background 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+            ${c.clave || "-"}
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">
+          <button onclick="window.reportarCuentaCargadaDirecto('${idVal}', '${tablaEsc}', '${correoEsc}', '${claveEsc}', '${provEsc}')" style="background: rgba(127, 29, 29, 0.8); border: 1px solid rgba(127, 29, 29, 0.9); color: #ffffff; padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.2s;">
             Reportar
           </button>
         </div>
