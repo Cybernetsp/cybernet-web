@@ -2885,10 +2885,10 @@
           style="
             overflow-y: auto;
             flex-grow: 1;
-            padding: 28px 32px 32px 32px;
+            padding: 32px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
             background: transparent;
           "
           class="cyber-custom-scroll"
@@ -2898,19 +2898,15 @@
             id="formCargarCuentas"
             onsubmit="ejecutarCargaLote(event)"
             style="
-              background: rgba(255, 255, 255, 0.03);
-              border: 1px solid rgba(255, 255, 255, 0.08);
-              border-radius: 16px;
-              padding: 20px;
               display: flex;
               flex-direction: column;
-              gap: 16px;
+              gap: 18px;
             "
           >
             <span
               style="
-                font-size: 0.8rem;
-                color: rgba(255, 255, 255, 0.5);
+                font-size: 0.75rem;
+                color: rgba(255, 255, 255, 0.4);
                 font-weight: 500;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
@@ -2920,7 +2916,7 @@
 
             <!-- SELECTORES -->
             <div
-              style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"
             >
               <!-- PLATAFORMAS (SE LLENA DINÁMICAMENTE CON STOCK EN VIVO) -->
               <select
@@ -2929,14 +2925,15 @@
                 required
                 style="
                   margin: 0;
-                  background: rgba(0, 0, 0, 0.3) !important;
-                  padding: 14px 16px;
-                  border-radius: 12px;
-                  border: 1px solid rgba(255, 255, 255, 0.1);
+                  background: rgba(255, 255, 255, 0.04) !important;
+                  padding: 16px 18px;
+                  border-radius: 14px;
+                  border: 1px solid rgba(255, 255, 255, 0.08);
                   color: #ffffff;
-                  font-size: 0.9rem;
-                  font-weight: 500;
+                  font-size: 0.95rem;
+                  font-weight: 400;
                   outline: none;
+                  transition: all 0.2s;
                 "
               >
                 <option value="" disabled selected>
@@ -2952,14 +2949,15 @@
                 onchange="comprobarProveedorDinamico()"
                 style="
                   margin: 0;
-                  background: rgba(0, 0, 0, 0.3) !important;
-                  padding: 14px 16px;
-                  border-radius: 12px;
-                  border: 1px solid rgba(255, 255, 255, 0.1);
+                  background: rgba(255, 255, 255, 0.04) !important;
+                  padding: 16px 18px;
+                  border-radius: 14px;
+                  border: 1px solid rgba(255, 255, 255, 0.08);
                   color: #ffffff;
-                  font-size: 0.9rem;
-                  font-weight: 500;
+                  font-size: 0.95rem;
+                  font-weight: 400;
                   outline: none;
+                  transition: all 0.2s;
                 "
               >
                 <option value="" disabled selected>
@@ -2986,14 +2984,15 @@
                 placeholder="Escribe el nombre del proveedor..."
                 style="
                   margin: 0;
-                  background: rgba(0, 0, 0, 0.3) !important;
-                  padding: 14px 16px;
-                  border-radius: 12px;
-                  border: 1px solid rgba(255, 255, 255, 0.1);
+                  background: rgba(255, 255, 255, 0.04) !important;
+                  padding: 16px 18px;
+                  border-radius: 14px;
+                  border: 1px solid rgba(255, 255, 255, 0.08);
                   color: #ffffff;
-                  font-size: 0.9rem;
-                  font-weight: 500;
+                  font-size: 0.95rem;
+                  font-weight: 400;
                   outline: none;
+                  transition: all 0.2s;
                 "
               />
             </div>
@@ -3002,23 +3001,24 @@
             <textarea
               id="loadCuentasBloque"
               class="input-ios"
-              rows="5"
+              rows="6"
               required
               placeholder="Pega aquí las cuentas. Formatos aceptados:&#10;correo@gmail.com clave123&#10;correo@gmail.com:clave123"
               style="
                 margin: 0;
-                background: rgba(0, 0, 0, 0.3) !important;
-                padding: 16px;
-                border-radius: 14px;
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                background: rgba(255, 255, 255, 0.04) !important;
+                padding: 18px;
+                border-radius: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.08);
                 color: #ffffff;
                 font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-                font-size: 0.9rem;
-                line-height: 1.5;
+                font-size: 0.95rem;
+                line-height: 1.6;
                 resize: vertical;
                 outline: none;
                 width: 100%;
                 box-sizing: border-box;
+                transition: all 0.2s;
               "
             ></textarea>
 
@@ -3029,18 +3029,19 @@
               class="btn-ios btn-success"
               style="
                 width: 100%;
-                padding: 16px;
+                padding: 18px;
                 font-size: 1rem;
                 font-weight: 500;
-                border-radius: 14px;
-                background: rgba(255, 255, 255, 0.1);
+                border-radius: 16px;
+                background: rgba(255, 255, 255, 0.08);
                 color: #ffffff;
-                border: 1px solid rgba(255, 255, 255, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.12);
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 10px;
+                transition: all 0.2s;
               "
             >
               CARGAR CUENTAS EN LOTE
@@ -3050,13 +3051,11 @@
           <!-- 2. CARGADAS EN ESTE TURNO -->
           <div
             style="
-              background: rgba(255, 255, 255, 0.03);
-              border: 1px solid rgba(255, 255, 255, 0.08);
-              border-radius: 16px;
-              padding: 20px;
+              border-top: 1px solid rgba(255, 255, 255, 0.06);
+              padding-top: 24px;
               display: flex;
               flex-direction: column;
-              gap: 14px;
+              gap: 16px;
             "
           >
             <div
@@ -3068,8 +3067,8 @@
             >
               <span
                 style="
-                  font-size: 0.8rem;
-                  color: rgba(255, 255, 255, 0.5);
+                  font-size: 0.75rem;
+                  color: rgba(255, 255, 255, 0.4);
                   font-weight: 500;
                   text-transform: uppercase;
                   letter-spacing: 0.5px;
@@ -3079,8 +3078,8 @@
               <span
                 id="cantCargadasTurno"
                 style="
-                  font-size: 0.8rem;
-                  color: rgba(255, 255, 255, 0.7);
+                  font-size: 0.75rem;
+                  color: rgba(255, 255, 255, 0.6);
                   font-weight: 500;
                   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
                 "
@@ -3093,26 +3092,23 @@
               style="
                 display: flex;
                 flex-direction: column;
-                gap: 10px;
-                max-height: 200px;
+                gap: 12px;
+                max-height: 250px;
                 overflow-y: auto;
-                padding-right: 2px;
+                padding-right: 4px;
               "
               class="cyber-custom-scroll"
             >
               <div
                 style="
                   text-align: center;
-                  padding: 25px;
-                  color: rgba(255, 255, 255, 0.4);
-                  font-size: 0.85rem;
-                  background: rgba(0, 0, 0, 0.2);
-                  border-radius: 14px;
-                  border: 1px dashed rgba(255, 255, 255, 0.08);
+                  padding: 32px;
+                  color: rgba(255, 255, 255, 0.3);
+                  font-size: 0.9rem;
+                  font-weight: 400;
                 "
               >
-                Las cuentas inyectadas a Sheets se reflejarán aquí con accesos
-                rápidos.
+                Las cuentas inyectadas se reflejarán aquí
               </div>
             </div>
           </div>
