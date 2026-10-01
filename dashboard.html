@@ -302,6 +302,18 @@
     </style>
   </head>
   <body>
+    <!-- Botón Toggle Alertas Móvil -->
+    <button
+      id="mobileAlertToggle"
+      class="mobile-alert-toggle"
+      onclick="toggleMobileAlerts()"
+      style="display: none;"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 15l-6-6-6 6"/>
+      </svg>
+    </button>
+
     <div id="cyber-toast-center" class="cyber-notification-center"></div>
     <div id="appleToast" class="apple-notification-toast"></div>
 
@@ -10635,7 +10647,7 @@
           menu.style.display = 'none';
         }
       }
-      
+
       // Cerrar menú al hacer clic fuera
       document.addEventListener('click', function(e) {
         const menu = document.getElementById('mobileMenu');
@@ -10644,6 +10656,20 @@
           menu.style.display = 'none';
         }
       });
+
+      // Función Toggle Alertas Móvil
+      function toggleMobileAlerts() {
+        const alertCenter = document.getElementById('cyber-toast-center');
+        const toggleBtn = document.getElementById('mobileAlertToggle');
+
+        if (alertCenter.classList.contains('mobile-alerts-visible')) {
+          alertCenter.classList.remove('mobile-alerts-visible');
+          toggleBtn.classList.remove('expanded');
+        } else {
+          alertCenter.classList.add('mobile-alerts-visible');
+          toggleBtn.classList.add('expanded');
+        }
+      }
     </script>
   </body>
 </html>
