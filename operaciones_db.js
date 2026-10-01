@@ -387,16 +387,19 @@ window.toggleNetflixManagerPanel = function () {
   if (typeof haptic === "function") haptic();
   let overlay = document.getElementById("netflixManagerOverlay");
 
+  // 🔥 EL TRUCO: Si la ventana existe pero es la VERSIÓN VIEJA (no tiene los cuadros), la destruimos
   if (overlay && !document.getElementById("statPinesDisponibles")) {
     overlay.remove();
-    overlay = null;
+    overlay = null; // Forzamos a que sea nulo para que el IF de abajo la vuelva a crear
   }
 
+  // Si no existe, crea la versión nueva con los cuadros estadísticos
   if (!overlay) {
     window.crearModalNetflixManagerHTML();
-    return window.toggleNetflixManagerPanel();
+    return window.toggleNetflixManagerPanel(); // Se vuelve a llamar a sí misma para abrirla
   }
 
+  // Lógica para abrir o cerrar
   if (overlay.classList.contains("open") || overlay.style.display === "flex") {
     overlay.classList.remove("open");
     overlay.style.display = "none";
@@ -404,10 +407,6 @@ window.toggleNetflixManagerPanel = function () {
     if (typeof cerrarTodasLasVentanas === "function") cerrarTodasLasVentanas();
     overlay.style.display = "flex";
     overlay.classList.add("open");
-
-    window.cargarCortesOperativosNetflix();
-    window.cargarEstadisticasNetflix();
-    window.dispararActualizarPinesRefacil();
   }
 };
 
@@ -510,127 +509,92 @@ window.mostrarEstadoSinCortes = function () {
     </div>`;
 };
 
-// 🔧 FUNCIÓN INDESTRUCTIBLE PARA CONVERTIR FECHAS LITERALES Y ASIGNAR EL LOTE PRIORITARIO
 function parsearFechaCorteMs(fStr) {
   if (!fStr || fStr === "-" || fStr === "N/A" || fStr === "SIN FECHA")
     return 9999999999999;
-
   if (fStr instanceof Date) return fStr.getTime();
 
-  let str = String(fStr).toUpperCase().trim();
-
-  const hoy = new Date();
+  let str = String(fStr).trim().toUpperCase();
+  let hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
-  if (str === "ANTEAYER" || str === "ANTES DE AYER") {
+  // Palabras clave relativas
+  if (str.includes("ANTEAYER") || str.includes("ANTES DE AYER"))
     return hoy.getTime() - 2 * 86400000;
-  }
-  if (str === "AYER") {
-    return hoy.getTime() - 86400000;
-  }
-  if (str === "HOY") {
-    return hoy.getTime();
-  }
+  if (str.includes("AYER")) return hoy.getTime() - 86400000;
+  if (str.includes("HOY")) return hoy.getTime();
 
-  // 1. Limpieza extrema: Quitar "DE", guiones y espacios en blanco extra.
-  // Transforma "31DEAGOSTO" o "31-AGOSTO" a "31 AGOSTO"
+  // Limpieza: quitar "de", separadores y espacios múltiples
   let limpia = str
-    .replace(/(\d+)\s*DE\s*([A-Z]+)/gi, "$1 $2")
-    .replace(/(\d+)DE([A-Z]+)/gi, "$1 $2")
-    .replace(/(\d+)([A-Z]{3,})/gi, "$1 $2")
-    .replace(/[\/\-\.,]/g, " ")
+    .replace(/(\d+)\s*DE\s*/gi, "$1 ")
+    .replace(/(\d+)DE/gi, "$1 ")
+    .replace(/[\/\-\.]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
-  // 2. Extraer los componentes: Día, Mes (letra o número), Año (opcional)
-  let matchDiaMes = limpia.match(
-    /^(\d{1,2})\s+([A-Z]+|\d{1,2})(?:\s+(\d{2,4}))?/,
-  );
+  const mesesAbrev = [
+    "ENE",
+    "FEB",
+    "MAR",
+    "ABR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AGO",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DIC",
+  ];
+  const mesesCompletos = [
+    "ENERO",
+    "FEBRERO",
+    "MARZO",
+    "ABRIL",
+    "MAYO",
+    "JUNIO",
+    "JULIO",
+    "AGOSTO",
+    "SEPTIEMBRE",
+    "OCTUBRE",
+    "NOVIEMBRE",
+    "DICIEMBRE",
+  ];
 
-  if (matchDiaMes) {
-    let dia = parseInt(matchDiaMes[1], 10);
-    let mesStr = matchDiaMes[2];
-    let anio = matchDiaMes[3]
-      ? parseInt(matchDiaMes[3], 10)
-      : hoy.getFullYear();
-
-    // Normalizar año (ej. 24 a 2024)
+  // Patrón 1: "30 AGOSTO" o "30 AGOSTO 2024"
+  let matchTexto = limpia.match(/^(\d{1,2})\s+([A-Z]+)(?:\s+(\d{2,4}))?/);
+  if (matchTexto) {
+    let dia = parseInt(matchTexto[1], 10);
+    let mesStr = matchTexto[2];
+    let anio = matchTexto[3] ? parseInt(matchTexto[3], 10) : hoy.getFullYear();
     if (anio < 100) anio += 2000;
 
-    const mesesMap = {
-      ENE: 0,
-      ENERO: 0,
-      "01": 0,
-      1: 0,
-      FEB: 1,
-      FEBRERO: 1,
-      "02": 1,
-      2: 1,
-      MAR: 2,
-      MARZO: 2,
-      "03": 2,
-      3: 2,
-      ABR: 3,
-      ABRIL: 3,
-      "04": 3,
-      4: 3,
-      MAY: 4,
-      MAYO: 4,
-      "05": 4,
-      5: 4,
-      JUN: 5,
-      JUNIO: 5,
-      "06": 5,
-      6: 5,
-      JUL: 6,
-      JULIO: 6,
-      "07": 6,
-      7: 6,
-      AGO: 7,
-      AGOSTO: 7,
-      "08": 7,
-      8: 7,
-      SEP: 8,
-      SEPT: 8,
-      SEPTIEMBRE: 8,
-      "09": 8,
-      9: 8,
-      OCT: 9,
-      OCTUBRE: 9,
-      10: 9,
-      NOV: 10,
-      NOVIEMBRE: 10,
-      11: 10,
-      DIC: 11,
-      DICIEMBRE: 11,
-      12: 11,
-    };
-
     let mesIdx = -1;
-    for (let key in mesesMap) {
-      if (mesStr === key || mesStr.startsWith(key)) {
-        mesIdx = mesesMap[key];
-        break;
-      }
+    if (/^\d{1,2}$/.test(mesStr)) {
+      mesIdx = parseInt(mesStr, 10) - 1;
+    } else {
+      mesIdx = mesesAbrev.findIndex((m) => mesStr.startsWith(m));
+      if (mesIdx === -1)
+        mesIdx = mesesCompletos.findIndex((m) => mesStr.startsWith(m));
     }
-
     if (!isNaN(dia) && mesIdx >= 0 && mesIdx <= 11) {
-      let dObj = new Date(anio, mesIdx, dia);
-
-      // 3. Ajuste inteligente: si el sistema detecta que el mes leído es *mayor*
-      // al mes en el que estamos actualmente (por ejemplo, lee Agosto, pero estamos en Septiembre),
-      // significa que esa cuenta es del año anterior, asegurando así que su valor en milisegundos sea mucho menor.
-      if (!matchDiaMes[3]) {
-        if (mesIdx > hoy.getMonth()) {
-          dObj.setFullYear(anio - 1);
-        }
-      }
-
-      return dObj.getTime();
+      return new Date(anio, mesIdx, dia).getTime();
     }
   }
 
-  // 4. Si fallan las reglas de texto, JS intenta interpretar la fecha de forma nativa.
+  // Patrón 2: formato numérico "30 08" o "30 08 2024" (DD MM [AAAA])
+  let matchNum = limpia.match(/^(\d{1,2})\s+(\d{1,2})(?:\s+(\d{2,4}))?/);
+  if (matchNum) {
+    let dia = parseInt(matchNum[1], 10);
+    let mes = parseInt(matchNum[2], 10);
+    let anio = matchNum[3] ? parseInt(matchNum[3], 10) : hoy.getFullYear();
+    if (anio < 100) anio += 2000;
+    if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12) {
+      return new Date(anio, mes - 1, dia).getTime();
+    }
+  }
+
+  // Último recurso: intentar parsear como fecha nativa
   let d = new Date(fStr);
   return isNaN(d.getTime()) ? 9999999999999 : d.getTime();
 }
@@ -647,7 +611,6 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     return;
   }
 
-  // 1. Asignar el valor numérico de tiempo a cada cuenta
   cuentas.forEach((c) => {
     let rawVenc =
       c.vencimiento ||
@@ -661,14 +624,12 @@ window.renderizarTarjetasCortesNetflix = function (cuentas) {
     c._vencTexto = rawVenc && rawVenc !== "-" ? rawVenc : "Sin Fecha";
   });
 
-  // 2. Encontrar el lote más antiguo (El valor en ms más pequeño)
   let minTs = Math.min(...cuentas.map((c) => c._tsVenc));
 
   let cuentasLoteActual = [];
   if (minTs === 9999999999999) {
     cuentasLoteActual = cuentas;
   } else {
-    // 3. Agrupar las cuentas que tengan la fecha exacta de minTs
     let dMin = new Date(minTs);
     cuentasLoteActual = cuentas.filter((c) => {
       if (c._tsVenc === 9999999999999) return false;
@@ -817,38 +778,22 @@ window.crearModalNetflixManagerHTML = function () {
   const modalHtml = `
     <div class="overlay-ios" id="netflixManagerOverlay" style="display: none; z-index: 16000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); align-items: center; justify-content: center;">
       <div class="sheet-ios" onclick="event.stopPropagation()" style="max-width: 480px; width: 92%; max-height: 88vh; background: #1a1a1c; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 22px; box-shadow: 0 30px 70px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 16px; overflow: hidden; margin: auto;">
-        
+
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 14px; flex-shrink: 0;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <div style="color: #e50914; display: flex; align-items: center; justify-content: center;">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
             </div>
-            <h3 style="margin: 0; color: #e50914; font-size: 1.15rem; font-weight: 800;">Cortes Operativos</h3>
+            <h3 style="margin: 0; color: #e50914; font-size: 1.15rem; font-weight: 800;">Netflix</h3>
           </div>
           <button type="button" onclick="window.toggleNetflixManagerPanel()" style="background: rgba(255,255,255,0.08); border: none; color: #a1a1aa; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">✕</button>
         </div>
 
-        <!-- 🔥 NUEVOS CUADROS ESTADÍSTICOS AÑADIDOS AQUÍ 🔥 -->
-        <div style="display: flex; gap: 12px; margin-bottom: 4px; flex-shrink: 0;">
-          <div style="flex: 1; background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.2); border-radius: 14px; padding: 14px; text-align: center; box-shadow: inset 0 0 20px rgba(48,209,88,0.02);">
-            <div style="font-size: 0.68rem; color: #30d158; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Pines Disponibles</div>
-            <div id="statPinesDisponibles" style="font-size: 1.8rem; font-weight: 900; color: #ffffff; font-family: monospace;">-</div>
-          </div>
-          <div style="flex: 1; background: rgba(10, 132, 255, 0.08); border: 1px solid rgba(10, 132, 255, 0.2); border-radius: 14px; padding: 14px; text-align: center; box-shadow: inset 0 0 20px rgba(10,132,255,0.02);">
-            <div style="font-size: 0.68rem; color: #0a84ff; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Cuentas Totales</div>
-            <div id="statCuentasTotales" style="font-size: 1.8rem; font-weight: 900; color: #ffffff; font-family: monospace;">-</div>
-          </div>
-        </div>
-
         <div style="display: flex; flex-direction: column; flex-shrink: 0;">
-          <button id="btnCrearAliasHeader" onclick="window.crearCuentaNetflixAliasExterna()" style="display: flex; width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
+          <button id="btnCrearAliasHeader" onclick="window.crearCuentaNetflixAliasExterna()" style="display: flex; width: 100%; background: #e50914; color: #ffffff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; align-items: center; justify-content: center; gap: 8px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
             Crear cuenta de Netflix (Usar Alias)
           </button>
-        </div>
-
-        <div id="listaCortesOperativosNetflix" class="cyber-custom-scroll" style="flex: 1; overflow-y: auto; padding-right: 4px;">
-          <div style="text-align: center; color: #a1a1aa; padding: 30px;">Cargando cortes...</div>
         </div>
 
       </div>
