@@ -1410,6 +1410,34 @@ textarea.input-ios {
     border-radius: 20px !important;
   }
 
+  /* Escritorio principal - layout a una columna */
+  .mac-desktop-workspace {
+    padding: 20px 12px 100px 12px !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  .mac-split-container {
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-width: 100% !important;
+    border-radius: 16px !important;
+  }
+
+  .mac-left-panel {
+    flex: none !important;
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 24px 16px !important;
+  }
+
+  .mac-right-panel {
+    padding: 20px 16px !important;
+    gap: 16px !important;
+  }
+
   /* Grids a una columna */
   .ipad-bento-container,
   .cyber-custom-scroll {
@@ -1587,6 +1615,58 @@ textarea.input-ios {
     border-radius: 20px;
     padding: 8px;
     animation: fadeInUp 0.3s ease;
+  }
+
+  /* Ajustar posición del wrapper del dock en móvil */
+  .macos-dock-wrapper {
+    bottom: 20px !important;
+  }
+
+  /* QR Code wrapper */
+  .mac-qr-wrapper {
+    padding: 0 !important;
+  }
+
+  /* Widgets del panel derecho */
+  .mac-right-panel .widget-ipad {
+    width: 100% !important;
+  }
+
+  /* Buscador */
+  .mac-search-wrapper {
+    width: 100% !important;
+  }
+
+  /* Botones de pago (COPIAR PAGOS, COPIAR NEQUI) */
+  .mac-left-panel button {
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Contenedor de botones de pago */
+  .mac-left-panel > div {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  /* Tarjetas de plantillas y combos */
+  .mac-filtered-cards {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .mac-filtered-cards .card-ios {
+    width: 100% !important;
+  }
+
+  /* Panel de finanzas flotante */
+  #cajaFinanzasPanel {
+    width: 95% !important;
+    max-width: 95% !important;
+    left: 2.5% !important;
+    bottom: 80px !important;
   }
 
   .mobile-menu-content {
