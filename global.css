@@ -1328,10 +1328,7 @@ textarea.input-ios {
 /* 2. Convertimos el contenedor en una rejilla elástica estilo Mac */
 .mac-filtered-cards {
   display: grid !important;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(260px, 1fr)
-  ) !important; /* 👈 Se adapta a 1, 2 o más columnas según el espacio */
+  grid-template-columns: repeat(2, 1fr) !important; /* 2 columnas fijas en PC */
   gap: 16px !important; /* 👈 El separador clave para que dejen de pegarse y respirar */
   width: 100% !important;
   padding-top: 4px;
