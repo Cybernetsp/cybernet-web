@@ -1437,7 +1437,7 @@ textarea.input-ios {
 }
 
 /* 📱 Optimización para Celular */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   /* Contenedores principales */
   .sheet-ios,
   .modal-ios {
