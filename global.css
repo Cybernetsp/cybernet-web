@@ -185,14 +185,51 @@ body {
 .mac-icon-bg {
   width: 48px;
   height: 48px;
-  border-radius: 14px; /* 🔥 EL SECRETO: 14px de curva en lugar de 50% */
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.4),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2); /* Sutil brillo superior tipo Apple */
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Wrapper del QR */
+.mac-qr-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  width: 100%;
+}
+
+.mac-qr-wrapper img {
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.mac-qr-wrapper button {
+  width: 100%;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mac-qr-wrapper button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .mac-tooltip {
@@ -234,31 +271,31 @@ body {
   max-width: 1000px;
   height: 70vh;
   min-height: 550px;
-  background: var(--window-bg);
+  background: #1a1a1e;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  border: var(--glass-border);
-  border-radius: 24px; /* Redondeado corporativo */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
   box-shadow:
     0 40px 80px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   overflow: hidden;
 }
 .mac-left-panel {
   flex: 0 0 320px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-right: var(--glass-border);
-  padding: 40px 20px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 32px 24px;
 }
 .mac-right-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 30px;
+  padding: 28px 32px;
   gap: 20px;
 }
 
@@ -277,22 +314,25 @@ body {
 .mac-search-input {
   width: 100%;
   padding: 14px 16px 14px 45px;
-  font-size: 1.05rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 400;
   color: #fff;
-  background: var(--input-bg);
-  border: var(--glass-border-light);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   outline: none;
   transition: var(--transition-fluid);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 .mac-search-input:focus {
-  border-color: var(--mac-blue);
-  background: var(--input-focus);
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
   box-shadow:
-    0 0 0 3px rgba(10, 132, 255, 0.25),
-    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    0 0 0 2px rgba(255, 255, 255, 0.05),
+    inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.mac-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* --- 6. GESTIÓN DE VENTANAS macOS --- */
@@ -424,19 +464,19 @@ body {
 
 /* --- 7. COMPONENTES INTERNOS (CARDS, INPUTS, BOTONES) --- */
 .card-ios {
-  background: var(--card-bg) !important;
-  border: var(--glass-border-light) !important;
-  border-radius: 16px !important; /* Tarjetas internas más redondeadas */
-  padding: 20px;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   transition: var(--transition-fluid);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 .card-ios:hover {
-  background: var(--card-hover) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 .input-ios {
