@@ -499,33 +499,110 @@ window.guardarCuentaConfirmadaNetflixDual = function (btn, datosCuenta) {
 window.forzarDeteccionManual = function () {
   if (typeof haptic === "function") haptic();
 
-  // Revelar el PIN
-  const pinEl = document.getElementById("displayCtaPinRecarga");
-  if (pinEl && window.pinOcultoActual) {
-    if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
-    pinEl.innerText = window.pinOcultoActual;
-    pinEl.style.color = "#ffffff";
-  }
-
-  // Mostrar input para pegar el link de verificación
   const spinner = document.getElementById("radarVerificacionSpinner");
   if (spinner) {
-    spinner.style.setProperty("display", "none", "important");
+    spinner.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Verificando correo manualmente...`;
   }
 
-  // Crear input para el link de verificación
-  const contenedor = document.getElementById("radarVerificacionContenedor");
-  if (contenedor) {
-    contenedor.innerHTML = `
-      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-        <span style="font-size: 0.75rem; color: #888; font-weight: 500;">Pega el link de verificación de Netflix:</span>
-        <input type="text" id="inputLinkVerificacionManual" placeholder="https://www.netflix.com/..." style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-family: monospace;">
-        <button onclick="window.procesarLinkManual()" style="width: 100%; background: rgba(48, 209, 88, 0.2); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
-          Continuar con este link
-        </button>
-      </div>
-    `;
-  }
+  // Obtener el correo actual
+  const correoActual = document.getElementById("displayCtaCorreo").innerText;
+
+  // Hacer una consulta manual al Google Script para verificar el estado
+  window.callbackCiber = function (res) {
+    const node = document.getElementById("node_forzar_deteccion");
+    if (node) node.remove();
+    delete window.callbackCiber;
+
+    if (res && res.status === "success") {
+      // 1. Si llegó el correo del PIN ("ya casi terminas")
+      if (res.yaCasiTerminas) {
+        const pinEl = document.getElementById("displayCtaPinRecarga");
+        if (pinEl && pinEl.innerText !== window.pinOcultoActual) {
+          if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+          pinEl.innerText = window.pinOcultoActual;
+          pinEl.style.color = "#ffffff";
+
+          if (spinner) {
+            spinner.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> PIN revelado. Esperando link de verificación...`;
+          }
+        }
+      }
+
+      // 2. Si llegó el Link de Verificación
+      if (res.linkVerificacion) {
+        if (window.verificationLinkInterval) {
+          clearInterval(window.verificationLinkInterval);
+        }
+        if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+
+        if (spinner) {
+          spinner.style.setProperty("display", "none", "important");
+        }
+
+        const btnLink = document.getElementById("btnLinkVerificarGmail");
+        if (btnLink) {
+          btnLink.href = res.linkVerificacion;
+          btnLink.innerHTML = "Verificar Correo en Netflix";
+          btnLink.style.setProperty("display", "inline-flex", "important");
+
+          btnLink.onclick = function () {
+            if (typeof haptic === "function") haptic();
+            const btnG = document.getElementById("btnGuardarMaestroNetflix");
+            if (btnG) btnG.style.setProperty("display", "block", "important");
+
+            const btnM = document.getElementById("btnCuentaMalaAlias");
+            if (btnM) btnM.style.display = "none";
+          };
+        }
+
+        const contenedor = document.getElementById("radarVerificacionContenedor");
+        if (contenedor) {
+          contenedor.style.background = "rgba(255,255,255,0.08)";
+        }
+      } else if (!res.yaCasiTerminas) {
+        // Si no llegó nada, mostrar opción manual
+        if (spinner) {
+          spinner.style.setProperty("display", "none", "important");
+        }
+
+        const contenedor = document.getElementById("radarVerificacionContenedor");
+        if (contenedor) {
+          contenedor.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+              <span style="font-size: 0.75rem; color: #888; font-weight: 500;">No se detectó el correo. Pega el link de verificación de Netflix:</span>
+              <input type="text" id="inputLinkVerificacionManual" placeholder="https://www.netflix.com/..." style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-family: monospace;">
+              <button onclick="window.procesarLinkManual()" style="width: 100%; background: rgba(48, 209, 88, 0.2); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                Continuar con este link
+              </button>
+            </div>
+          `;
+        }
+      }
+    } else {
+      // Si falla la consulta, mostrar opción manual
+      if (spinner) {
+        spinner.style.setProperty("display", "none", "important");
+      }
+
+      const contenedor = document.getElementById("radarVerificacionContenedor");
+      if (contenedor) {
+        contenedor.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+            <span style="font-size: 0.75rem; color: #888; font-weight: 500;">Error al verificar. Pega el link de verificación de Netflix:</span>
+            <input type="text" id="inputLinkVerificacionManual" placeholder="https://www.netflix.com/..." style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-family: monospace;">
+            <button onclick="window.procesarLinkManual()" style="width: 100%; background: rgba(48, 209, 88, 0.2); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+              Continuar con este link
+            </button>
+          </div>
+        `;
+      }
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_forzar_deteccion";
+  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoActual)}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
 
   // Ocultar botón de forzar detección
   const btnForzar = document.getElementById("btnForzarDeteccionManual");
