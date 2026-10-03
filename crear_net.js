@@ -277,6 +277,11 @@ window.abrirModalSuscripcionEstructura = function () {
           No llego correo de verificacion
         </button>
 
+        <!-- Botón Forzar Detección Manual (Nuevo) -->
+        <button id="btnForzarDeteccionManual" onclick="window.forzarDeteccionManual()" style="width: 100%; background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 10px; border-radius: 12px; font-weight: 500; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+          ⚡ El correo ya llegó (Forzar detección)
+        </button>
+
       </div>
     </div>
   `;
@@ -489,7 +494,83 @@ window.guardarCuentaConfirmadaNetflixDual = function (btn, datosCuenta) {
 };
 
 // ==========================================================================
-// 7. DESCARTAR CUENTA MALA Y PEDIR OTRA
+// 7. FORZAR DETECCIÓN MANUAL (CUANDO EL CORREO YA LLEGÓ PERO EL RADAR NO LO DETECTA)
+// ==========================================================================
+window.forzarDeteccionManual = function () {
+  if (typeof haptic === "function") haptic();
+
+  // Revelar el PIN
+  const pinEl = document.getElementById("displayCtaPinRecarga");
+  if (pinEl && window.pinOcultoActual) {
+    if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+    pinEl.innerText = window.pinOcultoActual;
+    pinEl.style.color = "#ffffff";
+  }
+
+  // Mostrar input para pegar el link de verificación
+  const spinner = document.getElementById("radarVerificacionSpinner");
+  if (spinner) {
+    spinner.style.setProperty("display", "none", "important");
+  }
+
+  // Crear input para el link de verificación
+  const contenedor = document.getElementById("radarVerificacionContenedor");
+  if (contenedor) {
+    contenedor.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+        <span style="font-size: 0.75rem; color: #888; font-weight: 500;">Pega el link de verificación de Netflix:</span>
+        <input type="text" id="inputLinkVerificacionManual" placeholder="https://www.netflix.com/..." style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-family: monospace;">
+        <button onclick="window.procesarLinkManual()" style="width: 100%; background: rgba(48, 209, 88, 0.2); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+          Continuar con este link
+        </button>
+      </div>
+    `;
+  }
+
+  // Ocultar botón de forzar detección
+  const btnForzar = document.getElementById("btnForzarDeteccionManual");
+  if (btnForzar) btnForzar.style.display = "none";
+};
+
+window.procesarLinkManual = function () {
+  const inputLink = document.getElementById("inputLinkVerificacionManual");
+  const link = inputLink ? inputLink.value.trim() : "";
+
+  if (!link) {
+    alert("⚠️ Por favor pega el link de verificación de Netflix");
+    return;
+  }
+
+  // Detener el radar automático
+  if (window.verificationLinkInterval) {
+    clearInterval(window.verificationLinkInterval);
+  }
+
+  // Mostrar botón de verificación con el link manual
+  const contenedor = document.getElementById("radarVerificacionContenedor");
+  if (contenedor) {
+    contenedor.innerHTML = `
+      <a id="btnLinkVerificarGmail" href="${link}" target="_blank" style="width: 100%; background: rgba(255,255,255,0.1); color: #ffffff; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; align-items: center; justify-content: center; gap: 8px; display: inline-flex;">
+        Verificar Correo en Netflix
+      </a>
+    `;
+  }
+
+  const btnLink = document.getElementById("btnLinkVerificarGmail");
+  if (btnLink) {
+    btnLink.onclick = function () {
+      if (typeof haptic === "function") haptic();
+      const btnG = document.getElementById("btnGuardarMaestroNetflix");
+      if (btnG) btnG.style.setProperty("display", "block", "important");
+
+      const btnM = document.getElementById("btnCuentaMalaAlias");
+      if (btnM) btnM.style.display = "none";
+    };
+  }
+};
+
+// ==========================================================================
+// 8. DESCARTAR CUENTA MALA Y PEDIR OTRA
 // ==========================================================================
 window.cambiarCuentaMalaAlias = function () {
   if (typeof haptic === "function") haptic();
