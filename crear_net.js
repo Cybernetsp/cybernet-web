@@ -21,8 +21,33 @@ window.crearCuentaNetflixAlias = function () {
 
   if (pendienteGuardada) {
     let d = JSON.parse(pendienteGuardada);
-    window.pinOcultoActual = d.pinRefacil || "";
-    window.restaurarInterfazAliasGenerada(d);
+
+    // Verificar si la cuenta ya fue guardada (consultando al Google Script)
+    // Si ya fue guardada, no restaurarla y generar una nueva
+    window.callbackCiber = function (res) {
+      const node = document.getElementById("node_verificar_pendiente");
+      if (node) node.remove();
+      delete window.callbackCiber;
+
+      if (res && res.status === "success" && res.yaGuardada) {
+        // La cuenta ya fue guardada, limpiar localStorage y generar nueva
+        console.log("✅ La cuenta pendiente ya fue guardada. Limpiando y generando nueva...");
+        localStorage.removeItem("cyber_netflix_alias_pendiente");
+        window.pinOcultoActual = "";
+        window.ejecutarGeneracionNuevaCuentaAlias();
+      } else {
+        // La cuenta sigue pendiente, restaurar
+        console.log("✅ La cuenta sigue pendiente. Restaurando...");
+        window.pinOcultoActual = d.pinRefacil || "";
+        window.restaurarInterfazAliasGenerada(d);
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "node_verificar_pendiente";
+    script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=verificarCuentaPendiente&correo=${encodeURIComponent(d.correo)}&_ts=${Date.now()}`;
+    document.body.appendChild(script);
+
     return;
   }
 
@@ -280,6 +305,11 @@ window.abrirModalSuscripcionEstructura = function () {
         <!-- Botón Forzar Detección Manual (Nuevo) -->
         <button id="btnForzarDeteccionManual" onclick="window.forzarDeteccionManual()" style="width: 100%; background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 10px; border-radius: 12px; font-weight: 500; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
           ⚡ El correo ya llegó (Forzar detección)
+        </button>
+
+        <!-- Botón Limpiar Pendiente (Para casos donde se activó pero no se guardó) -->
+        <button id="btnLimpiarPendiente" onclick="window.limpiarCuentaPendiente()" style="width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #888; padding: 8px; border-radius: 12px; font-weight: 500; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+          🗑️ Ya activé esta cuenta (Limpiar)
         </button>
 
       </div>
@@ -647,7 +677,37 @@ window.procesarLinkManual = function () {
 };
 
 // ==========================================================================
-// 8. DESCARTAR CUENTA MALA Y PEDIR OTRA
+// 9. LIMPIAR CUENTA PENDIENTE (CUANDO YA SE ACTIVÓ PERO NO SE GUARDÓ)
+// ==========================================================================
+window.limpiarCuentaPendiente = function () {
+  if (typeof haptic === "function") haptic();
+
+  if (
+    !confirm(
+      "⚠️ ¿Ya activaste esta cuenta y quieres generar una nueva?\n\nEsto limpiará la cuenta actual y generará una nueva.",
+    )
+  )
+    return;
+
+  // Limpiar localStorage
+  localStorage.removeItem("cyber_netflix_alias_pendiente");
+  window.pinOcultoActual = "";
+
+  // Detener radar si está activo
+  if (window.verificationLinkInterval) {
+    clearInterval(window.verificationLinkInterval);
+  }
+
+  // Cerrar modal
+  const modal = document.getElementById("cuentaGeneradaModalOverlay");
+  if (modal) modal.remove();
+
+  // Generar nueva cuenta
+  window.ejecutarGeneracionNuevaCuentaAlias();
+};
+
+// ==========================================================================
+// 10. DESCARTAR CUENTA MALA Y PEDIR OTRA
 // ==========================================================================
 window.cambiarCuentaMalaAlias = function () {
   if (typeof haptic === "function") haptic();
