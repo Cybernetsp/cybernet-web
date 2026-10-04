@@ -409,6 +409,11 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
 
     window.callbackCiber = function (res) {
       console.log("📧 Radar Gmail - Respuesta del Google Script:", res);
+      console.log("📧 - status:", res.status);
+      console.log("📧 - correoVerificacion:", res.correoVerificacion);
+      console.log("📧 - yaCasiTerminas:", res.yaCasiTerminas);
+      console.log("📧 - linkVerificacion:", res.linkVerificacion);
+      console.log("📧 - PIN oculto actual:", window.pinOcultoActual);
 
       const node = document.getElementById("node_radar_netflix");
       if (node) node.remove();
@@ -416,12 +421,15 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
 
       if (res && res.status === "success") {
         console.log("✅ Google Script status: success");
-        console.log("✅ correoVerificacion:", res.correoVerificacion);
-        console.log("✅ yaCasiTerminas:", res.yaCasiTerminas);
-        console.log("✅ linkVerificacion:", res.linkVerificacion);
+        console.log("✅ Detectando campos:", {
+          correoVerificacion: res.correoVerificacion,
+          yaCasiTerminas: res.yaCasiTerminas,
+          linkVerificacion: res.linkVerificacion
+        });
 
         // 1. Si llegó el correo de verificación o el de "ya casi terminas", mostrar el PIN
         if (res.correoVerificacion || res.yaCasiTerminas || res.linkVerificacion) {
+          console.log("🔓 Revelando PIN porque se detectó correo o link");
           const pinEl = document.getElementById("displayCtaPinRecarga");
           if (pinEl && pinEl.innerText !== window.pinOcultoActual) {
             if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
@@ -441,7 +449,7 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
           clearInterval(window.verificationLinkInterval);
           if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
 
-          // Revelar el PIN cuando se detecta el link de verificación
+          // Revelar el PIN si aún no se ha revelado
           const pinEl = document.getElementById("displayCtaPinRecarga");
           if (pinEl && pinEl.innerText !== window.pinOcultoActual) {
             pinEl.innerText = window.pinOcultoActual;
@@ -608,13 +616,28 @@ window.forzarDeteccionManual = function () {
 
   // Hacer una consulta manual al Google Script para verificar el estado
   window.callbackCiber = function (res) {
+    console.log("⚡ Detección Manual - Respuesta del Google Script:", res);
+    console.log("⚡ - status:", res.status);
+    console.log("⚡ - correoVerificacion:", res.correoVerificacion);
+    console.log("⚡ - yaCasiTerminas:", res.yaCasiTerminas);
+    console.log("⚡ - linkVerificacion:", res.linkVerificacion);
+    console.log("⚡ - PIN oculto actual:", window.pinOcultoActual);
+
     const node = document.getElementById("node_forzar_deteccion");
     if (node) node.remove();
     delete window.callbackCiber;
 
     if (res && res.status === "success") {
+      console.log("✅ Detección Manual - status: success");
+      console.log("✅ Detectando campos:", {
+        correoVerificacion: res.correoVerificacion,
+        yaCasiTerminas: res.yaCasiTerminas,
+        linkVerificacion: res.linkVerificacion
+      });
+
       // 1. Si llegó el correo del PIN ("ya casi terminas")
       if (res.yaCasiTerminas) {
+        console.log("🔓 Revelando PIN porque yaCasiTerminas = true");
         const pinEl = document.getElementById("displayCtaPinRecarga");
         if (pinEl && pinEl.innerText !== window.pinOcultoActual) {
           if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
@@ -629,10 +652,18 @@ window.forzarDeteccionManual = function () {
 
       // 2. Si llegó el Link de Verificación
       if (res.linkVerificacion) {
+        console.log("🔗 Link de verificación detectado:", res.linkVerificacion);
         if (window.verificationLinkInterval) {
           clearInterval(window.verificationLinkInterval);
         }
         if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
+
+        // REVELAR EL PIN AUTOMÁTICAMENTO cuando se detecta el link
+        const pinEl = document.getElementById("displayCtaPinRecarga");
+        if (pinEl && pinEl.innerText !== window.pinOcultoActual) {
+          pinEl.innerText = window.pinOcultoActual;
+          pinEl.style.color = "#ffffff";
+        }
 
         if (spinner) {
           spinner.style.setProperty("display", "none", "important");
