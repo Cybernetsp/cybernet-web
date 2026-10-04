@@ -673,10 +673,25 @@ window.cambiarCuentaMalaAlias = function () {
     delete window.callbackCiber;
 
     if (res && res.status === "success") {
+      console.log("✅ Respuesta del Google Script:", res);
+      console.log("✅ Correo nuevo:", res.correoNuevo);
+      console.log("✅ Clave nueva:", res.claveNueva);
+      console.log("✅ PIN Refacil:", res.pinRefacil);
+
       let d =
         JSON.parse(localStorage.getItem("cyber_netflix_alias_pendiente")) || {};
       d.correo = res.correoNuevo;
       d.clave = res.claveNueva;
+
+      // Si el Google Script devuelve un nuevo PIN, actualizarlo
+      if (res.pinRefacil) {
+        d.pinRefacil = res.pinRefacil;
+        window.pinOcultoActual = res.pinRefacil;
+        console.log("✅ PIN actualizado en localStorage:", res.pinRefacil);
+      } else {
+        console.warn("⚠️ El Google Script no devolvió un PIN nuevo. Manteniendo el PIN anterior.");
+      }
+
       localStorage.setItem("cyber_netflix_alias_pendiente", JSON.stringify(d));
 
       document.getElementById("displayCtaCorreo").innerText = res.correoNuevo;
@@ -684,9 +699,16 @@ window.cambiarCuentaMalaAlias = function () {
 
       if (window.verificationLinkInterval)
         clearInterval(window.verificationLinkInterval);
-      document.getElementById("displayCtaPinRecarga").innerText =
-        "Oculto (Esperando a Netflix...)";
-      document.getElementById("displayCtaPinRecarga").style.color = "#888";
+
+      const pinEl = document.getElementById("displayCtaPinRecarga");
+      if (res.pinRefacil) {
+        pinEl.innerText = "Oculto (Esperando a Netflix...)";
+        pinEl.style.color = "#888";
+      } else {
+        // Si no hay PIN nuevo, indicar que se está usando el anterior
+        pinEl.innerText = window.pinOcultoActual ? "Oculto (PIN anterior)" : "Oculto (Sin PIN)";
+        pinEl.style.color = "#ff9f0a";
+      }
 
       const spinner = document.getElementById("radarVerificacionSpinner");
       if (spinner) {
