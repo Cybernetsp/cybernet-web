@@ -35,17 +35,17 @@ window.crearCuentaNetflixAlias = function () {
         window.ejecutarGeneracionNuevaCuentaAlias();
       } else {
         // La cuenta sigue pendiente, verificar si está activada en PinesMes
-        window.verificarCuentaActivadaEnPinesMes(d.correo, function (activada) {
-          console.log("🔍 Resultado de verificación PinesMes:", activada);
+        window.verificarCuentaActivadaEnPinesMes(d.correo, function (activada, existeEnPinesMes, sinClave) {
+          console.log("🔍 Resultado de verificación PinesMes:", { activada, existeEnPinesMes, sinClave });
 
           if (activada) {
             // La cuenta está activada en PinesMes, permitir crear cuenta nueva
             console.log("✅ La cuenta está activada en PinesMes. Mostrando botón de cuenta nueva.");
             window.pinOcultoActual = d.pinRefacil || "";
             window.restaurarInterfazAliasGenerada(d, true); // true = cuenta activada
-          } else {
-            // La cuenta NO está activada, mostrar "CONTRASEÑA NO ENCONTRADA" en rojo
-            console.log("✅ La cuenta NO está activada. Mostrando clave en rojo.");
+          } else if (existeEnPinesMes && sinClave) {
+            // La cuenta existe en PinesMes pero no tiene contraseña ("SEÑA NO ENCON")
+            console.log("⚠️ La cuenta existe en PinesMes pero sin contraseña. Mostrando clave en rojo.");
             window.pinOcultoActual = d.pinRefacil || "";
             window.restaurarInterfazAliasGenerada(d, false); // false = cuenta pendiente
 
@@ -55,6 +55,12 @@ window.crearCuentaNetflixAlias = function () {
               claveEl.style.color = "#ff3b30";
               claveEl.style.fontWeight = "bold";
             }
+          } else {
+            // La cuenta NO existe en PinesMes (es una cuenta nueva normal)
+            console.log("✅ La cuenta NO existe en PinesMes. Mostrando clave normal.");
+            window.pinOcultoActual = d.pinRefacil || "";
+            window.restaurarInterfazAliasGenerada(d, false); // false = cuenta pendiente
+            // NO mostrar en rojo porque es una cuenta nueva
           }
         });
       }
@@ -108,11 +114,16 @@ window.verificarCuentaActivadaEnPinesMes = function (correo, callback) {
     if (res && res.status === "success") {
       // Si tiene "quienActivo" o "fechaActivacion", significa que está activada
       const activada = !!(res.quienActivo || res.fechaActivacion || res.linkVerificacion);
-      console.log("🔍 Cuenta activada en PinesMes:", activada, res);
-      callback(activada);
+      // Si tiene "clave" o el correo existe en la respuesta, significa que la cuenta ya está en PinesMes
+      const existeEnPinesMes = !!(res.clave || res.correoEncontrado);
+      // Si la clave está vacía o dice "SEÑA NO ENCON", significa que no tiene contraseña
+      const sinClave = !res.clave || res.clave.includes("SEÑA NO ENCON") || res.clave.includes("NO ENCONTRADA");
+
+      console.log("🔍 Estado en PinesMes:", { activada, existeEnPinesMes, sinClave, res });
+      callback(activada, existeEnPinesMes, sinClave);
     } else {
       console.warn("⚠️ No se pudo verificar activación en PinesMes:", res);
-      callback(false); // Si falla, asumimos que no está activada
+      callback(false, false, false); // Si falla, asumimos que no está activada ni existe
     }
   };
 
