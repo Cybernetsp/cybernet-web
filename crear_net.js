@@ -22,31 +22,21 @@ window.crearCuentaNetflixAlias = function () {
   if (pendienteGuardada) {
     let d = JSON.parse(pendienteGuardada);
 
-    // Verificar si la cuenta ya fue guardada (consultando al Google Script)
-    // Si ya fue guardada, no restaurarla y generar una nueva
-    window.callbackCiber = function (res) {
-      const node = document.getElementById("node_verificar_pendiente");
-      if (node) node.remove();
-      delete window.callbackCiber;
-
-      if (res && res.status === "success" && res.yaGuardada) {
-        // La cuenta ya fue guardada, limpiar localStorage y generar nueva
-        console.log("✅ La cuenta pendiente ya fue guardada. Limpiando y generando nueva...");
+    // Verificar si la cuenta ya fue guardada en MySQL
+    window.verificarCuentaEnMySQL(d.correo, function (yaGuardada) {
+      if (yaGuardada) {
+        // La cuenta ya está en MySQL, ignorarla y generar una nueva automáticamente
+        console.log("✅ La cuenta ya está guardada en MySQL. Ignorando y generando nueva:", d.correo);
         localStorage.removeItem("cyber_netflix_alias_pendiente");
         window.pinOcultoActual = "";
         window.ejecutarGeneracionNuevaCuentaAlias();
       } else {
-        // La cuenta sigue pendiente, restaurar
+        // La cuenta sigue pendiente, restaurar normalmente
         console.log("✅ La cuenta sigue pendiente. Restaurando...");
         window.pinOcultoActual = d.pinRefacil || "";
-        window.restaurarInterfazAliasGenerada(d);
+        window.restaurarInterfazAliasGenerada(d, false); // false = cuenta pendiente
       }
-    };
-
-    const script = document.createElement("script");
-    script.id = "node_verificar_pendiente";
-    script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=verificarCuentaPendiente&correo=${encodeURIComponent(d.correo)}&_ts=${Date.now()}`;
-    document.body.appendChild(script);
+    });
 
     return;
   }
@@ -57,6 +47,32 @@ window.crearCuentaNetflixAlias = function () {
 
 // Alias para compatibilidad
 window.crearCuentaNetflixAliasExterna = window.crearCuentaNetflixAlias;
+
+// ==========================================================================
+// HELPER: VERIFICAR SI CUENTA ESTÁ EN MYSQL
+// ==========================================================================
+window.verificarCuentaEnMySQL = function (correo, callback) {
+  const formData = new FormData();
+  formData.append("accion", "verificar_cuenta_netflix");
+  formData.append("correo", correo);
+
+  fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((r) => r.json())
+    .then((res) => {
+      if (res && res.status === "success" && res.yaGuardada) {
+        callback(true);
+      } else {
+        callback(false);
+      }
+    })
+    .catch((err) => {
+      console.error("Error verificando cuenta en MySQL:", err);
+      callback(false); // Si falla, asumimos que no está guardada
+    });
+};
 
 // ==========================================================================
 // 2. GENERAR NUEVA CUENTA EN SHEETS (RESERVA ALIAS + PIN EN PINESMES)
@@ -332,12 +348,29 @@ window.restaurarInterfazAliasGenerada = function (d) {
   document.getElementById("displayCtaPinRecarga").style.color = "#888";
 
   const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
-  btnGuardar.onclick = function () {
+  const btnLimpiar = document.getElementById("btnLimpiarPendiente");
+
+  // Ocultar botón de guardar (se muestra solo después de verificar)
+  if (btnGuardar) btnGuardar.style.display = "none";
+
+  // Restaurar botón de limpiar a su estado normal
+  if (btnLimpiar) {
+    btnLimpiar.style.background = "rgba(255, 255, 255, 0.05)";
+    btnLimpiar.style.borderColor = "rgba(255, 255, 255, 0.1)";
+    btnLimpiar.style.color = "#888";
+    btnLimpiar.innerHTML = "🗑️ Ya activé esta cuenta (Limpiar)";
+  }
+
+  const btnGuardarClick = function () {
     let datosFrescos =
       JSON.parse(localStorage.getItem("cyber_netflix_alias_pendiente")) || d;
     datosFrescos.pinRecarga = window.pinOcultoActual;
     window.guardarCuentaConfirmadaNetflixDual(btnGuardar, datosFrescos);
   };
+
+  if (btnGuardar) {
+    btnGuardar.onclick = btnGuardarClick;
+  }
 
   // Lanzar búsqueda continua de correos en Gmail
   window.lanzarRadarEspiaAlias(d.correo);
