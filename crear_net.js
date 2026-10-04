@@ -433,6 +433,13 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
           clearInterval(window.verificationLinkInterval);
           if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
 
+          // Revelar el PIN cuando se detecta el link de verificación
+          const pinEl = document.getElementById("displayCtaPinRecarga");
+          if (pinEl && pinEl.innerText !== window.pinOcultoActual) {
+            pinEl.innerText = window.pinOcultoActual;
+            pinEl.style.color = "#ffffff";
+          }
+
           const spinner = document.getElementById("radarVerificacionSpinner");
           if (spinner)
             spinner.style.setProperty("display", "none", "important");
@@ -837,10 +844,10 @@ window.cambiarCuentaMalaAlias = function () {
   document.body.appendChild(script);
   console.log("📡 Llamando al Google Script para cambiar cuenta:", script.src);
 
-  // Timeout de 30 segundos
+  // Timeout de 60 segundos (aumentado de 30s)
   setTimeout(() => {
     if (window.callbackCiber) {
-      console.error("⏱️ Timeout al cambiar cuenta");
+      console.error("⏱️ Timeout al cambiar cuenta (60s)");
       const scriptNode = document.getElementById("node_mala_netflix");
       if (scriptNode) scriptNode.remove();
       delete window.callbackCiber;
@@ -850,12 +857,13 @@ window.cambiarCuentaMalaAlias = function () {
 
       const spinner = document.getElementById("radarVerificacionSpinner");
       if (spinner) {
-        spinner.innerHTML = `⏱️ Tiempo agotado. Intenta de nuevo.`;
+        spinner.innerHTML = `⏱️ Tiempo agotado (60s). Intenta de nuevo.`;
+        spinner.style.color = "#ff9f0a";
       }
 
-      alert("⏱️ El Google Script tardó mucho. Intenta de nuevo.");
+      alert("⏱️ El Google Script tardó más de 60 segundos.\n\nEl servicio puede estar lento. Intenta de nuevo en unos momentos.");
     }
-  }, 30000);
+  }, 60000);
 };
 
 // ==========================================================================
