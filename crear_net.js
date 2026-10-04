@@ -379,6 +379,7 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
     clearInterval(window.verificationLinkInterval);
 
   let intentos = 0;
+  let fallos = 0;
   const MAX_INTENTOS = 300; // 10 minutos máximo (300 intentos x 2 segundos)
 
   window.verificationLinkInterval = setInterval(function () {
@@ -395,11 +396,17 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
 
     // El Google Script usa callbackCiber como nombre fijo
     window.callbackCiber = function (res) {
+      console.log("📧 Radar Gmail - Respuesta del Google Script:", res);
+
       const node = document.getElementById("node_radar_netflix");
       if (node) node.remove();
       delete window.callbackCiber;
 
       if (res && res.status === "success") {
+        console.log("✅ Google Script status: success");
+        console.log("✅ yaCasiTerminas:", res.yaCasiTerminas);
+        console.log("✅ linkVerificacion:", res.linkVerificacion);
+
         // 1. Si llegó el correo del PIN o el enlace
         if (res.yaCasiTerminas || res.linkVerificacion) {
           const pinEl = document.getElementById("displayCtaPinRecarga");
@@ -448,6 +455,18 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
             contenedor.style.background = "rgba(255,255,255,0.08)";
           }
         }
+      } else {
+        console.warn("⚠️ Google Script status: no success o respuesta vacía");
+        fallos++;
+
+        // Si hay muchos fallos consecutivos, sugerir usar el botón manual
+        if (fallos >= 5) {
+          const spinner = document.getElementById("radarVerificacionSpinner");
+          if (spinner) {
+            spinner.innerHTML = `⚠️ El radar no detecta correos. Usa "⚡ El correo ya llegó"`;
+            spinner.style.color = "#ff9f0a";
+          }
+        }
       }
     };
 
@@ -455,6 +474,7 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
     script.id = "node_radar_netflix";
     script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoTarget)}&_ts=${Date.now()}`;
     document.body.appendChild(script);
+    console.log("📡 Llamando al Google Script para verificar correo:", script.src);
 
     // Detener después de MAX_INTENTOS (10 minutos)
     if (intentos >= MAX_INTENTOS) {
