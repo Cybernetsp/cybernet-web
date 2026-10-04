@@ -21,9 +21,12 @@ window.crearCuentaNetflixAlias = function () {
 
   if (pendienteGuardada) {
     let d = JSON.parse(pendienteGuardada);
+    console.log("📋 Cuenta pendiente encontrada en localStorage:", d.correo);
 
     // Verificar si la cuenta ya fue guardada en MySQL
     window.verificarCuentaEnMySQL(d.correo, function (yaGuardada) {
+      console.log("🔍 Resultado de verificación MySQL:", yaGuardada);
+
       if (yaGuardada) {
         // La cuenta ya está en MySQL, ignorarla y generar una nueva automáticamente
         console.log("✅ La cuenta ya está guardada en MySQL. Ignorando y generando nueva:", d.correo);
@@ -321,6 +324,11 @@ window.abrirModalSuscripcionEstructura = function () {
         <!-- Botón Forzar Detección Manual (Nuevo) -->
         <button id="btnForzarDeteccionManual" onclick="window.forzarDeteccionManual()" style="width: 100%; background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 10px; border-radius: 12px; font-weight: 500; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
           ⚡ El correo ya llegó (Forzar detección)
+        </button>
+
+        <!-- Botón Ignorar y Crear Nueva (Para recargas) -->
+        <button id="btnIgnorarPendiente" onclick="window.ignorarPendienteYCrearNueva()" style="width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #888; padding: 8px; border-radius: 12px; font-weight: 500; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+          ➕ Ignorar esta y crear cuenta nueva
         </button>
 
       </div>
@@ -738,7 +746,37 @@ window.procesarLinkManual = function () {
 };
 
 // ==========================================================================
-// 9. DESCARTAR CUENTA MALA Y PEDIR OTRA
+// 9. IGNORAR CUENTA PENDIENTE Y CREAR NUEVA (PARA RECARGAS)
+// ==========================================================================
+window.ignorarPendienteYCrearNueva = function () {
+  if (typeof haptic === "function") haptic();
+
+  if (
+    !confirm(
+      "⚠️ ¿Ignorar esta cuenta pendiente y crear una nueva?\n\nEsto borrará la cuenta actual de la memoria local y generará una nueva.",
+    )
+  )
+    return;
+
+  // Limpiar localStorage
+  localStorage.removeItem("cyber_netflix_alias_pendiente");
+  window.pinOcultoActual = "";
+
+  // Detener radar si está activo
+  if (window.verificationLinkInterval) {
+    clearInterval(window.verificationLinkInterval);
+  }
+
+  // Cerrar modal
+  const modal = document.getElementById("cuentaGeneradaModalOverlay");
+  if (modal) modal.remove();
+
+  // Generar nueva cuenta
+  window.ejecutarGeneracionNuevaCuentaAlias();
+};
+
+// ==========================================================================
+// 10. DESCARTAR CUENTA MALA Y PEDIR OTRA
 // ==========================================================================
 window.cambiarCuentaMalaAlias = function () {
   if (typeof haptic === "function") haptic();
