@@ -373,19 +373,19 @@ window.abrirModalSuscripcionEstructura = function () {
           Guardar en Inventario Maestro
         </button>
 
+        <!-- Botón Cambiar Correo (Mantiene el PIN) -->
+        <button id="btnIgnorarPendiente" onclick="window.cambiarCorreoMismoPin()" style="width: 100%; background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 10px; border-radius: 12px; font-weight: 500; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+          🔄 Cambiar correo
+        </button>
+
+        <!-- Botón Forzar Detección Manual -->
+        <button id="btnForzarDeteccionManual" onclick="window.forzarDeteccionManual()" style="width: 100%; background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 10px; border-radius: 12px; font-weight: 500; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+          ⚡ Forzar detección de correo
+        </button>
+
         <!-- Botón Descartar Cuenta Mala -->
         <button id="btnCuentaMalaAlias" onclick="window.cambiarCuentaMalaAlias()" style="width: 100%; background: #8b0000; border: none; color: #ffffff; padding: 12px; border-radius: 12px; font-weight: 500; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
           No llego correo de verificacion
-        </button>
-
-        <!-- Botón Forzar Detección Manual (Nuevo) -->
-        <button id="btnForzarDeteccionManual" onclick="window.forzarDeteccionManual()" style="width: 100%; background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3); color: #ff9f0a; padding: 10px; border-radius: 12px; font-weight: 500; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
-          ⚡ El correo ya llegó (Forzar detección)
-        </button>
-
-        <!-- Botón Ignorar y Crear Nueva (Para recargas) -->
-        <button id="btnIgnorarPendiente" onclick="window.ignorarPendienteYCrearNueva()" style="width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #888; padding: 8px; border-radius: 12px; font-weight: 500; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
-          ➕ Ignorar esta y crear cuenta nueva
         </button>
 
         <!-- Botón Crear Cuenta Nueva (Solo cuando la cuenta está activada) -->
@@ -655,37 +655,9 @@ window.guardarCuentaConfirmadaNetflixDual = function (btn, datosCuenta) {
             if (window.verificationLinkInterval)
               clearInterval(window.verificationLinkInterval);
 
-            // Mostrar botón "Crear cuenta nueva" y ocultar otros botones
-            const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
-            const btnCuentaMala = document.getElementById("btnCuentaMalaAlias");
-            const btnForzar = document.getElementById("btnForzarDeteccionManual");
-            const btnIgnorar = document.getElementById("btnIgnorarPendiente");
-            const btnCrearNueva = document.getElementById("btnCrearCuentaNueva");
-            const radarSpinner = document.getElementById("radarVerificacionSpinner");
-            const radarContenedor = document.getElementById("radarVerificacionContenedor");
-
-            if (btnGuardar) btnGuardar.style.display = "none";
-            if (btnCuentaMala) btnCuentaMala.style.display = "none";
-            if (btnForzar) btnForzar.style.display = "none";
-            if (btnIgnorar) btnIgnorar.style.display = "none";
-            if (btnCrearNueva) btnCrearNueva.style.display = "flex";
-
-            // Actualizar el radar para mostrar éxito
-            if (radarSpinner) {
-              radarSpinner.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Cuenta activada y guardada`;
-              radarSpinner.style.color = "#30d158";
-            }
-            if (radarContenedor) {
-              radarContenedor.style.background = "rgba(48, 209, 88, 0.1)";
-              radarContenedor.style.borderColor = "rgba(48, 209, 88, 0.3)";
-            }
-
-            // Quitar el color rojo de la contraseña
-            const claveEl = document.getElementById("displayCtaClave");
-            if (claveEl) {
-              claveEl.style.color = "#ffffff";
-              claveEl.style.fontWeight = "500";
-            }
+            // Cerrar el modal automáticamente
+            const modal = document.getElementById("cuentaGeneradaModalOverlay");
+            if (modal) modal.remove();
 
             if (typeof triggerToast === "function")
               triggerToast(
@@ -908,7 +880,78 @@ window.procesarLinkManual = function () {
 };
 
 // ==========================================================================
-// 9. IGNORAR CUENTA PENDIENTE Y CREAR NUEVA (PARA RECARGAS)
+// 9. CAMBIAR CORREO MANTENIENDO EL PIN (PARA RECARGAS)
+// ==========================================================================
+window.cambiarCorreoMismoPin = function () {
+  if (typeof haptic === "function") haptic();
+
+  if (
+    !confirm(
+      "🔄 ¿Cambiar el correo manteniendo el mismo PIN?\n\nEl sistema buscará un nuevo correo en ALIAS y generará una nueva contraseña, pero mantendrá el PIN actual.",
+    )
+  )
+    return;
+
+  // Obtener el PIN actual
+  const pinActual = window.pinOcultoActual;
+  if (!pinActual) {
+    alert("❌ No hay PIN guardado. No se puede mantener el PIN.");
+    return;
+  }
+
+  // Detener radar si está activo
+  if (window.verificationLinkInterval) {
+    clearInterval(window.verificationLinkInterval);
+  }
+
+  // Mostrar estado de carga
+  const spinner = document.getElementById("radarVerificacionSpinner");
+  if (spinner) {
+    spinner.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> Buscando nuevo correo en ALIAS...`;
+  }
+
+  document.getElementById("displayCtaCorreo").innerText = "Buscando...";
+  document.getElementById("displayCtaClave").innerText = "Buscando...";
+
+  // Llamar al Google Script para cambiar el correo manteniendo el PIN
+  window.callbackCiber = function (res) {
+    const node = document.getElementById("node_cambiar_correo");
+    if (node) node.remove();
+    delete window.callbackCiber;
+
+    if (res && res.status === "success" && res.data) {
+      const d = res.data;
+      window.pinOcultoActual = pinActual; // Mantener el PIN anterior
+      d.pinRefacil = pinActual; // Asignar el PIN anterior a los datos
+
+      // Guardar en localStorage
+      localStorage.setItem("cyber_netflix_alias_pendiente", JSON.stringify(d));
+
+      // Actualizar la interfaz
+      window.restaurarInterfazAliasGenerada(d, false);
+
+      if (typeof CyberSonidos !== "undefined") CyberSonidos.play("success");
+    } else {
+      alert("❌ Error al cambiar el correo: " + (res ? res.message : "Error desconocido"));
+      const modal = document.getElementById("cuentaGeneradaModalOverlay");
+      if (modal) modal.remove();
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_cambiar_correo";
+  const userActivo =
+    sessionStorage.getItem("active_staff") ||
+    localStorage.getItem("cyber_saved_staff") ||
+    "Admin";
+  // Usar generarNuevaCuentaAlias pero pasando el PIN para que el Google Script lo mantenga
+  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&pinMantener=${encodeURIComponent(pinActual)}&callback=callbackCiber&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+  console.log("📡 Llamando al Google Script para cambiar correo manteniendo PIN:", script.src);
+};
+
+// ==========================================================================
+// 10. IGNORAR CUENTA PENDIENTE Y CREAR NUEVA (PARA RECARGAS)
 // ==========================================================================
 window.ignorarPendienteYCrearNueva = function () {
   if (typeof haptic === "function") haptic();
