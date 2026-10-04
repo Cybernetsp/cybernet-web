@@ -695,10 +695,32 @@ window.cambiarCuentaMalaAlias = function () {
       }
 
       window.lanzarRadarEspiaAlias(res.correoNuevo);
+
+      // Reiniciar botón de forzar detección
+      const btnForzar = document.getElementById("btnForzarDeteccionManual");
+      if (btnForzar) btnForzar.style.display = "flex";
+
+      // Ocultar contenedor si estaba mostrando input manual
+      const contenedor = document.getElementById("radarVerificacionContenedor");
+      if (contenedor) {
+        contenedor.style.background = "rgba(255,255,255,0.03)";
+        contenedor.style.border = "1px solid rgba(255,255,255,0.08)";
+      }
+
+      if (typeof triggerToast === "function") {
+        triggerToast("✅ Nueva cuenta generada: " + res.correoNuevo);
+      }
     } else {
+      console.error("❌ Error al cambiar cuenta:", res);
       alert(
         "❌ Error: " + (res ? res.message : "No se pudo cambiar la cuenta."),
       );
+
+      // Restaurar spinner
+      const spinner = document.getElementById("radarVerificacionSpinner");
+      if (spinner) {
+        spinner.innerHTML = `❌ Error. Intenta de nuevo.`;
+      }
     }
   };
 
@@ -707,6 +729,27 @@ window.cambiarCuentaMalaAlias = function () {
   const user = sessionStorage.getItem("active_staff") || "Sistema";
   script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=cambiarCuentaMalaAlias&correoMalo=${encodeURIComponent(correoMalo)}&user=${encodeURIComponent(user)}&_ts=${Date.now()}`;
   document.body.appendChild(script);
+  console.log("📡 Llamando al Google Script para cambiar cuenta:", script.src);
+
+  // Timeout de 30 segundos
+  setTimeout(() => {
+    if (window.callbackCiber) {
+      console.error("⏱️ Timeout al cambiar cuenta");
+      const scriptNode = document.getElementById("node_mala_netflix");
+      if (scriptNode) scriptNode.remove();
+      delete window.callbackCiber;
+
+      btnMala.disabled = false;
+      btnMala.innerHTML = "✕ Esta cuenta no sirve (Descartar y buscar otra)";
+
+      const spinner = document.getElementById("radarVerificacionSpinner");
+      if (spinner) {
+        spinner.innerHTML = `⏱️ Tiempo agotado. Intenta de nuevo.`;
+      }
+
+      alert("⏱️ El Google Script tardó mucho. Intenta de nuevo.");
+    }
+  }, 30000);
 };
 
 // ==========================================================================
