@@ -395,6 +395,10 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
     }
 
     // El Google Script usa callbackCiber como nombre fijo
+    // Remover el script anterior si existe para evitar conflictos
+    const nodeAnterior = document.getElementById("node_radar_netflix");
+    if (nodeAnterior) nodeAnterior.remove();
+
     window.callbackCiber = function (res) {
       console.log("📧 Radar Gmail - Respuesta del Google Script:", res);
 
