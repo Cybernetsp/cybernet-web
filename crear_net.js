@@ -408,11 +408,12 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
 
       if (res && res.status === "success") {
         console.log("✅ Google Script status: success");
+        console.log("✅ correoVerificacion:", res.correoVerificacion);
         console.log("✅ yaCasiTerminas:", res.yaCasiTerminas);
         console.log("✅ linkVerificacion:", res.linkVerificacion);
 
-        // 1. Si llegó el correo del PIN o el enlace
-        if (res.yaCasiTerminas || res.linkVerificacion) {
+        // 1. Si llegó el correo de verificación o el de "ya casi terminas", mostrar el PIN
+        if (res.correoVerificacion || res.yaCasiTerminas || res.linkVerificacion) {
           const pinEl = document.getElementById("displayCtaPinRecarga");
           if (pinEl && pinEl.innerText !== window.pinOcultoActual) {
             if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
@@ -421,12 +422,13 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
 
             const spinner = document.getElementById("radarVerificacionSpinner");
             if (spinner) {
-              spinner.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> PIN revelado. Esperando link de verificación...`;
+              spinner.innerHTML = `<svg class="spin-anim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></svg> ✅ Correo detectado. PIN revelado.`;
+              spinner.style.color = "#30d158";
             }
           }
         }
 
-        // 2. Si llegó el Link de Verificación
+        // 2. Si llegó el Link de Verificación explícito
         if (res.linkVerificacion) {
           clearInterval(window.verificationLinkInterval);
           if (typeof CyberSonidos !== "undefined") CyberSonidos.play("notif");
