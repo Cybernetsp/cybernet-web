@@ -109,7 +109,7 @@ window.ejecutarGeneracionNuevaCuentaAlias = function () {
     "Admin";
 
   // Intentar primero con JSONP, si falla usar fetch con proxy
-  const url = `${SCRIPT_URL_NETFLIX_GEN}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&_ts=${Date.now()}`;
+  const url = `${SCRIPT_URL_NETFLIX_GEN}?action=generarNuevaCuentaAlias&user=${encodeURIComponent(userActivo)}&callback=callbackCiber&_ts=${Date.now()}`;
   console.log("Intentando JSONP:", url);
 
   // El Google Script usa callbackCiber como nombre fijo
@@ -501,7 +501,7 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
 
     const script = document.createElement("script");
     script.id = "node_radar_netflix";
-    script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoTarget)}&_ts=${Date.now()}`;
+    script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoTarget)}&callback=callbackCiber&_ts=${Date.now()}`;
     document.body.appendChild(script);
     console.log("📡 Llamando al Google Script para verificar correo:", script.src);
 
@@ -595,7 +595,7 @@ window.guardarCuentaConfirmadaNetflixDual = function (btn, datosCuenta) {
 
   const script = document.createElement("script");
   script.id = "node_save_netflix";
-  const urlParams = `?action=confirmarGuardadoNetflix&correo=${encodeURIComponent(datosCuenta.correo)}&clave=${encodeURIComponent(datosCuenta.clave)}&_ts=${Date.now()}`;
+  const urlParams = `?action=confirmarGuardadoNetflix&correo=${encodeURIComponent(datosCuenta.correo)}&clave=${encodeURIComponent(datosCuenta.clave)}&callback=callbackCiber&_ts=${Date.now()}`;
   script.src = SCRIPT_URL_NETFLIX_GEN + urlParams;
   document.body.appendChild(script);
 };
@@ -731,7 +731,7 @@ window.forzarDeteccionManual = function () {
 
   const script = document.createElement("script");
   script.id = "node_forzar_deteccion";
-  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoActual)}&_ts=${Date.now()}`;
+  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correoActual)}&callback=callbackCiber&_ts=${Date.now()}`;
   document.body.appendChild(script);
 
   // Ocultar botón de forzar detección
@@ -909,7 +909,7 @@ window.cambiarCuentaMalaAlias = function () {
   const script = document.createElement("script");
   script.id = "node_mala_netflix";
   const user = sessionStorage.getItem("active_staff") || "Sistema";
-  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=cambiarCuentaMalaAlias&correoMalo=${encodeURIComponent(correoMalo)}&user=${encodeURIComponent(user)}&_ts=${Date.now()}`;
+  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=cambiarCuentaMalaAlias&correoMalo=${encodeURIComponent(correoMalo)}&user=${encodeURIComponent(user)}&callback=callbackCiber&_ts=${Date.now()}`;
   document.body.appendChild(script);
   console.log("📡 Llamando al Google Script para cambiar cuenta:", script.src);
 
