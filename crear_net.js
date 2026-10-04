@@ -34,10 +34,29 @@ window.crearCuentaNetflixAlias = function () {
         window.pinOcultoActual = "";
         window.ejecutarGeneracionNuevaCuentaAlias();
       } else {
-        // La cuenta sigue pendiente, restaurar normalmente
-        console.log("✅ La cuenta sigue pendiente. Restaurando...");
-        window.pinOcultoActual = d.pinRefacil || "";
-        window.restaurarInterfazAliasGenerada(d, false); // false = cuenta pendiente
+        // La cuenta sigue pendiente, verificar si está activada en PinesMes
+        window.verificarCuentaActivadaEnPinesMes(d.correo, function (activada) {
+          console.log("🔍 Resultado de verificación PinesMes:", activada);
+
+          if (activada) {
+            // La cuenta está activada en PinesMes, permitir crear cuenta nueva
+            console.log("✅ La cuenta está activada en PinesMes. Mostrando botón de cuenta nueva.");
+            window.pinOcultoActual = d.pinRefacil || "";
+            window.restaurarInterfazAliasGenerada(d, true); // true = cuenta activada
+          } else {
+            // La cuenta NO está activada, mostrar "CONTRASEÑA NO ENCONTRADA" en rojo
+            console.log("✅ La cuenta NO está activada. Mostrando clave en rojo.");
+            window.pinOcultoActual = d.pinRefacil || "";
+            window.restaurarInterfazAliasGenerada(d, false); // false = cuenta pendiente
+
+            // Mostrar "CONTRASEÑA NO ENCONTRADA" en rojo
+            const claveEl = document.getElementById("displayCtaClave");
+            if (claveEl) {
+              claveEl.style.color = "#ff3b30";
+              claveEl.style.fontWeight = "bold";
+            }
+          }
+        });
       }
     });
 
@@ -75,6 +94,33 @@ window.verificarCuentaEnMySQL = function (correo, callback) {
       console.error("Error verificando cuenta en MySQL:", err);
       callback(false); // Si falla, asumimos que no está guardada
     });
+};
+
+// ==========================================================================
+// HELPER: VERIFICAR SI CUENTA ESTÁ ACTIVADA EN PINESMES (GOOGLE SHEETS)
+// ==========================================================================
+window.verificarCuentaActivadaEnPinesMes = function (correo, callback) {
+  window.callbackCiber = function (res) {
+    const node = document.getElementById("node_verificar_activada");
+    if (node) node.remove();
+    delete window.callbackCiber;
+
+    if (res && res.status === "success") {
+      // Si tiene "quienActivo" o "fechaActivacion", significa que está activada
+      const activada = !!(res.quienActivo || res.fechaActivacion || res.linkVerificacion);
+      console.log("🔍 Cuenta activada en PinesMes:", activada, res);
+      callback(activada);
+    } else {
+      console.warn("⚠️ No se pudo verificar activación en PinesMes:", res);
+      callback(false); // Si falla, asumimos que no está activada
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_verificar_activada";
+  script.src = `${SCRIPT_URL_NETFLIX_GEN}?action=obtenerEstadoVerificacionAlias&correo=${encodeURIComponent(correo)}&callback=callbackCiber&_ts=${Date.now()}`;
+  document.body.appendChild(script);
+  console.log("📡 Verificando activación en PinesMes:", script.src);
 };
 
 // ==========================================================================
@@ -331,6 +377,11 @@ window.abrirModalSuscripcionEstructura = function () {
           ➕ Ignorar esta y crear cuenta nueva
         </button>
 
+        <!-- Botón Crear Cuenta Nueva (Solo cuando la cuenta está activada) -->
+        <button id="btnCrearCuentaNueva" onclick="window.ignorarPendienteYCrearNueva()" style="width: 100%; background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.3); color: #30d158; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+          ➕ Crear cuenta nueva
+        </button>
+
       </div>
     </div>
   `;
@@ -341,7 +392,7 @@ window.abrirModalSuscripcionEstructura = function () {
 // ==========================================================================
 // 4. RESTAURAR PANTALLA Y ARRANQUE DEL RADAR DE GMAIL
 // ==========================================================================
-window.restaurarInterfazAliasGenerada = function (d) {
+window.restaurarInterfazAliasGenerada = function (d, cuentaActivada = false) {
   window.abrirModalSuscripcionEstructura();
 
   document.getElementById("displayCtaCorreo").innerText = d.correo;
@@ -352,6 +403,7 @@ window.restaurarInterfazAliasGenerada = function (d) {
 
   const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
   const btnLimpiar = document.getElementById("btnLimpiarPendiente");
+  const btnIgnorar = document.getElementById("btnIgnorarPendiente");
 
   // Ocultar botón de guardar (se muestra solo después de verificar)
   if (btnGuardar) btnGuardar.style.display = "none";
@@ -362,6 +414,38 @@ window.restaurarInterfazAliasGenerada = function (d) {
     btnLimpiar.style.borderColor = "rgba(255, 255, 255, 0.1)";
     btnLimpiar.style.color = "#888";
     btnLimpiar.innerHTML = "🗑️ Ya activé esta cuenta (Limpiar)";
+  }
+
+  // Controlar el botón "Ignorar esta y crear cuenta nueva" según el estado de activación
+  if (btnIgnorar) {
+    if (cuentaActivada) {
+      // Si la cuenta está activada, ocultar el botón de ignorar
+      btnIgnorar.style.display = "none";
+    } else {
+      // Si la cuenta NO está activada, mostrar el botón de ignorar
+      btnIgnorar.style.display = "flex";
+    }
+  }
+
+  // Controlar el botón "Crear cuenta nueva" según el estado de activación
+  const btnCrearNueva = document.getElementById("btnCrearCuentaNueva");
+  if (btnCrearNueva) {
+    if (cuentaActivada) {
+      // Si la cuenta está activada, mostrar el botón de crear cuenta nueva
+      btnCrearNueva.style.display = "flex";
+    } else {
+      // Si la cuenta NO está activada, ocultar el botón de crear cuenta nueva
+      btnCrearNueva.style.display = "none";
+    }
+  }
+
+  // Si la cuenta NO está activada, mostrar "CONTRASEÑA NO ENCONTRADA" en rojo
+  if (!cuentaActivada) {
+    const claveEl = document.getElementById("displayCtaClave");
+    if (claveEl) {
+      claveEl.style.color = "#ff3b30";
+      claveEl.style.fontWeight = "bold";
+    }
   }
 
   const btnGuardarClick = function () {
@@ -474,6 +558,13 @@ window.lanzarRadarEspiaAlias = function (correoTarget) {
 
               const btnM = document.getElementById("btnCuentaMalaAlias");
               if (btnM) btnM.style.display = "none";
+
+              // Quitar el color rojo de la contraseña
+              const claveEl = document.getElementById("displayCtaClave");
+              if (claveEl) {
+                claveEl.style.color = "#ffffff";
+                claveEl.style.fontWeight = "500";
+              }
             };
           }
 
@@ -553,8 +644,37 @@ window.guardarCuentaConfirmadaNetflixDual = function (btn, datosCuenta) {
             if (window.verificationLinkInterval)
               clearInterval(window.verificationLinkInterval);
 
-            const modal = document.getElementById("cuentaGeneradaModalOverlay");
-            if (modal) modal.remove();
+            // Mostrar botón "Crear cuenta nueva" y ocultar otros botones
+            const btnGuardar = document.getElementById("btnGuardarMaestroNetflix");
+            const btnCuentaMala = document.getElementById("btnCuentaMalaAlias");
+            const btnForzar = document.getElementById("btnForzarDeteccionManual");
+            const btnIgnorar = document.getElementById("btnIgnorarPendiente");
+            const btnCrearNueva = document.getElementById("btnCrearCuentaNueva");
+            const radarSpinner = document.getElementById("radarVerificacionSpinner");
+            const radarContenedor = document.getElementById("radarVerificacionContenedor");
+
+            if (btnGuardar) btnGuardar.style.display = "none";
+            if (btnCuentaMala) btnCuentaMala.style.display = "none";
+            if (btnForzar) btnForzar.style.display = "none";
+            if (btnIgnorar) btnIgnorar.style.display = "none";
+            if (btnCrearNueva) btnCrearNueva.style.display = "flex";
+
+            // Actualizar el radar para mostrar éxito
+            if (radarSpinner) {
+              radarSpinner.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Cuenta activada y guardada`;
+              radarSpinner.style.color = "#30d158";
+            }
+            if (radarContenedor) {
+              radarContenedor.style.background = "rgba(48, 209, 88, 0.1)";
+              radarContenedor.style.borderColor = "rgba(48, 209, 88, 0.3)";
+            }
+
+            // Quitar el color rojo de la contraseña
+            const claveEl = document.getElementById("displayCtaClave");
+            if (claveEl) {
+              claveEl.style.color = "#ffffff";
+              claveEl.style.fontWeight = "500";
+            }
 
             if (typeof triggerToast === "function")
               triggerToast(
