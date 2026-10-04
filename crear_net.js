@@ -323,11 +323,6 @@ window.abrirModalSuscripcionEstructura = function () {
           ⚡ El correo ya llegó (Forzar detección)
         </button>
 
-        <!-- Botón Limpiar Pendiente (Para casos donde se activó pero no se guardó) -->
-        <button id="btnLimpiarPendiente" onclick="window.limpiarCuentaPendiente()" style="width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #888; padding: 8px; border-radius: 12px; font-weight: 500; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
-          🗑️ Ya activé esta cuenta (Limpiar)
-        </button>
-
       </div>
     </div>
   `;
@@ -710,37 +705,7 @@ window.procesarLinkManual = function () {
 };
 
 // ==========================================================================
-// 9. LIMPIAR CUENTA PENDIENTE (CUANDO YA SE ACTIVÓ PERO NO SE GUARDÓ)
-// ==========================================================================
-window.limpiarCuentaPendiente = function () {
-  if (typeof haptic === "function") haptic();
-
-  if (
-    !confirm(
-      "⚠️ ¿Ya activaste esta cuenta y quieres generar una nueva?\n\nEsto limpiará la cuenta actual y generará una nueva.",
-    )
-  )
-    return;
-
-  // Limpiar localStorage
-  localStorage.removeItem("cyber_netflix_alias_pendiente");
-  window.pinOcultoActual = "";
-
-  // Detener radar si está activo
-  if (window.verificationLinkInterval) {
-    clearInterval(window.verificationLinkInterval);
-  }
-
-  // Cerrar modal
-  const modal = document.getElementById("cuentaGeneradaModalOverlay");
-  if (modal) modal.remove();
-
-  // Generar nueva cuenta
-  window.ejecutarGeneracionNuevaCuentaAlias();
-};
-
-// ==========================================================================
-// 10. DESCARTAR CUENTA MALA Y PEDIR OTRA
+// 9. DESCARTAR CUENTA MALA Y PEDIR OTRA
 // ==========================================================================
 window.cambiarCuentaMalaAlias = function () {
   if (typeof haptic === "function") haptic();
