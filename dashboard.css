@@ -16,12 +16,12 @@
 
 .cyber-notification {
   pointer-events: auto;
-  background: #111115;
-  border: 1px solid #27272a;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
   padding: 14px 16px;
-  color: white;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  color: var(--text-primary);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   opacity: 0;
   transform: translateX(50px) scale(0.95);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -37,22 +37,22 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   padding-bottom: 8px;
   margin-bottom: 8px;
 }
 
 .cyber-notif-body {
   font-size: 0.82rem;
-  color: #a1a1aa;
+  color: var(--text-secondary);
   line-height: 1.4;
 }
 
 .cyber-notif-close {
   margin-left: auto;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   border: none;
-  color: #a1a1aa;
+  color: var(--text-secondary);
   cursor: pointer;
   width: 22px;
   height: 22px;
@@ -65,7 +65,7 @@
 }
 
 .cyber-notif-close:hover {
-  background: var(--ios-red);
+  background: var(--mac-red);
   color: white;
 }
 
