@@ -802,7 +802,10 @@ window.cargarDashboardFinanzasSheets = function (mes, dia, container) {
       '<div class="empty-log-msg">Cargando datos históricos desde Google Sheets...</div>';
 
   const cbName = "cb_finanzas_" + Date.now();
+  
   window[cbName] = function (res) {
+    console.log("Respuesta de Google Sheets:", res);
+    
     const node = document.getElementById("node_" + cbName);
     if (node) node.remove();
     delete window[cbName];
@@ -816,10 +819,32 @@ window.cargarDashboardFinanzasSheets = function (mes, dia, container) {
     }
   };
 
+  window[cbName + "_error"] = function () {
+    console.error("Error al cargar Google Script");
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+    delete window[cbName + "_error"];
+    
+    if (container)
+      container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">❌ Error de conexión con Google Apps Script.</div>`;
+  };
+
   const script = document.createElement("script");
   script.id = "node_" + cbName;
   script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDashboardFinanzas&mes=${encodeURIComponent(mes)}&dia=${encodeURIComponent(dia)}&callback=${cbName}&_ts=${Date.now()}`;
+  script.onerror = window[cbName + "_error"];
+  script.onload = function() {
+    setTimeout(() => {
+      if (window[cbName]) {
+        console.warn("Callback no se ejecutó después de 5 segundos");
+        window[cbName + "_error"]();
+      }
+    }, 5000);
+  };
+  
   document.body.appendChild(script);
+  console.log("Script cargado:", script.src);
 };
 
 window.filtrarHoy = function () {
