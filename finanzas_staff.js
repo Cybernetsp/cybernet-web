@@ -1274,6 +1274,17 @@ window.actualizarWidgetAnillosYBanderas = function (pctIng, pctGas) {
     }
   });
 
+  // Actualizar barras de progreso
+  const barIngresos = document.getElementById("barFillIngresos");
+  const barGastos = document.getElementById("barFillGastos");
+  
+  if (barIngresos) {
+    barIngresos.style.width = pctIng + "%";
+  }
+  if (barGastos) {
+    barGastos.style.width = pctGas + "%";
+  }
+
   const elementoCajaReal =
     document.getElementById("val_neto") ||
     Array.from(document.querySelectorAll("*")).find(
