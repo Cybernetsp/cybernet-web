@@ -1302,23 +1302,7 @@ window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
 
   listaMovimientos.forEach((mov) => {
     const esIngreso = mov.tipo === "INGRESO";
-    const colorMonto = esIngreso ? "#30d158" : "#ff453a";
-    const signo = esIngreso ? "+" : "-";
     const montoNum = Number(mov.monto) || 0;
-    const montoFmt = "$" + montoNum.toLocaleString("es-CO");
-
-    html += `
-      <div style="background: rgba(255, 255, 255, 0.035); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s ease; box-sizing: border-box; width: 100%; flex-shrink: 0;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(255,255,255,0.15)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.035)'; this.style.borderColor='rgba(255,255,255,0.08)';">
-        <div style="display: flex; flex-direction: column; gap: 3px; overflow: hidden; padding-right: 10px;">
-          <div style="font-weight: 800; color: #ffffff; font-size: 0.9rem; letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${mov.categoria}</div>
-          <div style="font-size: 0.78rem; color: #a1a1aa; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${mov.detalle || "Sin descripción"} • <span style="color: #71717a; font-family: monospace;">${mov.fecha}</span>
-          </div>
-        </div>
-        <div style="font-weight: 900; font-size: 1.05rem; color: ${colorMonto}; font-family: monospace; letter-spacing: 0.3px; flex-shrink: 0; text-align: right;">
-          ${signo}${montoFmt}
-        </div>
-      </div>`;
 
     const categoria = mov.categoria || "Sin categoría";
     if (!totalesPorCategoria[categoria]) {
@@ -1328,7 +1312,7 @@ window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
   });
 
   html += `
-    <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid rgba(255, 255, 255, 0.1);">
+    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid rgba(255, 255, 255, 0.1);">
       <div style="font-weight: 800; color: #0a84ff; font-size: 0.85rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
         Total por Categoría
@@ -1350,6 +1334,27 @@ window.renderizarHistorialMovimientosUI = function (listaMovimientos) {
   });
 
   html += `</div>`;
+
+  listaMovimientos.forEach((mov) => {
+    const esIngreso = mov.tipo === "INGRESO";
+    const colorMonto = esIngreso ? "#30d158" : "#ff453a";
+    const signo = esIngreso ? "+" : "-";
+    const montoNum = Number(mov.monto) || 0;
+    const montoFmt = "$" + montoNum.toLocaleString("es-CO");
+
+    html += `
+      <div style="background: rgba(255, 255, 255, 0.035); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s ease; box-sizing: border-box; width: 100%; flex-shrink: 0;" onmouseover="this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(255,255,255,0.15)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.035)'; this.style.borderColor='rgba(255,255,255,0.08)';">
+        <div style="display: flex; flex-direction: column; gap: 3px; overflow: hidden; padding-right: 10px;">
+          <div style="font-weight: 800; color: #ffffff; font-size: 0.9rem; letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${mov.categoria}</div>
+          <div style="font-size: 0.78rem; color: #a1a1aa; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${mov.detalle || "Sin descripción"} • <span style="color: #71717a; font-family: monospace;">${mov.fecha}</span>
+          </div>
+        </div>
+        <div style="font-weight: 900; font-size: 1.05rem; color: ${colorMonto}; font-family: monospace; letter-spacing: 0.3px; flex-shrink: 0; text-align: right;">
+          ${signo}${montoFmt}
+        </div>
+      </div>`;
+  });
 
   contenedor.innerHTML = html;
 };
