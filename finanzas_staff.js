@@ -854,7 +854,8 @@ window.cargarDashboardFinanzasSheets = function (mes, dia, container) {
                 ...datosMySQL.dia,
                 ingresos: datosSheets.dia.ingresos
               },
-              ingresosDesdeSheets: true
+              ingresosDesdeSheets: true,
+              listaDetallada: datosSheets.listaDetallada || datosMySQL.listaDetallada
             };
             
             window.globalFinanzasData = datosCombinados;
@@ -1146,6 +1147,20 @@ window.renderDashboard = function () {
 
   ingNum = ingNum - montoJeissonExtraido;
 
+  // 🔴 CALCULAR MONTO DE JEISSON PARA GANANCIA TOTAL (SOLO SI VIENEN DE SHEETS)
+  let montoJeissonParaGananciaTotal = 0;
+  if (window.globalFinanzasData.ingresosDesdeSheets && window.globalFinanzasData.listaDetallada) {
+    window.globalFinanzasData.listaDetallada.forEach((mov) => {
+      if (
+        mov.tipo === "INGRESO" &&
+        (mov.categoria.toUpperCase().includes("JEISSON") ||
+          (mov.detalle || "").toUpperCase().includes("JEISSON"))
+      ) {
+        montoJeissonParaGananciaTotal += Number(mov.monto) || 0;
+      }
+    });
+  }
+
   const netoOperativo = ingNum - (gasNum + invNum + nomNum);
 
   // 2. PORCENTAJES DE ANILLOS
@@ -1193,7 +1208,7 @@ window.renderDashboard = function () {
   const ahorroCalculado = Math.round(miGananciaNeta * 0.6); // 60% para Ahorro
   const otrosCalculado = miGananciaNeta - ahorroCalculado; // 40% restante para Otros/Libre
 
-  const gananciaTotalMasJeisson = miGananciaNeta + montoJeissonExtraido;
+  const gananciaTotalMasJeisson = miGananciaNeta + (window.globalFinanzasData.ingresosDesdeSheets ? montoJeissonParaGananciaTotal : montoJeissonExtraido);
 
   if (document.getElementById("valProyMio"))
     document.getElementById("valProyMio").innerText =
