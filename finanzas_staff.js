@@ -734,7 +734,7 @@ window.cargarDashboardFinanzas = function () {
   const container = document.getElementById("listaDesgloseGastos");
   if (container)
     container.innerHTML =
-      '<div class="empty-log-msg">Calculando balance desde MySQL...</div>';
+      '<div class="empty-log-msg">Calculando balance...</div>';
 
   const mSelect = document.getElementById("appleMonthSelect");
   const dSelect = document.getElementById("appleDaySelect");
@@ -743,6 +743,24 @@ window.cargarDashboardFinanzas = function () {
   const dia = dSelect ? dSelect.value : "TODOS";
 
   window.cargarRentabilidadPlataformas();
+
+  const hoy = new Date();
+  const mesActualIndex = hoy.getMonth();
+  const mesSeleccionadoIndex = mesesArray.indexOf(mes);
+
+  const esMesActual = mesSeleccionadoIndex === mesActualIndex;
+
+  if (esMesActual) {
+    cargarDashboardFinanzasMySQL(mes, dia, container);
+  } else {
+    cargarDashboardFinanzasSheets(mes, dia, container);
+  }
+};
+
+window.cargarDashboardFinanzasMySQL = function (mes, dia, container) {
+  if (container)
+    container.innerHTML =
+      '<div class="empty-log-msg">Calculando balance desde MySQL...</div>';
 
   const formData = new FormData();
   formData.append("accion", "obtener_dashboard_finanzas");
@@ -776,6 +794,32 @@ window.cargarDashboardFinanzas = function () {
       if (container)
         container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">❌ Error de red con MySQL.</div>`;
     });
+};
+
+window.cargarDashboardFinanzasSheets = function (mes, dia, container) {
+  if (container)
+    container.innerHTML =
+      '<div class="empty-log-msg">Cargando datos históricos desde Google Sheets...</div>';
+
+  const cbName = "cb_finanzas_" + Date.now();
+  window[cbName] = function (res) {
+    const node = document.getElementById("node_" + cbName);
+    if (node) node.remove();
+    delete window[cbName];
+
+    if (res && res.status === "success") {
+      window.globalFinanzasData = res;
+      window.renderDashboard();
+    } else {
+      if (container)
+        container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">Error: ${res ? res.message : "Fallo al consultar Google Sheets."}</div>`;
+    }
+  };
+
+  const script = document.createElement("script");
+  script.id = "node_" + cbName;
+  script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDashboardFinanzas&mes=${encodeURIComponent(mes)}&dia=${encodeURIComponent(dia)}&callback=${cbName}&_ts=${Date.now()}`;
+  document.body.appendChild(script);
 };
 
 window.filtrarHoy = function () {
