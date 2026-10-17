@@ -799,24 +799,79 @@ window.cargarDashboardFinanzasMySQL = function (mes, dia, container) {
 window.cargarDashboardFinanzasSheets = function (mes, dia, container) {
   if (container)
     container.innerHTML =
-      '<div class="empty-log-msg">Cargando datos históricos desde Google Sheets...</div>';
+      '<div class="empty-log-msg">Cargando datos históricos (Ventas de Sheets, Gastos de MySQL)...</div>';
 
-  const cbName = "cb_finanzas_" + Date.now();
+  const cbName = "cb_ventas_sheets_" + Date.now();
   
   window[cbName] = function (res) {
-    console.log("Callback ejecutado. Respuesta:", res);
+    console.log("Ventas de Sheets:", res);
     
     const node = document.getElementById("node_" + cbName);
     if (node) node.remove();
     delete window[cbName];
 
     if (res && res.status === "success") {
-      window.globalFinanzasData = res.data;
-      window.renderDashboard();
+      const datosSheets = res.data;
+      
+      const formData = new FormData();
+      formData.append("accion", "obtener_dashboard_finanzas");
+      formData.append("mes", mes);
+      formData.append("dia", dia);
+
+      fetch("https://api.cybernetsp.com/acciones_mysql.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.text())
+        .then((text) => {
+          let resMySQL;
+          try {
+            resMySQL = JSON.parse(text);
+          } catch (e) {
+            if (container)
+              container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">❌ Error en PHP MySQL:<br><small>${text.replace(/</g, "&lt;")}</small></div>`;
+            return;
+          }
+
+          if (resMySQL && resMySQL.status === "success") {
+            const datosMySQL = resMySQL.data;
+            
+            const datosCombinados = {
+              ...datosMySQL,
+              mes: {
+                ...datosMySQL.mes,
+                ingresos: datosSheets.mes.ingresos
+              },
+              semana: {
+                ...datosMySQL.semana,
+                ingresos: datosSheets.semana.ingresos
+              },
+              quincena: {
+                ...datosMySQL.quincena,
+                ingresos: datosSheets.quincena.ingresos
+              },
+              dia: {
+                ...datosMySQL.dia,
+                ingresos: datosSheets.dia.ingresos
+              }
+            };
+            
+            window.globalFinanzasData = datosCombinados;
+            window.renderDashboard();
+          } else {
+            if (container)
+              container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">Error MySQL: ${resMySQL ? resMySQL.message : "Fallo al consultar."}</div>`;
+          }
+        })
+        .catch((err) => {
+          console.error("Error MySQL:", err);
+          if (container)
+            container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">❌ Error de red con MySQL.</div>`;
+        });
     } else {
-      console.error("Error en respuesta:", res);
+      console.error("Error en Sheets:", res);
       if (container)
-        container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">Error: ${res ? res.message : "Fallo al consultar Google Sheets."}</div>`;
+        container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">Error Sheets: ${res ? res.message : "Fallo al consultar Google Sheets."}</div>`;
     }
   };
 
