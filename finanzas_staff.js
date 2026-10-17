@@ -854,7 +854,7 @@ window.cargarDashboardFinanzasSheets = function (mes, dia, container) {
                 ...datosMySQL.dia,
                 ingresos: datosSheets.dia.ingresos
               },
-              listaDetallada: datosSheets.listaDetallada || datosMySQL.listaDetallada
+              ingresosDesdeSheets: true
             };
             
             window.globalFinanzasData = datosCombinados;
@@ -1130,9 +1130,9 @@ window.renderDashboard = function () {
   const invNum = Number(d.inversiones) || 0;
   const nomNum = Number(d.nomina) || 0;
 
-  // 🔴 FILTRO ESPECIAL PARA EXCLUIR A JEISSON DE LOS INGRESOS BRUTOS
+  // 🔴 FILTRO ESPECIAL PARA EXCLUIR A JEISSON DE LOS INGRESOS BRUTOS (SOLO SI NO VIENEN DE SHEETS)
   let montoJeissonExtraido = 0;
-  if (window.globalFinanzasData.listaDetallada) {
+  if (!window.globalFinanzasData.ingresosDesdeSheets && window.globalFinanzasData.listaDetallada) {
     window.globalFinanzasData.listaDetallada.forEach((mov) => {
       if (
         mov.tipo === "INGRESO" &&
