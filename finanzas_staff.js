@@ -804,7 +804,7 @@ window.cargarDashboardFinanzasSheets = function (mes, dia, container) {
   const cbName = "cb_finanzas_" + Date.now();
   
   window[cbName] = function (res) {
-    console.log("Respuesta de Google Sheets:", res);
+    console.log("Callback ejecutado. Respuesta:", res);
     
     const node = document.getElementById("node_" + cbName);
     if (node) node.remove();
@@ -814,37 +814,18 @@ window.cargarDashboardFinanzasSheets = function (mes, dia, container) {
       window.globalFinanzasData = res;
       window.renderDashboard();
     } else {
+      console.error("Error en respuesta:", res);
       if (container)
         container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">Error: ${res ? res.message : "Fallo al consultar Google Sheets."}</div>`;
     }
   };
 
-  window[cbName + "_error"] = function () {
-    console.error("Error al cargar Google Script");
-    const node = document.getElementById("node_" + cbName);
-    if (node) node.remove();
-    delete window[cbName];
-    delete window[cbName + "_error"];
-    
-    if (container)
-      container.innerHTML = `<div class="empty-log-msg" style="color:var(--ios-red);">❌ Error de conexión con Google Apps Script.</div>`;
-  };
-
   const script = document.createElement("script");
   script.id = "node_" + cbName;
   script.src = `${GOOGLE_SCRIPT_URL}?action=obtenerDashboardFinanzas&mes=${encodeURIComponent(mes)}&dia=${encodeURIComponent(dia)}&callback=${cbName}&_ts=${Date.now()}`;
-  script.onerror = window[cbName + "_error"];
-  script.onload = function() {
-    setTimeout(() => {
-      if (window[cbName]) {
-        console.warn("Callback no se ejecutó después de 5 segundos");
-        window[cbName + "_error"]();
-      }
-    }, 5000);
-  };
   
+  console.log("URL del script:", script.src);
   document.body.appendChild(script);
-  console.log("Script cargado:", script.src);
 };
 
 window.filtrarHoy = function () {
