@@ -811,7 +811,7 @@ window.cargarDashboardFinanzasSheets = function (mes, dia, container) {
     delete window[cbName];
 
     if (res && res.status === "success") {
-      window.globalFinanzasData = res;
+      window.globalFinanzasData = res.data;
       window.renderDashboard();
     } else {
       console.error("Error en respuesta:", res);
