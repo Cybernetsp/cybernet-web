@@ -3517,177 +3517,105 @@
             <div
               style="
                 display: flex;
-                justify-content: space-between;
+                flex-direction: column;
                 align-items: center;
+                justify-content: center;
                 width: 100%;
-                flex-wrap: wrap;
-                gap: 20px;
-                padding-bottom: 20px;
+                padding: 24px 0;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.08);
               "
             >
-              <div style="flex: 1; min-width: 200px">
-                <span
-                  style="
-                    font-size: 0.75rem;
-                    font-weight: 500;
-                    color: #8e8e93;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-                  "
-                  id="txtPeriodoLabel"
-                  >Caja Real Mensual</span
-                >
-                <div
-                  style="
-                    font-size: 2.4rem;
-                    font-weight: 600;
-                    color: #ffffff;
-                    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-                    margin: 4px 0;
-                    letter-spacing: -0.5px;
-                  "
-                  id="val_neto"
-                >
-                  $0
-                </div>
+              <div
+                style="
+                  font-size: 2.4rem;
+                  font-weight: 600;
+                  color: #ffffff;
+                  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+                  letter-spacing: -0.5px;
+                "
+                id="val_neto"
+              >
+                $0
               </div>
 
               <div
                 style="
-                  flex: 1.2;
-                  min-width: 240px;
                   display: flex;
-                  align-items: center;
-                  gap: 20px;
+                  flex-direction: column;
+                  gap: 12px;
+                  width: 100%;
+                  max-width: 320px;
+                  margin-top: 20px;
                 "
               >
-                <svg
-                  viewBox="0 0 100 100"
-                  style="width: 80px; height: 80px; flex-shrink: 0"
-                >
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.08)"
-                    stroke-width="8"
-                  ></circle>
-                  <circle
-                    id="appleRingVentas"
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="none"
-                    stroke="#0a84ff"
-                    stroke-width="8"
-                    stroke-dasharray="251.3"
-                    stroke-dashoffset="251.3"
-                    transform="rotate(-90 50 50)"
-                    style="transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)"
-                  ></circle>
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="26"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.08)"
-                    stroke-width="8"
-                  ></circle>
-                  <circle
-                    id="appleRingGastos"
-                    cx="50"
-                    cy="50"
-                    r="26"
-                    fill="none"
-                    stroke="#ff453a"
-                    stroke-width="8"
-                    stroke-dasharray="163.3"
-                    stroke-dashoffset="163.3"
-                    transform="rotate(-90 50 50)"
-                    style="transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)"
-                  ></circle>
-                </svg>
-
-                <div
-                  style="
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
-                    flex: 1;
-                  "
-                >
-                  <div>
-                    <div
-                      style="
-                        display: flex;
-                        justify-content: space-between;
-                        font-size: 0.75rem;
-                        font-weight: 500;
-                        color: #8e8e93;
-                        margin-bottom: 4px;
-                        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-                      "
-                    >
-                      <span>Ingresos</span
-                      ><span id="txtBarPorcIngresos">0%</span>
-                    </div>
-                    <div
-                      style="
-                        height: 4px;
-                        background: rgba(255, 255, 255, 0.1);
-                        border-radius: 4px;
-                        overflow: hidden;
-                      "
-                    >
-                      <div
-                        id="barFillIngresos"
-                        style="
-                          height: 100%;
-                          width: 0%;
-                          background: #0a84ff;
-                          border-radius: 4px;
-                          transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-                        "
-                      ></div>
-                    </div>
+                <div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 0.75rem;
+                      font-weight: 500;
+                      color: #8e8e93;
+                      margin-bottom: 4px;
+                      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+                    "
+                  >
+                    <span>Ingresos</span
+                    ><span id="txtBarPorcIngresos">0%</span>
                   </div>
-                  <div>
+                  <div
+                    style="
+                      height: 4px;
+                      background: rgba(255, 255, 255, 0.1);
+                      border-radius: 4px;
+                      overflow: hidden;
+                    "
+                  >
                     <div
+                      id="barFillIngresos"
                       style="
-                        display: flex;
-                        justify-content: space-between;
-                        font-size: 0.75rem;
-                        font-weight: 500;
-                        color: #8e8e93;
-                        margin-bottom: 4px;
-                        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-                      "
-                    >
-                      <span>Gastos</span
-                      ><span id="txtBarPorcGastos">0%</span>
-                    </div>
-                    <div
-                      style="
-                        height: 4px;
-                        background: rgba(255, 255, 255, 0.1);
+                        height: 100%;
+                        width: 0%;
+                        background: #0a84ff;
                         border-radius: 4px;
-                        overflow: hidden;
+                        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
                       "
-                    >
-                      <div
-                        id="barFillGastos"
-                        style="
-                          height: 100%;
-                          width: 0%;
-                          background: #ff453a;
-                          border-radius: 4px;
-                          transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-                        "
-                      ></div>
-                    </div>
+                    ></div>
+                  </div>
+                </div>
+                <div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 0.75rem;
+                      font-weight: 500;
+                      color: #8e8e93;
+                      margin-bottom: 4px;
+                      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+                    "
+                  >
+                    <span>Gastos</span
+                    ><span id="txtBarPorcGastos">0%</span>
+                  </div>
+                  <div
+                    style="
+                      height: 4px;
+                      background: rgba(255, 255, 255, 0.1);
+                      border-radius: 4px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="barFillGastos"
+                      style="
+                        height: 100%;
+                        width: 0%;
+                        background: #ff453a;
+                        border-radius: 4px;
+                        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                      "
+                    ></div>
                   </div>
                 </div>
               </div>
