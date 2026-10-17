@@ -19,28 +19,28 @@
     background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* 🌑 ENTORNO OSCURO SOLIDO (Gris y Carbón Premium - Sin Transparencias) */
+/* 🌑 ENTORNO CLARO iOS MINIMALISTA (Apple Design System) */
 [data-theme="dark"],
 :root {
-  color-scheme: dark;
-  --page-bg: #0b0b0d;
+  color-scheme: light;
+  --page-bg: #f5f5f7; /* iOS light background */
 
-  /* Materiales Sólidos Mate (Se eliminó el rgba translúcido para evitar solapamientos) */
-  --window-bg: #1c1c1e; /* Gris oscuro de ventana Mac */
-  --card-bg: #2c2c2e; /* Gris tarjeta Mac */
-  --card-hover: #3a3a3c; /* Gris interactivo */
-  --glass-bg: #111112; /* Negro carbón sólido */
+  /* Materiales iOS Light */
+  --window-bg: #ffffff; /* Blanco puro */
+  --card-bg: #ffffff; /* Blanco tarjeta */
+  --card-hover: #f9f9fa; /* Gris muy claro hover */
+  --glass-bg: rgba(255, 255, 255, 0.8); /* Glass light */
 
   /* Textos y Bordes */
-  --text-primary: #ffffff;
-  --text-secondary: rgba(235, 235, 245, 0.6);
-  --glass-border: 1px solid #3a3a3c;
-  --glass-border-light: 1px solid #2c2c2e;
+  --text-primary: #1d1d1f; /* Apple dark text */
+  --text-secondary: rgba(29, 29, 31, 0.6); /* Apple secondary text */
+  --glass-border: 1px solid rgba(0, 0, 0, 0.08);
+  --glass-border-light: 1px solid rgba(0, 0, 0, 0.05);
 
   /* Controles (Inputs / Botones) */
-  --input-bg: rgba(0, 0, 0, 0.4);
-  --input-focus: rgba(0, 0, 0, 0.6);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  --input-bg: #f5f5f7;
+  --input-focus: #ebebf0;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
 }
 
 /* --- 2. MAQUETACIÓN BASE Y TIPOGRAFÍA --- */
@@ -56,55 +56,49 @@
 }
 
 /* =========================================================================
-   🌌 RECALIBRACIÓN ENTORNO: macOS MIDNIGHT AURA GRADIENT (PREMIUM TECH)
+   🌌 RECALIBRACIÓN ENTORNO: iOS LIGHT MINIMALISTA (Apple Design)
    ========================================================================= */
 body {
-  /* Gradiente líquido difuminado estilo Apple con velo oscuro integrado */
-  background:
-    linear-gradient(rgba(11, 11, 13, 0.6), rgba(11, 11, 13, 0.82)),
-    url("wallpaper.jpg") no-repeat center center fixed !important;
-  background-size: cover !important;
+  /* Fondo limpio estilo iOS */
+  background: var(--page-bg) !important;
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  overflow: hidden; /* Mantiene el escritorio de Cybernet OS fijo como un sistema real */
+  overflow: hidden;
 }
 
-/* Scrollbars estilo macOS (Píldoras flotantes) */
+/* Scrollbars estilo iOS (Minimalista) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
-  border-radius: 10px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  border-radius: 3px;
+  border: none;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background: rgba(0, 0, 0, 0.3);
 }
 
-/* --- 3. BARRA DE MENÚ SUPERIOR (macOS TOP BAR) --- */
+/* --- 3. BARRA DE MENÚ SUPERIOR (iOS TOP BAR) --- */
 .macos-top-bar {
-  height: 28px;
-  background: #111112; /* Sólido sin transparencias */
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   justify-content: space-between;
-  padding: 0 16px;
-  font-size: 0.85rem;
+  padding: 0 20px;
+  font-size: 0.9rem;
   font-weight: 500;
-  letter-spacing: 0.3px;
-  color: #fff;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
   align-items: center;
   position: fixed;
   top: 0;
@@ -112,65 +106,66 @@ body {
   width: 100%;
   z-index: 999999;
   border-bottom: var(--glass-border-light);
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
 }
 .mac-menu-left,
 .mac-menu-right {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 .mac-menu-item {
   cursor: pointer;
-  padding: 2px 8px;
-  border-radius: 4px;
-  transition: background 0.1s;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+  font-weight: 600;
 }
 .mac-menu-item:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.05);
 }
 
-/* --- 4. DOCK MAGNÉTICO INFERIOR --- */
+/* --- 4. DOCK MAGNÉTICO INFERIOR (iOS STYLE) --- */
 .macos-dock {
-  background: #1c1c1e;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: var(--glass-border-light);
-  border-radius: 24px;
-  padding: 10px 12px; /* 👈 Un poco más de espacio interno */
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: var(--glass-border);
+  border-radius: 20px;
+  padding: 10px 14px;
   display: flex;
-  gap: 12px; /* 👈 Separación perfecta entre íconos */
-  align-items: center; /* 👈 Alinea la rayita divisora */
+  gap: 14px;
+  align-items: center;
   pointer-events: auto;
   box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 10px 30px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .mac-icon-bg {
-  width: 52px; /* 👈 Tamaño exacto al de la foto */
+  width: 52px;
   height: 52px;
-  border-radius: 14px; /* 👈 La curva Squircle de Apple */
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 👈 Sombra suave, sin borde blanco */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
 }
 .macos-dock {
-  background: #1c1c1e; /* Sólido */
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: var(--glass-border-light);
-  border-radius: 24px;
-  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: var(--glass-border);
+  border-radius: 20px;
+  padding: 8px 12px;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   pointer-events: auto;
   box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 10px 30px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.05);
 }
 .mac-dock-icon {
   position: relative;
@@ -178,9 +173,9 @@ body {
   transition: var(--transition-fluid);
 }
 .mac-dock-icon:hover {
-  transform: scale(1.25);
+  transform: scale(1.15);
   z-index: 10;
-  margin: 0 10px;
+  margin: 0 8px;
 }
 .mac-icon-bg {
   width: 48px;
@@ -191,8 +186,8 @@ body {
   justify-content: center;
   font-size: 1.6rem;
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.4),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 /* Wrapper del QR */
@@ -207,31 +202,34 @@ body {
 
 .mac-qr-wrapper img {
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   max-width: 100%;
   height: auto;
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .mac-qr-wrapper button {
   width: 100%;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .mac-qr-wrapper button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: #f5f5f7;
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .mac-tooltip {
@@ -239,7 +237,7 @@ body {
   top: -40px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(30, 30, 30, 0.85);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(10px);
   color: white;
   padding: 5px 12px;
@@ -273,24 +271,24 @@ body {
   max-width: 1200px;
   height: 70vh;
   min-height: 550px;
-  background: #1a1a1e;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
+  background: #ffffff;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
   box-shadow:
-    0 40px 80px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 .mac-left-panel {
   flex: 0 0 280px;
-  background: rgba(0, 0, 0, 0.15);
+  background: #f9f9fa;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
   padding: 24px 20px;
 }
 .mac-right-panel {
@@ -299,6 +297,7 @@ body {
   flex-direction: column;
   padding: 24px 28px;
   gap: 16px;
+  background: #ffffff;
 }
 
 /* Buscador Spotlight */
@@ -318,23 +317,23 @@ body {
   padding: 14px 16px 14px 45px;
   font-size: 0.95rem;
   font-weight: 400;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
+  color: var(--text-primary);
+  background: #f5f5f7;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
   outline: none;
   transition: var(--transition-fluid);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 .mac-search-input:focus {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--mac-blue);
+  background: #ffffff;
   box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.05),
-    inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    0 0 0 3px rgba(10, 132, 255, 0.1),
+    inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 .mac-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-secondary);
 }
 
 /* --- 6. GESTIÓN DE VENTANAS macOS --- */
@@ -363,13 +362,13 @@ body {
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
   background: var(--window-bg) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: var(--glass-border) !important;
   box-shadow:
-    0 40px 80px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
-  border-radius: 20px !important; /* Ventanas de aplicaciones con curva suave */
+    0 20px 40px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.02) inset !important;
+  border-radius: 20px !important;
   pointer-events: auto;
   margin: 0 !important;
   display: flex;
@@ -397,7 +396,7 @@ body {
   border-bottom: var(--glass-border-light);
   cursor: grab;
   flex-shrink: 0;
-  background: #111112;
+  background: #f9f9fa;
   border-top-left-radius: 20px !important;
   border-top-right-radius: 20px !important;
 }
@@ -466,39 +465,40 @@ body {
 
 /* --- 7. COMPONENTES INTERNOS (CARDS, INPUTS, BOTONES) --- */
 .card-ios {
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
   border-radius: 16px !important;
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   transition: var(--transition-fluid);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 .card-ios:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: #f9f9fa !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .input-ios {
   width: 100%;
   padding: 12px 14px;
-  border-radius: 12px !important; /* Cajas de texto más suaves */
+  border-radius: 12px !important;
   border: var(--glass-border-light) !important;
   background: var(--input-bg) !important;
   color: var(--text-primary);
   font-size: 0.95rem;
   outline: none;
   transition: var(--transition-fluid);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 .input-ios:focus {
-  background: var(--input-focus) !important;
+  background: #ffffff !important;
   border-color: var(--mac-blue) !important;
   box-shadow:
-    0 0 0 2px rgba(10, 132, 255, 0.2),
-    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    0 0 0 3px rgba(10, 132, 255, 0.1),
+    inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 select.input-ios {
@@ -532,7 +532,7 @@ select.input-ios {
 }
 .btn-primary {
   background: var(--text-primary) !important;
-  color: #000 !important;
+  color: #ffffff !important;
 }
 .btn-success {
   background: var(--mac-green) !important;
@@ -543,12 +543,12 @@ select.input-ios {
   color: #ffffff !important;
 }
 .btn-secondary {
-  background: #2c2c2e !important;
+  background: #f5f5f7 !important;
   border: var(--glass-border-light) !important;
   color: var(--text-primary) !important;
 }
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: #ebebf0 !important;
 }
 
 /* Badges */
@@ -556,7 +556,7 @@ select.input-ios {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.05);
   border: var(--glass-border-light);
   padding: 4px 10px;
   border-radius: 8px !important;
@@ -565,18 +565,18 @@ select.input-ios {
 }
 .badge-blue {
   color: var(--mac-blue);
-  background: rgba(10, 132, 255, 0.15);
-  border-color: rgba(10, 132, 255, 0.2);
+  background: rgba(10, 132, 255, 0.1);
+  border-color: rgba(10, 132, 255, 0.15);
 }
 .badge-green {
   color: var(--mac-green);
-  background: rgba(48, 209, 88, 0.15);
-  border-color: rgba(48, 209, 88, 0.2);
+  background: rgba(48, 209, 88, 0.1);
+  border-color: rgba(48, 209, 88, 0.15);
 }
 .badge-danger {
   color: var(--mac-red);
-  background: rgba(255, 69, 58, 0.15);
-  border-color: rgba(255, 69, 58, 0.2);
+  background: rgba(255, 69, 58, 0.1);
+  border-color: rgba(255, 69, 58, 0.15);
 }
 
 /* --- 8. ISLA DINÁMICA & NOTIFICACIONES --- */
@@ -594,13 +594,14 @@ select.input-ios {
 }
 .cyber-notification {
   pointer-events: auto;
-  background: #1c1c1e; /* Sólido */
-  backdrop-filter: none !important;
+  background: #ffffff;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: var(--glass-border);
   border-radius: 16px;
   padding: 14px 16px;
-  color: white;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+  color: var(--text-primary);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   opacity: 0;
   transform: translateX(50px) scale(0.95);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
