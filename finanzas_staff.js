@@ -1196,9 +1196,42 @@ window.renderDashboard = function () {
   const pctGastosOperativos = ingNum > 0 ? Math.round((gastosOperativos / ingNum) * 100) : 0;
   window.actualizarWidgetAnillosYBanderas(pctIngresos, pctGastosOperativos);
 
+  // 🔧 DETERMINAR SI USAR NUEVOS PORCENTAJES (HOY EN ADELANTE) O ANTIGUOS (FECHAS ANTERIORES)
+  const mSelect = document.getElementById("appleMonthSelect");
+  const dSelect = document.getElementById("appleDaySelect");
+  const mesSeleccionado = mSelect ? mSelect.value : "AGOSTO";
+  const diaSeleccionado = dSelect ? dSelect.value : "TODOS";
+  
+  const hoy = new Date();
+  const mesActualIndex = hoy.getMonth();
+  const mesSeleccionadoIndex = mesesArray.indexOf(mesSeleccionado);
+  const diaActual = hoy.getDate();
+  
+  // Determinar si es fecha actual o posterior
+  let usarNuevosPorcentajes = false;
+  if (diaSeleccionado === "TODOS") {
+    // Si es "Todo el mes", usar nuevos porcentajes solo si es el mes actual
+    usarNuevosPorcentajes = mesSeleccionadoIndex === mesActualIndex;
+  } else {
+    // Si es un día específico, usar nuevos porcentajes si es hoy o fecha futura
+    const diaNum = parseInt(diaSeleccionado, 10);
+    if (mesSeleccionadoIndex > mesActualIndex) {
+      // Mes futuro
+      usarNuevosPorcentajes = true;
+    } else if (mesSeleccionadoIndex === mesActualIndex) {
+      // Mismo mes, verificar día
+      usarNuevosPorcentajes = diaNum >= diaActual;
+    }
+    // Mes anterior = porcentajes antiguos
+  }
+
   // 4. PROYECCIONES Y FONDOS EMPRESARIALES
-  const montoFondoNegocio = Math.round(ingNum * 0.55);
-  const montoReservaNomina = Math.round(ingNum * 0.14);
+  const porcFondoNegocio = usarNuevosPorcentajes ? 0.55 : 0.55; // Mantiene 55%
+  const porcReservaNomina = usarNuevosPorcentajes ? 0.14 : 0.17; // Nuevo: 14%, Antiguo: 17%
+  const porcMiGanancia = usarNuevosPorcentajes ? 0.31 : 0.28; // Nuevo: 31%, Antiguo: 28%
+  
+  const montoFondoNegocio = Math.round(ingNum * porcFondoNegocio);
+  const montoReservaNomina = Math.round(ingNum * porcReservaNomina);
   const totalFondosEmpresa = montoFondoNegocio + montoReservaNomina;
 
   if (document.getElementById("valProyNegocio"))
@@ -1211,8 +1244,14 @@ window.renderDashboard = function () {
     document.getElementById("valTotalFondosNegocio").innerText =
       formatMoneda(totalFondosEmpresa);
 
+  // Actualizar labels de porcentajes en el HTML
+  if (document.getElementById("lblPorcNomina"))
+    document.getElementById("lblPorcNomina").innerText = Math.round(porcReservaNomina * 100);
+  if (document.getElementById("lblPorcMio"))
+    document.getElementById("lblPorcMio").innerText = Math.round(porcMiGanancia * 100);
+
   // 5. CÁLCULO DE TU GANANCIA (60% Ahorro | 40% Otros/Libre)
-  const miGananciaNeta = Math.round(ingNum * 0.31);
+  const miGananciaNeta = Math.round(ingNum * porcMiGanancia);
   const ahorroCalculado = Math.round(miGananciaNeta * 0.6); // 60% para Ahorro
   const otrosCalculado = miGananciaNeta - ahorroCalculado; // 40% restante para Otros/Libre
 
