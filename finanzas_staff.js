@@ -744,17 +744,8 @@ window.cargarDashboardFinanzas = function () {
 
   window.cargarRentabilidadPlataformas();
 
-  const hoy = new Date();
-  const mesActualIndex = hoy.getMonth();
-  const mesSeleccionadoIndex = mesesArray.indexOf(mes);
-
-  const esMesActual = mesSeleccionadoIndex === mesActualIndex;
-
-  if (esMesActual) {
-    cargarDashboardFinanzasMySQL(mes, dia, container);
-  } else {
-    cargarDashboardFinanzasSheets(mes, dia, container);
-  }
+  // 🔧 SIEMPRE USAR MYSQL PARA CARGAR DATOS FINANCIEROS (INDEPENDIENTEMENTE DEL MES)
+  cargarDashboardFinanzasMySQL(mes, dia, container);
 };
 
 window.cargarDashboardFinanzasMySQL = function (mes, dia, container) {
