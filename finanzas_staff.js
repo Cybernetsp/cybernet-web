@@ -1198,7 +1198,7 @@ window.renderDashboard = function () {
 
   // 4. PROYECCIONES Y FONDOS EMPRESARIALES
   const montoFondoNegocio = Math.round(ingNum * 0.55);
-  const montoReservaNomina = Math.round(ingNum * 0.17);
+  const montoReservaNomina = Math.round(ingNum * 0.14);
   const totalFondosEmpresa = montoFondoNegocio + montoReservaNomina;
 
   if (document.getElementById("valProyNegocio"))
@@ -1212,7 +1212,7 @@ window.renderDashboard = function () {
       formatMoneda(totalFondosEmpresa);
 
   // 5. CÁLCULO DE TU GANANCIA (60% Ahorro | 40% Otros/Libre)
-  const miGananciaNeta = Math.round(ingNum * 0.28);
+  const miGananciaNeta = Math.round(ingNum * 0.31);
   const ahorroCalculado = Math.round(miGananciaNeta * 0.6); // 60% para Ahorro
   const otrosCalculado = miGananciaNeta - ahorroCalculado; // 40% restante para Otros/Libre
 
