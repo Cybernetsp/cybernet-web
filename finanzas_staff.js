@@ -744,8 +744,18 @@ window.cargarDashboardFinanzas = function () {
 
   window.cargarRentabilidadPlataformas();
 
-  // 🔧 COMBINAR DATOS: VENTAS BRUTAS DESDE SHEETS, EL RESTO DESDE MYSQL
-  cargarDashboardFinanzasSheets(mes, dia, container);
+  const hoy = new Date();
+  const mesActualIndex = hoy.getMonth();
+  const mesSeleccionadoIndex = mesesArray.indexOf(mes);
+
+  const esMesActual = mesSeleccionadoIndex === mesActualIndex;
+
+  // 🔧 MES ACTUAL: TODO DESDE MYSQL | MES ANTERIOR: INGRESOS DESDE SHEETS, GASTOS DESDE MYSQL
+  if (esMesActual) {
+    cargarDashboardFinanzasMySQL(mes, dia, container);
+  } else {
+    cargarDashboardFinanzasSheets(mes, dia, container);
+  }
 };
 
 window.cargarDashboardFinanzasMySQL = function (mes, dia, container) {
