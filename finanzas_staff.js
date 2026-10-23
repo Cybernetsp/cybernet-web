@@ -1186,8 +1186,15 @@ window.renderDashboard = function () {
     document.getElementById("val_inversiones").innerText = formatMoneda(invNum);
   if (document.getElementById("val_nomina"))
     document.getElementById("val_nomina").innerText = formatMoneda(nomNum);
+  
+  // 🔧 NUEVO: Calcular y mostrar Inversiones + Nómina
+  const gastosOperativos = invNum + nomNum;
+  if (document.getElementById("val_inv_plus_nomina"))
+    document.getElementById("val_inv_plus_nomina").innerText = formatMoneda(gastosOperativos);
 
-  window.actualizarWidgetAnillosYBanderas(pctIngresos, pctGastos);
+  // 🔧 Gastos Operativos ahora es la suma de Inversiones + Nómina
+  const pctGastosOperativos = ingNum > 0 ? Math.round((gastosOperativos / ingNum) * 100) : 0;
+  window.actualizarWidgetAnillosYBanderas(pctIngresos, pctGastosOperativos);
 
   // 4. PROYECCIONES Y FONDOS EMPRESARIALES
   const montoFondoNegocio = Math.round(ingNum * 0.55);
