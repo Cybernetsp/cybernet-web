@@ -856,7 +856,7 @@ window.cargarDashboardFinanzasSheets = function (mes, dia, container) {
                 ingresos: datosSheets.dia.ingresos
               },
               ingresosDesdeSheets: true,
-              listaDetallada: datosSheets.listaDetallada || datosMySQL.listaDetallada
+              listaDetallada: datosMySQL.listaDetallada
             };
             
             window.globalFinanzasData = datosCombinados;
