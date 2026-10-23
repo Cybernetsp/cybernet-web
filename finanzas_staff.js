@@ -744,8 +744,8 @@ window.cargarDashboardFinanzas = function () {
 
   window.cargarRentabilidadPlataformas();
 
-  // 🔧 SIEMPRE USAR MYSQL PARA CARGAR DATOS FINANCIEROS (INDEPENDIENTEMENTE DEL MES)
-  cargarDashboardFinanzasMySQL(mes, dia, container);
+  // 🔧 COMBINAR DATOS: VENTAS BRUTAS DESDE SHEETS, EL RESTO DESDE MYSQL
+  cargarDashboardFinanzasSheets(mes, dia, container);
 };
 
 window.cargarDashboardFinanzasMySQL = function (mes, dia, container) {
